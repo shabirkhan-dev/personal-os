@@ -1,4 +1,8 @@
-# Starter
+﻿# Starter
+
+[![CI](https://github.com/shabirkhan-dev/personal-os/actions/workflows/ci.yml/badge.svg)](https://github.com/shabirkhan-dev/personal-os/actions/workflows/ci.yml)
+[![Security](https://github.com/shabirkhan-dev/personal-os/actions/workflows/security.yml/badge.svg)](https://github.com/shabirkhan-dev/personal-os/actions/workflows/security.yml)
+
 
 Production-ready school platform monorepo built with **Bun + Turborepo**.
 
@@ -62,7 +66,7 @@ Target one app: `bun --cwd apps/web run dev` (same pattern for mobile, nest-api,
 - **Bun** workspaces + **Turborepo**
 - **Biome** for TS/JS (tabs, line width 100)
 - **Lefthook** pre-commit / commit-msg (Conventional Commits)
-- Bash: ShellCheck + shfmt · Python: Ruff · Rust: rustfmt + clippy
+- Bash: ShellCheck + shfmt Â· Python: Ruff Â· Rust: rustfmt + clippy
 
 ## Docker
 
@@ -71,8 +75,8 @@ cp env.docker.example .env
 docker compose up -d --build
 ```
 
-- Web `:3000` · Nest `:4000` · Postgres host `:5433`
-- Optional: `docker compose --profile rust up -d --build` · `--profile ai` for FastAPI
+- Web `:3000` Â· Nest `:4000` Â· Postgres host `:5433`
+- Optional: `docker compose --profile rust up -d --build` Â· `--profile ai` for FastAPI
 - Details: `/docs/docker` and [docker/README.md](docker/README.md)
 
 ## Deploy
@@ -90,7 +94,7 @@ Guide: `/docs/deploy` (`apps/docs/content/docs/deploy.mdx`).
 `.devcontainer/` installs **Bun**, **Rust**, **Python/Ruff**, and Bash lint tools. C and Lua are not included.
 
 ```text
-Reopen in Container → bun run prepare → bun run dev
+Reopen in Container â†’ bun run prepare â†’ bun run dev
 ```
 
 See [.devcontainer/README.md](.devcontainer/README.md).
@@ -113,3 +117,4 @@ Also: [PROJECT.md](PROJECT.md), [DESIGN.md](DESIGN.md), [AGENTS.md](AGENTS.md), 
 
 Dual-licensed under **MIT** or **Apache-2.0**:
 [LICENSE-MIT](LICENSE-MIT), [LICENSE-Apache-2.0](LICENSE-Apache-2.0).
+

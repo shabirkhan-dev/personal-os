@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Providers } from "@/components/providers";
 import { themeInitScript } from "@/components/theme";
@@ -11,11 +11,28 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+	metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://github.com/shabirkhan-dev/personal-os"),
 	title: {
-		default: "Starter",
-		template: "%s | Starter",
+		default: "Personal OS",
+		template: "%s | Personal OS",
 	},
-	description: "Production-ready application starter",
+	description: "Personal OS — Bun + Turborepo monorepo: Next.js, Expo, NestJS, shared UI, CI, Docker, and Dev Container.",
+	keywords: ["personal-os", "personal", "productivity", "bun", "turborepo", "monorepo", "nextjs", "nestjs", "expo", "typescript", "fullstack", "docker"],
+	applicationName: "Personal OS",
+	creator: "Personal OS",
+	openGraph: {
+		type: "website",
+		locale: "en_US",
+		siteName: "Personal OS",
+		title: "Personal OS",
+		description: "Personal OS — Bun + Turborepo monorepo: Next.js, Expo, NestJS, shared UI, CI, Docker, and Dev Container.",
+	},
+	twitter: {
+		card: "summary_large_image",
+		title: "Personal OS",
+		description: "Personal OS — Bun + Turborepo monorepo: Next.js, Expo, NestJS, shared UI, CI, Docker, and Dev Container.",
+	},
+	robots: { index: true, follow: true },
 };
 
 export default function RootLayout({

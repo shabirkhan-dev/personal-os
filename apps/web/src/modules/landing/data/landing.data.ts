@@ -1,4 +1,4 @@
-import {
+﻿import {
 	ApertureIcon,
 	CircleIcon,
 	CommandIcon,
@@ -12,10 +12,9 @@ import {
 import type { IconSvgElement } from "@hugeicons/react";
 
 export const SITE = {
-	name: "Starter",
-	title: "Starter — production monorepo starter",
-	description:
-		"Bun + Turborepo starter with Next.js, Expo, NestJS, docs, and Rust — shared UI, hooks, CI, and Docker included.",
+	name: "Personal OS",
+	title: "Personal OS â€” Bun + Turborepo monorepo",
+	description: "Personal OS — Bun + Turborepo monorepo: Next.js, Expo, NestJS, shared UI, CI, Docker, and Dev Container.",
 } as const;
 
 export type NavLink = {
@@ -104,7 +103,7 @@ export const WORKFLOW_STEPS: WorkflowStep[] = [
 	{
 		id: "anomaly",
 		label: "Clone the repo",
-		detail: "git clone → bun install",
+		detail: "git clone â†’ bun install",
 	},
 	{
 		id: "investigating",
@@ -119,12 +118,12 @@ export const WORKFLOW_STEPS: WorkflowStep[] = [
 	{
 		id: "fix",
 		label: "Dev servers up",
-		detail: "bun run dev — apps online in minutes",
+		detail: "bun run dev â€” apps online in minutes",
 	},
 	{
 		id: "notify",
 		label: "Quality gates green",
-		detail: "lint · typecheck · architecture check pass",
+		detail: "lint Â· typecheck Â· architecture check pass",
 	},
 ];
 
@@ -140,7 +139,7 @@ export const AGENT_MESSAGES: ChatMessage[] = [
 	},
 	{
 		role: "agent",
-		text: "Starter already ships all three — plus docs and a Rust binary.",
+		text: "Starter already ships all three â€” plus docs and a Rust binary.",
 	},
 	{
 		role: "agent",
@@ -148,7 +147,7 @@ export const AGENT_MESSAGES: ChatMessage[] = [
 	},
 	{
 		role: "agent",
-		text: "Run bun install && bun run dev — Turbo starts the workspace.",
+		text: "Run bun install && bun run dev â€” Turbo starts the workspace.",
 	},
 ];
 
@@ -169,7 +168,7 @@ export const CUSTOMER_LOGOS: CustomerLogo[] = [
 ];
 
 export const PRODUCT_BULLETS: string[] = [
-	"Five apps in one workspace — web, mobile, Nest, docs, Rust",
+	"Five apps in one workspace â€” web, mobile, Nest, docs, Rust",
 	"Shared UI tokens and TypeScript configs via @school-os/*",
 	"Hooks, CI, architecture boundaries, and Compose out of the box",
 ];
@@ -190,7 +189,7 @@ export const INCIDENT_TIMELINE: IncidentEvent[] = [
 	},
 	{
 		title: "Turbo pipeline",
-		detail: "dev · build · lint · typecheck orchestrated",
+		detail: "dev Â· build Â· lint Â· typecheck orchestrated",
 		tone: "info",
 		icon: "search",
 	},
@@ -208,7 +207,7 @@ export const INCIDENT_TIMELINE: IncidentEvent[] = [
 	},
 	{
 		title: "Ready to ship",
-		detail: "Docker Compose optional — school-os is live",
+		detail: "Docker Compose optional â€” school-os is live",
 		tone: "ok",
 		icon: "shield",
 	},
@@ -239,7 +238,7 @@ export const CAPABILITY_CARDS: CapabilityCard[] = [
 	{
 		title: "See the monorepo reason",
 		description:
-			"Turbo graphs tasks across apps — watch install, lint, and build fan out from one command.",
+			"Turbo graphs tasks across apps â€” watch install, lint, and build fan out from one command.",
 		span: 4,
 		kind: "reasoning",
 		palette: "blue",
@@ -261,7 +260,7 @@ export const CAPABILITY_CARDS: CapabilityCard[] = [
 	},
 	{
 		title: "Typed contracts end to end",
-		description: "Zod on Nest, TypeScript everywhere — schemas and configs stay honest.",
+		description: "Zod on Nest, TypeScript everywhere â€” schemas and configs stay honest.",
 		span: 2,
 		kind: "output",
 		palette: "lime",
@@ -290,14 +289,14 @@ export const STATS: Stat[] = [
 		suffix: "",
 		prefix: "",
 		label: "Runnable apps",
-		detail: "web · mobile · nest · docs · rust",
+		detail: "web Â· mobile Â· nest Â· docs Â· rust",
 	},
 	{
 		value: 3,
 		suffix: "",
 		prefix: "",
 		label: "Shared packages",
-		detail: "ui · logger · tsconfig",
+		detail: "ui Â· logger Â· tsconfig",
 	},
 	{
 		value: 0,
@@ -305,14 +304,14 @@ export const STATS: Stat[] = [
 		prefix: "",
 		label: "Time to first dev",
 		display: "<10m",
-		detail: "clone → install → run",
+		detail: "clone â†’ install â†’ run",
 	},
 	{
 		value: 4,
 		suffix: "+",
 		prefix: "",
 		label: "Languages wired",
-		detail: "TS · Rust · Bash · Python",
+		detail: "TS Â· Rust Â· Bash Â· Python",
 	},
 ];
 
@@ -327,7 +326,7 @@ export const ABOUT_PRINCIPLES: AboutPrinciple[] = [
 		icon: "bridge",
 		title: "Starter, not a demo dump",
 		description:
-			"Every app and package earns its place by helping you ship a real product — not a throwaway scaffold.",
+			"Every app and package earns its place by helping you ship a real product â€” not a throwaway scaffold.",
 	},
 	{
 		icon: "eye",
@@ -339,7 +338,7 @@ export const ABOUT_PRINCIPLES: AboutPrinciple[] = [
 		icon: "shield",
 		title: "Quality by default",
 		description:
-			"Biome, Lefthook, Turbo, and CI run before code lands — so green hooks become the habit, not a hope.",
+			"Biome, Lefthook, Turbo, and CI run before code lands â€” so green hooks become the habit, not a hope.",
 	},
 ];
 
@@ -464,7 +463,7 @@ export type PricingTier = {
 	monthly: number;
 };
 
-/** Slider steps: free → team → org (workspaces / projects included). */
+/** Slider steps: free â†’ team â†’ org (workspaces / projects included). */
 export const PRICING_TIERS: PricingTier[] = [
 	{ services: 1, monthly: 0 },
 	{ services: 5, monthly: 49 },
@@ -474,7 +473,7 @@ export const PRICING_TIERS: PricingTier[] = [
 ];
 
 export const PRICING_FEATURES: string[] = [
-	"Full monorepo starter (web · mobile · Nest · docs · Rust)",
+	"Full monorepo starter (web Â· mobile Â· Nest Â· docs Â· Rust)",
 	"Shared @school-os packages and TS configs",
 	"Lefthook, Biome, Turbo, and architecture checks",
 	"Docker Compose fragments + Dev Container",
@@ -494,7 +493,7 @@ export const WHY_CARDS: WhyCard[] = [
 		id: "route",
 		title: "One graph for every app",
 		description:
-			"Turbo orchestrates install, lint, build, and test across the workspace — no glue scripts to invent.",
+			"Turbo orchestrates install, lint, build, and test across the workspace â€” no glue scripts to invent.",
 		palette: "blue",
 		kind: "route",
 	},
@@ -502,7 +501,7 @@ export const WHY_CARDS: WhyCard[] = [
 		id: "keys",
 		title: "Boundaries you can enforce",
 		description:
-			"Architecture checks and AGENTS.md keep apps and packages in their lanes — humans and AI included.",
+			"Architecture checks and AGENTS.md keep apps and packages in their lanes â€” humans and AI included.",
 		palette: "lime",
 		kind: "keys",
 	},
@@ -510,7 +509,7 @@ export const WHY_CARDS: WhyCard[] = [
 		id: "ready",
 		title: "Running in under ten minutes",
 		description:
-			"Clone, bun install, bun run prepare, bun run dev — web, API, and docs come up without a weekend of setup.",
+			"Clone, bun install, bun run prepare, bun run dev â€” web, API, and docs come up without a weekend of setup.",
 		palette: "amber",
 		kind: "ready",
 	},
@@ -535,35 +534,35 @@ export const FAQ_ITEMS: FaqItem[] = [
 		id: "approvals",
 		question: "Can we keep or drop apps we do not need?",
 		answer:
-			"Yes. Apps under apps/ are independent. Remove or ignore what you do not ship yet — keep packages you still share.",
+			"Yes. Apps under apps/ are independent. Remove or ignore what you do not ship yet â€” keep packages you still share.",
 		icon: SecurityCheckIcon,
 	},
 	{
 		id: "stack",
 		question: "What stacks does Starter include?",
 		answer:
-			"Next.js web, Expo mobile, NestJS API, Fumadocs docs, and a Rust binary — plus shared UI, logger, and TypeScript configs.",
+			"Next.js web, Expo mobile, NestJS API, Fumadocs docs, and a Rust binary â€” plus shared UI, logger, and TypeScript configs.",
 		icon: Package01Icon,
 	},
 	{
 		id: "traces",
 		question: "How do architecture boundaries work?",
 		answer:
-			"scripts/architecture/check-boundaries.sh runs in hooks and CI so apps cannot import each other’s internals. Overrides are documented in /docs/overrides.",
+			"scripts/architecture/check-boundaries.sh runs in hooks and CI so apps cannot import each otherâ€™s internals. Overrides are documented in /docs/overrides.",
 		icon: CommandIcon,
 	},
 	{
 		id: "pricing",
 		question: "Is the starter free to use?",
 		answer:
-			"The monorepo starter is free to clone and run. Paid tiers are optional for team seats, support, and managed onboarding — annual billing includes two months free.",
+			"The monorepo starter is free to clone and run. Paid tiers are optional for team seats, support, and managed onboarding â€” annual billing includes two months free.",
 		icon: GemIcon,
 	},
 	{
 		id: "security",
 		question: "What quality gates run before a commit?",
 		answer:
-			"Lefthook formats with Biome, lints, typechecks, blocks large files, scans for obvious secrets, and runs the architecture check — Conventional Commits required.",
+			"Lefthook formats with Biome, lints, typechecks, blocks large files, scans for obvious secrets, and runs the architecture check â€” Conventional Commits required.",
 		icon: OctagonIcon,
 	},
 ];
@@ -604,3 +603,4 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
 export function dicebearUrl(seed: string): string {
 	return `https://api.dicebear.com/10.x/glass/svg?seed=${encodeURIComponent(seed)}`;
 }
+

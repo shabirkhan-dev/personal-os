@@ -1,11 +1,11 @@
-export const appName = "Starter Docs";
+﻿export const appName = "Personal OS Docs";
+export const appDescription = "Personal OS — Bun + Turborepo monorepo: Next.js, Expo, NestJS, shared UI, CI, Docker, and Dev Container.";
 export const docsRoute = "/docs";
 export const docsImageRoute = "/og/docs";
 export const docsContentRoute = "/llms.mdx/docs";
 
-// fill this with your actual GitHub info, for example:
 export const gitConfig = {
 	user: "shabirkhan-dev",
-	repo: "school-os",
+	repo: "personal-os",
 	branch: "main",
 };

@@ -1,11 +1,11 @@
-{
+﻿{
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
+    "name": "Personal OS",
+    "slug": "personal-os",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "mobile",
+    "scheme": "personal-os",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon",
@@ -55,3 +55,4 @@
     }
   }
 }
+

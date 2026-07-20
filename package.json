@@ -1,5 +1,10 @@
-{
-  "name": "starter",
+﻿{
+  "name": "personal-os",
+  "description": "Personal OS — Bun + Turborepo monorepo: Next.js, Expo, NestJS, shared UI, CI, Docker, and Dev Container.",
+  "keywords": ["personal-os", "personal", "productivity", "bun", "turborepo", "monorepo", "nextjs", "nestjs", "expo", "typescript", "fullstack", "docker"],
+  "homepage": "https://github.com/shabirkhan-dev/personal-os#readme",
+  "repository": { "type": "git", "url": "https://github.com/shabirkhan-dev/personal-os.git" },
+  "bugs": { "url": "https://github.com/shabirkhan-dev/personal-os/issues" },
   "version": "0.1.0",
   "private": true,
   "license": "MIT OR Apache-2.0",
@@ -55,3 +60,4 @@
     "expo-symbols": "57.0.1"
   }
 }
+

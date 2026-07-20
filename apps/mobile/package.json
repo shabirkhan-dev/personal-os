@@ -44,7 +44,7 @@
     "expo-web-browser": "~57.0.1",
     "lucide-react-native": "^1.25.0",
     "react": "19.2.3",
-    "react-dom": "19.2.3",
+    "react-dom": "19.2.7",
     "react-native": "0.86.0",
     "react-native-gesture-handler": "~2.32.0",
     "react-native-passkeys": "^0.4.1",

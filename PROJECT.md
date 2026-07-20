@@ -1,14 +1,14 @@
-# Starter - Project overview
+# Personal OS — Project overview
 
-This document is the deeper technical reference for the Starter monorepo.
-For quick setup/use, start with `README.md`.
+This document is the deeper technical reference for the Personal OS monorepo.
+For product vision see `plan.md`. For quick setup, start with `README.md`.
 
 ## What this repository includes
 
-Monorepo school-os managed by **Bun + Turborepo**, with:
+Monorepo **Personal OS** managed by **Bun + Turborepo**, with:
 
 - Multiple app templates (web, mobile, API, docs, Rust)
-- Shared workspace packages (`@school-os/*`)
+- Shared workspace packages (`@personal-os/*`)
 - Polyglot scripts and quality tooling
 - Architecture boundary checks
 - Git hooks and CI/CD/security pipelines
@@ -17,7 +17,7 @@ Monorepo school-os managed by **Bun + Turborepo**, with:
 ## Repository layout
 
 ```text
-school-os/
+personal-os/
 ├── apps/                     # Runnable applications
 │   ├── web/                  # Next.js app
 │   ├── mobile/               # Expo Router + NativeWind app
@@ -56,9 +56,9 @@ There is no root `docs/` directory.
 
 | Package | Workspace import | Purpose |
 | --- | --- | --- |
-| `packages/ui` | `@school-os/ui` | Shared web UI primitives + design tokens |
-| `packages/logger` | `@school-os/logger` | Shared structured logger for TypeScript and Rust |
-| `packages/typescript-config` | `@school-os/typescript-config` | Reusable TypeScript config presets |
+| `packages/ui` | `@personal-os/ui` | Shared web UI primitives + design tokens |
+| `packages/logger` | `@personal-os/logger` | Shared structured logger for TypeScript and Rust |
+| `packages/typescript-config` | `@personal-os/typescript-config` | Reusable TypeScript config presets |
 
 ## Root command surface
 
@@ -170,7 +170,7 @@ More details: docs app `/docs/docker` and `docker/README.md`.
 - Cursor-specific rules: `.cursor/rules/`
 - Architecture baseline: docs app `/docs/architecture`
 - Override process: docs app `/docs/overrides`
-- Use workspace imports as `@school-os/<package>`
+- Use workspace imports as `@personal-os/<package>`
 
 ## Related docs
 

@@ -11,7 +11,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { motion } from "motion/react";
 import type { IncidentEvent } from "../data/landing.data";
-import { INCIDENT_TIMELINE, PRODUCT_BULLETS } from "../data/landing.data";
+import { INCIDENT_TIMELINE, LANDING_COPY, PRODUCT_BULLETS } from "../data/landing.data";
 import { ATLAS_EASE, springSnappy } from "../lib/motion";
 import { FadeIn } from "./fade-in";
 import { MeshCanvas } from "./mesh-canvas";
@@ -37,15 +37,13 @@ export function ProductSection() {
 
 					<FadeIn delay={0.08}>
 						<h2 className="mt-6 text-balance font-serif text-3xl text-foreground leading-tight sm:text-4xl">
-							From clone to running workspace — every step is wired in.
+							{LANDING_COPY.productHeading}
 						</h2>
 					</FadeIn>
 
 					<FadeIn delay={0.14}>
 						<p className="mt-5 text-pretty text-muted-foreground leading-8">
-							Starter ships a complete Turborepo loop: install once, run shared tasks, enforce
-							architecture boundaries, and stand up web, mobile, API, docs, and Rust without
-							cobbling five repos together.
+							{LANDING_COPY.productBody}
 						</p>
 					</FadeIn>
 

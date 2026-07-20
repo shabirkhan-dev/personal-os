@@ -1,6 +1,6 @@
 ﻿{
   "name": "personal-os",
-  "description": "Personal OS — Bun + Turborepo monorepo: Next.js, Expo, NestJS, shared UI, CI, Docker, and Dev Container.",
+  "description": "Personal OS — your life in one place: routines, finance, skincare, food, fashion, and daily care.",
   "keywords": ["personal-os", "personal", "productivity", "bun", "turborepo", "monorepo", "nextjs", "nestjs", "expo", "typescript", "fullstack", "docker"],
   "homepage": "https://github.com/shabirkhan-dev/personal-os#readme",
   "repository": { "type": "git", "url": "https://github.com/shabirkhan-dev/personal-os.git" },

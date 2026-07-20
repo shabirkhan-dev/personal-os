@@ -14,6 +14,7 @@ import {
 	ABOUT_TEAM,
 	type AboutTeamMember,
 	dicebearUrl,
+	LANDING_COPY,
 	STATS,
 } from "../data/landing.data";
 import { ATLAS_EASE, hoverLift, springSnappy, springSoft } from "../lib/motion";
@@ -50,19 +51,17 @@ function AboutHero() {
 			<div className="mx-auto flex w-full max-w-3xl flex-col items-center text-center">
 				<FadeIn>
 					<span className="inline-flex items-center rounded-full border border-border bg-card px-3.5 py-1.5 font-medium text-muted-foreground text-xs">
-						About Starter
+						{LANDING_COPY.aboutTitle}
 					</span>
 				</FadeIn>
 				<FadeIn delay={0.06}>
 					<h1 className="mt-6 text-balance font-serif text-4xl text-foreground leading-[1.1] tracking-tight sm:text-5xl">
-						A monorepo starter built for school-scale products.
+						Your life operating system — routines, finance, care, food, and fashion in one place.
 					</h1>
 				</FadeIn>
 				<FadeIn delay={0.12}>
 					<p className="mt-6 max-w-2xl text-pretty text-muted-foreground text-base leading-8 sm:text-lg">
-						We built Starter after wiring the same five apps together too many times. It&apos;s the
-						Bun + Turborepo workspace we wished we had — shared UI, hooks, CI, Docker, and docs
-						included from day one.
+						{LANDING_COPY.aboutLead}
 					</p>
 				</FadeIn>
 			</div>

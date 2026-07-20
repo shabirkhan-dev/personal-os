@@ -1,19 +1,19 @@
 # Design System Brief
 
-This file is the source of truth for AI agents and humans when creating UI in this Starter.
+This file is the source of truth for AI agents and humans when creating UI in **Personal OS**.
 Keep it updated before generating new screens with Codex, Claude Code, Cursor, v0, Open Design,
 Figma MCP, Onlook, Scamp, or similar tools.
 
 ## Product Intent
 
-This Starter should produce production-grade application interfaces, not generic demo pages.
-Generated UI must feel domain-specific, accessible, responsive, and built from reusable components.
+This **Personal OS** should produce production-grade, domain-specific interfaces — not generic demo pages.
+Generated UI must feel personal, calm, and mobile-friendly — finance and routines alongside care, food, and fashion.
 
 ## Audience
 
-- Developers starting new products from this monorepo.
-- Designers or product builders using AI tools to explore screens.
-- AI coding agents implementing UI from product briefs, Figma frames, or design-system prompts.
+- You (primary) — tracking your own life domains
+- Future users who want one home for routines, money, care, food, and style
+- AI coding agents implementing Personal OS modules from product briefs
 
 ## Visual Principles
 

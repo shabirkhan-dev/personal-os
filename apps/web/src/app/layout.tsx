@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 		default: "Personal OS",
 		template: "%s | Personal OS",
 	},
-	description: "Personal OS — Bun + Turborepo monorepo: Next.js, Expo, NestJS, shared UI, CI, Docker, and Dev Container.",
+	description: "Personal OS — your life in one place: routines, finance, skincare, food, fashion, and daily care.",
 	keywords: ["personal-os", "personal", "productivity", "bun", "turborepo", "monorepo", "nextjs", "nestjs", "expo", "typescript", "fullstack", "docker"],
 	applicationName: "Personal OS",
 	creator: "Personal OS",
@@ -25,12 +25,12 @@ export const metadata: Metadata = {
 		locale: "en_US",
 		siteName: "Personal OS",
 		title: "Personal OS",
-		description: "Personal OS — Bun + Turborepo monorepo: Next.js, Expo, NestJS, shared UI, CI, Docker, and Dev Container.",
+		description: "Personal OS — your life in one place: routines, finance, skincare, food, fashion, and daily care.",
 	},
 	twitter: {
 		card: "summary_large_image",
 		title: "Personal OS",
-		description: "Personal OS — Bun + Turborepo monorepo: Next.js, Expo, NestJS, shared UI, CI, Docker, and Dev Container.",
+		description: "Personal OS — your life in one place: routines, finance, skincare, food, fashion, and daily care.",
 	},
 	robots: { index: true, follow: true },
 };

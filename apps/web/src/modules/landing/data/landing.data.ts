@@ -13,8 +13,30 @@ import type { IconSvgElement } from "@hugeicons/react";
 
 export const SITE = {
 	name: "Personal OS",
-	title: "Personal OS â€” Bun + Turborepo monorepo",
-	description: "Personal OS — Bun + Turborepo monorepo: Next.js, Expo, NestJS, shared UI, CI, Docker, and Dev Container.",
+	title: "Personal OS — your life operating system",
+	description:
+		"Personal OS — your life in one place: routines, finance, skincare, food, fashion, and daily care.",
+} as const;
+
+export const LANDING_COPY = {
+	heroBadge: "Built for your daily life",
+	heroTitlePrimary: "Run your life from one place",
+	heroTitleSecondary: "not ten scattered apps",
+	heroSubtitle:
+		"Finance, skincare routines, meals, fashion, habits, and personal care — Personal OS is your control plane for everyday life.",
+	workflowCardTitle: "Morning routine",
+	workflowCardSub: "personal-os",
+	chatCardTitle: "Life assistant",
+	chatCardSub: "Personal OS · ready",
+	productHeading: "From morning routine to monthly budget — one connected system.",
+	productBody:
+		"Personal OS connects the domains you actually live in: daily habits, personal care, food, fashion, and finance — web and mobile, with AI assist when you need it.",
+	whyLabel: "Why Personal OS",
+	whyHeading: "Built for people who want one home for their life.",
+	whySub: "Not another generic todo app — a personal operating system shaped around how you live.",
+	aboutTitle: "About Personal OS",
+	aboutLead:
+		"Personal OS is the place for your routines, money, care, food, and style — one dashboard, one mobile companion, one source of truth for you.",
 } as const;
 
 export type NavLink = {
@@ -135,19 +157,19 @@ export type ChatMessage = {
 export const AGENT_MESSAGES: ChatMessage[] = [
 	{
 		role: "user",
-		text: "Can we scaffold a school product with web + mobile + API?",
+		text: "Can Personal OS track my skincare routine and spending in one place?",
 	},
 	{
 		role: "agent",
-		text: "Starter already ships all three â€” plus docs and a Rust binary.",
+		text: "Yes — routines, finance, food, and fashion modules share one profile and timeline.",
 	},
 	{
 		role: "agent",
-		text: "Shared @school-os/ui and typescript-config keep stacks consistent.",
+		text: "Log a skincare step on mobile; see spend vs. budget on web the same day.",
 	},
 	{
 		role: "agent",
-		text: "Run bun install && bun run dev â€” Turbo starts the workspace.",
+		text: "AI assist helps plan meals, outfits, and habits without leaving your OS.",
 	},
 ];
 
@@ -168,9 +190,11 @@ export const CUSTOMER_LOGOS: CustomerLogo[] = [
 ];
 
 export const PRODUCT_BULLETS: string[] = [
-	"Five apps in one workspace â€” web, mobile, Nest, docs, Rust",
-	"Shared UI tokens and TypeScript configs via @school-os/*",
-	"Hooks, CI, architecture boundaries, and Compose out of the box",
+	"Finance, budgets, and spending in one timeline",
+	"Skincare and personal care routines you can follow daily",
+	"Meals, habits, and daily schedules on web and mobile",
+	"Fashion and wardrobe planning tied to your week",
+	"AI assist for planning without leaving your OS",
 ];
 
 export type IncidentEvent = {

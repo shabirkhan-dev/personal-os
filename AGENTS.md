@@ -1,12 +1,12 @@
-# Agent instructions (Starter)
+# Agent instructions (Personal OS)
 
 Universal instructions for AI agents (Cursor, Copilot, Claude Code, Windsurf, Cline, Aider, etc.).
 Read this file first when working in this repo.
 
 ## Project overview
 
-Monorepo Starter managed with **Turborepo + Bun**. Apps, shared packages, and
-multi-language scripts, all wired into a single lint/format/build/test surface.
+Monorepo **Personal OS** — a personal life operating system (routines, finance, skincare, food,
+fashion) — managed with **Turborepo + Bun**. See `plan.md` for product vision.
 
 ## Documentation
 
@@ -30,7 +30,7 @@ Before any Next.js work, find and read the relevant doc in `node_modules/next/di
 ## Repository layout
 
 ```
-school-os/
+personal-os/
 ├── apps/
 │   ├── web/             # Next.js (React, Tailwind, shadcn-style UI)
 │   ├── mobile/          # Expo Router + NativeWind app (TypeScript)
@@ -88,7 +88,7 @@ school-os/
 - **No ESLint/Prettier**: Biome is the only lint/format tool for TS/JS in this project.
 - **Naming**: PascalCase for components; files match component name. Hooks use `use*` prefix;
   utility functions are plain named exports.
-- **Imports**: Prefer workspace imports as `@school-os/<package>` (e.g. `@school-os/ui`).
+- **Imports**: Prefer workspace imports as `@personal-os/<package>` (e.g. `@personal-os/ui`).
   Group: external → workspace → relative. No unused imports.
 - **Types**: Explicit types for props and public APIs. Avoid `any`; use `unknown` and narrow.
 - **Errors**: Handle explicitly — log and rethrow, or use result types. No silent catches.
@@ -99,7 +99,7 @@ school-os/
 - **Monorepo**: Apps in `apps/`, shared code in `packages/`. When a change applies across apps,
   prefer changing a shared package.
 - **New apps**: Add under `apps/`, wire into `turbo.json` tasks if needed.
-- **New packages**: Add under `packages/`, export via `@school-os/<name>`.
+- **New packages**: Add under `packages/`, export via `@personal-os/<name>`.
 - **Shared UI**: `packages/ui` uses shadcn-style components. Shared Tailwind tokens live in
   `packages/ui/src/styles/globals.css`.
 - **TypeScript config**: Extend from `packages/typescript-config/base.json` (or `nextjs.json`

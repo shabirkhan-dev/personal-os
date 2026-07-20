@@ -1,7 +1,7 @@
 ﻿{
   "name": "personal-os",
-  "description": "Personal OS — your life in one place: routines, finance, skincare, food, fashion, and daily care.",
-  "keywords": ["personal-os", "personal", "productivity", "bun", "turborepo", "monorepo", "nextjs", "nestjs", "expo", "typescript", "fullstack", "docker"],
+  "description": "Personal life operating system — track routines, finance, skincare, food, fashion, and daily habits in one web and mobile app.",
+  "keywords": ["personal-os", "life-os", "routines", "finance", "skincare", "food", "fashion", "wellness", "habits", "productivity", "nextjs", "expo"],
   "homepage": "https://github.com/shabirkhan-dev/personal-os#readme",
   "repository": { "type": "git", "url": "https://github.com/shabirkhan-dev/personal-os.git" },
   "bugs": { "url": "https://github.com/shabirkhan-dev/personal-os/issues" },
@@ -60,4 +60,5 @@
     "expo-symbols": "57.0.1"
   }
 }
+
 

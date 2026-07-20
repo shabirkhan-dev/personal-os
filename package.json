@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "personal-os",
   "description": "Personal OS — Bun + Turborepo monorepo: Next.js, Expo, NestJS, shared UI, CI, Docker, and Dev Container.",
   "keywords": ["personal-os", "personal", "productivity", "bun", "turborepo", "monorepo", "nextjs", "nestjs", "expo", "typescript", "fullstack", "docker"],
@@ -40,7 +40,7 @@
     "prepare": "lefthook install"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.15",
+    "@biomejs/biome": "2.5.4",
     "lefthook": "2.1.6",
     "lightningcss": "1.32.0",
     "turbo": "^2.10.5"

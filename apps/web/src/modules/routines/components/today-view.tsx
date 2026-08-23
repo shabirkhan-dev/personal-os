@@ -7,12 +7,15 @@ import { Button } from "@school-os/ui/components/button";
 import { Card, CardContent } from "@school-os/ui/components/card";
 import { Checkbox } from "@school-os/ui/components/checkbox";
 import Link from "next/link";
+import { ErrorState } from "./error-state";
 
 export function TodayView({
 	view,
 	loading,
+	hasError = false,
 	togglingItemId,
 	onToggle,
+	onRetry,
 }: {
 	view:
 		| {
@@ -34,15 +37,26 @@ export function TodayView({
 		  }
 		| undefined;
 	loading: boolean;
+	hasError?: boolean;
 	togglingItemId: string | null;
 	onToggle: (routineId: string, itemId: string) => void;
+	onRetry?: () => void;
 }) {
+	if (hasError) {
+		return (
+			<ErrorState
+				description="Could not load today. Check your connection and try again."
+				onRetry={onRetry}
+			/>
+		);
+	}
+
 	if (loading) {
 		return <p className="text-dashboard-text-muted text-[13px]">Loading your day…</p>;
 	}
 
 	if (!view) {
-		return <p className="text-dashboard-text-muted text-[13px]">Could not load today.</p>;
+		return <ErrorState description="Could not load today." onRetry={onRetry} />;
 	}
 
 	const totalItems = view.routines.reduce((sum, routine) => sum + routine.totalItems, 0);

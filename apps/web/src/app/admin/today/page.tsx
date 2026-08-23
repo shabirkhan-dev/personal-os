@@ -9,7 +9,7 @@ import {
 } from "@/modules/routines";
 
 export default function AdminTodayPage() {
-	const { data: view, isLoading } = useTodayQuery();
+	const { data: view, isLoading, isError, refetch } = useTodayQuery();
 	const toggleMutation = useToggleItemMutation();
 
 	return (
@@ -24,6 +24,8 @@ export default function AdminTodayPage() {
 				<TodayView
 					view={view}
 					loading={isLoading}
+					hasError={isError}
+					onRetry={() => refetch()}
 					togglingItemId={
 						toggleMutation.isPending ? (toggleMutation.variables?.itemId ?? null) : null
 					}

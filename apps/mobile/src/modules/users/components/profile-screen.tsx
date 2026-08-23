@@ -4,7 +4,9 @@ import {
 	Key01Icon,
 	Logout01Icon,
 	Mail01Icon,
+	Moon02Icon,
 	ShieldOffIcon,
+	Sun01Icon,
 	UserIcon,
 } from "@hugeicons/core-free-icons";
 import { router } from "expo-router";
@@ -12,6 +14,7 @@ import { useEffect } from "react";
 import {
 	ActivityIndicator,
 	Alert,
+	Appearance,
 	Image,
 	Pressable,
 	ScrollView,
@@ -20,6 +23,7 @@ import {
 	View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Uniwind, useUniwind } from "uniwind";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { Icon, type IconProp } from "@/components/ui/icon";
 import { NeonCard } from "@/components/ui/neon-card";
@@ -131,6 +135,8 @@ export function ProfileScreen() {
 										</View>
 									</NeonCard>
 								</View>
+
+								<AppearanceSection />
 							</View>
 						) : (
 							/* Authenticated User Profile */
@@ -228,6 +234,8 @@ export function ProfileScreen() {
 									</NeonCard>
 								</View>
 
+								<AppearanceSection />
+
 								<View style={styles.section}>
 									<Text style={styles.sectionLabel}>SESSION</Text>
 									<NeonCard>
@@ -262,6 +270,51 @@ export function ProfileScreen() {
 				</ScrollView>
 				<BottomNav activeTab="profile" />
 			</SafeAreaView>
+		</View>
+	);
+}
+
+function AppearanceSection() {
+	const { theme } = useUniwind();
+
+	const handleSetTheme = (newTheme: "dark" | "light") => {
+		Uniwind.setTheme(newTheme);
+		Appearance.setColorScheme?.(newTheme);
+	};
+
+	return (
+		<View style={styles.section}>
+			<Text style={styles.sectionLabel}>APPEARANCE</Text>
+			<NeonCard>
+				<View className="flex-row p-1 bg-[#0B0C10] rounded-2xl border border-white/[0.04] gap-1">
+					<Pressable
+						onPress={() => handleSetTheme("dark")}
+						className={`flex-1 py-2.5 rounded-xl items-center flex-row justify-center gap-1.5 ${
+							theme === "dark" ? "bg-white" : ""
+						}`}
+					>
+						<Icon icon={Moon02Icon} size={14} color={theme === "dark" ? "#000000" : "#888888"} />
+						<Text
+							className={`text-xs font-bold ${theme === "dark" ? "text-black" : "text-[#888888]"}`}
+						>
+							Dark
+						</Text>
+					</Pressable>
+					<Pressable
+						onPress={() => handleSetTheme("light")}
+						className={`flex-1 py-2.5 rounded-xl items-center flex-row justify-center gap-1.5 ${
+							theme === "light" ? "bg-white" : ""
+						}`}
+					>
+						<Icon icon={Sun01Icon} size={14} color={theme === "light" ? "#000000" : "#888888"} />
+						<Text
+							className={`text-xs font-bold ${theme === "light" ? "text-black" : "text-[#888888]"}`}
+						>
+							Light
+						</Text>
+					</Pressable>
+				</View>
+			</NeonCard>
 		</View>
 	);
 }

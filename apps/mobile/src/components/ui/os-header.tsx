@@ -1,12 +1,14 @@
 import {
 	ArrowDown01Icon,
+	Moon02Icon,
 	Notification01Icon,
-	ScanIcon,
+	Sun01Icon,
 	Tick01Icon,
 } from "@hugeicons/core-free-icons";
 import { type Href, router, useSegments } from "expo-router";
 import * as React from "react";
 import {
+	Appearance,
 	Image,
 	Modal,
 	Pressable,
@@ -15,6 +17,7 @@ import {
 	TouchableWithoutFeedback,
 	View,
 } from "react-native";
+import { Uniwind, useUniwind } from "uniwind";
 import { Icon } from "@/components/ui/icon";
 import { NeonColors } from "@/constants/design-system";
 import { resolveMediaUrl } from "@/lib/media-url";
@@ -26,6 +29,14 @@ export function OSHeader() {
 	const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
 	const segments = useSegments() as string[];
 	const { user } = useAuth();
+	const { theme } = useUniwind();
+	const isDark = theme === "dark";
+
+	const toggleTheme = () => {
+		const nextTheme = isDark ? "light" : "dark";
+		Uniwind.setTheme(nextTheme);
+		Appearance.setColorScheme?.(nextTheme);
+	};
 
 	const avatarUri =
 		resolveMediaUrl(user?.profile?.avatarUrl?.trim()) ||
@@ -111,8 +122,18 @@ export function OSHeader() {
 			</View>
 
 			<View style={styles.right}>
-				<Pressable style={styles.iconButton}>
-					<Icon icon={ScanIcon} size={22} color={NeonColors.text.primary} strokeWidth={1.5} />
+				<Pressable
+					style={styles.themeToggleBtn}
+					onPress={toggleTheme}
+					accessibilityRole="button"
+					accessibilityLabel={`Switch to ${isDark ? "light" : "dark"} mode`}
+				>
+					<Icon
+						icon={isDark ? Sun01Icon : Moon02Icon}
+						size={20}
+						color={isDark ? "#FFEA00" : "#00E676"}
+						strokeWidth={2}
+					/>
 				</Pressable>
 				<View style={styles.notificationContainer}>
 					<Pressable style={styles.iconButton}>
@@ -228,6 +249,11 @@ const styles = StyleSheet.create({
 	},
 	iconButton: {
 		padding: 4,
+	},
+	themeToggleBtn: {
+		padding: 6,
+		borderRadius: 12,
+		backgroundColor: "rgba(255, 255, 255, 0.05)",
 	},
 	notificationContainer: {
 		position: "relative",

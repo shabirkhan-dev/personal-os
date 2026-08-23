@@ -84,14 +84,16 @@ describe('buildMonthSummary', () => {
 describe('FinanceService', () => {
 	let repository: Mocked<FinanceRepository>;
 	let service: FinanceService;
+	let existingTransaction: FinanceTransactionRecord | null;
 
 	beforeEach(() => {
+		existingTransaction = transactionRow();
 		repository = {
 			runInTransaction: vi.fn(<T>(work: (tx: unknown) => Promise<T>) => work(undefined)),
 			getTimezoneByUserId: vi.fn(async () => 'Asia/Kolkata'),
 			listTransactions: vi.fn(async () => []),
 			listMonthTransactions: vi.fn(async () => []),
-			findTransaction: vi.fn(async () => transactionRow()),
+			findTransaction: vi.fn(async () => existingTransaction),
 			insertTransaction: vi.fn(async (values) => transactionRow(values)),
 			updateTransaction: vi.fn(async (_userId, _id, patch) => transactionRow(patch)),
 			deleteTransaction: vi.fn(async () => transactionRow()),
@@ -104,7 +106,7 @@ describe('FinanceService', () => {
 	it('defaults occurredOn to today in the user timezone', async () => {
 		await service.createTransaction(
 			userId,
-			{ type: 'expense', amountMinor: 5_000 },
+			{ type: 'expense', amountMinor: 5_000, currency: 'INR' },
 			new Date('2026-08-23T20:00:00Z'), // 2026-08-24 in Kolkata
 		);
 		expect(repository.insertTransaction).toHaveBeenCalledWith(
@@ -120,6 +122,7 @@ describe('FinanceService', () => {
 		await service.createTransaction(userId, {
 			type: 'expense',
 			amountMinor: 5_000,
+			currency: 'INR',
 			category: ' Groceries ',
 		});
 		expect(repository.insertTransaction).toHaveBeenCalledWith(
@@ -179,7 +182,7 @@ describe('FinanceService', () => {
 	});
 
 	it('throws when updating a transaction that does not belong to the user', async () => {
-		repository.findTransaction.mockResolvedValue(null);
+		existingTransaction = null;
 		await expect(
 			service.updateTransaction(userId, 'b2222222-2222-4222-8222-222222222222', {
 				note: 'nope',

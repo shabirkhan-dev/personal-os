@@ -7,6 +7,7 @@ import { DatabaseModule } from '@/database/database.module';
 import { AiModule } from '@/modules/ai/ai.module';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { BillingModule } from '@/modules/billing/billing.module';
+import { FinanceModule } from '@/modules/finance/finance.module';
 import { HealthModule } from '@/modules/health/health.module';
 import { ProfilesModule } from '@/modules/profiles/profiles.module';
 import { RoutinesModule } from '@/modules/routines/routines.module';
@@ -22,6 +23,7 @@ import { UsersModule } from '@/modules/users/users.module';
 		AuthModule,
 		ProfilesModule,
 		RoutinesModule,
+		FinanceModule,
 		BillingModule,
 		AiModule,
 	],

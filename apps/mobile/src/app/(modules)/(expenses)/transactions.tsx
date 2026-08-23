@@ -10,12 +10,13 @@ import {
 	View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { FloatingActionButton } from "@/components/ui/floating-action-button";
+import { BottomNav } from "@/components/ui/bottom-nav";
 import { Icon } from "@/components/ui/icon";
 import { OSHeader } from "@/components/ui/os-header";
 import { NeonColors } from "@/constants/design-system";
 import {
 	AddTransactionModal,
+	FinanceTabs,
 	TransactionCard,
 	type TransactionType,
 	useDeleteTransactionMutation,
@@ -62,6 +63,8 @@ export default function TransactionsScreen() {
 							<Text style={styles.viewTitle}>Transactions</Text>
 							<Text style={styles.viewSubtitle}>Complete history and ledger.</Text>
 						</View>
+
+						<FinanceTabs active="transactions" />
 
 						{/* Type Filter Pills */}
 						<View className="flex-row gap-2 mb-4">
@@ -119,12 +122,8 @@ export default function TransactionsScreen() {
 						</View>
 					</View>
 				</ScrollView>
+				<BottomNav activeTab="finance" onAddPress={() => setModalVisible(true)} />
 			</SafeAreaView>
-
-			<FloatingActionButton
-				color={NeonColors.accent.orange}
-				onPress={() => setModalVisible(true)}
-			/>
 
 			<AddTransactionModal visible={modalVisible} onClose={() => setModalVisible(false)} />
 		</View>

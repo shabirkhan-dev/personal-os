@@ -10,7 +10,7 @@ import {
 	View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { FloatingActionButton } from "@/components/ui/floating-action-button";
+import { BottomNav } from "@/components/ui/bottom-nav";
 import { Icon } from "@/components/ui/icon";
 import { OSHeader } from "@/components/ui/os-header";
 import { NeonColors } from "@/constants/design-system";
@@ -18,11 +18,12 @@ import {
 	AddTransactionModal,
 	BudgetProgressCard,
 	FinanceSummaryCard,
+	FinanceTabs,
+	TransactionCard,
 	useDeleteTransactionMutation,
 	useMonthSummaryQuery,
 	useTransactionsQuery,
 } from "@/modules/finance";
-import { TransactionCard } from "@/modules/finance/components/transaction-card";
 
 export default function ExpensesIndex() {
 	const [modalVisible, setModalVisible] = useState(false);
@@ -66,7 +67,7 @@ export default function ExpensesIndex() {
 					}
 				>
 					<View style={styles.viewContainer}>
-						<View className="flex-row items-center justify-between mb-4">
+						<View className="flex-row items-center justify-between mb-2">
 							<View>
 								<Text style={styles.viewTitle}>Capital</Text>
 								<Text style={styles.viewSubtitle}>Live cash flow & budget tracking.</Text>
@@ -85,6 +86,8 @@ export default function ExpensesIndex() {
 								<Text className="text-orange-400 font-bold text-xs">Add</Text>
 							</Pressable>
 						</View>
+
+						<FinanceTabs active="overview" />
 
 						{/* Net Summary Card */}
 						{summaryLoading && !summary ? (
@@ -135,12 +138,8 @@ export default function ExpensesIndex() {
 						</View>
 					</View>
 				</ScrollView>
+				<BottomNav activeTab="finance" onAddPress={() => setModalVisible(true)} />
 			</SafeAreaView>
-
-			<FloatingActionButton
-				color={NeonColors.accent.orange}
-				onPress={() => setModalVisible(true)}
-			/>
 
 			<AddTransactionModal visible={modalVisible} onClose={() => setModalVisible(false)} />
 		</View>

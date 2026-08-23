@@ -12,12 +12,13 @@ import {
 	View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { FloatingActionButton } from "@/components/ui/floating-action-button";
+import { BottomNav } from "@/components/ui/bottom-nav";
 import { Icon } from "@/components/ui/icon";
 import { OSHeader } from "@/components/ui/os-header";
 import { NeonColors } from "@/constants/design-system";
 import {
 	BudgetProgressCard,
+	FinanceTabs,
 	getCurrentMonthString,
 	useBudgetsQuery,
 	useMonthSummaryQuery,
@@ -80,7 +81,7 @@ export default function BudgetScreen() {
 					}
 				>
 					<View style={styles.viewContainer}>
-						<View className="flex-row items-center justify-between mb-4">
+						<View className="flex-row items-center justify-between mb-2">
 							<View>
 								<Text style={styles.viewTitle}>Budget</Text>
 								<Text style={styles.viewSubtitle}>
@@ -102,6 +103,8 @@ export default function BudgetScreen() {
 							</Pressable>
 						</View>
 
+						<FinanceTabs active="budget" />
+
 						<View style={styles.logsList}>
 							{isLoading && !summary ? (
 								<View className="h-40 items-center justify-center">
@@ -122,12 +125,8 @@ export default function BudgetScreen() {
 						</View>
 					</View>
 				</ScrollView>
+				<BottomNav activeTab="finance" onAddPress={() => setBudgetModalVisible(true)} />
 			</SafeAreaView>
-
-			<FloatingActionButton
-				color={NeonColors.accent.orange}
-				onPress={() => setBudgetModalVisible(true)}
-			/>
 
 			{/* Set Budget Modal */}
 			<Modal

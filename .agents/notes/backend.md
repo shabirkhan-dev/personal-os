@@ -21,6 +21,9 @@
 
 ## Log
 
+- 2026-08-24 — quick wins: bounded upstream timeouts (Resend/AI/Stripe/Razorpay),
+  structured request/error observability, fail-closed production config +
+  Swagger gating. 45 tests green.
 - 2026-08-23 — finance v1 shipped: transactions CRUD, budgets (PUT replace),
   month summary; date helpers promoted to `common/time/local-date.ts`.
 - 2026-08-23 — routines v1 hardened: atomic writes, uuid validation, bounded

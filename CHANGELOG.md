@@ -25,13 +25,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - Root `docs/` directory (stale pointer after the docs app migration).
-- Web API backend switcher (Python / Rust / Hono).
+- Removed the legacy multi-backend web API switcher.
 
 ## [0.1.0] - 2026-02-10
 
 ### Added
 
-- Initial Starter monorepo layout (Turborepo + Bun).
+- Initial Personal OS monorepo layout (Turborepo + Bun).
 - Dual license: MIT and Apache-2.0.
 
 [Unreleased]: https://github.com/shabirkhan-dev/personal-os/compare/v0.1.0...HEAD

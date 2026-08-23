@@ -7,7 +7,7 @@ import { NeonColors } from "@/constants/design-system";
 export function LibraryWidget() {
 	return (
 		<Pressable style={({ pressed }) => [{ opacity: pressed ? 0.9 : 1 }]}>
-			<NeonCard accentColor={NeonColors.accent.teal}>
+			<NeonCard style={{ borderColor: "rgba(0, 229, 255, 0.3)" }}>
 				<View style={styles.header}>
 					<View style={styles.headerLeft}>
 						<Icon icon={BookOpen01Icon} size={20} color={NeonColors.accent.teal} />

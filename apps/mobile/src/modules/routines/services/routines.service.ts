@@ -11,14 +11,13 @@ import type {
 export const routinesService = {
 	getToday: (accessToken: string) => apiClient.get<TodayView>("/routines/today", { accessToken }),
 
-	list: (accessToken: string, query?: RoutineListQuery) =>
-		apiClient.get<Routine[]>("/routines", {
-			accessToken,
-			params: {
-				limit: query?.limit ?? 100,
-				offset: query?.offset ?? 0,
-			},
-		}),
+	list: (accessToken: string, query?: RoutineListQuery) => {
+		const searchParams = new URLSearchParams();
+		if (query?.limit !== undefined) searchParams.set("limit", String(query.limit));
+		if (query?.offset !== undefined) searchParams.set("offset", String(query.offset));
+		const qs = searchParams.toString();
+		return apiClient.get<Routine[]>(`/routines${qs ? `?${qs}` : ""}`, { accessToken });
+	},
 
 	getById: (accessToken: string, id: string) =>
 		apiClient.get<Routine>(`/routines/${id}`, { accessToken }),

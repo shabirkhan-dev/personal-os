@@ -7,7 +7,7 @@ import { NeonColors } from "@/constants/design-system";
 export function FocusWidget() {
 	return (
 		<Pressable style={({ pressed }) => [{ opacity: pressed ? 0.9 : 1 }]}>
-			<NeonCard accentColor={NeonColors.accent.pink}>
+			<NeonCard style={{ borderColor: "rgba(255, 0, 127, 0.3)" }}>
 				<View style={styles.header}>
 					<View style={styles.headerLeft}>
 						<Icon icon={Target01Icon} size={20} color={NeonColors.accent.pink} />

@@ -129,7 +129,9 @@ export function BottomNav({
 	const currentActive = getActiveTabId();
 
 	const handleTabPress = (route: string) => {
-		router.push(route as never);
+		if (pathname !== route) {
+			router.replace(route as never);
+		}
 	};
 
 	const leftTabs = tabs.slice(0, 2);

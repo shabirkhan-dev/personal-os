@@ -104,4 +104,10 @@ const styles = StyleSheet.create({
 	logsList: {
 		marginTop: 12,
 	},
+	emptyText: {
+		color: NeonColors.text.muted,
+		fontSize: 13,
+		textAlign: "center",
+		marginTop: 16,
+	},
 });

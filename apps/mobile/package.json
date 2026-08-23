@@ -15,6 +15,7 @@
     "build:dev:android:local": "eas build --profile development --platform android --local",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
+    "typecheck": "tsc --noEmit",
     "test": "bun -e \"console.log('[mobile] No unit tests yet; skipping.');\""
   },
   "dependencies": {

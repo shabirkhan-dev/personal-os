@@ -1,12 +1,13 @@
 import type { IconSvgElement } from "@hugeicons/react-native";
 import { HugeiconsIcon } from "@hugeicons/react-native";
+import type { ColorValue } from "react-native";
 
 export type IconProp = IconSvgElement;
 
 export interface IconProps {
 	icon?: IconSvgElement | null;
 	size?: number;
-	color?: string;
+	color?: string | ColorValue;
 	strokeWidth?: number;
 	[key: string]: unknown;
 }

@@ -1,75 +1,51 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
-import type { NewRoutineItemRecord, NewRoutineRecord } from '@/database/schema';
-import type { CreateRoutineInput, UpdateRoutineInput } from './routines.dto';
+import type { NewRoutineRecord } from '@/database/schema';
+import type { CreateRoutineInput, ListRoutinesQuery, UpdateRoutineInput } from './routines.dto';
 import { RoutinesRepository } from './routines.repository';
-
-export const DEFAULT_TIME_ZONE = 'UTC';
-
-/** Returns the calendar date (YYYY-MM-DD) in the given IANA time zone. */
-export function localDateInTimeZone(date: Date, timeZone: string): string {
-	return new Intl.DateTimeFormat('en-CA', { timeZone }).format(date);
-}
-
-/** Returns the ISO weekday number (1 = Monday .. 7 = Sunday) in the given time zone. */
-export function isoWeekdayInTimeZone(date: Date, timeZone: string): number {
-	const shortWeekday = new Intl.DateTimeFormat('en-US', {
-		timeZone,
-		weekday: 'short',
-	}).format(date);
-	const order = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-	const index = order.indexOf(shortWeekday);
-	if (index < 0) throw new Error(`Unexpected weekday token: ${shortWeekday}`);
-	return index + 1;
-}
-
-/** Pure schedule matcher: does this routine run on the given ISO weekday? */
-export function isScheduledOn(
-	scheduleType: string,
-	daysOfWeek: string | null,
-	weekday: number,
-): boolean {
-	if (scheduleType === 'daily') return true;
-	if (!daysOfWeek) return false;
-	return parseDaysOfWeek(daysOfWeek).includes(weekday);
-}
-
-function normalizeDaysOfWeek(daysOfWeek: number[]): string {
-	return [...new Set(daysOfWeek)].sort((a, b) => a - b).join(',');
-}
-
-function parseDaysOfWeek(daysOfWeek: string | null): number[] {
-	if (!daysOfWeek) return [];
-	return daysOfWeek
-		.split(',')
-		.map((token) => Number.parseInt(token.trim(), 10))
-		.filter((value) => Number.isInteger(value));
-}
+import {
+	DEFAULT_TIME_ZONE,
+	isoWeekdayInTimeZone,
+	isScheduledOn,
+	localDateInTimeZone,
+	normalizeDaysOfWeek,
+	parseDaysOfWeek,
+} from './routines.schedule';
 
 @Injectable()
 export class RoutinesService {
 	constructor(private readonly repository: RoutinesRepository) {}
 
 	async create(userId: string, input: CreateRoutineInput) {
-		const routine = await this.repository.insertRoutine({
-			userId,
-			name: input.name,
-			description: input.description ?? null,
-			scheduleType: input.scheduleType,
-			daysOfWeek:
-				input.scheduleType === 'specific_days' && input.daysOfWeek
-					? normalizeDaysOfWeek(input.daysOfWeek)
-					: null,
-		});
+		const items = toItemRows(userId, input.items);
 
-		if (input.items && input.items.length > 0) {
-			await this.repository.insertItems(toItemRows(routine.id, userId, input.items));
-		}
+		const routine = await this.repository.runInTransaction(async (tx) => {
+			const created = await this.repository.insertRoutine(
+				{
+					userId,
+					name: input.name,
+					description: input.description ?? null,
+					scheduleType: input.scheduleType,
+					daysOfWeek:
+						input.scheduleType === 'specific_days' && input.daysOfWeek
+							? normalizeDaysOfWeek(input.daysOfWeek)
+							: null,
+				},
+				tx,
+			);
+			if (items.length > 0) {
+				await this.repository.insertItems(
+					items.map((item) => ({ ...item, routineId: created.id })),
+					tx,
+				);
+			}
+			return created;
+		});
 		return this.getRoutineOrThrow(userId, routine.id);
 	}
 
-	async list(userId: string) {
-		const rows = await this.repository.listRoutines(userId);
+	async list(userId: string, query: ListRoutinesQuery) {
+		const rows = await this.repository.listRoutines(userId, query);
 		const items = await this.repository.listActiveItems(rows.map((routine) => routine.id));
 		return rows.map((routine) => toRoutineView(routine, items));
 	}
@@ -81,45 +57,32 @@ export class RoutinesService {
 	async update(userId: string, routineId: string, input: UpdateRoutineInput) {
 		await this.getRoutineOrThrow(userId, routineId);
 
-		const patch: Partial<NewRoutineRecord> = {};
-		if (input.name !== undefined) patch.name = input.name;
-		if (input.description !== undefined) patch.description = input.description ?? null;
-
-		const scheduleChangedToDaily = input.scheduleType === 'daily' && input.daysOfWeek === undefined;
-
-		if (input.daysOfWeek !== undefined && input.daysOfWeek !== null) {
-			patch.daysOfWeek = normalizeDaysOfWeek(input.daysOfWeek);
-		} else if (scheduleChangedToDaily || input.scheduleType === 'daily') {
-			patch.daysOfWeek = null;
-		}
-		if (input.scheduleType !== undefined) {
-			patch.scheduleType = input.scheduleType;
-			if (
-				input.scheduleType === 'specific_days' &&
-				patch.daysOfWeek === undefined &&
-				input.daysOfWeek === undefined
-			) {
-				const existing = await this.repository.findRoutine(userId, routineId);
-				if (!existing?.daysOfWeek) {
-					throw new NotFoundException(
-						'daysOfWeek is required when switching to specific_days without existing days',
-					);
-				}
+		const patch = buildRoutinePatch(input);
+		if (patch.requiresExistingDays) {
+			const existing = await this.getRoutineOrThrow(userId, routineId);
+			if (existing.daysOfWeek.length === 0) {
+				throw new NotFoundException(
+					'daysOfWeek is required when switching to specific_days without existing days',
+				);
 			}
 		}
 
-		if (input.archived !== undefined) {
-			patch.archivedAt = input.archived ? new Date() : null;
-		}
+		const items = input.items === undefined ? undefined : toItemRows(userId, input.items);
 
-		if (Object.keys(patch).length > 0) {
-			await this.repository.updateRoutine(userId, routineId, patch);
-		}
-
-		if (input.items !== undefined) {
-			await this.repository.softArchiveItems(routineId, userId);
-			await this.repository.insertItems(toItemRows(routineId, userId, input.items));
-		}
+		await this.repository.runInTransaction(async (tx) => {
+			if (patch.values && Object.keys(patch.values).length > 0) {
+				await this.repository.updateRoutine(userId, routineId, patch.values, tx);
+			}
+			if (items !== undefined) {
+				await this.repository.softArchiveItems(routineId, userId, tx);
+				if (items.length > 0) {
+					await this.repository.insertItems(
+						items.map((item) => ({ ...item, routineId })),
+						tx,
+					);
+				}
+			}
+		});
 		return this.getRoutineOrThrow(userId, routineId);
 	}
 
@@ -134,7 +97,7 @@ export class RoutinesService {
 		const today = localDateInTimeZone(now, timeZone);
 		const weekday = isoWeekdayInTimeZone(now, timeZone);
 
-		const allRoutines = await this.repository.listRoutines(userId);
+		const allRoutines = await this.repository.listRoutines(userId, { limit: 200, offset: 0 });
 		const scheduled = allRoutines.filter((routine) =>
 			isScheduledOn(routine.scheduleType, routine.daysOfWeek, weekday),
 		);
@@ -146,26 +109,7 @@ export class RoutinesService {
 			date: today,
 			timeZone,
 			weekday,
-			routines: scheduled.map((routine) => {
-				const routineItemsList = items.filter((item) => item.routineId === routine.id);
-				const completedItems = routineItemsList.filter((item) =>
-					completedItemIds.has(item.id),
-				).length;
-				return {
-					id: routine.id,
-					name: routine.name,
-					description: routine.description,
-					completedItems,
-					totalItems: routineItemsList.length,
-					items: routineItemsList.map((item) => ({
-						id: item.id,
-						name: item.name,
-						targetTime: item.targetTime,
-						sortOrder: item.sortOrder,
-						completed: completedItemIds.has(item.id),
-					})),
-				};
-			}),
+			routines: scheduled.map((routine) => toTodayRoutine(routine, items, completedItemIds)),
 		};
 	}
 
@@ -200,16 +144,11 @@ export class RoutinesService {
 	}
 }
 
-type RoutineRow = Awaited<ReturnType<RoutinesRepository['findRoutine']>>;
-type RoutineItemRow = Awaited<ReturnType<RoutinesRepository['findItem']>>;
+type RoutineRow = NonNullable<Awaited<ReturnType<RoutinesRepository['findRoutine']>>>;
+type RoutineItemRow = Awaited<ReturnType<RoutinesRepository['listActiveItems']>>[number];
 
-function toItemRows(
-	routineId: string,
-	userId: string,
-	items: CreateRoutineInput['items'],
-): NewRoutineItemRecord[] {
+function toItemRows(userId: string, items: CreateRoutineInput['items']) {
 	return (items ?? []).map((item, sortOrder) => ({
-		routineId,
 		userId,
 		name: item.name,
 		notes: item.notes ?? null,
@@ -218,7 +157,65 @@ function toItemRows(
 	}));
 }
 
-function toRoutineView(routine: NonNullable<RoutineRow>, items: RoutineItemRow[]) {
+function buildRoutinePatch(input: UpdateRoutineInput): {
+	values: Partial<NewRoutineRecord>;
+	requiresExistingDays: boolean;
+} {
+	const values: Partial<NewRoutineRecord> = {};
+	let requiresExistingDays = false;
+
+	if (input.name !== undefined) values.name = input.name;
+	if (input.description !== undefined) values.description = input.description ?? null;
+	if (input.archived !== undefined) values.archivedAt = input.archived ? new Date() : null;
+
+	switch (input.scheduleType) {
+		case 'daily':
+			values.scheduleType = 'daily';
+			values.daysOfWeek = null;
+			break;
+		case 'specific_days':
+			values.scheduleType = 'specific_days';
+			if (input.daysOfWeek !== undefined) {
+				values.daysOfWeek = normalizeDaysOfWeek(input.daysOfWeek);
+			} else if (input.daysOfWeek === undefined) {
+				requiresExistingDays = true;
+			}
+			break;
+		default:
+			break;
+	}
+
+	if (values.scheduleType === undefined && input.daysOfWeek !== undefined) {
+		values.daysOfWeek = normalizeDaysOfWeek(input.daysOfWeek);
+	}
+
+	return { values, requiresExistingDays };
+}
+
+function toTodayRoutine(
+	routine: RoutineRow,
+	items: RoutineItemRow[],
+	completedItemIds: ReadonlySet<string>,
+) {
+	const routineItemsList = items.filter((item) => item.routineId === routine.id);
+	const completedItems = routineItemsList.filter((item) => completedItemIds.has(item.id)).length;
+	return {
+		id: routine.id,
+		name: routine.name,
+		description: routine.description,
+		completedItems,
+		totalItems: routineItemsList.length,
+		items: routineItemsList.map((item) => ({
+			id: item.id,
+			name: item.name,
+			targetTime: item.targetTime,
+			sortOrder: item.sortOrder,
+			completed: completedItemIds.has(item.id),
+		})),
+	};
+}
+
+function toRoutineView(routine: RoutineRow, items: readonly RoutineItemRow[]) {
 	return {
 		id: routine.id,
 		name: routine.name,

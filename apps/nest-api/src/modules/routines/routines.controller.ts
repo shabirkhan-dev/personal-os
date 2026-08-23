@@ -6,16 +6,17 @@ import {
 	HttpCode,
 	HttpStatus,
 	Param,
+	ParseUUIDPipe,
 	Patch,
 	Post,
+	Query,
 	UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-
 import type { AccessTokenPayload } from '@/modules/auth/auth.types';
 import { CurrentUser } from '@/modules/auth/current-user.decorator';
 import { JwtAuthGuard } from '@/modules/auth/jwt-auth.guard';
-import { CreateRoutineDto, UpdateRoutineDto } from './routines.dto';
+import { CreateRoutineDto, ListRoutinesQueryDto, UpdateRoutineDto } from './routines.dto';
 import { RoutinesService } from './routines.service';
 
 @ApiTags('Routines')
@@ -32,14 +33,14 @@ export class RoutinesController {
 	}
 
 	@Get()
-	@ApiOperation({ summary: 'List all active routines with items' })
-	list(@CurrentUser() user: AccessTokenPayload) {
-		return this.routines.list(user.sub);
+	@ApiOperation({ summary: 'List active routines (bounded by limit/offset)' })
+	list(@CurrentUser() user: AccessTokenPayload, @Query() query: ListRoutinesQueryDto) {
+		return this.routines.list(user.sub, query);
 	}
 
 	@Get(':id')
 	@ApiOperation({ summary: 'Get a single routine' })
-	get(@CurrentUser() user: AccessTokenPayload, @Param('id') id: string) {
+	get(@CurrentUser() user: AccessTokenPayload, @Param('id', ParseUUIDPipe) id: string) {
 		return this.routines.get(user.sub, id);
 	}
 
@@ -55,7 +56,7 @@ export class RoutinesController {
 	@ApiOperation({ summary: 'Update a routine (items are replaced when provided)' })
 	update(
 		@CurrentUser() user: AccessTokenPayload,
-		@Param('id') id: string,
+		@Param('id', ParseUUIDPipe) id: string,
 		@Body() body: UpdateRoutineDto,
 	) {
 		return this.routines.update(user.sub, id, body);
@@ -64,7 +65,7 @@ export class RoutinesController {
 	@Delete(':id')
 	@HttpCode(HttpStatus.OK)
 	@ApiOperation({ summary: 'Archive a routine (soft delete)' })
-	archive(@CurrentUser() user: AccessTokenPayload, @Param('id') id: string) {
+	archive(@CurrentUser() user: AccessTokenPayload, @Param('id', ParseUUIDPipe) id: string) {
 		return this.routines.archive(user.sub, id);
 	}
 
@@ -73,8 +74,8 @@ export class RoutinesController {
 	@ApiOperation({ summary: 'Toggle an item completion for today' })
 	toggleItem(
 		@CurrentUser() user: AccessTokenPayload,
-		@Param('routineId') routineId: string,
-		@Param('itemId') itemId: string,
+		@Param('routineId', ParseUUIDPipe) routineId: string,
+		@Param('itemId', ParseUUIDPipe) itemId: string,
 	) {
 		return this.routines.toggleItem(user.sub, routineId, itemId);
 	}

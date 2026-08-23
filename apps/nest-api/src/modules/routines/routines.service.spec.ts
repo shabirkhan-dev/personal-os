@@ -2,12 +2,8 @@ import { beforeEach, describe, expect, it, type Mocked, vi } from 'vitest';
 
 import type { NewRoutineItemRecord, RoutineRecord } from '@/database/schema';
 import { RoutinesRepository } from './routines.repository';
-import {
-	isoWeekdayInTimeZone,
-	isScheduledOn,
-	localDateInTimeZone,
-	RoutinesService,
-} from './routines.service';
+import { isoWeekdayInTimeZone, isScheduledOn, localDateInTimeZone } from './routines.schedule';
+import { RoutinesService } from './routines.service';
 
 const userId = '11111111-1111-1111-1111-111111111111';
 
@@ -78,6 +74,7 @@ describe('RoutinesService', () => {
 	beforeEach(() => {
 		existingRoutine = routineRow();
 		repository = {
+			runInTransaction: vi.fn(<T>(work: (tx: unknown) => Promise<T>) => work(undefined)),
 			getTimezoneByUserId: vi.fn(async () => null),
 			listRoutines: vi.fn(async () => []),
 			findRoutine: vi.fn(async () => existingRoutine),
@@ -130,15 +127,21 @@ describe('RoutinesService', () => {
 				scheduleType: 'specific_days',
 				daysOfWeek: '1,5',
 			}),
+			undefined,
 		);
 		expect(result.items.map((item) => item.sortOrder)).toEqual([0, 1]);
 	});
 
 	it('lists routines with their items grouped', async () => {
 		repository.listRoutines.mockResolvedValue([routineRow()]);
-		const result = await service.list(userId);
+		const result = await service.list(userId, { limit: 100, offset: 0 });
 		expect(result).toHaveLength(1);
 		expect(result[0].items).toHaveLength(2);
+	});
+
+	it('passes pagination bounds to the repository', async () => {
+		await service.list(userId, { limit: 25, offset: 50 });
+		expect(repository.listRoutines).toHaveBeenCalledWith(userId, { limit: 25, offset: 50 });
 	});
 
 	it("returns only scheduled routines in today's view", async () => {

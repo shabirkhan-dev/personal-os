@@ -1,12 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { and, asc, eq, inArray, isNull } from 'drizzle-orm';
 
-import { DatabaseService } from '@/database/database.service';
+import { type Database, DatabaseService } from '@/database/database.service';
 import { routineCompletions, routineItems, routines, userProfiles } from '@/database/schema';
 
 @Injectable()
 export class RoutinesRepository {
 	constructor(private readonly database: DatabaseService) {}
+
+	private executor(tx?: Database): Database {
+		return tx ?? this.database.db;
+	}
+
+	runInTransaction<T>(work: (tx: Database) => Promise<T>): Promise<T> {
+		return this.database.transaction(work);
+	}
 
 	async getTimezoneByUserId(userId: string) {
 		const [profile] = await this.database.db
@@ -17,7 +25,11 @@ export class RoutinesRepository {
 		return profile?.timezone ?? null;
 	}
 
-	async listRoutines(userId: string, includeArchived = false) {
+	async listRoutines(
+		userId: string,
+		pagination: { limit: number; offset: number },
+		includeArchived = false,
+	) {
 		const conditions = includeArchived
 			? eq(routines.userId, userId)
 			: and(eq(routines.userId, userId), isNull(routines.archivedAt));
@@ -25,7 +37,9 @@ export class RoutinesRepository {
 			.select()
 			.from(routines)
 			.where(conditions)
-			.orderBy(asc(routines.createdAt));
+			.orderBy(asc(routines.createdAt))
+			.limit(pagination.limit)
+			.offset(pagination.offset);
 	}
 
 	async findRoutine(userId: string, routineId: string) {
@@ -37,8 +51,8 @@ export class RoutinesRepository {
 		return routine ?? null;
 	}
 
-	async insertRoutine(values: typeof routines.$inferInsert) {
-		const [routine] = await this.database.db.insert(routines).values(values).returning();
+	async insertRoutine(values: typeof routines.$inferInsert, tx?: Database) {
+		const [routine] = await this.executor(tx).insert(routines).values(values).returning();
 		if (!routine) throw new Error('Routine insert did not return a record');
 		return routine;
 	}
@@ -47,8 +61,9 @@ export class RoutinesRepository {
 		userId: string,
 		routineId: string,
 		patch: Partial<typeof routines.$inferInsert>,
+		tx?: Database,
 	) {
-		const [routine] = await this.database.db
+		const [routine] = await this.executor(tx)
 			.update(routines)
 			.set({ ...patch, updatedAt: new Date() })
 			.where(and(eq(routines.id, routineId), eq(routines.userId, userId)))
@@ -65,13 +80,13 @@ export class RoutinesRepository {
 			.orderBy(asc(routineItems.sortOrder), asc(routineItems.createdAt));
 	}
 
-	async insertItems(rows: (typeof routineItems.$inferInsert)[]) {
+	async insertItems(rows: (typeof routineItems.$inferInsert)[], tx?: Database) {
 		if (rows.length === 0) return [];
-		return this.database.db.insert(routineItems).values(rows).returning();
+		return this.executor(tx).insert(routineItems).values(rows).returning();
 	}
 
-	async softArchiveItems(routineId: string, userId: string) {
-		await this.database.db
+	async softArchiveItems(routineId: string, userId: string, tx?: Database) {
+		await this.executor(tx)
 			.update(routineItems)
 			.set({ archivedAt: new Date(), updatedAt: new Date() })
 			.where(

@@ -38,11 +38,32 @@ export const updateRoutineSchema = z
 		archived: z.boolean().optional(),
 	})
 	.strict()
-	.refine((input) => Object.keys(input).length > 0, 'At least one routine field is required');
+	.refine((input) => Object.keys(input).length > 0, 'At least one routine field is required')
+	.refine(
+		(input) =>
+			input.scheduleType !== 'specific_days' ||
+			input.daysOfWeek === undefined ||
+			input.daysOfWeek.length > 0,
+		'daysOfWeek cannot be empty when scheduleType is specific_days',
+	);
 
 export type RoutineItemInput = z.infer<typeof itemInputSchema>;
 export type CreateRoutineInput = z.infer<typeof createRoutineSchema>;
 export type UpdateRoutineInput = z.infer<typeof updateRoutineSchema>;
+
+export const listRoutinesQuerySchema = z.object({
+	limit: z.coerce.number().int().min(1).max(200).default(100),
+	offset: z.coerce.number().int().min(0).default(0),
+});
+
+export type ListRoutinesQuery = z.infer<typeof listRoutinesQuerySchema>;
+
+/** Carries the Zod query schema; validated before the handler runs. */
+export class ListRoutinesQueryDto implements ListRoutinesQuery {
+	static schema = listRoutinesQuerySchema;
+	limit!: number;
+	offset!: number;
+}
 
 /** Carries the Zod schema for the global validation pipe; instances never outlive the request. */
 export class CreateRoutineDto implements CreateRoutineInput {

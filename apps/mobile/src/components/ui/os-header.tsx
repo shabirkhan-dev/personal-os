@@ -20,16 +20,7 @@ import { NeonColors } from "@/constants/design-system";
 import { resolveMediaUrl } from "@/lib/media-url";
 import { useAuth } from "@/modules/auth";
 
-export type OSModule =
-	| "Dashboard"
-	| "Profile"
-	| "Skincare"
-	| "Exercise"
-	| "Expenses"
-	| "Nutrition"
-	| "Mindfulness"
-	| "Focus"
-	| "Library";
+export type OSModule = "Dashboard" | "Routines" | "Finance" | "Profile";
 
 export function OSHeader() {
 	const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
@@ -48,26 +39,16 @@ export function OSHeader() {
 
 	const currentModule: OSModule = React.useMemo(() => {
 		if (segments.includes("(profile)")) return "Profile";
-		if (segments.includes("(skincare)")) return "Skincare";
-		if (segments.includes("(exercise)")) return "Exercise";
-		if (segments.includes("(expenses)")) return "Expenses";
-		if (segments.includes("(nutrition)")) return "Nutrition";
-		if (segments.includes("(mindfulness)")) return "Mindfulness";
-		if (segments.includes("(focus)")) return "Focus";
-		if (segments.includes("(library)")) return "Library";
+		if (segments.includes("(routines)")) return "Routines";
+		if (segments.includes("(expenses)")) return "Finance";
 		return "Dashboard";
 	}, [segments]);
 
 	const modules: { label: OSModule; route: Href }[] = [
 		{ label: "Dashboard", route: "/(modules)/(dashboard)" },
+		{ label: "Routines", route: "/(modules)/(routines)" },
+		{ label: "Finance", route: "/(modules)/(expenses)" },
 		{ label: "Profile", route: "/(modules)/(profile)" as Href },
-		{ label: "Focus", route: "/(modules)/(focus)" },
-		{ label: "Library", route: "/(modules)/(library)" },
-		{ label: "Skincare", route: "/(modules)/(skincare)" },
-		{ label: "Exercise", route: "/(modules)/(exercise)" },
-		{ label: "Expenses", route: "/(modules)/(expenses)" },
-		{ label: "Nutrition", route: "/(modules)/(nutrition)" },
-		{ label: "Mindfulness", route: "/(modules)/(mindfulness)" },
 	];
 
 	const handleSelect = (route: Href) => {

@@ -188,6 +188,12 @@ export function RoutineManager({
 				)}
 			</div>
 
+			{error && !showForm && (
+				<p className="text-[12px] text-red-600 dark:text-red-400" role="alert">
+					{error}
+				</p>
+			)}
+
 			{showForm && (
 				<Card>
 					<CardContent className="space-y-5">
@@ -358,6 +364,9 @@ export function RoutineManager({
 						<p className="text-[13px] text-dashboard-text-secondary">
 							No routines yet. Create your first one.
 						</p>
+						<Button variant="outline" size="sm" onClick={startCreate}>
+							New routine
+						</Button>
 					</CardContent>
 				</Card>
 			)}
@@ -406,7 +415,9 @@ export function RoutineManager({
 									size="sm"
 									className="text-red-600 hover:bg-red-500/10 hover:text-red-600 dark:text-red-400 dark:hover:text-red-400"
 									onClick={() => {
-										void onArchive(routine.id).catch(() => {});
+										onArchive(routine.id).catch(() => {
+											setError("Could not archive this routine. Try again.");
+										});
 									}}
 								>
 									<HugeiconsIcon icon={Delete02Icon} size={14} strokeWidth={2} />

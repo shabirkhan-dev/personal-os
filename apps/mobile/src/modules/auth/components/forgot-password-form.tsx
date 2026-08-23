@@ -1,15 +1,16 @@
 import { Link, router } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, Text } from "react-native";
-import { NeonColors } from "@/constants/design-system";
 import { devCodeRouteParams } from "@/modules/auth/lib/dev-auth-code";
 import { authService } from "@/modules/auth/services/auth.service";
+import { useTheme } from "@/providers/theme-provider";
 import { AuthAlert } from "./auth-alert";
 import { AuthButton } from "./auth-button";
 import { AuthField } from "./auth-field";
 import { AuthScreen } from "./auth-screen";
 
 export function ForgotPasswordForm() {
+	const { colors } = useTheme();
 	const [email, setEmail] = useState("");
 	const [error, setError] = useState<string | null>(null);
 	const [submitting, setSubmitting] = useState(false);
@@ -21,7 +22,7 @@ export function ForgotPasswordForm() {
 			const result = await authService.forgotPassword(email.trim().toLowerCase());
 			const normalizedEmail = email.trim().toLowerCase();
 			router.push({
-				pathname: "/reset-password",
+				pathname: "/(auth)/reset-password",
 				params: { email: normalizedEmail, ...devCodeRouteParams(result.developmentCode) },
 			});
 		} catch (caught) {
@@ -45,8 +46,8 @@ export function ForgotPasswordForm() {
 				autoComplete="email"
 			/>
 			<AuthButton label="Send reset code" onPress={handleSubmit} pending={submitting} />
-			<Text style={styles.footerText}>
-				<Link href="/login" style={styles.link}>
+			<Text style={[styles.footerText, { color: colors.text.secondary }]}>
+				<Link href="/(auth)/login" style={[styles.link, { color: colors.accent.green }]}>
 					Back to sign in
 				</Link>
 			</Text>
@@ -60,7 +61,7 @@ const styles = StyleSheet.create({
 		fontSize: 14,
 	},
 	link: {
-		color: NeonColors.accent.green,
 		textDecorationLine: "underline",
+		fontWeight: "600",
 	},
 });

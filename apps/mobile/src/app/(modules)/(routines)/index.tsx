@@ -10,7 +10,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { BottomNav, ROUTINES_TABS } from "@/components/ui/bottom-nav";
 import { Icon } from "@/components/ui/icon";
 import { OSHeader } from "@/components/ui/os-header";
-import { NeonColors } from "@/constants/design-system";
 import {
 	AddRoutineModal,
 	RoutinesTabs,
@@ -32,7 +31,7 @@ function formatDisplayDate(isoDate: string): string {
 }
 
 export default function RoutinesTodayScreen() {
-	const { colors } = useTheme();
+	const { colors, isDark } = useTheme();
 	const [modalVisible, setModalVisible] = useState(false);
 	const { data: today, isLoading, isError, refetch, isRefetching } = useTodayQuery();
 	const toggleMutation = useToggleItemMutation();
@@ -53,8 +52,8 @@ export default function RoutinesTodayScreen() {
 				>
 					<View style={styles.header}>
 						<View className="flex-1">
-							<Text style={styles.title}>Today</Text>
-							<Text style={styles.subtitle}>
+							<Text style={[styles.title, { color: colors.text.primary }]}>Today</Text>
+							<Text style={[styles.subtitle, { color: colors.text.secondary }]}>
 								{today ? formatDisplayDate(today.date) : "Your daily routines"}
 							</Text>
 						</View>
@@ -64,13 +63,10 @@ export default function RoutinesTodayScreen() {
 								style={({ pressed }) => [{ opacity: pressed ? 0.8 : 1 }]}
 								className="bg-green-500/20 px-3 py-2 rounded-xl flex-row items-center gap-1 border border-green-500/30"
 							>
-								<Icon
-									icon={PlusSignIcon}
-									size={14}
-									color={NeonColors.accent.green}
-									strokeWidth={2.5}
-								/>
-								<Text className="text-green-400 font-bold text-xs">New</Text>
+								<Icon icon={PlusSignIcon} size={14} color={colors.accent.green} strokeWidth={2.5} />
+								<Text style={{ color: colors.accent.green }} className="font-bold text-xs">
+									New
+								</Text>
 							</Pressable>
 							<Pressable
 								onPress={() => refetch()}
@@ -79,12 +75,12 @@ export default function RoutinesTodayScreen() {
 								accessibilityLabel="Refresh routines"
 							>
 								{isRefetching ? (
-									<ActivityIndicator size="small" color={NeonColors.accent.green} />
+									<ActivityIndicator size="small" color={colors.accent.green} />
 								) : (
 									<Icon
 										icon={RefreshIcon}
 										size={16}
-										color={NeonColors.text.secondary}
+										color={colors.text.secondary}
 										strokeWidth={1.8}
 									/>
 								)}
@@ -98,35 +94,65 @@ export default function RoutinesTodayScreen() {
 
 					{isLoading && (
 						<View style={styles.centered}>
-							<ActivityIndicator color={NeonColors.accent.green} />
+							<ActivityIndicator color={colors.accent.green} />
 						</View>
 					)}
 
 					{isError && (
 						<View style={styles.centered}>
-							<Text style={styles.emptyTitle}>Could not load your day</Text>
-							<Text style={styles.emptySubtitle}>Pull to refresh or tap the icon above.</Text>
+							<Text style={[styles.emptyTitle, { color: colors.text.primary }]}>
+								Could not load your day
+							</Text>
+							<Text style={[styles.emptySubtitle, { color: colors.text.secondary }]}>
+								Pull to refresh or tap the icon above.
+							</Text>
 						</View>
 					)}
 
 					{today && (
 						<>
-							<View style={styles.progressCard}>
-								<Text style={styles.progressPercent}>{progress}%</Text>
-								<Text style={styles.progressLabel}>
+							<View
+								style={[
+									styles.progressCard,
+									{
+										backgroundColor: colors.surface,
+										borderColor: colors.card.border,
+									},
+								]}
+							>
+								<Text style={[styles.progressPercent, { color: colors.accent.green }]}>
+									{progress}%
+								</Text>
+								<Text style={[styles.progressLabel, { color: colors.text.secondary }]}>
 									{totalItems === 0
 										? "Nothing scheduled today"
 										: `${completedItems} of ${totalItems} done`}
 								</Text>
-								<View style={styles.progressTrack}>
-									<View style={[styles.progressFill, { width: `${progress}%` }]} />
+								<View
+									style={[
+										styles.progressTrack,
+										{
+											backgroundColor: isDark ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.06)",
+										},
+									]}
+								>
+									<View
+										style={[
+											styles.progressFill,
+											{ width: `${progress}%`, backgroundColor: colors.accent.green },
+										]}
+									/>
 								</View>
 							</View>
 
 							{today.routines.length === 0 && (
 								<View style={styles.centered}>
-									<Text style={styles.emptyTitle}>No routines scheduled</Text>
-									<Text style={styles.emptySubtitle}>Create routines on web to see them here.</Text>
+									<Text style={[styles.emptyTitle, { color: colors.text.primary }]}>
+										No routines scheduled
+									</Text>
+									<Text style={[styles.emptySubtitle, { color: colors.text.secondary }]}>
+										Create routines to see them here.
+									</Text>
 								</View>
 							)}
 
@@ -134,13 +160,34 @@ export default function RoutinesTodayScreen() {
 								const allDone =
 									routine.totalItems > 0 && routine.completedItems === routine.totalItems;
 								return (
-									<View key={routine.id} style={styles.routineCard}>
+									<View
+										key={routine.id}
+										style={[
+											styles.routineCard,
+											{
+												backgroundColor: colors.surface,
+												borderColor: colors.card.border,
+											},
+										]}
+									>
 										<View style={styles.routineHeader}>
-											<Text style={styles.routineName}>{routine.name}</Text>
+											<Text style={[styles.routineName, { color: colors.text.primary }]}>
+												{routine.name}
+											</Text>
 											<View
-												style={[styles.badge, allDone ? styles.badgeDone : styles.badgePending]}
+												style={[
+													styles.badge,
+													allDone
+														? styles.badgeDone
+														: [styles.badgePending, { borderColor: colors.card.border }],
+												]}
 											>
-												<Text style={[styles.badgeText, allDone && styles.badgeTextDone]}>
+												<Text
+													style={[
+														styles.badgeText,
+														{ color: allDone ? colors.accent.green : colors.text.secondary },
+													]}
+												>
 													{routine.completedItems}/{routine.totalItems}
 												</Text>
 											</View>
@@ -153,12 +200,20 @@ export default function RoutinesTodayScreen() {
 												<Pressable
 													key={item.id}
 													onPress={() =>
-														toggleMutation.mutate({ routineId: routine.id, itemId: item.id })
+														toggleMutation.mutate({
+															routineId: routine.id,
+															itemId: item.id,
+															completed: !item.completed,
+														})
 													}
 													disabled={pending}
 													style={({ pressed }) => [
 														styles.itemRow,
-														pressed && styles.itemRowPressed,
+														pressed && {
+															backgroundColor: isDark
+																? "rgba(255, 255, 255, 0.04)"
+																: "rgba(0, 0, 0, 0.03)",
+														},
 													]}
 													accessibilityRole="checkbox"
 													accessibilityState={{ checked: item.completed }}
@@ -168,28 +223,40 @@ export default function RoutinesTodayScreen() {
 														<Icon
 															icon={CheckmarkCircle02Icon}
 															size={20}
-															color={NeonColors.accent.green}
+															color={colors.accent.green}
 															strokeWidth={2}
 														/>
 													) : (
 														<Icon
 															icon={CircleIcon}
 															size={20}
-															color={NeonColors.text.muted}
+															color={colors.text.muted}
 															strokeWidth={1.8}
 														/>
 													)}
-													<Text style={[styles.itemName, item.completed && styles.itemNameDone]}>
+													<Text
+														style={[
+															styles.itemName,
+															{
+																color: item.completed ? colors.text.secondary : colors.text.primary,
+															},
+															item.completed && styles.itemNameDone,
+														]}
+													>
 														{item.name}
 													</Text>
 													{item.targetTime && (
-														<Text style={styles.itemTime}>{item.targetTime}</Text>
+														<Text style={[styles.itemTime, { color: colors.text.muted }]}>
+															{item.targetTime}
+														</Text>
 													)}
 												</Pressable>
 											);
 										})}
 										{routine.items.length === 0 && (
-											<Text style={styles.emptySteps}>No steps yet.</Text>
+											<Text style={[styles.emptySteps, { color: colors.text.muted }]}>
+												No steps yet.
+											</Text>
 										)}
 									</View>
 								);
@@ -212,7 +279,6 @@ export default function RoutinesTodayScreen() {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: NeonColors.background,
 	},
 	safeArea: {
 		flex: 1,
@@ -228,13 +294,11 @@ const styles = StyleSheet.create({
 		marginBottom: 24,
 	},
 	title: {
-		color: NeonColors.text.primary,
 		fontSize: 32,
 		fontWeight: "300",
 		flex: 1,
 	},
 	subtitle: {
-		color: NeonColors.text.secondary,
 		fontSize: 13,
 		marginTop: 12,
 	},
@@ -244,21 +308,17 @@ const styles = StyleSheet.create({
 		padding: 4,
 	},
 	progressCard: {
-		backgroundColor: NeonColors.surface,
 		borderWidth: 1,
-		borderColor: NeonColors.card.border,
 		borderRadius: 16,
 		marginHorizontal: 16,
 		marginBottom: 24,
 		padding: 16,
 	},
 	progressPercent: {
-		color: NeonColors.accent.green,
 		fontSize: 36,
 		fontWeight: "300",
 	},
 	progressLabel: {
-		color: NeonColors.text.secondary,
 		fontSize: 13,
 		marginTop: 4,
 		marginBottom: 12,
@@ -266,18 +326,14 @@ const styles = StyleSheet.create({
 	progressTrack: {
 		height: 6,
 		borderRadius: 3,
-		backgroundColor: "rgba(255, 255, 255, 0.06)",
 		overflow: "hidden",
 	},
 	progressFill: {
 		height: "100%",
 		borderRadius: 3,
-		backgroundColor: NeonColors.accent.green,
 	},
 	routineCard: {
-		backgroundColor: NeonColors.surface,
 		borderWidth: 1,
-		borderColor: NeonColors.card.border,
 		borderRadius: 16,
 		marginHorizontal: 16,
 		marginBottom: 16,
@@ -290,7 +346,6 @@ const styles = StyleSheet.create({
 		marginBottom: 12,
 	},
 	routineName: {
-		color: NeonColors.text.primary,
 		fontSize: 16,
 		fontWeight: "600",
 		flex: 1,
@@ -305,16 +360,10 @@ const styles = StyleSheet.create({
 		borderColor: "rgba(0, 230, 118, 0.4)",
 		backgroundColor: "rgba(0, 230, 118, 0.15)",
 	},
-	badgePending: {
-		borderColor: NeonColors.card.border,
-	},
+	badgePending: {},
 	badgeText: {
 		fontSize: 11,
 		fontWeight: "700",
-		color: NeonColors.text.secondary,
-	},
-	badgeTextDone: {
-		color: NeonColors.accent.green,
 	},
 	itemRow: {
 		flexDirection: "row",
@@ -324,24 +373,17 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 4,
 		borderRadius: 8,
 	},
-	itemRowPressed: {
-		backgroundColor: "rgba(255, 255, 255, 0.04)",
-	},
 	itemName: {
 		flex: 1,
-		color: NeonColors.text.primary,
 		fontSize: 14,
 	},
 	itemNameDone: {
-		color: NeonColors.text.secondary,
 		textDecorationLine: "line-through",
 	},
 	itemTime: {
-		color: NeonColors.text.muted,
 		fontSize: 11,
 	},
 	emptySteps: {
-		color: NeonColors.text.muted,
 		fontSize: 13,
 	},
 	centered: {
@@ -351,12 +393,10 @@ const styles = StyleSheet.create({
 		gap: 8,
 	},
 	emptyTitle: {
-		color: NeonColors.text.primary,
 		fontSize: 15,
 		fontWeight: "600",
 	},
 	emptySubtitle: {
-		color: NeonColors.text.secondary,
 		fontSize: 13,
 		textAlign: "center",
 	},

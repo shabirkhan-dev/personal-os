@@ -13,7 +13,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { BottomNav, ROUTINES_TABS } from "@/components/ui/bottom-nav";
 import { Icon } from "@/components/ui/icon";
 import { OSHeader } from "@/components/ui/os-header";
-import { NeonColors } from "@/constants/design-system";
 import {
 	AddRoutineModal,
 	RoutineCard,
@@ -45,36 +44,41 @@ export default function HabitsScreen() {
 						<RefreshControl
 							refreshing={isRefetching}
 							onRefresh={refetch}
-							tintColor={NeonColors.accent.green}
+							tintColor={colors.accent.green}
 						/>
 					}
 				>
 					<View style={styles.viewContainer}>
 						<View className="flex-row items-center justify-between mb-2">
 							<View>
-								<Text style={styles.title}>All Routines</Text>
-								<Text style={styles.subtitle}>Scheduled habit protocols.</Text>
+								<Text style={[styles.title, { color: colors.text.primary }]}>All Routines</Text>
+								<Text style={[styles.subtitle, { color: colors.text.secondary }]}>
+									Scheduled habit protocols.
+								</Text>
 							</View>
 							<Pressable
 								onPress={() => setModalVisible(true)}
 								style={({ pressed }) => [{ opacity: pressed ? 0.8 : 1 }]}
 								className="bg-green-500/20 px-3.5 py-2 rounded-xl flex-row items-center gap-1.5 border border-green-500/30"
 							>
-								<Icon
-									icon={PlusSignIcon}
-									size={16}
-									color={NeonColors.accent.green}
-									strokeWidth={2.5}
-								/>
-								<Text className="text-green-400 font-bold text-xs">New</Text>
+								<Icon icon={PlusSignIcon} size={16} color={colors.accent.green} strokeWidth={2.5} />
+								<Text style={{ color: colors.accent.green }} className="font-bold text-xs">
+									New
+								</Text>
 							</Pressable>
 						</View>
 
 						<RoutinesTabs active="habits" />
 
 						{isLoading && !routines ? (
-							<View className="h-40 items-center justify-center">
-								<ActivityIndicator color={NeonColors.accent.green} />
+							<View
+								style={{
+									backgroundColor: colors.surface,
+									borderColor: colors.card.border,
+								}}
+								className="h-40 items-center justify-center rounded-2xl border"
+							>
+								<ActivityIndicator color={colors.accent.green} />
 							</View>
 						) : routines && routines.length > 0 ? (
 							<View className="gap-1">
@@ -83,9 +87,18 @@ export default function HabitsScreen() {
 								))}
 							</View>
 						) : (
-							<View className="p-12 rounded-3xl bg-[#15161A] items-center justify-center border border-white/[0.04] mt-4">
-								<Icon icon={Task01Icon} size={36} color="#555555" />
-								<Text className="text-[#888888] font-medium text-sm mt-3 text-center">
+							<View
+								style={{
+									backgroundColor: colors.surface,
+									borderColor: colors.card.border,
+								}}
+								className="p-12 rounded-3xl items-center justify-center border mt-4"
+							>
+								<Icon icon={Task01Icon} size={36} color={colors.text.muted} />
+								<Text
+									style={{ color: colors.text.secondary }}
+									className="font-medium text-sm mt-3 text-center"
+								>
 									No routines created yet.{"\n"}Tap "New" or the + button below to create one.
 								</Text>
 							</View>
@@ -108,7 +121,6 @@ export default function HabitsScreen() {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: NeonColors.background,
 	},
 	safeArea: {
 		flex: 1,
@@ -121,13 +133,11 @@ const styles = StyleSheet.create({
 		paddingTop: 8,
 	},
 	title: {
-		color: NeonColors.text.primary,
 		fontSize: 32,
 		fontWeight: "300",
 	},
 	subtitle: {
-		color: NeonColors.text.secondary,
-		fontSize: 13,
+		fontSize: 14,
 		marginTop: 4,
 	},
 });

@@ -1,7 +1,6 @@
 import { Link, router } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { NeonColors } from "@/constants/design-system";
 import { getApiOrigin } from "@/lib/api/client";
 import { useAuth } from "@/modules/auth/context/auth-context";
 import {
@@ -12,6 +11,7 @@ import {
 } from "@/modules/auth/hooks/use-auth-mutations";
 import { loginSchema } from "@/modules/auth/schemas/auth.schemas";
 import type { TwoFactorChallenge } from "@/modules/auth/types/auth.types";
+import { useTheme } from "@/providers/theme-provider";
 import { AuthAlert } from "./auth-alert";
 import { AuthButton } from "./auth-button";
 import { AuthScreen } from "./auth-screen";
@@ -20,6 +20,7 @@ import { TwoFactorForm } from "./presentation/two-factor-form";
 
 export function LoginForm() {
 	const { user, loading, error, clearError } = useAuth();
+	const { colors } = useTheme();
 	const login = useLoginMutation();
 	const twoFactor = useTwoFactorMutation();
 	const magicLink = useMagicLinkRequestMutation();
@@ -85,7 +86,7 @@ export function LoginForm() {
 						onEmailChange={setEmail}
 						onPasswordChange={setPassword}
 						onTogglePassword={() => setShowPassword((value) => !value)}
-						onForgotPassword={() => router.push("/forgot-password")}
+						onForgotPassword={() => router.push("/(auth)/forgot-password" as never)}
 						onSubmit={() => {
 							clearError();
 							setLocalError(null);
@@ -103,7 +104,7 @@ export function LoginForm() {
 							});
 						}}
 					/>
-					<View style={styles.divider}>
+					<View style={[styles.divider, { borderTopColor: colors.card.border }]}>
 						<AuthButton
 							label="Sign in with fingerprint / passkey"
 							variant="outline"
@@ -129,7 +130,7 @@ export function LoginForm() {
 										setNotice(result.message);
 										if (result.developmentToken) {
 											router.push({
-												pathname: "/magic-link",
+												pathname: "/(auth)/magic-link",
 												params: { token: result.developmentToken },
 											});
 										}
@@ -138,9 +139,9 @@ export function LoginForm() {
 							}}
 						/>
 					</View>
-					<Text style={styles.footerText}>
+					<Text style={[styles.footerText, { color: colors.text.secondary }]}>
 						Don't have an account?{" "}
-						<Link href="/register" style={styles.link}>
+						<Link href="/(auth)/register" style={[styles.link, { color: colors.accent.green }]}>
 							Create one
 						</Link>
 					</Text>
@@ -153,18 +154,16 @@ export function LoginForm() {
 const styles = StyleSheet.create({
 	divider: {
 		borderTopWidth: 1,
-		borderTopColor: NeonColors.card.border,
 		paddingTop: 16,
 		marginTop: 4,
 		gap: 10,
 	},
 	footerText: {
-		color: NeonColors.text.secondary,
 		textAlign: "center",
 		fontSize: 14,
 	},
 	link: {
-		color: NeonColors.accent.green,
 		textDecorationLine: "underline",
+		fontWeight: "600",
 	},
 });

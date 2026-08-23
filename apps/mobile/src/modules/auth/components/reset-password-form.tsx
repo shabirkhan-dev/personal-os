@@ -34,7 +34,7 @@ export function ResetPasswordForm() {
 		setSubmitting(true);
 		try {
 			await authService.resetPassword({ email, code, newPassword: password });
-			router.replace({ pathname: "/login", params: { reset: "true" } });
+			router.replace({ pathname: "/(auth)/login", params: { reset: "true" } });
 		} catch (caught) {
 			setError(caught instanceof Error ? caught.message : "Password reset failed");
 		} finally {

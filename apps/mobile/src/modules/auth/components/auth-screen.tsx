@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { NeonCard } from "@/components/ui/neon-card";
-import { NeonColors } from "@/constants/design-system";
+import { useTheme } from "@/providers/theme-provider";
 
 interface AuthScreenProps {
 	brand?: string;
@@ -29,18 +29,26 @@ export function AuthScreen({
 	footer,
 	busy = false,
 }: AuthScreenProps) {
+	const { colors } = useTheme();
+
 	if (busy) {
 		return (
-			<SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
+			<SafeAreaView
+				style={[styles.safe, { backgroundColor: colors.background }]}
+				edges={["top", "bottom"]}
+			>
 				<View style={styles.loading}>
-					<ActivityIndicator color={NeonColors.accent.green} size="large" />
+					<ActivityIndicator color={colors.accent.green} size="large" />
 				</View>
 			</SafeAreaView>
 		);
 	}
 
 	return (
-		<SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
+		<SafeAreaView
+			style={[styles.safe, { backgroundColor: colors.background }]}
+			edges={["top", "bottom"]}
+		>
 			<KeyboardAvoidingView
 				style={styles.flex}
 				behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -51,9 +59,11 @@ export function AuthScreen({
 					showsVerticalScrollIndicator={false}
 				>
 					<NeonCard style={styles.card}>
-						<Text style={styles.brand}>{brand}</Text>
-						<Text style={styles.title}>{title}</Text>
-						<Text style={styles.description}>{description}</Text>
+						<Text style={[styles.brand, { color: colors.text.secondary }]}>{brand}</Text>
+						<Text style={[styles.title, { color: colors.text.primary }]}>{title}</Text>
+						<Text style={[styles.description, { color: colors.text.secondary }]}>
+							{description}
+						</Text>
 						<View style={styles.content}>{children}</View>
 					</NeonCard>
 					{footer ? <View style={styles.footer}>{footer}</View> : null}
@@ -66,7 +76,6 @@ export function AuthScreen({
 const styles = StyleSheet.create({
 	safe: {
 		flex: 1,
-		backgroundColor: NeonColors.background,
 	},
 	flex: {
 		flex: 1,
@@ -83,21 +92,20 @@ const styles = StyleSheet.create({
 		alignSelf: "center",
 	},
 	brand: {
-		color: NeonColors.text.secondary,
 		fontSize: 13,
 		fontWeight: "600",
 		textAlign: "center",
 		marginBottom: 8,
+		letterSpacing: 0.5,
 	},
 	title: {
-		color: NeonColors.text.primary,
 		fontSize: 28,
 		fontWeight: "700",
 		textAlign: "center",
 		marginBottom: 8,
+		letterSpacing: -0.5,
 	},
 	description: {
-		color: NeonColors.text.secondary,
 		fontSize: 15,
 		textAlign: "center",
 		marginBottom: 24,

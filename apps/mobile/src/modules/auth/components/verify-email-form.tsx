@@ -1,15 +1,16 @@
 import { Link, router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { StyleSheet, Text } from "react-native";
-import { NeonColors } from "@/constants/design-system";
 import { devCodeRouteParams, readDevCodeParam } from "@/modules/auth/lib/dev-auth-code";
 import { authService } from "@/modules/auth/services/auth.service";
+import { useTheme } from "@/providers/theme-provider";
 import { AuthAlert } from "./auth-alert";
 import { AuthButton } from "./auth-button";
 import { AuthField } from "./auth-field";
 import { AuthScreen } from "./auth-screen";
 
 export function VerifyEmailForm() {
+	const { colors } = useTheme();
 	const params = useLocalSearchParams<{ email?: string; devCode?: string }>();
 	const [email, setEmail] = useState(typeof params.email === "string" ? params.email : "");
 	const [code, setCode] = useState("");
@@ -27,7 +28,7 @@ export function VerifyEmailForm() {
 		setSubmitting(true);
 		try {
 			await authService.verifyEmail({ email, code });
-			router.replace({ pathname: "/login", params: { verified: "true" } });
+			router.replace({ pathname: "/(auth)/login", params: { verified: "true" } });
 		} catch (caught) {
 			setError(caught instanceof Error ? caught.message : "Verification failed");
 		} finally {
@@ -43,7 +44,7 @@ export function VerifyEmailForm() {
 			if (result.developmentCode) {
 				setDevelopmentCode(result.developmentCode);
 				router.replace({
-					pathname: "/verify-email",
+					pathname: "/(auth)/verify-email",
 					params: { email, ...devCodeRouteParams(result.developmentCode) },
 				});
 			}
@@ -86,8 +87,8 @@ export function VerifyEmailForm() {
 				pending={resending}
 				disabled={!email}
 			/>
-			<Text style={styles.footerText}>
-				<Link href="/login" style={styles.link}>
+			<Text style={[styles.footerText, { color: colors.text.secondary }]}>
+				<Link href="/(auth)/login" style={[styles.link, { color: colors.accent.green }]}>
 					Back to sign in
 				</Link>
 			</Text>
@@ -101,7 +102,7 @@ const styles = StyleSheet.create({
 		fontSize: 14,
 	},
 	link: {
-		color: NeonColors.accent.green,
 		textDecorationLine: "underline",
+		fontWeight: "600",
 	},
 });

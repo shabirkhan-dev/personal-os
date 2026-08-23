@@ -1,7 +1,7 @@
 import { Calendar01Icon, Time02Icon } from "@hugeicons/core-free-icons";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import { Icon } from "@/components/ui/icon";
-import { NeonColors } from "@/constants/design-system";
+import { useTheme } from "@/providers/theme-provider";
 import type { Routine } from "../types/routine.types";
 
 const DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -12,6 +12,8 @@ interface RoutineCardProps {
 }
 
 export function RoutineCard({ routine, onArchive }: RoutineCardProps) {
+	const { colors, isDark } = useTheme();
+
 	const handleLongPress = () => {
 		if (!onArchive) return;
 		Alert.alert(
@@ -40,41 +42,68 @@ export function RoutineCard({ routine, onArchive }: RoutineCardProps) {
 	return (
 		<Pressable
 			onLongPress={handleLongPress}
-			style={({ pressed }) => [styles.card, { opacity: pressed ? 0.9 : 1 }]}
-			className="p-4 rounded-3xl bg-[#15161A] border border-white/[0.08] mb-3 shadow-lg"
+			style={({ pressed }) => [
+				styles.card,
+				{
+					backgroundColor: colors.surface,
+					borderColor: colors.card.border,
+					opacity: pressed ? 0.9 : 1,
+				},
+			]}
 		>
 			<View className="flex-row items-start justify-between mb-2">
 				<View className="flex-1 pr-2">
-					<Text className="text-white font-bold text-base tracking-tight" numberOfLines={1}>
+					<Text
+						style={{ color: colors.text.primary }}
+						className="font-bold text-base tracking-tight"
+						numberOfLines={1}
+					>
 						{routine.name}
 					</Text>
 					{routine.description ? (
-						<Text className="text-[#888888] text-xs mt-0.5" numberOfLines={2}>
+						<Text
+							style={{ color: colors.text.secondary }}
+							className="text-xs mt-0.5"
+							numberOfLines={2}
+						>
 							{routine.description}
 						</Text>
 					) : null}
 				</View>
 				<View className="bg-green-500/15 px-2.5 py-1 rounded-full flex-row items-center gap-1">
-					<Icon icon={Calendar01Icon} size={12} color={NeonColors.accent.green} />
-					<Text className="text-green-400 text-[11px] font-bold">{scheduleBadgeText}</Text>
+					<Icon icon={Calendar01Icon} size={12} color={colors.accent.green} />
+					<Text style={{ color: colors.accent.green }} className="text-[11px] font-bold">
+						{scheduleBadgeText}
+					</Text>
 				</View>
 			</View>
 
 			{/* Steps List */}
-			<View className="pt-2 border-t border-white/[0.04] gap-1.5 mt-2">
+			<View style={{ borderTopColor: colors.card.border }} className="pt-2 border-t gap-1.5 mt-2">
 				{routine.items.map((item, index) => (
 					<View
 						key={item.id}
-						className="flex-row items-center justify-between py-1 px-2 rounded-lg bg-[#0B0C10]/60"
+						style={{
+							backgroundColor: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)",
+						}}
+						className="flex-row items-center justify-between py-1.5 px-2.5 rounded-lg"
 					>
-						<Text className="text-[#CCCCCC] text-xs font-medium flex-1" numberOfLines={1}>
-							<Text className="text-[#666666] font-mono mr-1.5">{index + 1}. </Text>
+						<Text
+							style={{ color: colors.text.primary }}
+							className="text-xs font-medium flex-1"
+							numberOfLines={1}
+						>
+							<Text style={{ color: colors.text.muted }} className="font-mono mr-1.5">
+								{index + 1}.{" "}
+							</Text>
 							{item.name}
 						</Text>
 						{item.targetTime && (
 							<View className="flex-row items-center gap-1">
-								<Icon icon={Time02Icon} size={12} color="#888888" />
-								<Text className="text-[#888888] text-[10px]">{item.targetTime}</Text>
+								<Icon icon={Time02Icon} size={12} color={colors.text.secondary} />
+								<Text style={{ color: colors.text.secondary }} className="text-[10px]">
+									{item.targetTime}
+								</Text>
 							</View>
 						)}
 					</View>
@@ -86,6 +115,14 @@ export function RoutineCard({ routine, onArchive }: RoutineCardProps) {
 
 const styles = StyleSheet.create({
 	card: {
-		backgroundColor: "#15161A",
+		padding: 16,
+		borderRadius: 20,
+		borderWidth: 1,
+		marginBottom: 12,
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.04,
+		shadowRadius: 8,
+		elevation: 2,
 	},
 });

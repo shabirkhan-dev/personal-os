@@ -15,6 +15,7 @@ import { useAuth } from "@/modules/auth";
 import { AccountTabs } from "@/modules/auth/components/account-tabs";
 import { AuthAlert } from "@/modules/auth/components/auth-alert";
 import { AuthButton } from "@/modules/auth/components/auth-button";
+import { useTheme } from "@/providers/theme-provider";
 import {
 	type BillingInterval,
 	billingService,
@@ -74,7 +75,8 @@ function formatMoney(amount: number): string {
 }
 
 export function BillingScreen() {
-	const { token, user } = useAuth();
+	const { user, token } = useAuth();
+	const { colors } = useTheme();
 	const [providers, setProviders] = useState<PaymentProviderName[]>([]);
 	const [provider, setProvider] = useState<PaymentProviderName>("stripe");
 	const [planCode, setPlanCode] = useState<PlanCode>("team");
@@ -82,10 +84,11 @@ export function BillingScreen() {
 	const [subscription, setSubscription] = useState<SubscriptionView>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [busy, setBusy] = useState(false);
-	const [ready, setReady] = useState(false);
+	const [loading, setLoading] = useState(true);
 
 	const loadBilling = useCallback(async () => {
 		if (!token) return;
+		setLoading(true);
 		try {
 			const [providerResult, subscriptionResult] = await Promise.all([
 				billingService.listProviders(token),
@@ -111,7 +114,7 @@ export function BillingScreen() {
 			setProviders([]);
 			setError(err instanceof Error ? err.message : "Could not load billing");
 		} finally {
-			setReady(true);
+			setLoading(false);
 		}
 	}, [token]);
 
@@ -176,7 +179,7 @@ export function BillingScreen() {
 	};
 
 	return (
-		<View style={styles.container}>
+		<View style={[styles.container, { backgroundColor: colors.background }]}>
 			<SafeAreaView edges={["top"]} style={styles.safeArea}>
 				<OSHeader />
 				<ScrollView
@@ -186,9 +189,9 @@ export function BillingScreen() {
 				>
 					<View style={styles.viewContainer}>
 						<View style={styles.viewHeader}>
-							<Text style={styles.eyebrow}>ACCOUNT</Text>
-							<Text style={styles.viewTitle}>Billing</Text>
-							<Text style={styles.viewSubtitle}>
+							<Text style={[styles.eyebrow, { color: colors.text.secondary }]}>ACCOUNT</Text>
+							<Text style={[styles.viewTitle, { color: colors.text.primary }]}>Billing</Text>
+							<Text style={[styles.viewSubtitle, { color: colors.text.secondary }]}>
 								Upgrade when you need more workspace capacity or managed support. Personal OS stays
 								free to use.
 							</Text>
@@ -196,7 +199,7 @@ export function BillingScreen() {
 
 						<AccountTabs active="billing" />
 
-						{!ready ? (
+						{loading ? (
 							<View style={styles.loadingBox}>
 								<ActivityIndicator color={NeonColors.accent.green} />
 								<Text style={styles.loadingText}>Loading billing…</Text>

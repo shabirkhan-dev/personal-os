@@ -39,9 +39,11 @@ import {
 	useRevokeSessionMutation,
 } from "@/modules/auth/hooks/use-auth-mutations";
 import { useSecurityStatusQuery, useSessionsQuery } from "@/modules/auth/hooks/use-auth-queries";
+import { useTheme } from "@/providers/theme-provider";
 
 export function SecurityScreen() {
 	const { user, logout, logoutAll } = useAuth();
+	const { colors } = useTheme();
 	const sessions = useSessionsQuery();
 	const security = useSecurityStatusQuery();
 	const changePassword = useChangePasswordMutation();
@@ -133,7 +135,7 @@ export function SecurityScreen() {
 	};
 
 	return (
-		<View style={styles.container}>
+		<View style={[styles.container, { backgroundColor: colors.background }]}>
 			<SafeAreaView edges={["top"]} style={styles.safeArea}>
 				<OSHeader />
 				<ScrollView
@@ -143,9 +145,9 @@ export function SecurityScreen() {
 				>
 					<View style={styles.viewContainer}>
 						<View style={styles.viewHeader}>
-							<Text style={styles.eyebrow}>ACCOUNT</Text>
-							<Text style={styles.viewTitle}>Security</Text>
-							<Text style={styles.viewSubtitle}>
+							<Text style={[styles.eyebrow, { color: colors.text.secondary }]}>ACCOUNT</Text>
+							<Text style={[styles.viewTitle, { color: colors.text.primary }]}>Security</Text>
+							<Text style={[styles.viewSubtitle, { color: colors.text.secondary }]}>
 								Manage sign-in methods, recovery options, and devices with access.
 							</Text>
 						</View>

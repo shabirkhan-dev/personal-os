@@ -17,7 +17,6 @@ import {
 	View,
 } from "react-native";
 import { Icon } from "@/components/ui/icon";
-import { NeonColors } from "@/constants/design-system";
 import { resolveMediaUrl } from "@/lib/media-url";
 import { useAuth } from "@/modules/auth";
 import { useTheme } from "@/providers/theme-provider";
@@ -28,7 +27,7 @@ export function OSHeader() {
 	const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
 	const segments = useSegments() as string[];
 	const { user } = useAuth();
-	const { isDark, toggleTheme } = useTheme();
+	const { isDark, colors, toggleTheme } = useTheme();
 
 	const avatarUri =
 		resolveMediaUrl(user?.profile?.avatarUrl?.trim()) ||
@@ -60,17 +59,39 @@ export function OSHeader() {
 	};
 
 	return (
-		<View style={styles.container}>
+		<View style={[styles.container, { borderBottomColor: colors.card.border }]}>
 			<View style={styles.left}>
 				<Pressable style={styles.avatarContainer} onPress={handleAvatarPress}>
-					<Image source={{ uri: avatarUri }} style={styles.avatar} />
-					<View style={styles.onlineDot} />
+					<Image
+						source={{ uri: avatarUri }}
+						style={[styles.avatar, { backgroundColor: colors.surface }]}
+					/>
+					<View
+						style={[
+							styles.onlineDot,
+							{
+								backgroundColor: colors.accent.green,
+								borderColor: colors.background,
+							},
+						]}
+					/>
 				</Pressable>
 
 				<View style={styles.dropdownContainer}>
-					<Pressable style={styles.accountSelector} onPress={() => setIsDropdownOpen(true)}>
-						<Text style={styles.accountName}>{currentModule}</Text>
-						<Icon icon={ArrowDown01Icon} size={16} color={NeonColors.text.secondary} />
+					<Pressable
+						style={[
+							styles.accountSelector,
+							{
+								backgroundColor: colors.surface,
+								borderColor: colors.card.border,
+							},
+						]}
+						onPress={() => setIsDropdownOpen(true)}
+					>
+						<Text style={[styles.accountName, { color: colors.text.primary }]}>
+							{currentModule}
+						</Text>
+						<Icon icon={ArrowDown01Icon} size={16} color={colors.text.secondary} />
 					</Pressable>
 
 					<Modal
@@ -81,7 +102,15 @@ export function OSHeader() {
 					>
 						<TouchableWithoutFeedback onPress={() => setIsDropdownOpen(false)}>
 							<View style={styles.modalOverlay}>
-								<View style={styles.dropdownMenu}>
+								<View
+									style={[
+										styles.dropdownMenu,
+										{
+											backgroundColor: colors.surface,
+											borderColor: colors.card.border,
+										},
+									]}
+								>
 									{modules.map((mod) => (
 										<Pressable
 											key={mod.label}
@@ -91,7 +120,13 @@ export function OSHeader() {
 											<Text
 												style={[
 													styles.dropdownItemText,
-													currentModule === mod.label && styles.activeDropdownItemText,
+													{
+														color:
+															currentModule === mod.label
+																? colors.text.primary
+																: colors.text.secondary,
+														fontWeight: currentModule === mod.label ? "700" : "500",
+													},
 												]}
 											>
 												{mod.label}
@@ -100,7 +135,7 @@ export function OSHeader() {
 												<Icon
 													icon={Tick01Icon}
 													size={16}
-													color={NeonColors.accent.green}
+													color={colors.accent.green}
 													strokeWidth={3}
 												/>
 											)}
@@ -115,7 +150,12 @@ export function OSHeader() {
 
 			<View style={styles.right}>
 				<Pressable
-					style={styles.themeToggleBtn}
+					style={[
+						styles.themeToggleBtn,
+						{
+							backgroundColor: isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.05)",
+						},
+					]}
 					onPress={toggleTheme}
 					accessibilityRole="button"
 					accessibilityLabel={`Switch to ${isDark ? "light" : "dark"} mode`}
@@ -123,20 +163,35 @@ export function OSHeader() {
 					<Icon
 						icon={isDark ? Sun01Icon : Moon02Icon}
 						size={20}
-						color={isDark ? "#FFEA00" : "#00E676"}
+						color={isDark ? "#FFEA00" : "#00B0FF"}
 						strokeWidth={2}
 					/>
 				</Pressable>
 				<View style={styles.notificationContainer}>
-					<Pressable style={styles.iconButton}>
+					<Pressable
+						style={[
+							styles.iconButton,
+							{
+								backgroundColor: isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.04)",
+							},
+						]}
+					>
 						<Icon
 							icon={Notification01Icon}
-							size={22}
-							color={NeonColors.text.primary}
-							strokeWidth={1.5}
+							size={20}
+							color={colors.text.primary}
+							strokeWidth={1.8}
 						/>
 					</Pressable>
-					<View style={styles.badge} />
+					<View
+						style={[
+							styles.badge,
+							{
+								backgroundColor: colors.accent.green,
+								borderColor: colors.background,
+							},
+						]}
+					/>
 				</View>
 			</View>
 		</View>
@@ -164,7 +219,6 @@ const styles = StyleSheet.create({
 		width: 36,
 		height: 36,
 		borderRadius: 18,
-		backgroundColor: NeonColors.surface,
 	},
 	onlineDot: {
 		position: "absolute",
@@ -173,9 +227,7 @@ const styles = StyleSheet.create({
 		width: 10,
 		height: 10,
 		borderRadius: 5,
-		backgroundColor: NeonColors.accent.green,
 		borderWidth: 2,
-		borderColor: NeonColors.background,
 	},
 	dropdownContainer: {
 		position: "relative",
@@ -183,37 +235,32 @@ const styles = StyleSheet.create({
 	accountSelector: {
 		flexDirection: "row",
 		alignItems: "center",
-		gap: 4,
-		backgroundColor: NeonColors.surface,
+		gap: 6,
 		paddingHorizontal: 12,
 		paddingVertical: 6,
 		borderRadius: 20,
 		borderWidth: 1,
-		borderColor: "rgba(255, 255, 255, 0.05)",
 	},
 	accountName: {
-		color: NeonColors.text.primary,
 		fontSize: 14,
 		fontWeight: "700",
-		letterSpacing: 0.5,
+		letterSpacing: 0.3,
 	},
 	modalOverlay: {
 		flex: 1,
-		backgroundColor: "rgba(0, 0, 0, 0.4)",
+		backgroundColor: "rgba(0, 0, 0, 0.3)",
 		justifyContent: "flex-start",
 		paddingTop: 60,
 		paddingLeft: 64,
 	},
 	dropdownMenu: {
 		width: 180,
-		backgroundColor: NeonColors.surface,
 		borderRadius: 16,
 		padding: 8,
 		borderWidth: 1,
-		borderColor: "rgba(255, 255, 255, 0.1)",
 		shadowColor: "#000",
 		shadowOffset: { width: 0, height: 10 },
-		shadowOpacity: 0.5,
+		shadowOpacity: 0.15,
 		shadowRadius: 20,
 		elevation: 10,
 	},
@@ -221,44 +268,36 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		justifyContent: "space-between",
 		alignItems: "center",
-		paddingVertical: 12,
+		paddingVertical: 10,
 		paddingHorizontal: 12,
 		borderRadius: 8,
 	},
 	dropdownItemText: {
-		color: NeonColors.text.secondary,
 		fontSize: 15,
-		fontWeight: "500",
-	},
-	activeDropdownItemText: {
-		color: NeonColors.text.primary,
-		fontWeight: "700",
 	},
 	right: {
 		flexDirection: "row",
 		alignItems: "center",
-		gap: 16,
+		gap: 10,
 	},
 	iconButton: {
-		padding: 4,
+		padding: 7,
+		borderRadius: 12,
 	},
 	themeToggleBtn: {
-		padding: 6,
+		padding: 7,
 		borderRadius: 12,
-		backgroundColor: "rgba(255, 255, 255, 0.05)",
 	},
 	notificationContainer: {
 		position: "relative",
 	},
 	badge: {
 		position: "absolute",
-		top: 4,
-		right: 4,
+		top: 3,
+		right: 3,
 		width: 8,
 		height: 8,
 		borderRadius: 4,
-		backgroundColor: NeonColors.accent.green,
 		borderWidth: 1.5,
-		borderColor: NeonColors.background,
 	},
 });

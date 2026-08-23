@@ -1,7 +1,7 @@
 import { TradeUpIcon, Wallet01Icon } from "@hugeicons/core-free-icons";
 import { StyleSheet, Text, View } from "react-native";
 import { Icon } from "@/components/ui/icon";
-import { NeonColors } from "@/constants/design-system";
+import { useTheme } from "@/providers/theme-provider";
 import type { MonthSummary } from "../types/finance.types";
 import { formatCurrency } from "./transaction-card";
 
@@ -11,6 +11,7 @@ interface FinanceSummaryCardProps {
 }
 
 export function FinanceSummaryCard({ summary, currency = "INR" }: FinanceSummaryCardProps) {
+	const { colors, isDark } = useTheme();
 	const incomeTotal = summary?.incomeTotal ?? 0;
 	const expenseTotal = summary?.expenseTotal ?? 0;
 	const netTotal = summary?.netTotal ?? 0;
@@ -18,15 +19,28 @@ export function FinanceSummaryCard({ summary, currency = "INR" }: FinanceSummary
 
 	return (
 		<View
-			style={styles.container}
-			className="p-5 mb-5 rounded-3xl bg-[#15161A] border border-white/[0.08] shadow-xl"
+			style={[
+				styles.container,
+				{
+					backgroundColor: colors.surface,
+					borderColor: colors.card.border,
+				},
+			]}
 		>
 			<View className="flex-row items-center justify-between mb-3">
 				<View className="flex-row items-center gap-2">
-					<View className="w-8 h-8 rounded-lg bg-white/10 items-center justify-center">
-						<Icon icon={Wallet01Icon} size={16} color="#FFFFFF" />
+					<View
+						style={{
+							backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)",
+						}}
+						className="w-8 h-8 rounded-lg items-center justify-center"
+					>
+						<Icon icon={Wallet01Icon} size={16} color={colors.text.primary} />
 					</View>
-					<Text className="text-[#888888] font-semibold text-xs uppercase tracking-wider">
+					<Text
+						style={{ color: colors.text.secondary }}
+						className="font-semibold text-xs uppercase tracking-wider"
+					>
 						Net Flow ({summary?.month ?? "This Month"})
 					</Text>
 				</View>
@@ -39,11 +53,11 @@ export function FinanceSummaryCard({ summary, currency = "INR" }: FinanceSummary
 					<Icon
 						icon={TradeUpIcon}
 						size={12}
-						color={isPositiveNet ? NeonColors.accent.green : NeonColors.accent.orange}
+						color={isPositiveNet ? colors.accent.green : colors.accent.orange}
 					/>
 					<Text
 						style={{
-							color: isPositiveNet ? NeonColors.accent.green : NeonColors.accent.orange,
+							color: isPositiveNet ? colors.accent.green : colors.accent.orange,
 						}}
 						className="text-[11px] font-bold"
 					>
@@ -53,22 +67,38 @@ export function FinanceSummaryCard({ summary, currency = "INR" }: FinanceSummary
 			</View>
 
 			{/* Large Net Number */}
-			<Text className="text-white font-light text-4xl mb-5">
+			<Text style={{ color: colors.text.primary }} className="font-light text-4xl mb-5">
 				{isPositiveNet ? "" : "-"}
 				{formatCurrency(Math.abs(netTotal), currency)}
 			</Text>
 
 			{/* Income vs Expense Pills */}
-			<View className="flex-row gap-3 pt-3 border-t border-white/[0.06]">
-				<View className="flex-1 p-3 rounded-2xl bg-[#0B0C10] border border-white/[0.04]">
-					<Text className="text-[#888888] text-[11px] font-medium mb-0.5">Total Income</Text>
-					<Text style={{ color: NeonColors.accent.green }} className="font-bold text-base">
+			<View style={{ borderTopColor: colors.card.border }} className="flex-row gap-3 pt-3 border-t">
+				<View
+					style={{
+						backgroundColor: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)",
+						borderColor: colors.card.border,
+					}}
+					className="flex-1 p-3 rounded-2xl border"
+				>
+					<Text style={{ color: colors.text.secondary }} className="text-[11px] font-medium mb-0.5">
+						Total Income
+					</Text>
+					<Text style={{ color: colors.accent.green }} className="font-bold text-base">
 						+{formatCurrency(incomeTotal, currency)}
 					</Text>
 				</View>
-				<View className="flex-1 p-3 rounded-2xl bg-[#0B0C10] border border-white/[0.04]">
-					<Text className="text-[#888888] text-[11px] font-medium mb-0.5">Total Expense</Text>
-					<Text style={{ color: NeonColors.accent.orange }} className="font-bold text-base">
+				<View
+					style={{
+						backgroundColor: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)",
+						borderColor: colors.card.border,
+					}}
+					className="flex-1 p-3 rounded-2xl border"
+				>
+					<Text style={{ color: colors.text.secondary }} className="text-[11px] font-medium mb-0.5">
+						Total Expense
+					</Text>
+					<Text style={{ color: colors.accent.orange }} className="font-bold text-base">
 						-{formatCurrency(expenseTotal, currency)}
 					</Text>
 				</View>
@@ -79,6 +109,14 @@ export function FinanceSummaryCard({ summary, currency = "INR" }: FinanceSummary
 
 const styles = StyleSheet.create({
 	container: {
-		backgroundColor: "#15161A",
+		padding: 20,
+		marginBottom: 20,
+		borderRadius: 24,
+		borderWidth: 1,
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 4 },
+		shadowOpacity: 0.05,
+		shadowRadius: 12,
+		elevation: 4,
 	},
 });

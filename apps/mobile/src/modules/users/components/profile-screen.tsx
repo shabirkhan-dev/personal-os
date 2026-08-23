@@ -28,7 +28,7 @@ import { NeonCard } from "@/components/ui/neon-card";
 import { OSHeader } from "@/components/ui/os-header";
 import { NeonColors } from "@/constants/design-system";
 import { resolveMediaUrl } from "@/lib/media-url";
-import { authService, useAuth } from "@/modules/auth";
+import { useAuth } from "@/modules/auth";
 import { AccountTabs } from "@/modules/auth/components/account-tabs";
 import { AuthButton } from "@/modules/auth/components/auth-button";
 import { useTheme } from "@/providers/theme-provider";

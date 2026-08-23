@@ -1,7 +1,7 @@
 import { ViewIcon, ViewOffIcon } from "@hugeicons/core-free-icons";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { Icon } from "@/components/ui/icon";
-import { NeonColors } from "@/constants/design-system";
+import { useTheme } from "@/providers/theme-provider";
 
 interface AuthFieldProps {
 	label: string;
@@ -42,23 +42,40 @@ export function AuthField({
 	numberOfLines,
 	rightLink,
 }: AuthFieldProps) {
+	const { colors, isDark } = useTheme();
+
 	return (
 		<View style={styles.field}>
 			<View style={styles.labelRow}>
-				<Text style={styles.label}>{label}</Text>
+				<Text style={[styles.label, { color: colors.text.primary }]}>{label}</Text>
 				{rightLink ? (
 					<Pressable onPress={rightLink.onPress} hitSlop={8}>
-						<Text style={styles.link}>{rightLink.label}</Text>
+						<Text style={[styles.link, { color: colors.accent.green }]}>{rightLink.label}</Text>
 					</Pressable>
 				) : null}
 			</View>
-			<View style={[styles.inputWrap, multiline && styles.inputWrapMultiline]}>
+			<View
+				style={[
+					styles.inputWrap,
+					{
+						borderColor: errorHint ? colors.accent.red : colors.card.border,
+						backgroundColor: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)",
+					},
+					multiline && styles.inputWrapMultiline,
+				]}
+			>
 				<TextInput
-					style={[styles.input, multiline && styles.inputMultiline]}
+					style={[
+						styles.input,
+						{
+							color: colors.text.primary,
+						},
+						multiline && styles.inputMultiline,
+					]}
 					value={value}
 					onChangeText={onChangeText}
 					placeholder={placeholder}
-					placeholderTextColor={NeonColors.text.muted}
+					placeholderTextColor={colors.text.muted}
 					secureTextEntry={secureTextEntry}
 					keyboardType={keyboardType}
 					autoComplete={autoComplete}
@@ -72,15 +89,19 @@ export function AuthField({
 				{showPasswordToggle ? (
 					<Pressable onPress={onTogglePassword} hitSlop={8} style={styles.eye}>
 						{secureTextEntry ? (
-							<Icon icon={ViewIcon} size={18} color={NeonColors.text.secondary} />
+							<Icon icon={ViewIcon} size={18} color={colors.text.secondary} />
 						) : (
-							<Icon icon={ViewOffIcon} size={18} color={NeonColors.text.secondary} />
+							<Icon icon={ViewOffIcon} size={18} color={colors.text.secondary} />
 						)}
 					</Pressable>
 				) : null}
 			</View>
-			{errorHint ? <Text style={styles.errorHint}>{errorHint}</Text> : null}
-			{!errorHint && hint ? <Text style={styles.hint}>{hint}</Text> : null}
+			{errorHint ? (
+				<Text style={[styles.errorHint, { color: colors.accent.red }]}>{errorHint}</Text>
+			) : null}
+			{!errorHint && hint ? (
+				<Text style={[styles.hint, { color: colors.text.muted }]}>{hint}</Text>
+			) : null}
 		</View>
 	);
 }
@@ -95,21 +116,18 @@ const styles = StyleSheet.create({
 		justifyContent: "space-between",
 	},
 	label: {
-		color: NeonColors.text.primary,
 		fontSize: 14,
 		fontWeight: "600",
 	},
 	link: {
-		color: NeonColors.text.secondary,
 		fontSize: 13,
+		fontWeight: "500",
 	},
 	inputWrap: {
 		flexDirection: "row",
 		alignItems: "center",
 		borderWidth: 1,
-		borderColor: NeonColors.card.border,
 		borderRadius: 14,
-		backgroundColor: "rgba(255,255,255,0.03)",
 		paddingHorizontal: 14,
 		minHeight: 48,
 	},
@@ -120,7 +138,6 @@ const styles = StyleSheet.create({
 	},
 	input: {
 		flex: 1,
-		color: NeonColors.text.primary,
 		fontSize: 16,
 		paddingVertical: 12,
 	},
@@ -132,11 +149,9 @@ const styles = StyleSheet.create({
 		paddingLeft: 8,
 	},
 	hint: {
-		color: NeonColors.text.muted,
 		fontSize: 12,
 	},
 	errorHint: {
-		color: NeonColors.accent.red,
 		fontSize: 12,
 	},
 });

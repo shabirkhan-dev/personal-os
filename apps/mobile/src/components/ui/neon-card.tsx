@@ -1,7 +1,7 @@
 import { LinearGradient } from "expo-linear-gradient";
 import type * as React from "react";
 import { StyleSheet, View, type ViewStyle } from "react-native";
-import { NeonColors } from "@/constants/design-system";
+import { useTheme } from "@/providers/theme-provider";
 
 interface NeonCardProps {
 	children: React.ReactNode;
@@ -10,12 +10,18 @@ interface NeonCardProps {
 }
 
 export function NeonCard({ children, style }: NeonCardProps) {
+	const { colors } = useTheme();
+
 	return (
 		<View style={[styles.outerContainer, style]}>
-			{/* Background Gradient Card */}
 			<LinearGradient
-				colors={NeonColors.card.gradient}
-				style={styles.card}
+				colors={colors.card.gradient}
+				style={[
+					styles.card,
+					{
+						borderColor: colors.card.border,
+					},
+				]}
 				start={{ x: 0, y: 0 }}
 				end={{ x: 0, y: 1 }}
 			>
@@ -28,12 +34,11 @@ export function NeonCard({ children, style }: NeonCardProps) {
 const styles = StyleSheet.create({
 	outerContainer: {
 		position: "relative",
-		padding: 0, // Removed padding since external glows are gone
+		padding: 0,
 	},
 	card: {
 		borderRadius: 32,
 		borderWidth: 1,
-		borderColor: NeonColors.card.border,
 		overflow: "hidden",
 	},
 	content: {

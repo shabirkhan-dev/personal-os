@@ -25,11 +25,11 @@ export default function AdminTodayPage() {
 					view={view}
 					loading={isLoading}
 					hasError={isError}
-					onRetry={() => refetch()}
 					togglingItemId={
 						toggleMutation.isPending ? (toggleMutation.variables?.itemId ?? null) : null
 					}
 					onToggle={(routineId, itemId) => toggleMutation.mutate({ routineId, itemId })}
+					onRetry={() => void refetch()}
 				/>
 			</div>
 		</div>

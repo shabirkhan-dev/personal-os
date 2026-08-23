@@ -12,7 +12,7 @@ import {
 	View,
 } from "react-native";
 import { Icon } from "@/components/ui/icon";
-import { NeonColors } from "@/constants/design-system";
+import { useTheme } from "@/providers/theme-provider";
 import { useCreateRoutineMutation } from "../hooks/use-routine-mutations";
 import type { RoutineScheduleType } from "../types/routine.types";
 
@@ -32,6 +32,7 @@ const WEEKDAYS = [
 ];
 
 export function AddRoutineModal({ visible, onClose }: AddRoutineModalProps) {
+	const { colors, isDark } = useTheme();
 	const createMutation = useCreateRoutineMutation();
 
 	const [name, setName] = useState("");
@@ -110,76 +111,130 @@ export function AddRoutineModal({ visible, onClose }: AddRoutineModalProps) {
 		<Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
 			<View style={styles.overlay}>
 				<View
-					style={styles.modalContent}
-					className="bg-[#15161A] rounded-3xl p-5 border border-white/[0.08] w-[92%] max-h-[85%]"
+					style={[
+						styles.modalContent,
+						{
+							backgroundColor: colors.surface,
+							borderColor: colors.card.border,
+						},
+					]}
+					className="rounded-3xl p-5 border w-[92%] max-h-[85%]"
 				>
 					{/* Modal Header */}
-					<View className="flex-row items-center justify-between pb-3 border-b border-white/[0.06] mb-4">
-						<Text className="text-white font-bold text-lg">Create Routine</Text>
+					<View
+						style={{ borderBottomColor: colors.card.border }}
+						className="flex-row items-center justify-between pb-3 border-b mb-4"
+					>
+						<Text style={{ color: colors.text.primary }} className="font-bold text-lg">
+							Create Routine
+						</Text>
 						<Pressable onPress={onClose} className="p-1">
-							<Icon icon={Cancel01Icon} size={20} color="#888888" />
+							<Icon icon={Cancel01Icon} size={20} color={colors.text.secondary} />
 						</Pressable>
 					</View>
 
 					<ScrollView showsVerticalScrollIndicator={false} className="mb-4">
 						{/* Routine Name */}
 						<View className="mb-4">
-							<Text className="text-[#888888] text-xs font-bold uppercase tracking-wider mb-1.5">
+							<Text
+								style={{ color: colors.text.secondary }}
+								className="text-xs font-bold uppercase tracking-wider mb-1.5"
+							>
 								Routine Name
 							</Text>
 							<TextInput
 								value={name}
 								onChangeText={setName}
 								placeholder="e.g. Morning Protocol"
-								placeholderTextColor="#555555"
-								className="bg-[#0B0C10] text-white px-3.5 py-3 rounded-2xl border border-white/[0.06] text-sm font-medium"
+								placeholderTextColor={colors.text.muted}
+								style={{
+									backgroundColor: isDark ? "rgba(255, 255, 255, 0.03)" : "rgba(0, 0, 0, 0.03)",
+									borderColor: colors.card.border,
+									color: colors.text.primary,
+								}}
+								className="px-3.5 py-3 rounded-2xl border text-sm font-medium"
 							/>
 						</View>
 
 						{/* Description */}
 						<View className="mb-4">
-							<Text className="text-[#888888] text-xs font-bold uppercase tracking-wider mb-1.5">
+							<Text
+								style={{ color: colors.text.secondary }}
+								className="text-xs font-bold uppercase tracking-wider mb-1.5"
+							>
 								Description (Optional)
 							</Text>
 							<TextInput
 								value={description}
 								onChangeText={setDescription}
 								placeholder="e.g. Daily activation sequence"
-								placeholderTextColor="#555555"
-								className="bg-[#0B0C10] text-white px-3.5 py-2.5 rounded-2xl border border-white/[0.06] text-xs"
+								placeholderTextColor={colors.text.muted}
+								style={{
+									backgroundColor: isDark ? "rgba(255, 255, 255, 0.03)" : "rgba(0, 0, 0, 0.03)",
+									borderColor: colors.card.border,
+									color: colors.text.primary,
+								}}
+								className="px-3.5 py-2.5 rounded-2xl border text-xs"
 							/>
 						</View>
 
 						{/* Schedule Type Switcher */}
 						<View className="mb-4">
-							<Text className="text-[#888888] text-xs font-bold uppercase tracking-wider mb-2">
+							<Text
+								style={{ color: colors.text.secondary }}
+								className="text-xs font-bold uppercase tracking-wider mb-2"
+							>
 								Schedule
 							</Text>
-							<View className="flex-row p-1 bg-[#0B0C10] rounded-xl border border-white/[0.04]">
+							<View
+								style={{
+									backgroundColor: isDark ? "rgba(255, 255, 255, 0.03)" : "rgba(0, 0, 0, 0.03)",
+									borderColor: colors.card.border,
+								}}
+								className="flex-row p-1 rounded-xl border"
+							>
 								<Pressable
 									onPress={() => setScheduleType("daily")}
-									className={`flex-1 py-2 rounded-lg items-center ${
-										scheduleType === "daily" ? "bg-white" : ""
-									}`}
+									style={[
+										scheduleType === "daily" && {
+											backgroundColor: isDark ? "#FFFFFF" : "#0F172A",
+										},
+									]}
+									className="flex-1 py-2 rounded-lg items-center"
 								>
 									<Text
-										className={`text-xs font-bold ${
-											scheduleType === "daily" ? "text-black" : "text-[#888888]"
-										}`}
+										style={{
+											color:
+												scheduleType === "daily"
+													? isDark
+														? "#000000"
+														: "#FFFFFF"
+													: colors.text.secondary,
+										}}
+										className="text-xs font-bold"
 									>
 										Everyday
 									</Text>
 								</Pressable>
 								<Pressable
 									onPress={() => setScheduleType("specific_days")}
-									className={`flex-1 py-2 rounded-lg items-center ${
-										scheduleType === "specific_days" ? "bg-white" : ""
-									}`}
+									style={[
+										scheduleType === "specific_days" && {
+											backgroundColor: isDark ? "#FFFFFF" : "#0F172A",
+										},
+									]}
+									className="flex-1 py-2 rounded-lg items-center"
 								>
 									<Text
-										className={`text-xs font-bold ${
-											scheduleType === "specific_days" ? "text-black" : "text-[#888888]"
-										}`}
+										style={{
+											color:
+												scheduleType === "specific_days"
+													? isDark
+														? "#000000"
+														: "#FFFFFF"
+													: colors.text.secondary,
+										}}
+										className="text-xs font-bold"
 									>
 										Specific Days
 									</Text>
@@ -196,16 +251,21 @@ export function AddRoutineModal({ visible, onClose }: AddRoutineModalProps) {
 										<Pressable
 											key={day.id}
 											onPress={() => toggleDay(day.id)}
-											className={`w-9 h-9 rounded-xl items-center justify-center border ${
-												isSelected
-													? "bg-green-500/20 border-green-400"
-													: "bg-[#0B0C10] border-white/[0.06]"
-											}`}
+											style={{
+												backgroundColor: isSelected
+													? `${colors.accent.green}25`
+													: isDark
+														? "rgba(255, 255, 255, 0.03)"
+														: "rgba(0, 0, 0, 0.03)",
+												borderColor: isSelected ? colors.accent.green : colors.card.border,
+											}}
+											className="w-9 h-9 rounded-xl items-center justify-center border"
 										>
 											<Text
-												className={`text-xs font-bold ${
-													isSelected ? "text-green-400" : "text-[#888888]"
-												}`}
+												style={{
+													color: isSelected ? colors.accent.green : colors.text.secondary,
+												}}
+												className="text-xs font-bold"
 											>
 												{day.label}
 											</Text>
@@ -218,41 +278,59 @@ export function AddRoutineModal({ visible, onClose }: AddRoutineModalProps) {
 						{/* Steps Builder */}
 						<View className="mb-4">
 							<View className="flex-row items-center justify-between mb-2">
-								<Text className="text-[#888888] text-xs font-bold uppercase tracking-wider">
+								<Text
+									style={{ color: colors.text.secondary }}
+									className="text-xs font-bold uppercase tracking-wider"
+								>
 									Steps ({items.length})
 								</Text>
 								<Pressable
 									onPress={addItemStep}
-									className="flex-row items-center gap-1 bg-green-500/15 px-2.5 py-1 rounded-lg"
+									style={{ backgroundColor: `${colors.accent.green}20` }}
+									className="flex-row items-center gap-1 px-2.5 py-1 rounded-lg"
 								>
-									<Icon icon={Add01Icon} size={14} color={NeonColors.accent.green} />
-									<Text className="text-green-400 text-xs font-bold">Add Step</Text>
+									<Icon icon={Add01Icon} size={14} color={colors.accent.green} />
+									<Text style={{ color: colors.accent.green }} className="text-xs font-bold">
+										Add Step
+									</Text>
 								</Pressable>
 							</View>
 
 							{items.map((step, idx) => (
 								<View
 									key={idx}
-									className="flex-row items-center gap-2 mb-2 bg-[#0B0C10] p-2 rounded-2xl border border-white/[0.04]"
+									style={{
+										backgroundColor: isDark ? "rgba(255, 255, 255, 0.03)" : "rgba(0, 0, 0, 0.03)",
+										borderColor: colors.card.border,
+									}}
+									className="flex-row items-center gap-2 mb-2 p-2 rounded-2xl border"
 								>
-									<Text className="text-[#555555] font-mono text-xs pl-1">{idx + 1}.</Text>
+									<Text style={{ color: colors.text.muted }} className="font-mono text-xs pl-1">
+										{idx + 1}.
+									</Text>
 									<TextInput
 										value={step.name}
 										onChangeText={(val) => updateItemStep(idx, "name", val)}
 										placeholder="e.g. 500ml Water"
-										placeholderTextColor="#555555"
-										className="flex-1 text-white text-xs py-1"
+										placeholderTextColor={colors.text.muted}
+										style={{ color: colors.text.primary }}
+										className="flex-1 text-xs py-1"
 									/>
 									<TextInput
 										value={step.targetTime}
 										onChangeText={(val) => updateItemStep(idx, "targetTime", val)}
 										placeholder="07:00"
-										placeholderTextColor="#444444"
-										className="w-14 text-center text-[#888888] text-xs bg-[#15161A] py-1 rounded-lg border border-white/[0.04]"
+										placeholderTextColor={colors.text.muted}
+										style={{
+											backgroundColor: isDark ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.05)",
+											borderColor: colors.card.border,
+											color: colors.text.secondary,
+										}}
+										className="w-14 text-center text-xs py-1 rounded-lg border"
 									/>
 									{items.length > 1 && (
 										<Pressable onPress={() => removeItemStep(idx)} className="p-1">
-											<Icon icon={Delete02Icon} size={14} color="#FF5252" />
+											<Icon icon={Delete02Icon} size={14} color={colors.accent.red} />
 										</Pressable>
 									)}
 								</View>
@@ -264,12 +342,17 @@ export function AddRoutineModal({ visible, onClose }: AddRoutineModalProps) {
 					<Pressable
 						onPress={handleSave}
 						disabled={createMutation.isPending}
-						className="w-full bg-white py-3.5 rounded-2xl items-center justify-center shadow-lg"
+						style={{
+							backgroundColor: isDark ? "#FFFFFF" : "#0F172A",
+						}}
+						className="w-full py-3.5 rounded-2xl items-center justify-center shadow-lg"
 					>
 						{createMutation.isPending ? (
-							<ActivityIndicator color="#000000" />
+							<ActivityIndicator color={isDark ? "#000000" : "#FFFFFF"} />
 						) : (
-							<Text className="text-black font-bold text-sm">Create Routine</Text>
+							<Text style={{ color: isDark ? "#000000" : "#FFFFFF" }} className="font-bold text-sm">
+								Create Routine
+							</Text>
 						)}
 					</Pressable>
 				</View>
@@ -285,7 +368,5 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 		alignItems: "center",
 	},
-	modalContent: {
-		backgroundColor: "#15161A",
-	},
+	modalContent: {},
 });

@@ -1,10 +1,10 @@
 import { Link, router } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, Text } from "react-native";
-import { NeonColors } from "@/constants/design-system";
 import { useAuth } from "@/modules/auth/context/auth-context";
 import { devCodeRouteParams } from "@/modules/auth/lib/dev-auth-code";
 import { registerSchema } from "@/modules/auth/schemas/auth.schemas";
+import { useTheme } from "@/providers/theme-provider";
 import { AuthAlert } from "./auth-alert";
 import { AuthButton } from "./auth-button";
 import { AuthField } from "./auth-field";
@@ -12,6 +12,7 @@ import { AuthScreen } from "./auth-screen";
 
 export function SignupForm() {
 	const { user, loading, error, clearError, register } = useAuth();
+	const { colors } = useTheme();
 	const [email, setEmail] = useState("");
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
@@ -45,7 +46,7 @@ export function SignupForm() {
 		try {
 			const result = await register(parsed.data);
 			router.push({
-				pathname: "/verify-email",
+				pathname: "/(auth)/verify-email",
 				params: { email: parsed.data.email, ...devCodeRouteParams(result.developmentCode) },
 			});
 		} catch {
@@ -62,7 +63,7 @@ export function SignupForm() {
 			title="Create your account"
 			description="Create your secure Personal OS account"
 			footer={
-				<Text style={styles.terms}>
+				<Text style={[styles.terms, { color: colors.text.muted }]}>
 					By continuing, you agree to our Terms of Service and Privacy Policy.
 				</Text>
 			}
@@ -115,9 +116,9 @@ export function SignupForm() {
 				pending={submitting}
 				disabled={passwordsMismatch}
 			/>
-			<Text style={styles.footerText}>
+			<Text style={[styles.footerText, { color: colors.text.secondary }]}>
 				Already have an account?{" "}
-				<Link href="/login" style={styles.link}>
+				<Link href="/(auth)/login" style={[styles.link, { color: colors.accent.green }]}>
 					Sign in
 				</Link>
 			</Text>
@@ -127,16 +128,14 @@ export function SignupForm() {
 
 const styles = StyleSheet.create({
 	footerText: {
-		color: NeonColors.text.secondary,
 		textAlign: "center",
 		fontSize: 14,
 	},
 	link: {
-		color: NeonColors.accent.green,
 		textDecorationLine: "underline",
+		fontWeight: "600",
 	},
 	terms: {
-		color: NeonColors.text.muted,
 		fontSize: 12,
 		textAlign: "center",
 		paddingHorizontal: 12,

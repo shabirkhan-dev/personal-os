@@ -20,7 +20,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Icon } from "@/components/ui/icon";
 import { OSHeader } from "@/components/ui/os-header";
-import { NeonColors } from "@/constants/design-system";
 import { useAuth } from "@/modules/auth";
 import {
 	AddTransactionModal,
@@ -34,7 +33,7 @@ import { useTheme } from "@/providers/theme-provider";
 
 export default function DashboardIndex() {
 	const { user } = useAuth();
-	const { colors } = useTheme();
+	const { colors, isDark } = useTheme();
 	const [expenseModalVisible, setExpenseModalVisible] = useState(false);
 
 	const { data: todayData, isLoading: routinesLoading, refetch: refetchRoutines } = useTodayQuery();
@@ -87,50 +86,67 @@ export default function DashboardIndex() {
 						<RefreshControl
 							refreshing={refreshing}
 							onRefresh={handleRefresh}
-							tintColor={NeonColors.accent.green}
+							tintColor={colors.accent.green}
 						/>
 					}
 				>
 					<View style={styles.viewContainer}>
 						{/* Greeting & System Status */}
 						<View className="mb-6">
-							<Text className="text-[#888888] font-medium text-xs uppercase tracking-wider">
+							<Text
+								style={{ color: colors.text.secondary }}
+								className="font-medium text-xs uppercase tracking-wider"
+							>
 								Personal OS • Overview
 							</Text>
-							<Text className="text-white font-light text-3xl mt-1">
-								Welcome, <Text className="font-semibold text-white">{displayName}</Text>
+							<Text style={{ color: colors.text.primary }} className="font-light text-3xl mt-1">
+								Welcome,{" "}
+								<Text style={{ color: colors.text.primary }} className="font-semibold">
+									{displayName}
+								</Text>
 							</Text>
 						</View>
 
 						{/* Daily Routine Summary Card */}
 						<Pressable
 							onPress={() => router.push("/(modules)/(routines)" as never)}
-							style={({ pressed }) => [{ opacity: pressed ? 0.9 : 1 }]}
-							className="p-5 mb-5 rounded-3xl bg-[#15161A] border border-white/[0.08] shadow-lg"
+							style={({ pressed }) => [
+								{
+									backgroundColor: colors.surface,
+									borderColor: colors.card.border,
+									opacity: pressed ? 0.9 : 1,
+								},
+							]}
+							className="p-5 mb-5 rounded-3xl border shadow-lg"
 						>
 							<View className="flex-row items-center justify-between mb-3">
 								<View className="flex-row items-center gap-2">
 									<View className="w-8 h-8 rounded-lg bg-green-500/15 items-center justify-center">
-										<Icon icon={Calendar01Icon} size={16} color={NeonColors.accent.green} />
+										<Icon icon={Calendar01Icon} size={16} color={colors.accent.green} />
 									</View>
-									<Text className="text-[#888888] font-semibold text-xs uppercase tracking-wider">
+									<Text
+										style={{ color: colors.text.secondary }}
+										className="font-semibold text-xs uppercase tracking-wider"
+									>
 										Today's Routines
 									</Text>
 								</View>
 								<View className="bg-green-500/15 px-2.5 py-1 rounded-full flex-row items-center gap-1">
-									<Icon icon={TradeUpIcon} size={12} color={NeonColors.accent.green} />
-									<Text className="text-green-400 text-[11px] font-bold">
+									<Icon icon={TradeUpIcon} size={12} color={colors.accent.green} />
+									<Text style={{ color: colors.accent.green }} className="text-[11px] font-bold">
 										{completedItems}/{totalItems} Done
 									</Text>
 								</View>
 							</View>
 
 							<View className="flex-row items-baseline justify-between mb-3">
-								<Text className="text-white text-4xl font-light">
+								<Text style={{ color: colors.text.primary }} className="text-4xl font-light">
 									{completionRate}
-									<Text className="text-2xl text-[#888888]">%</Text>
+									<Text style={{ color: colors.text.secondary }} className="text-2xl">
+										%
+									</Text>
 								</Text>
-								<Text className="text-green-400 font-semibold text-xs">
+								<Text style={{ color: colors.accent.green }} className="font-semibold text-xs">
 									{totalItems === 0
 										? "All routines complete"
 										: completedItems === totalItems
@@ -140,11 +156,16 @@ export default function DashboardIndex() {
 							</View>
 
 							{/* Progress Bar */}
-							<View className="h-2 w-full bg-[#0B0C10] rounded-full overflow-hidden mb-4">
+							<View
+								style={{
+									backgroundColor: isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.06)",
+								}}
+								className="h-2 w-full rounded-full overflow-hidden mb-4"
+							>
 								<View
 									style={{
 										width: `${completionRate}%`,
-										backgroundColor: NeonColors.accent.green,
+										backgroundColor: colors.accent.green,
 									}}
 									className="h-full rounded-full"
 								/>
@@ -152,7 +173,10 @@ export default function DashboardIndex() {
 
 							{/* Interactive Top Checklist (First 3 active items) */}
 							{routines.length > 0 && (
-								<View className="pt-3 border-t border-white/[0.05] gap-2">
+								<View
+									style={{ borderTopColor: colors.card.border }}
+									className="pt-3 border-t gap-2"
+								>
 									{routines
 										.flatMap((r) => r.items)
 										.slice(0, 3)
@@ -167,19 +191,23 @@ export default function DashboardIndex() {
 														handleToggle(parentRoutine.id, item.id, item.completed);
 													}
 												}}
-												className="flex-row items-center justify-between p-2.5 rounded-xl bg-[#0B0C10] border border-white/[0.03]"
+												style={{
+													backgroundColor: isDark
+														? "rgba(255, 255, 255, 0.03)"
+														: "rgba(0, 0, 0, 0.02)",
+													borderColor: colors.card.border,
+												}}
+												className="flex-row items-center justify-between p-2.5 rounded-xl border"
 											>
 												<View className="flex-row items-center gap-2.5 flex-1">
 													<Icon
 														icon={item.completed ? CheckmarkCircle02Icon : CircleIcon}
 														size={18}
-														color={
-															item.completed ? NeonColors.accent.green : NeonColors.text.secondary
-														}
+														color={item.completed ? colors.accent.green : colors.text.secondary}
 													/>
 													<Text
 														style={{
-															color: item.completed ? "#666666" : "#FFFFFF",
+															color: item.completed ? colors.text.secondary : colors.text.primary,
 															textDecorationLine: item.completed ? "line-through" : "none",
 														}}
 														className="text-xs font-medium flex-1"
@@ -189,7 +217,9 @@ export default function DashboardIndex() {
 													</Text>
 												</View>
 												{item.targetTime && (
-													<Text className="text-[#666666] text-[10px]">{item.targetTime}</Text>
+													<Text style={{ color: colors.text.muted }} className="text-[10px]">
+														{item.targetTime}
+													</Text>
 												)}
 											</Pressable>
 										))}
@@ -201,29 +231,49 @@ export default function DashboardIndex() {
 						<View className="flex-row gap-3 mb-5">
 							<Pressable
 								onPress={() => setExpenseModalVisible(true)}
-								style={({ pressed }) => [{ opacity: pressed ? 0.8 : 1 }]}
-								className="flex-1 p-3.5 rounded-2xl bg-[#15161A] border border-white/[0.06] flex-row items-center gap-2.5"
+								style={({ pressed }) => [
+									{
+										backgroundColor: colors.surface,
+										borderColor: colors.card.border,
+										opacity: pressed ? 0.8 : 1,
+									},
+								]}
+								className="flex-1 p-3.5 rounded-2xl border flex-row items-center gap-2.5"
 							>
 								<View className="w-8 h-8 rounded-xl bg-orange-500/15 items-center justify-center">
-									<Icon icon={PlusSignIcon} size={16} color={NeonColors.accent.orange} />
+									<Icon icon={PlusSignIcon} size={16} color={colors.accent.orange} />
 								</View>
 								<View>
-									<Text className="text-white font-semibold text-xs">Log Expense</Text>
-									<Text className="text-[#888888] text-[10px]">Add to ledger</Text>
+									<Text style={{ color: colors.text.primary }} className="font-semibold text-xs">
+										Log Expense
+									</Text>
+									<Text style={{ color: colors.text.secondary }} className="text-[10px]">
+										Add to ledger
+									</Text>
 								</View>
 							</Pressable>
 
 							<Pressable
 								onPress={() => router.push("/(modules)/(routines)" as never)}
-								style={({ pressed }) => [{ opacity: pressed ? 0.8 : 1 }]}
-								className="flex-1 p-3.5 rounded-2xl bg-[#15161A] border border-white/[0.06] flex-row items-center gap-2.5"
+								style={({ pressed }) => [
+									{
+										backgroundColor: colors.surface,
+										borderColor: colors.card.border,
+										opacity: pressed ? 0.8 : 1,
+									},
+								]}
+								className="flex-1 p-3.5 rounded-2xl border flex-row items-center gap-2.5"
 							>
 								<View className="w-8 h-8 rounded-xl bg-green-500/15 items-center justify-center">
-									<Icon icon={Calendar01Icon} size={16} color={NeonColors.accent.green} />
+									<Icon icon={Calendar01Icon} size={16} color={colors.accent.green} />
 								</View>
 								<View>
-									<Text className="text-white font-semibold text-xs">All Routines</Text>
-									<Text className="text-[#888888] text-[10px]">View checklist</Text>
+									<Text style={{ color: colors.text.primary }} className="font-semibold text-xs">
+										All Routines
+									</Text>
+									<Text style={{ color: colors.text.secondary }} className="text-[10px]">
+										View checklist
+									</Text>
 								</View>
 							</Pressable>
 						</View>
@@ -231,17 +281,28 @@ export default function DashboardIndex() {
 						{/* Finance Health Section */}
 						<View className="mb-5">
 							<View className="flex-row items-center justify-between mb-3">
-								<Text className="text-white font-bold text-sm uppercase tracking-wider">
+								<Text
+									style={{ color: colors.text.primary }}
+									className="font-bold text-sm uppercase tracking-wider"
+								>
 									Financial Health
 								</Text>
 								<Pressable onPress={() => router.push("/(modules)/(expenses)" as never)}>
-									<Text className="text-orange-400 text-xs font-semibold">View Capital →</Text>
+									<Text style={{ color: colors.accent.orange }} className="text-xs font-semibold">
+										View Capital →
+									</Text>
 								</Pressable>
 							</View>
 
 							{financeLoading && !financeSummary ? (
-								<View className="h-40 rounded-3xl bg-[#15161A] items-center justify-center">
-									<ActivityIndicator color={NeonColors.accent.orange} />
+								<View
+									style={{
+										backgroundColor: colors.surface,
+										borderColor: colors.card.border,
+									}}
+									className="h-40 rounded-3xl border items-center justify-center"
+								>
+									<ActivityIndicator color={colors.accent.orange} />
 								</View>
 							) : (
 								<FinanceSummaryCard summary={financeSummary} />
@@ -252,49 +313,58 @@ export default function DashboardIndex() {
 						{recentTransactions && recentTransactions.length > 0 && (
 							<View className="mb-4">
 								<View className="flex-row items-center justify-between mb-3">
-									<Text className="text-white font-bold text-sm uppercase tracking-wider">
+									<Text
+										style={{ color: colors.text.primary }}
+										className="font-bold text-sm uppercase tracking-wider"
+									>
 										Latest Transactions
 									</Text>
 									<Pressable
 										onPress={() => router.push("/(modules)/(expenses)/transactions" as never)}
 									>
-										<Text className="text-[#888888] text-xs">All logs →</Text>
+										<Text style={{ color: colors.text.secondary }} className="text-xs">
+											All logs →
+										</Text>
 									</Pressable>
 								</View>
 
 								{recentTransactions.map((tx) => (
 									<View
 										key={tx.id}
-										className="flex-row items-center justify-between p-3.5 mb-2 rounded-2xl bg-[#15161A] border border-white/[0.04]"
+										style={{
+											backgroundColor: colors.surface,
+											borderColor: colors.card.border,
+										}}
+										className="flex-row items-center justify-between p-3.5 mb-2 rounded-2xl border"
 									>
 										<View className="flex-row items-center gap-3 flex-1">
 											<View className="w-8 h-8 rounded-lg bg-orange-500/10 items-center justify-center">
 												<Icon
 													icon={Wallet01Icon}
 													size={16}
-													color={
-														tx.type === "income"
-															? NeonColors.accent.green
-															: NeonColors.accent.orange
-													}
+													color={tx.type === "income" ? colors.accent.green : colors.accent.orange}
 												/>
 											</View>
 											<View className="flex-1 pr-2">
 												<Text
-													className="text-white font-medium text-xs capitalize"
+													style={{ color: colors.text.primary }}
+													className="font-medium text-xs capitalize"
 													numberOfLines={1}
 												>
 													{tx.category ?? "Expense"}
 												</Text>
-												<Text className="text-[#666666] text-[10px] mt-0.5" numberOfLines={1}>
+												<Text
+													style={{ color: colors.text.secondary }}
+													className="text-[10px] mt-0.5"
+													numberOfLines={1}
+												>
 													{tx.note ?? tx.occurredOn}
 												</Text>
 											</View>
 										</View>
 										<Text
 											style={{
-												color:
-													tx.type === "income" ? NeonColors.accent.green : NeonColors.text.primary,
+												color: tx.type === "income" ? colors.accent.green : colors.text.primary,
 											}}
 											className="font-bold text-xs"
 										>
@@ -320,7 +390,6 @@ export default function DashboardIndex() {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: NeonColors.background,
 	},
 	safeArea: {
 		flex: 1,

@@ -13,7 +13,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { BottomNav, FINANCE_TABS } from "@/components/ui/bottom-nav";
 import { Icon } from "@/components/ui/icon";
 import { OSHeader } from "@/components/ui/os-header";
-import { NeonColors } from "@/constants/design-system";
 import {
 	AddTransactionModal,
 	BudgetProgressCard,
@@ -64,15 +63,17 @@ export default function ExpensesIndex() {
 						<RefreshControl
 							refreshing={refreshing}
 							onRefresh={handleRefresh}
-							tintColor={NeonColors.accent.orange}
+							tintColor={colors.accent.orange}
 						/>
 					}
 				>
 					<View style={styles.viewContainer}>
 						<View className="flex-row items-center justify-between mb-2">
 							<View>
-								<Text style={styles.viewTitle}>Capital</Text>
-								<Text style={styles.viewSubtitle}>Live cash flow & budget tracking.</Text>
+								<Text style={[styles.viewTitle, { color: colors.text.primary }]}>Capital</Text>
+								<Text style={[styles.viewSubtitle, { color: colors.text.secondary }]}>
+									Live cash flow & budget tracking.
+								</Text>
 							</View>
 							<Pressable
 								onPress={() => setModalVisible(true)}
@@ -82,10 +83,12 @@ export default function ExpensesIndex() {
 								<Icon
 									icon={PlusSignIcon}
 									size={16}
-									color={NeonColors.accent.orange}
+									color={colors.accent.orange}
 									strokeWidth={2.5}
 								/>
-								<Text className="text-orange-400 font-bold text-xs">Add</Text>
+								<Text style={{ color: colors.accent.orange }} className="font-bold text-xs">
+									Add
+								</Text>
 							</Pressable>
 						</View>
 
@@ -93,8 +96,14 @@ export default function ExpensesIndex() {
 
 						{/* Net Summary Card */}
 						{summaryLoading && !summary ? (
-							<View className="h-44 rounded-3xl bg-[#15161A] items-center justify-center mb-5">
-								<ActivityIndicator color={NeonColors.accent.orange} />
+							<View
+								style={{
+									backgroundColor: colors.surface,
+									borderColor: colors.card.border,
+								}}
+								className="h-44 rounded-3xl border items-center justify-center mb-5"
+							>
+								<ActivityIndicator color={colors.accent.orange} />
 							</View>
 						) : (
 							<FinanceSummaryCard summary={summary} />
@@ -103,7 +112,10 @@ export default function ExpensesIndex() {
 						{/* Category Spending Breakdown */}
 						{summary && summary.categories.length > 0 && (
 							<View className="mb-5">
-								<Text className="text-white font-bold text-sm uppercase tracking-wider mb-3">
+								<Text
+									style={{ color: colors.text.primary }}
+									className="font-bold text-sm uppercase tracking-wider mb-3"
+								>
 									Monthly Budgets & Spend
 								</Text>
 								{summary.categories.map((cat) => (
@@ -115,24 +127,44 @@ export default function ExpensesIndex() {
 						{/* Recent Transactions */}
 						<View className="mb-4">
 							<View className="flex-row items-center justify-between mb-3">
-								<Text className="text-white font-bold text-sm uppercase tracking-wider">
+								<Text
+									style={{ color: colors.text.primary }}
+									className="font-bold text-sm uppercase tracking-wider"
+								>
 									Recent Transactions
 								</Text>
-								<Text className="text-[#888888] text-xs">Hold to delete</Text>
+								<Text style={{ color: colors.text.secondary }} className="text-xs">
+									Hold to delete
+								</Text>
 							</View>
 
 							{txLoading && !transactions ? (
-								<View className="h-24 rounded-2xl bg-[#15161A] items-center justify-center">
-									<ActivityIndicator color={NeonColors.accent.orange} />
+								<View
+									style={{
+										backgroundColor: colors.surface,
+										borderColor: colors.card.border,
+									}}
+									className="h-24 rounded-2xl border items-center justify-center"
+								>
+									<ActivityIndicator color={colors.accent.orange} />
 								</View>
 							) : transactions && transactions.length > 0 ? (
 								transactions.map((tx) => (
 									<TransactionCard key={tx.id} transaction={tx} onDelete={handleDelete} />
 								))
 							) : (
-								<View className="p-8 rounded-2xl bg-[#15161A] items-center justify-center border border-white/[0.04]">
-									<Icon icon={ShoppingBag01Icon} size={32} color="#555555" />
-									<Text className="text-[#888888] font-medium text-sm mt-2">
+								<View
+									style={{
+										backgroundColor: colors.surface,
+										borderColor: colors.card.border,
+									}}
+									className="p-8 rounded-2xl items-center justify-center border"
+								>
+									<Icon icon={ShoppingBag01Icon} size={32} color={colors.text.muted} />
+									<Text
+										style={{ color: colors.text.secondary }}
+										className="font-medium text-sm mt-2"
+									>
 										No transactions recorded yet
 									</Text>
 								</View>
@@ -155,7 +187,6 @@ export default function ExpensesIndex() {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: NeonColors.background,
 	},
 	safeArea: {
 		flex: 1,
@@ -168,12 +199,10 @@ const styles = StyleSheet.create({
 		paddingTop: 8,
 	},
 	viewTitle: {
-		color: NeonColors.text.primary,
 		fontSize: 32,
 		fontWeight: "300",
 	},
 	viewSubtitle: {
-		color: NeonColors.text.secondary,
 		fontSize: 14,
 		marginTop: 4,
 	},

@@ -15,7 +15,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { BottomNav, FINANCE_TABS } from "@/components/ui/bottom-nav";
 import { Icon } from "@/components/ui/icon";
 import { OSHeader } from "@/components/ui/os-header";
-import { NeonColors } from "@/constants/design-system";
 import {
 	BudgetProgressCard,
 	FinanceTabs,
@@ -27,7 +26,7 @@ import {
 import { useTheme } from "@/providers/theme-provider";
 
 export default function BudgetScreen() {
-	const { colors } = useTheme();
+	const { colors, isDark } = useTheme();
 	const currentMonth = getCurrentMonthString();
 	const { data: summary, isLoading, refetch } = useMonthSummaryQuery(currentMonth);
 	const { data: budgets, refetch: refetchBudgets } = useBudgetsQuery(currentMonth);
@@ -78,15 +77,15 @@ export default function BudgetScreen() {
 								refetch();
 								refetchBudgets();
 							}}
-							tintColor={NeonColors.accent.orange}
+							tintColor={colors.accent.orange}
 						/>
 					}
 				>
 					<View style={styles.viewContainer}>
 						<View className="flex-row items-center justify-between mb-2">
 							<View>
-								<Text style={styles.viewTitle}>Budget</Text>
-								<Text style={styles.viewSubtitle}>
+								<Text style={[styles.viewTitle, { color: colors.text.primary }]}>Budget</Text>
+								<Text style={[styles.viewSubtitle, { color: colors.text.secondary }]}>
 									Spending limits & category caps ({currentMonth}).
 								</Text>
 							</View>
@@ -98,10 +97,12 @@ export default function BudgetScreen() {
 								<Icon
 									icon={PlusSignIcon}
 									size={16}
-									color={NeonColors.accent.orange}
+									color={colors.accent.orange}
 									strokeWidth={2.5}
 								/>
-								<Text className="text-orange-400 font-bold text-xs">Set Limit</Text>
+								<Text style={{ color: colors.accent.orange }} className="font-bold text-xs">
+									Set Limit
+								</Text>
 							</Pressable>
 						</View>
 
@@ -109,17 +110,32 @@ export default function BudgetScreen() {
 
 						<View style={styles.logsList}>
 							{isLoading && !summary ? (
-								<View className="h-40 items-center justify-center">
-									<ActivityIndicator color={NeonColors.accent.orange} />
+								<View
+									style={{
+										backgroundColor: colors.surface,
+										borderColor: colors.card.border,
+									}}
+									className="h-40 items-center justify-center rounded-2xl border"
+								>
+									<ActivityIndicator color={colors.accent.orange} />
 								</View>
 							) : summary && summary.categories.length > 0 ? (
 								summary.categories.map((item) => (
 									<BudgetProgressCard key={item.category} item={item} />
 								))
 							) : (
-								<View className="p-12 rounded-3xl bg-[#15161A] items-center justify-center border border-white/[0.04]">
-									<Icon icon={Target01Icon} size={36} color="#555555" />
-									<Text className="text-[#888888] font-medium text-sm mt-3 text-center">
+								<View
+									style={{
+										backgroundColor: colors.surface,
+										borderColor: colors.card.border,
+									}}
+									className="p-12 rounded-3xl items-center justify-center border"
+								>
+									<Icon icon={Target01Icon} size={36} color={colors.text.muted} />
+									<Text
+										style={{ color: colors.text.secondary }}
+										className="font-medium text-sm mt-3 text-center"
+									>
 										No budget categories tracked yet.{"\n"}Tap "Set Limit" to define a monthly cap.
 									</Text>
 								</View>
@@ -143,44 +159,79 @@ export default function BudgetScreen() {
 			>
 				<View style={styles.modalOverlay}>
 					<View
-						style={styles.modalContent}
-						className="bg-[#15161A] rounded-3xl p-6 border border-white/[0.08] w-[90%]"
+						style={[
+							styles.modalContent,
+							{
+								backgroundColor: colors.surface,
+								borderColor: colors.card.border,
+							},
+						]}
+						className="rounded-3xl p-6 border w-[90%]"
 					>
-						<Text className="text-white font-bold text-lg mb-4">Set Category Budget Limit</Text>
+						<Text style={{ color: colors.text.primary }} className="font-bold text-lg mb-4">
+							Set Category Budget Limit
+						</Text>
 
 						<View className="mb-3">
-							<Text className="text-[#888888] text-xs font-semibold uppercase mb-1">Category</Text>
+							<Text
+								style={{ color: colors.text.secondary }}
+								className="text-xs font-semibold uppercase mb-1"
+							>
+								Category
+							</Text>
 							<TextInput
 								value={categoryName}
 								onChangeText={setCategoryName}
 								placeholder="e.g. food, transport, shopping"
-								placeholderTextColor="#555555"
-								style={styles.modalInput}
-								className="bg-[#0B0C10] text-white p-3 rounded-xl border border-white/[0.06] text-sm"
+								placeholderTextColor={colors.text.muted}
+								style={[
+									styles.modalInput,
+									{
+										backgroundColor: isDark ? "rgba(255, 255, 255, 0.03)" : "rgba(0, 0, 0, 0.03)",
+										borderColor: colors.card.border,
+										color: colors.text.primary,
+									},
+								]}
+								className="p-3 rounded-xl border text-sm"
 							/>
 						</View>
 
 						<View className="mb-5">
-							<Text className="text-[#888888] text-xs font-semibold uppercase mb-1">
+							<Text
+								style={{ color: colors.text.secondary }}
+								className="text-xs font-semibold uppercase mb-1"
+							>
 								Monthly Limit (₹ / $)
 							</Text>
 							<TextInput
 								value={limitAmount}
 								onChangeText={setLimitAmount}
 								placeholder="e.g. 5000"
-								placeholderTextColor="#555555"
+								placeholderTextColor={colors.text.muted}
 								keyboardType="decimal-pad"
-								style={styles.modalInput}
-								className="bg-[#0B0C10] text-white p-3 rounded-xl border border-white/[0.06] text-sm font-bold"
+								style={[
+									styles.modalInput,
+									{
+										backgroundColor: isDark ? "rgba(255, 255, 255, 0.03)" : "rgba(0, 0, 0, 0.03)",
+										borderColor: colors.card.border,
+										color: colors.text.primary,
+									},
+								]}
+								className="p-3 rounded-xl border text-sm font-bold"
 							/>
 						</View>
 
 						<View className="flex-row gap-3">
 							<Pressable
 								onPress={() => setBudgetModalVisible(false)}
-								className="flex-1 py-3.5 rounded-xl bg-[#222222] items-center justify-center"
+								style={{
+									backgroundColor: isDark ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.05)",
+								}}
+								className="flex-1 py-3.5 rounded-xl items-center justify-center"
 							>
-								<Text className="text-[#888888] font-bold text-sm">Cancel</Text>
+								<Text style={{ color: colors.text.secondary }} className="font-bold text-sm">
+									Cancel
+								</Text>
 							</Pressable>
 							<Pressable
 								onPress={handleSaveBudget}
@@ -188,7 +239,7 @@ export default function BudgetScreen() {
 								style={{
 									opacity:
 										setBudgetsMutation.isPending || !categoryName.trim() || !limitAmount ? 0.5 : 1,
-									backgroundColor: NeonColors.accent.orange,
+									backgroundColor: colors.accent.orange,
 								}}
 								className="flex-1 py-3.5 rounded-xl items-center justify-center"
 							>
@@ -209,7 +260,6 @@ export default function BudgetScreen() {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: NeonColors.background,
 	},
 	safeArea: {
 		flex: 1,
@@ -222,12 +272,10 @@ const styles = StyleSheet.create({
 		paddingTop: 8,
 	},
 	viewTitle: {
-		color: NeonColors.text.primary,
 		fontSize: 32,
 		fontWeight: "300",
 	},
 	viewSubtitle: {
-		color: NeonColors.text.secondary,
 		fontSize: 14,
 		marginTop: 4,
 	},
@@ -236,14 +284,16 @@ const styles = StyleSheet.create({
 	},
 	modalOverlay: {
 		flex: 1,
-		backgroundColor: "rgba(0, 0, 0, 0.75)",
+		backgroundColor: "rgba(0, 0, 0, 0.7)",
 		alignItems: "center",
 		justifyContent: "center",
 	},
 	modalContent: {
-		backgroundColor: "#15161A",
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 10 },
+		shadowOpacity: 0.25,
+		shadowRadius: 20,
+		elevation: 10,
 	},
-	modalInput: {
-		backgroundColor: "#0B0C10",
-	},
+	modalInput: {},
 });

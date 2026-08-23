@@ -1,5 +1,5 @@
 import { ActivityIndicator, Pressable, StyleSheet, Text, type ViewStyle } from "react-native";
-import { NeonColors } from "@/constants/design-system";
+import { useTheme } from "@/providers/theme-provider";
 
 interface AuthButtonProps {
 	label: string;
@@ -18,15 +18,23 @@ export function AuthButton({
 	variant = "primary",
 	style,
 }: AuthButtonProps) {
+	const { colors, isDark } = useTheme();
 	const isDisabled = disabled || pending;
+
 	return (
 		<Pressable
 			onPress={onPress}
 			disabled={isDisabled}
 			style={({ pressed }) => [
 				styles.base,
-				variant === "primary" && styles.primary,
-				variant === "outline" && styles.outline,
+				variant === "primary" && [styles.primary, { backgroundColor: colors.accent.green }],
+				variant === "outline" && [
+					styles.outline,
+					{
+						borderColor: colors.card.border,
+						backgroundColor: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)",
+					},
+				],
 				variant === "ghost" && styles.ghost,
 				pressed && !isDisabled && styles.pressed,
 				isDisabled && styles.disabled,
@@ -34,15 +42,13 @@ export function AuthButton({
 			]}
 		>
 			{pending ? (
-				<ActivityIndicator
-					color={variant === "primary" ? NeonColors.background : NeonColors.accent.green}
-				/>
+				<ActivityIndicator color={variant === "primary" ? "#000000" : colors.accent.green} />
 			) : (
 				<Text
 					style={[
 						styles.label,
 						variant === "primary" && styles.primaryLabel,
-						variant !== "primary" && styles.secondaryLabel,
+						variant !== "primary" && [styles.secondaryLabel, { color: colors.text.primary }],
 					]}
 				>
 					{label}
@@ -60,13 +66,9 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 		paddingHorizontal: 16,
 	},
-	primary: {
-		backgroundColor: NeonColors.accent.green,
-	},
+	primary: {},
 	outline: {
 		borderWidth: 1,
-		borderColor: NeonColors.card.border,
-		backgroundColor: "transparent",
 	},
 	ghost: {
 		backgroundColor: "transparent",
@@ -82,9 +84,7 @@ const styles = StyleSheet.create({
 		fontWeight: "700",
 	},
 	primaryLabel: {
-		color: NeonColors.background,
+		color: "#000000",
 	},
-	secondaryLabel: {
-		color: NeonColors.text.primary,
-	},
+	secondaryLabel: {},
 });

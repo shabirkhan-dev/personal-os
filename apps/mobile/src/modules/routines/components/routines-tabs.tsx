@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { NeonColors } from "@/constants/design-system";
+import { useTheme } from "@/providers/theme-provider";
 
 export type RoutineTab = "today" | "habits";
 
@@ -14,10 +14,17 @@ const TABS: Array<{ id: RoutineTab; label: string; route: string }> = [
 ];
 
 export function RoutinesTabs({ active }: RoutinesTabsProps) {
+	const { colors, isDark } = useTheme();
+
 	return (
 		<View
-			style={styles.container}
-			className="flex-row p-1 bg-[#15161A] rounded-2xl mb-4 border border-white/[0.06]"
+			style={[
+				styles.container,
+				{
+					backgroundColor: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)",
+					borderColor: colors.card.border,
+				},
+			]}
 		>
 			{TABS.map((tab) => {
 				const isSelected = active === tab.id;
@@ -29,12 +36,19 @@ export function RoutinesTabs({ active }: RoutinesTabsProps) {
 								router.push(tab.route as never);
 							}
 						}}
-						style={[styles.tab, isSelected && styles.activeTab]}
-						className="flex-1 py-2.5 rounded-xl items-center justify-center"
+						style={[
+							styles.tab,
+							isSelected && [
+								styles.activeTab,
+								{
+									backgroundColor: isDark ? "#FFFFFF" : "#0F172A",
+								},
+							],
+						]}
 					>
 						<Text
 							style={{
-								color: isSelected ? "#000000" : NeonColors.text.secondary,
+								color: isSelected ? (isDark ? "#000000" : "#FFFFFF") : colors.text.secondary,
 								fontWeight: isSelected ? "700" : "500",
 							}}
 							className="text-xs tracking-tight"
@@ -50,16 +64,23 @@ export function RoutinesTabs({ active }: RoutinesTabsProps) {
 
 const styles = StyleSheet.create({
 	container: {
-		backgroundColor: "#15161A",
+		flexDirection: "row",
+		padding: 4,
+		borderRadius: 16,
+		marginBottom: 16,
+		borderWidth: 1,
 	},
 	tab: {
+		flex: 1,
+		paddingVertical: 10,
 		borderRadius: 12,
+		alignItems: "center",
+		justifyContent: "center",
 	},
 	activeTab: {
-		backgroundColor: "#FFFFFF",
 		shadowColor: "#000000",
 		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.2,
+		shadowOpacity: 0.15,
 		shadowRadius: 4,
 		elevation: 3,
 	},

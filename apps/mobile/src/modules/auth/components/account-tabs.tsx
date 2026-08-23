@@ -1,12 +1,22 @@
 import { router } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { NeonColors } from "@/constants/design-system";
+import { useTheme } from "@/providers/theme-provider";
 
 type AccountTab = "profile" | "security" | "billing";
 
 export function AccountTabs({ active }: { active: AccountTab }) {
+	const { colors, isDark } = useTheme();
+
 	return (
-		<View style={styles.row}>
+		<View
+			style={[
+				styles.row,
+				{
+					borderColor: colors.card.border,
+					backgroundColor: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)",
+				},
+			]}
+		>
 			<Tab
 				label="Profile"
 				active={active === "profile"}
@@ -27,12 +37,22 @@ export function AccountTabs({ active }: { active: AccountTab }) {
 }
 
 function Tab({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
+	const { colors } = useTheme();
+
 	return (
 		<Pressable
 			onPress={onPress}
 			style={({ pressed }) => [styles.tab, active && styles.tabActive, pressed && styles.pressed]}
 		>
-			<Text style={[styles.label, active && styles.labelActive]}>{label}</Text>
+			<Text
+				style={[
+					styles.label,
+					{ color: active ? colors.accent.green : colors.text.secondary },
+					active && styles.labelActive,
+				]}
+			>
+				{label}
+			</Text>
 		</Pressable>
 	);
 }
@@ -44,8 +64,6 @@ const styles = StyleSheet.create({
 		padding: 4,
 		borderRadius: 14,
 		borderWidth: 1,
-		borderColor: NeonColors.card.border,
-		backgroundColor: "rgba(255,255,255,0.03)",
 	},
 	tab: {
 		flex: 1,
@@ -61,12 +79,11 @@ const styles = StyleSheet.create({
 		borderColor: "rgba(0, 230, 118, 0.35)",
 	},
 	label: {
-		color: NeonColors.text.secondary,
 		fontSize: 13,
 		fontWeight: "600",
 	},
 	labelActive: {
-		color: NeonColors.accent.green,
+		fontWeight: "700",
 	},
 	pressed: {
 		opacity: 0.85,

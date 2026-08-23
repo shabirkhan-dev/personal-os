@@ -8,7 +8,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import { Icon, type IconProp } from "@/components/ui/icon";
-import { NeonColors } from "@/constants/design-system";
+import { useTheme } from "@/providers/theme-provider";
 import type { FinanceTransaction } from "../types/finance.types";
 
 interface TransactionCardProps {
@@ -38,9 +38,10 @@ export function formatCurrency(amountMinor: number, currency: string = "INR"): s
 }
 
 export function TransactionCard({ transaction, onDelete }: TransactionCardProps) {
+	const { colors } = useTheme();
 	const isIncome = transaction.type === "income";
 	const icon = getCategoryIcon(transaction.category);
-	const iconColor = isIncome ? NeonColors.accent.green : NeonColors.accent.orange;
+	const iconColor = isIncome ? colors.accent.green : colors.accent.orange;
 
 	const handleLongPress = () => {
 		if (!onDelete) return;
@@ -57,8 +58,14 @@ export function TransactionCard({ transaction, onDelete }: TransactionCardProps)
 	return (
 		<Pressable
 			onLongPress={handleLongPress}
-			style={({ pressed }) => [styles.container, { opacity: pressed ? 0.75 : 1 }]}
-			className="flex-row items-center justify-between p-3.5 mb-2.5 rounded-2xl bg-[#15161A] border border-white/[0.06]"
+			style={({ pressed }) => [
+				styles.container,
+				{
+					backgroundColor: colors.surface,
+					borderColor: colors.card.border,
+					opacity: pressed ? 0.75 : 1,
+				},
+			]}
 		>
 			<View className="flex-row items-center gap-3 flex-1">
 				<View
@@ -68,10 +75,18 @@ export function TransactionCard({ transaction, onDelete }: TransactionCardProps)
 					<Icon icon={icon} size={20} color={iconColor} strokeWidth={2} />
 				</View>
 				<View className="flex-1 pr-2">
-					<Text className="text-white font-semibold text-sm capitalize" numberOfLines={1}>
+					<Text
+						style={{ color: colors.text.primary }}
+						className="font-semibold text-sm capitalize"
+						numberOfLines={1}
+					>
 						{transaction.category ?? "Uncategorized"}
 					</Text>
-					<Text className="text-[#888888] text-xs mt-0.5" numberOfLines={1}>
+					<Text
+						style={{ color: colors.text.secondary }}
+						className="text-xs mt-0.5"
+						numberOfLines={1}
+					>
 						{transaction.note ? transaction.note : transaction.occurredOn}
 					</Text>
 				</View>
@@ -80,14 +95,16 @@ export function TransactionCard({ transaction, onDelete }: TransactionCardProps)
 			<View className="items-end">
 				<Text
 					style={{
-						color: isIncome ? NeonColors.accent.green : NeonColors.text.primary,
+						color: isIncome ? colors.accent.green : colors.text.primary,
 					}}
 					className="font-bold text-sm"
 				>
 					{isIncome ? "+" : "-"}
 					{formatCurrency(transaction.amountMinor, transaction.currency)}
 				</Text>
-				<Text className="text-[#555555] text-[10px] mt-0.5">{transaction.occurredOn}</Text>
+				<Text style={{ color: colors.text.muted }} className="text-[10px] mt-0.5">
+					{transaction.occurredOn}
+				</Text>
 			</View>
 		</Pressable>
 	);
@@ -95,6 +112,17 @@ export function TransactionCard({ transaction, onDelete }: TransactionCardProps)
 
 const styles = StyleSheet.create({
 	container: {
-		backgroundColor: "#15161A",
+		flexDirection: "row",
+		alignItems: "center",
+		justifyContent: "space-between",
+		padding: 14,
+		marginBottom: 10,
+		borderRadius: 18,
+		borderWidth: 1,
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.04,
+		shadowRadius: 8,
+		elevation: 2,
 	},
 });

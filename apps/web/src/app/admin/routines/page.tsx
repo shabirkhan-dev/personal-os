@@ -11,7 +11,7 @@ import {
 } from "@/modules/routines";
 
 export default function AdminRoutinesPage() {
-	const { data: routines, isLoading } = useRoutinesQuery();
+	const { data: routines, isLoading, isError, refetch } = useRoutinesQuery();
 	const createMutation = useCreateRoutineMutation();
 	const updateMutation = useUpdateRoutineMutation();
 	const archiveMutation = useArchiveRoutineMutation();
@@ -28,6 +28,8 @@ export default function AdminRoutinesPage() {
 				<RoutineManager
 					routines={routines}
 					loading={isLoading}
+					listError={isError}
+					onRetryList={() => void refetch()}
 					createPending={createMutation.isPending}
 					updatePending={updateMutation.isPending}
 					onCreate={createMutation.mutateAsync}

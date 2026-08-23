@@ -13,7 +13,7 @@ import {
 	View,
 } from "react-native";
 import { Icon } from "@/components/ui/icon";
-import { NeonColors } from "@/constants/design-system";
+import { useTheme } from "@/providers/theme-provider";
 import { useCreateTransactionMutation } from "../hooks/use-finance-mutations";
 import type { TransactionType } from "../types/finance.types";
 
@@ -36,6 +36,7 @@ const COMMON_CATEGORIES = [
 ];
 
 export function AddTransactionModal({ visible, onClose }: AddTransactionModalProps) {
+	const { colors, isDark } = useTheme();
 	const [type, setType] = useState<TransactionType>("expense");
 	const [amount, setAmount] = useState("");
 	const [category, setCategory] = useState("Food");
@@ -77,28 +78,39 @@ export function AddTransactionModal({ visible, onClose }: AddTransactionModalPro
 				style={styles.overlay}
 			>
 				<View
-					style={styles.content}
-					className="bg-[#15161A] rounded-t-3xl p-6 border-t border-white/[0.08]"
+					style={[
+						styles.content,
+						{
+							backgroundColor: colors.surface,
+							borderTopColor: colors.card.border,
+						},
+					]}
+					className="rounded-t-3xl p-6 border-t"
 				>
 					<View className="flex-row items-center justify-between mb-5">
-						<Text className="text-white font-bold text-lg">Add Transaction</Text>
+						<Text style={{ color: colors.text.primary }} className="font-bold text-lg">
+							Add Transaction
+						</Text>
 						<Pressable onPress={onClose} hitSlop={12}>
-							<Icon icon={Cancel01Icon} size={20} color="#888888" />
+							<Icon icon={Cancel01Icon} size={20} color={colors.text.secondary} />
 						</Pressable>
 					</View>
 
 					{/* Type Switcher */}
-					<View className="flex-row bg-[#0B0C10] p-1 rounded-xl mb-5 border border-white/[0.05]">
+					<View
+						style={{
+							backgroundColor: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)",
+							borderColor: colors.card.border,
+						}}
+						className="flex-row p-1 rounded-xl mb-5 border"
+					>
 						<Pressable
 							onPress={() => setType("expense")}
-							style={[
-								styles.typeButton,
-								!isIncome && { backgroundColor: NeonColors.accent.orange },
-							]}
+							style={[styles.typeButton, !isIncome && { backgroundColor: colors.accent.orange }]}
 							className="flex-1 py-2.5 rounded-lg items-center justify-center"
 						>
 							<Text
-								style={{ color: !isIncome ? "#000000" : "#888888" }}
+								style={{ color: !isIncome ? "#000000" : colors.text.secondary }}
 								className="font-bold text-xs"
 							>
 								Expense
@@ -106,11 +118,11 @@ export function AddTransactionModal({ visible, onClose }: AddTransactionModalPro
 						</Pressable>
 						<Pressable
 							onPress={() => setType("income")}
-							style={[styles.typeButton, isIncome && { backgroundColor: NeonColors.accent.green }]}
+							style={[styles.typeButton, isIncome && { backgroundColor: colors.accent.green }]}
 							className="flex-1 py-2.5 rounded-lg items-center justify-center"
 						>
 							<Text
-								style={{ color: isIncome ? "#000000" : "#888888" }}
+								style={{ color: isIncome ? "#000000" : colors.text.secondary }}
 								className="font-bold text-xs"
 							>
 								Income
@@ -120,23 +132,38 @@ export function AddTransactionModal({ visible, onClose }: AddTransactionModalPro
 
 					{/* Amount Input */}
 					<View className="mb-4">
-						<Text className="text-[#888888] text-xs font-semibold uppercase mb-1.5">
+						<Text
+							style={{ color: colors.text.secondary }}
+							className="text-xs font-semibold uppercase mb-1.5"
+						>
 							Amount (₹ / $)
 						</Text>
 						<TextInput
 							value={amount}
 							onChangeText={setAmount}
 							placeholder="0.00"
-							placeholderTextColor="#555555"
+							placeholderTextColor={colors.text.muted}
 							keyboardType="decimal-pad"
-							style={styles.input}
-							className="bg-[#0B0C10] text-white p-3.5 rounded-xl border border-white/[0.06] text-xl font-bold"
+							style={[
+								styles.input,
+								{
+									backgroundColor: isDark ? "rgba(255, 255, 255, 0.03)" : "rgba(0, 0, 0, 0.03)",
+									borderColor: colors.card.border,
+									color: colors.text.primary,
+								},
+							]}
+							className="p-3.5 rounded-xl border text-xl font-bold"
 						/>
 					</View>
 
 					{/* Category Selector */}
 					<View className="mb-4">
-						<Text className="text-[#888888] text-xs font-semibold uppercase mb-2">Category</Text>
+						<Text
+							style={{ color: colors.text.secondary }}
+							className="text-xs font-semibold uppercase mb-2"
+						>
+							Category
+						</Text>
 						<ScrollView
 							horizontal
 							showsHorizontalScrollIndicator={false}
@@ -150,20 +177,28 @@ export function AddTransactionModal({ visible, onClose }: AddTransactionModalPro
 										onPress={() => setCategory(cat)}
 										style={[
 											styles.catBadge,
-											isSelected && {
-												borderColor: isIncome ? NeonColors.accent.green : NeonColors.accent.orange,
-												backgroundColor: `${isIncome ? NeonColors.accent.green : NeonColors.accent.orange}15`,
+											{
+												backgroundColor: isSelected
+													? `${isIncome ? colors.accent.green : colors.accent.orange}18`
+													: isDark
+														? "rgba(255,255,255,0.03)"
+														: "rgba(0,0,0,0.03)",
+												borderColor: isSelected
+													? isIncome
+														? colors.accent.green
+														: colors.accent.orange
+													: colors.card.border,
 											},
 										]}
-										className="px-3.5 py-2 rounded-xl bg-[#0B0C10] border border-white/[0.06] mr-2"
+										className="px-3.5 py-2 rounded-xl border mr-2"
 									>
 										<Text
 											style={{
 												color: isSelected
 													? isIncome
-														? NeonColors.accent.green
-														: NeonColors.accent.orange
-													: "#888888",
+														? colors.accent.green
+														: colors.accent.orange
+													: colors.text.secondary,
 												fontWeight: isSelected ? "700" : "500",
 											}}
 											className="text-xs"
@@ -178,32 +213,52 @@ export function AddTransactionModal({ visible, onClose }: AddTransactionModalPro
 
 					{category === "Other" && (
 						<View className="mb-4">
-							<Text className="text-[#888888] text-xs font-semibold uppercase mb-1.5">
+							<Text
+								style={{ color: colors.text.secondary }}
+								className="text-xs font-semibold uppercase mb-1.5"
+							>
 								Custom Category
 							</Text>
 							<TextInput
 								value={customCategory}
 								onChangeText={setCustomCategory}
 								placeholder="e.g. Freelance, Books, Gift"
-								placeholderTextColor="#555555"
-								style={styles.input}
-								className="bg-[#0B0C10] text-white p-3 rounded-xl border border-white/[0.06] text-sm"
+								placeholderTextColor={colors.text.muted}
+								style={[
+									styles.input,
+									{
+										backgroundColor: isDark ? "rgba(255, 255, 255, 0.03)" : "rgba(0, 0, 0, 0.03)",
+										borderColor: colors.card.border,
+										color: colors.text.primary,
+									},
+								]}
+								className="p-3 rounded-xl border text-sm"
 							/>
 						</View>
 					)}
 
 					{/* Note Input */}
 					<View className="mb-6">
-						<Text className="text-[#888888] text-xs font-semibold uppercase mb-1.5">
+						<Text
+							style={{ color: colors.text.secondary }}
+							className="text-xs font-semibold uppercase mb-1.5"
+						>
 							Note (Optional)
 						</Text>
 						<TextInput
 							value={note}
 							onChangeText={setNote}
 							placeholder="e.g. Lunch with team, Groceries from supermarket"
-							placeholderTextColor="#555555"
-							style={styles.input}
-							className="bg-[#0B0C10] text-white p-3 rounded-xl border border-white/[0.06] text-sm"
+							placeholderTextColor={colors.text.muted}
+							style={[
+								styles.input,
+								{
+									backgroundColor: isDark ? "rgba(255, 255, 255, 0.03)" : "rgba(0, 0, 0, 0.03)",
+									borderColor: colors.card.border,
+									color: colors.text.primary,
+								},
+							]}
+							className="p-3 rounded-xl border text-sm"
 						/>
 					</View>
 
@@ -214,7 +269,7 @@ export function AddTransactionModal({ visible, onClose }: AddTransactionModalPro
 						style={[
 							styles.saveBtn,
 							{
-								backgroundColor: isIncome ? NeonColors.accent.green : NeonColors.accent.orange,
+								backgroundColor: isIncome ? colors.accent.green : colors.accent.orange,
 								opacity: createMutation.isPending || !amount ? 0.5 : 1,
 							},
 						]}
@@ -242,19 +297,14 @@ const styles = StyleSheet.create({
 		justifyContent: "flex-end",
 	},
 	content: {
-		backgroundColor: "#15161A",
 		borderTopLeftRadius: 24,
 		borderTopRightRadius: 24,
 	},
 	typeButton: {
 		borderRadius: 8,
 	},
-	input: {
-		backgroundColor: "#0B0C10",
-	},
-	catBadge: {
-		backgroundColor: "#0B0C10",
-	},
+	input: {},
+	catBadge: {},
 	saveBtn: {
 		borderRadius: 12,
 	},

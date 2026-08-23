@@ -11,7 +11,6 @@ import { router, usePathname } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Icon, type IconProp } from "@/components/ui/icon";
-import { NeonColors } from "@/constants/design-system";
 
 export interface TabItemConfig {
 	id: string;
@@ -101,6 +100,8 @@ export const ROUTINES_TABS: TabItemConfig[] = [
 	},
 ];
 
+import { useTheme } from "@/providers/theme-provider";
+
 export interface BottomNavProps {
 	tabs?: TabItemConfig[];
 	activeTab?: string;
@@ -118,6 +119,7 @@ export function BottomNav({
 }: BottomNavProps) {
 	const insets = useSafeAreaInsets();
 	const pathname = usePathname();
+	const { isDark, colors } = useTheme();
 
 	const getActiveTabId = (): string => {
 		if (activeTab) return activeTab;
@@ -143,9 +145,11 @@ export function BottomNav({
 				styles.container,
 				{
 					paddingBottom: Math.max(insets.bottom, 12),
+					backgroundColor: colors.background,
+					borderTopColor: colors.card.border,
 				},
 			]}
-			className="bg-[#0B0C10]/95 border-t border-white/[0.07] flex-row items-center justify-around px-2 pt-2"
+			className="border-t flex-row items-center justify-around px-2 pt-2"
 		>
 			{/* Left 2 Tabs */}
 			{leftTabs.map((tab) => {
@@ -163,14 +167,14 @@ export function BottomNav({
 						<Icon
 							icon={tab.icon}
 							size={22}
-							color={isActive ? NeonColors.text.primary : NeonColors.text.secondary}
+							color={isActive ? colors.text.primary : colors.text.secondary}
 							strokeWidth={isActive ? 2.2 : 1.6}
 						/>
 						<Text
 							style={[
 								styles.tabLabel,
 								{
-									color: isActive ? NeonColors.text.primary : NeonColors.text.secondary,
+									color: isActive ? colors.text.primary : colors.text.secondary,
 									fontWeight: isActive ? "600" : "400",
 								},
 							]}
@@ -190,13 +194,14 @@ export function BottomNav({
 						styles.centerPill,
 						{
 							transform: [{ scale: pressed ? 0.94 : 1 }],
+							backgroundColor: isDark ? "#FFFFFF" : "#0F172A",
 						},
 					]}
-					className="w-[52px] h-[34px] bg-white rounded-full items-center justify-center shadow-lg"
+					className="w-[52px] h-[34px] rounded-full items-center justify-center shadow-lg"
 					accessibilityRole="button"
 					accessibilityLabel={addAccessibilityLabel}
 				>
-					<Icon icon={addIcon} size={20} color="#0B0C10" strokeWidth={2.4} />
+					<Icon icon={addIcon} size={20} color={isDark ? "#0B0C10" : "#FFFFFF"} strokeWidth={2.4} />
 				</Pressable>
 			</View>
 
@@ -216,14 +221,14 @@ export function BottomNav({
 						<Icon
 							icon={tab.icon}
 							size={22}
-							color={isActive ? NeonColors.text.primary : NeonColors.text.secondary}
+							color={isActive ? colors.text.primary : colors.text.secondary}
 							strokeWidth={isActive ? 2.2 : 1.6}
 						/>
 						<Text
 							style={[
 								styles.tabLabel,
 								{
-									color: isActive ? NeonColors.text.primary : NeonColors.text.secondary,
+									color: isActive ? colors.text.primary : colors.text.secondary,
 									fontWeight: isActive ? "600" : "400",
 								},
 							]}

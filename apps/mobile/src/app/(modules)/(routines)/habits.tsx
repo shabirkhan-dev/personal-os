@@ -21,8 +21,10 @@ import {
 	useArchiveRoutineMutation,
 	useRoutinesListQuery,
 } from "@/modules/routines";
+import { useTheme } from "@/providers/theme-provider";
 
 export default function HabitsScreen() {
+	const { colors } = useTheme();
 	const [modalVisible, setModalVisible] = useState(false);
 	const { data: routines, isLoading, refetch, isRefetching } = useRoutinesListQuery();
 	const archiveMutation = useArchiveRoutineMutation();
@@ -32,7 +34,7 @@ export default function HabitsScreen() {
 	};
 
 	return (
-		<View style={styles.container}>
+		<View style={[styles.container, { backgroundColor: colors.background }]}>
 			<SafeAreaView edges={["top"]} style={styles.safeArea}>
 				<OSHeader />
 

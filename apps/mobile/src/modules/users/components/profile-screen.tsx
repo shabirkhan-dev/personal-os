@@ -9,12 +9,11 @@ import {
 	Sun01Icon,
 	UserIcon,
 } from "@hugeicons/core-free-icons";
-import { router } from "expo-router";
+import { router, useSegments } from "expo-router";
 import { useEffect } from "react";
 import {
 	ActivityIndicator,
 	Alert,
-	Appearance,
 	Image,
 	Pressable,
 	ScrollView,
@@ -23,27 +22,31 @@ import {
 	View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Uniwind, useUniwind } from "uniwind";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { Icon, type IconProp } from "@/components/ui/icon";
 import { NeonCard } from "@/components/ui/neon-card";
 import { OSHeader } from "@/components/ui/os-header";
 import { NeonColors } from "@/constants/design-system";
 import { resolveMediaUrl } from "@/lib/media-url";
-import { useAuth } from "@/modules/auth";
+import { authService, useAuth } from "@/modules/auth";
 import { AccountTabs } from "@/modules/auth/components/account-tabs";
 import { AuthButton } from "@/modules/auth/components/auth-button";
+import { useTheme } from "@/providers/theme-provider";
 import { ProfileForm } from "./profile-form";
 
 export function ProfileScreen() {
 	const { user, loading, logout, logoutAll, refreshUser } = useAuth();
+	const { colors } = useTheme();
+	const segments = useSegments() as string[];
 
 	useEffect(() => {
-		void refreshUser();
-	}, [refreshUser]);
+		if (segments.includes("(profile)") && user) {
+			void refreshUser();
+		}
+	}, [segments, user, refreshUser]);
 
 	const confirmLogout = () => {
-		Alert.alert("Sign out", "End this session on this device?", [
+		Alert.alert("Sign out", "Are you sure you want to sign out of this device?", [
 			{ text: "Cancel", style: "cancel" },
 			{
 				text: "Sign out",
@@ -69,7 +72,7 @@ export function ProfileScreen() {
 	};
 
 	return (
-		<View style={styles.container}>
+		<View style={[styles.container, { backgroundColor: colors.background }]}>
 			<SafeAreaView edges={["top"]} style={styles.safeArea}>
 				<OSHeader />
 				<ScrollView
@@ -275,12 +278,7 @@ export function ProfileScreen() {
 }
 
 function AppearanceSection() {
-	const { theme } = useUniwind();
-
-	const handleSetTheme = (newTheme: "dark" | "light") => {
-		Uniwind.setTheme(newTheme);
-		Appearance.setColorScheme?.(newTheme);
-	};
+	const { activeTheme, setTheme } = useTheme();
 
 	return (
 		<View style={styles.section}>
@@ -288,27 +286,39 @@ function AppearanceSection() {
 			<NeonCard>
 				<View className="flex-row p-1 bg-[#0B0C10] rounded-2xl border border-white/[0.04] gap-1">
 					<Pressable
-						onPress={() => handleSetTheme("dark")}
+						onPress={() => setTheme("dark")}
 						className={`flex-1 py-2.5 rounded-xl items-center flex-row justify-center gap-1.5 ${
-							theme === "dark" ? "bg-white" : ""
+							activeTheme === "dark" ? "bg-white" : ""
 						}`}
 					>
-						<Icon icon={Moon02Icon} size={14} color={theme === "dark" ? "#000000" : "#888888"} />
+						<Icon
+							icon={Moon02Icon}
+							size={14}
+							color={activeTheme === "dark" ? "#000000" : "#888888"}
+						/>
 						<Text
-							className={`text-xs font-bold ${theme === "dark" ? "text-black" : "text-[#888888]"}`}
+							className={`text-xs font-bold ${
+								activeTheme === "dark" ? "text-black" : "text-[#888888]"
+							}`}
 						>
 							Dark
 						</Text>
 					</Pressable>
 					<Pressable
-						onPress={() => handleSetTheme("light")}
+						onPress={() => setTheme("light")}
 						className={`flex-1 py-2.5 rounded-xl items-center flex-row justify-center gap-1.5 ${
-							theme === "light" ? "bg-white" : ""
+							activeTheme === "light" ? "bg-white" : ""
 						}`}
 					>
-						<Icon icon={Sun01Icon} size={14} color={theme === "light" ? "#000000" : "#888888"} />
+						<Icon
+							icon={Sun01Icon}
+							size={14}
+							color={activeTheme === "light" ? "#000000" : "#888888"}
+						/>
 						<Text
-							className={`text-xs font-bold ${theme === "light" ? "text-black" : "text-[#888888]"}`}
+							className={`text-xs font-bold ${
+								activeTheme === "light" ? "text-black" : "text-[#888888]"
+							}`}
 						>
 							Light
 						</Text>

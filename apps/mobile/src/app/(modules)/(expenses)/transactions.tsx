@@ -22,8 +22,10 @@ import {
 	useDeleteTransactionMutation,
 	useTransactionsQuery,
 } from "@/modules/finance";
+import { useTheme } from "@/providers/theme-provider";
 
 export default function TransactionsScreen() {
+	const { colors } = useTheme();
 	const [modalVisible, setModalVisible] = useState(false);
 	const [typeFilter, setTypeFilter] = useState<TransactionType | "all">("all");
 
@@ -43,7 +45,7 @@ export default function TransactionsScreen() {
 	};
 
 	return (
-		<View style={styles.container}>
+		<View style={[styles.container, { backgroundColor: colors.background }]}>
 			<SafeAreaView edges={["top"]} style={styles.safeArea}>
 				<OSHeader />
 

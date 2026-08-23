@@ -8,7 +8,6 @@ import {
 import { type Href, router, useSegments } from "expo-router";
 import * as React from "react";
 import {
-	Appearance,
 	Image,
 	Modal,
 	Pressable,
@@ -17,11 +16,11 @@ import {
 	TouchableWithoutFeedback,
 	View,
 } from "react-native";
-import { Uniwind, useUniwind } from "uniwind";
 import { Icon } from "@/components/ui/icon";
 import { NeonColors } from "@/constants/design-system";
 import { resolveMediaUrl } from "@/lib/media-url";
 import { useAuth } from "@/modules/auth";
+import { useTheme } from "@/providers/theme-provider";
 
 export type OSModule = "Dashboard" | "Routines" | "Finance" | "Profile";
 
@@ -29,14 +28,7 @@ export function OSHeader() {
 	const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
 	const segments = useSegments() as string[];
 	const { user } = useAuth();
-	const { theme } = useUniwind();
-	const isDark = theme === "dark";
-
-	const toggleTheme = () => {
-		const nextTheme = isDark ? "light" : "dark";
-		Uniwind.setTheme(nextTheme);
-		Appearance.setColorScheme?.(nextTheme);
-	};
+	const { isDark, toggleTheme } = useTheme();
 
 	const avatarUri =
 		resolveMediaUrl(user?.profile?.avatarUrl?.trim()) ||

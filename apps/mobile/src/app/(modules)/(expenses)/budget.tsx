@@ -24,8 +24,10 @@ import {
 	useMonthSummaryQuery,
 	useSetBudgetsMutation,
 } from "@/modules/finance";
+import { useTheme } from "@/providers/theme-provider";
 
 export default function BudgetScreen() {
+	const { colors } = useTheme();
 	const currentMonth = getCurrentMonthString();
 	const { data: summary, isLoading, refetch } = useMonthSummaryQuery(currentMonth);
 	const { data: budgets, refetch: refetchBudgets } = useBudgetsQuery(currentMonth);
@@ -62,7 +64,7 @@ export default function BudgetScreen() {
 	};
 
 	return (
-		<View style={styles.container}>
+		<View style={[styles.container, { backgroundColor: colors.background }]}>
 			<SafeAreaView edges={["top"]} style={styles.safeArea}>
 				<OSHeader />
 

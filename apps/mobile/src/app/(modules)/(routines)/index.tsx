@@ -17,6 +17,7 @@ import {
 	useTodayQuery,
 	useToggleItemMutation,
 } from "@/modules/routines";
+import { useTheme } from "@/providers/theme-provider";
 
 function formatDisplayDate(isoDate: string): string {
 	const [year, month, day] = isoDate.split("-").map(Number);
@@ -31,6 +32,7 @@ function formatDisplayDate(isoDate: string): string {
 }
 
 export default function RoutinesTodayScreen() {
+	const { colors } = useTheme();
 	const [modalVisible, setModalVisible] = useState(false);
 	const { data: today, isLoading, isError, refetch, isRefetching } = useTodayQuery();
 	const toggleMutation = useToggleItemMutation();
@@ -41,7 +43,7 @@ export default function RoutinesTodayScreen() {
 	const progress = totalItems === 0 ? 0 : Math.round((completedItems / totalItems) * 100);
 
 	return (
-		<View style={styles.container}>
+		<View style={[styles.container, { backgroundColor: colors.background }]}>
 			<SafeAreaView edges={["top"]} style={styles.safeArea}>
 				<OSHeader />
 

@@ -8,12 +8,12 @@ import {
 	TaskDone01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Badge } from "@school-os/ui/components/badge";
-import { Button } from "@school-os/ui/components/button";
-import { Card, CardContent } from "@school-os/ui/components/card";
-import { Field, FieldDescription, FieldLabel } from "@school-os/ui/components/field";
-import { Input } from "@school-os/ui/components/input";
-import { Spinner } from "@school-os/ui/components/spinner";
+import { Badge } from "@personal-os/ui/components/badge";
+import { Button } from "@personal-os/ui/components/button";
+import { Card, CardContent } from "@personal-os/ui/components/card";
+import { Field, FieldDescription, FieldLabel } from "@personal-os/ui/components/field";
+import { Input } from "@personal-os/ui/components/input";
+import { Spinner } from "@personal-os/ui/components/spinner";
 import { useState } from "react";
 import type {
 	CreateRoutineInput,
@@ -21,6 +21,7 @@ import type {
 	RoutineScheduleType,
 	UpdateRoutineInput,
 } from "../types/routine.types";
+import { ErrorState } from "./error-state";
 
 const WEEKDAYS = [
 	{ iso: 1, label: "Mon" },
@@ -72,6 +73,8 @@ function formFromRoutine(routine: Routine): RoutineFormValue {
 export function RoutineManager({
 	routines,
 	loading,
+	listError,
+	onRetryList,
 	createPending,
 	updatePending,
 	onCreate,
@@ -80,6 +83,8 @@ export function RoutineManager({
 }: {
 	routines: Routine[] | undefined;
 	loading: boolean;
+	listError?: boolean;
+	onRetryList?: () => void;
 	createPending: boolean;
 	updatePending: boolean;
 	onCreate: (input: CreateRoutineInput) => Promise<unknown>;
@@ -155,6 +160,15 @@ export function RoutineManager({
 			<div className="flex justify-center py-10">
 				<Spinner className="size-6" />
 			</div>
+		);
+	}
+
+	if (listError) {
+		return (
+			<ErrorState
+				description="Could not load your routines. Check your connection and try again."
+				onRetry={onRetryList}
+			/>
 		);
 	}
 

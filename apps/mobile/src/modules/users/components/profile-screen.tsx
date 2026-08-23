@@ -1,15 +1,27 @@
 import {
 	Calendar01Icon,
 	CheckmarkCircle02Icon,
+	Key01Icon,
 	Logout01Icon,
 	Mail01Icon,
 	ShieldOffIcon,
 	UserIcon,
 } from "@hugeicons/core-free-icons";
+import { router } from "expo-router";
 import { useEffect } from "react";
-import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+	ActivityIndicator,
+	Alert,
+	Image,
+	Pressable,
+	ScrollView,
+	StyleSheet,
+	Text,
+	View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Icon } from "@/components/ui/icon";
+import { BottomNav } from "@/components/ui/bottom-nav";
+import { Icon, type IconProp } from "@/components/ui/icon";
 import { NeonCard } from "@/components/ui/neon-card";
 import { OSHeader } from "@/components/ui/os-header";
 import { NeonColors } from "@/constants/design-system";
@@ -20,23 +32,11 @@ import { AuthButton } from "@/modules/auth/components/auth-button";
 import { ProfileForm } from "./profile-form";
 
 export function ProfileScreen() {
-	const { user, logout, logoutAll, refreshUser } = useAuth();
+	const { user, loading, logout, logoutAll, refreshUser } = useAuth();
 
 	useEffect(() => {
 		void refreshUser();
 	}, [refreshUser]);
-
-	if (!user) return null;
-
-	const displayName = user.profile?.displayName?.trim() || user.username;
-	const avatarUri =
-		resolveMediaUrl(user.profile?.avatarUrl?.trim()) ||
-		`https://avatar.vercel.sh/${encodeURIComponent(user.username)}`;
-	const memberSince = new Date(user.createdAt).toLocaleDateString(undefined, {
-		year: "numeric",
-		month: "long",
-		day: "numeric",
-	});
 
 	const confirmLogout = () => {
 		Alert.alert("Sign out", "End this session on this device?", [
@@ -82,129 +82,198 @@ export function ProfileScreen() {
 							</Text>
 						</View>
 
-						<AccountTabs active="profile" />
-
-						<NeonCard style={styles.heroCard}>
-							<View style={styles.hero}>
-								<View style={styles.avatarWrap}>
-									<Image source={{ uri: avatarUri }} style={styles.avatar} />
-									<View style={styles.onlineDot} />
-								</View>
-								<Text style={styles.displayName}>{displayName}</Text>
-								<Text style={styles.handle}>@{user.username}</Text>
-								{user.profile?.bio ? <Text style={styles.bio}>{user.profile.bio}</Text> : null}
-								<View style={styles.badgeRow}>
-									<View
-										style={[styles.badge, user.emailVerified ? styles.badgeOk : styles.badgeWarn]}
-									>
-										{user.emailVerified ? (
-											<Icon
-												icon={CheckmarkCircle02Icon}
-												size={12}
-												color={NeonColors.accent.green}
-												strokeWidth={2.5}
+						{loading ? (
+							<View className="h-64 items-center justify-center">
+								<ActivityIndicator color={NeonColors.accent.green} />
+							</View>
+						) : !user ? (
+							/* Guest / Unauthenticated State */
+							<View className="gap-5">
+								<NeonCard style={styles.heroCard}>
+									<View style={styles.hero}>
+										<View style={styles.avatarWrap}>
+											<Image
+												source={{ uri: "https://avatar.vercel.sh/guest" }}
+												style={styles.avatar}
 											/>
-										) : (
-											<Icon
-												icon={Mail01Icon}
-												size={12}
-												color={NeonColors.accent.orange}
-												strokeWidth={2}
-											/>
-										)}
-										<Text
-											style={[
-												styles.badgeText,
-												user.emailVerified ? styles.badgeOkText : styles.badgeWarnText,
-											]}
-										>
-											{user.emailVerified ? "Email verified" : "Verify email"}
+										</View>
+										<Text style={styles.displayName}>Guest Session</Text>
+										<Text style={styles.handle}>Local Profile Mode</Text>
+										<Text style={styles.bio}>
+											Sign in with your Personal OS account to sync your habits, finances, and data
+											across all devices.
 										</Text>
+										<View className="w-full mt-4">
+											<AuthButton
+												label="Sign In / Register"
+												onPress={() => router.push("/(auth)" as never)}
+											/>
+										</View>
 									</View>
-									<View style={styles.badge}>
-										<Icon
-											icon={UserIcon}
-											size={12}
-											color={NeonColors.text.secondary}
-											strokeWidth={2}
-										/>
-										<Text style={styles.badgeText}>{user.isActive ? "Active" : "Inactive"}</Text>
-									</View>
+								</NeonCard>
+
+								<View style={styles.section}>
+									<Text style={styles.sectionLabel}>SYSTEM STATUS</Text>
+									<NeonCard>
+										<View style={styles.identityList}>
+											<IdentityRow
+												icon={CheckmarkCircle02Icon}
+												label="API Connection"
+												value="Online (v1)"
+												accent={NeonColors.accent.green}
+											/>
+											<IdentityRow
+												icon={Key01Icon}
+												label="Session State"
+												value="Local Workspace"
+												last
+											/>
+										</View>
+									</NeonCard>
 								</View>
 							</View>
-						</NeonCard>
+						) : (
+							/* Authenticated User Profile */
+							<>
+								<AccountTabs active="profile" />
 
-						<View style={styles.section}>
-							<Text style={styles.sectionLabel}>PUBLIC PROFILE</Text>
-							<NeonCard>
-								<ProfileForm user={user} />
-							</NeonCard>
-						</View>
-
-						<View style={styles.section}>
-							<Text style={styles.sectionLabel}>ACCOUNT IDENTITY</Text>
-							<NeonCard>
-								<View style={styles.identityList}>
-									<IdentityRow icon={Mail01Icon} label="Email" value={user.email} />
-									<IdentityRow
-										icon={CheckmarkCircle02Icon}
-										label="Email status"
-										value={user.emailVerified ? "Verified" : "Verification required"}
-										accent={user.emailVerified ? NeonColors.accent.green : NeonColors.accent.orange}
-									/>
-									<IdentityRow
-										icon={Calendar01Icon}
-										label="Member since"
-										value={memberSince}
-										last
-									/>
-								</View>
-							</NeonCard>
-						</View>
-
-						<View style={styles.section}>
-							<Text style={styles.sectionLabel}>SESSION</Text>
-							<NeonCard>
-								<View style={styles.sessionActions}>
-									<AuthButton label="Sign out" variant="outline" onPress={confirmLogout} />
-									<Pressable style={styles.logoutAll} onPress={confirmLogoutAll}>
-										<Icon
-											icon={ShieldOffIcon}
-											size={16}
-											color={NeonColors.accent.red}
-											strokeWidth={1.8}
-										/>
-										<Text style={styles.logoutAllText}>Sign out everywhere</Text>
-									</Pressable>
-									<View style={styles.logoutHint}>
-										<Icon
-											icon={Logout01Icon}
-											size={14}
-											color={NeonColors.text.muted}
-											strokeWidth={1.8}
-										/>
-										<Text style={styles.logoutHintText}>
-											Sign out ends only this device session
+								<NeonCard style={styles.heroCard}>
+									<View style={styles.hero}>
+										<View style={styles.avatarWrap}>
+											<Image
+												source={{
+													uri:
+														resolveMediaUrl(user.profile?.avatarUrl?.trim()) ||
+														`https://avatar.vercel.sh/${encodeURIComponent(user.username)}`,
+												}}
+												style={styles.avatar}
+											/>
+											<View style={styles.onlineDot} />
+										</View>
+										<Text style={styles.displayName}>
+											{user.profile?.displayName?.trim() || user.username}
 										</Text>
+										<Text style={styles.handle}>@{user.username}</Text>
+										{user.profile?.bio ? <Text style={styles.bio}>{user.profile.bio}</Text> : null}
+										<View style={styles.badgeRow}>
+											<View
+												style={[
+													styles.badge,
+													user.emailVerified ? styles.badgeOk : styles.badgeWarn,
+												]}
+											>
+												<Icon
+													icon={user.emailVerified ? CheckmarkCircle02Icon : Mail01Icon}
+													size={12}
+													color={
+														user.emailVerified ? NeonColors.accent.green : NeonColors.accent.orange
+													}
+													strokeWidth={2.5}
+												/>
+												<Text
+													style={[
+														styles.badgeText,
+														user.emailVerified ? styles.badgeOkText : styles.badgeWarnText,
+													]}
+												>
+													{user.emailVerified ? "Email verified" : "Verify email"}
+												</Text>
+											</View>
+											<View style={styles.badge}>
+												<Icon
+													icon={UserIcon}
+													size={12}
+													color={NeonColors.text.secondary}
+													strokeWidth={2}
+												/>
+												<Text style={styles.badgeText}>
+													{user.isActive ? "Active" : "Inactive"}
+												</Text>
+											</View>
+										</View>
 									</View>
+								</NeonCard>
+
+								<View style={styles.section}>
+									<Text style={styles.sectionLabel}>PUBLIC PROFILE</Text>
+									<NeonCard>
+										<ProfileForm user={user} />
+									</NeonCard>
 								</View>
-							</NeonCard>
-						</View>
+
+								<View style={styles.section}>
+									<Text style={styles.sectionLabel}>ACCOUNT IDENTITY</Text>
+									<NeonCard>
+										<View style={styles.identityList}>
+											<IdentityRow icon={Mail01Icon} label="Email" value={user.email} />
+											<IdentityRow
+												icon={CheckmarkCircle02Icon}
+												label="Email status"
+												value={user.emailVerified ? "Verified" : "Verification required"}
+												accent={
+													user.emailVerified ? NeonColors.accent.green : NeonColors.accent.orange
+												}
+											/>
+											<IdentityRow
+												icon={Calendar01Icon}
+												label="Member since"
+												value={new Date(user.createdAt).toLocaleDateString(undefined, {
+													year: "numeric",
+													month: "long",
+													day: "numeric",
+												})}
+												last
+											/>
+										</View>
+									</NeonCard>
+								</View>
+
+								<View style={styles.section}>
+									<Text style={styles.sectionLabel}>SESSION</Text>
+									<NeonCard>
+										<View style={styles.sessionActions}>
+											<AuthButton label="Sign out" variant="outline" onPress={confirmLogout} />
+											<Pressable style={styles.logoutAll} onPress={confirmLogoutAll}>
+												<Icon
+													icon={ShieldOffIcon}
+													size={16}
+													color={NeonColors.accent.red}
+													strokeWidth={1.8}
+												/>
+												<Text style={styles.logoutAllText}>Sign out everywhere</Text>
+											</Pressable>
+											<View style={styles.logoutHint}>
+												<Icon
+													icon={Logout01Icon}
+													size={14}
+													color={NeonColors.text.muted}
+													strokeWidth={1.8}
+												/>
+												<Text style={styles.logoutHintText}>
+													Sign out ends only this device session
+												</Text>
+											</View>
+										</View>
+									</NeonCard>
+								</View>
+							</>
+						)}
 					</View>
 				</ScrollView>
+				<BottomNav activeTab="profile" />
 			</SafeAreaView>
 		</View>
 	);
 }
 
 function IdentityRow({
-	icon: Icon,
+	icon,
 	label,
 	value,
 	accent,
 	last = false,
 }: {
-	icon: typeof Mail;
+	icon: IconProp;
 	label: string;
 	value: string;
 	accent?: string;
@@ -213,7 +282,7 @@ function IdentityRow({
 	return (
 		<View style={[styles.identityRow, last && styles.identityRowLast]}>
 			<View style={styles.identityIcon}>
-				<Icon size={16} color={accent ?? NeonColors.text.secondary} strokeWidth={1.8} />
+				<Icon icon={icon} size={16} color={accent ?? NeonColors.text.secondary} strokeWidth={1.8} />
 			</View>
 			<View style={styles.identityCopy}>
 				<Text style={styles.identityLabel}>{label}</Text>

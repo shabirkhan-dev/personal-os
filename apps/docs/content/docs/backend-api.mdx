@@ -263,6 +263,23 @@ interface MonthSummary {
 
 ## Changelog
 
+### 2026-08-24 — Auth security hardening + step-up
+
+- **Step-up auth**: `POST /auth/security/step-up` (current password) returns a
+  single-use token bound to user + session + action. TOTP setup/disable, passkey
+  registration/deletion, and Google linking now require it via the
+  `X-Step-Up-Token` header. A bearer token alone can no longer change account
+  security factors.
+- **Password byte bound**: passwords are limited to 72 UTF-8 bytes at validation
+  (bcrypt truncation guard) across register, login, reset, and change-password.
+- **Atomic auth**: failed-login counters and challenge attempts are incremented
+  in SQL (no lost updates); email-verification/password-reset challenge
+  consumption is conditional and single-use.
+- **CSRF**: cookie-authenticated requests must present an allow-listed `Origin`;
+  non-cookie (bearer/body-token) clients are unaffected.
+- DB migration `0006`: adds `step_up` challenge purpose + `action`/`session_id`
+  columns on `auth_challenges`.
+
 ### 2026-08-24 — Observability, timeouts, production config hardening
 
 - External calls are now deadline-bounded: `EXTERNAL_REQUEST_TIMEOUT_MS`

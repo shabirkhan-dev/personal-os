@@ -21,6 +21,8 @@
 
 ## Log
 
+- 2026-08-24 — auth cluster: step-up flow, 72-byte password bound, atomic
+  lockout + challenge consumption, CSRF origin binding (5 cards closed).
 - 2026-08-24 — quick wins: bounded upstream timeouts (Resend/AI/Stripe/Razorpay),
   structured request/error observability, fail-closed production config +
   Swagger gating. 45 tests green.

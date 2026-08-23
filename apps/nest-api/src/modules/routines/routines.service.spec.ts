@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, type Mocked, vi } from 'vitest';
-
+import { isoWeekdayInTimeZone, localDateInTimeZone } from '@/common/time/local-date';
 import type { NewRoutineItemRecord, RoutineRecord } from '@/database/schema';
 import { RoutinesRepository } from './routines.repository';
-import { isoWeekdayInTimeZone, isScheduledOn, localDateInTimeZone } from './routines.schedule';
+import { isScheduledOn } from './routines.schedule';
 import { RoutinesService } from './routines.service';
 
 const userId = '11111111-1111-1111-1111-111111111111';

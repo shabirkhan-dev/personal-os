@@ -1,14 +1,21 @@
-import { Activity, BarChart2, Home, Plus, User } from "lucide-react-native";
+import {
+	Activity01Icon,
+	Analytics01Icon,
+	Home01Icon,
+	PlusSignIcon,
+	UserIcon,
+} from "@hugeicons/core-free-icons";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Icon } from "@/components/ui/icon";
 import { NeonColors } from "@/constants/design-system";
 
 export function BottomNav() {
 	const tabs = [
-		{ icon: Home, label: "Home", active: true },
-		{ icon: BarChart2, label: "Stats", active: false },
-		{ icon: Plus, label: "Add", isCenter: true },
-		{ icon: Activity, label: "Logs", active: false },
-		{ icon: User, label: "Me", active: false },
+		{ icon: Home01Icon, label: "Home", active: true },
+		{ icon: Analytics01Icon, label: "Stats", active: false },
+		{ icon: PlusSignIcon, label: "Add", isCenter: true },
+		{ icon: Activity01Icon, label: "Logs", active: false },
+		{ icon: UserIcon, label: "Me", active: false },
 	];
 
 	return (
@@ -17,7 +24,7 @@ export function BottomNav() {
 				<Pressable key={tab.label} style={[styles.tab, tab.isCenter && styles.centerTab]}>
 					{tab.isCenter ? (
 						<View style={styles.centerButton}>
-							<Plus size={28} color={NeonColors.background} strokeWidth={2.5} />
+							<Icon icon={PlusSignIcon} size={28} color={NeonColors.background} strokeWidth={2.5} />
 						</View>
 					) : (
 						<>

@@ -1,5 +1,6 @@
+import { Target01Icon, Task01Icon } from "@hugeicons/core-free-icons";
 import { Tabs } from "expo-router";
-import { ListTodo, Target } from "lucide-react-native";
+import { Icon } from "@/components/ui/icon";
 import { NeonColors } from "@/constants/design-system";
 
 export default function FocusLayout() {
@@ -23,7 +24,7 @@ export default function FocusLayout() {
 				options={{
 					title: "Dashboard",
 					tabBarIcon: ({ color, focused }) => (
-						<Target color={color} size={22} strokeWidth={focused ? 2.5 : 1.5} />
+						<Icon icon={Target01Icon} color={color} size={22} strokeWidth={focused ? 2.5 : 1.5} />
 					),
 				}}
 			/>
@@ -32,7 +33,7 @@ export default function FocusLayout() {
 				options={{
 					title: "Tasks",
 					tabBarIcon: ({ color, focused }) => (
-						<ListTodo color={color} size={22} strokeWidth={focused ? 2.5 : 1.5} />
+						<Icon icon={Task01Icon} color={color} size={22} strokeWidth={focused ? 2.5 : 1.5} />
 					),
 				}}
 			/>

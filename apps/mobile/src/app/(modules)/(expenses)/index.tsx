@@ -1,4 +1,4 @@
-import { ShoppingBag } from "lucide-react-native";
+import { ShoppingBag01Icon } from "@hugeicons/core-free-icons";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FloatingActionButton } from "@/components/ui/floating-action-button";
@@ -25,7 +25,7 @@ export default function ExpensesIndex() {
 						<SpendingWidget />
 						<View style={styles.logsList}>
 							<LogListItem
-								icon={ShoppingBag}
+								icon={ShoppingBag01Icon}
 								iconColor={NeonColors.accent.orange}
 								title="Groceries"
 								subtitle="Whole Foods Market"

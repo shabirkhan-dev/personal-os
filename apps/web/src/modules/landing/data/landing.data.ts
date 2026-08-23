@@ -14,7 +14,8 @@ import type { IconSvgElement } from "@hugeicons/react";
 export const SITE = {
 	name: "Personal OS",
 	title: "Personal OS — your life operating system",
-	description: "Personal life operating system — track routines, finance, skincare, food, fashion, and daily habits in one web and mobile app.",
+	description:
+		"Personal life operating system — track routines, finance, skincare, food, fashion, and daily habits in one web and mobile app.",
 } as const;
 
 export const LANDING_COPY = {
@@ -626,5 +627,3 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
 export function dicebearUrl(seed: string): string {
 	return `https://api.dicebear.com/10.x/glass/svg?seed=${encodeURIComponent(seed)}`;
 }
-
-

@@ -1,13 +1,13 @@
 import {
-	CheckCircle2,
-	Fingerprint,
-	KeyRound,
-	Lock,
-	Monitor,
-	Shield,
-	ShieldOff,
-	Smartphone,
-} from "lucide-react-native";
+	CheckmarkCircle02Icon,
+	ComputerIcon,
+	FingerAccessIcon,
+	Key01Icon,
+	LockIcon,
+	Shield01Icon,
+	ShieldOffIcon,
+	SmartPhone01Icon,
+} from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import {
 	ActivityIndicator,
@@ -20,6 +20,7 @@ import {
 	View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Icon } from "@/components/ui/icon";
 import { NeonCard } from "@/components/ui/neon-card";
 import { OSHeader } from "@/components/ui/os-header";
 import { NeonColors } from "@/constants/design-system";
@@ -199,7 +200,12 @@ export function SecurityScreen() {
 									) : totpEnabled ? (
 										<>
 											<View style={styles.statusRow}>
-												<CheckCircle2 size={16} color={NeonColors.accent.green} strokeWidth={2} />
+												<Icon
+													icon={CheckmarkCircle02Icon}
+													size={16}
+													color={NeonColors.accent.green}
+													strokeWidth={2}
+												/>
 												<Text style={styles.statusText}>
 													Authenticator active · {security.data?.mfa.recoveryCodesRemaining ?? 0}{" "}
 													recovery codes left
@@ -293,7 +299,12 @@ export function SecurityScreen() {
 										passkeys.map((passkey) => (
 											<View key={passkey.id} style={styles.listRow}>
 												<View style={styles.listIcon}>
-													<KeyRound size={16} color={NeonColors.text.secondary} strokeWidth={1.8} />
+													<Icon
+														icon={Key01Icon}
+														size={16}
+														color={NeonColors.text.secondary}
+														strokeWidth={1.8}
+													/>
 												</View>
 												<View style={styles.listCopy}>
 													<Text style={styles.listTitle}>{passkey.name}</Text>
@@ -393,7 +404,12 @@ export function SecurityScreen() {
 										sessions.data.map((session) => (
 											<View key={session.id} style={styles.listRow}>
 												<View style={styles.listIcon}>
-													<Monitor size={16} color={NeonColors.text.secondary} strokeWidth={1.8} />
+													<Icon
+														icon={ComputerIcon}
+														size={16}
+														color={NeonColors.text.secondary}
+														strokeWidth={1.8}
+													/>
 												</View>
 												<View style={styles.listCopy}>
 													<Text style={styles.listTitle} numberOfLines={2}>
@@ -417,7 +433,12 @@ export function SecurityScreen() {
 										<Text style={styles.empty}>No active sessions found.</Text>
 									)}
 									<Pressable style={styles.logoutAll} onPress={confirmLogoutAll}>
-										<ShieldOff size={16} color={NeonColors.accent.red} strokeWidth={1.8} />
+										<Icon
+											icon={ShieldOffIcon}
+											size={16}
+											color={NeonColors.accent.red}
+											strokeWidth={1.8}
+										/>
 										<Text style={styles.logoutAllText}>Sign out everywhere</Text>
 									</Pressable>
 								</View>
@@ -425,7 +446,12 @@ export function SecurityScreen() {
 						</View>
 
 						<View style={styles.footerHint}>
-							<Smartphone size={14} color={NeonColors.text.muted} strokeWidth={1.8} />
+							<Icon
+								icon={SmartPhone01Icon}
+								size={14}
+								color={NeonColors.text.muted}
+								strokeWidth={1.8}
+							/>
 							<Text style={styles.footerHintText}>
 								Google account linking is available on the web account settings for now.
 							</Text>
@@ -442,11 +468,16 @@ function OverviewChip({ label, value, active }: { label: string; value: string; 
 		<View style={styles.chip}>
 			<View style={styles.chipIcon}>
 				{label === "Two-factor" ? (
-					<Shield size={14} color={NeonColors.text.secondary} strokeWidth={1.8} />
+					<Icon icon={Shield01Icon} size={14} color={NeonColors.text.secondary} strokeWidth={1.8} />
 				) : label === "Passkeys" ? (
-					<Fingerprint size={14} color={NeonColors.text.secondary} strokeWidth={1.8} />
+					<Icon
+						icon={FingerAccessIcon}
+						size={14}
+						color={NeonColors.text.secondary}
+						strokeWidth={1.8}
+					/>
 				) : (
-					<Lock size={14} color={NeonColors.text.secondary} strokeWidth={1.8} />
+					<Icon icon={LockIcon} size={14} color={NeonColors.text.secondary} strokeWidth={1.8} />
 				)}
 			</View>
 			<Text style={styles.chipLabel}>{label}</Text>

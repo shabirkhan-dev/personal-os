@@ -1,5 +1,6 @@
-import { Calendar, Sparkles } from "lucide-react-native";
+import { Calendar01Icon, SparklesIcon } from "@hugeicons/core-free-icons";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Icon } from "@/components/ui/icon";
 import { NeonCard } from "@/components/ui/neon-card";
 import { NeonColors } from "@/constants/design-system";
 
@@ -15,7 +16,7 @@ export function SkincareWidget() {
 			<NeonCard>
 				<View style={styles.header}>
 					<Text style={styles.label}>DAILY ROUTINE</Text>
-					<Sparkles size={18} color={NeonColors.accent.purple} />
+					<Icon icon={SparklesIcon} size={18} color={NeonColors.accent.purple} />
 				</View>
 
 				<View style={styles.statusRow}>
@@ -23,7 +24,7 @@ export function SkincareWidget() {
 						Morning <Text style={styles.unit}>Set</Text>
 					</Text>
 					<View style={styles.dateBadge}>
-						<Calendar size={12} color={NeonColors.text.secondary} />
+						<Icon icon={Calendar01Icon} size={12} color={NeonColors.text.secondary} />
 						<Text style={styles.dateText}>May 7</Text>
 					</View>
 				</View>

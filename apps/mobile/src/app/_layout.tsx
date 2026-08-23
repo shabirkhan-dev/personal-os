@@ -1,7 +1,5 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useColorScheme } from "react-native";
 import { AnimatedSplashOverlay } from "@/components/animated-icon";
 import { AppProviders } from "@/components/providers";
 import { useAuth } from "@/modules/auth";
@@ -13,15 +11,11 @@ export const unstable_settings = {
 };
 
 export default function RootLayout() {
-	const colorScheme = useColorScheme();
-
 	return (
 		<AppProviders>
-			<ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-				<AnimatedSplashOverlay />
-				<SplashScreenController />
-				<RootNavigator />
-			</ThemeProvider>
+			<AnimatedSplashOverlay />
+			<SplashScreenController />
+			<RootNavigator />
 		</AppProviders>
 	);
 }

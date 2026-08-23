@@ -1,4 +1,4 @@
-import { Droplet } from "lucide-react-native";
+import { DropletIcon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -41,7 +41,7 @@ export default function ProductsScreen() {
 								products.map((item) => (
 									<LogListItem
 										key={item.id}
-										icon={Droplet}
+										icon={DropletIcon}
 										iconColor={NeonColors.accent.blue}
 										title={item.title}
 										subtitle={item.subtitle}

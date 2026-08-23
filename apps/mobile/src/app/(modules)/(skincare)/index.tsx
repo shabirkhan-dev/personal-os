@@ -1,4 +1,4 @@
-import { Sparkles } from "lucide-react-native";
+import { SparklesIcon } from "@hugeicons/core-free-icons";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FloatingActionButton } from "@/components/ui/floating-action-button";
@@ -25,7 +25,7 @@ export default function SkincareIndex() {
 						<SkincareWidget />
 						<View style={styles.logsList}>
 							<LogListItem
-								icon={Sparkles}
+								icon={SparklesIcon}
 								iconColor={NeonColors.accent.purple}
 								title="Face Wash"
 								subtitle="Completed morning set"

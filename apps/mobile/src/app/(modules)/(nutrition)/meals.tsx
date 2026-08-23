@@ -1,4 +1,4 @@
-import { Coffee } from "lucide-react-native";
+import { CoffeeIcon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -41,7 +41,7 @@ export default function NutritionMealsScreen() {
 								meals.map((item) => (
 									<LogListItem
 										key={item.id}
-										icon={Coffee}
+										icon={CoffeeIcon}
 										iconColor={NeonColors.accent.yellow}
 										title={item.title}
 										subtitle={item.subtitle}

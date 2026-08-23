@@ -1,4 +1,4 @@
-import { CreditCard } from "lucide-react-native";
+import { CreditCardIcon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -41,7 +41,7 @@ export default function TransactionsScreen() {
 								transactions.map((item) => (
 									<LogListItem
 										key={item.id}
-										icon={CreditCard}
+										icon={CreditCardIcon}
 										iconColor={NeonColors.accent.orange}
 										title={item.title}
 										subtitle={item.subtitle}

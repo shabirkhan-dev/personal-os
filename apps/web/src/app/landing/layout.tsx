@@ -50,4 +50,3 @@ export default function LandingLayout({ children }: Readonly<{ children: React.R
 		</>
 	);
 }
-

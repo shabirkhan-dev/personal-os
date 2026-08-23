@@ -1,5 +1,6 @@
+import { DashboardSquare01Icon, FlashIcon } from "@hugeicons/core-free-icons";
 import { Tabs } from "expo-router";
-import { LayoutDashboard, Zap } from "lucide-react-native";
+import { Icon } from "@/components/ui/icon";
 import { NeonColors } from "@/constants/design-system";
 
 export default function DashboardLayout() {
@@ -23,7 +24,12 @@ export default function DashboardLayout() {
 				options={{
 					title: "Home",
 					tabBarIcon: ({ color, focused }) => (
-						<LayoutDashboard color={color} size={22} strokeWidth={focused ? 2.5 : 1.5} />
+						<Icon
+							icon={DashboardSquare01Icon}
+							color={color}
+							size={22}
+							strokeWidth={focused ? 2.5 : 1.5}
+						/>
 					),
 				}}
 			/>
@@ -32,7 +38,7 @@ export default function DashboardLayout() {
 				options={{
 					title: "Insights",
 					tabBarIcon: ({ color, focused }) => (
-						<Zap color={color} size={22} strokeWidth={focused ? 2.5 : 1.5} />
+						<Icon icon={FlashIcon} color={color} size={22} strokeWidth={focused ? 2.5 : 1.5} />
 					),
 				}}
 			/>

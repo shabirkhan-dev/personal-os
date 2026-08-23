@@ -1,5 +1,6 @@
+import { BookOpen01Icon, Brain01Icon } from "@hugeicons/core-free-icons";
 import { Tabs } from "expo-router";
-import { BookOpen, Brain } from "lucide-react-native";
+import { Icon } from "@/components/ui/icon";
 import { NeonColors } from "@/constants/design-system";
 
 export default function MindfulnessLayout() {
@@ -23,7 +24,7 @@ export default function MindfulnessLayout() {
 				options={{
 					title: "Clarity",
 					tabBarIcon: ({ color, focused }) => (
-						<Brain color={color} size={22} strokeWidth={focused ? 2.5 : 1.5} />
+						<Icon icon={Brain01Icon} color={color} size={22} strokeWidth={focused ? 2.5 : 1.5} />
 					),
 				}}
 			/>
@@ -32,7 +33,7 @@ export default function MindfulnessLayout() {
 				options={{
 					title: "Journal",
 					tabBarIcon: ({ color, focused }) => (
-						<BookOpen color={color} size={22} strokeWidth={focused ? 2.5 : 1.5} />
+						<Icon icon={BookOpen01Icon} color={color} size={22} strokeWidth={focused ? 2.5 : 1.5} />
 					),
 				}}
 			/>

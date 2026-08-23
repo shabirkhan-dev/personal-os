@@ -1,5 +1,6 @@
-import { Plus } from "lucide-react-native";
+import { PlusSignIcon } from "@hugeicons/core-free-icons";
 import { Pressable, StyleSheet, View } from "react-native";
+import { Icon } from "@/components/ui/icon";
 import { NeonColors, NeonShadows } from "@/constants/design-system";
 
 interface FloatingActionButtonProps {
@@ -21,7 +22,7 @@ export function FloatingActionButton({
 					pressed && styles.pressed,
 				]}
 			>
-				<Plus size={32} color={NeonColors.background} strokeWidth={2.5} />
+				<Icon icon={PlusSignIcon} size={32} color={NeonColors.background} strokeWidth={2.5} />
 			</Pressable>
 		</View>
 	);

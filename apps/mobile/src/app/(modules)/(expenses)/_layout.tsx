@@ -1,5 +1,6 @@
+import { Menu01Icon, PieChartIcon, Wallet01Icon } from "@hugeicons/core-free-icons";
 import { Tabs } from "expo-router";
-import { List, PieChart, Wallet } from "lucide-react-native";
+import { Icon } from "@/components/ui/icon";
 import { NeonColors } from "@/constants/design-system";
 
 export default function ExpensesLayout() {
@@ -23,7 +24,7 @@ export default function ExpensesLayout() {
 				options={{
 					title: "Capital",
 					tabBarIcon: ({ color, focused }) => (
-						<Wallet color={color} size={22} strokeWidth={focused ? 2.5 : 1.5} />
+						<Icon icon={Wallet01Icon} color={color} size={22} strokeWidth={focused ? 2.5 : 1.5} />
 					),
 				}}
 			/>
@@ -32,7 +33,7 @@ export default function ExpensesLayout() {
 				options={{
 					title: "Logs",
 					tabBarIcon: ({ color, focused }) => (
-						<List color={color} size={22} strokeWidth={focused ? 2.5 : 1.5} />
+						<Icon icon={Menu01Icon} color={color} size={22} strokeWidth={focused ? 2.5 : 1.5} />
 					),
 				}}
 			/>
@@ -41,7 +42,7 @@ export default function ExpensesLayout() {
 				options={{
 					title: "Budget",
 					tabBarIcon: ({ color, focused }) => (
-						<PieChart color={color} size={22} strokeWidth={focused ? 2.5 : 1.5} />
+						<Icon icon={PieChartIcon} color={color} size={22} strokeWidth={focused ? 2.5 : 1.5} />
 					),
 				}}
 			/>

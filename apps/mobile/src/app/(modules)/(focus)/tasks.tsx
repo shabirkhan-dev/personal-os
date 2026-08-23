@@ -1,4 +1,4 @@
-import { CheckCircle2 } from "lucide-react-native";
+import { CheckmarkCircle02Icon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -41,7 +41,7 @@ export default function FocusTasksScreen() {
 								tasks.map((item) => (
 									<LogListItem
 										key={item.id}
-										icon={CheckCircle2}
+										icon={CheckmarkCircle02Icon}
 										iconColor={NeonColors.accent.pink}
 										title={item.title}
 										subtitle={item.subtitle}

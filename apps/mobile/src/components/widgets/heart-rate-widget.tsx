@@ -1,5 +1,6 @@
-import { Heart } from "lucide-react-native";
+import { FavouriteIcon } from "@hugeicons/core-free-icons";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Icon } from "@/components/ui/icon";
 import { NeonCard } from "@/components/ui/neon-card";
 import { NeonColors } from "@/constants/design-system";
 
@@ -23,7 +24,7 @@ export function HeartRateWidget() {
 			<NeonCard>
 				<View style={styles.header}>
 					<Text style={styles.timeLabel}>TODAY 11:26 PM</Text>
-					<Heart size={24} color={NeonColors.text.primary} strokeWidth={1.5} />
+					<Icon icon={FavouriteIcon} size={24} color={NeonColors.text.primary} strokeWidth={1.5} />
 				</View>
 
 				<View style={styles.mainValue}>

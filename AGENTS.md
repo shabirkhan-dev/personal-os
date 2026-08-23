@@ -20,6 +20,16 @@ Key routes: `/docs/quick-start`, `/docs/production-roadmap`, `/docs/architecture
 `/docs/docker`, `/docs/deploy`, `/docs/qol`, `/docs/ai-first-workflow`, `/docs/overrides`,
 `/docs/product-system-design`. Also see root `README.md`, `PROJECT.md`, and `DESIGN.md`.
 
+## Agent-to-agent API contract
+
+**Frontend agents (web/mobile): before consuming any NestJS endpoint, read
+`apps/docs/content/docs/backend-api.mdx`** — the backend status board. It lists every
+module's readiness, exact request/response contracts, error envelope, and a changelog.
+
+**Backend agent: any API change (new endpoint, contract change, deprecation) must be
+reflected in that file in the same commit**, with a changelog entry flagged BREAKING
+where callers are affected.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # Next.js: ALWAYS read docs before coding

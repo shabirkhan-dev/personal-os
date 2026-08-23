@@ -1,8 +1,13 @@
+import {
+	CancelCircleIcon,
+	CheckmarkCircle02Icon,
+	CreditCardIcon,
+} from "@hugeicons/core-free-icons";
 import { router } from "expo-router";
-import { CheckCircle2, CreditCard, XCircle } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Icon } from "@/components/ui/icon";
 import { NeonCard } from "@/components/ui/neon-card";
 import { OSHeader } from "@/components/ui/os-header";
 import { NeonColors } from "@/constants/design-system";
@@ -249,7 +254,8 @@ export function BillingScreen() {
 													<Text style={styles.planTagline}>{plan.tagline}</Text>
 													{plan.features.map((feature) => (
 														<View key={feature} style={styles.featureRow}>
-															<CheckCircle2
+															<Icon
+																icon={CheckmarkCircle02Icon}
 																size={14}
 																color={NeonColors.accent.green}
 																strokeWidth={2}
@@ -295,7 +301,8 @@ export function BillingScreen() {
 														disabled={!selectable}
 														style={[styles.providerCard, selected && styles.providerCardSelected]}
 													>
-														<CreditCard
+														<Icon
+															icon={CreditCardIcon}
 															size={18}
 															color={selected ? NeonColors.accent.green : NeonColors.text.secondary}
 														/>
@@ -425,9 +432,19 @@ export function BillingResultScreen({ variant }: { variant: "success" | "cancel"
 				<View style={styles.resultWrap}>
 					<NeonCard style={styles.resultCard}>
 						{success ? (
-							<CheckCircle2 size={40} color={NeonColors.accent.green} strokeWidth={2} />
+							<Icon
+								icon={CheckmarkCircle02Icon}
+								size={40}
+								color={NeonColors.accent.green}
+								strokeWidth={2}
+							/>
 						) : (
-							<XCircle size={40} color={NeonColors.accent.orange} strokeWidth={2} />
+							<Icon
+								icon={CancelCircleIcon}
+								size={40}
+								color={NeonColors.accent.orange}
+								strokeWidth={2}
+							/>
 						)}
 						<Text style={styles.eyebrow}>BILLING</Text>
 						<Text style={styles.viewTitle}>

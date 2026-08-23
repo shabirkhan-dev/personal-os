@@ -1,7 +1,15 @@
-import { CheckCircle2, Coffee, Droplet, Mic, TrendingUp, Zap } from "lucide-react-native";
+import {
+	CheckmarkCircle02Icon,
+	CoffeeIcon,
+	DropletIcon,
+	FlashIcon,
+	Mic01Icon,
+	TradeUpIcon,
+} from "@hugeicons/core-free-icons";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FloatingActionButton } from "@/components/ui/floating-action-button";
+import { Icon } from "@/components/ui/icon";
 import { LogListItem } from "@/components/ui/log-list-item";
 import { OSHeader } from "@/components/ui/os-header";
 import { QuickAction } from "@/components/ui/quick-action";
@@ -31,7 +39,7 @@ export default function DashboardIndex() {
 								94.2<Text style={styles.scorePercent}>%</Text>
 							</Text>
 							<View style={styles.trendBadge}>
-								<TrendingUp size={12} color={NeonColors.accent.green} />
+								<Icon icon={TradeUpIcon} size={12} color={NeonColors.accent.green} />
 								<Text style={styles.trendText}>+2.4%</Text>
 							</View>
 						</View>
@@ -39,10 +47,10 @@ export default function DashboardIndex() {
 
 					{/* Quick Actions */}
 					<View style={styles.quickActionsRow}>
-						<QuickAction icon={Zap} label="Workout" />
-						<QuickAction icon={Droplet} label="Log Water" />
-						<QuickAction icon={Mic} label="Record" />
-						<QuickAction icon={Coffee} label="Mood" />
+						<QuickAction icon={FlashIcon} label="Workout" />
+						<QuickAction icon={DropletIcon} label="Log Water" />
+						<QuickAction icon={Mic01Icon} label="Record" />
+						<QuickAction icon={CoffeeIcon} label="Mood" />
 					</View>
 
 					{/* Vital Signs Carousel */}
@@ -84,7 +92,7 @@ export default function DashboardIndex() {
 
 					<View style={styles.logsList}>
 						<LogListItem
-							icon={CheckCircle2}
+							icon={CheckmarkCircle02Icon}
 							iconColor={NeonColors.accent.green}
 							title="Design System"
 							subtitle="Architecture finalized"

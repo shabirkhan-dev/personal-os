@@ -1,4 +1,4 @@
-import { AlertCircle, PiggyBank, Target } from "lucide-react-native";
+import { AlertCircleIcon, PiggyBankIcon, Target01Icon } from "@hugeicons/core-free-icons";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LogListItem } from "@/components/ui/log-list-item";
@@ -23,7 +23,7 @@ export default function BudgetScreen() {
 
 						<View style={styles.logsList}>
 							<LogListItem
-								icon={Target}
+								icon={Target01Icon}
 								iconColor={NeonColors.accent.blue}
 								title="Monthly Target"
 								subtitle="$1,200 of $2,000 remaining"
@@ -32,7 +32,7 @@ export default function BudgetScreen() {
 								deltaColor={NeonColors.accent.green}
 							/>
 							<LogListItem
-								icon={PiggyBank}
+								icon={PiggyBankIcon}
 								iconColor={NeonColors.accent.green}
 								title="Savings Goal"
 								subtitle="Emergency fund progress"
@@ -41,7 +41,7 @@ export default function BudgetScreen() {
 								deltaColor={NeonColors.accent.green}
 							/>
 							<LogListItem
-								icon={AlertCircle}
+								icon={AlertCircleIcon}
 								iconColor={NeonColors.accent.orange}
 								title="Food & Dining"
 								subtitle="Category nearing limit"

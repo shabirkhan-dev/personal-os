@@ -1,5 +1,6 @@
+import { PieChartIcon, Restaurant01Icon } from "@hugeicons/core-free-icons";
 import { Tabs } from "expo-router";
-import { PieChart, Utensils } from "lucide-react-native";
+import { Icon } from "@/components/ui/icon";
 import { NeonColors } from "@/constants/design-system";
 
 export default function NutritionLayout() {
@@ -23,7 +24,7 @@ export default function NutritionLayout() {
 				options={{
 					title: "Diet",
 					tabBarIcon: ({ color, focused }) => (
-						<PieChart color={color} size={22} strokeWidth={focused ? 2.5 : 1.5} />
+						<Icon icon={PieChartIcon} color={color} size={22} strokeWidth={focused ? 2.5 : 1.5} />
 					),
 				}}
 			/>
@@ -32,7 +33,12 @@ export default function NutritionLayout() {
 				options={{
 					title: "Meals",
 					tabBarIcon: ({ color, focused }) => (
-						<Utensils color={color} size={22} strokeWidth={focused ? 2.5 : 1.5} />
+						<Icon
+							icon={Restaurant01Icon}
+							color={color}
+							size={22}
+							strokeWidth={focused ? 2.5 : 1.5}
+						/>
 					),
 				}}
 			/>

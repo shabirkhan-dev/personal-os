@@ -1,5 +1,10 @@
+import {
+	ArrowDown01Icon,
+	Notification01Icon,
+	ScanIcon,
+	Tick01Icon,
+} from "@hugeicons/core-free-icons";
 import { type Href, router, useSegments } from "expo-router";
-import { Bell, Check, ChevronDown, Scan } from "lucide-react-native";
 import * as React from "react";
 import {
 	Image,
@@ -10,6 +15,7 @@ import {
 	TouchableWithoutFeedback,
 	View,
 } from "react-native";
+import { Icon } from "@/components/ui/icon";
 import { NeonColors } from "@/constants/design-system";
 import { resolveMediaUrl } from "@/lib/media-url";
 import { useAuth } from "@/modules/auth";
@@ -80,7 +86,7 @@ export function OSHeader() {
 				<View style={styles.dropdownContainer}>
 					<Pressable style={styles.accountSelector} onPress={() => setIsDropdownOpen(true)}>
 						<Text style={styles.accountName}>{currentModule}</Text>
-						<ChevronDown size={16} color={NeonColors.text.secondary} />
+						<Icon icon={ArrowDown01Icon} size={16} color={NeonColors.text.secondary} />
 					</Pressable>
 
 					<Modal
@@ -107,7 +113,12 @@ export function OSHeader() {
 												{mod.label}
 											</Text>
 											{currentModule === mod.label && (
-												<Check size={16} color={NeonColors.accent.green} strokeWidth={3} />
+												<Icon
+													icon={Tick01Icon}
+													size={16}
+													color={NeonColors.accent.green}
+													strokeWidth={3}
+												/>
 											)}
 										</Pressable>
 									))}
@@ -120,11 +131,16 @@ export function OSHeader() {
 
 			<View style={styles.right}>
 				<Pressable style={styles.iconButton}>
-					<Scan size={22} color={NeonColors.text.primary} strokeWidth={1.5} />
+					<Icon icon={ScanIcon} size={22} color={NeonColors.text.primary} strokeWidth={1.5} />
 				</Pressable>
 				<View style={styles.notificationContainer}>
 					<Pressable style={styles.iconButton}>
-						<Bell size={22} color={NeonColors.text.primary} strokeWidth={1.5} />
+						<Icon
+							icon={Notification01Icon}
+							size={22}
+							color={NeonColors.text.primary}
+							strokeWidth={1.5}
+						/>
 					</Pressable>
 					<View style={styles.badge} />
 				</View>

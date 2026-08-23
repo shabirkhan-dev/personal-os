@@ -1,5 +1,6 @@
-import { CheckCircle2, Clock, Target } from "lucide-react-native";
+import { CheckmarkCircle02Icon, Clock01Icon, Target01Icon } from "@hugeicons/core-free-icons";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Icon } from "@/components/ui/icon";
 import { NeonCard } from "@/components/ui/neon-card";
 import { NeonColors } from "@/constants/design-system";
 
@@ -9,7 +10,7 @@ export function FocusWidget() {
 			<NeonCard accentColor={NeonColors.accent.pink}>
 				<View style={styles.header}>
 					<View style={styles.headerLeft}>
-						<Target size={20} color={NeonColors.accent.pink} />
+						<Icon icon={Target01Icon} size={20} color={NeonColors.accent.pink} />
 						<Text style={styles.title}>Deep Work</Text>
 					</View>
 					<Text style={styles.subtitle}>Pomodoro</Text>
@@ -24,13 +25,13 @@ export function FocusWidget() {
 
 				<View style={styles.statsContainer}>
 					<View style={styles.statItem}>
-						<Clock size={16} color={NeonColors.text.secondary} />
+						<Icon icon={Clock01Icon} size={16} color={NeonColors.text.secondary} />
 						<Text style={styles.statValue}>2.5h</Text>
 						<Text style={styles.statLabel}>Today</Text>
 					</View>
 					<View style={styles.divider} />
 					<View style={styles.statItem}>
-						<CheckCircle2 size={16} color={NeonColors.text.secondary} />
+						<Icon icon={CheckmarkCircle02Icon} size={16} color={NeonColors.text.secondary} />
 						<Text style={styles.statValue}>4</Text>
 						<Text style={styles.statLabel}>Sessions</Text>
 					</View>

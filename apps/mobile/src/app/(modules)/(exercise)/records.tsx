@@ -1,4 +1,4 @@
-import { Activity } from "lucide-react-native";
+import { Activity01Icon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -41,7 +41,7 @@ export default function RecordsScreen() {
 								records.map((item) => (
 									<LogListItem
 										key={item.id}
-										icon={Activity}
+										icon={Activity01Icon}
 										iconColor={NeonColors.accent.blue}
 										title={item.title}
 										subtitle={item.subtitle}

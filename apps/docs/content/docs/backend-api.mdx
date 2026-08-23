@@ -1,0 +1,188 @@
+# Backend API — status board
+
+> **For AI agents and humans consuming the API.** Read this before wiring any
+> frontend feature to the NestJS API. It tracks what is ready, exact contracts,
+> and every change that affects callers.
+>
+> Owner: backend agent. Update this file in the same commit as any API change.
+
+Base URL (dev): `http://localhost:4000/api/v1`
+
+---
+
+## How to call the API
+
+### Auth
+
+- All endpoints below require `Authorization: Bearer <accessToken>` unless noted.
+- Access tokens are short-lived. On `401`, call `POST /auth/refresh` (cookie-based)
+  to get a new session — see `/docs` Swagger page on the API server for auth endpoints.
+- Sessions also set httpOnly cookies; browser clients use `credentials: "include"`.
+
+### Response envelope
+
+Every JSON response is wrapped by the API:
+
+```jsonc
+// success
+{ "success": true, "statusCode": 200, "data": { /* payload */ } }
+// failure
+{ "success": false, "statusCode": 400, "code": "VALIDATION_ERROR", "message": "...", "errors": [{ "path": "name", "message": "..." }] }
+```
+
+Frontend API clients unwrap `data` automatically (web: `src/lib/api/client.ts`,
+mobile: `src/lib/api/client.ts`).
+
+### Conventions
+
+- URI-versioned (`/api/v1`). Breaking changes ship as `/api/v2` or are listed as
+  **BREAKING** in the changelog with migration notes.
+- Dates sent/stored per user timezone come from `user_profiles.timezone`
+  (fallback `UTC`) as `YYYY-MM-DD`.
+- Weekdays are ISO numbers: `1 = Monday … 7 = Sunday`.
+
+---
+
+## Module status
+
+| Module | Status | Notes |
+| --- | --- | --- |
+| Auth (login, register, magic link, Google, passkeys, MFA) | ✅ ready | See Swagger `/api/docs` |
+| Users / profiles (`/users/me*`) | ✅ ready | Includes avatar upload |
+| Billing (Razorpay) | ✅ ready | Internal flows |
+| Health (`GET /health`) | ✅ ready | No auth |
+| AI proxy | ✅ beta | Nest proxies FastAPI; keys stay server-side |
+| **Routines** | ✅ ready | Phase 1 core loop — see contract below |
+| Finance | 🚧 planned | Phase 2 |
+| Care / Food / Fashion | 🚧 planned | Phases 3–4 |
+
+---
+
+## Routines API (ready)
+
+A routine belongs to one user and contains ordered items ("steps").
+Completions are logged **per item per day** — a routine counts as done when all
+its items are done for the day.
+
+### Types
+
+```ts
+type RoutineScheduleType = "daily" | "specific_days";
+
+interface Routine {
+	id: string; // uuid
+	name: string;
+	description: string | null;
+	scheduleType: RoutineScheduleType;
+	daysOfWeek: number[]; // [] for daily; e.g. [1, 3, 5]
+	archivedAt: string | null;
+	createdAt: string;
+	updatedAt: string;
+	items: Array<{
+		id: string;
+		name: string;
+		notes: string | null;
+		targetTime: string | null; // "HH:MM"
+		sortOrder: number;
+	}>;
+}
+
+interface TodayView {
+	date: string; // "YYYY-MM-DD" in the user's timezone
+	timeZone: string;
+	weekday: number; // ISO weekday of `date`
+	routines: Array<{
+		id: string;
+		name: string;
+		description: string | null;
+		completedItems: number;
+		totalItems: number;
+		items: Array<{
+			id: string;
+			name: string;
+			targetTime: string | null;
+			sortOrder: number;
+			completed: boolean;
+		}>;
+	}>;
+}
+```
+
+### Endpoints
+
+All routes are prefixed `/routines` and require auth.
+
+| Method | Path | Purpose | Returns |
+| --- | --- | --- | --- |
+| GET | `/routines/today` | Scheduled routines for today + completion state | `TodayView` |
+| GET | `/routines?limit=&offset=` | List active routines (bounded) | `Routine[]` |
+| GET | `/routines/:id` | Single routine | `Routine` |
+| POST | `/routines` | Create routine with items | `Routine` (201) |
+| PATCH | `/routines/:id` | Update fields; `items` replaces all active items | `Routine` |
+| DELETE | `/routines/:id` | Soft-archive (history preserved) | `{ id, archived: true }` |
+| POST | `/routines/:routineId/items/:itemId/toggle` | Toggle item completion for today | `{ itemId, date, completed }` |
+
+#### Query params for `GET /routines`
+
+| Param | Type | Default | Rules |
+| --- | --- | --- | --- |
+| `limit` | int | 100 | 1–200 |
+| `offset` | int | 0 | ≥ 0 |
+
+Malformed uuids in paths return `400 VALIDATION_ERROR` (never a DB hit).
+Unknown ids return `404 NOT_FOUND`.
+
+#### Create/update body examples
+
+```jsonc
+// POST /routines
+{
+	"name": "Morning routine",
+	"description": "Start the day right",
+	"scheduleType": "specific_days",
+	"daysOfWeek": [1, 3, 5],
+	"items": [
+		{ "name": "Drink water", "targetTime": "07:00" },
+		{ "name": "Stretch" }
+	]
+}
+
+// PATCH /routines/:id — partial; "archived": false un-archives
+{
+	"name": "Morning ritual",
+	"items": [{ "name": "Meditate" }]
+}
+```
+
+Rules enforced server-side:
+
+- `name` required (1–120 chars); `description` ≤ 500; ≤ 50 items; item names 1–200.
+- `scheduleType: "specific_days"` requires non-empty `daysOfWeek`.
+- `targetTime` must be `"HH:MM"` (24h).
+- Toggling is day-scoped and idempotent-safe (unique index on user+item+day).
+
+### Frontend usage map
+
+| Client | Files | Notes |
+| --- | --- | --- |
+| Web | `apps/web/src/modules/routines/**`, pages `admin/today`, `admin/routines` | React Query hooks |
+| Mobile | `apps/mobile/src/modules/routines/**`, route `(modules)/(routines)` | React Query hooks |
+
+---
+
+## Changelog
+
+### 2026-08-23 — Routines v1 hardening
+
+- `GET /routines` now validates `limit` (1–200, default 100) and `offset` (≥ 0).
+  Response shape unchanged (still `Routine[]`).
+- Malformed uuid path params now fail fast with `400 VALIDATION_ERROR`.
+- Routine creation and item replacement are now atomic (DB transaction):
+  clients will never observe a routine without its items after a success response.
+- Schedule/date helpers extracted to `routines.schedule.ts` (internal refactor,
+  no contract change).
+
+### 2026-08-23 — Routines v1 shipped
+
+- Initial release of everything in the table above. Consumers: web + mobile Today
+  screens.

@@ -1,4 +1,4 @@
-import { CheckCircle2, Info } from "lucide-react-native";
+import { CheckmarkCircle02Icon, InformationCircleIcon } from "@hugeicons/core-free-icons";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FloatingActionButton } from "@/components/ui/floating-action-button";
@@ -25,7 +25,7 @@ export default function NutritionIndex() {
 						<NutritionWidget />
 						<View style={styles.logsList}>
 							<LogListItem
-								icon={CheckCircle2}
+								icon={CheckmarkCircle02Icon}
 								iconColor={NeonColors.accent.green}
 								title="Daily Protein Goal"
 								subtitle="120g of 150g consumed"
@@ -34,7 +34,7 @@ export default function NutritionIndex() {
 								deltaColor={NeonColors.text.secondary}
 							/>
 							<LogListItem
-								icon={Info}
+								icon={InformationCircleIcon}
 								iconColor={NeonColors.accent.yellow}
 								title="Fasting Window"
 								subtitle="Intermittent Fasting (16:8)"

@@ -1,4 +1,4 @@
-import { BookText } from "lucide-react-native";
+import { Book01Icon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -41,7 +41,7 @@ export default function MindfulnessJournalScreen() {
 								journal.map((item) => (
 									<LogListItem
 										key={item.id}
-										icon={BookText}
+										icon={Book01Icon}
 										iconColor={NeonColors.accent.cyan}
 										title={item.title}
 										subtitle={item.subtitle}

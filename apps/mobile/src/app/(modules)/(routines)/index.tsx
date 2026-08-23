@@ -1,6 +1,7 @@
-import { CheckCircle2, Circle, RefreshCw } from "lucide-react-native";
+import { CheckmarkCircle02Icon, CircleIcon, RefreshIcon } from "@hugeicons/core-free-icons";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Icon } from "@/components/ui/icon";
 import { OSHeader } from "@/components/ui/os-header";
 import { NeonColors } from "@/constants/design-system";
 import { useTodayQuery, useToggleItemMutation } from "@/modules/routines";
@@ -49,7 +50,12 @@ export default function RoutinesTodayScreen() {
 							{isRefetching ? (
 								<ActivityIndicator size="small" color={NeonColors.accent.green} />
 							) : (
-								<RefreshCw size={16} color={NeonColors.text.secondary} strokeWidth={1.8} />
+								<Icon
+									icon={RefreshIcon}
+									size={16}
+									color={NeonColors.text.secondary}
+									strokeWidth={1.8}
+								/>
 							)}
 						</Pressable>
 					</View>
@@ -123,13 +129,19 @@ export default function RoutinesTodayScreen() {
 													accessibilityLabel={`${item.completed ? "Uncheck" : "Check"} ${item.name}`}
 												>
 													{item.completed ? (
-														<CheckCircle2
+														<Icon
+															icon={CheckmarkCircle02Icon}
 															size={20}
 															color={NeonColors.accent.green}
 															strokeWidth={2}
 														/>
 													) : (
-														<Circle size={20} color={NeonColors.text.muted} strokeWidth={1.8} />
+														<Icon
+															icon={CircleIcon}
+															size={20}
+															color={NeonColors.text.muted}
+															strokeWidth={1.8}
+														/>
 													)}
 													<Text style={[styles.itemName, item.completed && styles.itemNameDone]}>
 														{item.name}

@@ -1,9 +1,10 @@
-import type { LucideIcon } from "lucide-react-native";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { NeonColors } from "@/constants/design-system";
+import type { IconProp } from "./icon";
+import { Icon } from "./icon";
 
 interface LogListItemProps {
-	icon: LucideIcon;
+	icon: IconProp;
 	iconColor: string;
 	title: string;
 	subtitle: string;
@@ -14,7 +15,7 @@ interface LogListItemProps {
 }
 
 export function LogListItem({
-	icon: Icon,
+	icon,
 	iconColor,
 	title,
 	subtitle,
@@ -30,7 +31,7 @@ export function LogListItem({
 		>
 			<View style={styles.left}>
 				<View style={[styles.iconWrapper, { backgroundColor: `${iconColor}15` }]}>
-					<Icon size={20} color={iconColor} strokeWidth={2} />
+					<Icon icon={icon} size={20} color={iconColor} strokeWidth={2} />
 				</View>
 				<View style={styles.textContainer}>
 					<Text style={styles.title}>{title}</Text>

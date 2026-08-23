@@ -1,18 +1,19 @@
-import type { LucideIcon } from "lucide-react-native";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { NeonColors } from "@/constants/design-system";
+import type { IconProp } from "./icon";
+import { Icon } from "./icon";
 
 interface QuickActionProps {
-	icon: LucideIcon;
+	icon: IconProp;
 	label: string;
 	onPress?: () => void;
 }
 
-export function QuickAction({ icon: Icon, label, onPress }: QuickActionProps) {
+export function QuickAction({ icon, label, onPress }: QuickActionProps) {
 	return (
 		<Pressable style={styles.container} onPress={onPress}>
 			<View style={styles.iconWrapper}>
-				<Icon size={24} color={NeonColors.text.primary} strokeWidth={1.5} />
+				<Icon icon={icon} size={24} color={NeonColors.text.primary} strokeWidth={1.5} />
 			</View>
 			<Text style={styles.label}>{label}</Text>
 		</Pressable>

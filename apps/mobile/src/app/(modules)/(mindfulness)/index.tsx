@@ -1,4 +1,4 @@
-import { Headphones, HeartPulse } from "lucide-react-native";
+import { HeadphonesIcon, Pulse01Icon } from "@hugeicons/core-free-icons";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FloatingActionButton } from "@/components/ui/floating-action-button";
@@ -25,7 +25,7 @@ export default function MindfulnessIndex() {
 						<MindfulnessWidget />
 						<View style={styles.logsList}>
 							<LogListItem
-								icon={HeartPulse}
+								icon={Pulse01Icon}
 								iconColor={NeonColors.accent.cyan}
 								title="Morning Meditation"
 								subtitle="Guided breathing exercise"
@@ -34,7 +34,7 @@ export default function MindfulnessIndex() {
 								deltaColor={NeonColors.text.secondary}
 							/>
 							<LogListItem
-								icon={Headphones}
+								icon={HeadphonesIcon}
 								iconColor={NeonColors.accent.purple}
 								title="Deep Focus Session"
 								subtitle="Binaural beats, uninterrupted"

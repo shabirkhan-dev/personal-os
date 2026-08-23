@@ -1,5 +1,6 @@
+import { Bookmark01Icon, LibraryIcon } from "@hugeicons/core-free-icons";
 import { Tabs } from "expo-router";
-import { BookMarked, Library as LibraryIcon } from "lucide-react-native";
+import { Icon } from "@/components/ui/icon";
 import { NeonColors } from "@/constants/design-system";
 
 export default function LibraryLayout() {
@@ -23,7 +24,7 @@ export default function LibraryLayout() {
 				options={{
 					title: "Dashboard",
 					tabBarIcon: ({ color, focused }) => (
-						<LibraryIcon color={color} size={22} strokeWidth={focused ? 2.5 : 1.5} />
+						<Icon icon={LibraryIcon} color={color} size={22} strokeWidth={focused ? 2.5 : 1.5} />
 					),
 				}}
 			/>
@@ -32,7 +33,7 @@ export default function LibraryLayout() {
 				options={{
 					title: "Books",
 					tabBarIcon: ({ color, focused }) => (
-						<BookMarked color={color} size={22} strokeWidth={focused ? 2.5 : 1.5} />
+						<Icon icon={Bookmark01Icon} color={color} size={22} strokeWidth={focused ? 2.5 : 1.5} />
 					),
 				}}
 			/>

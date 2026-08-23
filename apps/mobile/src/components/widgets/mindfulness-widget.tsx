@@ -1,5 +1,6 @@
-import { Brain, Heart, Moon, Sun } from "lucide-react-native";
+import { Brain01Icon, FavouriteIcon, Moon02Icon, Sun03Icon } from "@hugeicons/core-free-icons";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Icon } from "@/components/ui/icon";
 import { NeonCard } from "@/components/ui/neon-card";
 import { NeonColors } from "@/constants/design-system";
 
@@ -9,7 +10,7 @@ export function MindfulnessWidget() {
 			<NeonCard>
 				<View style={styles.header}>
 					<View style={styles.iconContainer}>
-						<Brain size={20} color={NeonColors.accent.cyan} />
+						<Icon icon={Brain01Icon} size={20} color={NeonColors.accent.cyan} />
 					</View>
 					<Text style={styles.title}>Mental Clarity</Text>
 					<Text style={styles.subtitle}>Optimum</Text>
@@ -17,7 +18,7 @@ export function MindfulnessWidget() {
 
 				<View style={styles.statsRow}>
 					<View style={styles.statBox}>
-						<Sun size={20} color={NeonColors.accent.yellow} />
+						<Icon icon={Sun03Icon} size={20} color={NeonColors.accent.yellow} />
 						<Text style={styles.statValue}>15m</Text>
 						<Text style={styles.statLabel}>Meditation</Text>
 					</View>
@@ -25,7 +26,7 @@ export function MindfulnessWidget() {
 					<View style={styles.divider} />
 
 					<View style={styles.statBox}>
-						<Heart size={20} color={NeonColors.accent.red} />
+						<Icon icon={FavouriteIcon} size={20} color={NeonColors.accent.red} />
 						<Text style={styles.statValue}>Calm</Text>
 						<Text style={styles.statLabel}>Avg Mood</Text>
 					</View>
@@ -33,7 +34,7 @@ export function MindfulnessWidget() {
 					<View style={styles.divider} />
 
 					<View style={styles.statBox}>
-						<Moon size={20} color={NeonColors.accent.purple} />
+						<Icon icon={Moon02Icon} size={20} color={NeonColors.accent.purple} />
 						<Text style={styles.statValue}>7h 45m</Text>
 						<Text style={styles.statLabel}>Deep Sleep</Text>
 					</View>

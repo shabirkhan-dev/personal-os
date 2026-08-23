@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "personal-os",
   "description": "Personal life operating system — track routines, finance, skincare, food, fashion, and daily habits in one web and mobile app.",
   "keywords": ["personal-os", "life-os", "routines", "finance", "skincare", "food", "fashion", "wellness", "habits", "productivity", "nextjs", "expo"],
@@ -51,13 +51,13 @@
     "lightningcss": "1.32.0",
     "@expo/dom-webview": "57.0.0",
     "@expo/log-box": "57.0.0",
-    "@expo/metro-runtime": "57.0.6",
-    "expo": "57.0.7",
-    "expo-constants": "57.0.6",
+    "@expo/metro-runtime": "57.0.12",
+    "expo": "57.0.15",
+    "expo-constants": "57.0.13",
     "expo-font": "57.0.1",
     "expo-glass-effect": "57.0.1",
-    "expo-linking": "57.0.3",
-    "expo-symbols": "57.0.1"
+    "expo-linking": "57.0.7",
+    "expo-symbols": "57.0.2"
   }
 }
 

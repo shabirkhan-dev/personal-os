@@ -1,4 +1,4 @@
-import { BarChart3, TrendingUp, Zap } from "lucide-react-native";
+import { Analytics01Icon, FlashIcon, TradeUpIcon } from "@hugeicons/core-free-icons";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LogListItem } from "@/components/ui/log-list-item";
@@ -23,7 +23,7 @@ export default function InsightsScreen() {
 
 						<View style={styles.logsList}>
 							<LogListItem
-								icon={TrendingUp}
+								icon={TradeUpIcon}
 								iconColor={NeonColors.accent.green}
 								title="Weekly Trend"
 								subtitle="Consistency up 12% this week"
@@ -32,7 +32,7 @@ export default function InsightsScreen() {
 								deltaColor={NeonColors.text.secondary}
 							/>
 							<LogListItem
-								icon={Zap}
+								icon={FlashIcon}
 								iconColor={NeonColors.accent.orange}
 								title="Peak Energy"
 								subtitle="Best performance window detected"
@@ -41,7 +41,7 @@ export default function InsightsScreen() {
 								deltaColor={NeonColors.accent.green}
 							/>
 							<LogListItem
-								icon={BarChart3}
+								icon={Analytics01Icon}
 								iconColor={NeonColors.accent.blue}
 								title="Sleep Quality"
 								subtitle="REM cycles improving steadily"

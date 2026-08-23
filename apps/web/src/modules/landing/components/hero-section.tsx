@@ -127,8 +127,12 @@ function WorkflowCard() {
 						<HugeiconsIcon icon={File01Icon} className="size-4" aria-hidden={true} />
 					</span>
 					<div>
-						<p className="font-semibold text-neutral-900 text-sm">{LANDING_COPY.workflowCardTitle}</p>
-						<p className="text-[11px] text-neutral-500">{LANDING_COPY.workflowCardSub} · just now</p>
+						<p className="font-semibold text-neutral-900 text-sm">
+							{LANDING_COPY.workflowCardTitle}
+						</p>
+						<p className="text-[11px] text-neutral-500">
+							{LANDING_COPY.workflowCardSub} · just now
+						</p>
 					</div>
 				</div>
 

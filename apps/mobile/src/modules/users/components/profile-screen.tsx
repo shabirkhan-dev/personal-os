@@ -1,7 +1,15 @@
-import { Calendar, CheckCircle2, LogOut, Mail, ShieldOff, UserRound } from "lucide-react-native";
+import {
+	Calendar01Icon,
+	CheckmarkCircle02Icon,
+	Logout01Icon,
+	Mail01Icon,
+	ShieldOffIcon,
+	UserIcon,
+} from "@hugeicons/core-free-icons";
 import { useEffect } from "react";
 import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Icon } from "@/components/ui/icon";
 import { NeonCard } from "@/components/ui/neon-card";
 import { OSHeader } from "@/components/ui/os-header";
 import { NeonColors } from "@/constants/design-system";
@@ -90,9 +98,19 @@ export function ProfileScreen() {
 										style={[styles.badge, user.emailVerified ? styles.badgeOk : styles.badgeWarn]}
 									>
 										{user.emailVerified ? (
-											<CheckCircle2 size={12} color={NeonColors.accent.green} strokeWidth={2.5} />
+											<Icon
+												icon={CheckmarkCircle02Icon}
+												size={12}
+												color={NeonColors.accent.green}
+												strokeWidth={2.5}
+											/>
 										) : (
-											<Mail size={12} color={NeonColors.accent.orange} strokeWidth={2} />
+											<Icon
+												icon={Mail01Icon}
+												size={12}
+												color={NeonColors.accent.orange}
+												strokeWidth={2}
+											/>
 										)}
 										<Text
 											style={[
@@ -104,7 +122,12 @@ export function ProfileScreen() {
 										</Text>
 									</View>
 									<View style={styles.badge}>
-										<UserRound size={12} color={NeonColors.text.secondary} strokeWidth={2} />
+										<Icon
+											icon={UserIcon}
+											size={12}
+											color={NeonColors.text.secondary}
+											strokeWidth={2}
+										/>
 										<Text style={styles.badgeText}>{user.isActive ? "Active" : "Inactive"}</Text>
 									</View>
 								</View>
@@ -122,14 +145,19 @@ export function ProfileScreen() {
 							<Text style={styles.sectionLabel}>ACCOUNT IDENTITY</Text>
 							<NeonCard>
 								<View style={styles.identityList}>
-									<IdentityRow icon={Mail} label="Email" value={user.email} />
+									<IdentityRow icon={Mail01Icon} label="Email" value={user.email} />
 									<IdentityRow
-										icon={CheckCircle2}
+										icon={CheckmarkCircle02Icon}
 										label="Email status"
 										value={user.emailVerified ? "Verified" : "Verification required"}
 										accent={user.emailVerified ? NeonColors.accent.green : NeonColors.accent.orange}
 									/>
-									<IdentityRow icon={Calendar} label="Member since" value={memberSince} last />
+									<IdentityRow
+										icon={Calendar01Icon}
+										label="Member since"
+										value={memberSince}
+										last
+									/>
 								</View>
 							</NeonCard>
 						</View>
@@ -140,11 +168,21 @@ export function ProfileScreen() {
 								<View style={styles.sessionActions}>
 									<AuthButton label="Sign out" variant="outline" onPress={confirmLogout} />
 									<Pressable style={styles.logoutAll} onPress={confirmLogoutAll}>
-										<ShieldOff size={16} color={NeonColors.accent.red} strokeWidth={1.8} />
+										<Icon
+											icon={ShieldOffIcon}
+											size={16}
+											color={NeonColors.accent.red}
+											strokeWidth={1.8}
+										/>
 										<Text style={styles.logoutAllText}>Sign out everywhere</Text>
 									</Pressable>
 									<View style={styles.logoutHint}>
-										<LogOut size={14} color={NeonColors.text.muted} strokeWidth={1.8} />
+										<Icon
+											icon={Logout01Icon}
+											size={14}
+											color={NeonColors.text.muted}
+											strokeWidth={1.8}
+										/>
 										<Text style={styles.logoutHintText}>
 											Sign out ends only this device session
 										</Text>

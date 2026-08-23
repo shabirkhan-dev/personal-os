@@ -1,4 +1,4 @@
-import { Calendar, CheckCircle2, Clock } from "lucide-react-native";
+import { Calendar01Icon, CheckmarkCircle02Icon, Clock01Icon } from "@hugeicons/core-free-icons";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LogListItem } from "@/components/ui/log-list-item";
@@ -23,7 +23,7 @@ export default function HistoryScreen() {
 
 						<View style={styles.logsList}>
 							<LogListItem
-								icon={CheckCircle2}
+								icon={CheckmarkCircle02Icon}
 								iconColor={NeonColors.accent.green}
 								title="Morning Routine"
 								subtitle="Cleanser → Serum → SPF"
@@ -32,7 +32,7 @@ export default function HistoryScreen() {
 								deltaColor={NeonColors.text.secondary}
 							/>
 							<LogListItem
-								icon={Clock}
+								icon={Clock01Icon}
 								iconColor={NeonColors.accent.purple}
 								title="Night Routine"
 								subtitle="Double cleanse → Retinol → Moisturizer"
@@ -41,7 +41,7 @@ export default function HistoryScreen() {
 								deltaColor={NeonColors.text.secondary}
 							/>
 							<LogListItem
-								icon={Calendar}
+								icon={Calendar01Icon}
 								iconColor={NeonColors.accent.blue}
 								title="Weekly Mask"
 								subtitle="Clay mask — 15 min session"

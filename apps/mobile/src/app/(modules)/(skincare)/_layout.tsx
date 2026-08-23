@@ -1,5 +1,6 @@
+import { Clock01Icon, ShoppingBag01Icon, SparklesIcon } from "@hugeicons/core-free-icons";
 import { Tabs } from "expo-router";
-import { History, ShoppingBag, Sparkles } from "lucide-react-native";
+import { Icon } from "@/components/ui/icon";
 import { NeonColors } from "@/constants/design-system";
 
 export default function SkincareLayout() {
@@ -23,7 +24,7 @@ export default function SkincareLayout() {
 				options={{
 					title: "Routine",
 					tabBarIcon: ({ color, focused }) => (
-						<Sparkles color={color} size={22} strokeWidth={focused ? 2.5 : 1.5} />
+						<Icon icon={SparklesIcon} color={color} size={22} strokeWidth={focused ? 2.5 : 1.5} />
 					),
 				}}
 			/>
@@ -32,7 +33,12 @@ export default function SkincareLayout() {
 				options={{
 					title: "Products",
 					tabBarIcon: ({ color, focused }) => (
-						<ShoppingBag color={color} size={22} strokeWidth={focused ? 2.5 : 1.5} />
+						<Icon
+							icon={ShoppingBag01Icon}
+							color={color}
+							size={22}
+							strokeWidth={focused ? 2.5 : 1.5}
+						/>
 					),
 				}}
 			/>
@@ -41,7 +47,7 @@ export default function SkincareLayout() {
 				options={{
 					title: "History",
 					tabBarIcon: ({ color, focused }) => (
-						<History color={color} size={22} strokeWidth={focused ? 2.5 : 1.5} />
+						<Icon icon={Clock01Icon} color={color} size={22} strokeWidth={focused ? 2.5 : 1.5} />
 					),
 				}}
 			/>

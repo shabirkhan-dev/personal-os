@@ -1,5 +1,6 @@
-import { Apple, Beef, Flame, Wheat } from "lucide-react-native";
+import { AppleIcon, Bread01Icon, FireIcon, NaturalFoodIcon } from "@hugeicons/core-free-icons";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Icon } from "@/components/ui/icon";
 import { NeonCard } from "@/components/ui/neon-card";
 import { NeonColors, NeonShadows } from "@/constants/design-system";
 
@@ -9,7 +10,7 @@ export function NutritionWidget() {
 			<NeonCard>
 				<View style={styles.header}>
 					<View style={styles.iconContainer}>
-						<Flame size={20} color={NeonColors.accent.yellow} />
+						<Icon icon={FireIcon} size={20} color={NeonColors.accent.yellow} />
 					</View>
 					<Text style={styles.title}>Daily Macros</Text>
 					<Text style={styles.subtitle}>1,450 / 2,200 kcal</Text>
@@ -23,17 +24,17 @@ export function NutritionWidget() {
 
 				<View style={styles.macrosRow}>
 					<View style={styles.macroItem}>
-						<Beef size={18} color={NeonColors.accent.red} />
+						<Icon icon={NaturalFoodIcon} size={18} color={NeonColors.accent.red} />
 						<Text style={styles.macroValue}>120g</Text>
 						<Text style={styles.macroLabel}>Protein</Text>
 					</View>
 					<View style={styles.macroItem}>
-						<Wheat size={18} color={NeonColors.accent.orange} />
+						<Icon icon={Bread01Icon} size={18} color={NeonColors.accent.orange} />
 						<Text style={styles.macroValue}>160g</Text>
 						<Text style={styles.macroLabel}>Carbs</Text>
 					</View>
 					<View style={styles.macroItem}>
-						<Apple size={18} color={NeonColors.accent.green} />
+						<Icon icon={AppleIcon} size={18} color={NeonColors.accent.green} />
 						<Text style={styles.macroValue}>45g</Text>
 						<Text style={styles.macroLabel}>Fats</Text>
 					</View>

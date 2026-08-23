@@ -11,13 +11,29 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-	metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://github.com/shabirkhan-dev/personal-os"),
+	metadataBase: new URL(
+		process.env.NEXT_PUBLIC_SITE_URL ?? "https://github.com/shabirkhan-dev/personal-os",
+	),
 	title: {
 		default: "Personal OS",
 		template: "%s | Personal OS",
 	},
-	description: "Personal life operating system — track routines, finance, skincare, food, fashion, and daily habits in one web and mobile app.",
-	keywords: ["personal-os", "life-os", "routines", "finance", "skincare", "food", "fashion", "wellness", "habits", "productivity", "nextjs", "expo"],
+	description:
+		"Personal life operating system — track routines, finance, skincare, food, fashion, and daily habits in one web and mobile app.",
+	keywords: [
+		"personal-os",
+		"life-os",
+		"routines",
+		"finance",
+		"skincare",
+		"food",
+		"fashion",
+		"wellness",
+		"habits",
+		"productivity",
+		"nextjs",
+		"expo",
+	],
 	applicationName: "Personal OS",
 	creator: "Personal OS",
 	openGraph: {
@@ -25,12 +41,14 @@ export const metadata: Metadata = {
 		locale: "en_US",
 		siteName: "Personal OS",
 		title: "Personal OS — life in one place",
-		description: "Personal life operating system — track routines, finance, skincare, food, fashion, and daily habits in one web and mobile app.",
+		description:
+			"Personal life operating system — track routines, finance, skincare, food, fashion, and daily habits in one web and mobile app.",
 	},
 	twitter: {
 		card: "summary_large_image",
 		title: "Personal OS — life in one place",
-		description: "Personal life operating system — track routines, finance, skincare, food, fashion, and daily habits in one web and mobile app.",
+		description:
+			"Personal life operating system — track routines, finance, skincare, food, fashion, and daily habits in one web and mobile app.",
 	},
 	robots: { index: true, follow: true },
 };

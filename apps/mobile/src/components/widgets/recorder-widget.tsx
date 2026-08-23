@@ -1,5 +1,6 @@
-import { Pause, Settings2, Square } from "lucide-react-native";
+import { PauseIcon, Settings02Icon, StopIcon } from "@hugeicons/core-free-icons";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Icon } from "@/components/ui/icon";
 import { NeonCard } from "@/components/ui/neon-card";
 import { NeonColors } from "@/constants/design-system";
 
@@ -44,15 +45,25 @@ export function RecorderWidget() {
 				{/* Controls */}
 				<View style={styles.controls}>
 					<Pressable style={styles.secondaryButton}>
-						<Settings2 size={20} color={NeonColors.text.primary} />
+						<Icon icon={Settings02Icon} size={20} color={NeonColors.text.primary} />
 					</Pressable>
 
 					<Pressable style={styles.mainButton}>
-						<Pause size={24} color={NeonColors.text.primary} fill={NeonColors.text.primary} />
+						<Icon
+							icon={PauseIcon}
+							size={24}
+							color={NeonColors.text.primary}
+							fill={NeonColors.text.primary}
+						/>
 					</Pressable>
 
 					<Pressable style={styles.secondaryButton}>
-						<Square size={20} color={NeonColors.text.primary} fill={NeonColors.text.primary} />
+						<Icon
+							icon={StopIcon}
+							size={20}
+							color={NeonColors.text.primary}
+							fill={NeonColors.text.primary}
+						/>
 					</Pressable>
 				</View>
 			</NeonCard>

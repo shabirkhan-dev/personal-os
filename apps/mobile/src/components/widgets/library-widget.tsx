@@ -1,5 +1,6 @@
-import { BookMarked, Bookmark, BookOpen } from "lucide-react-native";
+import { Bookmark01Icon, BookOpen01Icon } from "@hugeicons/core-free-icons";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Icon } from "@/components/ui/icon";
 import { NeonCard } from "@/components/ui/neon-card";
 import { NeonColors } from "@/constants/design-system";
 
@@ -9,7 +10,7 @@ export function LibraryWidget() {
 			<NeonCard accentColor={NeonColors.accent.teal}>
 				<View style={styles.header}>
 					<View style={styles.headerLeft}>
-						<BookOpen size={20} color={NeonColors.accent.teal} />
+						<Icon icon={BookOpen01Icon} size={20} color={NeonColors.accent.teal} />
 						<Text style={styles.title}>Currently Reading</Text>
 					</View>
 					<Text style={styles.subtitle}>2 Books</Text>
@@ -17,7 +18,7 @@ export function LibraryWidget() {
 
 				<View style={styles.bookContainer}>
 					<View style={styles.bookCover}>
-						<BookMarked size={24} color={NeonColors.background} />
+						<Icon icon={Bookmark01Icon} size={24} color={NeonColors.background} />
 					</View>
 					<View style={styles.bookInfo}>
 						<Text style={styles.bookTitle}>Atomic Habits</Text>
@@ -33,13 +34,13 @@ export function LibraryWidget() {
 
 				<View style={styles.statsContainer}>
 					<View style={styles.statItem}>
-						<Bookmark size={16} color={NeonColors.text.secondary} />
+						<Icon icon={Bookmark01Icon} size={16} color={NeonColors.text.secondary} />
 						<Text style={styles.statValue}>14</Text>
 						<Text style={styles.statLabel}>Completed</Text>
 					</View>
 					<View style={styles.divider} />
 					<View style={styles.statItem}>
-						<BookOpen size={16} color={NeonColors.text.secondary} />
+						<Icon icon={BookOpen01Icon} size={16} color={NeonColors.text.secondary} />
 						<Text style={styles.statValue}>32</Text>
 						<Text style={styles.statLabel}>Wishlist</Text>
 					</View>

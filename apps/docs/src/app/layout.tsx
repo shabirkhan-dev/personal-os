@@ -1,5 +1,5 @@
-﻿import type { Metadata } from "next";
-import { RootProvider } from "fumadocs-ui/provider/next";
+﻿import { RootProvider } from "fumadocs-ui/provider/next";
+import type { Metadata } from "next";
 import { appDescription, appName } from "@/lib/shared";
 import "./global.css";
 
@@ -9,7 +9,20 @@ export const metadata: Metadata = {
 		template: `%s | ${appName}`,
 	},
 	description: appDescription,
-	keywords: ["personal-os", "life-os", "routines", "finance", "skincare", "food", "fashion", "wellness", "habits", "productivity", "nextjs", "expo"],
+	keywords: [
+		"personal-os",
+		"life-os",
+		"routines",
+		"finance",
+		"skincare",
+		"food",
+		"fashion",
+		"wellness",
+		"habits",
+		"productivity",
+		"nextjs",
+		"expo",
+	],
 	openGraph: {
 		title: appName,
 		description: appDescription,

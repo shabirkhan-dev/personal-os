@@ -1,4 +1,4 @@
-import { X } from "lucide-react-native";
+import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import {
 	KeyboardAvoidingView,
@@ -10,6 +10,7 @@ import {
 	TextInput,
 	View,
 } from "react-native";
+import { Icon } from "@/components/ui/icon";
 import { NeonColors } from "@/constants/design-system";
 
 interface AddEntryModalProps {
@@ -52,7 +53,7 @@ export function AddEntryModal({
 					<View style={styles.header}>
 						<Text style={[styles.modalTitle, { color }]}>{titleLabel}</Text>
 						<Pressable onPress={onClose} style={styles.closeButton}>
-							<X size={24} color={NeonColors.text.secondary} />
+							<Icon icon={Cancel01Icon} size={24} color={NeonColors.text.secondary} />
 						</Pressable>
 					</View>
 

@@ -1,7 +1,6 @@
 import { Menu01Icon, PieChartIcon, Wallet01Icon } from "@hugeicons/core-free-icons";
 import { Tabs } from "expo-router";
 import { Icon } from "@/components/ui/icon";
-import { NeonColors } from "@/constants/design-system";
 
 export default function ExpensesLayout() {
 	return (
@@ -9,13 +8,14 @@ export default function ExpensesLayout() {
 			screenOptions={{
 				headerShown: false,
 				tabBarStyle: {
-					backgroundColor: NeonColors.background,
-					borderTopColor: "rgba(255, 255, 255, 0.05)",
-					height: 84,
-					paddingBottom: 24,
+					backgroundColor: "#0B0C10",
+					borderTopColor: "rgba(255, 255, 255, 0.08)",
+					height: 64,
+					paddingBottom: 12,
+					paddingTop: 8,
 				},
-				tabBarActiveTintColor: NeonColors.accent.orange,
-				tabBarInactiveTintColor: NeonColors.text.muted,
+				tabBarActiveTintColor: "#FFFFFF",
+				tabBarInactiveTintColor: "#888888",
 				tabBarLabelStyle: { fontSize: 10, fontWeight: "600" },
 			}}
 		>

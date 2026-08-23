@@ -1,9 +1,9 @@
 import {
 	Calendar01Icon,
-	FlashIcon,
 	Home01Icon,
 	PlusSignIcon,
 	UserIcon,
+	Wallet01Icon,
 } from "@hugeicons/core-free-icons";
 import { router, usePathname } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
@@ -12,12 +12,12 @@ import { Icon, type IconProp } from "@/components/ui/icon";
 import { NeonColors } from "@/constants/design-system";
 
 export interface BottomNavProps {
-	activeTab?: "home" | "routines" | "focus" | "profile";
+	activeTab?: "home" | "routines" | "finance" | "profile";
 	onAddPress?: () => void;
 }
 
 interface TabItemConfig {
-	id: "home" | "routines" | "focus" | "profile";
+	id: "home" | "routines" | "finance" | "profile";
 	label: string;
 	icon: IconProp;
 	route: string;
@@ -37,10 +37,10 @@ const TABS: TabItemConfig[] = [
 		route: "/(modules)/(routines)",
 	},
 	{
-		id: "focus",
-		label: "Focus",
-		icon: FlashIcon,
-		route: "/(modules)/(focus)",
+		id: "finance",
+		label: "Finance",
+		icon: Wallet01Icon,
+		route: "/(modules)/(expenses)",
 	},
 	{
 		id: "profile",
@@ -54,10 +54,10 @@ export function BottomNav({ activeTab, onAddPress }: BottomNavProps) {
 	const insets = useSafeAreaInsets();
 	const pathname = usePathname();
 
-	const getActiveTab = (): "home" | "routines" | "focus" | "profile" => {
+	const getActiveTab = (): "home" | "routines" | "finance" | "profile" => {
 		if (activeTab) return activeTab;
 		if (pathname.includes("(routines)")) return "routines";
-		if (pathname.includes("(focus)") || pathname.includes("(expenses)")) return "focus";
+		if (pathname.includes("(expenses)")) return "finance";
 		if (pathname.includes("(profile)")) return "profile";
 		return "home";
 	};

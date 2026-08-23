@@ -1,0 +1,90 @@
+version: 1
+
+# This file is the future CI/PM-tool ownership source. A card may narrow these paths but may not
+# widen them without an explicit ownership change approved by the human.
+policy:
+  default: deny-unowned-writes
+  read_access: broad-for-understanding
+  write_access: card-scope-only
+
+roles:
+  backend-auth:
+    team: backend
+    paths:
+      - apps/nest-api/src/modules/auth/**
+      - apps/nest-api/src/modules/mfa/**
+      - apps/nest-api/src/modules/passkeys/**
+      - apps/nest-api/src/modules/social-auth/**
+    reviewers:
+      - backend-platform
+      - reviewer
+  backend-product:
+    team: backend
+    paths:
+      - apps/nest-api/src/modules/billing/**
+      - apps/nest-api/src/modules/finance/**
+      - apps/nest-api/src/modules/profiles/**
+      - apps/nest-api/src/modules/routines/**
+      - apps/nest-api/src/modules/users/**
+    reviewers:
+      - backend-platform
+      - reviewer
+  backend-platform:
+    team: backend
+    paths:
+      - apps/nest-api/src/common/**
+      - apps/nest-api/src/config/**
+      - apps/nest-api/src/database/**
+      - apps/nest-api/src/modules/ai/**
+      - apps/nest-api/src/modules/email/**
+      - apps/nest-api/src/modules/health/**
+      - apps/nest-api/test/**
+    reviewers:
+      - reviewer
+  web:
+    team: web
+    paths:
+      - apps/web/**
+    reviewers:
+      - reviewer
+  mobile:
+    team: mobile
+    paths:
+      - apps/mobile/**
+    reviewers:
+      - reviewer
+
+shared:
+  api-contract:
+    paths:
+      - apps/docs/content/docs/backend-api.mdx
+    writers:
+      - backend-auth
+      - backend-product
+      - backend-platform
+    reviewers:
+      - reviewer
+      - web
+      - mobile
+  project-docs:
+    paths:
+      - apps/docs/content/docs/**
+    writers:
+      - human
+      - slice-architect
+    reviewers:
+      - human
+  project-policy:
+    paths:
+      - .agents/agent-contract.md
+      - .agents/roles/**
+      - .agents/ownership.yaml
+    writers:
+      - human
+    reviewers:
+      - human
+  coordination:
+    paths:
+      - .agents/board/**
+      - .agents/notes/**
+    policy: Follow `.agents/README.md`; agents may update their own card lifecycle or owned note.

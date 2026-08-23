@@ -1,10 +1,19 @@
 ---
+id: pos-<stable-id>
 title: <one-line summary>
+type: feature | bug | chore | spike | decision | risk | announcement
 from: backend | web | mobile | human
 to: backend | web | mobile | all
 priority: low | normal | high
 status: open
 assignee: none
+reviewer: none
+parent: none
+depends_on: []
+branch: none
+worktree: none
+scope: []
+allowed_shared: []
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
 ---
@@ -22,6 +31,21 @@ e.g. `apps/docs/content/docs/backend-api.mdx#routines-api-ready`.>
 
 <Concrete suggestion of how to solve it, or exactly what you need back.
 Include a "definition of done" so the resolver knows when to close it.>
+
+## Scope
+
+**In scope:**
+
+- <paths, modules, or contract sections the assignee may change>
+
+**Out of scope:**
+
+- <owned by another role, or explicitly deferred>
+
+## Validation
+
+- <commands, tests, screenshots, or manual checks required>
+- <contract, migration, rollout, or compatibility checks if relevant>
 
 ## Resolution
 

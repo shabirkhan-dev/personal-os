@@ -16,6 +16,8 @@ import {
 	Settings02Icon,
 	SidebarLeftIcon,
 	StudentIcon,
+	Sun03Icon,
+	TaskDone01Icon,
 	TeacherIcon,
 	Tick02Icon,
 	UnfoldMoreIcon,
@@ -56,6 +58,8 @@ const sections: NavSection[] = [
 		heading: "Main Menu",
 		items: [
 			{ id: "dashboard", label: "Dashboard", icon: DashboardSquare01Icon, href: "/admin" },
+			{ id: "today", label: "Today", icon: Sun03Icon, href: "/admin/today" },
+			{ id: "routines", label: "Routines", icon: TaskDone01Icon, href: "/admin/routines" },
 			{ id: "ai-assist", label: "AI Assist", icon: BubbleChatIcon, href: "/admin/ai" },
 			{ id: "attendance", label: "Attendance", icon: ClipboardIcon },
 			{ id: "timetable", label: "Timetable", icon: Calendar03Icon },
@@ -125,6 +129,12 @@ function activeNavId(pathname: string): string {
 	}
 	if (pathname.startsWith("/admin/ai")) {
 		return "ai-assist";
+	}
+	if (pathname.startsWith("/admin/today")) {
+		return "today";
+	}
+	if (pathname.startsWith("/admin/routines")) {
+		return "routines";
 	}
 	if (pathname === "/admin" || pathname === "/admin/") {
 		return "dashboard";

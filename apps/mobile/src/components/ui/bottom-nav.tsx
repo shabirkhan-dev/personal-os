@@ -1,6 +1,8 @@
 import {
 	Calendar01Icon,
 	Home01Icon,
+	Menu01Icon,
+	PieChartIcon,
 	PlusSignIcon,
 	UserIcon,
 	Wallet01Icon,
@@ -11,19 +13,14 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Icon, type IconProp } from "@/components/ui/icon";
 import { NeonColors } from "@/constants/design-system";
 
-export interface BottomNavProps {
-	activeTab?: "home" | "routines" | "finance" | "profile";
-	onAddPress?: () => void;
-}
-
-interface TabItemConfig {
-	id: "home" | "routines" | "finance" | "profile";
+export interface TabItemConfig {
+	id: string;
 	label: string;
 	icon: IconProp;
 	route: string;
 }
 
-const TABS: TabItemConfig[] = [
+export const GLOBAL_TABS: TabItemConfig[] = [
 	{
 		id: "home",
 		label: "Home",
@@ -50,26 +47,66 @@ const TABS: TabItemConfig[] = [
 	},
 ];
 
-export function BottomNav({ activeTab, onAddPress }: BottomNavProps) {
+export const FINANCE_TABS: TabItemConfig[] = [
+	{
+		id: "capital",
+		label: "Capital",
+		icon: Wallet01Icon,
+		route: "/(modules)/(expenses)",
+	},
+	{
+		id: "transactions",
+		label: "Logs",
+		icon: Menu01Icon,
+		route: "/(modules)/(expenses)/transactions",
+	},
+	{
+		id: "budgets",
+		label: "Budgets",
+		icon: PieChartIcon,
+		route: "/(modules)/(expenses)/budget",
+	},
+	{
+		id: "home",
+		label: "Home",
+		icon: Home01Icon,
+		route: "/(modules)/(dashboard)",
+	},
+];
+
+export interface BottomNavProps {
+	tabs?: TabItemConfig[];
+	activeTab?: string;
+	onAddPress?: () => void;
+	addIcon?: IconProp;
+	addAccessibilityLabel?: string;
+}
+
+export function BottomNav({
+	tabs = GLOBAL_TABS,
+	activeTab,
+	onAddPress,
+	addIcon = PlusSignIcon,
+	addAccessibilityLabel = "Quick action",
+}: BottomNavProps) {
 	const insets = useSafeAreaInsets();
 	const pathname = usePathname();
 
-	const getActiveTab = (): "home" | "routines" | "finance" | "profile" => {
+	const getActiveTabId = (): string => {
 		if (activeTab) return activeTab;
-		if (pathname.includes("(routines)")) return "routines";
-		if (pathname.includes("(expenses)")) return "finance";
-		if (pathname.includes("(profile)")) return "profile";
-		return "home";
+		const match = tabs.find((t) => pathname === t.route || pathname.startsWith(t.route));
+		if (match) return match.id;
+		return tabs[0]?.id ?? "home";
 	};
 
-	const currentActive = getActiveTab();
+	const currentActive = getActiveTabId();
 
 	const handleTabPress = (route: string) => {
 		router.push(route as never);
 	};
 
-	const leftTabs = TABS.slice(0, 2);
-	const rightTabs = TABS.slice(2, 4);
+	const leftTabs = tabs.slice(0, 2);
+	const rightTabs = tabs.slice(2, 4);
 
 	return (
 		<View
@@ -128,9 +165,9 @@ export function BottomNav({ activeTab, onAddPress }: BottomNavProps) {
 					]}
 					className="w-[52px] h-[34px] bg-white rounded-full items-center justify-center shadow-lg"
 					accessibilityRole="button"
-					accessibilityLabel="Quick create new entry"
+					accessibilityLabel={addAccessibilityLabel}
 				>
-					<Icon icon={PlusSignIcon} size={20} color="#0B0C10" strokeWidth={2.4} />
+					<Icon icon={addIcon} size={20} color="#0B0C10" strokeWidth={2.4} />
 				</Pressable>
 			</View>
 

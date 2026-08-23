@@ -12,7 +12,7 @@ import {
 	View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { BottomNav } from "@/components/ui/bottom-nav";
+import { BottomNav, FINANCE_TABS } from "@/components/ui/bottom-nav";
 import { Icon } from "@/components/ui/icon";
 import { OSHeader } from "@/components/ui/os-header";
 import { NeonColors } from "@/constants/design-system";
@@ -125,7 +125,11 @@ export default function BudgetScreen() {
 						</View>
 					</View>
 				</ScrollView>
-				<BottomNav activeTab="finance" onAddPress={() => setBudgetModalVisible(true)} />
+				<BottomNav
+					tabs={FINANCE_TABS}
+					activeTab="budgets"
+					onAddPress={() => setBudgetModalVisible(true)}
+				/>
 			</SafeAreaView>
 
 			{/* Set Budget Modal */}

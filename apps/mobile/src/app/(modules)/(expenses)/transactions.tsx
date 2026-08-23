@@ -10,7 +10,7 @@ import {
 	View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { BottomNav } from "@/components/ui/bottom-nav";
+import { BottomNav, FINANCE_TABS } from "@/components/ui/bottom-nav";
 import { Icon } from "@/components/ui/icon";
 import { OSHeader } from "@/components/ui/os-header";
 import { NeonColors } from "@/constants/design-system";
@@ -122,7 +122,11 @@ export default function TransactionsScreen() {
 						</View>
 					</View>
 				</ScrollView>
-				<BottomNav activeTab="finance" onAddPress={() => setModalVisible(true)} />
+				<BottomNav
+					tabs={FINANCE_TABS}
+					activeTab="transactions"
+					onAddPress={() => setModalVisible(true)}
+				/>
 			</SafeAreaView>
 
 			<AddTransactionModal visible={modalVisible} onClose={() => setModalVisible(false)} />

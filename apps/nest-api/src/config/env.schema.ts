@@ -14,10 +14,12 @@ export const envSchema = z
 		PORT: z.coerce.number().int().positive().default(4000),
 		API_PREFIX: z.string().min(1).default('api'),
 		API_VERSION: z.string().regex(/^\d+$/).default('1'),
-		SERVICE_NAME: z.string().min(1).default('starter-api'),
-		APP_NAME: z.string().min(1).max(80).default('Starter'),
+		SERVICE_NAME: z.string().min(1).default('personal-os-api'),
+		APP_NAME: z.string().min(1).max(80).default('Personal OS'),
 		WEB_APP_URL: z.url().default('http://localhost:3000'),
-		DATABASE_URL: z.url().default('postgresql://school-os:school-os@localhost:5433/school-os'),
+		DATABASE_URL: z
+			.url()
+			.default('postgresql://personal-os:personal-os@localhost:5433/personal-os'),
 		DATABASE_POOL_MAX: z.coerce.number().int().min(1).max(50).default(10),
 		DATABASE_SSL: z.enum(['true', 'false']).optional(),
 		JWT_SECRET: z.string().min(32).default(developmentJwtSecret),
@@ -31,10 +33,11 @@ export const envSchema = z
 		OTP_MAX_ATTEMPTS: z.coerce.number().int().min(3).max(10).default(5),
 		MAGIC_LINK_TTL_MINUTES: z.coerce.number().int().min(5).max(60).default(15),
 		MFA_CHALLENGE_TTL_MINUTES: z.coerce.number().int().min(2).max(15).default(5),
+		STEP_UP_TTL_MINUTES: z.coerce.number().int().min(1).max(30).default(5),
 		PASSWORD_BCRYPT_ROUNDS: z.coerce.number().int().min(10).max(14).default(12),
 		MAX_LOGIN_ATTEMPTS: z.coerce.number().int().min(3).max(20).default(5),
 		LOGIN_LOCK_MINUTES: z.coerce.number().int().min(1).max(1440).default(15),
-		REFRESH_COOKIE_NAME: z.string().min(1).default('starter_refresh_token'),
+		REFRESH_COOKIE_NAME: z.string().min(1).default('personal_os_refresh_token'),
 		COOKIE_DOMAIN: z.string().min(1).optional(),
 		/**
 		 * Use `none` when the web app and API are on different sites
@@ -48,7 +51,7 @@ export const envSchema = z
 			.default('true')
 			.transform((value) => value === 'true'),
 		RESEND_API_KEY: z.string().min(1).optional(),
-		AUTH_EMAIL_FROM: z.string().min(3).default('Starter <auth@example.com>'),
+		AUTH_EMAIL_FROM: z.string().min(3).default('Personal OS <auth@example.com>'),
 		WEBAUTHN_RP_ID: z.string().min(1).default('localhost'),
 		/** Comma-separated allowed WebAuthn origins (web + native). */
 		WEBAUTHN_ORIGIN: z.string().min(1).default('http://localhost:3000'),
@@ -111,7 +114,7 @@ export const envSchema = z
 		if (env.WEBAUTHN_ORIGIN.split(',').some((origin) => isLocalhostOrigin(origin.trim()))) {
 			reject(['WEBAUTHN_ORIGIN'], 'WEBAUTHN_ORIGIN must not be localhost in production');
 		}
-		if (env.AUTH_EMAIL_FROM === 'Starter <auth@example.com>') {
+		if (env.AUTH_EMAIL_FROM === 'Personal OS <auth@example.com>') {
 			reject(['AUTH_EMAIL_FROM'], 'AUTH_EMAIL_FROM must be a real sender in production');
 		}
 	});

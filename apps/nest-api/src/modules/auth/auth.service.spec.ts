@@ -12,8 +12,8 @@ import { AuthCryptoService } from './auth-crypto.service';
 
 const user: UserRecord = {
 	id: 'a01a0cab-a947-44f0-bfcd-4b8e8c907534',
-	email: 'starter@example.com',
-	username: 'starter',
+	email: 'personal@example.com',
+	username: 'personal',
 	passwordHash: 'password-hash',
 	emailVerifiedAt: null,
 	isActive: true,
@@ -69,6 +69,8 @@ describe('AuthService', () => {
 			attempts: 0,
 			expiresAt: new Date(Date.now() + 600_000),
 			consumedAt: null,
+			action: null,
+			sessionId: null,
 			createdAt: new Date(),
 		} satisfies AuthChallengeRecord);
 

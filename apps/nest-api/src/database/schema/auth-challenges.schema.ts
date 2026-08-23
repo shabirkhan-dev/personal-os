@@ -9,6 +9,7 @@ export const authChallengePurpose = pgEnum('auth_challenge_purpose', [
 	'mfa_login',
 	'webauthn_registration',
 	'webauthn_authentication',
+	'step_up',
 ]);
 
 export const authChallenges = pgTable(
@@ -24,6 +25,8 @@ export const authChallenges = pgTable(
 		attempts: integer('attempts').notNull().default(0),
 		expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
 		consumedAt: timestamp('consumed_at', { withTimezone: true }),
+		action: varchar('action', { length: 64 }),
+		sessionId: varchar('session_id', { length: 36 }),
 		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 	},
 	(table) => [

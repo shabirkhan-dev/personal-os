@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { and, desc, eq, gt, isNull, ne } from 'drizzle-orm';
+import { and, desc, eq, gt, isNull, ne, sql } from 'drizzle-orm';
 
 import { DatabaseService } from '@/database/database.service';
 import {
@@ -23,6 +23,8 @@ export class AuthRepository {
 		purpose: AuthChallengePurpose;
 		codeHash: string;
 		expiresAt: Date;
+		action?: string | null;
+		sessionId?: string | null;
 	}): Promise<AuthChallengeRecord> {
 		return this.database.db.transaction(async (transaction) => {
 			const now = new Date();
@@ -37,7 +39,19 @@ export class AuthRepository {
 					),
 				);
 
-			const [challenge] = await transaction.insert(authChallenges).values(input).returning();
+			const [challenge] = await transaction
+				.insert(authChallenges)
+				.values({
+					id: input.id,
+					userId: input.userId,
+					email: input.email,
+					purpose: input.purpose,
+					codeHash: input.codeHash,
+					expiresAt: input.expiresAt,
+					action: input.action ?? null,
+					sessionId: input.sessionId ?? null,
+				})
+				.returning();
 			if (!challenge) {
 				throw new Error('Auth challenge insert did not return a record');
 			}
@@ -82,42 +96,65 @@ export class AuthRepository {
 		return challenge ?? null;
 	}
 
-	async recordChallengeAttempt(
-		challengeId: string,
-		attempts: number,
-		consume: boolean,
-	): Promise<void> {
-		await this.database.db
-			.update(authChallenges)
-			.set({ attempts, ...(consume ? { consumedAt: new Date() } : {}) })
-			.where(eq(authChallenges.id, challengeId));
+	async recordChallengeAttempt(challengeId: string, maxAttempts: number): Promise<void> {
+		await this.database.db.transaction(async (transaction) => {
+			const [row] = await transaction
+				.update(authChallenges)
+				.set({ attempts: sql`${authChallenges.attempts} + 1` })
+				.where(and(eq(authChallenges.id, challengeId), isNull(authChallenges.consumedAt)))
+				.returning({ attempts: authChallenges.attempts });
+
+			if (row && row.attempts >= maxAttempts) {
+				await transaction
+					.update(authChallenges)
+					.set({ consumedAt: new Date() })
+					.where(and(eq(authChallenges.id, challengeId), isNull(authChallenges.consumedAt)));
+			}
+		});
 	}
 
-	async completeEmailVerification(challengeId: string, userId: string): Promise<void> {
-		await this.database.db.transaction(async (transaction) => {
+	/**
+	 * Consumes the challenge and marks the user verified atomically. Returns
+	 * false when a concurrent request already consumed the challenge.
+	 */
+	async completeEmailVerification(challengeId: string, userId: string): Promise<boolean> {
+		return this.database.db.transaction(async (transaction) => {
 			const now = new Date();
-			await transaction
+			const consumed = await transaction
 				.update(authChallenges)
 				.set({ consumedAt: now })
-				.where(eq(authChallenges.id, challengeId));
+				.where(and(eq(authChallenges.id, challengeId), isNull(authChallenges.consumedAt)))
+				.returning({ id: authChallenges.id });
+			if (consumed.length === 0) {
+				return false;
+			}
 			await transaction
 				.update(users)
 				.set({ emailVerifiedAt: now, updatedAt: now })
 				.where(eq(users.id, userId));
+			return true;
 		});
 	}
 
+	/**
+	 * Consumes the challenge and applies the password reset atomically. Returns
+	 * false when a concurrent request already consumed the challenge.
+	 */
 	async completePasswordReset(input: {
 		challengeId: string;
 		userId: string;
 		passwordHash: string;
-	}): Promise<void> {
-		await this.database.db.transaction(async (transaction) => {
+	}): Promise<boolean> {
+		return this.database.db.transaction(async (transaction) => {
 			const now = new Date();
-			await transaction
+			const consumed = await transaction
 				.update(authChallenges)
 				.set({ consumedAt: now })
-				.where(eq(authChallenges.id, input.challengeId));
+				.where(and(eq(authChallenges.id, input.challengeId), isNull(authChallenges.consumedAt)))
+				.returning({ id: authChallenges.id });
+			if (consumed.length === 0) {
+				return false;
+			}
 			await transaction
 				.update(users)
 				.set({
@@ -132,6 +169,7 @@ export class AuthRepository {
 				.update(sessions)
 				.set({ revokedAt: now, revocationReason: 'password_reset' })
 				.where(and(eq(sessions.userId, input.userId), isNull(sessions.revokedAt)));
+			return true;
 		});
 	}
 

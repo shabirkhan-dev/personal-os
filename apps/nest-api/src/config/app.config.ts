@@ -19,6 +19,7 @@ export type AppConfig = {
 	otpMaxAttempts: number;
 	magicLinkTtlMinutes: number;
 	mfaChallengeTtlMinutes: number;
+	stepUpTtlMinutes: number;
 	passwordBcryptRounds: number;
 	maxLoginAttempts: number;
 	loginLockMinutes: number;
@@ -78,6 +79,7 @@ export function createAppConfig(env: Env = parseEnv()): AppConfig {
 		otpMaxAttempts: env.OTP_MAX_ATTEMPTS,
 		magicLinkTtlMinutes: env.MAGIC_LINK_TTL_MINUTES,
 		mfaChallengeTtlMinutes: env.MFA_CHALLENGE_TTL_MINUTES,
+		stepUpTtlMinutes: env.STEP_UP_TTL_MINUTES,
 		passwordBcryptRounds: env.PASSWORD_BCRYPT_ROUNDS,
 		maxLoginAttempts: env.MAX_LOGIN_ATTEMPTS,
 		loginLockMinutes: env.LOGIN_LOCK_MINUTES,

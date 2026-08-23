@@ -13,6 +13,7 @@ import { AuthSecurityController } from './auth-security.controller';
 import { CsrfGuard } from './csrf.guard';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { RefreshCookieService } from './refresh-cookie.service';
+import { StepUpGuard } from './step-up.guard';
 
 @Module({
 	imports: [
@@ -24,7 +25,14 @@ import { RefreshCookieService } from './refresh-cookie.service';
 		SocialAuthModule,
 	],
 	controllers: [AuthController, AuthMethodsController, AuthSecurityController],
-	providers: [AuthRepository, AuthService, CsrfGuard, JwtAuthGuard, RefreshCookieService],
+	providers: [
+		AuthRepository,
+		AuthService,
+		CsrfGuard,
+		JwtAuthGuard,
+		RefreshCookieService,
+		StepUpGuard,
+	],
 	exports: [AuthService, JwtAuthGuard],
 })
 export class AuthModule {}

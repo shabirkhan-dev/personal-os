@@ -14,7 +14,7 @@ const productionBase = {
 	CORS_ORIGIN: 'https://app.example.com',
 	WEBAUTHN_RP_ID: 'example.com',
 	WEBAUTHN_ORIGIN: 'https://app.example.com',
-	AUTH_EMAIL_FROM: 'Personal OS <auth@example.com>',
+	AUTH_EMAIL_FROM: 'Personal OS <no-reply@personalos.app>',
 };
 
 describe('envSchema production fail-closed', () => {
@@ -43,7 +43,7 @@ describe('envSchema production fail-closed', () => {
 	it('rejects the development email sender in production', () => {
 		const result = envSchema.safeParse({
 			...productionBase,
-			AUTH_EMAIL_FROM: 'Starter <auth@example.com>',
+			AUTH_EMAIL_FROM: 'Personal OS <auth@example.com>',
 		});
 		expect(result.success).toBe(false);
 		expect(issues(result)).toContain('AUTH_EMAIL_FROM');

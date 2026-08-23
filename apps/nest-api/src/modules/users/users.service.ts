@@ -98,18 +98,8 @@ export class UsersService {
 		return toPublicUser(user);
 	}
 
-	async recordFailedLogin(
-		user: UserRecord,
-		maxAttempts: number,
-		lockMinutes: number,
-	): Promise<void> {
-		const attempts = user.failedLoginAttempts + 1;
-		const lockedUntil =
-			attempts >= maxAttempts ? new Date(Date.now() + lockMinutes * 60_000) : user.lockedUntil;
-		await this.usersRepository.updateLoginSecurity(user.id, {
-			failedLoginAttempts: attempts,
-			lockedUntil,
-		});
+	async recordFailedLogin(userId: string, maxAttempts: number, lockMinutes: number): Promise<void> {
+		await this.usersRepository.incrementFailedLogin(userId, maxAttempts, lockMinutes);
 	}
 
 	async resetFailedLogins(userId: string): Promise<void> {

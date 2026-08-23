@@ -63,6 +63,9 @@ export class AppConfigService {
 	get mfaChallengeTtlMinutes(): number {
 		return this.config.mfaChallengeTtlMinutes;
 	}
+	get stepUpTtlMinutes(): number {
+		return this.config.stepUpTtlMinutes;
+	}
 	get passwordBcryptRounds(): number {
 		return this.config.passwordBcryptRounds;
 	}

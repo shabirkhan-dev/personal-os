@@ -1,7 +1,32 @@
 import * as z from 'zod';
 
 const emailSchema = z.email().trim().toLowerCase().max(320);
-const passwordSchema = z.string().min(12).max(128);
+
+/**
+ * bcrypt truncates inputs at 72 bytes. Enforce the limit at the boundary so two
+ * distinct over-limit suffixes can never authenticate interchangeably.
+ */
+const MAX_PASSWORD_BYTES = 72;
+const passwordByteBoundMessage = `Password must be at most ${MAX_PASSWORD_BYTES} bytes when UTF-8 encoded`;
+
+function withinPasswordByteLimit(value: string): boolean {
+	return Buffer.byteLength(value, 'utf8') <= MAX_PASSWORD_BYTES;
+}
+
+/** New passwords: minimum length + the byte bound. */
+const passwordSchema = z
+	.string()
+	.min(12)
+	.max(128)
+	.refine(withinPasswordByteLimit, { message: passwordByteBoundMessage });
+
+/** Passwords being entered for verification: length sanity + the byte bound. */
+const enteredPasswordSchema = z
+	.string()
+	.min(1)
+	.max(128)
+	.refine(withinPasswordByteLimit, { message: passwordByteBoundMessage });
+
 const otpSchema = z.string().regex(/^\d{6}$/, 'Code must contain exactly 6 digits');
 const usernameSchema = z
 	.string()
@@ -23,7 +48,7 @@ export const registerBodySchema = z
 	.strict();
 
 export const loginBodySchema = z
-	.object({ email: emailSchema, password: z.string().min(1).max(128) })
+	.object({ email: emailSchema, password: enteredPasswordSchema })
 	.strict();
 export const emailBodySchema = z.object({ email: emailSchema }).strict();
 export const verifyEmailBodySchema = z.object({ email: emailSchema, code: otpSchema }).strict();
@@ -32,7 +57,7 @@ export const resetPasswordBodySchema = z
 	.strict();
 export const changePasswordBodySchema = z
 	.object({
-		currentPassword: z.string().min(1).max(128),
+		currentPassword: enteredPasswordSchema,
 		newPassword: passwordSchema,
 	})
 	.strict()
@@ -48,6 +73,16 @@ export const magicLinkBodySchema = z.object({ token: z.string().min(20).max(512)
 export const totpCodeBodySchema = z.object({ code: z.string().min(6).max(32) }).strict();
 export const googleCredentialBodySchema = z
 	.object({ credential: z.string().min(100).max(10_000) })
+	.strict();
+
+export const STEP_UP_ACTIONS = ['totp', 'passkey', 'social_link'] as const;
+export type StepUpAction = (typeof STEP_UP_ACTIONS)[number];
+
+export const stepUpBodySchema = z
+	.object({
+		password: enteredPasswordSchema,
+		action: z.enum(STEP_UP_ACTIONS),
+	})
 	.strict();
 export const passkeyOptionsBodySchema = z.object({ email: emailSchema.optional() }).strict();
 export const passkeyRegistrationBodySchema = z
@@ -122,6 +157,11 @@ export class GoogleCredentialBodyDto {
 	static schema = googleCredentialBodySchema;
 	credential!: string;
 }
+export class StepUpBodyDto {
+	static schema = stepUpBodySchema;
+	password!: string;
+	action!: StepUpAction;
+}
 export class PasskeyOptionsBodyDto {
 	static schema = passkeyOptionsBodySchema;
 	email?: string;
@@ -151,3 +191,4 @@ export type ChangePasswordBody = z.infer<typeof changePasswordBodySchema>;
 export type ChallengeTokenBody = z.infer<typeof challengeTokenBodySchema>;
 export type MagicLinkBody = z.infer<typeof magicLinkBodySchema>;
 export type RefreshBody = z.infer<typeof refreshBodySchema>;
+export type StepUpBody = z.infer<typeof stepUpBodySchema>;

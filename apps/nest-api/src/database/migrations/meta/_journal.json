@@ -43,6 +43,13 @@
       "when": 1787509350105,
       "tag": "0005_absurd_stardust",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1787518642416,
+      "tag": "0006_nostalgic_mojo",
+      "breakpoints": true
     }
   ]
 }

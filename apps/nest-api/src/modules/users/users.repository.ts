@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { eq } from 'drizzle-orm';
+import { and, eq, isNull, sql } from 'drizzle-orm';
 
 import { DatabaseService } from '@/database/database.service';
 import { type UserRecord, userProfiles, users } from '@/database/schema';
@@ -67,6 +67,38 @@ export class UsersRepository {
 			.update(users)
 			.set({ ...input, updatedAt: new Date() })
 			.where(eq(users.id, userId));
+	}
+
+	/**
+	 * Atomically increments the failed-login counter and, when the threshold is
+	 * crossed, locks the account without extending an existing lock. Using SQL
+	 * increment avoids lost updates from concurrent failed logins.
+	 */
+	async incrementFailedLogin(
+		userId: string,
+		maxAttempts: number,
+		lockMinutes: number,
+	): Promise<void> {
+		await this.database.db.transaction(async (transaction) => {
+			const [row] = await transaction
+				.update(users)
+				.set({
+					failedLoginAttempts: sql`${users.failedLoginAttempts} + 1`,
+					updatedAt: new Date(),
+				})
+				.where(eq(users.id, userId))
+				.returning({ failedLoginAttempts: users.failedLoginAttempts });
+
+			if (row && row.failedLoginAttempts >= maxAttempts) {
+				await transaction
+					.update(users)
+					.set({
+						lockedUntil: new Date(Date.now() + lockMinutes * 60_000),
+						updatedAt: new Date(),
+					})
+					.where(and(eq(users.id, userId), isNull(users.lockedUntil)));
+			}
+		});
 	}
 
 	async markEmailVerified(userId: string): Promise<UserRecord | null> {

@@ -9,6 +9,7 @@ import { AuthModule } from '@/modules/auth/auth.module';
 import { BillingModule } from '@/modules/billing/billing.module';
 import { HealthModule } from '@/modules/health/health.module';
 import { ProfilesModule } from '@/modules/profiles/profiles.module';
+import { RoutinesModule } from '@/modules/routines/routines.module';
 import { UsersModule } from '@/modules/users/users.module';
 
 @Module({
@@ -20,6 +21,7 @@ import { UsersModule } from '@/modules/users/users.module';
 		UsersModule,
 		AuthModule,
 		ProfilesModule,
+		RoutinesModule,
 		BillingModule,
 		AiModule,
 	],

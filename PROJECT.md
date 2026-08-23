@@ -1,7 +1,8 @@
 # Personal OS — Project overview
 
 This document is the deeper technical reference for the Personal OS monorepo.
-For product vision see `plan.md`. For quick setup, start with `README.md`.
+For product direction see [the production roadmap](apps/docs/content/docs/production-roadmap.mdx). For
+quick setup, start with `README.md`.
 
 ## What this repository includes
 
@@ -40,7 +41,7 @@ personal-os/
 └── AGENTS.md                 # Universal AI agent guidance
 ```
 
-Documentation is served by `apps/docs` (`bun --cwd apps/docs run dev` → http://localhost:3002/docs).
+Documentation is served by `apps/docs` (`bun --cwd=apps/docs run dev` → http://localhost:3002/docs).
 There is no root `docs/` directory.
 ## Apps and stacks
 

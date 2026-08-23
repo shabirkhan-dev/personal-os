@@ -158,7 +158,7 @@ export default function HomePage() {
 						Keep the source of truth close
 					</div>
 					<p className="mt-3 text-sm leading-6 text-fd-muted-foreground">
-						Product direction lives in <code>plan.md</code>. Agent rules live in{" "}
+						Product direction lives in the production roadmap. Agent rules live in{" "}
 						<code>AGENTS.md</code>. Cross-team work lives in <code>.agents/</code>. API callers use
 						the status board below.
 					</p>

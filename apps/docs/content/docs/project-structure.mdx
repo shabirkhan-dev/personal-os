@@ -23,7 +23,6 @@ personal-os/
 ├── AGENTS.md              # Agent and repository instructions
 ├── DESIGN.md              # Product and interface design brief
 ├── PROJECT.md             # Expanded project and tooling reference
-├── plan.md                # Product direction and milestones
 ├── turbo.json             # Task graph and cache configuration
 └── biome.json             # TypeScript/JavaScript lint and format configuration
 ```
@@ -40,7 +39,8 @@ personal-os/
 | Documentation | `apps/docs/content/docs/` | Add the page to the nearest `meta.json` |
 | Cross-team request | `.agents/board/open/` | Use the board protocol; do not edit another team's notes |
 
-The existing shared package names use the `@school-os/*` npm scope from the original starter. Keep
+Product direction and milestones live in `apps/docs/content/docs/production-roadmap.mdx`. The
+existing shared package names use the `@school-os/*` npm scope from the original starter. Keep
 those imports working until the package namespace is intentionally migrated; do not introduce a
 second alias casually.
 

@@ -24,7 +24,7 @@ Starting Phase 2 backend today. Scope for v1:
 
 ## Why / Context
 
-plan.md M2. Contract section will appear in
+The production roadmap's M2 milestone. The contract section will appear in
 `apps/docs/content/docs/backend-api.mdx#finance-api` in the same commit as the code.
 
 ## Proposal or Ask

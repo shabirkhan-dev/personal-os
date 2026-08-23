@@ -6,19 +6,39 @@ Read this file first when working in this repo.
 ## Project overview
 
 Monorepo **Personal OS** — a personal life operating system (routines, finance, skincare, food,
-fashion) — managed with **Turborepo + Bun**. See `plan.md` for product vision.
+fashion) — managed with **Turborepo + Bun**. Product direction lives in
+`apps/docs/content/docs/production-roadmap.mdx`.
 
 ## Documentation
 
 There is **no root `docs/` folder**. Project docs live in the docs app:
 
 - Source: `apps/docs/content/docs/`
-- Dev: `bun --cwd apps/docs run dev`
+- Dev: `bun --cwd=apps/docs run dev`
 - Browse: http://localhost:3002/docs
 
 Key routes: `/docs/quick-start`, `/docs/production-roadmap`, `/docs/architecture`,
 `/docs/docker`, `/docs/deploy`, `/docs/qol`, `/docs/ai-first-workflow`, `/docs/overrides`,
-`/docs/product-system-design`. Also see root `README.md`, `PROJECT.md`, and `DESIGN.md`.
+`/docs/product-system-design`, `/docs/team-coordination`. Also see root `README.md`,
+`PROJECT.md`, and `DESIGN.md`.
+
+## Source of truth and coordination
+
+Keep project knowledge in the maintained docs and coordination board. Do not create parallel
+product plans in the repository root.
+
+- **Product direction and milestones:** `apps/docs/content/docs/production-roadmap.mdx`
+- **System architecture and security:** `apps/docs/content/docs/product-system-design.mdx` and
+  `apps/docs/content/docs/architecture/`
+- **API readiness and contracts:** `apps/docs/content/docs/backend-api.mdx`
+- **Team coordination and ownership:** `.agents/README.md`, `.agents/board/`, and
+  `.agents/notes/`
+- **Setup and repository conventions:** `README.md`, `PROJECT.md`, `DESIGN.md`, and this file
+
+There is intentionally no standalone root product-plan file. When direction changes, update the
+relevant docs page and raise or update a board card when another team needs to act. When
+implementation and documentation disagree, verify the code and update the appropriate source of
+truth in the same change.
 
 ## Agent-to-agent API contract
 
@@ -173,10 +193,11 @@ only, then `bun run dev`. See `/docs/docker` and `docker/README.md`.
 ## Key files to read for deeper context
 
 - `PROJECT.md` — detailed layout, tooling, and commands.
+- **Product roadmap** (`apps/docs/content/docs/production-roadmap.mdx`) — product direction and milestones.
 - `DESIGN.md` — design-system brief for UI generation and review.
-- **Docs app** (`apps/docs`, run with `bun --cwd apps/docs run dev`):
+- **Docs app** (`apps/docs`, run with `bun --cwd=apps/docs run dev`):
   - `/docs/production-roadmap` — production build phases and Nest API spine
-  - `/docs/ai-first-workflow` — school-os audit and AI-first workflow roadmap
+  - `/docs/ai-first-workflow` — AI-assisted development and review standards
   - `/docs/qol` — full QoL stack (hooks, CI, per-language tools)
   - `/docs/architecture` — architecture baseline and enforceable boundaries
   - `/docs/overrides` — policy for project-specific architecture overrides

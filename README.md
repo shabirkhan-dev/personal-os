@@ -5,7 +5,7 @@
 
 Personal life operating system — track routines, finance, skincare, food, fashion, and everything about your day.
 
-Built on a **Bun + Turborepo** monorepo (Next.js web, Expo mobile, NestJS API, Fumadocs docs, optional AI and Rust). Product modules are rolling out on top of this foundation — see [plan.md](plan.md).
+Built on a **Bun + Turborepo** monorepo (Next.js web, Expo mobile, NestJS API, Fumadocs docs, optional AI and Rust). Product modules are rolling out on top of this foundation — see the [production roadmap](apps/docs/content/docs/production-roadmap.mdx).
 
 > Workspace UI packages use the `@school-os/*` npm scope from the Starter kit. Domain packages will use `@personal-os/*` as features land.
 
@@ -58,7 +58,7 @@ bun run dev
 
 | Doc | Purpose |
 | --- | --- |
-| [plan.md](plan.md) | Vision, domains, and milestones |
+| [Production roadmap](apps/docs/content/docs/production-roadmap.mdx) | Vision, domains, and milestones |
 | [PROJECT.md](PROJECT.md) | Monorepo layout and conventions |
 | [AGENTS.md](AGENTS.md) | Instructions for AI agents |
 | [DESIGN.md](DESIGN.md) | UI design brief |

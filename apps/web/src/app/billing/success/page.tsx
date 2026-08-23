@@ -1,6 +1,6 @@
 import { CheckmarkCircle02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { buttonVariants } from "@school-os/ui/components/button";
+import { buttonVariants } from "@personal-os/ui/components/button";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 

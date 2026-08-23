@@ -1,6 +1,6 @@
 import { Loading03Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { cn } from "@school-os/ui/lib/utils";
+import { cn } from "@personal-os/ui/lib/utils";
 import type { ComponentProps } from "react";
 
 function Spinner({ className, ...props }: Omit<ComponentProps<typeof HugeiconsIcon>, "icon">) {

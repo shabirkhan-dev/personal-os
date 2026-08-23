@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Starter scripts – bash
+# Personal OS scripts – Bash
 set -euo pipefail
 
-echo "Hello from Starter scripts (bash)"
+echo "Hello from Personal OS scripts (bash)"

@@ -2,9 +2,9 @@
 
 import { ImageUploadIcon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Button } from "@school-os/ui/components/button";
-import { Field, FieldDescription, FieldLabel } from "@school-os/ui/components/field";
-import { Spinner } from "@school-os/ui/components/spinner";
+import { Button } from "@personal-os/ui/components/button";
+import { Field, FieldDescription, FieldLabel } from "@personal-os/ui/components/field";
+import { Spinner } from "@personal-os/ui/components/spinner";
 import { useId, useRef, useState } from "react";
 import { buildAvatarTemplates } from "../lib/avatar-templates";
 

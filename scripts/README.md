@@ -1,4 +1,4 @@
-# Starter scripts
+# Personal OS scripts
 
 Scripts live under **`scripts/`** at repo root, organized by language: **bash**, **python**.
 
@@ -40,4 +40,3 @@ Optional (for lint/format):
 
 - **bash** – `.shellcheckrc`, shfmt 4-space indent.
 - **python** – `pyproject.toml` (ruff + black-style line-length 100, Python 3.11).
-

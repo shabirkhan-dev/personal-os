@@ -1,6 +1,6 @@
-# `@school-os/ui`
+# `@personal-os/ui`
 
-Shared shadcn/ui primitives for the Starter monorepo.
+Shared shadcn/ui primitives for the Personal OS monorepo.
 
 This package follows the [shadcn monorepo](https://ui.shadcn.com/docs/monorepo) layout:
 
@@ -31,15 +31,15 @@ Keep `style`, `iconLibrary`, and `baseColor` identical in:
 Preferred (deep imports — matches CLI aliases):
 
 ```tsx
-import { Button } from "@school-os/ui/components/button";
-import { cn } from "@school-os/ui/lib/utils";
-import { useIsMobile } from "@school-os/ui/hooks/use-mobile";
+import { Button } from "@personal-os/ui/components/button";
+import { cn } from "@personal-os/ui/lib/utils";
+import { useIsMobile } from "@personal-os/ui/hooks/use-mobile";
 ```
 
 Barrel import (still supported):
 
 ```tsx
-import { Button, Card, cn } from "@school-os/ui";
+import { Button, Card, cn } from "@personal-os/ui";
 ```
 
 ## Styles
@@ -48,7 +48,7 @@ Apps import shared tokens from this package:
 
 ```css
 @import "tailwindcss";
-@import "@school-os/ui/globals.css";
+@import "@personal-os/ui/globals.css";
 @source "../../../../packages/ui/src";
 ```
 

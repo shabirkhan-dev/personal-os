@@ -3,7 +3,7 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"],
-      "@school-os/ui/*": ["../../packages/ui/src/*"]
+      "@personal-os/ui/*": ["../../packages/ui/src/*"]
     }
   },
   "include": [

@@ -21,5 +21,5 @@ def test_assist_mock_reply(client: TestClient, service_headers: dict[str, str]) 
     assert response.status_code == 200
     payload = response.json()
     assert payload["provider"] == "mock"
-    assert "School OS Assist" in payload["reply"]
+    assert "Personal OS Assist" in payload["reply"]
     assert "How do I start the monorepo?" in payload["reply"]

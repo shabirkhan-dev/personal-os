@@ -4,22 +4,22 @@ services:
     build:
       context: ../..
       dockerfile: apps/nest-api/Dockerfile
-    image: school-os-nest-api:local
+    image: personal-os-nest-api:local
     restart: unless-stopped
     environment:
       NODE_ENV: production
       PORT: 4000
       API_PREFIX: api
       API_VERSION: "1"
-      SERVICE_NAME: school-os-api
-      DATABASE_URL: postgresql://${POSTGRES_USER:-school-os}:${POSTGRES_PASSWORD:-school-os}@postgres:5432/${POSTGRES_DB:-school-os}
+      SERVICE_NAME: personal-os-api
+      DATABASE_URL: postgresql://${POSTGRES_USER:-personal-os}:${POSTGRES_PASSWORD:-personal-os}@postgres:5432/${POSTGRES_DB:-personal-os}
       DATABASE_POOL_MAX: ${DATABASE_POOL_MAX:-10}
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env (min 32 chars)}
       JWT_ACCESS_EXPIRES_IN: ${JWT_ACCESS_EXPIRES_IN:-15m}
       AUTH_TOKEN_SECRET: ${AUTH_TOKEN_SECRET:?Set AUTH_TOKEN_SECRET in .env (min 32 chars)}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
       AUTH_DEV_EXPOSE_CODES: ${AUTH_DEV_EXPOSE_CODES:-false}
-      AUTH_EMAIL_FROM: ${AUTH_EMAIL_FROM:-Starter <auth@example.com>}
+      AUTH_EMAIL_FROM: ${AUTH_EMAIL_FROM:-Personal OS <auth@example.com>}
       RESEND_API_KEY: ${RESEND_API_KEY:?Set RESEND_API_KEY in .env}
       RUN_MIGRATIONS: ${RUN_MIGRATIONS:-true}
       TRUST_PROXY: ${TRUST_PROXY:-false}

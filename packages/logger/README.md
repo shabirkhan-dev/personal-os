@@ -1,13 +1,13 @@
-# @school-os/logger
+# @personal-os/logger
 
 Beautiful, injectable logger for TypeScript/JavaScript and Rust. Same design in both: levels, colors, timestamps, optional prefix, and child loggers.
 
 ## TypeScript / JavaScript
 
-**Install:** Add `@school-os/logger` to your app (workspace dependency).
+**Install:** Add `@personal-os/logger` to your app (workspace dependency).
 
 ```ts
-import { createLogger } from "@school-os/logger";
+import { createLogger } from "@personal-os/logger";
 
 const log = createLogger({ prefix: "app" });
 log.info("Server started");
@@ -26,11 +26,11 @@ httpLog.info("GET / 200");
 
 ```toml
 [dependencies]
-school-logger = { path = "../../packages/logger/rust" }
+personal-os-logger = { path = "../../packages/logger/rust" }
 ```
 
 ```rust
-use school_logger::Logger;
+use personal_os_logger::Logger;
 
 let log = Logger::new().with_prefix("app");
 log.info("Server started");

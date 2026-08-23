@@ -15,12 +15,12 @@ describe('AuthCryptoService', () => {
 	});
 
 	it('creates verifiable purpose-bound OTP hashes', () => {
-		const hash = service.hashOtp('email_verification', 'starter@example.com', '123456');
+		const hash = service.hashOtp('email_verification', 'personal@example.com', '123456');
 
-		expect(service.verifyOtp('email_verification', 'starter@example.com', '123456', hash)).toBe(
+		expect(service.verifyOtp('email_verification', 'personal@example.com', '123456', hash)).toBe(
 			true,
 		);
-		expect(service.verifyOtp('password_reset', 'starter@example.com', '123456', hash)).toBe(false);
+		expect(service.verifyOtp('password_reset', 'personal@example.com', '123456', hash)).toBe(false);
 	});
 
 	it('creates refresh tokens that reveal only the session identifier', () => {
@@ -41,14 +41,14 @@ describe('AuthCryptoService', () => {
 
 	it('creates one-purpose challenge tokens', () => {
 		const token = service.createChallengeToken('84c5bd4b-2a8f-4a89-85db-c22f45dc2ab9');
-		const tokenHash = service.hashChallengeToken('magic_link', 'starter@example.com', token);
+		const tokenHash = service.hashChallengeToken('magic_link', 'personal@example.com', token);
 		expect(service.getChallengeId(token)).toBe('84c5bd4b-2a8f-4a89-85db-c22f45dc2ab9');
 		expect(
-			service.verifyChallengeToken('magic_link', 'starter@example.com', token, tokenHash),
+			service.verifyChallengeToken('magic_link', 'personal@example.com', token, tokenHash),
 		).toBe(true);
-		expect(service.verifyChallengeToken('mfa_login', 'starter@example.com', token, tokenHash)).toBe(
-			false,
-		);
+		expect(
+			service.verifyChallengeToken('mfa_login', 'personal@example.com', token, tokenHash),
+		).toBe(false);
 	});
 
 	it('signs short-lived access tokens with minimal claims', async () => {

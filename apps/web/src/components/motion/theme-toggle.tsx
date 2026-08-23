@@ -13,7 +13,7 @@ import {
 	DropdownMenuRadioItem,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "@school-os/ui/components/dropdown-menu";
+} from "@personal-os/ui/components/dropdown-menu";
 import { useReducedMotion } from "motion/react";
 import {
 	type ComponentPropsWithoutRef,

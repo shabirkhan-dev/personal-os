@@ -3,8 +3,8 @@
 import { Dialog as SheetPrimitive } from "@base-ui/react/dialog";
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Button } from "@school-os/ui/components/button";
-import { cn } from "@school-os/ui/lib/utils";
+import { Button } from "@personal-os/ui/components/button";
+import { cn } from "@personal-os/ui/lib/utils";
 import type * as React from "react";
 
 function Sheet({ ...props }: SheetPrimitive.Root.Props) {

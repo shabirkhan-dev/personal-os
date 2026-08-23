@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@school-os/ui/lib/utils";
+import { cn } from "@personal-os/ui/lib/utils";
 import type * as React from "react";
 
 // Primitive label; associate with input via htmlFor or wrap input inside.

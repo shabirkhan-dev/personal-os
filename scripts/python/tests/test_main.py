@@ -10,7 +10,7 @@ class MainScriptTest(unittest.TestCase):
             capture_output=True,
             text=True,
         )
-        self.assertIn("Hello from School OS scripts (python)", result.stdout)
+        self.assertIn("Hello from Personal OS scripts (python)", result.stdout)
 
 
 if __name__ == "__main__":

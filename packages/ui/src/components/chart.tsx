@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@school-os/ui/lib/utils";
+import { cn } from "@personal-os/ui/lib/utils";
 import * as React from "react";
 import * as RechartsPrimitive from "recharts";
 

@@ -10,7 +10,7 @@ import { ATLAS_EASE, menuItemVariants, springSnappy, springSoft } from "../lib/m
 import { cn } from "../lib/utils";
 import { LandingAuthActions } from "./landing-auth-actions";
 
-function StarterMark({ className }: { className?: string }) {
+function PersonalOSMark({ className }: { className?: string }) {
 	return (
 		<span
 			className={cn(
@@ -45,7 +45,7 @@ export function SiteHeader() {
 						href="/"
 						className="flex shrink-0 items-center gap-2 rounded-lg px-1 font-semibold text-foreground outline-none focus-visible:ring-2 focus-visible:ring-foreground/30"
 					>
-						<StarterMark />
+						<PersonalOSMark />
 						{SITE.name}
 					</Link>
 

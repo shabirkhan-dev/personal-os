@@ -19,7 +19,7 @@
     "@hugeicons/core-free-icons": "^4.2.2",
     "@hugeicons/react": "^1.1.9",
     "@paper-design/shaders-react": "^0.0.77",
-    "@school-os/ui": "workspace:*",
+    "@personal-os/ui": "workspace:*",
     "@simplewebauthn/browser": "^13.3.0",
     "@tanstack/react-query": "^5.100.10",
     "clsx": "^2.1.1",
@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",
-    "@school-os/typescript-config": "workspace:*",
+    "@personal-os/typescript-config": "workspace:*",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^25.9.5",
     "@types/react": "^19.2.14",

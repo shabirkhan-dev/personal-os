@@ -8,7 +8,7 @@ import {
 	UnfoldMoreIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { cn } from "@school-os/ui/lib/utils";
+import { cn } from "@personal-os/ui/lib/utils";
 import type * as React from "react";
 
 const Select = SelectPrimitive.Root;

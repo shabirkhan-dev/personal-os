@@ -1,8 +1,8 @@
 /*
- * Starter landing theme.
+ * Personal OS landing theme.
  * Scoped to [data-landing] so the marketing surface can carry its own
  * neutral shadcn-like palette + display fonts without leaking into the
- * rest of the Starter app. Dark is the default; the .dark class is
+ * rest of the Personal OS app. Dark is the default; the .dark class is
  * toggled on <html> by the AgentShell.
  */
 
@@ -14,7 +14,7 @@
 		monospace;
 	--font-geist-mono: var(--font-mono);
 
-	/* Light palette — clean white Starter marketing surface */
+	/* Light palette — clean white Personal OS marketing surface */
 	--background: #ffffff;
 	--foreground: #09090b;
 	--card: #ffffff;

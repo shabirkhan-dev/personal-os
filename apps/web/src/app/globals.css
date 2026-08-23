@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@school-os/ui/globals.css";
+@import "@personal-os/ui/globals.css";
 
 /* Scan UI package for Tailwind classes */
 @source "../../../../packages/ui/src";
@@ -72,7 +72,7 @@
 	--dashboard-tooltip-bg: rgba(255, 255, 255, 0.98);
 	--dashboard-chart-line: #404040;
 	--dashboard-chart-leader: rgba(115, 115, 115, 0.5);
-	/* Teal — school-ops accent; avoids generic indigo/purple SaaS default */
+	/* Teal — personal-systems accent; avoids generic indigo/purple SaaS default */
 	--dashboard-accent: #0f766e;
 	--dashboard-accent-hover: #0d9488;
 	--dashboard-accent-fg: #ffffff;

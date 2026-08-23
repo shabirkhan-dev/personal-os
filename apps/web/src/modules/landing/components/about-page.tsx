@@ -81,7 +81,7 @@ function AboutStats() {
 					</FadeIn>
 					<FadeIn delay={0.08}>
 						<h2 className="mt-5 text-balance font-serif text-3xl text-foreground leading-tight sm:text-4xl">
-							Apps in the starter. Minutes to first dev.
+							Apps in Personal OS. Minutes to first dev.
 						</h2>
 					</FadeIn>
 				</div>
@@ -161,12 +161,12 @@ function AboutTeam() {
 					</FadeIn>
 					<FadeIn delay={0.06}>
 						<h2 className="mt-5 text-balance font-serif text-3xl text-foreground leading-tight sm:text-4xl">
-							The people behind Starter.
+							The people behind Personal OS.
 						</h2>
 					</FadeIn>
 					<FadeIn delay={0.1}>
 						<p className="mt-4 text-pretty text-muted-foreground text-sm leading-7 sm:text-base">
-							Engineers who&apos;ve shipped polyglot monorepos — now packaging the starter so you
+							Engineers who&apos;ve shipped polyglot monorepos — now building Personal OS so you
 							don&apos;t start from zero.
 						</p>
 					</FadeIn>

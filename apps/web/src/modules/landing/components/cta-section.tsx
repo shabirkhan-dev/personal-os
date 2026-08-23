@@ -34,7 +34,7 @@ export function CtaSection() {
 
 				<FadeIn delay={0.08}>
 					<h2 className="mt-5 max-w-2xl text-balance font-serif text-4xl text-foreground leading-[1.05] sm:text-5xl">
-						Clone the starter. Run the workspace.
+						Run Personal OS locally.
 					</h2>
 				</FadeIn>
 
@@ -55,7 +55,7 @@ export function CtaSection() {
 							<span className="size-3 rounded-full bg-[#ff5f57]" />
 							<span className="size-3 rounded-full bg-[#febc2e]" />
 							<span className="size-3 rounded-full bg-[#28c840]" />
-							<span className="ml-2 font-mono text-[11px] text-white/40">~/school-os</span>
+							<span className="ml-2 font-mono text-[11px] text-white/40">~/personal-os</span>
 							<motion.button
 								type="button"
 								onClick={handleCopy}

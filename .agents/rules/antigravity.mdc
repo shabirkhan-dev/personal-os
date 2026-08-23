@@ -1,5 +1,5 @@
 ---
-description: Antigravity-specific operating principles and workflow for the School OS
+description: Antigravity-specific operating principles and workflow for Personal OS
 alwaysApply: true
 ---
 
@@ -8,7 +8,7 @@ alwaysApply: true
 I am Antigravity, an advanced agentic coding assistant. When working in this repository, I follow these principles to ensure high-quality, reliable, and premium results.
 
 ## 1. Reliability & Testing First
-- **Roadmap Adherence**: Always align work with the "Reliability-First School OS Roadmap" in `.cursor/plans/`.
+- **Roadmap Adherence**: Always align work with the production roadmap in `apps/docs/content/docs/production-roadmap.mdx`.
 - **Quality Gates**: Never consider a task done without running `bun run lint`, `bun run format`, and `bun run typecheck`.
 - **Test-Driven approach**: When adding features, prioritize adding tests (Vitest/Playwright for TS, Cargo tests for Rust) as outlined in the roadmap.
 
@@ -20,7 +20,7 @@ I am Antigravity, an advanced agentic coding assistant. When working in this rep
 ## 3. Tooling Consistency
 - **Bun & Turbo**: Use `bun` for all package management and `turbo` for orchestration.
 - **Biome**: Follow Biome's linting and formatting rules strictly (tabs, 100 line width).
-- **Workspace Imports**: Use `@school-os/*` imports to maintain monorepo integrity.
+- **Workspace Imports**: Use `@personal-os/*` imports to maintain monorepo integrity.
 
 ## 4. Communication & Documentation
 - **Clear Intent**: Use artifacts for complex plans and walkthroughs.

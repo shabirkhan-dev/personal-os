@@ -60,7 +60,7 @@ export function SiteFooter() {
 							{SITE.name}
 						</span>
 						<p className="mt-3 max-w-xs text-muted-foreground text-sm leading-6">
-							Production-ready monorepo starter for web, mobile, API, docs, and Rust.
+							Personal OS monorepo for web, mobile, API, docs, and Rust.
 						</p>
 						<span className="mt-5 inline-flex w-fit items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-muted-foreground text-xs">
 							<span className="relative flex size-2">
@@ -73,22 +73,22 @@ export function SiteFooter() {
 						<div className="mt-8">
 							<p className="font-medium text-foreground text-sm">Release notes</p>
 							<p className="mt-1 text-muted-foreground text-sm">
-								What landed in Starter this month. Once a month, no noise.
+								What landed in Personal OS this month. Once a month, no noise.
 							</p>
 							<form
 								onSubmit={handleSubmit}
 								className="mt-4 flex flex-col gap-2.5 sm:flex-row sm:items-center"
 							>
-								<label htmlFor="school-os-newsletter" className="sr-only">
+								<label htmlFor="personal-os-newsletter" className="sr-only">
 									Email address
 								</label>
 								<input
-									id="school-os-newsletter"
+									id="personal-os-newsletter"
 									type="email"
 									required
 									value={email}
 									onChange={(event) => setEmail(event.target.value)}
-									placeholder="you@school.dev"
+									placeholder="you@example.com"
 									className="h-12 w-full flex-1 appearance-none rounded-full border border-border bg-background px-5 text-foreground text-sm shadow-none outline-none transition-[border-color,box-shadow] placeholder:text-muted-foreground focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-ring/40"
 								/>
 								<button

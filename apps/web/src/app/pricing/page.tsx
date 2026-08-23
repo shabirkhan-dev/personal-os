@@ -23,9 +23,9 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-	title: "Pricing — Starter",
+	title: "Pricing — Personal OS",
 	description:
-		"Starter is free to clone and run. Slide for team and enterprise seats — no surprise overages.",
+		"Personal OS is free to use. Upgrade when you need more workspace capacity — no surprise overages.",
 };
 
 export default function PricingPage() {

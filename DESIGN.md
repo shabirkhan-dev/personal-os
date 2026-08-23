@@ -67,7 +67,7 @@ The repo has a shared web primitive package at `packages/ui` and app-local primi
 
 Current rule:
 
-- Use `@school-os/ui` for stable shared primitives such as `Button`, `Card`, `Badge`, form fields,
+- Use `@personal-os/ui` for stable shared primitives such as `Button`, `Card`, `Badge`, form fields,
   `Separator`, `Skeleton`, and `Textarea`.
 - Keep complex or app-specific composed components inside each app or feature module.
 - Promote a component to `packages/ui` only after it is reusable and free of route/auth/data

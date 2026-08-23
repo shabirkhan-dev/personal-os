@@ -1,4 +1,4 @@
-//! school-logger — Beautiful, injectable logger for Rust. Use `Logger::new()` and inject anywhere.
+//! personal-os-logger — Beautiful, injectable logger for Rust. Use `Logger::new()` and inject anywhere.
 
 mod format;
 mod level;

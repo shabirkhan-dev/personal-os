@@ -1,7 +1,7 @@
 {
   "name": "nest-api",
   "version": "0.0.1",
-  "description": "Production NestJS authentication and user starter API",
+  "description": "Production NestJS authentication and user API",
   "private": true,
   "license": "MIT OR Apache-2.0",
   "scripts": {

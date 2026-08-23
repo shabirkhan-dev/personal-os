@@ -75,7 +75,10 @@ export function ProfileForm({ user }: ProfileFormProps) {
 				<AuthAlert variant="destructive" title="Could not update profile" message={errorMessage} />
 			) : null}
 			{saved && (update.isSuccess || uploadAvatar.isSuccess) ? (
-				<AuthAlert title="Profile updated" message="Your changes are now active across Starter." />
+				<AuthAlert
+					title="Profile updated"
+					message="Your changes are now active across Personal OS."
+				/>
 			) : null}
 
 			<AuthField

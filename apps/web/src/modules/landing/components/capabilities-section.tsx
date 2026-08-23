@@ -30,7 +30,7 @@ export function CapabilitiesSection() {
 					</FadeIn>
 					<FadeIn delay={0.12}>
 						<p className="mt-4 max-w-xl text-pretty text-muted-foreground text-sm leading-7">
-							Shared UI, Nest spine, Expo mobile, docs, CI, and Docker — ship a school product
+							Shared UI, Nest spine, Expo mobile, docs, CI, and Docker — ship a personal product
 							without stitching five repos yourself.
 						</p>
 					</FadeIn>

@@ -22,7 +22,7 @@ interface AuthScreenProps {
 }
 
 export function AuthScreen({
-	brand = "Starter",
+	brand = "Personal OS",
 	title,
 	description,
 	children,

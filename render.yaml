@@ -8,7 +8,7 @@
 
 services:
   - type: web
-    name: school-os-nest-api
+    name: personal-os-nest-api
     runtime: docker
     plan: free
     region: oregon
@@ -31,7 +31,7 @@ services:
       - key: JWT_ACCESS_EXPIRES_IN
         value: 15m
       - key: APP_NAME
-        value: Starter
+        value: Personal OS
       # Paste from Neon console (pooled URL recommended).
       - key: DATABASE_URL
         sync: false
@@ -47,7 +47,7 @@ services:
         sync: false
       - key: AUTH_EMAIL_FROM
         sync: false
-      # Set after Vercel web is live, e.g. https://school-os.vercel.app
+      # Set after Vercel web is live, e.g. https://personal-os.vercel.app
       - key: WEB_APP_URL
         sync: false
       - key: CORS_ORIGIN

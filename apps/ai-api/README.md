@@ -8,7 +8,7 @@ Python **FastAPI** service for in-app AI assistance. Managed with **[uv](https:/
 Web / Mobile  →  NestJS (auth, tenancy, audit)  →  ai-api (prompts + models)
 ```
 
-- FastAPI does **not** own auth sessions, billing, or school CRUD.
+- FastAPI does **not** own auth sessions, billing, or domain CRUD.
 - Nest authenticates the user, then calls ai-api with a shared service token.
 - Model providers are behind a port (`LlmProvider`) so mock and OpenAI-compatible backends swap cleanly.
 

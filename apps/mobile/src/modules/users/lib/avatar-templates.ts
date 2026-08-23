@@ -25,7 +25,7 @@ export function buildAvatarTemplates(seed: string): Array<{
 	label: string;
 	url: string;
 }> {
-	const base = seed.trim() || "school-os";
+	const base = seed.trim() || "personal-os";
 	return AVATAR_TEMPLATE_STYLES.map((template) => ({
 		id: template.id,
 		label: template.label,

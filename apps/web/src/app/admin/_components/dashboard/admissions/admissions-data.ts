@@ -43,7 +43,7 @@ export const admissions: Admission[] = [
 		date: "Jul 14, 2026",
 		status: "pending",
 		source: "walk-in",
-		note: "Awaiting prior school transcript",
+		note: "Awaiting prior record import",
 	},
 	{
 		id: "#A-2043",

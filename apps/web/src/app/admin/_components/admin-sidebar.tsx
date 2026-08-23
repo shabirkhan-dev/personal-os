@@ -35,13 +35,13 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "@school-os/ui/components/dropdown-menu";
+} from "@personal-os/ui/components/dropdown-menu";
 import {
 	Tooltip,
 	TooltipContent,
 	TooltipProvider,
 	TooltipTrigger,
-} from "@school-os/ui/components/tooltip";
+} from "@personal-os/ui/components/tooltip";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { type ComponentProps, useState } from "react";
@@ -106,12 +106,12 @@ const sections: NavSection[] = [
 	},
 ];
 
-type School = { id: string; name: string; kind: string; mark: string };
+type Workspace = { id: string; name: string; kind: string; mark: string };
 
-const schools: School[] = [
-	{ id: "northwood", name: "Northwood High School", kind: "Grades 9–12", mark: "N" },
-	{ id: "riverside", name: "Riverside Elementary", kind: "Grades K–5", mark: "R" },
-	{ id: "district", name: "District Office", kind: "All campuses", mark: "D" },
+const workspaces: Workspace[] = [
+	{ id: "personal", name: "Personal OS", kind: "Life operating system", mark: "P" },
+	{ id: "health", name: "Health & Care", kind: "Personal workspace", mark: "H" },
+	{ id: "money", name: "Money & Plans", kind: "Personal workspace", mark: "M" },
 ];
 
 type AdminSidebarProps = {
@@ -147,9 +147,9 @@ export function AdminSidebar({ className, mobile = false, onNavigate }: AdminSid
 	const router = useRouter();
 	const { user, logout } = useAuth();
 	const [collapsed, setCollapsed] = useState(false);
-	const [schoolId, setSchoolId] = useState(schools[0].id);
+	const [workspaceId, setWorkspaceId] = useState(workspaces[0].id);
 
-	const school = schools.find((s) => s.id === schoolId) ?? schools[0];
+	const workspace = workspaces.find((item) => item.id === workspaceId) ?? workspaces[0];
 	const isCollapsed = !mobile && collapsed;
 	const width = mobile ? "w-full" : isCollapsed ? "w-[76px]" : "w-[260px]";
 	const activeId = activeNavId(pathname);
@@ -214,16 +214,16 @@ export function AdminSidebar({ className, mobile = false, onNavigate }: AdminSid
 									)}
 								>
 									<div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-dashboard-accent-soft text-dashboard-accent">
-										<span className="font-bold text-[15px] leading-none">{school.mark}</span>
+										<span className="font-bold text-[15px] leading-none">{workspace.mark}</span>
 									</div>
 									{!isCollapsed && (
 										<>
 											<div className="min-w-0 flex-1">
 												<div className="text-[11px] text-dashboard-text-dim leading-tight">
-													{school.kind}
+													{workspace.kind}
 												</div>
 												<div className="truncate font-semibold text-[13px] text-dashboard-text-secondary leading-tight">
-													{school.name}
+													{workspace.name}
 												</div>
 											</div>
 											<HugeiconsIcon
@@ -244,24 +244,24 @@ export function AdminSidebar({ className, mobile = false, onNavigate }: AdminSid
 						>
 							<DropdownMenuGroup>
 								<DropdownMenuLabel className="text-[10.5px] text-dashboard-text-dim uppercase">
-									Switch campus
+									Switch workspace
 								</DropdownMenuLabel>
 							</DropdownMenuGroup>
 							<DropdownMenuSeparator className="bg-dashboard-border" />
-							{schools.map((s) => {
-								const selected = s.id === schoolId;
+							{workspaces.map((item) => {
+								const selected = item.id === workspaceId;
 								return (
 									<DropdownMenuItem
-										key={s.id}
-										onClick={() => setSchoolId(s.id)}
+										key={item.id}
+										onClick={() => setWorkspaceId(item.id)}
 										className="gap-3 focus:bg-dashboard-hover-strong"
 									>
 										<div className="flex size-8 items-center justify-center rounded-md bg-dashboard-accent-soft font-bold text-[13px] text-dashboard-accent">
-											{s.mark}
+											{item.mark}
 										</div>
 										<div className="min-w-0 flex-1">
-											<div className="truncate font-medium text-[13px]">{s.name}</div>
-											<div className="text-[11px] text-dashboard-text-dim">{s.kind}</div>
+											<div className="truncate font-medium text-[13px]">{item.name}</div>
+											<div className="text-[11px] text-dashboard-text-dim">{item.kind}</div>
 										</div>
 										{selected && (
 											<HugeiconsIcon

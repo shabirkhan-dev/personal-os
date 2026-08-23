@@ -1,7 +1,7 @@
 [project]
-name = "school-scripts"
+name = "personal-os-scripts"
 version = "0.1.0"
-description = "Python scripts for Starter"
+description = "Python scripts for Personal OS"
 requires-python = ">=3.11"
 
 [tool.ruff]

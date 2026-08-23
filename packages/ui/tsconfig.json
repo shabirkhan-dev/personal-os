@@ -5,7 +5,7 @@
 		"ignoreDeprecations": "6.0",
 		"baseUrl": ".",
 		"paths": {
-			"@school-os/ui/*": ["./src/*"]
+			"@personal-os/ui/*": ["./src/*"]
 		}
 	},
 	"include": ["src/**/*.ts", "src/**/*.tsx"],

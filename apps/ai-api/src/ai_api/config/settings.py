@@ -12,7 +12,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    app_name: str = "school-os-ai-api"
+    app_name: str = "personal-os-ai-api"
     environment: Literal["development", "test", "production"] = "development"
     port: int = Field(default=8000, ge=1, le=65535)
     api_prefix: str = "/api/v1"

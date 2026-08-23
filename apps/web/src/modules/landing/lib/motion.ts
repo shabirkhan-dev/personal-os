@@ -1,6 +1,6 @@
 import type { Transition, Variants } from "motion/react";
 
-/** Shared Motion tokens for the Starter landing page. */
+/** Shared Motion tokens for the Personal OS landing page. */
 export const ATLAS_EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 export const springSnappy: Transition = {

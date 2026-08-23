@@ -8,7 +8,7 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "@school-os/ui/components/dropdown-menu";
+} from "@personal-os/ui/components/dropdown-menu";
 import { motion, useReducedMotion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";

@@ -7,9 +7,9 @@ import {
 	UserEdit01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Alert, AlertDescription, AlertTitle } from "@school-os/ui/components/alert";
-import { Badge } from "@school-os/ui/components/badge";
-import { Spinner } from "@school-os/ui/components/spinner";
+import { Alert, AlertDescription, AlertTitle } from "@personal-os/ui/components/alert";
+import { Badge } from "@personal-os/ui/components/badge";
+import { Spinner } from "@personal-os/ui/components/spinner";
 import { useEffect, useState } from "react";
 import { ProfileForm } from "@/modules/users/components/profile-form";
 import {

@@ -165,7 +165,7 @@
         "@hugeicons/core-free-icons": "^4.2.2",
         "@hugeicons/react": "^1.1.9",
         "@paper-design/shaders-react": "^0.0.77",
-        "@school-os/ui": "workspace:*",
+        "@personal-os/ui": "workspace:*",
         "@simplewebauthn/browser": "^13.3.0",
         "@tanstack/react-query": "^5.100.10",
         "clsx": "^2.1.1",
@@ -179,7 +179,7 @@
       },
       "devDependencies": {
         "@playwright/test": "^1.61.1",
-        "@school-os/typescript-config": "workspace:*",
+        "@personal-os/typescript-config": "workspace:*",
         "@tailwindcss/postcss": "^4.3.3",
         "@types/node": "^25.9.5",
         "@types/react": "^19.2.14",
@@ -192,10 +192,10 @@
       },
     },
     "packages/logger": {
-      "name": "@school-os/logger",
+      "name": "@personal-os/logger",
       "version": "0.0.0",
       "devDependencies": {
-        "@school-os/typescript-config": "workspace:*",
+        "@personal-os/typescript-config": "workspace:*",
         "@types/node": "^25.9.5",
         "@vitest/coverage-v8": "^4.1.6",
         "typescript": "^6.0.3",
@@ -203,11 +203,11 @@
       },
     },
     "packages/typescript-config": {
-      "name": "@school-os/typescript-config",
+      "name": "@personal-os/typescript-config",
       "version": "0.0.0",
     },
     "packages/ui": {
-      "name": "@school-os/ui",
+      "name": "@personal-os/ui",
       "version": "0.0.0",
       "dependencies": {
         "@base-ui/react": "^1.6.0",
@@ -221,7 +221,7 @@
         "vaul": "^1.1.2",
       },
       "devDependencies": {
-        "@school-os/typescript-config": "workspace:*",
+        "@personal-os/typescript-config": "workspace:*",
         "@types/react": "^19.2.14",
         "@types/react-dom": "^19.2.3",
         "typescript": "^6.0.3",
@@ -966,11 +966,11 @@
 
     "@scarf/scarf": ["@scarf/scarf@1.4.0", "", {}, "sha512-xxeapPiUXdZAE3che6f3xogoJPeZgig6omHEy1rIY5WVsB3H2BHNnZH+gHG6x91SCWyQCzWGsuL2Hh3ClO5/qQ=="],
 
-    "@school-os/logger": ["@school-os/logger@workspace:packages/logger"],
+    "@personal-os/logger": ["@personal-os/logger@workspace:packages/logger"],
 
-    "@school-os/typescript-config": ["@school-os/typescript-config@workspace:packages/typescript-config"],
+    "@personal-os/typescript-config": ["@personal-os/typescript-config@workspace:packages/typescript-config"],
 
-    "@school-os/ui": ["@school-os/ui@workspace:packages/ui"],
+    "@personal-os/ui": ["@personal-os/ui@workspace:packages/ui"],
 
     "@scure/base": ["@scure/base@2.2.0", "", {}, "sha512-b8XEupJibegiXV+tDUseI8oLQc8ei3d/4Jkb2RpbHh3MfE054ov3uIz2dhFkB3FI8iwYkEh0gGCApkrYggkPNg=="],
 

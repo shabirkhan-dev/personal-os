@@ -45,7 +45,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow Starter to access your photos for your profile avatar."
+          "photosPermission": "Allow Personal OS to access your photos for your profile avatar."
         }
       ]
     ],
@@ -55,4 +55,3 @@
     }
   }
 }
-

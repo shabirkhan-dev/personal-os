@@ -7,8 +7,8 @@ import {
 	Loading03Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Badge } from "@school-os/ui/components/badge";
-import { Button, buttonVariants } from "@school-os/ui/components/button";
+import { Badge } from "@personal-os/ui/components/badge";
+import { Button, buttonVariants } from "@personal-os/ui/components/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -35,7 +35,7 @@ const PLANS: PlanOption[] = [
 	{
 		code: "team",
 		label: "Team",
-		tagline: "For small crews shipping the starter into production.",
+		tagline: "For people building a more intentional daily system.",
 		monthly: 49,
 		recommended: true,
 		features: ["Up to 5 workspaces", "Shared UI + Nest spine", "Email support", "Cancel anytime"],
@@ -193,8 +193,8 @@ export function BillingPageContent() {
 							Billing
 						</h1>
 						<p className="mt-1.5 max-w-xl text-[13px] text-dashboard-text-muted leading-5">
-							Upgrade when you need team seats or managed support. Starter stays free to clone and
-							run.
+							Upgrade when you need more workspace capacity or managed support. Personal OS stays
+							free to use.
 						</p>
 					</div>
 					<Link
@@ -450,8 +450,8 @@ export function BillingPageContent() {
 								) : null}
 
 								<p className="text-center text-[11px] text-dashboard-text-muted leading-4">
-									Payments are processed by {PROVIDER_COPY[provider].label}. Starter does not store
-									card numbers.
+									Payments are processed by {PROVIDER_COPY[provider].label}. Personal OS does not
+									store card numbers.
 								</p>
 							</div>
 						</div>
@@ -529,7 +529,7 @@ function SubscriptionBanner({
 						/>
 					</span>
 					<div>
-						<p className="font-medium text-[13px] text-dashboard-text-primary">Free starter</p>
+						<p className="font-medium text-[13px] text-dashboard-text-primary">Free plan</p>
 						<p className="mt-1 text-[12px] text-dashboard-text-muted leading-5">
 							No paid subscription yet. Choose a plan below when you are ready to upgrade.
 						</p>

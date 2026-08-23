@@ -60,7 +60,7 @@ export function PricingSection() {
 				</FadeIn>
 				<FadeIn delay={0.1}>
 					<p className="mt-4 max-w-xl text-pretty text-muted-foreground leading-7">
-						Starter is free to clone and run. Slide for team and enterprise seats — no surprise
+						Personal OS is free to use. Upgrade for team and enterprise capacity — no surprise
 						overages, cancel anytime.
 					</p>
 				</FadeIn>
@@ -122,7 +122,7 @@ export function PricingSection() {
 							</Link>
 						</motion.div>
 						<p className="text-muted-foreground text-sm leading-5">
-							Starter is free forever — clone and run, no card required.
+							Personal OS is free to use — no card required.
 						</p>
 					</FadeIn>
 				</div>

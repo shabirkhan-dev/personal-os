@@ -4,8 +4,8 @@ import { RequireAuth } from "@/modules/auth/components";
 import "@/modules/chat/styles/chat.css";
 
 export const metadata: Metadata = {
-	title: "Chat | Starter",
-	description: "Starter chat workspace",
+	title: "Chat | Personal OS",
+	description: "Personal OS chat workspace",
 };
 
 export default function ChatLayout({ children }: Readonly<{ children: React.ReactNode }>) {

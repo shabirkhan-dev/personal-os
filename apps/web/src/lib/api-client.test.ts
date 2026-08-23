@@ -3,8 +3,8 @@ import { ApiError, getBaseUrl, login, me, refreshSession, register } from "./api
 
 const user = {
 	id: "9d3f45e6-f7df-4f64-8bd2-c20a2dd28722",
-	email: "starter@example.com",
-	username: "starter",
+	email: "personal@example.com",
+	username: "personal",
 	isActive: true,
 	emailVerified: true,
 	hasPassword: true,
@@ -27,12 +27,12 @@ describe("api client", () => {
 		);
 
 		const result = await register({
-			username: "starter",
-			email: "starter@example.com",
+			username: "personal",
+			email: "personal@example.com",
 			password: "a-secure-password",
 		});
 
-		expect(result.user.username).toBe("starter");
+		expect(result.user.username).toBe("personal");
 		expect(result.accepted).toBe(true);
 	});
 
@@ -47,7 +47,7 @@ describe("api client", () => {
 		vi.stubGlobal("fetch", fetchMock);
 
 		const loginResult = await login({
-			email: "starter@example.com",
+			email: "personal@example.com",
 			password: "a-secure-password",
 		});
 		await refreshSession();
@@ -89,7 +89,7 @@ describe("api client", () => {
 			),
 		);
 
-		const promise = login({ email: "starter@example.com", password: "wrong-password" });
+		const promise = login({ email: "personal@example.com", password: "wrong-password" });
 		await expect(promise).rejects.toMatchObject({
 			name: "ApiError",
 			statusCode: 401,

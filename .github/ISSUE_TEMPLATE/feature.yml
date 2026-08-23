@@ -1,5 +1,5 @@
 name: Feature
-description: Plan a product feature or school-os improvement
+description: Plan a product feature or personal-os improvement
 title: "[Feature]: "
 labels: ["feature"]
 body:
@@ -45,4 +45,3 @@ body:
     attributes:
       label: Technical notes
       description: APIs, data model, affected apps/packages, security, migrations, or tests.
-

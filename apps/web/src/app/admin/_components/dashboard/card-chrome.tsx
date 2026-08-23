@@ -7,7 +7,7 @@ import {
 	TooltipContent,
 	TooltipProvider,
 	TooltipTrigger,
-} from "@school-os/ui/components/tooltip";
+} from "@personal-os/ui/components/tooltip";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 

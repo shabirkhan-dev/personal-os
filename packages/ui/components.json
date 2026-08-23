@@ -15,11 +15,11 @@
   "menuColor": "inverted",
   "menuAccent": "subtle",
   "aliases": {
-    "components": "@school-os/ui/components",
-    "utils": "@school-os/ui/lib/utils",
-    "ui": "@school-os/ui/components",
-    "lib": "@school-os/ui/lib",
-    "hooks": "@school-os/ui/hooks"
+    "components": "@personal-os/ui/components",
+    "utils": "@personal-os/ui/lib/utils",
+    "ui": "@personal-os/ui/components",
+    "lib": "@personal-os/ui/lib",
+    "hooks": "@personal-os/ui/hooks"
   },
   "registries": {
     "@beui": "https://beui.dev/r/{name}.json"

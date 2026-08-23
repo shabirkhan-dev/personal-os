@@ -4,12 +4,12 @@ services:
     build:
       context: ../..
       dockerfile: apps/rust/Dockerfile
-    image: school-os-rust-api:local
+    image: personal-os-rust-api:local
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-school-os}:${POSTGRES_PASSWORD:-school-os}@postgres:5432/${POSTGRES_DB:-school-os}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-personal-os}:${POSTGRES_PASSWORD:-personal-os}@postgres:5432/${POSTGRES_DB:-personal-os}
       PORT: 3002
-      APP_NAME: school-os-rust
+      APP_NAME: personal-os-rust
       APP_VERSION: 0.1.0
       NODE_ENV: production
     ports:

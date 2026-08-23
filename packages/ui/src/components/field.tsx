@@ -1,8 +1,8 @@
 "use client";
 
-import { Label } from "@school-os/ui/components/label";
-import { Separator } from "@school-os/ui/components/separator";
-import { cn } from "@school-os/ui/lib/utils";
+import { Label } from "@personal-os/ui/components/label";
+import { Separator } from "@personal-os/ui/components/separator";
+import { cn } from "@personal-os/ui/lib/utils";
 import type * as React from "react";
 
 function FieldGroup({ className, ...props }: React.ComponentProps<"div">) {

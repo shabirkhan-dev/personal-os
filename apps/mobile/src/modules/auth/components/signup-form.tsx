@@ -60,7 +60,7 @@ export function SignupForm() {
 	return (
 		<AuthScreen
 			title="Create your account"
-			description="Create your secure Starter account"
+			description="Create your secure Personal OS account"
 			footer={
 				<Text style={styles.terms}>
 					By continuing, you agree to our Terms of Service and Privacy Policy.
@@ -75,7 +75,7 @@ export function SignupForm() {
 				label="Email"
 				value={email}
 				onChangeText={setEmail}
-				placeholder="you@school.edu"
+				placeholder="you@example.com"
 				keyboardType="email-address"
 				autoComplete="email"
 				editable={!submitting}

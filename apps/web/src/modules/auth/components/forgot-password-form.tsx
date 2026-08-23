@@ -1,17 +1,17 @@
 "use client";
 
-import { Alert, AlertDescription, AlertTitle } from "@school-os/ui/components/alert";
-import { Button } from "@school-os/ui/components/button";
+import { Alert, AlertDescription, AlertTitle } from "@personal-os/ui/components/alert";
+import { Button } from "@personal-os/ui/components/button";
 import {
 	Card,
 	CardContent,
 	CardDescription,
 	CardHeader,
 	CardTitle,
-} from "@school-os/ui/components/card";
-import { Field, FieldGroup, FieldLabel } from "@school-os/ui/components/field";
-import { Input } from "@school-os/ui/components/input";
-import { Spinner } from "@school-os/ui/components/spinner";
+} from "@personal-os/ui/components/card";
+import { Field, FieldGroup, FieldLabel } from "@personal-os/ui/components/field";
+import { Input } from "@personal-os/ui/components/input";
+import { Spinner } from "@personal-os/ui/components/spinner";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";

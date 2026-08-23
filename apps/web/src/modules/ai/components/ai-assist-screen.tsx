@@ -22,13 +22,13 @@ const QUICK_PROMPTS = [
 		label: "Run locally",
 		description: "Dev + install steps",
 		icon: CodeIcon,
-		prompt: "How do I install dependencies and run the Starter monorepo locally?",
+		prompt: "How do I install dependencies and run the Personal OS monorepo locally?",
 	},
 	{
 		label: "Nest auth",
 		description: "JWT, MFA, sessions",
 		icon: SearchFocusIcon,
-		prompt: "Explain how Nest auth, refresh cookies, and MFA fit together in this starter.",
+		prompt: "Explain how Nest auth, refresh cookies, and MFA fit together in Personal OS.",
 	},
 	{
 		label: "AI pipeline",
@@ -138,7 +138,7 @@ export function AiAssistScreen() {
 								onSubmitPrompt={(value) => void send(value)}
 								disabled={!token}
 								busy={busy}
-								placeholder="Ask Starter Assist..."
+								placeholder="Ask Personal OS Assist..."
 								modelLabel={modelLabel}
 								showUpgradeRail={false}
 							/>

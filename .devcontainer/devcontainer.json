@@ -1,5 +1,5 @@
 {
-	"name": "Starter",
+	"name": "Personal OS",
 	"build": {
 		"dockerfile": "Dockerfile",
 		"context": ".."

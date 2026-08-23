@@ -13,5 +13,5 @@ async fn health() -> Json<Value> {
 pub fn create_app(pool: sqlx::PgPool) -> Router {
     crate::modules::create_router(pool)
         .route("/health", get(health))
-        .route("/", get(|| async { Json(json!({ "success": true, "code": 200, "message": "OK", "data": { "name": "school-os-rust", "version": "0.1.0" } })) }))
+        .route("/", get(|| async { Json(json!({ "success": true, "code": 200, "message": "OK", "data": { "name": "personal-os-rust", "version": "0.1.0" } })) }))
 }

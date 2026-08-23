@@ -7,7 +7,7 @@ alwaysApply: true
 
 - **Names**: Clear, consistent. Components PascalCase; files match component name. Hooks `use*`; utils plain functions.
 - **Size**: Prefer small functions and components. Extract when a file or function grows past a single concern.
-- **Imports**: Prefer `@school-os/*` for workspace packages. Group: external → workspace → relative. No unused imports.
+- **Imports**: Prefer `@personal-os/*` for workspace packages. Group: external → workspace → relative. No unused imports.
 - **Types**: Prefer explicit types for props and public APIs. Avoid `any`; use `unknown` and narrow when needed.
 - **Errors**: Handle errors explicitly. Log and rethrow or return result types; avoid silent catches.
 - **Comments**: Only explain non-obvious intent, trade-offs, or constraints. No narrating what code does. No dead/commented-out code.

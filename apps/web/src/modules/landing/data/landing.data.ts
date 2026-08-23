@@ -94,7 +94,7 @@ export const NAV_ITEMS: NavItem[] = [
 			},
 			{
 				label: "About",
-				description: "Why we built Starter",
+				description: "Why we built Personal OS",
 				href: "/about",
 			},
 		],
@@ -231,7 +231,7 @@ export const INCIDENT_TIMELINE: IncidentEvent[] = [
 	},
 	{
 		title: "Ready to ship",
-		detail: "Docker Compose optional â€” school-os is live",
+		detail: "Docker Compose optional â€” personal-os is live",
 		tone: "ok",
 		icon: "shield",
 	},
@@ -270,14 +270,14 @@ export const CAPABILITY_CARDS: CapabilityCard[] = [
 	{
 		title: "Add an app in one workspace",
 		description:
-			"Drop a package under apps/ or packages/, export as @school-os/*, and wire it into turbo.json.",
+			"Drop a package under apps/ or packages/, export as @personal-os/*, and wire it into turbo.json.",
 		span: 2,
 		kind: "tools",
 		palette: "blue",
 	},
 	{
 		title: "Shared UI that sticks",
-		description: "Design tokens and primitives live in @school-os/ui for web.",
+		description: "Design tokens and primitives live in @personal-os/ui for web.",
 		span: 2,
 		kind: "memory",
 		palette: "teal",
@@ -348,7 +348,7 @@ export type AboutPrinciple = {
 export const ABOUT_PRINCIPLES: AboutPrinciple[] = [
 	{
 		icon: "bridge",
-		title: "Starter, not a demo dump",
+		title: "Personal OS, not a demo dump",
 		description:
 			"Every app and package earns its place by helping you ship a real product â€” not a throwaway scaffold.",
 	},
@@ -409,7 +409,7 @@ export const ABOUT_TEAM: AboutTeamMember[] = [
 		name: "Theo Park",
 		role: "Mobile & UI",
 		seed: "TheoPark",
-		bio: "Expo Router + shared design tokens. Believes the starter should look production-ready on day one.",
+		bio: "Expo Router + shared design tokens. Believes Personal OS should feel production-ready on day one.",
 		tone: "amber",
 		profileHref: "#",
 	},
@@ -425,7 +425,7 @@ export type Testimonial = {
 export const TESTIMONIALS_ROW_ONE: Testimonial[] = [
 	{
 		quote:
-			"We skipped three weeks of wiring Turbo, hooks, and Docker. Starter was already opinionated the right way.",
+			"We skipped three weeks of wiring Turbo, hooks, and Docker. Personal OS was already opinionated the right way.",
 		name: "Maya Chen",
 		role: "Staff Eng, campus product",
 		seed: "Maya",
@@ -449,7 +449,7 @@ export const TESTIMONIALS_ROW_ONE: Testimonial[] = [
 export const TESTIMONIALS_ROW_TWO: Testimonial[] = [
 	{
 		quote:
-			"Adding a package under packages/ and exporting @school-os/* took minutes. Turbo picked it up immediately.",
+			"Adding a package under packages/ and exporting @personal-os/* took minutes. Turbo picked it up immediately.",
 		name: "Theo Park",
 		role: "Mobile engineer",
 		seed: "Theo",
@@ -497,8 +497,8 @@ export const PRICING_TIERS: PricingTier[] = [
 ];
 
 export const PRICING_FEATURES: string[] = [
-	"Full monorepo starter (web Â· mobile Â· Nest Â· docs Â· Rust)",
-	"Shared @school-os packages and TS configs",
+	"Full Personal OS monorepo (web Â· mobile Â· Nest Â· docs Â· Rust)",
+	"Shared @personal-os packages and TS configs",
 	"Lefthook, Biome, Turbo, and architecture checks",
 	"Docker Compose fragments + Dev Container",
 	"Docs site and production roadmap baked in",
@@ -563,7 +563,7 @@ export const FAQ_ITEMS: FaqItem[] = [
 	},
 	{
 		id: "stack",
-		question: "What stacks does Starter include?",
+		question: "What stacks does Personal OS include?",
 		answer:
 			"Next.js web, Expo mobile, NestJS API, Fumadocs docs, and a Rust binary â€” plus shared UI, logger, and TypeScript configs.",
 		icon: Package01Icon,
@@ -577,9 +577,9 @@ export const FAQ_ITEMS: FaqItem[] = [
 	},
 	{
 		id: "pricing",
-		question: "Is the starter free to use?",
+		question: "Is Personal OS free to use?",
 		answer:
-			"The monorepo starter is free to clone and run. Paid tiers are optional for team seats, support, and managed onboarding â€” annual billing includes two months free.",
+			"Personal OS is free to use. Paid tiers are optional for team capacity, support, and managed onboarding â€” annual billing includes two months free.",
 		icon: GemIcon,
 	},
 	{

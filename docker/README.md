@@ -42,5 +42,5 @@ docker compose --profile rust up -d --build
 **Manual fragment (no `include`):**
 
 ```bash
-docker compose -f docker/compose/postgres.yml --project-name school-os up -d
+docker compose -f docker/compose/postgres.yml --project-name personal-os up -d
 ```

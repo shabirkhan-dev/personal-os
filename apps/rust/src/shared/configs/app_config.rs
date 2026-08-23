@@ -9,7 +9,7 @@ pub struct AppConfig {
 
 pub fn get_config() -> AppConfig {
     AppConfig {
-        name: env::var("APP_NAME").unwrap_or_else(|_| "school-os-rust".to_string()),
+        name: env::var("APP_NAME").unwrap_or_else(|_| "personal-os-rust".to_string()),
         version: env::var("APP_VERSION").unwrap_or_else(|_| "0.1.0".to_string()),
         env: env::var("NODE_ENV").unwrap_or_else(|_| "development".to_string()),
         port: env::var("PORT")

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""School OS scripts – python."""
+"""Personal OS scripts – Python."""
 
 
 def main() -> None:
-    print("Hello from School OS scripts (python)")
+    print("Hello from Personal OS scripts (python)")
 
 
 if __name__ == "__main__":

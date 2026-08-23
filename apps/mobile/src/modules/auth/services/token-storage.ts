@@ -1,7 +1,7 @@
 import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";
 
-const REFRESH_TOKEN_KEY = "starter.auth.refreshToken";
+const REFRESH_TOKEN_KEY = "personal-os.auth.refreshToken";
 
 async function setRefreshTokenValue(value: string | null): Promise<void> {
 	if (Platform.OS === "web") {

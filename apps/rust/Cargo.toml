@@ -1,12 +1,12 @@
 [package]
-name = "school-os-rust"
+name = "personal-os-rust"
 version = "0.1.0"
 edition = "2021"
-description = "Rust app for starter monorepo"
+description = "Rust app for the Personal OS monorepo"
 rust-version = "1.86"
 
 [dependencies]
-school-logger = { path = "../../packages/logger/rust" }
+personal-os-logger = { path = "../../packages/logger/rust" }
 axum = "0.8.9"
 tokio = { version = "1.52.3", features = ["full"] }
 serde = { version = "1.0.228", features = ["derive"] }

@@ -2,10 +2,10 @@
 
 import { Sun03Icon, TaskDone01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Badge } from "@school-os/ui/components/badge";
-import { Button } from "@school-os/ui/components/button";
-import { Card, CardContent } from "@school-os/ui/components/card";
-import { Checkbox } from "@school-os/ui/components/checkbox";
+import { Badge } from "@personal-os/ui/components/badge";
+import { Button } from "@personal-os/ui/components/button";
+import { Card, CardContent } from "@personal-os/ui/components/card";
+import { Checkbox } from "@personal-os/ui/components/checkbox";
 import Link from "next/link";
 import { ErrorState } from "./error-state";
 

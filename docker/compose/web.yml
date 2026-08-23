@@ -6,7 +6,7 @@ services:
       dockerfile: apps/web/Dockerfile
       args:
         NEXT_PUBLIC_NEST_API_URL: ${NEXT_PUBLIC_NEST_API_URL:-http://localhost:4000}
-    image: school-os-web:local
+    image: personal-os-web:local
     restart: unless-stopped
     environment:
       NODE_ENV: production

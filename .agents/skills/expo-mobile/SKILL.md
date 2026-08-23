@@ -1,11 +1,11 @@
 ---
 name: expo-mobile
-description: Best practices for Expo Router mobile apps in this monorepo school-os; Tailwind/NativeWind; official Expo Skills and LLM docs.
+description: Best practices for Expo Router mobile apps in this monorepo personal-os; Tailwind/NativeWind; official Expo Skills and LLM docs.
 version: 1.2.0
 license: MIT
 ---
 
-# Expo Mobile Skill (Starter)
+# Expo Mobile Skill (Personal OS)
 
 Use this when working on **`apps/mobile`**.
 

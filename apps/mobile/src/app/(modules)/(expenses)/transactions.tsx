@@ -1,22 +1,44 @@
-import { CreditCardIcon } from "@hugeicons/core-free-icons";
+import { ShoppingBag01Icon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+	ActivityIndicator,
+	Pressable,
+	RefreshControl,
+	ScrollView,
+	StyleSheet,
+	Text,
+	View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { AddEntryModal } from "@/components/ui/add-entry-modal";
 import { FloatingActionButton } from "@/components/ui/floating-action-button";
-import { LogListItem } from "@/components/ui/log-list-item";
+import { Icon } from "@/components/ui/icon";
 import { OSHeader } from "@/components/ui/os-header";
 import { NeonColors } from "@/constants/design-system";
-import { useAppStore } from "@/store/use-app-store";
+import {
+	AddTransactionModal,
+	TransactionCard,
+	type TransactionType,
+	useDeleteTransactionMutation,
+	useTransactionsQuery,
+} from "@/modules/finance";
 
 export default function TransactionsScreen() {
 	const [modalVisible, setModalVisible] = useState(false);
-	const transactions = useAppStore((state) => state.expensesTransactions);
-	const addEntry = useAppStore((state) => state.addEntry);
-	const deleteEntry = useAppStore((state) => state.deleteEntry);
+	const [typeFilter, setTypeFilter] = useState<TransactionType | "all">("all");
 
-	const handleSave = (title: string, subtitle: string, value: string, delta: string) => {
-		addEntry("expenses", { title, subtitle, value, delta });
+	const {
+		data: transactions,
+		isLoading,
+		refetch,
+	} = useTransactionsQuery({
+		type: typeFilter === "all" ? undefined : typeFilter,
+		limit: 100,
+	});
+
+	const deleteMutation = useDeleteTransactionMutation();
+
+	const handleDelete = (id: string) => {
+		deleteMutation.mutate(id);
 	};
 
 	return (
@@ -27,30 +49,72 @@ export default function TransactionsScreen() {
 				<ScrollView
 					showsVerticalScrollIndicator={false}
 					contentContainerStyle={styles.scrollContent}
+					refreshControl={
+						<RefreshControl
+							refreshing={isLoading}
+							onRefresh={refetch}
+							tintColor={NeonColors.accent.orange}
+						/>
+					}
 				>
 					<View style={styles.viewContainer}>
 						<View style={styles.viewHeader}>
 							<Text style={styles.viewTitle}>Transactions</Text>
-							<Text style={styles.viewSubtitle}>Complete log of all financial activity.</Text>
+							<Text style={styles.viewSubtitle}>Complete history and ledger.</Text>
 						</View>
 
+						{/* Type Filter Pills */}
+						<View className="flex-row gap-2 mb-4">
+							{(["all", "expense", "income"] as const).map((filter) => {
+								const isSelected = typeFilter === filter;
+								return (
+									<Pressable
+										key={filter}
+										onPress={() => setTypeFilter(filter)}
+										style={[
+											styles.filterPill,
+											isSelected && {
+												backgroundColor:
+													filter === "income"
+														? NeonColors.accent.green
+														: filter === "expense"
+															? NeonColors.accent.orange
+															: "#FFFFFF",
+											},
+										]}
+										className="px-4 py-2 rounded-xl bg-[#15161A] border border-white/[0.06]"
+									>
+										<Text
+											style={{
+												color: isSelected ? "#000000" : "#888888",
+												fontWeight: isSelected ? "700" : "500",
+											}}
+											className="text-xs uppercase"
+										>
+											{filter}
+										</Text>
+									</Pressable>
+								);
+							})}
+						</View>
+
+						{/* Transaction List */}
 						<View style={styles.logsList}>
-							{transactions.length === 0 ? (
-								<Text style={styles.emptyText}>No transactions logged.</Text>
-							) : (
+							{isLoading && !transactions ? (
+								<View className="h-40 items-center justify-center">
+									<ActivityIndicator color={NeonColors.accent.orange} />
+								</View>
+							) : transactions && transactions.length > 0 ? (
 								transactions.map((item) => (
-									<LogListItem
-										key={item.id}
-										icon={CreditCardIcon}
-										iconColor={NeonColors.accent.orange}
-										title={item.title}
-										subtitle={item.subtitle}
-										value={item.value}
-										delta={item.delta}
-										deltaColor={NeonColors.text.secondary}
-										onPress={() => deleteEntry("expenses", item.id)}
-									/>
+									<TransactionCard key={item.id} transaction={item} onDelete={handleDelete} />
 								))
+							) : (
+								<View className="p-12 rounded-3xl bg-[#15161A] items-center justify-center border border-white/[0.04] mt-4">
+									<Icon icon={ShoppingBag01Icon} size={36} color="#555555" />
+									<Text className="text-[#888888] font-medium text-sm mt-3">
+										No {typeFilter !== "all" ? typeFilter : ""} transactions found
+									</Text>
+								</View>
 							)}
 						</View>
 					</View>
@@ -62,24 +126,12 @@ export default function TransactionsScreen() {
 				onPress={() => setModalVisible(true)}
 			/>
 
-			<AddEntryModal
-				visible={modalVisible}
-				onClose={() => setModalVisible(false)}
-				onSave={handleSave}
-				color={NeonColors.accent.orange}
-				titleLabel="Add Transaction"
-			/>
+			<AddTransactionModal visible={modalVisible} onClose={() => setModalVisible(false)} />
 		</View>
 	);
 }
 
 const styles = StyleSheet.create({
-	emptyText: {
-		color: NeonColors.text.muted,
-		fontSize: 16,
-		textAlign: "center",
-		marginTop: 32,
-	},
 	container: {
 		flex: 1,
 		backgroundColor: NeonColors.background,
@@ -88,14 +140,14 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	scrollContent: {
-		paddingBottom: 40,
+		paddingBottom: 60,
 	},
 	viewContainer: {
 		paddingHorizontal: 16,
 		paddingTop: 8,
 	},
 	viewHeader: {
-		marginBottom: 24,
+		marginBottom: 16,
 	},
 	viewTitle: {
 		color: NeonColors.text.primary,
@@ -107,7 +159,10 @@ const styles = StyleSheet.create({
 		fontSize: 14,
 		marginTop: 4,
 	},
+	filterPill: {
+		borderRadius: 12,
+	},
 	logsList: {
-		marginTop: 12,
+		marginTop: 4,
 	},
 });

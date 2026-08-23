@@ -1,11 +1,65 @@
-import { AlertCircleIcon, PiggyBankIcon, Target01Icon } from "@hugeicons/core-free-icons";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { PlusSignIcon, Target01Icon } from "@hugeicons/core-free-icons";
+import { useState } from "react";
+import {
+	ActivityIndicator,
+	Modal,
+	Pressable,
+	RefreshControl,
+	ScrollView,
+	StyleSheet,
+	Text,
+	TextInput,
+	View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { LogListItem } from "@/components/ui/log-list-item";
+import { FloatingActionButton } from "@/components/ui/floating-action-button";
+import { Icon } from "@/components/ui/icon";
 import { OSHeader } from "@/components/ui/os-header";
 import { NeonColors } from "@/constants/design-system";
+import {
+	BudgetProgressCard,
+	getCurrentMonthString,
+	useBudgetsQuery,
+	useMonthSummaryQuery,
+	useSetBudgetsMutation,
+} from "@/modules/finance";
 
 export default function BudgetScreen() {
+	const currentMonth = getCurrentMonthString();
+	const { data: summary, isLoading, refetch } = useMonthSummaryQuery(currentMonth);
+	const { data: budgets, refetch: refetchBudgets } = useBudgetsQuery(currentMonth);
+	const setBudgetsMutation = useSetBudgetsMutation();
+
+	const [budgetModalVisible, setBudgetModalVisible] = useState(false);
+	const [categoryName, setCategoryName] = useState("");
+	const [limitAmount, setLimitAmount] = useState("");
+
+	const handleSaveBudget = async () => {
+		const parsedLimit = Number.parseFloat(limitAmount);
+		if (!categoryName.trim() || Number.isNaN(parsedLimit) || parsedLimit < 0) return;
+
+		const currentList = budgets ?? [];
+		const filtered = currentList.filter(
+			(b) => b.category.toLowerCase() !== categoryName.trim().toLowerCase(),
+		);
+		const updatedBudgets = [
+			...filtered.map((b) => ({ category: b.category, limitMinor: b.limitMinor })),
+			{ category: categoryName.trim().toLowerCase(), limitMinor: Math.round(parsedLimit * 100) },
+		];
+
+		try {
+			await setBudgetsMutation.mutateAsync({
+				month: currentMonth,
+				input: { budgets: updatedBudgets },
+			});
+			setCategoryName("");
+			setLimitAmount("");
+			setBudgetModalVisible(false);
+		} catch {
+			// Handled by mutation
+		}
+	};
+
 	return (
 		<View style={styles.container}>
 			<SafeAreaView edges={["top"]} style={styles.safeArea}>
@@ -14,45 +68,135 @@ export default function BudgetScreen() {
 				<ScrollView
 					showsVerticalScrollIndicator={false}
 					contentContainerStyle={styles.scrollContent}
+					refreshControl={
+						<RefreshControl
+							refreshing={isLoading}
+							onRefresh={() => {
+								refetch();
+								refetchBudgets();
+							}}
+							tintColor={NeonColors.accent.orange}
+						/>
+					}
 				>
 					<View style={styles.viewContainer}>
-						<View style={styles.viewHeader}>
-							<Text style={styles.viewTitle}>Budget</Text>
-							<Text style={styles.viewSubtitle}>Spending limits and savings goals overview.</Text>
+						<View className="flex-row items-center justify-between mb-4">
+							<View>
+								<Text style={styles.viewTitle}>Budget</Text>
+								<Text style={styles.viewSubtitle}>
+									Spending limits & category caps ({currentMonth}).
+								</Text>
+							</View>
+							<Pressable
+								onPress={() => setBudgetModalVisible(true)}
+								style={({ pressed }) => [{ opacity: pressed ? 0.8 : 1 }]}
+								className="bg-orange-500/20 px-3.5 py-2 rounded-xl flex-row items-center gap-1.5 border border-orange-500/30"
+							>
+								<Icon
+									icon={PlusSignIcon}
+									size={16}
+									color={NeonColors.accent.orange}
+									strokeWidth={2.5}
+								/>
+								<Text className="text-orange-400 font-bold text-xs">Set Limit</Text>
+							</Pressable>
 						</View>
 
 						<View style={styles.logsList}>
-							<LogListItem
-								icon={Target01Icon}
-								iconColor={NeonColors.accent.blue}
-								title="Monthly Target"
-								subtitle="$1,200 of $2,000 remaining"
-								value="60%"
-								delta="On track"
-								deltaColor={NeonColors.accent.green}
-							/>
-							<LogListItem
-								icon={PiggyBankIcon}
-								iconColor={NeonColors.accent.green}
-								title="Savings Goal"
-								subtitle="Emergency fund progress"
-								value="$8,420"
-								delta="84%"
-								deltaColor={NeonColors.accent.green}
-							/>
-							<LogListItem
-								icon={AlertCircleIcon}
-								iconColor={NeonColors.accent.orange}
-								title="Food & Dining"
-								subtitle="Category nearing limit"
-								value="$380/$400"
-								delta="95%"
-								deltaColor={NeonColors.accent.red}
-							/>
+							{isLoading && !summary ? (
+								<View className="h-40 items-center justify-center">
+									<ActivityIndicator color={NeonColors.accent.orange} />
+								</View>
+							) : summary && summary.categories.length > 0 ? (
+								summary.categories.map((item) => (
+									<BudgetProgressCard key={item.category} item={item} />
+								))
+							) : (
+								<View className="p-12 rounded-3xl bg-[#15161A] items-center justify-center border border-white/[0.04]">
+									<Icon icon={Target01Icon} size={36} color="#555555" />
+									<Text className="text-[#888888] font-medium text-sm mt-3 text-center">
+										No budget categories tracked yet.{"\n"}Tap "Set Limit" to define a monthly cap.
+									</Text>
+								</View>
+							)}
 						</View>
 					</View>
 				</ScrollView>
 			</SafeAreaView>
+
+			<FloatingActionButton
+				color={NeonColors.accent.orange}
+				onPress={() => setBudgetModalVisible(true)}
+			/>
+
+			{/* Set Budget Modal */}
+			<Modal
+				visible={budgetModalVisible}
+				animationType="slide"
+				transparent
+				onRequestClose={() => setBudgetModalVisible(false)}
+			>
+				<View style={styles.modalOverlay}>
+					<View
+						style={styles.modalContent}
+						className="bg-[#15161A] rounded-3xl p-6 border border-white/[0.08] w-[90%]"
+					>
+						<Text className="text-white font-bold text-lg mb-4">Set Category Budget Limit</Text>
+
+						<View className="mb-3">
+							<Text className="text-[#888888] text-xs font-semibold uppercase mb-1">Category</Text>
+							<TextInput
+								value={categoryName}
+								onChangeText={setCategoryName}
+								placeholder="e.g. food, transport, shopping"
+								placeholderTextColor="#555555"
+								style={styles.modalInput}
+								className="bg-[#0B0C10] text-white p-3 rounded-xl border border-white/[0.06] text-sm"
+							/>
+						</View>
+
+						<View className="mb-5">
+							<Text className="text-[#888888] text-xs font-semibold uppercase mb-1">
+								Monthly Limit (₹ / $)
+							</Text>
+							<TextInput
+								value={limitAmount}
+								onChangeText={setLimitAmount}
+								placeholder="e.g. 5000"
+								placeholderTextColor="#555555"
+								keyboardType="decimal-pad"
+								style={styles.modalInput}
+								className="bg-[#0B0C10] text-white p-3 rounded-xl border border-white/[0.06] text-sm font-bold"
+							/>
+						</View>
+
+						<View className="flex-row gap-3">
+							<Pressable
+								onPress={() => setBudgetModalVisible(false)}
+								className="flex-1 py-3.5 rounded-xl bg-[#222222] items-center justify-center"
+							>
+								<Text className="text-[#888888] font-bold text-sm">Cancel</Text>
+							</Pressable>
+							<Pressable
+								onPress={handleSaveBudget}
+								disabled={setBudgetsMutation.isPending || !categoryName.trim() || !limitAmount}
+								style={{
+									opacity:
+										setBudgetsMutation.isPending || !categoryName.trim() || !limitAmount ? 0.5 : 1,
+									backgroundColor: NeonColors.accent.orange,
+								}}
+								className="flex-1 py-3.5 rounded-xl items-center justify-center"
+							>
+								{setBudgetsMutation.isPending ? (
+									<ActivityIndicator color="#000000" />
+								) : (
+									<Text className="text-black font-bold text-sm">Save Limit</Text>
+								)}
+							</Pressable>
+						</View>
+					</View>
+				</View>
+			</Modal>
 		</View>
 	);
 }
@@ -66,14 +210,11 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	scrollContent: {
-		paddingBottom: 40,
+		paddingBottom: 60,
 	},
 	viewContainer: {
 		paddingHorizontal: 16,
 		paddingTop: 8,
-	},
-	viewHeader: {
-		marginBottom: 24,
 	},
 	viewTitle: {
 		color: NeonColors.text.primary,
@@ -86,6 +227,18 @@ const styles = StyleSheet.create({
 		marginTop: 4,
 	},
 	logsList: {
-		marginTop: 12,
+		marginTop: 4,
+	},
+	modalOverlay: {
+		flex: 1,
+		backgroundColor: "rgba(0, 0, 0, 0.75)",
+		alignItems: "center",
+		justifyContent: "center",
+	},
+	modalContent: {
+		backgroundColor: "#15161A",
+	},
+	modalInput: {
+		backgroundColor: "#0B0C10",
 	},
 });

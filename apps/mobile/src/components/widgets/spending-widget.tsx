@@ -1,24 +1,51 @@
+import { router } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { NeonCard } from "@/components/ui/neon-card";
 import { NeonColors } from "@/constants/design-system";
+import { formatCurrency, useMonthSummaryQuery } from "@/modules/finance";
 
 export function SpendingWidget() {
-	const categories = [
-		{ name: "Groceries", amount: 78.46, color: NeonColors.accent.orange },
-		{ name: "Entertainment", amount: 56.2, color: NeonColors.accent.purple },
-		{ name: "Transportation", amount: 33.58, color: NeonColors.accent.blue },
-		{ name: "Utilities", amount: 24.21, color: NeonColors.accent.green },
+	const { data: summary } = useMonthSummaryQuery();
+
+	const totalExpenseMinor = summary?.expenseTotal ?? 19245;
+	const totalIncomeMinor = summary?.incomeTotal ?? 250000;
+	const spentPercentage =
+		totalIncomeMinor > 0
+			? Math.min(Math.round((totalExpenseMinor / totalIncomeMinor) * 100), 100)
+			: 0;
+
+	const colors = [
+		NeonColors.accent.orange,
+		NeonColors.accent.purple,
+		NeonColors.accent.blue,
+		NeonColors.accent.green,
+		NeonColors.accent.teal,
 	];
 
+	const categories =
+		summary && summary.categories.length > 0
+			? summary.categories.slice(0, 4).map((c, idx) => ({
+					name: c.category,
+					amountMinor: c.spent,
+					color: colors[idx % colors.length] ?? NeonColors.accent.orange,
+				}))
+			: [
+					{ name: "Groceries", amountMinor: 7846, color: NeonColors.accent.orange },
+					{ name: "Entertainment", amountMinor: 5620, color: NeonColors.accent.purple },
+					{ name: "Transportation", amountMinor: 3358, color: NeonColors.accent.blue },
+					{ name: "Utilities", amountMinor: 2421, color: NeonColors.accent.green },
+				];
+
 	return (
-		<Pressable style={({ pressed }) => [{ opacity: pressed ? 0.9 : 1 }]}>
+		<Pressable
+			onPress={() => router.push("/(modules)/(expenses)" as never)}
+			style={({ pressed }) => [{ opacity: pressed ? 0.9 : 1 }]}
+		>
 			<NeonCard>
-				<Text style={styles.label}>TODAY SPENDING</Text>
+				<Text style={styles.label}>MONTHLY SPENDING</Text>
 				<View style={styles.amountContainer}>
-					<Text style={styles.amount}>
-						$192<Text style={styles.decimal}>.45</Text>
-					</Text>
-					<Text style={styles.percentage}>78%</Text>
+					<Text style={styles.amount}>{formatCurrency(totalExpenseMinor)}</Text>
+					<Text style={styles.percentage}>{spentPercentage}% of income</Text>
 				</View>
 
 				{/* Segmented Progress Bar */}
@@ -45,9 +72,11 @@ export function SpendingWidget() {
 						<View key={cat.name} style={styles.legendItem}>
 							<View style={styles.legendLeft}>
 								<View style={[styles.dot, { backgroundColor: cat.color }]} />
-								<Text style={styles.categoryName}>{cat.name}</Text>
+								<Text style={styles.categoryName} className="capitalize">
+									{cat.name}
+								</Text>
 							</View>
-							<Text style={styles.categoryAmount}>${cat.amount.toFixed(2)}</Text>
+							<Text style={styles.categoryAmount}>{formatCurrency(cat.amountMinor)}</Text>
 						</View>
 					))}
 				</View>

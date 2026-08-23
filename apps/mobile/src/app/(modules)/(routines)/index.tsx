@@ -1,6 +1,7 @@
 import { CheckmarkCircle02Icon, CircleIcon, RefreshIcon } from "@hugeicons/core-free-icons";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { BottomNav } from "@/components/ui/bottom-nav";
 import { Icon } from "@/components/ui/icon";
 import { OSHeader } from "@/components/ui/os-header";
 import { NeonColors } from "@/constants/design-system";
@@ -161,6 +162,7 @@ export default function RoutinesTodayScreen() {
 						</>
 					)}
 				</ScrollView>
+				<BottomNav activeTab="routines" />
 			</SafeAreaView>
 		</View>
 	);

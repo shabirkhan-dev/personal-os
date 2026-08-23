@@ -1,89 +1,198 @@
 import {
-	Activity01Icon,
-	Analytics01Icon,
+	Calendar01Icon,
+	FlashIcon,
 	Home01Icon,
 	PlusSignIcon,
 	UserIcon,
 } from "@hugeicons/core-free-icons";
+import { router, usePathname } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { Icon } from "@/components/ui/icon";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Icon, type IconProp } from "@/components/ui/icon";
 import { NeonColors } from "@/constants/design-system";
 
-export function BottomNav() {
-	const tabs = [
-		{ icon: Home01Icon, label: "Home", active: true },
-		{ icon: Analytics01Icon, label: "Stats", active: false },
-		{ icon: PlusSignIcon, label: "Add", isCenter: true },
-		{ icon: Activity01Icon, label: "Logs", active: false },
-		{ icon: UserIcon, label: "Me", active: false },
-	];
+export interface BottomNavProps {
+	activeTab?: "home" | "routines" | "focus" | "profile";
+	onAddPress?: () => void;
+}
+
+interface TabItemConfig {
+	id: "home" | "routines" | "focus" | "profile";
+	label: string;
+	icon: IconProp;
+	route: string;
+}
+
+const TABS: TabItemConfig[] = [
+	{
+		id: "home",
+		label: "Home",
+		icon: Home01Icon,
+		route: "/(modules)/(dashboard)",
+	},
+	{
+		id: "routines",
+		label: "Routines",
+		icon: Calendar01Icon,
+		route: "/(modules)/(routines)",
+	},
+	{
+		id: "focus",
+		label: "Focus",
+		icon: FlashIcon,
+		route: "/(modules)/(focus)",
+	},
+	{
+		id: "profile",
+		label: "Profile",
+		icon: UserIcon,
+		route: "/(modules)/(profile)",
+	},
+];
+
+export function BottomNav({ activeTab, onAddPress }: BottomNavProps) {
+	const insets = useSafeAreaInsets();
+	const pathname = usePathname();
+
+	const getActiveTab = (): "home" | "routines" | "focus" | "profile" => {
+		if (activeTab) return activeTab;
+		if (pathname.includes("(routines)")) return "routines";
+		if (pathname.includes("(focus)") || pathname.includes("(expenses)")) return "focus";
+		if (pathname.includes("(profile)")) return "profile";
+		return "home";
+	};
+
+	const currentActive = getActiveTab();
+
+	const handleTabPress = (route: string) => {
+		router.push(route as never);
+	};
+
+	const leftTabs = TABS.slice(0, 2);
+	const rightTabs = TABS.slice(2, 4);
 
 	return (
-		<View style={styles.container}>
-			{tabs.map((tab, _i) => (
-				<Pressable key={tab.label} style={[styles.tab, tab.isCenter && styles.centerTab]}>
-					{tab.isCenter ? (
-						<View style={styles.centerButton}>
-							<Icon icon={PlusSignIcon} size={28} color={NeonColors.background} strokeWidth={2.5} />
-						</View>
-					) : (
-						<>
-							<tab.icon
-								size={22}
-								color={tab.active ? NeonColors.accent.green : NeonColors.text.muted}
-								strokeWidth={tab.active ? 2 : 1.5}
-							/>
-							<Text
-								style={[
-									styles.label,
-									{ color: tab.active ? NeonColors.accent.green : NeonColors.text.muted },
-								]}
-							>
-								{tab.label}
-							</Text>
-						</>
-					)}
+		<View
+			style={[
+				styles.container,
+				{
+					paddingBottom: Math.max(insets.bottom, 12),
+				},
+			]}
+			className="bg-[#0B0C10]/95 border-t border-white/[0.07] flex-row items-center justify-around px-2 pt-2"
+		>
+			{/* Left 2 Tabs */}
+			{leftTabs.map((tab) => {
+				const isActive = currentActive === tab.id;
+				return (
+					<Pressable
+						key={tab.id}
+						onPress={() => handleTabPress(tab.route)}
+						style={({ pressed }) => [styles.tabButton, { opacity: pressed ? 0.7 : 1 }]}
+						className="flex-1 items-center justify-center py-1"
+						accessibilityRole="button"
+						accessibilityLabel={tab.label}
+						accessibilityState={{ selected: isActive }}
+					>
+						<Icon
+							icon={tab.icon}
+							size={22}
+							color={isActive ? NeonColors.text.primary : NeonColors.text.secondary}
+							strokeWidth={isActive ? 2.2 : 1.6}
+						/>
+						<Text
+							style={[
+								styles.tabLabel,
+								{
+									color: isActive ? NeonColors.text.primary : NeonColors.text.secondary,
+									fontWeight: isActive ? "600" : "400",
+								},
+							]}
+							className="text-[10px] mt-1 tracking-tight"
+						>
+							{tab.label}
+						</Text>
+					</Pressable>
+				);
+			})}
+
+			{/* Center Quick Action Pill (+) */}
+			<View className="items-center justify-center px-1">
+				<Pressable
+					onPress={onAddPress}
+					style={({ pressed }) => [
+						styles.centerPill,
+						{
+							transform: [{ scale: pressed ? 0.94 : 1 }],
+						},
+					]}
+					className="w-[52px] h-[34px] bg-white rounded-full items-center justify-center shadow-lg"
+					accessibilityRole="button"
+					accessibilityLabel="Quick create new entry"
+				>
+					<Icon icon={PlusSignIcon} size={20} color="#0B0C10" strokeWidth={2.4} />
 				</Pressable>
-			))}
+			</View>
+
+			{/* Right 2 Tabs */}
+			{rightTabs.map((tab) => {
+				const isActive = currentActive === tab.id;
+				return (
+					<Pressable
+						key={tab.id}
+						onPress={() => handleTabPress(tab.route)}
+						style={({ pressed }) => [styles.tabButton, { opacity: pressed ? 0.7 : 1 }]}
+						className="flex-1 items-center justify-center py-1"
+						accessibilityRole="button"
+						accessibilityLabel={tab.label}
+						accessibilityState={{ selected: isActive }}
+					>
+						<Icon
+							icon={tab.icon}
+							size={22}
+							color={isActive ? NeonColors.text.primary : NeonColors.text.secondary}
+							strokeWidth={isActive ? 2.2 : 1.6}
+						/>
+						<Text
+							style={[
+								styles.tabLabel,
+								{
+									color: isActive ? NeonColors.text.primary : NeonColors.text.secondary,
+									fontWeight: isActive ? "600" : "400",
+								},
+							]}
+							className="text-[10px] mt-1 tracking-tight"
+						>
+							{tab.label}
+						</Text>
+					</Pressable>
+				);
+			})}
 		</View>
 	);
 }
 
 const styles = StyleSheet.create({
 	container: {
-		flexDirection: "row",
-		height: 84,
-		backgroundColor: NeonColors.background,
-		borderTopWidth: 1,
-		borderTopColor: "rgba(255, 255, 255, 0.05)",
-		paddingBottom: 24,
-		paddingHorizontal: 12,
+		backgroundColor: "#0B0C10",
+		borderTopWidth: StyleSheet.hairlineWidth,
+		borderTopColor: "rgba(255, 255, 255, 0.08)",
 	},
-	tab: {
-		flex: 1,
-		justifyContent: "center",
+	tabButton: {
 		alignItems: "center",
-		gap: 4,
-	},
-	centerTab: {
-		justifyContent: "flex-start",
-		marginTop: -20,
-	},
-	centerButton: {
-		width: 56,
-		height: 56,
-		borderRadius: 28,
-		backgroundColor: NeonColors.accent.green,
 		justifyContent: "center",
-		alignItems: "center",
-		shadowColor: NeonColors.accent.green,
-		shadowOffset: { width: 0, height: 4 },
-		shadowOpacity: 0.3,
-		shadowRadius: 8,
-		elevation: 6,
 	},
-	label: {
+	tabLabel: {
 		fontSize: 10,
-		fontWeight: "600",
+		letterSpacing: -0.2,
+	},
+	centerPill: {
+		backgroundColor: "#FFFFFF",
+		borderRadius: 9999,
+		shadowColor: "#000000",
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.25,
+		shadowRadius: 4,
+		elevation: 4,
 	},
 });

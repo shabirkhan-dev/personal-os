@@ -1,5 +1,7 @@
 export * from './auth-challenges.schema';
 export * from './auth-identities.schema';
+export * from './finance-budgets.schema';
+export * from './finance-transactions.schema';
 export * from './passkeys.schema';
 export * from './routine-completions.schema';
 export * from './routine-items.schema';

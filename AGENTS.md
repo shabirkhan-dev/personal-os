@@ -30,6 +30,16 @@ module's readiness, exact request/response contracts, error envelope, and a chan
 reflected in that file in the same commit**, with a changelog entry flagged BREAKING
 where callers are affected.
 
+## Agent coordination hub
+
+Cross-team coordination lives in **`.agents/`**:
+
+- `board/` — kanban cards (`open/`, `doing/`, `done/`) that any agent or the human
+  can raise to request work, report cross-team bugs, or announce changes.
+- `notes/backend.md`, `notes/frontend.md`, `notes/mobile.md` — per-team scratchpads,
+  owned by that team; everyone else reads.
+- Protocol and rules: `.agents/README.md`. Read it before your first card.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # Next.js: ALWAYS read docs before coding

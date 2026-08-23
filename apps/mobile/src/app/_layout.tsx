@@ -1,8 +1,7 @@
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { AnimatedSplashOverlay } from "@/components/animated-icon";
+import { useEffect } from "react";
 import { AppProviders } from "@/components/providers";
-import { useAuth } from "@/modules/auth";
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
@@ -11,34 +10,16 @@ export const unstable_settings = {
 };
 
 export default function RootLayout() {
+	useEffect(() => {
+		SplashScreen.hideAsync().catch(() => undefined);
+	}, []);
+
 	return (
 		<AppProviders>
-			<AnimatedSplashOverlay />
-			<SplashScreenController />
-			<RootNavigator />
+			<Stack screenOptions={{ headerShown: false }}>
+				<Stack.Screen name="(modules)" />
+				<Stack.Screen name="(auth)" />
+			</Stack>
 		</AppProviders>
-	);
-}
-
-function SplashScreenController() {
-	const { loading } = useAuth();
-	if (!loading) {
-		SplashScreen.hideAsync().catch(() => undefined);
-	}
-	return null;
-}
-
-function RootNavigator() {
-	const { loading } = useAuth();
-
-	if (loading) {
-		return null;
-	}
-
-	return (
-		<Stack screenOptions={{ headerShown: false }}>
-			<Stack.Screen name="(modules)" />
-			<Stack.Screen name="(auth)" />
-		</Stack>
 	);
 }

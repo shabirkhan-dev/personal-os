@@ -8,6 +8,18 @@ export interface RoutineItem {
 	sortOrder: number;
 }
 
+export interface Routine {
+	id: string;
+	name: string;
+	description: string | null;
+	scheduleType: RoutineScheduleType;
+	daysOfWeek: number[];
+	archivedAt: string | null;
+	createdAt: string;
+	updatedAt: string;
+	items: RoutineItem[];
+}
+
 export interface TodayItem extends RoutineItem {
 	completed: boolean;
 }
@@ -32,4 +44,36 @@ export interface ToggleResult {
 	itemId: string;
 	date: string;
 	completed: boolean;
+}
+
+export interface CreateRoutineInput {
+	name: string;
+	description?: string | null;
+	scheduleType: RoutineScheduleType;
+	daysOfWeek?: number[];
+	items: Array<{
+		name: string;
+		notes?: string | null;
+		targetTime?: string | null;
+		sortOrder?: number;
+	}>;
+}
+
+export interface UpdateRoutineInput {
+	name?: string;
+	description?: string | null;
+	scheduleType?: RoutineScheduleType;
+	daysOfWeek?: number[];
+	archived?: boolean;
+	items?: Array<{
+		name: string;
+		notes?: string | null;
+		targetTime?: string | null;
+		sortOrder?: number;
+	}>;
+}
+
+export interface RoutineListQuery {
+	limit?: number;
+	offset?: number;
 }

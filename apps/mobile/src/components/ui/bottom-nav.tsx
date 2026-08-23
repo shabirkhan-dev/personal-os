@@ -74,6 +74,33 @@ export const FINANCE_TABS: TabItemConfig[] = [
 	},
 ];
 
+export const ROUTINES_TABS: TabItemConfig[] = [
+	{
+		id: "today",
+		label: "Today",
+		icon: Calendar01Icon,
+		route: "/(modules)/(routines)",
+	},
+	{
+		id: "habits",
+		label: "Habits",
+		icon: Menu01Icon,
+		route: "/(modules)/(routines)/habits",
+	},
+	{
+		id: "finance",
+		label: "Finance",
+		icon: Wallet01Icon,
+		route: "/(modules)/(expenses)",
+	},
+	{
+		id: "home",
+		label: "Home",
+		icon: Home01Icon,
+		route: "/(modules)/(dashboard)",
+	},
+];
+
 export interface BottomNavProps {
 	tabs?: TabItemConfig[];
 	activeTab?: string;

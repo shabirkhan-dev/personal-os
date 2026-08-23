@@ -1,11 +1,22 @@
-import { CheckmarkCircle02Icon, CircleIcon, RefreshIcon } from "@hugeicons/core-free-icons";
+import {
+	CheckmarkCircle02Icon,
+	CircleIcon,
+	PlusSignIcon,
+	RefreshIcon,
+} from "@hugeicons/core-free-icons";
+import { useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { BottomNav } from "@/components/ui/bottom-nav";
+import { BottomNav, ROUTINES_TABS } from "@/components/ui/bottom-nav";
 import { Icon } from "@/components/ui/icon";
 import { OSHeader } from "@/components/ui/os-header";
 import { NeonColors } from "@/constants/design-system";
-import { useTodayQuery, useToggleItemMutation } from "@/modules/routines";
+import {
+	AddRoutineModal,
+	RoutinesTabs,
+	useTodayQuery,
+	useToggleItemMutation,
+} from "@/modules/routines";
 
 function formatDisplayDate(isoDate: string): string {
 	const [year, month, day] = isoDate.split("-").map(Number);
@@ -20,6 +31,7 @@ function formatDisplayDate(isoDate: string): string {
 }
 
 export default function RoutinesTodayScreen() {
+	const [modalVisible, setModalVisible] = useState(false);
 	const { data: today, isLoading, isError, refetch, isRefetching } = useTodayQuery();
 	const toggleMutation = useToggleItemMutation();
 
@@ -38,27 +50,48 @@ export default function RoutinesTodayScreen() {
 					contentContainerStyle={styles.scrollContent}
 				>
 					<View style={styles.header}>
-						<Text style={styles.title}>Today</Text>
-						<Text style={styles.subtitle}>
-							{today ? formatDisplayDate(today.date) : "Your daily routines"}
-						</Text>
-						<Pressable
-							onPress={() => refetch()}
-							style={styles.refreshButton}
-							accessibilityRole="button"
-							accessibilityLabel="Refresh routines"
-						>
-							{isRefetching ? (
-								<ActivityIndicator size="small" color={NeonColors.accent.green} />
-							) : (
+						<View className="flex-1">
+							<Text style={styles.title}>Today</Text>
+							<Text style={styles.subtitle}>
+								{today ? formatDisplayDate(today.date) : "Your daily routines"}
+							</Text>
+						</View>
+						<View className="flex-row items-center gap-2">
+							<Pressable
+								onPress={() => setModalVisible(true)}
+								style={({ pressed }) => [{ opacity: pressed ? 0.8 : 1 }]}
+								className="bg-green-500/20 px-3 py-2 rounded-xl flex-row items-center gap-1 border border-green-500/30"
+							>
 								<Icon
-									icon={RefreshIcon}
-									size={16}
-									color={NeonColors.text.secondary}
-									strokeWidth={1.8}
+									icon={PlusSignIcon}
+									size={14}
+									color={NeonColors.accent.green}
+									strokeWidth={2.5}
 								/>
-							)}
-						</Pressable>
+								<Text className="text-green-400 font-bold text-xs">New</Text>
+							</Pressable>
+							<Pressable
+								onPress={() => refetch()}
+								style={styles.refreshButton}
+								accessibilityRole="button"
+								accessibilityLabel="Refresh routines"
+							>
+								{isRefetching ? (
+									<ActivityIndicator size="small" color={NeonColors.accent.green} />
+								) : (
+									<Icon
+										icon={RefreshIcon}
+										size={16}
+										color={NeonColors.text.secondary}
+										strokeWidth={1.8}
+									/>
+								)}
+							</Pressable>
+						</View>
+					</View>
+
+					<View className="px-4">
+						<RoutinesTabs active="today" />
 					</View>
 
 					{isLoading && (
@@ -162,8 +195,14 @@ export default function RoutinesTodayScreen() {
 						</>
 					)}
 				</ScrollView>
-				<BottomNav activeTab="routines" />
+				<BottomNav
+					tabs={ROUTINES_TABS}
+					activeTab="today"
+					onAddPress={() => setModalVisible(true)}
+				/>
 			</SafeAreaView>
+
+			<AddRoutineModal visible={modalVisible} onClose={() => setModalVisible(false)} />
 		</View>
 	);
 }

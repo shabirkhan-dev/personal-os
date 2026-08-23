@@ -53,7 +53,7 @@ mobile: `src/lib/api/client.ts`).
 | Health (`GET /health`) | ✅ ready | No auth |
 | AI proxy | ✅ beta | Nest proxies FastAPI; keys stay server-side |
 | **Routines** | ✅ ready | Phase 1 core loop — see contract below |
-| Finance | 🚧 planned | Phase 2 |
+| **Finance** | ✅ ready | Transactions + budgets + month summary — see contract below |
 | Care / Food / Fashion | 🚧 planned | Phases 3–4 |
 
 ---
@@ -170,7 +170,104 @@ Rules enforced server-side:
 
 ---
 
+## Finance API (ready)
+
+Money is stored as **integer minor units** (`amountMinor`: paise for INR) —
+never floats. Dates (`occurredOn`, `YYYY-MM-DD`) are supplied by the client so
+grouping matches the user's local day. Categories are free-form strings that
+the server **trims and lower-cases**, so `Food` and `food` always group together.
+Uncategorized expenses appear under the `uncategorized` key in summaries.
+
+### Types
+
+```ts
+type TransactionType = "expense" | "income";
+
+interface FinanceTransaction {
+	id: string; // uuid
+	type: TransactionType;
+	amountMinor: number; // integer, >= 1
+	currency: string; // default "INR"
+	category: string | null;
+	note: string | null;
+	occurredOn: string; // "YYYY-MM-DD"
+	createdAt: string;
+	updatedAt: string;
+}
+
+interface FinanceBudget {
+	id: string;
+	month: string; // "YYYY-MM"
+	category: string;
+	limitMinor: number;
+}
+
+interface MonthSummary {
+	month: string;
+	incomeTotal: number;
+	expenseTotal: number;
+	netTotal: number; // income - expense
+	categories: Array<{
+		category: string;
+		spent: number; // expense sum for the month
+		limit: number | null; // budget limit, if set
+	}>;
+}
+```
+
+### Endpoints (all under `/finance`, auth required)
+
+| Method | Path | Purpose | Returns |
+| --- | --- | --- | --- |
+| GET | `/finance/transactions?limit=&offset=&type=&category=&month=` | Filterable, bounded list (newest first) | `FinanceTransaction[]` |
+| POST | `/finance/transactions` | Create; `occurredOn` defaults to today (user tz) | `FinanceTransaction` (201) |
+| PATCH | `/finance/transactions/:id` | Partial update | `FinanceTransaction` |
+| DELETE | `/finance/transactions/:id` | **Hard delete** (ledger semantics, unlike routines) | `{ id, deleted: true }` |
+| GET | `/finance/summary/:month` | Totals + per-category spend + budget vs actual | `MonthSummary` |
+| PUT | `/finance/budgets/:month` | Replace the month's whole budget set | `FinanceBudget[]` |
+| GET | `/finance/budgets/:month` | List budgets for a month | `FinanceBudget[]` |
+
+#### Validation rules
+
+- `month` must match `YYYY-MM`; invalid values return `400 VALIDATION_ERROR`.
+- `occurredOn` must be a real calendar date between 2000 and 2100.
+- `amountMinor` / `limitMinor`: integers ≥ 1 (budgets allow 0), capped at 10¹².
+- `category`: 1–64 chars after trim/lower-case; letters, digits, space, `_`, `-`.
+- List query: `limit` 1–200 (default 100), `offset` ≥ 0; filters combine with AND.
+
+#### Body examples
+
+```jsonc
+// POST /finance/transactions
+{ "type": "expense", "amountMinor": 25000, "category": "Groceries", "note": "Weekly market run" }
+
+// PUT /finance/budgets/2026-09  (replaces all budgets for September)
+{
+	"budgets": [
+		{ "category": "food", "limitMinor": 1500000 },
+		{ "category": "transport", "limitMinor": 400000 }
+	]
+}
+```
+
+### Frontend usage map
+
+| Client | Files | Notes |
+| --- | --- | --- |
+| Web/mobile | not wired yet | Raise a card if you need a shape change before wiring |
+
+---
+
 ## Changelog
+
+### 2026-08-23 — Finance v1 shipped
+
+- New module under `/finance`: transactions CRUD, monthly budgets (PUT replaces
+  the month's set), and `GET /finance/summary/:month`.
+- Money is integer minor units; categories are server-normalized
+  (trim + lower-case). See the Finance section for full contracts.
+- No frontend consumers yet — shape changes are still cheap, request them via a
+  board card.
 
 ### 2026-08-23 — Routines v1 hardening
 

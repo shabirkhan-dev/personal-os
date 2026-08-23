@@ -10,12 +10,14 @@
 		"---",
 		"docker",
 		"deploy",
-		"qol",
-		"production-roadmap",
 		"backend-api",
-		"product-system-design",
-		"ai-first-workflow",
 		"architecture",
+		"product-system-design",
+		"production-roadmap",
+		"---",
+		"ai-first-workflow",
+		"qol",
+		"team-coordination",
 		"overrides",
 		"dependency-upgrade-report"
 	]

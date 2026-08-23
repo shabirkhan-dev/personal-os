@@ -1,49 +1,101 @@
 ---
 title: Quick Start
-description: Get the Starter running in minutes.
+description: Install Personal OS, choose a local runtime, and start developing.
 ---
+
+This guide gets a new developer from a clean checkout to a working app. Use the focused commands
+when you are changing one surface; use the full stack when you need browser, API, and Postgres
+together.
 
 ## Prerequisites
 
-- Bun (latest stable)
+- [Bun](https://bun.sh) **1.3.13** (the version pinned by `packageManager`)
 - Git
-- Node-compatible system dependencies for Next.js and Expo
+- Docker Compose **v2.20+** if you want containerized Postgres or the full stack
+- An Android emulator, iOS simulator, or physical device for native mobile work
 
-## 1) Install dependencies
+Node, npm, yarn, and pnpm are not the repository package managers. Bun runs the workspace scripts.
+
+## 1. Install and enable repository hooks
 
 ```bash
+git clone https://github.com/shabirkhan-dev/personal-os.git
+cd personal-os
 bun install
-```
-
-## 2) Install git hooks (recommended)
-
-```bash
 bun run prepare
 ```
 
-This enables Lefthook checks for formatting, linting, type checks, and commit hygiene.
+Lefthook installs the repository's pre-commit and commit-message checks. If hooks are unavailable
+on a machine, run the same checks explicitly before opening a PR.
 
-## 3) Run the workspace
+## 2. Choose a local runtime
+
+### App-only development
+
+For docs or UI work that does not need the database:
 
 ```bash
-bun run dev
+bun --cwd=apps/docs run dev   # http://localhost:3002/docs
+bun --cwd=apps/web run dev    # http://localhost:3000
 ```
 
-Turbo will run relevant app/dev tasks across the monorepo.
-
-## 4) Open apps
-
-- Web app: `apps/web`
-- Mobile app: `apps/mobile`
-- API app: `apps/hono-api`
-- Docs app: `apps/docs`
-
-## 5) Validate quality before pushing
+Run each command in its own terminal. Mobile starts Metro instead:
 
 ```bash
+bun --cwd=apps/mobile run start
+```
+
+### Host apps with Docker Postgres
+
+This is the usual mode for API feature work:
+
+```bash
+cp env.docker.example .env
+docker compose up -d postgres
+cp apps/nest-api/.env.example apps/nest-api/.env
+bun --cwd=apps/nest-api run dev
+```
+
+Then start the web, mobile, or docs app separately. The API is available at
+`http://localhost:4000`; Swagger is at `http://localhost:4000/api/docs`.
+
+### Full container stack
+
+Use this when you want Docker to run Postgres, Nest, and the production-style web image:
+
+```bash
+cp env.docker.example .env
+docker compose up -d --build
+```
+
+The docs app is not part of the Compose stack; run it with `bun --cwd=apps/docs run dev` if needed.
+The optional AI service is enabled with `docker compose --profile ai up -d --build`.
+
+## 3. Know the default ports
+
+| Service | URL |
+| --- | --- |
+| Web | `http://localhost:3000` |
+| Nest API | `http://localhost:4000` |
+| API Swagger | `http://localhost:4000/api/docs` |
+| Docs | `http://localhost:3002/docs` |
+| Postgres | `localhost:5433` |
+| AI service (optional) | `http://localhost:8000` |
+
+## 4. Verify before you hand work over
+
+Run checks for the surfaces you changed, then use the root checks for a cross-app change:
+
+```bash
+bun --cwd=apps/docs run types:check
+bun --cwd=apps/docs run lint
 bun run lint
-bun run format
 bun run typecheck
+bun run test
 ```
 
-If your change only touches one app, you can still run checks at the root to keep CI consistent.
+`bun run format` writes formatting changes. Run it deliberately and review the diff, especially
+when other developers have uncommitted work in the monorepo.
+
+Before consuming a Nest endpoint, read [Backend API](/docs/backend-api). Before changing a visible
+web surface, read [DESIGN.md](https://github.com/shabirkhan-dev/personal-os/blob/main/DESIGN.md).

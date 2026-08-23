@@ -1,335 +1,69 @@
 ---
 title: AI-First Workflow
-description: Starter audit notes and AI-assisted development roadmap.
+description: How humans and coding agents can move quickly without losing project truth.
 ---
-Last updated: May 6, 2026
 
-This document audits the starter monorepo as a reusable personal Starter and turns the recent
-AI/UI research into a practical improvement plan.
+AI is part of the development workflow and a future product capability. In both cases, it should
+make reasoning more visible, not make ownership or verification disappear.
 
-## Current Strengths
+## What agents must read
 
-The repo already has a strong base:
+Before an agent changes code, it should read:
 
-- Bun workspaces with Turborepo orchestration.
-- Multiple app templates: Next.js web, Expo mobile, Hono API, FastAPI, Nest API, and Rust.
-- Shared TypeScript config and Tailwind token package.
-- Polyglot quality tooling for TypeScript, Bash, Python, and Rust.
-- Git hooks through Lefthook.
-- GitHub Actions for CI, CD template, dependency review, CodeQL, and Dependabot.
-- Docker Compose fragments for Postgres and Hono API.
-- Dev Container support.
-- Agent instructions and rule files.
-- Shared `@school-os/ui` package for stable web primitives.
-- Web app already has shadcn-style primitives, dashboard examples, Vitest, and Playwright.
+1. Root `AGENTS.md` and any app-specific instructions.
+2. The relevant source of truth: `plan.md`, `DESIGN.md`, or the API status board.
+3. `.agents/README.md` and the team's notes when the work crosses ownership boundaries.
+4. Installed framework documentation for framework-sensitive work. For Next.js, use the docs under
+   `node_modules/next/dist/docs/` as required by the repository rules.
 
-This is already beyond a normal Starter. The next phase should make it easier to turn into a
-real product quickly while keeping design quality, security, and agent workflow consistent.
+Agents should inspect the current tree before proposing a new abstraction. A plausible pattern from
+another project is not evidence that Personal OS needs it.
 
-## High-Priority Gaps
-
-### 1. Shared UI Package Needs Gradual Migration
-
-`packages/ui` now exists as a conservative shared primitive package. The web app still has many
-local primitives in `apps/web/src/components/ui`, and mobile has separate UI primitives under
-`apps/mobile/src/components/ui`.
-
-Recommendation:
-
-- Move stable shadcn-style web primitives there over time.
-- Keep app-specific composed components inside each app.
-- Add a component preview surface through Storybook or the docs app.
-
-Why it matters:
-
-- AI agents need a single place to reuse primitives.
-- New apps should not copy/paste UI components.
-- Visual consistency improves across projects.
-
-### 2. No Repo-Level Design System Brief
-
-The repo has Tailwind tokens, but it did not have a human/agent-readable design brief.
-
-Recommendation:
-
-- Keep `DESIGN.md` at repo root.
-- Treat `packages/ui/src/styles/globals.css` as implementation tokens.
-- Treat `DESIGN.md` as intent, rules, anti-patterns, and agent guidance.
-- Link `DESIGN.md` from `README.md`, `AGENTS.md`, and future PR templates.
-
-Why it matters:
-
-- AI-generated UI becomes less generic.
-- Developers get a consistent quality bar.
-- Design decisions become reviewable in Git.
-
-### 3. Visual QA Is Too Thin
-
-The web app has Playwright e2e, but the repo does not yet define visual review as a first-class
-workflow.
-
-Recommendation:
-
-- Add Playwright screenshot tests for core web screens.
-- Add mobile/web viewport checks for generated UI.
-- Consider Storybook + Chromatic/Percy later for shared components.
-- Store approved screenshots only if the team wants baseline visual regression.
-
-Minimum school-os policy:
-
-- Every new product screen should be checked at desktop and mobile widths.
-- Every data view should include loading, empty, error, and populated states.
-- Every interactive component should include hover, focus-visible, disabled, and active states.
-
-### 4. GitHub Collaboration Templates Are Missing
-
-The repo has CI, but not enough issue/PR structure for repeatable AI-agent work.
-
-Recommendation:
-
-- Add a pull request template.
-- Add feature and bug issue templates.
-- Add a CODEOWNERS file once ownership is clear.
-- Require PRs for agent-generated code.
-
-Why it matters:
-
-- Agents perform better with acceptance criteria.
-- Human review becomes easier.
-- CI failures map back to clear expected behavior.
-
-### 5. Nest API Tracking Was Converted To Normal Files
-
-`apps/nest-api` was previously tracked as a gitlink without a `.gitmodules` mapping. It has been
-converted back into normal workspace files so a fresh clone can reconstruct the Nest template.
-
-Recommendation:
-
-- Keep app templates as normal workspace directories unless there is a strong reason to use
-  submodules.
-- Do not add nested Git repositories inside `apps/*`.
-
-Why it matters:
-
-- Starter kits must clone cleanly.
-- CI and new machines should not depend on local-only nested repo state.
-
-### 6. Security Coverage Is JS-Heavy
-
-Security workflow covers dependency review and CodeQL for JavaScript/TypeScript. The repo also has
-Python, Rust, C, Docker, and shell scripts.
-
-Recommendation:
-
-- Add `cargo audit` or `cargo deny` for Rust.
-- Add `pip-audit` or `uv pip audit` when Python dependencies grow.
-- Add `gitleaks` or equivalent secret scanning in CI.
-- Add container scanning if Docker images become real deployment targets.
-- Add Semgrep if custom rules become useful.
-
-### 7. Release Workflow Is Only a Placeholder
-
-The CD workflow is a useful template, but it still echoes placeholder deploy commands.
-
-Recommendation:
-
-- Add Changesets or Release Please for version/changelog automation.
-- Add environment-specific deploy docs.
-- Keep production deploys tag-gated.
-- Add health-check URLs through GitHub environments.
-
-### 8. App Provisioning Is Manual
-
-The repo is a Starter, but it does not yet have a first-class "create a new product from this"
-script.
-
-Recommendation:
-
-- Add a scaffold script later: `bun run create:app`.
-- Let it copy selected templates: web, mobile, Hono, FastAPI, docs.
-- Replace names, ports, package scopes, env files, and README placeholders.
-- Optionally remove unused apps for a lean product repo.
-
-## Recommended AI-First Development Flow
-
-### 1. Start With a Product Brief
-
-Create an issue or local brief:
-
-```md
-# Product Brief
-
-## Goal
-
-## Users
-
-## Core Flows
-
-## Screens
-
-## Data Model
-
-## Required States
-
-## Acceptance Criteria
-
-## Non-Goals
-```
-
-### 2. Generate Design Direction Before Code
-
-Use one of:
-
-- `DESIGN.md` + Codex/Claude/Cursor.
-- Open Design for artifact/design-system exploration.
-- Figma MCP when a Figma file exists.
-- Onlook for visual editing of the running web app.
-- Scamp if you want local design-as-code exploration.
-- Wireweave for early wireframes.
-
-Output should be:
-
-- Chosen screen direction.
-- Components needed.
-- Token changes if needed.
-- Edge states.
-- Desktop and mobile behavior.
-
-### 3. Implement Through Existing App Boundaries
-
-For web:
-
-- Use `@school-os/ui` for stable shared primitives.
-- Keep app-local components in `apps/web/src/components/ui` until they prove reusable.
-- Move reusable primitives into `packages/ui` gradually.
-- Keep route-specific composed components in feature modules.
-
-For mobile:
-
-- Use Expo Router conventions.
-- Keep primitives in `src/components/ui`.
-- Use safe-area aware layouts.
-
-For APIs:
-
-- Define schema/contract first.
-- Add validation tests.
-- Keep auth/permissions explicit.
-
-### 4. Review Through CI and Visual QA
-
-Minimum before merge:
-
-- `bun run lint`
-- `bun run typecheck`
-- `bun run test`
-- `bun run test:e2e:web` when web flow changes
-- desktop/mobile screenshot review for UI changes
-- secret scan
-- PR review
-
-## Starter Target Architecture
-
-Recommended eventual layout:
+## A safe agent loop
 
 ```text
-school-os/
-├── DESIGN.md
-├── apps/
-│   ├── web/
-│   ├── mobile/
-│   ├── nest-api/
-│   └── docs/                 # Fumadocs; content in apps/docs/content/docs/
-├── packages/
-│   ├── ui/
-│   ├── logger/
-│   └── typescript-config/
-├── .github/
-│   ├── ISSUE_TEMPLATE/
-│   ├── PULL_REQUEST_TEMPLATE.md
-│   ├── CODEOWNERS
-│   └── workflows/
-└── scripts/
-    ├── scaffold/
-    ├── architecture/
-    └── git-hooks/
+Read rules → inspect code → state scope → make a focused change
+→ run targeted checks → review the diff → update source-of-truth docs
+→ hand off evidence and remaining risks
 ```
 
-## Phased Improvement Plan
+For cross-team work, raise a board card before editing another team's area. Do not write to another
+team's notes file. Keep contracts in the API status board, not in duplicated prompts or tickets.
 
-### Phase 1: Workflow Foundation
+## Review standards for generated code
 
-- Keep `DESIGN.md` current.
-- Use PR and issue templates.
-- Keep `apps/nest-api` as normal tracked workspace files.
-- Keep `AGENTS.md` aligned with actual packages and design workflow.
-- Keep docs linked from root `README.md`.
+- Prefer small, named functions and explicit types over clever compression.
+- Reject `any`, silent catches, unchecked user input, and unbounded queries.
+- Check authorization and ownership independently of UI visibility.
+- Check timezone and date semantics for every daily or monthly feature.
+- Reuse the existing UI tokens and primitives; do not introduce a second design language.
+- Test empty, loading, error, retry, and narrow-screen states for user-facing flows.
+- Explain environment-limited checks instead of reporting them as passing.
 
-### Phase 2: Shared UI and Visual QA
+## Product AI boundary
 
-- Expand `packages/ui` gradually.
-- Move stable web primitives from `apps/web/src/components/ui` when they are route/data independent.
-- Add Storybook or a docs-app component gallery.
-- Add Playwright screenshot checks for key web screens.
-- Add design-state examples for loading/empty/error.
+The public path is:
 
-### Phase 3: Security and Release Hardening
+```text
+Web / Mobile → NestJS AI proxy → apps/ai-api → model provider
+```
 
-- Add Rust audit.
-- Add Python dependency audit.
-- Add Gitleaks/TruffleHog in CI.
-- Add Release Please or Changesets.
-- Add real deploy adapters for Vercel/Cloudflare/Railway/Fly/Render as optional templates.
+`apps/ai-api` is an internal beta service. Nest owns authentication, authorization, request shape,
+provider policy, and secret handling. AI output is untrusted until validated and should be presented
+as a suggestion, draft, or explanation. It should not silently create a transaction, change a routine,
+or send a message.
 
-### Phase 4: Product Generator
+## Prompts and data minimization
 
-- Add `scripts/scaffold`.
-- Add `bun run create:app`.
-- Let users select stack templates.
-- Rewrite package names and env examples.
-- Generate a project-specific README and `DESIGN.md`.
+- Send only the fields needed for the task.
+- State the user's timezone when a date or schedule is involved.
+- Prefer structured output validated by a schema.
+- Keep user intent and confirmation outside the model response.
+- Make it possible to inspect, correct, regenerate, or discard a suggestion.
+- Never place secrets, raw access tokens, or unnecessary personal data into prompts or logs.
 
-## Suggested Tool Additions
+## Done means evidence
 
-| Need | Recommended Addition |
-| --- | --- |
-| Shared component system | `packages/ui` |
-| Component review | Storybook or docs-app gallery |
-| Visual regression | Playwright screenshots first, Chromatic/Percy later |
-| Design-system source | Root `DESIGN.md` + Tailwind tokens |
-| AI design exploration | Open Design, Figma MCP, Onlook, Scamp |
-| GitHub workflow | PR template, issue templates, CODEOWNERS |
-| Release automation | Release Please or Changesets |
-| Rust security | `cargo audit` or `cargo deny` |
-| Python security | `pip-audit` or `uv` audit workflow |
-| Secret scanning | Gitleaks/TruffleHog CI job |
-| App scaffolding | `bun run create:app` script |
-
-## Agent Workflow Rules
-
-Agents should follow this pattern:
-
-1. Read `README.md`, `AGENTS.md`, and `DESIGN.md`.
-2. Read the target app README.
-3. Propose a plan before implementation.
-4. Keep edits scoped to the target app/package.
-5. Reuse existing components and tokens.
-6. Add tests for behavior changes.
-7. Run the smallest relevant verification command first.
-8. Report commands run and any remaining gaps.
-
-## Final Recommendation
-
-Do not turn this repo into a huge framework. Keep it as a practical Starter with strong
-defaults, clear escape hatches, and first-class AI-agent instructions.
-
-The best next investment is:
-
-1. Fix clone/repo hygiene.
-2. Add the design-system workflow.
-3. Create a shared UI package.
-4. Add visual QA.
-5. Add scaffold automation.
-
-That combination will make this Starter useful for real upcoming projects, not just a collection
-of templates.
+An AI-assisted change is ready for review when the author can point to the files changed, the
+commands run, the behavior checked, and the remaining uncertainty. A good agent leaves the next
+developer with less archaeology, not more.

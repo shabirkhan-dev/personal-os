@@ -1,43 +1,53 @@
 ---
 title: Project Structure
-description: A clear map of the monorepo layout and responsibilities.
+description: A map of the Personal OS monorepo and where new code belongs.
 ---
 
-## Repository layout
-
 ```text
-school-os/
+personal-os/
 ├── apps/
-│   ├── web/
-│   ├── mobile/
-│   ├── docs/          # Fumadocs site; MDX in apps/docs/content/docs/
-│   ├── nest-api/
-│   └── rust/
+│   ├── web/               # Next.js browser app
+│   ├── mobile/            # Expo Router + NativeWind mobile app
+│   ├── nest-api/          # NestJS production API and Drizzle database layer
+│   ├── ai-api/            # Internal FastAPI AI service; Nest is the public proxy
+│   ├── docs/              # This Fumadocs site; MDX lives in content/docs/
+│   └── rust/              # Optional Rust service/binary area
 ├── packages/
-│   ├── ui/
-│   ├── typescript-config/
-│   └── logger/
-├── scripts/
-├── docker/
-├── turbo.json
-└── biome.json
+│   ├── ui/                # Shared web primitives and design tokens
+│   ├── typescript-config/ # Shared TypeScript bases
+│   └── logger/            # Shared TypeScript/Rust logging package
+├── .agents/               # Team board, notes, and coordination protocol
+├── .github/               # CI, security, and automation workflows
+├── docker/                # Compose fragments and container support
+├── scripts/               # Bash, Python, architecture, and hook utilities
+├── AGENTS.md              # Agent and repository instructions
+├── DESIGN.md              # Product and interface design brief
+├── PROJECT.md             # Expanded project and tooling reference
+├── plan.md                # Product direction and milestones
+├── turbo.json             # Task graph and cache configuration
+└── biome.json             # TypeScript/JavaScript lint and format configuration
 ```
 
-## Core principles
+## Where to put new code
 
-- Keep app-specific code inside each app folder.
-- Move reusable logic into `packages/*`.
-- Prefer workspace imports (`@school-os/*`) over copy-paste.
-- Keep tooling centralized at repository root.
+| Need | Location | Rule |
+| --- | --- | --- |
+| Browser route or feature | `apps/web/src/` | Keep routing, feature UI, and app helpers inside the web app |
+| Mobile route or feature | `apps/mobile/src/` | Use `src/app` for routes and `src/components` for reusable UI |
+| API module or endpoint | `apps/nest-api/src/modules/` | Keep controllers thin; update the API doc in the same change |
+| AI provider or prompt flow | `apps/ai-api/` | Reach it through Nest; do not expose provider keys to clients |
+| Shared web primitive | `packages/ui/src/` | Keep it app-agnostic and expose a public package entrypoint |
+| Documentation | `apps/docs/content/docs/` | Add the page to the nearest `meta.json` |
+| Cross-team request | `.agents/board/open/` | Use the board protocol; do not edit another team's notes |
 
-## Where to add new code
+The existing shared package names use the `@school-os/*` npm scope from the original starter. Keep
+those imports working until the package namespace is intentionally migrated; do not introduce a
+second alias casually.
 
-- New product surface: `apps/<new-app>`
-- Shared UI/utilities/types: `packages/<new-package>`
-- Docs pages: `apps/docs/content/docs/` (served at `/docs/...`)
-- Automation scripts: `scripts/`
+## Boundaries that matter
 
-## Why this works
-
-This structure keeps local iteration fast while preserving consistency at scale. Teams can ship
-independently inside each app, without losing shared standards across the repo.
+- Apps may depend on shared packages, but apps must not import one another through relative paths.
+- Packages must not import app aliases such as `@/...`.
+- Web modules should be consumed through their public module boundary, not deep internal files.
+- API contracts belong in `apps/docs/content/docs/backend-api.mdx`; cards and notes should link there.
+- Run `bun run architecture:check` when moving files or introducing a new package boundary.

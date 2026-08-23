@@ -3,7 +3,7 @@ title: Deploy
 description: Host web and docs on Vercel, Nest API on Render with Neon Postgres.
 ---
 
-Ship the Starter stack without Docker on the public internet:
+Ship the Personal OS web, docs, API, and database layers without running Docker in production:
 
 | App | Platform | Notes |
 |-----|----------|--------|
@@ -30,7 +30,7 @@ Repo files: `apps/web/vercel.json`, `apps/docs/vercel.json`, root `render.yaml`.
 |----------|---------|
 | `DATABASE_URL` | Neon pooled URL |
 | `RESEND_API_KEY` | `re_...` from [Resend](https://resend.com) |
-| `AUTH_EMAIL_FROM` | `Starter <noreply@your-domain.com>` |
+| `AUTH_EMAIL_FROM` | `Personal OS <noreply@your-domain.com>` |
 | `WEB_APP_URL` | `https://your-web.vercel.app` (set after step 3) |
 | `CORS_ORIGIN` | same as `WEB_APP_URL` (comma-separate preview URLs if needed) |
 | `WEBAUTHN_RP_ID` | `your-web.vercel.app` (hostname only) |

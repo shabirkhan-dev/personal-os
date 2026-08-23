@@ -1,30 +1,41 @@
 ---
 title: Apps Overview
-description: What each app does and where it fits in the platform.
+description: What each application does and how the Personal OS platform is split.
 ---
 
-## `apps/web`
+Personal OS is a monorepo, but the apps do not have equal responsibilities. The Nest API owns
+public product contracts; the AI service is an internal implementation detail; web and mobile are
+callers of those contracts.
 
-Next.js web frontend with shared design primitives and Tailwind-based styling.
+| App | Runtime | Responsibility | Default command |
+| --- | --- | --- | --- |
+| `apps/web` | Next.js | Browser experience, feature workflows, and web authentication | `bun --cwd=apps/web run dev` |
+| `apps/mobile` | Expo Router | Native-first logging, routines, finance, and mobile authentication | `bun --cwd=apps/mobile run start` |
+| `apps/nest-api` | NestJS | Versioned REST API, auth, profiles, routines, finance, billing, and AI proxy | `bun --cwd=apps/nest-api run dev` |
+| `apps/ai-api` | FastAPI | Internal AI provider adapter and model-facing workflows | `bun run dev:ai` |
+| `apps/docs` | Next.js + Fumadocs | Project handbook, API status board, and engineering decisions | `bun --cwd=apps/docs run dev` |
+| `apps/rust` | Rust | Optional systems/performance service area; not on the default dev path | `bun run dev:rust` |
 
-## `apps/mobile`
+## Dependency direction
 
-Expo Router mobile app using NativeWind and shared workspace conventions.
+```text
+web ───────┐
+mobile ────┼──> NestJS API ───> Postgres
+           │          │
+docs ──────┘          └──────> internal AI API (optional)
+```
 
-## `apps/docs`
+The browser and mobile apps use the versioned API at `/api/v1`. The Nest API validates auth,
+authorization, input, and response envelopes. The AI service is never a client-facing bypass; keep
+provider credentials and model policy behind Nest.
 
-Fumadocs-powered documentation site for onboarding, architecture, and workflows.
+## What is implemented
 
-## `apps/hono-api`
+- Auth, sessions, profiles, passkeys, MFA, social sign-in, and health checks.
+- Routines with schedules, ordered items, today state, and completion logging.
+- Finance with transactions, budgets, month summaries, and category summaries.
+- A beta AI proxy with a mock provider for local development.
 
-Hono-based API service with Prisma and PostgreSQL integration patterns.
-
-## `apps/rust`
-
-Rust service/binary area for performance-sensitive or systems-level workloads.
-
-## Cross-app strategy
-
-- Keep domain boundaries explicit.
-- Share contracts and utilities through packages.
-- Evolve each app independently while maintaining one quality bar.
+Care, food, fashion, and the unified cross-domain timeline are future product slices. See the
+[production roadmap](/docs/production-roadmap) for sequencing and [Backend API](/docs/backend-api)
+for readiness before integration.

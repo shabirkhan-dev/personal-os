@@ -1,42 +1,61 @@
 ---
 title: Commands and Tooling
-description: The command surface and toolchain used across the monorepo.
+description: The command surface used to develop, verify, and operate Personal OS.
 ---
 
 ## Package manager
 
-Use Bun for everything:
+Use Bun **1.3.13** for workspace installation and scripts:
 
 ```bash
 bun install
 ```
 
-Do not use npm, yarn, or pnpm in this repository.
+Do not commit a second lockfile or use npm, yarn, or pnpm to update dependencies.
 
-## Common root commands
+## Root commands
+
+| Command | Purpose |
+| --- | --- |
+| `bun run dev` | Run development tasks across apps except Rust |
+| `bun run build` | Build all apps and packages in the Turbo graph |
+| `bun run lint` | Run workspace linters and script checks |
+| `bun run format` | Format the repository; writes files |
+| `bun run typecheck` | Type-check TypeScript workspaces |
+| `bun run test` | Run workspace and script tests |
+| `bun run preflight` | Lint, typecheck, and test |
+| `bun run architecture:check` | Enforce import boundaries and naming rules |
+| `bun run test:e2e:web` | Run the web Playwright suite |
+
+## Focused commands
 
 ```bash
-bun run dev
-bun run build
-bun run lint
-bun run format
-bun run typecheck
-bun run test
+bun --cwd=apps/docs run types:check
+bun --cwd=apps/docs run build
+bun --cwd=apps/web run typecheck
+bun --cwd=apps/web run test:e2e
+bun --cwd=apps/mobile run lint
+bun --cwd=apps/nest-api run typecheck
+bun --cwd=apps/nest-api run test:e2e
+bun --cwd=apps/nest-api run db:generate
+bun --cwd=apps/nest-api run db:migrate
+bun --cwd=apps/ai-api run test
 ```
 
-## Toolchain
+Use focused checks while iterating, then run the relevant root checks before hand-off. Database
+migrations require a reachable `DATABASE_URL`; do not run them against a shared or production
+database from a local feature branch.
 
-- **Turborepo**: Task orchestration and caching
-- **Biome**: Formatting and linting for TS/JS
-- **Lefthook**: Git hooks (pre-commit and commit-msg)
-- **TypeScript**: Shared base config via `packages/typescript-config`
+## Toolchain roles
 
-## CI expectations
+- **Bun** — package management and scripts.
+- **Turborepo** — task orchestration, filtering, and caching.
+- **Biome** — TypeScript/JavaScript linting and formatting.
+- **Lefthook** — pre-commit and commit-message checks.
+- **TypeScript** — shared compiler bases under `packages/typescript-config`.
+- **Ruff/uv** — Python checks for `apps/ai-api`.
+- **Cargo/rustfmt/clippy** — Rust checks for `apps/rust`.
+- **Playwright** — browser regression tests for the web app.
 
-Before opening a PR:
-
-1. Run lint and format locally.
-2. Run typecheck for TS changes.
-3. Run tests for affected apps or packages.
-
-These checks align with CI and reduce review friction.
+When a tool is unavailable on the host, record the limitation in the hand-off rather than silently
+claiming the check passed.

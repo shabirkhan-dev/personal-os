@@ -1,4 +1,7 @@
-# Backend API — status board
+---
+title: Backend API
+description: Readiness, contracts, and integration rules for the NestJS API.
+---
 
 > **For AI agents and humans consuming the API.** Read this before wiring any
 > frontend feature to the NestJS API. It tracks what is ready, exact contracts,
@@ -49,9 +52,9 @@ mobile: `src/lib/api/client.ts`).
 | --- | --- | --- |
 | Auth (login, register, magic link, Google, passkeys, MFA) | ✅ ready | See Swagger `/api/docs` |
 | Users / profiles (`/users/me*`) | ✅ ready | Includes avatar upload |
-| Billing (Razorpay) | ✅ ready | Internal flows |
+| Billing (Stripe/Razorpay) | ✅ ready | Provider-specific internal flows |
 | Health (`GET /health`) | ✅ ready | No auth |
-| AI proxy | ✅ beta | Nest proxies FastAPI; keys stay server-side |
+| AI proxy | ✅ beta | Nest proxies `apps/ai-api`; provider keys stay server-side |
 | **Routines** | ✅ ready | Phase 1 core loop — see contract below |
 | **Finance** | ✅ ready | Transactions + budgets + month summary — see contract below |
 | Care / Food / Fashion | 🚧 planned | Phases 3–4 |
@@ -259,6 +262,20 @@ interface MonthSummary {
 ---
 
 ## Changelog
+
+### 2026-08-24 — Observability, timeouts, production config hardening
+
+- External calls are now deadline-bounded: `EXTERNAL_REQUEST_TIMEOUT_MS`
+  (default 10s) applies to Resend email, the AI service, and the Stripe/Razorpay
+  SDKs. Timeouts surface as stable 503s (`EMAIL_PROVIDER_TIMEOUT`,
+  `AI_UNAVAILABLE`) — no silent hangs.
+- Structured request logging: successful requests and 5xx/unexpected errors are
+  logged with `method path status durationMs requestId`; inbound request IDs are
+  sanitized; `/health` and `/docs` are excluded; no secrets/bodies are logged.
+- Production boot now fails closed on localhost/default DB, CORS, WebAuthn, and
+  email-sender values, and requires `DATABASE_SSL=true` unless a managed host.
+- OpenAPI (`/api/docs`) is now gated by `SWAGGER_ENABLED` and **disabled by
+  default in production**.
 
 ### 2026-08-23 — Finance v1 shipped
 

@@ -1,11 +1,11 @@
-# docs
+# Personal OS docs
 
-Starter documentation site (Next.js + Fumadocs).
+Project documentation site built with Next.js and Fumadocs.
 
 All project docs live in `content/docs/` and are served from this app.
 
 ```bash
-bun --cwd apps/docs run dev
+bun --cwd=apps/docs run dev
 ```
 
 Open http://localhost:3002/docs
@@ -16,12 +16,13 @@ Open http://localhost:3002/docs
 | --- | --- |
 | `/docs` | Home |
 | `/docs/quick-start` | Bootstrap |
-| `/docs/production-roadmap` | Nest API / product phases |
-| `/docs/product-system-design` | Architecture & data model |
+| `/docs/production-roadmap` | Product phases and engineering sequence |
+| `/docs/product-system-design` | Current product architecture and security model |
 | `/docs/architecture` | Boundaries + ADRs |
 | `/docs/docker` | Compose / Postgres |
 | `/docs/qol` | Hooks, CI, tooling |
 | `/docs/ai-first-workflow` | AI-assisted workflow |
+| `/docs/team-coordination` | Board, notes, and API coordination |
 | `/docs/overrides` | Architecture override policy |
 
 Agents should use these pages plus root `AGENTS.md` / `DESIGN.md` / `PROJECT.md`.

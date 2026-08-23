@@ -1,0 +1,46 @@
+---
+title: Team Coordination
+description: How backend, web, mobile, and documentation work stays aligned.
+---
+
+Personal OS is developed by independent backend, web, mobile, and documentation contributors. The
+`.agents/` directory is the shared coordination layer for work that cannot be solved safely inside
+one team's files.
+
+## The coordination map
+
+| Location | Purpose | Ownership |
+| --- | --- | --- |
+| `.agents/board/open/` | New requests, bugs, and cross-team dependencies | Anyone can raise a card |
+| `.agents/board/doing/` | Claimed work in progress | The named assignee |
+| `.agents/board/done/` | Resolved work and decisions | The assignee closes the loop |
+| `.agents/notes/backend.md` | Backend scratchpad | Backend team |
+| `.agents/notes/frontend.md` | Web scratchpad | Web team |
+| `.agents/notes/mobile.md` | Mobile scratchpad | Mobile team |
+| `.agents/README.md` | Protocol and card lifecycle | Shared; change deliberately |
+
+## Rules that prevent drift
+
+1. Read `.agents/README.md` before raising or claiming a card.
+2. Claim a card by moving it from `open/` to `doing/` and filling in `assignee`.
+3. Do not edit another team's notes file. Raise a card instead.
+4. Keep full API contracts in [Backend API](/docs/backend-api), not duplicated in cards or notes.
+5. When an API changes, update the status board in the same commit and mark breaking changes clearly.
+6. Stage explicit paths when committing; parallel contributors may have unrelated uncommitted work.
+
+## A useful card
+
+Keep cards short and actionable:
+
+```md
+From: mobile
+To: backend
+Priority: medium
+
+What: Add a date-range completion endpoint for the weekly routine view.
+Why: Today view only returns the current day.
+Proposal: Return up to 90 days using the existing response envelope.
+```
+
+Link to the API status board instead of copying a contract into the card. A card is a hand-off, not
+a second documentation system.

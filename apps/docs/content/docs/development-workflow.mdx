@@ -1,43 +1,75 @@
 ---
 title: Development Workflow
-description: A simple, reliable workflow for shipping high-quality changes.
+description: The repeatable path from a small idea to a reviewable Personal OS change.
 ---
 
-## 1) Branch and scope
+The repository has several teams working in parallel. A good change makes its ownership, contract,
+scope, and verification obvious to the next developer.
 
-- Create a focused branch.
-- Keep one concern per PR when possible.
-- Avoid mixing formatting-only changes with feature changes.
+## 1. Start from the source of truth
 
-## 2) Build in small steps
+Before coding, read the relevant part of:
 
-- Prefer small commits with clear intent.
-- Extract shared logic into `packages/*` early.
-- Keep app boundaries clean and explicit.
+- `AGENTS.md` for repository rules.
+- `DESIGN.md` for visible web and mobile work.
+- `plan.md` for product direction and milestone boundaries.
+- `.agents/README.md` for cross-team coordination.
+- [Backend API](/docs/backend-api) before consuming or changing a Nest endpoint.
 
-## 3) Run local quality checks
+If the work crosses teams, raise a short card in `.agents/board/open/`. Claim it before doing the
+work, and close the loop in `done/` with a resolution.
+
+## 2. Define the change boundary
+
+- Keep the branch and commit focused.
+- Decide which app owns the behavior before adding shared code.
+- Prefer an existing package or public module boundary over a new copy.
+- Treat API contract changes as coordinated work, not frontend-only implementation details.
+- Do not mix formatting-only cleanup with a feature unless formatting is required to make the change
+  reviewable.
+
+## 3. Implement with the project patterns
+
+- Keep controllers and route handlers thin; put business rules in services/modules.
+- Validate external input and preserve the API response envelope.
+- Keep web and mobile API clients aligned with the API status board.
+- Use the shared design tokens and accessible primitives for visible UI.
+- Keep secrets server-side; clients must not call the internal AI provider directly.
+
+## 4. Verify in layers
+
+Run the smallest relevant checks first:
+
+```bash
+bun --cwd=apps/web run lint
+bun --cwd=apps/web run typecheck   # where the app provides it
+bun --cwd=apps/web run test
+```
+
+Use the corresponding app directory for mobile, Nest, docs, or AI work.
+
+For visible web changes, exercise the route at desktop and mobile widths. For API changes, run
+unit/e2e tests and update `apps/docs/content/docs/backend-api.mdx` in the same commit. For Docker or
+configuration changes, verify the health endpoint and inspect the built image path.
+
+Then run the root checks appropriate to the change:
 
 ```bash
 bun run lint
-bun run format
 bun run typecheck
+bun run test
+bun run architecture:check
 ```
 
-Run tests for the surfaces you touched.
+## 5. Hand off clearly
 
-## 4) Open a PR with context
+The PR or card should state:
 
-Include:
+- what changed and why;
+- which source-of-truth docs changed;
+- commands that passed and any environment-limited checks;
+- migration, rollout, or follow-up work;
+- screenshots or a short interaction note for meaningful UI changes.
 
-- What changed
-- Why it changed
-- How it was tested
-
-Clear PR context speeds up review and reduces regressions.
-
-## 5) Merge-ready checklist
-
-- No lint/type errors
-- No dead code or unused imports
-- Docs updated for behavior/config changes
-- CI green
+The merge-ready bar is: no known dead code, no silent error paths, no undocumented contract drift,
+and a reviewer can reproduce the verification from the hand-off.

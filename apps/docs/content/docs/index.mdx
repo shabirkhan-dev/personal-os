@@ -1,36 +1,57 @@
-﻿---
-title: Personal OS Documentation
-description: Personal life operating system — track routines, finance, skincare, food, fashion, and daily habits in one web and mobile app.
+---
+title: Personal OS
+description: The engineering handbook for the Personal OS monorepo.
 ---
 
-Welcome to the official documentation for **Personal OS**.
+Personal OS is a personal life operating system for routines, finance, personal care, food,
+fashion, and the small decisions that shape a day. This site documents the software that powers
+it: how to run the repo, how the apps fit together, and what is safe to build next.
 
-Personal OS is your life operating system â€” finance, skincare, routines, food, fashion, and more â€” built on a production monorepo foundation.
-
-## Start here
+## Read this first
 
 <Cards>
   <Card
     title="Quick Start"
-    description="Install, bootstrap, and run your first dev session."
+    description="Install dependencies, choose a local runtime, and open the apps."
     href="/docs/quick-start"
   />
   <Card
     title="Project Structure"
-    description="Understand how apps, packages, and tooling fit together."
+    description="Find the right app, package, script, or coordination file."
     href="/docs/project-structure"
   />
   <Card
-    title="Architecture"
-    description="Baseline layering, boundaries, and enforceable rules."
-    href="/docs/architecture"
+    title="Backend API"
+    description="Check module readiness and the exact contracts before integrating."
+    href="/docs/backend-api"
   />
   <Card
-    title="Docker"
-    description="Postgres Compose setup for local development."
-    href="/docs/docker"
+    title="Development Workflow"
+    description="Ship focused changes with the repository's review and hand-off rules."
+    href="/docs/development-workflow"
   />
 </Cards>
 
-Product vision and roadmap: [plan.md](https://github.com/shabirkhan-dev/personal-os/blob/main/plan.md) in the repository root.
+## What is real today
 
+| Surface | Current state |
+| --- | --- |
+| Platform | Bun + Turborepo, Next.js web, Expo mobile, NestJS API, Fumadocs, CI, and Docker |
+| Identity | Auth, profiles, sessions, passkeys, MFA, and social sign-in spine |
+| Product | Routines and finance APIs are ready; care, food, and fashion are planned |
+| Intelligence | Nest owns the public AI proxy; `apps/ai-api` is an internal beta service |
+
+The [production roadmap](/docs/production-roadmap) explains the sequence. The [API status board](/docs/backend-api)
+is the contract for web and mobile callers.
+
+## Source of truth
+
+- `plan.md` — product vision, domains, and milestones.
+- `AGENTS.md` — repository rules for humans and coding agents.
+- `DESIGN.md` — visual and interaction quality bar.
+- `.agents/` — team notes, work requests, and cross-team coordination.
+- `apps/docs/content/docs/backend-api.mdx` — API readiness and caller contracts.
+
+If implementation and a planning page disagree, verify the code and update the relevant source of
+truth in the same change. Documentation should help a new developer make the right decision without
+having to reconstruct the project history.

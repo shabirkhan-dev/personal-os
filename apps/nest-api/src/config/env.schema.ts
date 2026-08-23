@@ -69,43 +69,71 @@ export const envSchema = z
 		RAZORPAY_PLAN_ENTERPRISE_YEARLY: z.string().min(1).optional(),
 		AI_API_URL: z.url().default('http://localhost:8000'),
 		AI_SERVICE_TOKEN: z.string().min(16).default('development-only-ai-service-token-change-me'),
+		EXTERNAL_REQUEST_TIMEOUT_MS: z.coerce.number().int().min(100).max(60_000).default(10_000),
+		/** Explicitly omit in production to disable the OpenAPI page (fail-closed default). */
+		SWAGGER_ENABLED: z.enum(['true', 'false']).optional(),
 	})
 	.superRefine((env, context) => {
 		if (env.NODE_ENV !== 'production') {
 			return;
 		}
 
+		const reject = (path: (string | number)[], message: string) =>
+			context.addIssue({ code: 'custom', path, message });
+
 		if (env.JWT_SECRET === developmentJwtSecret) {
-			context.addIssue({
-				code: 'custom',
-				path: ['JWT_SECRET'],
-				message: 'JWT_SECRET must be changed in production',
-			});
+			reject(['JWT_SECRET'], 'JWT_SECRET must be changed in production');
 		}
 		if (env.AUTH_TOKEN_SECRET === developmentTokenSecret) {
-			context.addIssue({
-				code: 'custom',
-				path: ['AUTH_TOKEN_SECRET'],
-				message: 'AUTH_TOKEN_SECRET must be changed in production',
-			});
+			reject(['AUTH_TOKEN_SECRET'], 'AUTH_TOKEN_SECRET must be changed in production');
 		}
 		if (!env.RESEND_API_KEY) {
-			context.addIssue({
-				code: 'custom',
-				path: ['RESEND_API_KEY'],
-				message: 'RESEND_API_KEY is required in production',
-			});
+			reject(['RESEND_API_KEY'], 'RESEND_API_KEY is required in production');
 		}
 		if (env.AI_SERVICE_TOKEN.startsWith('development-only')) {
-			context.addIssue({
-				code: 'custom',
-				path: ['AI_SERVICE_TOKEN'],
-				message: 'AI_SERVICE_TOKEN must be changed in production',
-			});
+			reject(['AI_SERVICE_TOKEN'], 'AI_SERVICE_TOKEN must be changed in production');
+		}
+		if (env.WEB_APP_URL === 'http://localhost:3000') {
+			reject(['WEB_APP_URL'], 'WEB_APP_URL must be a real production URL');
+		}
+		if (isLocalhostUrl(env.DATABASE_URL)) {
+			reject(['DATABASE_URL'], 'DATABASE_URL must not point at localhost in production');
+		}
+		if (env.DATABASE_SSL !== 'true' && !/(?:neon\.tech|sslmode=require)/i.test(env.DATABASE_URL)) {
+			reject(['DATABASE_SSL'], 'DATABASE_SSL must be enabled in production');
+		}
+		if (env.CORS_ORIGIN.split(',').some((origin) => isLocalhostOrigin(origin.trim()))) {
+			reject(['CORS_ORIGIN'], 'CORS_ORIGIN must not allow localhost in production');
+		}
+		if (env.WEBAUTHN_RP_ID === 'localhost') {
+			reject(['WEBAUTHN_RP_ID'], 'WEBAUTHN_RP_ID must be a real domain in production');
+		}
+		if (env.WEBAUTHN_ORIGIN.split(',').some((origin) => isLocalhostOrigin(origin.trim()))) {
+			reject(['WEBAUTHN_ORIGIN'], 'WEBAUTHN_ORIGIN must not be localhost in production');
+		}
+		if (env.AUTH_EMAIL_FROM === 'Starter <auth@example.com>') {
+			reject(['AUTH_EMAIL_FROM'], 'AUTH_EMAIL_FROM must be a real sender in production');
 		}
 	});
 
 export type Env = z.infer<typeof envSchema>;
+
+function isLocalhostUrl(value: string): boolean {
+	try {
+		const hostname = new URL(value).hostname;
+		return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
+	} catch {
+		return false;
+	}
+}
+
+function isLocalhostOrigin(value: string): boolean {
+	try {
+		return isLocalhostUrl(value);
+	} catch {
+		return value.startsWith('http://localhost') || value.startsWith('http://127.0.0.1');
+	}
+}
 
 export function parseEnv(env: NodeJS.ProcessEnv = process.env): Env {
 	const result = envSchema.safeParse(env);

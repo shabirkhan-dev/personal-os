@@ -51,6 +51,8 @@ export type AppConfig = {
 	};
 	aiApiUrl: string;
 	aiServiceToken: string;
+	externalRequestTimeoutMs: number;
+	swaggerEnabled: boolean;
 };
 
 export function createAppConfig(env: Env = parseEnv()): AppConfig {
@@ -130,5 +132,10 @@ export function createAppConfig(env: Env = parseEnv()): AppConfig {
 		},
 		aiApiUrl: env.AI_API_URL.replace(/\/$/, ''),
 		aiServiceToken: env.AI_SERVICE_TOKEN,
+		externalRequestTimeoutMs: env.EXTERNAL_REQUEST_TIMEOUT_MS,
+		swaggerEnabled:
+			env.SWAGGER_ENABLED === undefined
+				? env.NODE_ENV !== 'production'
+				: env.SWAGGER_ENABLED === 'true',
 	};
 }

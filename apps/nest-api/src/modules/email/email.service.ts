@@ -1,5 +1,10 @@
 import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 
+import {
+	fetchWithTimeout,
+	isAbortError,
+	UpstreamTimeoutError,
+} from '@/common/http/fetch-with-timeout';
 import { AppConfigService } from '@/config/app-config.service';
 import { magicLinkEmail, passwordResetEmail, verificationEmail } from './email.templates';
 
@@ -26,19 +31,42 @@ export class EmailService {
 			return;
 		}
 
-		const response = await fetch('https://api.resend.com/emails', {
-			method: 'POST',
-			headers: {
-				Authorization: `Bearer ${this.config.resendApiKey}`,
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({
-				from: this.config.authEmailFrom,
-				to: [to],
-				subject: message.subject,
-				html: message.html,
-			}),
-		});
+		let response: Response;
+		try {
+			response = await fetchWithTimeout(
+				'https://api.resend.com/emails',
+				{
+					method: 'POST',
+					headers: {
+						Authorization: `Bearer ${this.config.resendApiKey}`,
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						from: this.config.authEmailFrom,
+						to: [to],
+						subject: message.subject,
+						html: message.html,
+					}),
+				},
+				this.config.externalRequestTimeoutMs,
+			);
+		} catch (error) {
+			if (error instanceof UpstreamTimeoutError || isAbortError(error)) {
+				this.logger.error(`Resend timed out after ${this.config.externalRequestTimeoutMs}ms`);
+				throw new ServiceUnavailableException({
+					code: 'EMAIL_PROVIDER_TIMEOUT',
+					message: 'The email provider did not respond in time. Please try again.',
+				});
+			}
+			this.logger.error(
+				'Email provider request failed',
+				error instanceof Error ? error.stack : undefined,
+			);
+			throw new ServiceUnavailableException({
+				code: 'EMAIL_PROVIDER_UNREACHABLE',
+				message: 'The email service is temporarily unavailable.',
+			});
+		}
 
 		if (!response.ok) {
 			const providerError = await readProviderError(response);

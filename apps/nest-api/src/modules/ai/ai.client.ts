@@ -5,6 +5,7 @@ import {
 	ServiceUnavailableException,
 } from '@nestjs/common';
 
+import { fetchWithTimeout } from '@/common/http/fetch-with-timeout';
 import { AppConfigService } from '@/config/app-config.service';
 import type { AssistRequestInput, AssistResponse } from './ai.dto';
 
@@ -19,15 +20,19 @@ export class AiClient {
 
 		let response: Response;
 		try {
-			response = await fetch(url, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					'X-AI-Service-Token': this.config.aiServiceToken,
-					'X-User-Id': userId,
+			response = await fetchWithTimeout(
+				url,
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'X-AI-Service-Token': this.config.aiServiceToken,
+						'X-User-Id': userId,
+					},
+					body: JSON.stringify(body),
 				},
-				body: JSON.stringify(body),
-			});
+				this.config.externalRequestTimeoutMs,
+			);
 		} catch (error) {
 			this.logger.error('AI API unreachable', error instanceof Error ? error.stack : undefined);
 			throw new ServiceUnavailableException({
@@ -58,7 +63,11 @@ export class AiClient {
 
 	async health(): Promise<{ ok: boolean; provider?: string }> {
 		try {
-			const response = await fetch(`${this.config.aiApiUrl}/api/v1/health`);
+			const response = await fetchWithTimeout(
+				`${this.config.aiApiUrl}/api/v1/health`,
+				{},
+				this.config.externalRequestTimeoutMs,
+			);
 			if (!response.ok) {
 				return { ok: false };
 			}

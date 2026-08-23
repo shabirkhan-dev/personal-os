@@ -136,4 +136,10 @@ export class AppConfigService {
 	get aiServiceToken(): string {
 		return this.config.aiServiceToken;
 	}
+	get externalRequestTimeoutMs(): number {
+		return this.config.externalRequestTimeoutMs;
+	}
+	get swaggerEnabled(): boolean {
+		return this.config.swaggerEnabled;
+	}
 }

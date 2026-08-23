@@ -59,6 +59,9 @@ export function setupApp(app: INestApplication, config: AppConfigService): void 
 		.setVersion(config.apiVersion)
 		.addBearerAuth()
 		.build();
-	const document = SwaggerModule.createDocument(app, swaggerConfig);
-	SwaggerModule.setup(`${config.apiPrefix}/docs`, app, document);
+
+	if (config.swaggerEnabled) {
+		const document = SwaggerModule.createDocument(app, swaggerConfig);
+		SwaggerModule.setup(`${config.apiPrefix}/docs`, app, document);
+	}
 }

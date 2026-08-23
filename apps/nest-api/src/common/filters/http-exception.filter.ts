@@ -1,6 +1,14 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common';
+import {
+	ArgumentsHost,
+	Catch,
+	ExceptionFilter,
+	HttpException,
+	HttpStatus,
+	Logger,
+} from '@nestjs/common';
 import type { Request, Response } from 'express';
 
+import { logRequest } from '@/common/observability/http-logging';
 import type { ApiErrorResponse } from '@/common/types/api-response.type';
 import type { RequestWithId } from '@/common/types/request-with-id.type';
 
@@ -13,12 +21,16 @@ type HttpExceptionPayload = {
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
+	private readonly logger = new Logger(HttpExceptionFilter.name);
+
 	catch(exception: unknown, host: ArgumentsHost): void {
 		const http = host.switchToHttp();
 		const request = http.getRequest<RequestWithId>();
 		const response = http.getResponse<Response>();
 		const statusCode = getStatusCode(exception);
 		const payload = getExceptionPayload(exception);
+
+		logException(this.logger, exception, statusCode, request);
 
 		const body: ApiErrorResponse = {
 			success: false,
@@ -32,8 +44,38 @@ export class HttpExceptionFilter implements ExceptionFilter {
 			...(payload.errors ? { errors: payload.errors } : {}),
 		};
 
+		logRequest(request, statusCode, statusCode >= 500 ? 'error' : 'warn');
 		response.status(statusCode).json(body);
 	}
+}
+
+/**
+ * Logs only server-side failures and unexpected errors with a request ID for
+ * correlation. Client errors (4xx) are intentionally not logged to keep the
+ * stream free of expected noise. Never logs bodies, headers, or credentials.
+ */
+function logException(
+	logger: Logger,
+	exception: unknown,
+	statusCode: number,
+	request: RequestWithId,
+): void {
+	const requestId = request.requestId ?? 'req_unknown';
+	if (exception instanceof HttpException) {
+		if (statusCode >= 500) {
+			const payload = getExceptionPayload(exception);
+			logger.error(
+				`${requestId} ${statusCode} ${payload.message ?? exception.message}`,
+				exception.stack,
+			);
+		}
+		return;
+	}
+
+	logger.error(
+		`${requestId} ${statusCode} ${exception instanceof Error ? exception.message : String(exception)}`,
+		exception instanceof Error ? exception.stack : undefined,
+	);
 }
 
 function getStatusCode(exception: unknown): number {

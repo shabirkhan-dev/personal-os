@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import Razorpay from 'razorpay';
 
+import { UpstreamTimeoutError, withTimeout } from '@/common/http/fetch-with-timeout';
 import { AppConfigService } from '@/config/app-config.service';
 import {
 	type CheckoutInput,
@@ -50,17 +51,32 @@ export class RazorpayPaymentProvider extends PaymentProvider {
 
 	async createCheckout(input: CheckoutInput): Promise<CheckoutResult> {
 		const razorpay = this.requireClient();
-		const subscription = (await razorpay.subscriptions.create({
-			plan_id: input.priceId,
-			total_count: input.billingInterval === 'yearly' ? 10 : 120,
-			customer_notify: 1,
-			notes: {
-				userId: input.userId,
-				email: input.email,
-				planCode: input.planCode,
-				billingInterval: input.billingInterval,
-			},
-		})) as RazorpaySubscription;
+
+		let subscription: RazorpaySubscription;
+		try {
+			subscription = (await withTimeout(
+				razorpay.subscriptions.create({
+					plan_id: input.priceId,
+					total_count: input.billingInterval === 'yearly' ? 10 : 120,
+					customer_notify: 1,
+					notes: {
+						userId: input.userId,
+						email: input.email,
+						planCode: input.planCode,
+						billingInterval: input.billingInterval,
+					},
+				}),
+				this.config.externalRequestTimeoutMs,
+			)) as RazorpaySubscription;
+		} catch (error) {
+			if (error instanceof UpstreamTimeoutError) {
+				throw new ServiceUnavailableException({
+					code: 'BILLING_PROVIDER_TIMEOUT',
+					message: 'The payment provider did not respond in time. Please try again.',
+				});
+			}
+			throw error;
+		}
 
 		if (!subscription.short_url) {
 			throw new ServiceUnavailableException({

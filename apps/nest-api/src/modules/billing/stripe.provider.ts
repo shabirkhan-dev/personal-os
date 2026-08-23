@@ -27,6 +27,8 @@ export class StripePaymentProvider extends PaymentProvider {
 		this.client = config.stripeSecretKey
 			? new Stripe(config.stripeSecretKey, {
 					apiVersion: '2026-06-24.dahlia',
+					timeout: config.externalRequestTimeoutMs,
+					maxNetworkRetries: 0,
 				})
 			: null;
 	}

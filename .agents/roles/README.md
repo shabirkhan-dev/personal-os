@@ -9,7 +9,8 @@ integration charter before acting.
 2. `.agents/README.md`
 3. `.agents/agent-contract.md`
 4. The relevant role charter below
-5. The assigned board card and linked source-of-truth docs
+5. `.agents/worktrees.md` for branch, port, and handoff rules
+6. The assigned board card and linked source-of-truth docs
 
 ## Implementation roles
 

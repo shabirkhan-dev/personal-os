@@ -14,7 +14,7 @@ Every agent session must have all of the following before work begins:
 
 - one role from `.agents/roles/`;
 - one board card with an assignee, scope, acceptance criteria, and validation plan;
-- one branch and worktree when parallel worktrees are in use;
+- one branch and worktree for implementation work;
 - one named reviewer who is not the implementation agent.
 
 Existing cards created before this contract are grandfathered while another agent is actively
@@ -28,6 +28,10 @@ write boundary for that task, even when the role owns a broader area.
 Agents may read broadly to understand dependencies. They may write only to the card scope and
 explicitly approved shared paths. Git worktrees isolate branches; they do not grant permission to
 edit every file in the repository.
+
+New implementation work uses the helper described in `.agents/worktrees.md`. The shared `main`
+worktree is integration-only. Existing work that began on `main` may finish there during the
+migration window, but it must not be mixed with a newly claimed card.
 
 ## Non-negotiable rules
 
@@ -80,6 +84,12 @@ reasonable interpretation, and record the decision. Quiet guessing is not accept
 4. Confirm the card's allowed paths, dependencies, and definition of done.
 5. If the scope is wrong or the contract is missing, stop and raise a clarification card.
 
+For a new implementation card, create the role worktree before editing:
+
+```bash
+bun run worktree -- add <role> <card-slug>
+```
+
 ### During implementation
 
 1. Keep changes inside the declared scope.
@@ -88,7 +98,8 @@ reasonable interpretation, and record the decision. Quiet guessing is not accept
 4. Add or update tests for changed behavior and failure paths.
 5. Update the source of truth in the same change when the implementation changes it. Backend API
    changes must update `apps/docs/content/docs/backend-api.mdx` and its changelog.
-6. Report blockers as soon as they affect the delivery plan.
+6. Keep local service ports unique and record them on the card.
+7. Report blockers as soon as they affect the delivery plan.
 
 ### Before completion
 

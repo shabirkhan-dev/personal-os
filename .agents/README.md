@@ -8,6 +8,7 @@ Cross-team communication for the agents building Personal OS:
 ├── agent-contract.md ← universal behavior, evidence, and violation policy
 ├── ownership.yaml    ← role-to-path ownership map for CI and future PM tooling
 ├── roles/            ← role charters loaded before each agent session
+├── worktrees.md      ← branch, port, and worktree lifecycle
 ├── README.md        ← you are here (protocol)
 ├── board/           ← kanban-style cards anyone can raise
 │   ├── open/        raised, waiting for an owner
@@ -34,14 +35,17 @@ Cross-team communication for the agents building Personal OS:
 5. **Declare scope before working.** Every implementation card records its type, scope, owner,
    reviewer, dependencies, branch, and worktree. The card may narrow the role's ownership but may
    not silently widen it.
-6. **Claim before working.** Move `open/ → doing/`, fill `assignee` in the card.
-7. **Escalate cross-scope work.** Read broadly, write narrowly. If another area must change, raise
+6. **Use an isolated worktree.** For new implementation work, use
+   `bun run worktree -- add <role> <card-slug>` and record the printed branch and path on the
+   card. `main` is integration-only.
+7. **Claim before working.** Move `open/ → doing/`, fill `assignee` in the card.
+8. **Escalate cross-scope work.** Read broadly, write narrowly. If another area must change, raise
    a card or obtain explicit owner approval and list the shared path on the current card.
-8. **Close the loop.** When done, move to `done/`, fill `Resolution`, set
+9. **Close the loop.** When done, move to `done/`, fill `Resolution`, set
    `status: done`. Done cards stay as history.
-9. **Commit only your own work.** Stage explicit paths (`git add <your/files>`),
+10. **Commit only your worktree's paths.** Stage explicit paths (`git add <your/files>`),
    never `git add -A`. Other agents work side by side in this repo.
-10. **Reference cards by filename**, not folder path (cards move between folders).
+11. **Reference cards by filename**, not folder path (cards move between folders).
 
 ## Card lifecycle
 
@@ -75,3 +79,5 @@ from evidence on cards, commits, reviews, and CI—not from subjective labels su
 The implementation agents own code. The reviewer is independent and read-only by default. The
 integrator merges approved work but does not use integration authority to rewrite another role's
 feature.
+
+See `worktrees.md` for the complete lifecycle, port convention, and safe cleanup rules.

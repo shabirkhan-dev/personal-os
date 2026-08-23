@@ -29,8 +29,7 @@ function SplashScreenController() {
 }
 
 function RootNavigator() {
-	const { user, loading } = useAuth();
-	const signedIn = !!user;
+	const { loading } = useAuth();
 
 	if (loading) {
 		return null;
@@ -38,12 +37,8 @@ function RootNavigator() {
 
 	return (
 		<Stack screenOptions={{ headerShown: false }}>
-			<Stack.Protected guard={signedIn}>
-				<Stack.Screen name="(modules)" />
-			</Stack.Protected>
-			<Stack.Protected guard={!signedIn}>
-				<Stack.Screen name="(auth)" />
-			</Stack.Protected>
+			<Stack.Screen name="(modules)" />
+			<Stack.Screen name="(auth)" />
 		</Stack>
 	);
 }

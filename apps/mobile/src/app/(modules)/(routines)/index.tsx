@@ -8,7 +8,6 @@ import { useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Badge } from "@/components/ui/badge";
-import { BottomNav, ROUTINES_TABS } from "@/components/ui/bottom-nav";
 import { Card } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
 import { OSHeader } from "@/components/ui/os-header";
@@ -211,11 +210,6 @@ export default function RoutinesTodayScreen() {
 						</>
 					) : null}
 				</ScrollView>
-				<BottomNav
-					tabs={ROUTINES_TABS}
-					activeTab="today"
-					onAddPress={() => setModalVisible(true)}
-				/>
 			</SafeAreaView>
 
 			<AddRoutineModal visible={modalVisible} onClose={() => setModalVisible(false)} />

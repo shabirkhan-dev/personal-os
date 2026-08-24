@@ -21,6 +21,15 @@
 	--color-border: var(--border);
 	--color-input: var(--input);
 	--color-ring: var(--ring);
+	--color-accent-green: var(--accent-green);
+	--color-accent-orange: var(--accent-orange);
+	--color-accent-blue: var(--accent-blue);
+	--color-accent-red: var(--accent-red);
+	--color-accent-purple: var(--accent-purple);
+	--color-accent-yellow: var(--accent-yellow);
+	--color-accent-cyan: var(--accent-cyan);
+	--color-accent-pink: var(--accent-pink);
+	--color-accent-teal: var(--accent-teal);
 
 	--radius-sm: calc(var(--radius) - 4px);
 	--radius-md: calc(var(--radius) - 2px);
@@ -31,55 +40,79 @@
 	--radius-4xl: calc(var(--radius) + 16px);
 }
 
-:root {
-	--background: #f8fafc;
-	--foreground: #0f172a;
-	--card: #ffffff;
-	--card-foreground: #0f172a;
-	--popover: #ffffff;
-	--popover-foreground: #0f172a;
-	--primary: #00e676;
-	--primary-foreground: #000000;
-	--secondary: #f1f5f9;
-	--secondary-foreground: #0f172a;
-	--muted: #f1f5f9;
-	--muted-foreground: #64748b;
-	--accent: #f1f5f9;
-	--accent-foreground: #0f172a;
-	--destructive: #ef4444;
-	--destructive-foreground: #ffffff;
-	--border: #e2e8f0;
-	--input: #cbd5e1;
-	--ring: #00e676;
-	--radius: 1rem;
+@layer theme {
+	:root {
+		@variant light {
+			--background: #f8fafc;
+			--foreground: #0f172a;
+			--card: #ffffff;
+			--card-foreground: #0f172a;
+			--popover: #ffffff;
+			--popover-foreground: #0f172a;
+			--primary: #00e676;
+			--primary-foreground: #000000;
+			--secondary: #f1f5f9;
+			--secondary-foreground: #0f172a;
+			--muted: #f1f5f9;
+			--muted-foreground: #64748b;
+			--accent: #f1f5f9;
+			--accent-foreground: #0f172a;
+			--destructive: #ef4444;
+			--destructive-foreground: #ffffff;
+			--border: #e2e8f0;
+			--input: #cbd5e1;
+			--ring: #00e676;
+			--accent-green: #00c853;
+			--accent-orange: #ff6d00;
+			--accent-blue: #0288d1;
+			--accent-red: #d50000;
+			--accent-purple: #aa00ff;
+			--accent-yellow: #ffd600;
+			--accent-cyan: #00b8d4;
+			--accent-pink: #c51162;
+			--accent-teal: #00897b;
+			--radius: 1rem;
+		}
 
+		@variant dark {
+			--background: #0b0c10;
+			--foreground: #ffffff;
+			--card: #15161a;
+			--card-foreground: #ffffff;
+			--popover: #15161a;
+			--popover-foreground: #ffffff;
+			--primary: #00e676;
+			--primary-foreground: #000000;
+			--secondary: #1f2026;
+			--secondary-foreground: #ffffff;
+			--muted: #1a1b20;
+			--muted-foreground: #888888;
+			--accent: #1f2026;
+			--accent-foreground: #ffffff;
+			--destructive: #ff1744;
+			--destructive-foreground: #ffffff;
+			--border: rgba(255, 255, 255, 0.08);
+			--input: rgba(255, 255, 255, 0.1);
+			--ring: #00e676;
+			--accent-green: #00e676;
+			--accent-orange: #ff6d00;
+			--accent-blue: #00b0ff;
+			--accent-red: #ff1744;
+			--accent-purple: #d500f9;
+			--accent-yellow: #ffea00;
+			--accent-cyan: #18ffff;
+			--accent-pink: #ff007f;
+			--accent-teal: #00bfa5;
+			--radius: 1rem;
+		}
+	}
+}
+
+:root {
 	--font-display: Spline Sans, Inter, ui-sans-serif, system-ui, sans-serif, Apple Color Emoji,
 		Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
 	--font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New,
 		monospace;
 	--font-rounded: "SF Pro Rounded", "Hiragino Maru Gothic ProN", Meiryo, "MS PGothic", sans-serif;
 	--font-serif: Georgia, "Times New Roman", serif;
-}
-
-.dark {
-	--background: #0b0c10;
-	--foreground: #ffffff;
-	--card: #15161a;
-	--card-foreground: #ffffff;
-	--popover: #15161a;
-	--popover-foreground: #ffffff;
-	--primary: #00e676;
-	--primary-foreground: #000000;
-	--secondary: #1f2026;
-	--secondary-foreground: #ffffff;
-	--muted: #1a1b20;
-	--muted-foreground: #888888;
-	--accent: #1f2026;
-	--accent-foreground: #ffffff;
-	--destructive: #ff1744;
-	--destructive-foreground: #ffffff;
-	--border: rgba(255, 255, 255, 0.08);
-	--input: rgba(255, 255, 255, 0.1);
-	--ring: #00e676;
-	--radius: 1rem;
 }

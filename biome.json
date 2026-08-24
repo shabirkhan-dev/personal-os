@@ -11,6 +11,7 @@
 			"apps/**/*.tsx",
 			"packages/**/*.ts",
 			"packages/**/*.tsx",
+			"!apps/mobile/src/uniwind-types.d.ts",
 			"*.config.ts",
 			"*.config.mjs",
 			"!**/.next",

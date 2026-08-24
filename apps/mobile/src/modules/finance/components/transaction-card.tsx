@@ -28,13 +28,19 @@ function getCategoryIcon(category: string | null): IconProp {
 	return Wallet01Icon;
 }
 
-export function formatCurrency(amountMinor: number, currency: string = "INR"): string {
-	const amount = amountMinor / 100;
-	const symbol = currency === "USD" ? "$" : currency === "EUR" ? "€" : "₹";
-	return `${symbol}${amount.toLocaleString("en-IN", {
-		minimumFractionDigits: 2,
-		maximumFractionDigits: 2,
-	})}`;
+export const DEFAULT_CURRENCY = "INR";
+
+export function formatCurrency(amountMinor: number, currency: string = DEFAULT_CURRENCY): string {
+	try {
+		return new Intl.NumberFormat("en-IN", {
+			style: "currency",
+			currency: currency.toUpperCase(),
+			minimumFractionDigits: 2,
+			maximumFractionDigits: 2,
+		}).format(amountMinor / 100);
+	} catch {
+		return `${currency.toUpperCase()} ${(amountMinor / 100).toFixed(2)}`;
+	}
 }
 
 export function TransactionCard({ transaction, onDelete }: TransactionCardProps) {

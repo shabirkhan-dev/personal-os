@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useCreateTransactionMutation } from "../hooks/use-finance-mutations";
 import type { TransactionType } from "../types/finance.types";
+import { DEFAULT_CURRENCY } from "./transaction-card";
 
 interface AddTransactionModalProps {
 	visible: boolean;
@@ -45,16 +46,18 @@ export function AddTransactionModal({ visible, onClose }: AddTransactionModalPro
 
 	const handleSave = async () => {
 		const parsedAmount = Number.parseFloat(amount);
-		if (Number.isNaN(parsedAmount) || parsedAmount <= 0) return;
+		if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) return;
 
 		const finalCategory =
 			category === "Other" && customCategory.trim() ? customCategory.trim() : category;
 		const amountMinor = Math.round(parsedAmount * 100);
+		if (amountMinor < 1) return;
 
 		try {
 			await createMutation.mutateAsync({
 				type,
 				amountMinor,
+				currency: DEFAULT_CURRENCY,
 				category: finalCategory,
 				note: note.trim() || undefined,
 			});
@@ -122,7 +125,7 @@ export function AddTransactionModal({ visible, onClose }: AddTransactionModalPro
 					{/* Amount Input */}
 					<View className="mb-4">
 						<Text className="text-muted-foreground text-xs font-semibold uppercase mb-1.5">
-							Amount (₹ / $)
+							Amount ({DEFAULT_CURRENCY})
 						</Text>
 						<Input
 							value={amount}

@@ -2,7 +2,6 @@ import { PlusSignIcon, ShoppingBag01Icon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { BottomNav, FINANCE_TABS } from "@/components/ui/bottom-nav";
 import { Card } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
 import { OSHeader } from "@/components/ui/os-header";
@@ -120,11 +119,6 @@ export default function ExpensesIndex() {
 						</View>
 					</View>
 				</ScrollView>
-				<BottomNav
-					tabs={FINANCE_TABS}
-					activeTab="capital"
-					onAddPress={() => setModalVisible(true)}
-				/>
 			</SafeAreaView>
 
 			<AddTransactionModal visible={modalVisible} onClose={() => setModalVisible(false)} />

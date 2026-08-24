@@ -1,118 +1,41 @@
 import { CheckmarkCircle02Icon, Clock01Icon, Target01Icon } from "@hugeicons/core-free-icons";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { Icon } from "@/components/ui/icon";
 import { NeonCard } from "@/components/ui/neon-card";
-import { NeonColors } from "@/constants/design-system";
 
 export function FocusWidget() {
 	return (
-		<Pressable style={({ pressed }) => [{ opacity: pressed ? 0.9 : 1 }]}>
-			<NeonCard style={{ borderColor: "rgba(255, 0, 127, 0.3)" }}>
-				<View style={styles.header}>
-					<View style={styles.headerLeft}>
-						<Icon icon={Target01Icon} size={20} color={NeonColors.accent.pink} />
-						<Text style={styles.title}>Deep Work</Text>
+		<Pressable className="active:opacity-90">
+			<NeonCard className="border-accent-pink/30">
+				<View className="flex-row justify-between items-center mb-5">
+					<View className="flex-row items-center gap-2">
+						<Icon icon={Target01Icon} size={20} className="text-accent-pink" />
+						<Text className="text-foreground text-lg font-semibold">Deep Work</Text>
 					</View>
-					<Text style={styles.subtitle}>Pomodoro</Text>
+					<Text className="text-muted-foreground text-sm">Pomodoro</Text>
 				</View>
 
-				<View style={styles.timerContainer}>
-					<View style={styles.timerCircle}>
-						<Text style={styles.timerText}>25:00</Text>
-						<Text style={styles.timerLabel}>Focus Time</Text>
+				<View className="items-center my-4">
+					<View className="w-[140px] h-[140px] rounded-full border-4 border-accent-pink bg-accent-pink/5 items-center justify-center">
+						<Text className="text-foreground text-[32px] font-bold font-mono">25:00</Text>
+						<Text className="text-accent-pink text-xs mt-1 font-semibold">Focus Time</Text>
 					</View>
 				</View>
 
-				<View style={styles.statsContainer}>
-					<View style={styles.statItem}>
-						<Icon icon={Clock01Icon} size={16} color={NeonColors.text.secondary} />
-						<Text style={styles.statValue}>2.5h</Text>
-						<Text style={styles.statLabel}>Today</Text>
+				<View className="flex-row justify-around items-center mt-4 pt-4 border-t border-border/40">
+					<View className="items-center gap-1">
+						<Icon icon={Clock01Icon} size={16} className="text-muted-foreground" />
+						<Text className="text-foreground text-base font-semibold">2.5h</Text>
+						<Text className="text-muted-foreground text-xs">Today</Text>
 					</View>
-					<View style={styles.divider} />
-					<View style={styles.statItem}>
-						<Icon icon={CheckmarkCircle02Icon} size={16} color={NeonColors.text.secondary} />
-						<Text style={styles.statValue}>4</Text>
-						<Text style={styles.statLabel}>Sessions</Text>
+					<View className="w-px h-6 bg-border" />
+					<View className="items-center gap-1">
+						<Icon icon={CheckmarkCircle02Icon} size={16} className="text-muted-foreground" />
+						<Text className="text-foreground text-base font-semibold">4</Text>
+						<Text className="text-muted-foreground text-xs">Sessions</Text>
 					</View>
 				</View>
 			</NeonCard>
 		</Pressable>
 	);
 }
-
-const styles = StyleSheet.create({
-	header: {
-		flexDirection: "row",
-		justifyContent: "space-between",
-		alignItems: "center",
-		marginBottom: 20,
-	},
-	headerLeft: {
-		flexDirection: "row",
-		alignItems: "center",
-		gap: 8,
-	},
-	title: {
-		color: NeonColors.text.primary,
-		fontSize: 18,
-		fontWeight: "600",
-	},
-	subtitle: {
-		color: NeonColors.text.secondary,
-		fontSize: 14,
-	},
-	timerContainer: {
-		alignItems: "center",
-		marginVertical: 16,
-	},
-	timerCircle: {
-		width: 140,
-		height: 140,
-		borderRadius: 70,
-		borderWidth: 4,
-		borderColor: NeonColors.accent.pink,
-		alignItems: "center",
-		justifyContent: "center",
-		backgroundColor: "rgba(255,0,127,0.05)",
-	},
-	timerText: {
-		color: NeonColors.text.primary,
-		fontSize: 32,
-		fontWeight: "700",
-		fontVariant: ["tabular-nums"],
-	},
-	timerLabel: {
-		color: NeonColors.accent.pink,
-		fontSize: 12,
-		marginTop: 4,
-		fontWeight: "600",
-	},
-	statsContainer: {
-		flexDirection: "row",
-		justifyContent: "space-around",
-		alignItems: "center",
-		marginTop: 16,
-		paddingTop: 16,
-		borderTopWidth: 1,
-		borderTopColor: "rgba(255, 255, 255, 0.05)",
-	},
-	statItem: {
-		alignItems: "center",
-		gap: 4,
-	},
-	statValue: {
-		color: NeonColors.text.primary,
-		fontSize: 16,
-		fontWeight: "600",
-	},
-	statLabel: {
-		color: NeonColors.text.secondary,
-		fontSize: 12,
-	},
-	divider: {
-		width: 1,
-		height: 24,
-		backgroundColor: "rgba(255, 255, 255, 0.1)",
-	},
-});

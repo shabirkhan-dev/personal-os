@@ -1,16 +1,17 @@
 import { Book01Icon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AddEntryModal } from "@/components/ui/add-entry-modal";
 import { FloatingActionButton } from "@/components/ui/floating-action-button";
 import { LogListItem } from "@/components/ui/log-list-item";
 import { OSHeader } from "@/components/ui/os-header";
-import { NeonColors } from "@/constants/design-system";
+import { useTheme } from "@/providers/theme-provider";
 import { useAppStore } from "@/store/use-app-store";
 
 export default function MindfulnessJournalScreen() {
 	const [modalVisible, setModalVisible] = useState(false);
+	const { colors } = useTheme();
 	const journal = useAppStore((state) => state.mindfulnessJournal);
 	const addEntry = useAppStore((state) => state.addEntry);
 	const deleteEntry = useAppStore((state) => state.deleteEntry);
@@ -20,34 +21,38 @@ export default function MindfulnessJournalScreen() {
 	};
 
 	return (
-		<View style={styles.container}>
-			<SafeAreaView edges={["top"]} style={styles.safeArea}>
+		<View className="flex-1 bg-background">
+			<SafeAreaView edges={["top"]} className="flex-1">
 				<OSHeader />
 
 				<ScrollView
 					showsVerticalScrollIndicator={false}
-					contentContainerStyle={styles.scrollContent}
+					contentContainerStyle={{ paddingBottom: 40 }}
 				>
-					<View style={styles.viewContainer}>
-						<View style={styles.viewHeader}>
-							<Text style={styles.viewTitle}>Journal</Text>
-							<Text style={styles.viewSubtitle}>Daily thoughts, gratitudes, and reflections.</Text>
+					<View className="px-4 pt-2">
+						<View className="mb-6">
+							<Text className="text-foreground text-3xl font-light tracking-tight">Journal</Text>
+							<Text className="text-muted-foreground text-sm mt-1">
+								Daily thoughts, gratitudes, and reflections.
+							</Text>
 						</View>
 
-						<View style={styles.logsList}>
+						<View className="mt-3">
 							{journal.length === 0 ? (
-								<Text style={styles.emptyText}>No journal entries yet.</Text>
+								<Text className="text-muted-foreground text-base text-center mt-8">
+									No journal entries yet.
+								</Text>
 							) : (
 								journal.map((item) => (
 									<LogListItem
 										key={item.id}
 										icon={Book01Icon}
-										iconColor={NeonColors.accent.cyan}
+										iconColor={colors.accent.cyan}
 										title={item.title}
 										subtitle={item.subtitle}
 										value={item.value}
 										delta={item.delta}
-										deltaColor={NeonColors.accent.green}
+										deltaColor={colors.accent.green}
 										onPress={() => deleteEntry("mindfulness", item.id)}
 									/>
 								))
@@ -57,54 +62,15 @@ export default function MindfulnessJournalScreen() {
 				</ScrollView>
 			</SafeAreaView>
 
-			<FloatingActionButton color={NeonColors.accent.cyan} onPress={() => setModalVisible(true)} />
+			<FloatingActionButton color={colors.accent.cyan} onPress={() => setModalVisible(true)} />
 
 			<AddEntryModal
 				visible={modalVisible}
 				onClose={() => setModalVisible(false)}
 				onSave={handleSave}
-				color={NeonColors.accent.cyan}
+				color={colors.accent.cyan}
 				titleLabel="Add Journal Entry"
 			/>
 		</View>
 	);
 }
-
-const styles = StyleSheet.create({
-	emptyText: {
-		color: NeonColors.text.muted,
-		fontSize: 16,
-		textAlign: "center",
-		marginTop: 32,
-	},
-	container: {
-		flex: 1,
-		backgroundColor: NeonColors.background,
-	},
-	safeArea: {
-		flex: 1,
-	},
-	scrollContent: {
-		paddingBottom: 40,
-	},
-	viewContainer: {
-		paddingHorizontal: 16,
-		paddingTop: 8,
-	},
-	viewHeader: {
-		marginBottom: 24,
-	},
-	viewTitle: {
-		color: NeonColors.text.primary,
-		fontSize: 32,
-		fontWeight: "300",
-	},
-	viewSubtitle: {
-		color: NeonColors.text.secondary,
-		fontSize: 14,
-		marginTop: 4,
-	},
-	logsList: {
-		marginTop: 12,
-	},
-});

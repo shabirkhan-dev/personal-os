@@ -1,13 +1,26 @@
 import {
+	Activity01Icon,
+	AppleIcon,
+	Bookmark01Icon,
+	BookOpen01Icon,
+	Brain01Icon,
 	Calendar01Icon,
+	CreditCardIcon,
+	Dumbbell01Icon,
 	Home01Icon,
+	LibraryIcon,
 	Menu01Icon,
 	PieChartIcon,
 	PlusSignIcon,
+	Shield01Icon,
+	ShoppingBag01Icon,
+	SparklesIcon,
+	Target01Icon,
+	Task01Icon,
 	UserIcon,
 	Wallet01Icon,
 } from "@hugeicons/core-free-icons";
-import { router, usePathname } from "expo-router";
+import { router, usePathname, useSegments } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Icon, type IconProp } from "@/components/ui/icon";
@@ -101,6 +114,85 @@ export const ROUTINES_TABS: TabItemConfig[] = [
 	},
 ];
 
+export const PROFILE_TABS: TabItemConfig[] = [
+	{
+		id: "profile",
+		label: "Profile",
+		icon: UserIcon,
+		route: "/(modules)/(profile)",
+	},
+	{
+		id: "security",
+		label: "Security",
+		icon: Shield01Icon,
+		route: "/(modules)/(profile)/security",
+	},
+	{
+		id: "billing",
+		label: "Billing",
+		icon: CreditCardIcon,
+		route: "/(modules)/(profile)/billing",
+	},
+	{
+		id: "home",
+		label: "Home",
+		icon: Home01Icon,
+		route: "/(modules)/(dashboard)",
+	},
+];
+
+export const SKINCARE_TABS: TabItemConfig[] = [
+	{ id: "routine", label: "Routine", icon: SparklesIcon, route: "/(modules)/(skincare)" },
+	{
+		id: "products",
+		label: "Products",
+		icon: ShoppingBag01Icon,
+		route: "/(modules)/(skincare)/products",
+	},
+	{ id: "history", label: "History", icon: Calendar01Icon, route: "/(modules)/(skincare)/history" },
+	{ id: "home", label: "Home", icon: Home01Icon, route: "/(modules)/(dashboard)" },
+];
+
+export const NUTRITION_TABS: TabItemConfig[] = [
+	{ id: "diet", label: "Diet", icon: PieChartIcon, route: "/(modules)/(nutrition)" },
+	{ id: "meals", label: "Meals", icon: AppleIcon, route: "/(modules)/(nutrition)/meals" },
+	{ id: "finance", label: "Finance", icon: Wallet01Icon, route: "/(modules)/(expenses)" },
+	{ id: "home", label: "Home", icon: Home01Icon, route: "/(modules)/(dashboard)" },
+];
+
+export const MINDFULNESS_TABS: TabItemConfig[] = [
+	{ id: "clarity", label: "Clarity", icon: Brain01Icon, route: "/(modules)/(mindfulness)" },
+	{
+		id: "journal",
+		label: "Journal",
+		icon: BookOpen01Icon,
+		route: "/(modules)/(mindfulness)/journal",
+	},
+	{ id: "routines", label: "Routines", icon: Calendar01Icon, route: "/(modules)/(routines)" },
+	{ id: "home", label: "Home", icon: Home01Icon, route: "/(modules)/(dashboard)" },
+];
+
+export const LIBRARY_TABS: TabItemConfig[] = [
+	{ id: "library", label: "Library", icon: LibraryIcon, route: "/(modules)/(library)" },
+	{ id: "books", label: "Books", icon: Bookmark01Icon, route: "/(modules)/(library)/books" },
+	{ id: "routines", label: "Routines", icon: Calendar01Icon, route: "/(modules)/(routines)" },
+	{ id: "home", label: "Home", icon: Home01Icon, route: "/(modules)/(dashboard)" },
+];
+
+export const FOCUS_TABS: TabItemConfig[] = [
+	{ id: "focus", label: "Focus", icon: Target01Icon, route: "/(modules)/(focus)" },
+	{ id: "tasks", label: "Tasks", icon: Task01Icon, route: "/(modules)/(focus)/tasks" },
+	{ id: "routines", label: "Routines", icon: Calendar01Icon, route: "/(modules)/(routines)" },
+	{ id: "home", label: "Home", icon: Home01Icon, route: "/(modules)/(dashboard)" },
+];
+
+export const EXERCISE_TABS: TabItemConfig[] = [
+	{ id: "performance", label: "Performance", icon: Dumbbell01Icon, route: "/(modules)/(exercise)" },
+	{ id: "records", label: "Records", icon: Activity01Icon, route: "/(modules)/(exercise)/records" },
+	{ id: "routines", label: "Routines", icon: Calendar01Icon, route: "/(modules)/(routines)" },
+	{ id: "home", label: "Home", icon: Home01Icon, route: "/(modules)/(dashboard)" },
+];
+
 export interface BottomNavProps {
 	tabs?: TabItemConfig[];
 	activeTab?: string;
@@ -118,19 +210,28 @@ export function BottomNav({
 }: BottomNavProps) {
 	const insets = useSafeAreaInsets();
 	const pathname = usePathname();
+	const segments = useSegments() as string[];
+
+	const isRouteMatch = (route: string) => {
+		const routeSegments = route.split("/").filter(Boolean);
+		const segmentMatch = routeSegments.every((segment, index) => segments[index] === segment);
+		return segmentMatch || pathname === route || pathname.startsWith(`${route}/`);
+	};
 
 	const getActiveTabId = (): string => {
 		if (activeTab) return activeTab;
-		const match = tabs.find((t) => pathname === t.route || pathname.startsWith(t.route));
+		const match = [...tabs]
+			.sort((a, b) => b.route.length - a.route.length)
+			.find((t) => isRouteMatch(t.route));
 		if (match) return match.id;
 		return tabs[0]?.id ?? "home";
 	};
 
 	const currentActive = getActiveTabId();
 
-	const handleTabPress = (route: string) => {
-		if (pathname !== route) {
-			router.replace(route as never);
+	const handleTabPress = (tab: TabItemConfig) => {
+		if (currentActive !== tab.id) {
+			router.replace(tab.route as never);
 		}
 	};
 
@@ -148,7 +249,7 @@ export function BottomNav({
 				return (
 					<Pressable
 						key={tab.id}
-						onPress={() => handleTabPress(tab.route)}
+						onPress={() => handleTabPress(tab)}
 						className="flex-1 items-center justify-center py-1 active:opacity-70"
 						accessibilityRole="button"
 						accessibilityLabel={tab.label}
@@ -172,17 +273,18 @@ export function BottomNav({
 				);
 			})}
 
-			{/* Center Quick Action Pill (+) */}
-			<View className="items-center justify-center px-1">
-				<Pressable
-					onPress={onAddPress}
-					className="w-[52px] h-[34px] rounded-full bg-foreground items-center justify-center shadow-lg active:scale-95"
-					accessibilityRole="button"
-					accessibilityLabel={addAccessibilityLabel}
-				>
-					<Icon icon={addIcon} size={20} className="text-background" strokeWidth={2.4} />
-				</Pressable>
-			</View>
+			{onAddPress ? (
+				<View className="items-center justify-center px-1">
+					<Pressable
+						onPress={onAddPress}
+						className="w-[52px] h-[34px] rounded-full bg-foreground items-center justify-center shadow-lg active:scale-95"
+						accessibilityRole="button"
+						accessibilityLabel={addAccessibilityLabel}
+					>
+						<Icon icon={addIcon} size={20} className="text-background" strokeWidth={2.4} />
+					</Pressable>
+				</View>
+			) : null}
 
 			{/* Right 2 Tabs */}
 			{rightTabs.map((tab) => {
@@ -190,7 +292,7 @@ export function BottomNav({
 				return (
 					<Pressable
 						key={tab.id}
-						onPress={() => handleTabPress(tab.route)}
+						onPress={() => handleTabPress(tab)}
 						className="flex-1 items-center justify-center py-1 active:opacity-70"
 						accessibilityRole="button"
 						accessibilityLabel={tab.label}

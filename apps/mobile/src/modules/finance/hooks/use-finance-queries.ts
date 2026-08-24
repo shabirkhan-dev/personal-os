@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/modules/auth";
 import { financeService } from "../services/finance.service";
 import type { TransactionsQuery } from "../types/finance.types";
 
@@ -17,25 +18,36 @@ export function getCurrentMonthString(): string {
 }
 
 export function useMonthSummaryQuery(month: string = getCurrentMonthString()) {
+	const { token, user } = useAuth();
 	return useQuery({
-		queryKey: financeKeys.summary(month),
-		queryFn: () => financeService.getSummary(month),
+		queryKey: [...financeKeys.summary(month), user?.id],
+		queryFn: () => financeService.getSummary(month, requireToken(token)),
+		enabled: Boolean(token && user),
 		staleTime: 30_000,
 	});
 }
 
 export function useTransactionsQuery(query: TransactionsQuery = {}) {
+	const { token, user } = useAuth();
 	return useQuery({
-		queryKey: financeKeys.transactions(query),
-		queryFn: () => financeService.getTransactions(query),
+		queryKey: [...financeKeys.transactions(query), user?.id],
+		queryFn: () => financeService.getTransactions(query, requireToken(token)),
+		enabled: Boolean(token && user),
 		staleTime: 15_000,
 	});
 }
 
 export function useBudgetsQuery(month: string = getCurrentMonthString()) {
+	const { token, user } = useAuth();
 	return useQuery({
-		queryKey: financeKeys.budgets(month),
-		queryFn: () => financeService.getBudgets(month),
+		queryKey: [...financeKeys.budgets(month), user?.id],
+		queryFn: () => financeService.getBudgets(month, requireToken(token)),
+		enabled: Boolean(token && user),
 		staleTime: 60_000,
 	});
+}
+
+function requireToken(token: string | null): string {
+	if (!token) throw new Error("Authentication required");
+	return token;
 }

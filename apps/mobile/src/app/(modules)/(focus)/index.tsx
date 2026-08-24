@@ -1,15 +1,16 @@
 import { useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AddEntryModal } from "@/components/ui/add-entry-modal";
 import { FloatingActionButton } from "@/components/ui/floating-action-button";
 import { OSHeader } from "@/components/ui/os-header";
 import { FocusWidget } from "@/components/widgets/focus-widget";
-import { NeonColors } from "@/constants/design-system";
+import { useTheme } from "@/providers/theme-provider";
 import { useAppStore } from "@/store/use-app-store";
 
 export default function FocusIndex() {
 	const [modalVisible, setModalVisible] = useState(false);
+	const { colors } = useTheme();
 	const addEntry = useAppStore((state) => state.addEntry);
 
 	const handleSave = (title: string, subtitle: string, value: string, delta: string) => {
@@ -17,18 +18,18 @@ export default function FocusIndex() {
 	};
 
 	return (
-		<View style={styles.container}>
-			<SafeAreaView edges={["top"]} style={styles.safeArea}>
+		<View className="flex-1 bg-background">
+			<SafeAreaView edges={["top"]} className="flex-1">
 				<OSHeader />
 
 				<ScrollView
 					showsVerticalScrollIndicator={false}
-					contentContainerStyle={styles.scrollContent}
+					contentContainerStyle={{ paddingBottom: 40 }}
 				>
-					<View style={styles.viewContainer}>
-						<View style={styles.viewHeader}>
-							<Text style={styles.viewTitle}>Focus</Text>
-							<Text style={styles.viewSubtitle}>
+					<View className="px-4 pt-2">
+						<View className="mb-6">
+							<Text className="text-foreground text-3xl font-light tracking-tight">Focus</Text>
+							<Text className="text-muted-foreground text-sm mt-1">
 								Pomodoro, deep work tracking, and task management.
 							</Text>
 						</View>
@@ -37,45 +38,15 @@ export default function FocusIndex() {
 				</ScrollView>
 			</SafeAreaView>
 
-			<FloatingActionButton color={NeonColors.accent.pink} onPress={() => setModalVisible(true)} />
+			<FloatingActionButton color={colors.accent.pink} onPress={() => setModalVisible(true)} />
 
 			<AddEntryModal
 				visible={modalVisible}
 				onClose={() => setModalVisible(false)}
 				onSave={handleSave}
-				color={NeonColors.accent.pink}
+				color={colors.accent.pink}
 				titleLabel="Add Task"
 			/>
 		</View>
 	);
 }
-
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		backgroundColor: NeonColors.background,
-	},
-	safeArea: {
-		flex: 1,
-	},
-	scrollContent: {
-		paddingBottom: 40,
-	},
-	viewContainer: {
-		paddingHorizontal: 16,
-		paddingTop: 8,
-	},
-	viewHeader: {
-		marginBottom: 24,
-	},
-	viewTitle: {
-		color: NeonColors.text.primary,
-		fontSize: 32,
-		fontWeight: "300",
-	},
-	viewSubtitle: {
-		color: NeonColors.text.secondary,
-		fontSize: 14,
-		marginTop: 4,
-	},
-});

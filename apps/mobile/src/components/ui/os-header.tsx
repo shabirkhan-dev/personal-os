@@ -7,7 +7,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { type Href, router, useSegments } from "expo-router";
 import * as React from "react";
-import { Image, Modal, Pressable, Text, TouchableWithoutFeedback, View } from "react-native";
+import { Alert, Image, Modal, Pressable, Text, TouchableWithoutFeedback, View } from "react-native";
 import { Icon } from "@/components/ui/icon";
 import { resolveMediaUrl } from "@/lib/media-url";
 import { cn } from "@/lib/utils";
@@ -136,7 +136,7 @@ export function OSHeader() {
 				{/* Notifications Bell */}
 				<Pressable
 					className="w-9 h-9 rounded-full bg-card border border-border items-center justify-center relative active:opacity-80 shadow-sm"
-					onPress={() => {}}
+					onPress={() => Alert.alert("Notifications", "You are all caught up.")}
 					accessibilityLabel="Notifications"
 				>
 					<Icon icon={Notification01Icon} size={18} className="text-foreground" />

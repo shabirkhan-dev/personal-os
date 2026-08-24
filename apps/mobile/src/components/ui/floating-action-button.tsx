@@ -1,50 +1,26 @@
 import { PlusSignIcon } from "@hugeicons/core-free-icons";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { Icon } from "@/components/ui/icon";
-import { NeonColors, NeonShadows } from "@/constants/design-system";
 
 interface FloatingActionButtonProps {
 	onPress?: () => void;
 	color?: string;
 }
 
-export function FloatingActionButton({
-	onPress,
-	color = NeonColors.accent.green,
-}: FloatingActionButtonProps) {
+export function FloatingActionButton({ onPress, color }: FloatingActionButtonProps) {
+	if (!onPress) return null;
+
 	return (
-		<View style={styles.container}>
+		<View className="absolute bottom-[104px] right-6 z-[999]">
 			<Pressable
 				onPress={onPress}
-				style={({ pressed }) => [
-					styles.button,
-					{ backgroundColor: color, shadowColor: color },
-					pressed && styles.pressed,
-				]}
+				className="w-16 h-16 rounded-full bg-primary items-center justify-center shadow-lg active:scale-95 active:opacity-90"
+				style={color ? { backgroundColor: color } : undefined}
+				accessibilityRole="button"
+				accessibilityLabel="Add entry"
 			>
-				<Icon icon={PlusSignIcon} size={32} color={NeonColors.background} strokeWidth={2.5} />
+				<Icon icon={PlusSignIcon} size={32} className="text-primary-foreground" strokeWidth={2.5} />
 			</Pressable>
 		</View>
 	);
 }
-
-const styles = StyleSheet.create({
-	container: {
-		position: "absolute",
-		bottom: 104, // Above the bottom nav
-		right: 24,
-		zIndex: 999,
-	},
-	button: {
-		width: 64,
-		height: 64,
-		borderRadius: 32,
-		justifyContent: "center",
-		alignItems: "center",
-		...NeonShadows.glow,
-	},
-	pressed: {
-		transform: [{ scale: 0.92 }],
-		opacity: 0.9,
-	},
-});

@@ -10,7 +10,6 @@ import {
 	View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { BottomNav, FINANCE_TABS } from "@/components/ui/bottom-nav";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
@@ -28,7 +27,11 @@ import {
 export default function BudgetScreen() {
 	const currentMonth = getCurrentMonthString();
 	const { data: summary, isLoading, refetch } = useMonthSummaryQuery(currentMonth);
-	const { data: budgets, refetch: refetchBudgets } = useBudgetsQuery(currentMonth);
+	const {
+		data: budgets,
+		isLoading: budgetsLoading,
+		refetch: refetchBudgets,
+	} = useBudgetsQuery(currentMonth);
 	const setBudgetsMutation = useSetBudgetsMutation();
 
 	const [budgetModalVisible, setBudgetModalVisible] = useState(false);
@@ -37,10 +40,10 @@ export default function BudgetScreen() {
 
 	const handleSaveBudget = async () => {
 		const parsedLimit = Number.parseFloat(limitAmount);
-		if (!categoryName.trim() || Number.isNaN(parsedLimit) || parsedLimit < 0) return;
+		if (!categoryName.trim() || !Number.isFinite(parsedLimit) || parsedLimit <= 0 || !budgets)
+			return;
 
-		const currentList = budgets ?? [];
-		const filtered = currentList.filter(
+		const filtered = budgets.filter(
 			(b) => b.category.toLowerCase() !== categoryName.trim().toLowerCase(),
 		);
 		const updatedBudgets = [
@@ -71,7 +74,7 @@ export default function BudgetScreen() {
 					contentContainerStyle={{ paddingBottom: 60 }}
 					refreshControl={
 						<RefreshControl
-							refreshing={isLoading}
+							refreshing={isLoading || budgetsLoading}
 							onRefresh={() => {
 								refetch();
 								refetchBudgets();
@@ -89,6 +92,7 @@ export default function BudgetScreen() {
 							</View>
 							<Pressable
 								onPress={() => setBudgetModalVisible(true)}
+								disabled={budgetsLoading || !budgets}
 								className="bg-amber-500/20 px-3.5 py-2 rounded-xl flex-row items-center gap-1.5 border border-amber-500/30 active:opacity-80"
 							>
 								<Icon icon={PlusSignIcon} size={16} className="text-amber-500" strokeWidth={2.5} />
@@ -118,11 +122,6 @@ export default function BudgetScreen() {
 						</View>
 					</View>
 				</ScrollView>
-				<BottomNav
-					tabs={FINANCE_TABS}
-					activeTab="budgets"
-					onAddPress={() => setBudgetModalVisible(true)}
-				/>
 			</SafeAreaView>
 
 			{/* Set Budget Modal */}
@@ -151,7 +150,7 @@ export default function BudgetScreen() {
 
 						<View className="mb-5">
 							<Text className="text-muted-foreground text-xs font-semibold uppercase mb-1">
-								Monthly Limit (₹ / $)
+								Monthly Limit (INR)
 							</Text>
 							<Input
 								value={limitAmount}
@@ -172,7 +171,7 @@ export default function BudgetScreen() {
 							</Button>
 							<Button
 								onPress={handleSaveBudget}
-								disabled={!categoryName.trim() || !limitAmount}
+								disabled={!categoryName.trim() || !limitAmount || budgetsLoading || !budgets}
 								loading={setBudgetsMutation.isPending}
 								className="flex-1 bg-amber-500 active:bg-amber-600"
 							>

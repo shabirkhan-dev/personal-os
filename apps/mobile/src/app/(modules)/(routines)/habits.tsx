@@ -2,7 +2,6 @@ import { PlusSignIcon, Task01Icon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { BottomNav, ROUTINES_TABS } from "@/components/ui/bottom-nav";
 import { Card } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
 import { OSHeader } from "@/components/ui/os-header";
@@ -74,12 +73,6 @@ export default function HabitsScreen() {
 						)}
 					</View>
 				</ScrollView>
-
-				<BottomNav
-					tabs={ROUTINES_TABS}
-					activeTab="habits"
-					onAddPress={() => setModalVisible(true)}
-				/>
 			</SafeAreaView>
 
 			<AddRoutineModal visible={modalVisible} onClose={() => setModalVisible(false)} />

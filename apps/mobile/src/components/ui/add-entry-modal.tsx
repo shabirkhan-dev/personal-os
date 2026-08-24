@@ -5,13 +5,12 @@ import {
 	Modal,
 	Platform,
 	Pressable,
-	StyleSheet,
 	Text,
 	TextInput,
 	View,
 } from "react-native";
 import { Icon } from "@/components/ui/icon";
-import { NeonColors } from "@/constants/design-system";
+import { useTheme } from "@/providers/theme-provider";
 
 interface AddEntryModalProps {
 	visible: boolean;
@@ -25,17 +24,19 @@ export function AddEntryModal({
 	visible,
 	onClose,
 	onSave,
-	color = NeonColors.accent.green,
+	color,
 	titleLabel = "Add New Entry",
 }: AddEntryModalProps) {
+	const { colors } = useTheme();
+	const resolvedColor = color ?? colors.accent.green;
 	const [title, setTitle] = useState("");
 	const [subtitle, setSubtitle] = useState("");
 	const [value, setValue] = useState("");
 	const [delta, setDelta] = useState("");
 
 	const handleSave = () => {
-		if (!title) return;
-		onSave(title, subtitle, value, delta);
+		if (!title.trim()) return;
+		onSave(title.trim(), subtitle.trim(), value.trim(), delta.trim());
 		setTitle("");
 		setSubtitle("");
 		setValue("");
@@ -44,59 +45,58 @@ export function AddEntryModal({
 	};
 
 	return (
-		<Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
+		<Modal animationType="slide" transparent visible={visible} onRequestClose={onClose}>
 			<KeyboardAvoidingView
 				behavior={Platform.OS === "ios" ? "padding" : "height"}
-				style={styles.centeredView}
+				className="flex-1 justify-end bg-black/60"
 			>
-				<View style={styles.modalView}>
-					<View style={styles.header}>
-						<Text style={[styles.modalTitle, { color }]}>{titleLabel}</Text>
-						<Pressable onPress={onClose} style={styles.closeButton}>
-							<Icon icon={Cancel01Icon} size={24} color={NeonColors.text.secondary} />
+				<View className="bg-card rounded-t-[32px] p-6 pb-12 border border-border">
+					<View className="flex-row justify-between items-center mb-6">
+						<Text className="text-primary text-xl font-semibold" style={{ color: resolvedColor }}>
+							{titleLabel}
+						</Text>
+						<Pressable onPress={onClose} className="p-1" accessibilityLabel="Close modal">
+							<Icon icon={Cancel01Icon} size={24} className="text-muted-foreground" />
 						</Pressable>
 					</View>
 
-					<View style={styles.form}>
+					<View className="gap-4">
 						<TextInput
-							style={styles.input}
+							className="bg-muted/40 border border-input rounded-xl p-4 text-foreground text-base"
 							placeholder="Title (e.g., Avocado Toast)"
-							placeholderTextColor={NeonColors.text.muted}
+							placeholderTextColor={colors.text.muted}
 							value={title}
 							onChangeText={setTitle}
 							autoFocus
 						/>
 						<TextInput
-							style={styles.input}
+							className="bg-muted/40 border border-input rounded-xl p-4 text-foreground text-base"
 							placeholder="Subtitle (e.g., Breakfast)"
-							placeholderTextColor={NeonColors.text.muted}
+							placeholderTextColor={colors.text.muted}
 							value={subtitle}
 							onChangeText={setSubtitle}
 						/>
 						<TextInput
-							style={styles.input}
+							className="bg-muted/40 border border-input rounded-xl p-4 text-foreground text-base"
 							placeholder="Value (e.g., 450 kcal)"
-							placeholderTextColor={NeonColors.text.muted}
+							placeholderTextColor={colors.text.muted}
 							value={value}
 							onChangeText={setValue}
 						/>
 						<TextInput
-							style={styles.input}
+							className="bg-muted/40 border border-input rounded-xl p-4 text-foreground text-base"
 							placeholder="Secondary Info (e.g., 35g Protein)"
-							placeholderTextColor={NeonColors.text.muted}
+							placeholderTextColor={colors.text.muted}
 							value={delta}
 							onChangeText={setDelta}
 						/>
 
 						<Pressable
-							style={({ pressed }) => [
-								styles.saveButton,
-								{ backgroundColor: color },
-								pressed && { opacity: 0.8 },
-							]}
+							className="rounded-xl p-4 items-center mt-2 active:opacity-80"
+							style={{ backgroundColor: resolvedColor }}
 							onPress={handleSave}
 						>
-							<Text style={styles.saveButtonText}>Save Entry</Text>
+							<Text className="text-primary-foreground text-base font-bold">Save Entry</Text>
 						</Pressable>
 					</View>
 				</View>
@@ -104,63 +104,3 @@ export function AddEntryModal({
 		</Modal>
 	);
 }
-
-const styles = StyleSheet.create({
-	centeredView: {
-		flex: 1,
-		justifyContent: "flex-end",
-		backgroundColor: "rgba(0,0,0,0.6)",
-	},
-	modalView: {
-		backgroundColor: NeonColors.surface,
-		borderTopLeftRadius: 32,
-		borderTopRightRadius: 32,
-		padding: 24,
-		paddingBottom: 48,
-		shadowColor: "#000",
-		shadowOffset: { width: 0, height: -10 },
-		shadowOpacity: 0.3,
-		shadowRadius: 20,
-		elevation: 5,
-		borderTopWidth: 1,
-		borderLeftWidth: 1,
-		borderRightWidth: 1,
-		borderColor: "rgba(255,255,255,0.05)",
-	},
-	header: {
-		flexDirection: "row",
-		justifyContent: "space-between",
-		alignItems: "center",
-		marginBottom: 24,
-	},
-	modalTitle: {
-		fontSize: 20,
-		fontWeight: "600",
-	},
-	closeButton: {
-		padding: 4,
-	},
-	form: {
-		gap: 16,
-	},
-	input: {
-		backgroundColor: "rgba(255,255,255,0.03)",
-		borderWidth: 1,
-		borderColor: "rgba(255,255,255,0.1)",
-		borderRadius: 12,
-		padding: 16,
-		color: NeonColors.text.primary,
-		fontSize: 16,
-	},
-	saveButton: {
-		borderRadius: 12,
-		padding: 16,
-		alignItems: "center",
-		marginTop: 8,
-	},
-	saveButtonText: {
-		color: NeonColors.background,
-		fontSize: 16,
-		fontWeight: "700",
-	},
-});

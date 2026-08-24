@@ -4,7 +4,7 @@
 
 ## Current focus
 
-- (set by the mobile agent)
+- Wave 1 (auth/session correctness): `mobile-auth-route-guard` done pending review (`agent/mobile/auth-route-guard`, `ce15fc4`). Next: query-cache user isolation, then session lifecycle recovery.
 
 ## API consumption
 
@@ -13,4 +13,4 @@
 
 ## Log
 
-- (append one line per meaningful change)
+- 2026-08-24: claimed `2026-08-24-mobile-auth-route-guard`; added jest-expo test infra (bun-store transformIgnorePatterns fix), guarded `(modules)`/`(auth)` layouts, gated splash on bootstrap. 10 tests green; awaiting review.

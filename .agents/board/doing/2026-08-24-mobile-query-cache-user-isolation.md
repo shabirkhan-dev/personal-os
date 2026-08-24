@@ -45,34 +45,44 @@ even when the access token is gone.
 
 ## Resolution
 
-Implementation complete on branch `agent/mobile/query-cache-isolation`
-(commit `4ad389e`, pushed). Stacked on `agent/mobile/auth-route-guard` (wave
-1a) to inherit the test infrastructure; merge order must be 1a → this branch.
-Awaiting independent review.
+Implementation complete. Awaiting independent review.
 
 ### Changed
 
-- `apps/mobile/src/modules/routines/hooks/use-routine-queries.ts` — all
-  protected keys are now user-scoped (`["routines", userId, …]`, matching the
-  finance pattern); hooks gate on `token && user`, so queries stay disabled
-  while bootstrap is unresolved. Mutation prefix invalidation
-  (`["routines"]`) is unaffected.
-- `apps/mobile/src/modules/auth/context/auth-context.tsx` — `clearSession`
-  now calls `queryClient.clear()` via `useQueryClient`; covers logout,
-  logoutAll, refresh failure, and failed cold-start bootstrap.
-- Tests: new `use-routine-queries.test.tsx` (key scoping, disabled-during-
-  bootstrap, per-account cache separation) and two cache-wipe cases in
-  `auth-context.test.tsx` (failed bootstrap, logout).
-- `providers.tsx` needed no change (QueryClient already created above
-  AuthProvider); scope entry unused by design.
+Review round (`0745e91`, branch rebased onto `agent/mobile/auth-route-guard`
+tip `b75f0fa`):
+- `apps/mobile/src/modules/auth/context/auth-context.tsx` — privacy gap fixed:
+  - `previousUserIdRef` (stable `useRef`) tracks the last authenticated id;
+    identity comparison deliberately stays out of effect dependency lists so
+    adding deps cannot retrigger the bootstrap refresh loop;
+  - on `establishSession` with a **different** user id, caches are purged
+    *before* the new token/user state is exposed
+    (`cancelQueries()` → `clear()`);
+  - same-user refresh (timer, `refreshUser` 401 path) performs **no purge**;
+  - `clearSession` uses the same purge helper and resets the ref.
+- `apps/mobile/src/modules/auth/context/auth-context.test.tsx` — added:
+  - real AuthProvider A→B test: establish User A, seed cached data,
+    establish User B → A's rows removed from cache, B exposes no inherited
+    data (`["routines","user-2",…]` undefined);
+  - in-flight cleanup: hanging `fetchQuery` for A is cancelled (signal
+    aborted, promise settles, entry removed) during switch;
+  - freshness/same-user: seeded A data survives a same-id refresh via
+    `refreshUser` 401 → single network refresh, cache preserved;
+  - logout + failed-bootstrap wipe cases from round 1 kept.
+
+Round 1 (`2a37c20` after rebase; originally `4ad389e`) — unchanged:
+user-scoped routine keys `["routines", userId, …]`, hooks gated on
+`token && user`, mutation prefix invalidation untouched.
 
 ### Validation
 
-- `bun --cwd apps/mobile run test`: 5 suites, 15 tests passed
+Round 2 (exact commands from review):
 - `bun --cwd apps/mobile run lint`: Biome clean
 - `bun --cwd apps/mobile run typecheck`: 0 errors
-- root `bun run typecheck` (turbo): 5 tasks successful incl. mobile
-- `bun run architecture:check`: boundaries + naming OK
+- `bun --cwd apps/mobile run test -- --runInBand`: 5 suites, **22 tests passed**
+- root `bun run architecture:check`: boundaries + naming OK
+- Smoke: `expo export --platform web` succeeds, clean route list (no test-file
+  routes), `index.html` emitted.
 
 ### Contract impact
 
@@ -80,11 +90,5 @@ None (no API change).
 
 ### Review
 
-Pending — reviewer: independent reviewer agent session.
-
-### Follow-ups / honest limitations
-
-- Device verification of account-switch flows not run in this environment;
-  covered by unit tests per card DoD.
-- Compatible with single-flight refresh card (`2026-08-24-auth-refresh-single-flight`):
-  cache clearing happens in `clearSession` regardless of which path invokes it.
+Pending — reviewer: independent reviewer agent session. Review items addressed
+in `0745e91`; merge order auth-route-guard → this branch.

@@ -52,9 +52,10 @@ loop when refresh has been rejected.
 
 ## Resolution
 
-Implementation complete on branch `agent/mobile/session-lifecycle` (pushed).
+Implementation complete (tip `3544a55` after rebase onto the round-2 fixes).
 Stacked on `agent/mobile/query-cache-isolation` → merge order: auth-route-guard
-→ query-cache-isolation → session-lifecycle. Awaiting independent review.
+(`b75f0fa`) → query-cache-isolation (`0745e91`) → session-lifecycle
+(`3544a55`). Awaiting independent review.
 
 ### Changed
 

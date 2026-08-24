@@ -16,3 +16,4 @@
 - 2026-08-24: claimed `mobile-auth-route-guard`; added jest-expo test infra (bun-store transformIgnorePatterns fix), guarded `(modules)`/`(auth)` layouts, gated splash on bootstrap. 10 tests green; awaiting review.
 - 2026-08-24: claimed `mobile-query-cache-user-isolation`; routines keys user-scoped, clearSession wipes React Query cache. 15 tests green.
 - 2026-08-24: claimed `mobile-session-lifecycle-recovery` (+ mobile half of `auth-refresh-single-flight`); single-flight refresh, AppState revalidation on resume, guarded 401 retry in api client. 25 tests green.
+- 2026-08-24: review round — routing transition tests + moved app-dir tests to `src/tests/app` (phantom-route fix found via web export) on auth-route-guard (`e93bc44`,`b75f0fa`); account-switch purge via stable prev-user ref with A→B/in-flight/same-user coverage on query-cache-isolation (`0745e91`, 22 tests); session-lifecycle rebased (`3544a55`, 32 tests). All cards in `doing/` pending independent review.

@@ -53,37 +53,52 @@ hide the splash screen only after the initial route decision is safe.
 
 ## Resolution
 
-Implementation complete on branch `agent/mobile/auth-route-guard` (commit
-`ce15fc4`, pushed). Awaiting independent review — card stays in `doing/` until
-review is recorded.
+Implementation complete. Awaiting independent review — card stays in `doing/`
+until review is recorded.
 
 ### Changed
 
-- `apps/mobile/src/app/_layout.tsx` — splash screen now hides only after auth
-  bootstrap resolves; root stack moved inside the provider tree.
-- `apps/mobile/src/app/(modules)/_layout.tsx` — renders nothing during
-  bootstrap, redirects unauthenticated users to `/(auth)/login`.
+Follow-up review round (`e93bc44`, `b75f0fa`):
+- `apps/mobile/src/tests/app/modules-layout.test.tsx`,
+  `apps/mobile/src/tests/app/auth-layout.test.tsx` — added session-transition
+  routing coverage requested by review:
+  - cold-start bootstrap → covered by `auth-context.test.tsx`
+    ("restores the session on cold start…") plus splash-gate test;
+  - sign-out teardown routes `(modules)` → `/(auth)/login` (also covers
+    expired-session refresh failure, which tears the session down through the
+    same `clearSession` path);
+  - sign-in re-entry returns `(modules)` to module screens;
+  - authenticated deep link into `(auth)` bounces to dashboard once bootstrap
+    resolves (no stuck auth form);
+  - post-sign-out `(auth)` renders forms again.
+- **Route-tree fix found during Expo web export:** colocated `*.test.tsx`
+  files under `src/app/**` were exported as phantom routes
+  (`/(modules)/modules-layout.test`). All three app-dir test files moved to
+  `src/tests/app/` with adjusted imports; export is clean.
+
+Initial round (`ce15fc4`) — unchanged behavior, no refactors beyond scope:
+- `apps/mobile/src/app/_layout.tsx` — splash hides only after bootstrap.
+- `apps/mobile/src/app/(modules)/_layout.tsx` — null while loading; redirects
+  unauthenticated users to `/(auth)/login`.
 - `apps/mobile/src/app/(auth)/_layout.tsx` — redirects authenticated users to
-  `/(modules)/(dashboard)` (fixes deep-link spin on auth screens).
-- `apps/mobile/jest.config.js`, `apps/mobile/tests/stubs/empty-module.js`,
-  `apps/mobile/src/types/css-modules.d.ts` — new minimal jest-expo test setup.
-  Includes a Bun-store-aware `transformIgnorePatterns` (`node_modules/.bun/<pkg>
-  @ver+hash/node_modules/…`) without which transpiled packages ship raw ESM to
-  jest under Bun workspaces.
-- `apps/mobile/package.json` — real `test: jest` script; devDeps jest,
-  jest-expo, @types/jest, @testing-library/react-native, @babel/runtime.
-- `apps/mobile/tsconfig.json` — explicit `"types": ["jest"]` (TS 6 does not
-  auto-include `@types/*` here).
-- Tests: `root-layout.test.tsx`, `(auth)/auth-layout.test.tsx`,
-  `(modules)/modules-layout.test.tsx`, `auth-context.test.tsx`.
+  `/(modules)/(dashboard)`.
+- `apps/mobile/jest.config.js`, `tests/stubs/empty-module.js`,
+  `src/types/css-modules.d.ts`, `package.json`, `tsconfig.json` — jest-expo
+  infra incl. Bun-store-aware `transformIgnorePatterns`.
 
 ### Validation
 
-- `bun --cwd apps/mobile run test`: 4 suites, 10 tests passed
-- `bun --cwd apps/mobile run lint`: Biome clean (155 files)
+Round 2 (exact commands from review):
+- `bun --cwd apps/mobile run lint`: Biome clean
 - `bun --cwd apps/mobile run typecheck`: 0 errors
-- root `bun run typecheck` (turbo): 5 tasks successful incl. mobile
-- `bun run architecture:check`: boundaries + naming OK
+- `bun --cwd apps/mobile run test -- --runInBand`: 4 suites, **14 tests passed**
+- root `bun run architecture:check`: boundaries + naming OK
+
+Smoke verification:
+- `expo export --platform web` succeeds; `index.html` emitted; no phantom test
+  routes after `b75f0fa`. Native device/emulator unavailable in this
+  environment — recorded as honest limitation; unit coverage stands in per
+  card DoD ("focused tests or an equivalent e2e check").
 
 ### Contract impact
 
@@ -91,14 +106,6 @@ None (no API change).
 
 ### Review
 
-Pending — reviewer: independent reviewer agent session. Requested via board.
-
-### Follow-ups / honest limitations
-
-- Device/simulator verification of cold start, sign-out, sign-in, and
-  expired-session navigation was **not** run in this environment (no emulator);
-  covered by focused unit tests instead per card DoD "focused tests or an
-  equivalent e2e check". Reviewer or QA should smoke-test on device before
-  store-facing builds.
-- Scope note recorded at claim time: this card also introduced the mobile test
-  runner required by wave 1–2 cards' DoDs.
+Pending — reviewer: independent reviewer agent session. Round-2 items addressed
+in `e93bc44` + `b75f0fa`; merge requires sign-off on
+`agent/mobile/auth-route-guard` (tip `b75f0fa`).

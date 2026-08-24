@@ -76,8 +76,7 @@ check or AI-native project-management tool can reject out-of-scope changes befor
 The contract distinguishes an honest blocker from a violation. Repeated failures are evaluated
 from evidence on cards, commits, reviews, and CI—not from subjective labels such as "lazy".
 
-The implementation agents own code. The reviewer is independent and read-only by default. The
-integrator merges approved work but does not use integration authority to rewrite another role's
-feature.
+Implementation agents own code. QA and the reviewer are independent and read-only by default.
+The PM coordinates delivery but cannot waive review, scope, or validation gates.
 
 See `worktrees.md` for the complete lifecycle, port convention, and safe cleanup rules.

@@ -212,7 +212,7 @@ When work crosses ownership boundaries:
 3. For a coordinated slice, create one parent slice and separate child cards per owner.
 4. If an atomic change truly requires multiple owners, list every path and required reviewer on
    the card before implementation begins.
-5. Do not use a broad role such as "lead" or "integrator" as permission to bypass ownership.
+5. Do not use a broad role such as "lead" or "PM" as permission to bypass ownership.
 
 ## Contract maintenance
 

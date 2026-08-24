@@ -13,13 +13,13 @@ From the repository root:
 
 ```bash
 wtp list
-wtp add -b agent/backend-auth/auth-refresh main
+wtp add -b agent/backend/auth-refresh main
 ```
 
 WTP creates a branch-based path under:
 
 ```text
-../personal-os-worktrees/agent/backend-auth/auth-refresh/
+../personal-os-worktrees/agent/backend/auth-refresh/
 ```
 
 The `.wtp.yml` post-create hook runs `bun install --frozen-lockfile` in the new worktree. It does
@@ -54,9 +54,10 @@ The canonical single-worktree development ports are:
 | AI API | 8000 |
 | Expo/Metro | 8081 |
 
-Parallel agents must choose non-conflicting ports and record them on the card. A simple local
-scheme is to add a role slot to each port: backend-auth `+10`, backend-product `+20`,
-backend-platform `+30`, web `+40`, and mobile `+50`.
+Parallel agents must choose non-conflicting ports and record them on the card. Do not maintain a
+large permanent role-to-port matrix. The PM assigns ports only to roles that actually run a local
+service; QA, reviewer, UI/UX, and PM normally reuse an existing environment or run targeted
+commands without starting a service.
 
 ## Agent finish sequence
 
@@ -70,7 +71,7 @@ backend-platform `+30`, web `+40`, and mobile `+50`.
 8. After merge, remove the clean worktree and branch when appropriate:
 
 ```bash
-wtp remove --with-branch agent/backend-auth/auth-refresh
+wtp remove --with-branch agent/backend/auth-refresh
 ```
 
 Use `--force` or `--force-branch` only after confirming that uncommitted or unmerged work is

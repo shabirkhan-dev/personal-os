@@ -1,79 +1,84 @@
 version: 1
 
-# This file is the future CI/PM-tool ownership source. A card may narrow these paths but may not
-# widen them without an explicit ownership change approved by the human.
+# A card may narrow these paths but may not widen them without human approval. The backend is one
+# accountable role; auth, domain, billing, and migrations are card-level focus areas.
 policy:
   default: deny-unowned-writes
   read_access: broad-for-understanding
   write_access: card-scope-only
 
 roles:
-  backend-auth:
+  backend:
     team: backend
     paths:
-      - apps/nest-api/src/modules/auth/**
-      - apps/nest-api/src/modules/mfa/**
-      - apps/nest-api/src/modules/passkeys/**
-      - apps/nest-api/src/modules/social-auth/**
+      - apps/nest-api/**
     reviewers:
-      - backend-platform
       - reviewer
-  backend-product:
-    team: backend
+      - qa
+  ai-python:
+    team: ai
     paths:
-      - apps/nest-api/src/modules/billing/**
-      - apps/nest-api/src/modules/finance/**
-      - apps/nest-api/src/modules/profiles/**
-      - apps/nest-api/src/modules/routines/**
-      - apps/nest-api/src/modules/users/**
-    reviewers:
-      - backend-platform
-      - reviewer
-  backend-platform:
-    team: backend
-    paths:
-      - apps/nest-api/src/common/**
-      - apps/nest-api/src/config/**
-      - apps/nest-api/src/database/**
-      - apps/nest-api/src/modules/ai/**
-      - apps/nest-api/src/modules/email/**
-      - apps/nest-api/src/modules/health/**
-      - apps/nest-api/test/**
+      - apps/ai-api/**
+      - scripts/python/**
     reviewers:
       - reviewer
+      - qa
   web:
     team: web
     paths:
       - apps/web/**
     reviewers:
       - reviewer
+      - qa
+      - ui-ux
   mobile:
     team: mobile
     paths:
       - apps/mobile/**
     reviewers:
       - reviewer
+      - qa
+      - ui-ux
+  qa:
+    team: quality
+    mode: read-only
+    paths: []
+    reviewers:
+      - reviewer
+  reviewer:
+    team: quality
+    mode: read-only
+    paths: []
+    reviewers:
+      - human
+  ui-ux:
+    team: design
+    paths:
+      - DESIGN.md
+      - packages/ui/**
+    reviewers:
+      - reviewer
+      - web
+      - mobile
+  pm:
+    team: product
+    paths:
+      - .agents/board/**
+      - apps/docs/content/docs/production-roadmap.mdx
+      - apps/docs/content/docs/team-coordination.mdx
+    reviewers:
+      - human
 
 shared:
   api-contract:
     paths:
       - apps/docs/content/docs/backend-api.mdx
     writers:
-      - backend-auth
-      - backend-product
-      - backend-platform
+      - backend
     reviewers:
       - reviewer
       - web
       - mobile
-  project-docs:
-    paths:
-      - apps/docs/content/docs/**
-    writers:
-      - human
-      - slice-architect
-    reviewers:
-      - human
   project-policy:
     paths:
       - .agents/agent-contract.md

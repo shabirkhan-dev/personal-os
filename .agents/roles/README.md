@@ -1,7 +1,6 @@
 # Agent role charters
 
-Each agent must load the universal contract and exactly one implementation, planning, review, or
-integration charter before acting.
+Each agent must load the universal contract and exactly one role charter before acting.
 
 ## Load order
 
@@ -12,20 +11,20 @@ integration charter before acting.
 5. `.agents/worktrees.md` for branch, port, and handoff rules
 6. The assigned board card and linked source-of-truth docs
 
-## Implementation roles
+## Active roles
 
-- [Backend authentication](backend-auth.md) — auth, MFA, passkeys, and social authentication
-- [Backend product](backend-product.md) — product domains and billing
-- [Backend platform](backend-platform.md) — infrastructure, database, common services, and
-  operational foundations
+- [Backend](backend.md) — the complete NestJS API and backend platform
+- [AI/Python](ai-python.md) — FastAPI AI service, Python tooling, and AI reliability
 - [Web](web.md) — Next.js web application
 - [Mobile](mobile.md) — Expo Router mobile application
+- [QA](qa.md) — behavior, regression, accessibility, and end-to-end verification
+- [Reviewer](reviewer.md) — independent code, scope, and contract review
+- [UI/UX](ui-ux.md) — design system, Figma-quality specifications, and visual quality
+- [PM](pm.md) — planning, assignment, status collection, and delivery coordination
 
-## Control-plane roles
+Role charters define default ownership. A card may narrow a role's scope but may not silently
+widen it. Backend specializations such as auth, finance, or billing are focus areas on cards,
+not separate permanent agents.
 
-- [Slice architect](slice-architect.md) — decomposes product outcomes into owned, testable cards
-- [Reviewer](reviewer.md) — independently checks scope, correctness, and evidence
-- [Integrator](integrator.md) — coordinates approved merges and release readiness
-
-Role charters define default ownership. A specific card may narrow the scope further. No card may
-silently widen a role's ownership.
+Security/bug-bounty becomes a separate role only when the product's threat surface and workload
+justify it. Until then, QA and reviewer raise security findings and backend owns remediation.

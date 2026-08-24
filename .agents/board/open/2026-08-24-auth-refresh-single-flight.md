@@ -38,4 +38,9 @@ refresh, and ensure a failed refresh clears the session only once. Cover the
 
 ## Resolution
 
-(open)
+(partially open) — **Mobile half delivered** on branch
+`agent/mobile/session-lifecycle` (see `2026-08-24-mobile-session-lifecycle-recovery.md`
+in `doing/` for evidence: single-flight refresh, 401 retry, 25 passing tests).
+**Web half still open** for the web agent:
+`apps/web/src/modules/auth/context/auth-context.tsx` needs the same
+single-flight + 401 retry treatment with web-side tests.

@@ -58,4 +58,45 @@ describe("AuthLayout authenticated redirect", () => {
 		expect(getByText("redirect:/(modules)/(dashboard)")).toBeTruthy();
 		expect(queryByText("stack")).toBeNull();
 	});
+
+	it("bounces an authenticated deep link to modules once bootstrap resolves", () => {
+		// Cold start deep-linked into (auth) with a stored session: the auth
+		// form renders while bootstrap is pending, then must hand off.
+		mockedUseAuth.mockReturnValue({
+			token: null,
+			loading: true,
+		} as ReturnType<typeof useAuth>);
+
+		const { queryByText, getByText, rerender } = render(<AuthLayout />);
+		expect(getByText("stack")).toBeTruthy();
+		expect(queryByText(/^redirect:/)).toBeNull();
+
+		mockedUseAuth.mockReturnValue({
+			token: "restored-access-token",
+			loading: false,
+		} as ReturnType<typeof useAuth>);
+		rerender(<AuthLayout />);
+
+		expect(getByText("redirect:/(modules)/(dashboard)")).toBeTruthy();
+		expect(queryByText("stack")).toBeNull();
+	});
+
+	it("returns to auth screens after sign-out clears an authenticated session", () => {
+		mockedUseAuth.mockReturnValue({
+			token: "access-token",
+			loading: false,
+		} as ReturnType<typeof useAuth>);
+
+		const { queryByText, getByText, rerender } = render(<AuthLayout />);
+		expect(queryByText("stack")).toBeNull();
+
+		mockedUseAuth.mockReturnValue({
+			token: null,
+			loading: false,
+		} as ReturnType<typeof useAuth>);
+		rerender(<AuthLayout />);
+
+		expect(getByText("stack")).toBeTruthy();
+		expect(queryByText(/^redirect:/)).toBeNull();
+	});
 });

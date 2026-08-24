@@ -62,6 +62,8 @@ roles:
       - mobile
   pm:
     team: product
+    operator: codex
+    final_approver: human
     paths:
       - .agents/board/**
       - apps/docs/content/docs/production-roadmap.mdx

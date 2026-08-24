@@ -5,18 +5,20 @@ import {
 	RefreshIcon,
 } from "@hugeicons/core-free-icons";
 import { useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Badge } from "@/components/ui/badge";
 import { BottomNav, ROUTINES_TABS } from "@/components/ui/bottom-nav";
+import { Card } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
 import { OSHeader } from "@/components/ui/os-header";
+import { cn } from "@/lib/utils";
 import {
 	AddRoutineModal,
 	RoutinesTabs,
 	useTodayQuery,
 	useToggleItemMutation,
 } from "@/modules/routines";
-import { useTheme } from "@/providers/theme-provider";
 
 function formatDisplayDate(isoDate: string): string {
 	const [year, month, day] = isoDate.split("-").map(Number);
@@ -31,7 +33,6 @@ function formatDisplayDate(isoDate: string): string {
 }
 
 export default function RoutinesTodayScreen() {
-	const { colors, isDark } = useTheme();
 	const [modalVisible, setModalVisible] = useState(false);
 	const { data: today, isLoading, isError, refetch, isRefetching } = useTodayQuery();
 	const toggleMutation = useToggleItemMutation();
@@ -42,45 +43,42 @@ export default function RoutinesTodayScreen() {
 	const progress = totalItems === 0 ? 0 : Math.round((completedItems / totalItems) * 100);
 
 	return (
-		<View style={[styles.container, { backgroundColor: colors.background }]}>
-			<SafeAreaView edges={["top"]} style={styles.safeArea}>
+		<View className="flex-1 bg-background">
+			<SafeAreaView edges={["top"]} className="flex-1">
 				<OSHeader />
 
 				<ScrollView
 					showsVerticalScrollIndicator={false}
-					contentContainerStyle={styles.scrollContent}
+					contentContainerStyle={{ paddingBottom: 40 }}
 				>
-					<View style={styles.header}>
+					<View className="flex-row items-start px-4 pt-2 mb-6">
 						<View className="flex-1">
-							<Text style={[styles.title, { color: colors.text.primary }]}>Today</Text>
-							<Text style={[styles.subtitle, { color: colors.text.secondary }]}>
+							<Text className="text-foreground text-3xl font-light tracking-tight">Today</Text>
+							<Text className="text-muted-foreground text-xs mt-1">
 								{today ? formatDisplayDate(today.date) : "Your daily routines"}
 							</Text>
 						</View>
 						<View className="flex-row items-center gap-2">
 							<Pressable
 								onPress={() => setModalVisible(true)}
-								style={({ pressed }) => [{ opacity: pressed ? 0.8 : 1 }]}
-								className="bg-green-500/20 px-3 py-2 rounded-xl flex-row items-center gap-1 border border-green-500/30"
+								className="bg-primary/20 px-3.5 py-2 rounded-xl flex-row items-center gap-1 border border-primary/30 active:opacity-80"
 							>
-								<Icon icon={PlusSignIcon} size={14} color={colors.accent.green} strokeWidth={2.5} />
-								<Text style={{ color: colors.accent.green }} className="font-bold text-xs">
-									New
-								</Text>
+								<Icon icon={PlusSignIcon} size={14} className="text-primary" strokeWidth={2.5} />
+								<Text className="text-primary font-bold text-xs">New</Text>
 							</Pressable>
 							<Pressable
 								onPress={() => refetch()}
-								style={styles.refreshButton}
+								className="p-2 ml-1"
 								accessibilityRole="button"
 								accessibilityLabel="Refresh routines"
 							>
 								{isRefetching ? (
-									<ActivityIndicator size="small" color={colors.accent.green} />
+									<ActivityIndicator size="small" className="text-primary" />
 								) : (
 									<Icon
 										icon={RefreshIcon}
 										size={16}
-										color={colors.text.secondary}
+										className="text-muted-foreground"
 										strokeWidth={1.8}
 									/>
 								)}
@@ -92,177 +90,126 @@ export default function RoutinesTodayScreen() {
 						<RoutinesTabs active="today" />
 					</View>
 
-					{isLoading && (
-						<View style={styles.centered}>
-							<ActivityIndicator color={colors.accent.green} />
+					{isLoading ? (
+						<View className="py-12 items-center justify-center">
+							<ActivityIndicator className="text-primary" />
 						</View>
-					)}
+					) : null}
 
-					{isError && (
-						<View style={styles.centered}>
-							<Text style={[styles.emptyTitle, { color: colors.text.primary }]}>
-								Could not load your day
-							</Text>
-							<Text style={[styles.emptySubtitle, { color: colors.text.secondary }]}>
+					{isError ? (
+						<View className="py-12 items-center justify-center px-4">
+							<Text className="text-foreground text-sm font-semibold">Could not load your day</Text>
+							<Text className="text-muted-foreground text-xs mt-1">
 								Pull to refresh or tap the icon above.
 							</Text>
 						</View>
-					)}
+					) : null}
 
-					{today && (
+					{today ? (
 						<>
-							<View
-								style={[
-									styles.progressCard,
-									{
-										backgroundColor: colors.surface,
-										borderColor: colors.card.border,
-									},
-								]}
-							>
-								<Text style={[styles.progressPercent, { color: colors.accent.green }]}>
-									{progress}%
-								</Text>
-								<Text style={[styles.progressLabel, { color: colors.text.secondary }]}>
-									{totalItems === 0
-										? "Nothing scheduled today"
-										: `${completedItems} of ${totalItems} done`}
-								</Text>
-								<View
-									style={[
-										styles.progressTrack,
-										{
-											backgroundColor: isDark ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.06)",
-										},
-									]}
-								>
-									<View
-										style={[
-											styles.progressFill,
-											{ width: `${progress}%`, backgroundColor: colors.accent.green },
-										]}
-									/>
-								</View>
+							{/* Progress Card */}
+							<View className="px-4 mb-5">
+								<Card className="p-4">
+									<Text className="text-primary text-4xl font-light">{progress}%</Text>
+									<Text className="text-muted-foreground text-xs mt-1 mb-3">
+										{totalItems === 0
+											? "Nothing scheduled today"
+											: `${completedItems} of ${totalItems} done`}
+									</Text>
+									<View className="h-2 w-full bg-muted/60 rounded-full overflow-hidden">
+										<View
+											style={{ width: `${progress}%` }}
+											className="h-full rounded-full bg-primary"
+										/>
+									</View>
+								</Card>
 							</View>
 
-							{today.routines.length === 0 && (
-								<View style={styles.centered}>
-									<Text style={[styles.emptyTitle, { color: colors.text.primary }]}>
+							{today.routines.length === 0 ? (
+								<View className="py-12 items-center justify-center px-4">
+									<Text className="text-foreground text-sm font-semibold">
 										No routines scheduled
 									</Text>
-									<Text style={[styles.emptySubtitle, { color: colors.text.secondary }]}>
+									<Text className="text-muted-foreground text-xs mt-1">
 										Create routines to see them here.
 									</Text>
 								</View>
-							)}
+							) : null}
 
-							{today.routines.map((routine) => {
-								const allDone =
-									routine.totalItems > 0 && routine.completedItems === routine.totalItems;
-								return (
-									<View
-										key={routine.id}
-										style={[
-											styles.routineCard,
-											{
-												backgroundColor: colors.surface,
-												borderColor: colors.card.border,
-											},
-										]}
-									>
-										<View style={styles.routineHeader}>
-											<Text style={[styles.routineName, { color: colors.text.primary }]}>
-												{routine.name}
-											</Text>
-											<View
-												style={[
-													styles.badge,
-													allDone
-														? styles.badgeDone
-														: [styles.badgePending, { borderColor: colors.card.border }],
-												]}
-											>
-												<Text
-													style={[
-														styles.badgeText,
-														{ color: allDone ? colors.accent.green : colors.text.secondary },
-													]}
-												>
-													{routine.completedItems}/{routine.totalItems}
+							<View className="px-4 gap-3">
+								{today.routines.map((routine) => {
+									const allDone =
+										routine.totalItems > 0 && routine.completedItems === routine.totalItems;
+									return (
+										<Card key={routine.id} className="p-4">
+											<View className="flex-row items-center justify-between mb-3">
+												<Text className="text-card-foreground font-semibold text-base flex-1">
+													{routine.name}
 												</Text>
-											</View>
-										</View>
-
-										{routine.items.map((item) => {
-											const pending =
-												toggleMutation.isPending && toggleMutation.variables?.itemId === item.id;
-											return (
-												<Pressable
-													key={item.id}
-													onPress={() =>
-														toggleMutation.mutate({
-															routineId: routine.id,
-															itemId: item.id,
-															completed: !item.completed,
-														})
-													}
-													disabled={pending}
-													style={({ pressed }) => [
-														styles.itemRow,
-														pressed && {
-															backgroundColor: isDark
-																? "rgba(255, 255, 255, 0.04)"
-																: "rgba(0, 0, 0, 0.03)",
-														},
-													]}
-													accessibilityRole="checkbox"
-													accessibilityState={{ checked: item.completed }}
-													accessibilityLabel={`${item.completed ? "Uncheck" : "Check"} ${item.name}`}
-												>
-													{item.completed ? (
-														<Icon
-															icon={CheckmarkCircle02Icon}
-															size={20}
-															color={colors.accent.green}
-															strokeWidth={2}
-														/>
-													) : (
-														<Icon
-															icon={CircleIcon}
-															size={20}
-															color={colors.text.muted}
-															strokeWidth={1.8}
-														/>
-													)}
+												<Badge variant={allDone ? "success" : "secondary"}>
 													<Text
-														style={[
-															styles.itemName,
-															{
-																color: item.completed ? colors.text.secondary : colors.text.primary,
-															},
-															item.completed && styles.itemNameDone,
-														]}
+														className={cn(
+															"text-[11px] font-bold",
+															allDone ? "text-emerald-500" : "text-muted-foreground",
+														)}
 													>
-														{item.name}
+														{routine.completedItems}/{routine.totalItems}
 													</Text>
-													{item.targetTime && (
-														<Text style={[styles.itemTime, { color: colors.text.muted }]}>
-															{item.targetTime}
+												</Badge>
+											</View>
+
+											{routine.items.map((item) => {
+												const pending =
+													toggleMutation.isPending && toggleMutation.variables?.itemId === item.id;
+												return (
+													<Pressable
+														key={item.id}
+														onPress={() =>
+															toggleMutation.mutate({
+																routineId: routine.id,
+																itemId: item.id,
+																completed: !item.completed,
+															})
+														}
+														disabled={pending}
+														className="flex-row items-center gap-3 py-2.5 px-2 rounded-xl active:bg-muted/40"
+														accessibilityRole="checkbox"
+														accessibilityState={{ checked: item.completed }}
+														accessibilityLabel={`${item.completed ? "Uncheck" : "Check"} ${item.name}`}
+													>
+														<Icon
+															icon={item.completed ? CheckmarkCircle02Icon : CircleIcon}
+															size={20}
+															className={item.completed ? "text-primary" : "text-muted-foreground"}
+															strokeWidth={item.completed ? 2 : 1.8}
+														/>
+														<Text
+															className={cn(
+																"flex-1 text-sm font-medium",
+																item.completed
+																	? "text-muted-foreground line-through"
+																	: "text-foreground",
+															)}
+														>
+															{item.name}
 														</Text>
-													)}
-												</Pressable>
-											);
-										})}
-										{routine.items.length === 0 && (
-											<Text style={[styles.emptySteps, { color: colors.text.muted }]}>
-												No steps yet.
-											</Text>
-										)}
-									</View>
-								);
-							})}
+														{item.targetTime ? (
+															<Text className="text-muted-foreground text-xs">
+																{item.targetTime}
+															</Text>
+														) : null}
+													</Pressable>
+												);
+											})}
+											{routine.items.length === 0 ? (
+												<Text className="text-muted-foreground text-xs py-1">No steps yet.</Text>
+											) : null}
+										</Card>
+									);
+								})}
+							</View>
 						</>
-					)}
+					) : null}
 				</ScrollView>
 				<BottomNav
 					tabs={ROUTINES_TABS}
@@ -275,129 +222,3 @@ export default function RoutinesTodayScreen() {
 		</View>
 	);
 }
-
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-	},
-	safeArea: {
-		flex: 1,
-	},
-	scrollContent: {
-		paddingBottom: 40,
-	},
-	header: {
-		flexDirection: "row",
-		alignItems: "flex-start",
-		paddingHorizontal: 16,
-		paddingTop: 8,
-		marginBottom: 24,
-	},
-	title: {
-		fontSize: 32,
-		fontWeight: "300",
-		flex: 1,
-	},
-	subtitle: {
-		fontSize: 13,
-		marginTop: 12,
-	},
-	refreshButton: {
-		marginLeft: 12,
-		marginTop: 10,
-		padding: 4,
-	},
-	progressCard: {
-		borderWidth: 1,
-		borderRadius: 16,
-		marginHorizontal: 16,
-		marginBottom: 24,
-		padding: 16,
-	},
-	progressPercent: {
-		fontSize: 36,
-		fontWeight: "300",
-	},
-	progressLabel: {
-		fontSize: 13,
-		marginTop: 4,
-		marginBottom: 12,
-	},
-	progressTrack: {
-		height: 6,
-		borderRadius: 3,
-		overflow: "hidden",
-	},
-	progressFill: {
-		height: "100%",
-		borderRadius: 3,
-	},
-	routineCard: {
-		borderWidth: 1,
-		borderRadius: 16,
-		marginHorizontal: 16,
-		marginBottom: 16,
-		padding: 16,
-	},
-	routineHeader: {
-		flexDirection: "row",
-		alignItems: "center",
-		justifyContent: "space-between",
-		marginBottom: 12,
-	},
-	routineName: {
-		fontSize: 16,
-		fontWeight: "600",
-		flex: 1,
-	},
-	badge: {
-		borderRadius: 12,
-		paddingHorizontal: 10,
-		paddingVertical: 4,
-		borderWidth: 1,
-	},
-	badgeDone: {
-		borderColor: "rgba(0, 230, 118, 0.4)",
-		backgroundColor: "rgba(0, 230, 118, 0.15)",
-	},
-	badgePending: {},
-	badgeText: {
-		fontSize: 11,
-		fontWeight: "700",
-	},
-	itemRow: {
-		flexDirection: "row",
-		alignItems: "center",
-		gap: 12,
-		paddingVertical: 10,
-		paddingHorizontal: 4,
-		borderRadius: 8,
-	},
-	itemName: {
-		flex: 1,
-		fontSize: 14,
-	},
-	itemNameDone: {
-		textDecorationLine: "line-through",
-	},
-	itemTime: {
-		fontSize: 11,
-	},
-	emptySteps: {
-		fontSize: 13,
-	},
-	centered: {
-		alignItems: "center",
-		justifyContent: "center",
-		paddingVertical: 48,
-		gap: 8,
-	},
-	emptyTitle: {
-		fontSize: 15,
-		fontWeight: "600",
-	},
-	emptySubtitle: {
-		fontSize: 13,
-		textAlign: "center",
-	},
-});

@@ -1,16 +1,9 @@
 import { PlusSignIcon, Task01Icon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
-import {
-	ActivityIndicator,
-	Pressable,
-	RefreshControl,
-	ScrollView,
-	StyleSheet,
-	Text,
-	View,
-} from "react-native";
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { BottomNav, ROUTINES_TABS } from "@/components/ui/bottom-nav";
+import { Card } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
 import { OSHeader } from "@/components/ui/os-header";
 import {
@@ -20,10 +13,8 @@ import {
 	useArchiveRoutineMutation,
 	useRoutinesListQuery,
 } from "@/modules/routines";
-import { useTheme } from "@/providers/theme-provider";
 
 export default function HabitsScreen() {
-	const { colors } = useTheme();
 	const [modalVisible, setModalVisible] = useState(false);
 	const { data: routines, isLoading, refetch, isRefetching } = useRoutinesListQuery();
 	const archiveMutation = useArchiveRoutineMutation();
@@ -33,53 +24,40 @@ export default function HabitsScreen() {
 	};
 
 	return (
-		<View style={[styles.container, { backgroundColor: colors.background }]}>
-			<SafeAreaView edges={["top"]} style={styles.safeArea}>
+		<View className="flex-1 bg-background">
+			<SafeAreaView edges={["top"]} className="flex-1">
 				<OSHeader />
 
 				<ScrollView
 					showsVerticalScrollIndicator={false}
-					contentContainerStyle={styles.scrollContent}
-					refreshControl={
-						<RefreshControl
-							refreshing={isRefetching}
-							onRefresh={refetch}
-							tintColor={colors.accent.green}
-						/>
-					}
+					contentContainerStyle={{ paddingBottom: 40 }}
+					refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
 				>
-					<View style={styles.viewContainer}>
+					<View className="px-4 pt-2">
 						<View className="flex-row items-center justify-between mb-2">
 							<View>
-								<Text style={[styles.title, { color: colors.text.primary }]}>All Routines</Text>
-								<Text style={[styles.subtitle, { color: colors.text.secondary }]}>
+								<Text className="text-foreground text-3xl font-light tracking-tight">
+									All Routines
+								</Text>
+								<Text className="text-muted-foreground text-xs mt-1">
 									Scheduled habit protocols.
 								</Text>
 							</View>
 							<Pressable
 								onPress={() => setModalVisible(true)}
-								style={({ pressed }) => [{ opacity: pressed ? 0.8 : 1 }]}
-								className="bg-green-500/20 px-3.5 py-2 rounded-xl flex-row items-center gap-1.5 border border-green-500/30"
+								className="bg-primary/20 px-3.5 py-2 rounded-xl flex-row items-center gap-1.5 border border-primary/30 active:opacity-80"
 							>
-								<Icon icon={PlusSignIcon} size={16} color={colors.accent.green} strokeWidth={2.5} />
-								<Text style={{ color: colors.accent.green }} className="font-bold text-xs">
-									New
-								</Text>
+								<Icon icon={PlusSignIcon} size={16} className="text-primary" strokeWidth={2.5} />
+								<Text className="text-primary font-bold text-xs">New</Text>
 							</Pressable>
 						</View>
 
 						<RoutinesTabs active="habits" />
 
 						{isLoading && !routines ? (
-							<View
-								style={{
-									backgroundColor: colors.surface,
-									borderColor: colors.card.border,
-								}}
-								className="h-40 items-center justify-center rounded-2xl border"
-							>
-								<ActivityIndicator color={colors.accent.green} />
-							</View>
+							<Card className="h-40 items-center justify-center">
+								<ActivityIndicator className="text-primary" />
+							</Card>
 						) : routines && routines.length > 0 ? (
 							<View className="gap-1">
 								{routines.map((routine) => (
@@ -87,21 +65,12 @@ export default function HabitsScreen() {
 								))}
 							</View>
 						) : (
-							<View
-								style={{
-									backgroundColor: colors.surface,
-									borderColor: colors.card.border,
-								}}
-								className="p-12 rounded-3xl items-center justify-center border mt-4"
-							>
-								<Icon icon={Task01Icon} size={36} color={colors.text.muted} />
-								<Text
-									style={{ color: colors.text.secondary }}
-									className="font-medium text-sm mt-3 text-center"
-								>
+							<Card className="p-12 items-center justify-center mt-4">
+								<Icon icon={Task01Icon} size={36} className="text-muted-foreground" />
+								<Text className="text-muted-foreground font-medium text-sm mt-3 text-center">
 									No routines created yet.{"\n"}Tap "New" or the + button below to create one.
 								</Text>
-							</View>
+							</Card>
 						)}
 					</View>
 				</ScrollView>
@@ -117,27 +86,3 @@ export default function HabitsScreen() {
 		</View>
 	);
 }
-
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-	},
-	safeArea: {
-		flex: 1,
-	},
-	scrollContent: {
-		paddingBottom: 40,
-	},
-	viewContainer: {
-		paddingHorizontal: 16,
-		paddingTop: 8,
-	},
-	title: {
-		fontSize: 32,
-		fontWeight: "300",
-	},
-	subtitle: {
-		fontSize: 14,
-		marginTop: 4,
-	},
-});

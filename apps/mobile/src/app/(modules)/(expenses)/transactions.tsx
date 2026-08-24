@@ -1,18 +1,12 @@
 import { ShoppingBag01Icon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
-import {
-	ActivityIndicator,
-	Pressable,
-	RefreshControl,
-	ScrollView,
-	StyleSheet,
-	Text,
-	View,
-} from "react-native";
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { BottomNav, FINANCE_TABS } from "@/components/ui/bottom-nav";
+import { Card } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
 import { OSHeader } from "@/components/ui/os-header";
+import { cn } from "@/lib/utils";
 import {
 	AddTransactionModal,
 	FinanceTabs,
@@ -21,10 +15,8 @@ import {
 	useDeleteTransactionMutation,
 	useTransactionsQuery,
 } from "@/modules/finance";
-import { useTheme } from "@/providers/theme-provider";
 
 export default function TransactionsScreen() {
-	const { colors, isDark } = useTheme();
 	const [modalVisible, setModalVisible] = useState(false);
 	const [typeFilter, setTypeFilter] = useState<TransactionType | "all">("all");
 
@@ -44,25 +36,21 @@ export default function TransactionsScreen() {
 	};
 
 	return (
-		<View style={[styles.container, { backgroundColor: colors.background }]}>
-			<SafeAreaView edges={["top"]} style={styles.safeArea}>
+		<View className="flex-1 bg-background">
+			<SafeAreaView edges={["top"]} className="flex-1">
 				<OSHeader />
 
 				<ScrollView
 					showsVerticalScrollIndicator={false}
-					contentContainerStyle={styles.scrollContent}
-					refreshControl={
-						<RefreshControl
-							refreshing={isLoading}
-							onRefresh={refetch}
-							tintColor={colors.accent.orange}
-						/>
-					}
+					contentContainerStyle={{ paddingBottom: 60 }}
+					refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetch} />}
 				>
-					<View style={styles.viewContainer}>
-						<View style={styles.viewHeader}>
-							<Text style={[styles.viewTitle, { color: colors.text.primary }]}>Transactions</Text>
-							<Text style={[styles.viewSubtitle, { color: colors.text.secondary }]}>
+					<View className="px-4 pt-2">
+						<View className="mb-4">
+							<Text className="text-foreground text-3xl font-light tracking-tight">
+								Transactions
+							</Text>
+							<Text className="text-muted-foreground text-xs mt-1">
 								Complete history and ledger.
 							</Text>
 						</View>
@@ -77,33 +65,28 @@ export default function TransactionsScreen() {
 									<Pressable
 										key={filter}
 										onPress={() => setTypeFilter(filter)}
-										style={[
-											styles.filterPill,
-											{
-												backgroundColor: isSelected
-													? filter === "income"
-														? colors.accent.green
-														: filter === "expense"
-															? colors.accent.orange
-															: isDark
-																? "#FFFFFF"
-																: "#0F172A"
-													: colors.surface,
-												borderColor: colors.card.border,
-											},
-										]}
-										className="px-4 py-2 rounded-xl border"
+										className={cn(
+											"px-4 py-2 rounded-xl border active:opacity-80",
+											isSelected
+												? filter === "income"
+													? "bg-emerald-500/20 border-emerald-500/40"
+													: filter === "expense"
+														? "bg-amber-500/20 border-amber-500/40"
+														: "bg-card border-border shadow-sm"
+												: "bg-muted/40 border-border/60",
+										)}
 									>
 										<Text
-											style={{
-												color: isSelected
-													? isDark
-														? "#000000"
-														: "#FFFFFF"
-													: colors.text.secondary,
-												fontWeight: isSelected ? "700" : "500",
-											}}
-											className="text-xs uppercase"
+											className={cn(
+												"text-xs uppercase font-semibold",
+												isSelected
+													? filter === "income"
+														? "text-emerald-500 font-bold"
+														: filter === "expense"
+															? "text-amber-500 font-bold"
+															: "text-card-foreground font-bold"
+													: "text-muted-foreground",
+											)}
 										>
 											{filter}
 										</Text>
@@ -113,37 +96,22 @@ export default function TransactionsScreen() {
 						</View>
 
 						{/* Transaction List */}
-						<View style={styles.logsList}>
+						<View className="mt-1">
 							{isLoading && !transactions ? (
-								<View
-									style={{
-										backgroundColor: colors.surface,
-										borderColor: colors.card.border,
-									}}
-									className="h-40 items-center justify-center rounded-2xl border"
-								>
-									<ActivityIndicator color={colors.accent.orange} />
-								</View>
+								<Card className="h-40 items-center justify-center">
+									<ActivityIndicator className="text-amber-500" />
+								</Card>
 							) : transactions && transactions.length > 0 ? (
 								transactions.map((item) => (
 									<TransactionCard key={item.id} transaction={item} onDelete={handleDelete} />
 								))
 							) : (
-								<View
-									style={{
-										backgroundColor: colors.surface,
-										borderColor: colors.card.border,
-									}}
-									className="p-12 rounded-3xl items-center justify-center border mt-4"
-								>
-									<Icon icon={ShoppingBag01Icon} size={36} color={colors.text.muted} />
-									<Text
-										style={{ color: colors.text.secondary }}
-										className="font-medium text-sm mt-3"
-									>
+								<Card className="p-12 items-center justify-center mt-4">
+									<Icon icon={ShoppingBag01Icon} size={36} className="text-muted-foreground" />
+									<Text className="text-muted-foreground font-medium text-sm mt-3">
 										No {typeFilter !== "all" ? typeFilter : ""} transactions found
 									</Text>
-								</View>
+								</Card>
 							)}
 						</View>
 					</View>
@@ -159,36 +127,3 @@ export default function TransactionsScreen() {
 		</View>
 	);
 }
-
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-	},
-	safeArea: {
-		flex: 1,
-	},
-	scrollContent: {
-		paddingBottom: 60,
-	},
-	viewContainer: {
-		paddingHorizontal: 16,
-		paddingTop: 8,
-	},
-	viewHeader: {
-		marginBottom: 16,
-	},
-	viewTitle: {
-		fontSize: 32,
-		fontWeight: "300",
-	},
-	viewSubtitle: {
-		fontSize: 14,
-		marginTop: 4,
-	},
-	filterPill: {
-		borderRadius: 12,
-	},
-	logsList: {
-		marginTop: 4,
-	},
-});

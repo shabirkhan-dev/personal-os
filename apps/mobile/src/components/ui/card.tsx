@@ -1,22 +1,52 @@
 import type * as React from "react";
-import { Text, View, type ViewProps } from "react-native";
+import { Text, type TextProps, View, type ViewProps } from "react-native";
+import { cn } from "@/lib/utils";
 
-interface CardProps extends ViewProps {
-	title?: string;
-	description?: string;
-	children?: React.ReactNode;
+export interface CardProps extends ViewProps {
 	className?: string;
+	children?: React.ReactNode;
 }
 
-export function Card({ title, description, children, className, ...props }: CardProps) {
+export function Card({ className, ...props }: CardProps) {
 	return (
 		<View
-			className={`bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-6 rounded-2xl shadow-sm ${className || ""}`}
+			className={cn(
+				"bg-card border border-border rounded-3xl p-5 shadow-sm shadow-black/5",
+				className,
+			)}
 			{...props}
-		>
-			{title && <Text className="text-xl font-bold text-black dark:text-white mb-1">{title}</Text>}
-			{description && <Text className="text-gray-500 dark:text-gray-400 mb-4">{description}</Text>}
-			<View>{children}</View>
-		</View>
+		/>
+	);
+}
+
+export function CardHeader({ className, ...props }: ViewProps) {
+	return <View className={cn("flex-col gap-1.5 mb-4", className)} {...props} />;
+}
+
+export function CardTitle({ className, ...props }: TextProps) {
+	return (
+		<Text
+			className={cn("text-card-foreground font-semibold text-base tracking-tight", className)}
+			{...props}
+		/>
+	);
+}
+
+export function CardDescription({ className, ...props }: TextProps) {
+	return (
+		<Text className={cn("text-muted-foreground text-xs leading-relaxed", className)} {...props} />
+	);
+}
+
+export function CardContent({ className, ...props }: ViewProps) {
+	return <View className={cn("flex-col", className)} {...props} />;
+}
+
+export function CardFooter({ className, ...props }: ViewProps) {
+	return (
+		<View
+			className={cn("flex-row items-center pt-4 mt-4 border-t border-border/40", className)}
+			{...props}
+		/>
 	);
 }

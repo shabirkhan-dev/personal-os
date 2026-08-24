@@ -1,7 +1,6 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
-import { NeonColors } from "@/constants/design-system";
+import { ActivityIndicator, Text, View } from "react-native";
 import { useMagicLinkConsumeMutation } from "@/modules/auth/hooks/use-auth-mutations";
 import { AuthAlert } from "./auth-alert";
 import { AuthButton } from "./auth-button";
@@ -36,29 +35,16 @@ export function MagicLinkConsumer() {
 					message={consume.error instanceof Error ? consume.error.message : "Could not sign in"}
 				/>
 			) : (
-				<View style={styles.pending}>
-					<ActivityIndicator color={NeonColors.accent.green} />
-					<Text style={styles.pendingText}>Signing you in...</Text>
+				<View className="items-center justify-center gap-3 py-7">
+					<ActivityIndicator className="text-primary" />
+					<Text className="text-muted-foreground text-sm font-medium">Signing you in...</Text>
 				</View>
 			)}
 			<AuthButton
 				label="Back to login"
 				variant="outline"
-				onPress={() => router.replace("/login")}
+				onPress={() => router.replace("/(auth)/login")}
 			/>
 		</AuthScreen>
 	);
 }
-
-const styles = StyleSheet.create({
-	pending: {
-		alignItems: "center",
-		justifyContent: "center",
-		gap: 12,
-		paddingVertical: 28,
-	},
-	pendingText: {
-		color: NeonColors.text.secondary,
-		fontSize: 14,
-	},
-});

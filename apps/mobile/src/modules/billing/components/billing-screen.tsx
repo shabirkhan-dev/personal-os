@@ -5,17 +5,17 @@ import {
 } from "@hugeicons/core-free-icons";
 import { router } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
-import { NeonCard } from "@/components/ui/neon-card";
 import { OSHeader } from "@/components/ui/os-header";
-import { NeonColors } from "@/constants/design-system";
+import { cn } from "@/lib/utils";
 import { useAuth } from "@/modules/auth";
 import { AccountTabs } from "@/modules/auth/components/account-tabs";
 import { AuthAlert } from "@/modules/auth/components/auth-alert";
-import { AuthButton } from "@/modules/auth/components/auth-button";
-import { useTheme } from "@/providers/theme-provider";
 import {
 	type BillingInterval,
 	billingService,
@@ -59,24 +59,19 @@ const PLANS: PlanOption[] = [
 
 const PROVIDER_COPY: Record<PaymentProviderName, { label: string; hint: string }> = {
 	stripe: { label: "Stripe", hint: "Cards worldwide · hosted checkout" },
-	razorpay: { label: "Razorpay", hint: "India-friendly · UPI & cards" },
+	razorpay: { label: "Razorpay", hint: "Cards, UPI, netbanking (India)" },
 };
 
-function yearlyMonthly(monthly: number): number {
-	return Math.round((monthly * 10) / 12);
+function formatMoney(amount: number) {
+	return `$${amount}`;
 }
 
-function formatMoney(amount: number): string {
-	return new Intl.NumberFormat("en-US", {
-		style: "currency",
-		currency: "USD",
-		maximumFractionDigits: 0,
-	}).format(amount);
+function yearlyMonthly(monthly: number) {
+	return Math.round((monthly * 10) / 12);
 }
 
 export function BillingScreen() {
 	const { user, token } = useAuth();
-	const { colors } = useTheme();
 	const [providers, setProviders] = useState<PaymentProviderName[]>([]);
 	const [provider, setProvider] = useState<PaymentProviderName>("stripe");
 	const [planCode, setPlanCode] = useState<PlanCode>("team");
@@ -179,19 +174,21 @@ export function BillingScreen() {
 	};
 
 	return (
-		<View style={[styles.container, { backgroundColor: colors.background }]}>
-			<SafeAreaView edges={["top"]} style={styles.safeArea}>
+		<View className="flex-1 bg-background">
+			<SafeAreaView edges={["top"]} className="flex-1">
 				<OSHeader />
 				<ScrollView
 					showsVerticalScrollIndicator={false}
-					contentContainerStyle={styles.scrollContent}
+					contentContainerStyle={{ paddingBottom: 40 }}
 					keyboardShouldPersistTaps="handled"
 				>
-					<View style={styles.viewContainer}>
-						<View style={styles.viewHeader}>
-							<Text style={[styles.eyebrow, { color: colors.text.secondary }]}>ACCOUNT</Text>
-							<Text style={[styles.viewTitle, { color: colors.text.primary }]}>Billing</Text>
-							<Text style={[styles.viewSubtitle, { color: colors.text.secondary }]}>
+					<View className="px-4 pt-2">
+						<View className="mb-4">
+							<Text className="text-muted-foreground text-xs font-bold uppercase tracking-wider mb-1">
+								ACCOUNT
+							</Text>
+							<Text className="text-foreground text-3xl font-light tracking-tight">Billing</Text>
+							<Text className="text-muted-foreground text-sm mt-1">
 								Upgrade when you need more workspace capacity or managed support. Personal OS stays
 								free to use.
 							</Text>
@@ -200,9 +197,9 @@ export function BillingScreen() {
 						<AccountTabs active="billing" />
 
 						{loading ? (
-							<View style={styles.loadingBox}>
-								<ActivityIndicator color={NeonColors.accent.green} />
-								<Text style={styles.loadingText}>Loading billing…</Text>
+							<View className="h-48 items-center justify-center gap-3">
+								<ActivityIndicator className="text-primary" />
+								<Text className="text-muted-foreground text-xs font-medium">Loading billing…</Text>
 							</View>
 						) : (
 							<>
@@ -215,128 +212,135 @@ export function BillingScreen() {
 									canManage={canManageStripe}
 								/>
 
-								<NeonCard style={styles.sectionCard}>
-									<View style={styles.sectionHeader}>
-										<View style={styles.sectionHeaderText}>
-											<Text style={styles.sectionTitle}>Plan</Text>
-											<Text style={styles.sectionHint}>Select what you want after checkout.</Text>
+								{/* Plan Selection Card */}
+								<View className="mb-5">
+									<Card className="p-5">
+										<View className="flex-row items-center justify-between mb-4">
+											<View>
+												<CardTitle className="text-base font-bold">Choose Plan</CardTitle>
+												<CardDescription>Select workspace capacity.</CardDescription>
+											</View>
+											<IntervalToggle value={billingInterval} onChange={setBillingInterval} />
 										</View>
-										<IntervalToggle value={billingInterval} onChange={setBillingInterval} />
-									</View>
 
-									<View style={styles.planGrid}>
-										{PLANS.map((plan) => {
-											const selected = planCode === plan.code;
-											const price =
-												billingInterval === "yearly" ? yearlyMonthly(plan.monthly) : plan.monthly;
-											return (
-												<Pressable
-													key={plan.code}
-													onPress={() => setPlanCode(plan.code)}
-													style={[styles.planCard, selected && styles.planCardSelected]}
-												>
-													<View style={styles.planTop}>
-														<Text style={styles.planLabel}>{plan.label}</Text>
-														{plan.recommended ? (
-															<View style={styles.recommendedBadge}>
-																<Text style={styles.recommendedText}>Popular</Text>
-															</View>
-														) : null}
-													</View>
-													<Text style={styles.planPrice}>
-														{formatMoney(price)}
-														<Text style={styles.planPriceUnit}>/mo</Text>
-													</Text>
-													{billingInterval === "yearly" ? (
-														<Text style={styles.planBilled}>
-															Billed {formatMoney(plan.monthly * 10)}/yr · 2 months free
-														</Text>
-													) : (
-														<Text style={styles.planBilled}>Billed monthly</Text>
-													)}
-													<Text style={styles.planTagline}>{plan.tagline}</Text>
-													{plan.features.map((feature) => (
-														<View key={feature} style={styles.featureRow}>
-															<Icon
-																icon={CheckmarkCircle02Icon}
-																size={14}
-																color={NeonColors.accent.green}
-																strokeWidth={2}
-															/>
-															<Text style={styles.featureText}>{feature}</Text>
+										<View className="gap-3">
+											{PLANS.map((plan) => {
+												const selected = planCode === plan.code;
+												const price =
+													billingInterval === "yearly" ? yearlyMonthly(plan.monthly) : plan.monthly;
+												return (
+													<Pressable
+														key={plan.code}
+														onPress={() => setPlanCode(plan.code)}
+														className={cn(
+															"p-4 rounded-2xl border",
+															selected
+																? "bg-primary/10 border-primary"
+																: "bg-muted/40 border-border",
+														)}
+													>
+														<View className="flex-row items-center justify-between mb-1.5">
+															<Text className="text-foreground font-bold text-base">
+																{plan.label}
+															</Text>
+															{plan.recommended ? <Badge variant="default">Popular</Badge> : null}
 														</View>
-													))}
-												</Pressable>
-											);
-										})}
-									</View>
-								</NeonCard>
+														<Text className="text-foreground font-bold text-2xl mb-1">
+															{formatMoney(price)}
+															<Text className="text-muted-foreground text-xs font-normal">/mo</Text>
+														</Text>
+														<Text className="text-muted-foreground text-xs mb-3">
+															{plan.tagline}
+														</Text>
+														<View className="gap-1.5 pt-2 border-t border-border/40">
+															{plan.features.map((feature) => (
+																<View key={feature} className="flex-row items-center gap-2">
+																	<Icon
+																		icon={CheckmarkCircle02Icon}
+																		size={14}
+																		className="text-primary"
+																		strokeWidth={2}
+																	/>
+																	<Text className="text-foreground text-xs font-medium">
+																		{feature}
+																	</Text>
+																</View>
+															))}
+														</View>
+													</Pressable>
+												);
+											})}
+										</View>
+									</Card>
+								</View>
 
-								<NeonCard style={styles.sectionCard}>
-									<Text style={styles.sectionTitle}>Payment method</Text>
-									<Text style={styles.sectionHint}>
-										{providers.length > 1
-											? "Same plan price — pick where payment is processed."
-											: providers.length === 1
-												? `Checkout opens in your browser via ${PROVIDER_COPY[provider].label}.`
-												: "Configure a payment provider on the API to enable checkout."}
-									</Text>
-									{providers.length === 0 ? (
-										<View style={styles.providerGap}>
+								{/* Payment Method Selector */}
+								<View className="mb-5">
+									<Card className="p-5">
+										<CardTitle className="text-base font-bold mb-1">Payment Method</CardTitle>
+										<CardDescription className="mb-4">
+											{providers.length > 1
+												? "Pick where payment is processed."
+												: providers.length === 1
+													? `Checkout opens in your browser via ${PROVIDER_COPY[provider]?.label ?? "Stripe"}.`
+													: "Configure a payment provider on the API to enable checkout."}
+										</CardDescription>
+
+										{providers.length === 0 ? (
 											<AuthAlert
 												title="Checkout not configured"
 												message="Add Stripe and/or Razorpay keys to the Nest API, then reopen this screen."
 												variant="info"
 											/>
-										</View>
-									) : (
-										<View style={styles.providerRow}>
-											{providers.map((name) => {
-												const selected = provider === name;
-												const copy = PROVIDER_COPY[name];
-												const selectable = providers.length > 1;
-												return (
-													<Pressable
-														key={name}
-														onPress={() => {
-															if (selectable) setProvider(name);
-														}}
-														disabled={!selectable}
-														style={[styles.providerCard, selected && styles.providerCardSelected]}
-													>
-														<Icon
-															icon={CreditCardIcon}
-															size={18}
-															color={selected ? NeonColors.accent.green : NeonColors.text.secondary}
-														/>
-														<Text style={styles.providerLabel}>{copy.label}</Text>
-														<Text style={styles.providerHint}>{copy.hint}</Text>
-													</Pressable>
-												);
-											})}
-										</View>
-									)}
-								</NeonCard>
+										) : (
+											<View className="flex-row gap-2.5">
+												{providers.map((name) => {
+													const selected = provider === name;
+													const copy = PROVIDER_COPY[name];
+													return (
+														<Pressable
+															key={name}
+															onPress={() => setProvider(name)}
+															className={cn(
+																"flex-1 p-3.5 rounded-2xl border",
+																selected
+																	? "bg-primary/10 border-primary"
+																	: "bg-muted/40 border-border",
+															)}
+														>
+															<Text className="text-foreground font-bold text-sm mb-0.5">
+																{copy?.label ?? name}
+															</Text>
+															<Text className="text-muted-foreground text-[10px] leading-tight">
+																{copy?.hint ?? ""}
+															</Text>
+														</Pressable>
+													);
+												})}
+											</View>
+										)}
+									</Card>
+								</View>
 
-								<NeonCard style={styles.sectionCard}>
-									<Text style={styles.sectionTitle}>Checkout</Text>
-									<Text style={styles.checkoutSummary}>
-										{selectedPlan.label} · {formatMoney(displayPrice)}/mo
-										{billingInterval === "yearly"
-											? ` · ${formatMoney(billedToday)} billed today`
-											: ""}
+								{/* Checkout CTA */}
+								<Card className="p-5 mb-6">
+									<View className="flex-row items-baseline justify-between mb-1">
+										<Text className="text-foreground text-base font-bold">
+											{selectedPlan.label} Plan
+										</Text>
+										<Text className="text-foreground text-xl font-bold">
+											{formatMoney(displayPrice)}
+											<Text className="text-muted-foreground text-xs font-normal">/mo</Text>
+										</Text>
+									</View>
+									<Text className="text-muted-foreground text-xs mb-4">
+										Billed as {formatMoney(billedToday)}{" "}
+										{billingInterval === "yearly" ? "annually" : "today"}. Cancel anytime.
 									</Text>
-									<AuthButton
-										label={
-											busy ? "Opening checkout…" : `Continue with ${PROVIDER_COPY[provider].label}`
-										}
-										onPress={() => {
-											void startCheckout();
-										}}
-										pending={busy}
-										disabled={checkoutDisabled}
-									/>
-								</NeonCard>
+									<Button disabled={checkoutDisabled} loading={busy} onPress={startCheckout}>
+										Proceed to checkout
+									</Button>
+								</Card>
 							</>
 						)}
 					</View>
@@ -357,47 +361,52 @@ function SubscriptionBanner({
 	busy: boolean;
 	canManage: boolean;
 }) {
-	if (!subscription) {
+	if (!subscription || subscription.status === "cancelled" || subscription.status === "ended") {
 		return (
-			<NeonCard style={styles.sectionCard}>
-				<Text style={styles.sectionTitle}>Current plan</Text>
-				<Text style={styles.sectionHint}>
-					Free plan. Upgrade below when you need more capacity.
-				</Text>
-			</NeonCard>
+			<Card className="p-4 mb-5 border-border bg-muted/40">
+				<View className="flex-row items-center gap-3">
+					<Icon icon={CreditCardIcon} size={20} className="text-muted-foreground" />
+					<View className="flex-1">
+						<Text className="text-foreground text-sm font-bold">Free Plan Active</Text>
+						<Text className="text-muted-foreground text-xs">
+							Upgrade for more workspace limits and dedicated support.
+						</Text>
+					</View>
+				</View>
+			</Card>
 		);
 	}
 
-	const periodEnd = subscription.currentPeriodEnd
-		? new Date(subscription.currentPeriodEnd).toLocaleDateString(undefined, {
-				year: "numeric",
-				month: "short",
-				day: "numeric",
-			})
-		: null;
+	const isActive = subscription.status === "active" || subscription.status === "trialing";
 
 	return (
-		<NeonCard style={styles.sectionCard}>
-			<Text style={styles.sectionTitle}>Current plan</Text>
-			<Text style={styles.subStatus}>
-				{subscription.planCode} · {subscription.status}
-				{subscription.billingInterval ? ` · ${subscription.billingInterval}` : ""}
+		<Card
+			className={cn(
+				"p-4 mb-5 border",
+				isActive ? "bg-primary/10 border-primary/40" : "bg-destructive/10 border-destructive/40",
+			)}
+		>
+			<View className="flex-row items-center justify-between mb-2">
+				<View className="flex-row items-center gap-2">
+					<Icon
+						icon={isActive ? CheckmarkCircle02Icon : CancelCircleIcon}
+						size={18}
+						className={isActive ? "text-primary" : "text-destructive"}
+					/>
+					<Text className="text-foreground font-bold text-sm capitalize">
+						{subscription.planCode} ({subscription.status})
+					</Text>
+				</View>
+				{canManage ? (
+					<Pressable onPress={onManage} disabled={busy} className="px-2.5 py-1 rounded-lg bg-card">
+						<Text className="text-foreground text-xs font-bold">Manage</Text>
+					</Pressable>
+				) : null}
+			</View>
+			<Text className="text-muted-foreground text-xs">
+				Provider: {subscription.provider} · Interval: {subscription.billingInterval}
 			</Text>
-			{periodEnd ? (
-				<Text style={styles.sectionHint}>
-					{subscription.cancelAtPeriodEnd ? "Ends" : "Renews"} {periodEnd}
-				</Text>
-			) : null}
-			{canManage ? (
-				<AuthButton
-					label="Manage in Stripe"
-					variant="outline"
-					onPress={onManage}
-					pending={busy}
-					style={styles.manageBtn}
-				/>
-			) : null}
-		</NeonCard>
+		</Card>
 	);
 }
 
@@ -409,279 +418,39 @@ function IntervalToggle({
 	onChange: (next: BillingInterval) => void;
 }) {
 	return (
-		<View style={styles.intervalRow}>
-			{(["monthly", "yearly"] as const).map((interval) => {
-				const active = value === interval;
-				return (
-					<Pressable
-						key={interval}
-						onPress={() => onChange(interval)}
-						style={[styles.intervalChip, active && styles.intervalChipActive]}
-					>
-						<Text style={[styles.intervalLabel, active && styles.intervalLabelActive]}>
-							{interval === "monthly" ? "Monthly" : "Yearly"}
-						</Text>
-					</Pressable>
-				);
-			})}
+		<View className="flex-row p-1 bg-muted/60 border border-border/40 rounded-xl">
+			<Pressable
+				onPress={() => onChange("monthly")}
+				className={cn(
+					"px-3 py-1.5 rounded-lg",
+					value === "monthly" && "bg-card border border-border/60 shadow-sm",
+				)}
+			>
+				<Text
+					className={cn(
+						"text-xs font-bold",
+						value === "monthly" ? "text-foreground" : "text-muted-foreground",
+					)}
+				>
+					Monthly
+				</Text>
+			</Pressable>
+			<Pressable
+				onPress={() => onChange("yearly")}
+				className={cn(
+					"px-3 py-1.5 rounded-lg",
+					value === "yearly" && "bg-card border border-border/60 shadow-sm",
+				)}
+			>
+				<Text
+					className={cn(
+						"text-xs font-bold",
+						value === "yearly" ? "text-foreground" : "text-muted-foreground",
+					)}
+				>
+					Yearly
+				</Text>
+			</Pressable>
 		</View>
 	);
 }
-
-export function BillingResultScreen({ variant }: { variant: "success" | "cancel" }) {
-	const success = variant === "success";
-	return (
-		<View style={styles.container}>
-			<SafeAreaView edges={["top"]} style={styles.safeArea}>
-				<OSHeader />
-				<View style={styles.resultWrap}>
-					<NeonCard style={styles.resultCard}>
-						{success ? (
-							<Icon
-								icon={CheckmarkCircle02Icon}
-								size={40}
-								color={NeonColors.accent.green}
-								strokeWidth={2}
-							/>
-						) : (
-							<Icon
-								icon={CancelCircleIcon}
-								size={40}
-								color={NeonColors.accent.orange}
-								strokeWidth={2}
-							/>
-						)}
-						<Text style={styles.eyebrow}>BILLING</Text>
-						<Text style={styles.viewTitle}>
-							{success ? "Payment received" : "Checkout cancelled"}
-						</Text>
-						<Text style={styles.viewSubtitle}>
-							{success
-								? "Your subscription activates once the provider webhook confirms it — usually within a few seconds."
-								: "No charge was made. You can return to billing and try again whenever you are ready."}
-						</Text>
-						<AuthButton
-							label="View billing"
-							onPress={() => router.replace("/(modules)/(profile)/billing")}
-							style={styles.manageBtn}
-						/>
-					</NeonCard>
-				</View>
-			</SafeAreaView>
-		</View>
-	);
-}
-
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		backgroundColor: NeonColors.background,
-	},
-	safeArea: {
-		flex: 1,
-	},
-	scrollContent: {
-		paddingBottom: 48,
-	},
-	viewContainer: {
-		paddingHorizontal: 20,
-		gap: 16,
-	},
-	viewHeader: {
-		gap: 6,
-		paddingTop: 8,
-	},
-	eyebrow: {
-		color: NeonColors.text.muted,
-		fontSize: 11,
-		fontWeight: "700",
-		letterSpacing: 1.2,
-	},
-	viewTitle: {
-		color: NeonColors.text.primary,
-		fontSize: 28,
-		fontWeight: "700",
-		letterSpacing: -0.5,
-	},
-	viewSubtitle: {
-		color: NeonColors.text.secondary,
-		fontSize: 14,
-		lineHeight: 20,
-		maxWidth: 360,
-	},
-	loadingBox: {
-		alignItems: "center",
-		gap: 12,
-		paddingVertical: 48,
-	},
-	loadingText: {
-		color: NeonColors.text.secondary,
-		fontSize: 14,
-	},
-	sectionCard: {
-		gap: 0,
-	},
-	sectionHeader: {
-		gap: 12,
-		marginBottom: 16,
-	},
-	sectionHeaderText: {
-		gap: 4,
-	},
-	sectionTitle: {
-		color: NeonColors.text.primary,
-		fontSize: 16,
-		fontWeight: "700",
-	},
-	sectionHint: {
-		color: NeonColors.text.secondary,
-		fontSize: 13,
-		lineHeight: 18,
-		marginTop: 4,
-	},
-	planGrid: {
-		gap: 12,
-	},
-	planCard: {
-		borderRadius: 16,
-		borderWidth: 1,
-		borderColor: NeonColors.card.border,
-		backgroundColor: "rgba(255,255,255,0.03)",
-		padding: 16,
-		gap: 8,
-	},
-	planCardSelected: {
-		borderColor: "rgba(0, 230, 118, 0.45)",
-		backgroundColor: "rgba(0, 230, 118, 0.08)",
-	},
-	planTop: {
-		flexDirection: "row",
-		alignItems: "center",
-		justifyContent: "space-between",
-		gap: 8,
-	},
-	planLabel: {
-		color: NeonColors.text.primary,
-		fontSize: 16,
-		fontWeight: "700",
-	},
-	recommendedBadge: {
-		borderRadius: 8,
-		paddingHorizontal: 8,
-		paddingVertical: 3,
-		backgroundColor: "rgba(0, 230, 118, 0.15)",
-	},
-	recommendedText: {
-		color: NeonColors.accent.green,
-		fontSize: 11,
-		fontWeight: "700",
-	},
-	planPrice: {
-		color: NeonColors.text.primary,
-		fontSize: 24,
-		fontWeight: "700",
-	},
-	planPriceUnit: {
-		fontSize: 14,
-		fontWeight: "500",
-		color: NeonColors.text.secondary,
-	},
-	planBilled: {
-		color: NeonColors.text.muted,
-		fontSize: 12,
-	},
-	planTagline: {
-		color: NeonColors.text.secondary,
-		fontSize: 13,
-		lineHeight: 18,
-		marginBottom: 4,
-	},
-	featureRow: {
-		flexDirection: "row",
-		alignItems: "center",
-		gap: 8,
-	},
-	featureText: {
-		color: NeonColors.text.secondary,
-		fontSize: 13,
-		flex: 1,
-	},
-	providerRow: {
-		gap: 10,
-		marginTop: 14,
-	},
-	providerGap: {
-		marginTop: 14,
-	},
-	providerCard: {
-		borderRadius: 14,
-		borderWidth: 1,
-		borderColor: NeonColors.card.border,
-		padding: 14,
-		gap: 4,
-	},
-	providerCardSelected: {
-		borderColor: "rgba(0, 230, 118, 0.45)",
-		backgroundColor: "rgba(0, 230, 118, 0.08)",
-	},
-	providerLabel: {
-		color: NeonColors.text.primary,
-		fontSize: 15,
-		fontWeight: "700",
-		marginTop: 4,
-	},
-	providerHint: {
-		color: NeonColors.text.secondary,
-		fontSize: 12,
-	},
-	checkoutSummary: {
-		color: NeonColors.text.secondary,
-		fontSize: 13,
-		marginTop: 8,
-		marginBottom: 14,
-	},
-	subStatus: {
-		color: NeonColors.text.primary,
-		fontSize: 15,
-		fontWeight: "600",
-		marginTop: 6,
-		textTransform: "capitalize",
-	},
-	manageBtn: {
-		marginTop: 14,
-	},
-	intervalRow: {
-		flexDirection: "row",
-		gap: 6,
-		alignSelf: "flex-start",
-		padding: 3,
-		borderRadius: 10,
-		borderWidth: 1,
-		borderColor: NeonColors.card.border,
-	},
-	intervalChip: {
-		paddingHorizontal: 12,
-		paddingVertical: 7,
-		borderRadius: 8,
-	},
-	intervalChipActive: {
-		backgroundColor: "rgba(0, 230, 118, 0.15)",
-	},
-	intervalLabel: {
-		color: NeonColors.text.secondary,
-		fontSize: 12,
-		fontWeight: "600",
-	},
-	intervalLabelActive: {
-		color: NeonColors.accent.green,
-	},
-	resultWrap: {
-		flex: 1,
-		paddingHorizontal: 20,
-		justifyContent: "center",
-	},
-	resultCard: {
-		alignItems: "center",
-		gap: 8,
-	},
-});

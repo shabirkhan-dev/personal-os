@@ -1,16 +1,14 @@
 import { Link, router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { StyleSheet, Text } from "react-native";
+import { Text } from "react-native";
 import { devCodeRouteParams, readDevCodeParam } from "@/modules/auth/lib/dev-auth-code";
 import { authService } from "@/modules/auth/services/auth.service";
-import { useTheme } from "@/providers/theme-provider";
 import { AuthAlert } from "./auth-alert";
 import { AuthButton } from "./auth-button";
 import { AuthField } from "./auth-field";
 import { AuthScreen } from "./auth-screen";
 
 export function VerifyEmailForm() {
-	const { colors } = useTheme();
 	const params = useLocalSearchParams<{ email?: string; devCode?: string }>();
 	const [email, setEmail] = useState(typeof params.email === "string" ? params.email : "");
 	const [code, setCode] = useState("");
@@ -87,22 +85,11 @@ export function VerifyEmailForm() {
 				pending={resending}
 				disabled={!email}
 			/>
-			<Text style={[styles.footerText, { color: colors.text.secondary }]}>
-				<Link href="/(auth)/login" style={[styles.link, { color: colors.accent.green }]}>
+			<Text className="text-center text-sm text-muted-foreground mt-2">
+				<Link href="/(auth)/login" className="text-primary font-semibold underline">
 					Back to sign in
 				</Link>
 			</Text>
 		</AuthScreen>
 	);
 }
-
-const styles = StyleSheet.create({
-	footerText: {
-		textAlign: "center",
-		fontSize: 14,
-	},
-	link: {
-		textDecorationLine: "underline",
-		fontWeight: "600",
-	},
-});

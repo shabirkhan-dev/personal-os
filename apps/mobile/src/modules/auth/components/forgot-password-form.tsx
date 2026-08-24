@@ -1,16 +1,14 @@
 import { Link, router } from "expo-router";
 import { useState } from "react";
-import { StyleSheet, Text } from "react-native";
+import { Text } from "react-native";
 import { devCodeRouteParams } from "@/modules/auth/lib/dev-auth-code";
 import { authService } from "@/modules/auth/services/auth.service";
-import { useTheme } from "@/providers/theme-provider";
 import { AuthAlert } from "./auth-alert";
 import { AuthButton } from "./auth-button";
 import { AuthField } from "./auth-field";
 import { AuthScreen } from "./auth-screen";
 
 export function ForgotPasswordForm() {
-	const { colors } = useTheme();
 	const [email, setEmail] = useState("");
 	const [error, setError] = useState<string | null>(null);
 	const [submitting, setSubmitting] = useState(false);
@@ -46,22 +44,11 @@ export function ForgotPasswordForm() {
 				autoComplete="email"
 			/>
 			<AuthButton label="Send reset code" onPress={handleSubmit} pending={submitting} />
-			<Text style={[styles.footerText, { color: colors.text.secondary }]}>
-				<Link href="/(auth)/login" style={[styles.link, { color: colors.accent.green }]}>
+			<Text className="text-center text-sm text-muted-foreground mt-2">
+				<Link href="/(auth)/login" className="text-primary font-semibold underline">
 					Back to sign in
 				</Link>
 			</Text>
 		</AuthScreen>
 	);
 }
-
-const styles = StyleSheet.create({
-	footerText: {
-		textAlign: "center",
-		fontSize: 14,
-	},
-	link: {
-		textDecorationLine: "underline",
-		fontWeight: "600",
-	},
-});

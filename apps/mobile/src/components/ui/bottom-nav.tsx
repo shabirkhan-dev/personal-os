@@ -8,9 +8,10 @@ import {
 	Wallet01Icon,
 } from "@hugeicons/core-free-icons";
 import { router, usePathname } from "expo-router";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Icon, type IconProp } from "@/components/ui/icon";
+import { cn } from "@/lib/utils";
 
 export interface TabItemConfig {
 	id: string;
@@ -100,8 +101,6 @@ export const ROUTINES_TABS: TabItemConfig[] = [
 	},
 ];
 
-import { useTheme } from "@/providers/theme-provider";
-
 export interface BottomNavProps {
 	tabs?: TabItemConfig[];
 	activeTab?: string;
@@ -119,7 +118,6 @@ export function BottomNav({
 }: BottomNavProps) {
 	const insets = useSafeAreaInsets();
 	const pathname = usePathname();
-	const { isDark, colors } = useTheme();
 
 	const getActiveTabId = (): string => {
 		if (activeTab) return activeTab;
@@ -141,15 +139,8 @@ export function BottomNav({
 
 	return (
 		<View
-			style={[
-				styles.container,
-				{
-					paddingBottom: Math.max(insets.bottom, 12),
-					backgroundColor: colors.background,
-					borderTopColor: colors.card.border,
-				},
-			]}
-			className="border-t flex-row items-center justify-around px-2 pt-2"
+			style={{ paddingBottom: Math.max(insets.bottom, 12) }}
+			className="bg-card border-t border-border flex-row items-center justify-around px-2 pt-2 shadow-sm"
 		>
 			{/* Left 2 Tabs */}
 			{leftTabs.map((tab) => {
@@ -158,8 +149,7 @@ export function BottomNav({
 					<Pressable
 						key={tab.id}
 						onPress={() => handleTabPress(tab.route)}
-						style={({ pressed }) => [styles.tabButton, { opacity: pressed ? 0.7 : 1 }]}
-						className="flex-1 items-center justify-center py-1"
+						className="flex-1 items-center justify-center py-1 active:opacity-70"
 						accessibilityRole="button"
 						accessibilityLabel={tab.label}
 						accessibilityState={{ selected: isActive }}
@@ -167,18 +157,14 @@ export function BottomNav({
 						<Icon
 							icon={tab.icon}
 							size={22}
-							color={isActive ? colors.text.primary : colors.text.secondary}
+							className={isActive ? "text-foreground" : "text-muted-foreground"}
 							strokeWidth={isActive ? 2.2 : 1.6}
 						/>
 						<Text
-							style={[
-								styles.tabLabel,
-								{
-									color: isActive ? colors.text.primary : colors.text.secondary,
-									fontWeight: isActive ? "600" : "400",
-								},
-							]}
-							className="text-[10px] mt-1 tracking-tight"
+							className={cn(
+								"text-[10px] mt-1 tracking-tight",
+								isActive ? "text-foreground font-semibold" : "text-muted-foreground font-normal",
+							)}
 						>
 							{tab.label}
 						</Text>
@@ -190,18 +176,11 @@ export function BottomNav({
 			<View className="items-center justify-center px-1">
 				<Pressable
 					onPress={onAddPress}
-					style={({ pressed }) => [
-						styles.centerPill,
-						{
-							transform: [{ scale: pressed ? 0.94 : 1 }],
-							backgroundColor: isDark ? "#FFFFFF" : "#0F172A",
-						},
-					]}
-					className="w-[52px] h-[34px] rounded-full items-center justify-center shadow-lg"
+					className="w-[52px] h-[34px] rounded-full bg-foreground items-center justify-center shadow-lg active:scale-95"
 					accessibilityRole="button"
 					accessibilityLabel={addAccessibilityLabel}
 				>
-					<Icon icon={addIcon} size={20} color={isDark ? "#0B0C10" : "#FFFFFF"} strokeWidth={2.4} />
+					<Icon icon={addIcon} size={20} className="text-background" strokeWidth={2.4} />
 				</Pressable>
 			</View>
 
@@ -212,8 +191,7 @@ export function BottomNav({
 					<Pressable
 						key={tab.id}
 						onPress={() => handleTabPress(tab.route)}
-						style={({ pressed }) => [styles.tabButton, { opacity: pressed ? 0.7 : 1 }]}
-						className="flex-1 items-center justify-center py-1"
+						className="flex-1 items-center justify-center py-1 active:opacity-70"
 						accessibilityRole="button"
 						accessibilityLabel={tab.label}
 						accessibilityState={{ selected: isActive }}
@@ -221,18 +199,14 @@ export function BottomNav({
 						<Icon
 							icon={tab.icon}
 							size={22}
-							color={isActive ? colors.text.primary : colors.text.secondary}
+							className={isActive ? "text-foreground" : "text-muted-foreground"}
 							strokeWidth={isActive ? 2.2 : 1.6}
 						/>
 						<Text
-							style={[
-								styles.tabLabel,
-								{
-									color: isActive ? colors.text.primary : colors.text.secondary,
-									fontWeight: isActive ? "600" : "400",
-								},
-							]}
-							className="text-[10px] mt-1 tracking-tight"
+							className={cn(
+								"text-[10px] mt-1 tracking-tight",
+								isActive ? "text-foreground font-semibold" : "text-muted-foreground font-normal",
+							)}
 						>
 							{tab.label}
 						</Text>
@@ -242,28 +216,3 @@ export function BottomNav({
 		</View>
 	);
 }
-
-const styles = StyleSheet.create({
-	container: {
-		backgroundColor: "#0B0C10",
-		borderTopWidth: StyleSheet.hairlineWidth,
-		borderTopColor: "rgba(255, 255, 255, 0.08)",
-	},
-	tabButton: {
-		alignItems: "center",
-		justifyContent: "center",
-	},
-	tabLabel: {
-		fontSize: 10,
-		letterSpacing: -0.2,
-	},
-	centerPill: {
-		backgroundColor: "#FFFFFF",
-		borderRadius: 9999,
-		shadowColor: "#000000",
-		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.25,
-		shadowRadius: 4,
-		elevation: 4,
-	},
-});

@@ -2,28 +2,19 @@ import {
 	CheckmarkCircle02Icon,
 	ComputerIcon,
 	FingerAccessIcon,
-	Key01Icon,
-	LockIcon,
 	Shield01Icon,
 	ShieldOffIcon,
 	SmartPhone01Icon,
 } from "@hugeicons/core-free-icons";
 import { useState } from "react";
-import {
-	ActivityIndicator,
-	Alert,
-	Image,
-	Pressable,
-	ScrollView,
-	StyleSheet,
-	Text,
-	View,
-} from "react-native";
+import { ActivityIndicator, Alert, Image, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
-import { NeonCard } from "@/components/ui/neon-card";
 import { OSHeader } from "@/components/ui/os-header";
-import { NeonColors } from "@/constants/design-system";
+import { cn } from "@/lib/utils";
 import { useAuth } from "@/modules/auth";
 import { AccountTabs } from "@/modules/auth/components/account-tabs";
 import { AuthAlert } from "@/modules/auth/components/auth-alert";
@@ -39,11 +30,9 @@ import {
 	useRevokeSessionMutation,
 } from "@/modules/auth/hooks/use-auth-mutations";
 import { useSecurityStatusQuery, useSessionsQuery } from "@/modules/auth/hooks/use-auth-queries";
-import { useTheme } from "@/providers/theme-provider";
 
 export function SecurityScreen() {
-	const { user, logout, logoutAll } = useAuth();
-	const { colors } = useTheme();
+	const { user, logoutAll } = useAuth();
 	const sessions = useSessionsQuery();
 	const security = useSecurityStatusQuery();
 	const changePassword = useChangePasswordMutation();
@@ -100,31 +89,8 @@ export function SecurityScreen() {
 		]);
 	};
 
-	const confirmRevoke = (sessionId: string, isCurrent: boolean) => {
-		Alert.alert(
-			isCurrent ? "Revoke this device?" : "Revoke session?",
-			isCurrent
-				? "You will be signed out on this device."
-				: "That device will need to sign in again.",
-			[
-				{ text: "Cancel", style: "cancel" },
-				{
-					text: "Revoke",
-					style: "destructive",
-					onPress: () => {
-						revoke.mutate(sessionId, {
-							onSuccess: async () => {
-								if (isCurrent) await logout();
-							},
-						});
-					},
-				},
-			],
-		);
-	};
-
-	const confirmDeletePasskey = (passkeyId: string, name: string) => {
-		Alert.alert("Remove passkey", `Remove “${name}”?`, [
+	const handleDeletePasskey = (passkeyId: string) => {
+		Alert.alert("Remove passkey", "Delete this passkey from your account?", [
 			{ text: "Cancel", style: "cancel" },
 			{
 				text: "Remove",
@@ -135,19 +101,21 @@ export function SecurityScreen() {
 	};
 
 	return (
-		<View style={[styles.container, { backgroundColor: colors.background }]}>
-			<SafeAreaView edges={["top"]} style={styles.safeArea}>
+		<View className="flex-1 bg-background">
+			<SafeAreaView edges={["top"]} className="flex-1">
 				<OSHeader />
 				<ScrollView
 					showsVerticalScrollIndicator={false}
-					contentContainerStyle={styles.scrollContent}
+					contentContainerStyle={{ paddingBottom: 40 }}
 					keyboardShouldPersistTaps="handled"
 				>
-					<View style={styles.viewContainer}>
-						<View style={styles.viewHeader}>
-							<Text style={[styles.eyebrow, { color: colors.text.secondary }]}>ACCOUNT</Text>
-							<Text style={[styles.viewTitle, { color: colors.text.primary }]}>Security</Text>
-							<Text style={[styles.viewSubtitle, { color: colors.text.secondary }]}>
+					<View className="px-4 pt-2">
+						<View className="mb-4">
+							<Text className="text-muted-foreground text-xs font-bold uppercase tracking-wider mb-1">
+								ACCOUNT
+							</Text>
+							<Text className="text-foreground text-3xl font-light tracking-tight">Security</Text>
+							<Text className="text-muted-foreground text-sm mt-1">
 								Manage sign-in methods, recovery options, and devices with access.
 							</Text>
 						</View>
@@ -162,7 +130,8 @@ export function SecurityScreen() {
 							/>
 						) : null}
 
-						<View style={styles.overviewGrid}>
+						{/* Overview Chips */}
+						<View className="flex-row flex-wrap gap-2 mb-2">
 							<OverviewChip
 								label="Email"
 								value={user.emailVerified ? "Verified" : "Needs verification"}
@@ -185,30 +154,35 @@ export function SecurityScreen() {
 							/>
 						</View>
 
-						<Text style={styles.protectionHint}>
+						<Text className="text-muted-foreground text-xs font-medium mb-5">
 							{protectionCount} of 4 protections active
 							{googleLinked ? " · Google linked" : ""}
 						</Text>
 
-						<View style={styles.section}>
-							<Text style={styles.sectionLabel}>TWO-FACTOR AUTHENTICATION</Text>
-							<NeonCard>
-								<View style={styles.sectionBody}>
-									<Text style={styles.sectionHelp}>
+						{/* Two-Factor Authentication Section */}
+						<View className="mb-5">
+							<Text className="text-muted-foreground text-xs font-bold uppercase tracking-wider mb-2">
+								TWO-FACTOR AUTHENTICATION
+							</Text>
+							<Card className="p-5">
+								<CardHeader className="mb-3">
+									<CardDescription>
 										Require an authenticator code after password sign-in.
-									</Text>
+									</CardDescription>
+								</CardHeader>
+								<CardContent className="gap-3">
 									{security.isLoading ? (
-										<ActivityIndicator color={NeonColors.accent.green} />
+										<ActivityIndicator className="text-primary" />
 									) : totpEnabled ? (
 										<>
-											<View style={styles.statusRow}>
+											<View className="flex-row items-center gap-2 py-1">
 												<Icon
 													icon={CheckmarkCircle02Icon}
 													size={16}
-													color={NeonColors.accent.green}
+													className="text-primary"
 													strokeWidth={2}
 												/>
-												<Text style={styles.statusText}>
+												<Text className="text-foreground text-xs font-medium">
 													Authenticator active · {security.data?.mfa.recoveryCodesRemaining ?? 0}{" "}
 													recovery codes left
 												</Text>
@@ -236,11 +210,17 @@ export function SecurityScreen() {
 										</>
 									) : beginTotp.data ? (
 										<>
-											<Image source={{ uri: beginTotp.data.qrCodeDataUrl }} style={styles.qr} />
-											<Text style={styles.sectionHelp}>
+											<Image
+												source={{ uri: beginTotp.data.qrCodeDataUrl }}
+												className="w-44 h-44 self-center rounded-xl my-2"
+											/>
+											<Text className="text-muted-foreground text-xs text-center">
 												Scan the QR code, then enter the six-digit code from your authenticator.
 											</Text>
-											<Text style={styles.secret} selectable>
+											<Text
+												className="font-mono text-xs text-foreground bg-muted/60 p-2.5 rounded-xl text-center my-1"
+												selectable
+											>
 												{beginTotp.data.secret}
 											</Text>
 											<AuthField
@@ -253,7 +233,7 @@ export function SecurityScreen() {
 												maxLength={6}
 											/>
 											<AuthButton
-												label={confirmTotp.isPending ? "Confirming…" : "Confirm 2FA"}
+												label={confirmTotp.isPending ? "Verifying…" : "Enable 2FA"}
 												pending={confirmTotp.isPending}
 												disabled={totpCode.trim().length !== 6}
 												onPress={() => {
@@ -268,93 +248,109 @@ export function SecurityScreen() {
 										</>
 									) : (
 										<AuthButton
-											label={beginTotp.isPending ? "Starting…" : "Set up authenticator"}
+											label={beginTotp.isPending ? "Setting up…" : "Set up authenticator app"}
+											variant="outline"
 											pending={beginTotp.isPending}
 											onPress={() => beginTotp.mutate()}
 										/>
 									)}
+
 									{recoveryCodes.length > 0 ? (
-										<View style={styles.recoveryBox}>
-											<Text style={styles.recoveryTitle}>Save these recovery codes now</Text>
-											{recoveryCodes.map((code) => (
-												<Text key={code} style={styles.recoveryCode} selectable>
-													{code}
-												</Text>
-											))}
+										<View className="bg-muted/50 border border-border p-3.5 rounded-2xl gap-2 mt-2">
+											<Text className="text-foreground text-xs font-bold">
+												Save these recovery codes
+											</Text>
+											<Text className="text-muted-foreground text-[11px]">
+												Store them securely. Each code can be used once if you lose your
+												authenticator.
+											</Text>
+											<View className="flex-row flex-wrap gap-2 pt-1">
+												{recoveryCodes.map((c) => (
+													<Text
+														key={c}
+														className="font-mono text-xs text-foreground bg-card border border-border/60 px-2 py-1 rounded-lg"
+														selectable
+													>
+														{c}
+													</Text>
+												))}
+											</View>
 										</View>
 									) : null}
-								</View>
-							</NeonCard>
+								</CardContent>
+							</Card>
 						</View>
 
-						<View style={styles.section}>
-							<Text style={styles.sectionLabel}>PASSKEYS</Text>
-							<NeonCard>
-								<View style={styles.sectionBody}>
-									<Text style={styles.sectionHelp}>
-										Use biometrics, a device PIN, or a physical security key. Requires a development
-										build (not Expo Go).
-									</Text>
-									{passkeys.length === 0 ? (
-										<Text style={styles.empty}>No passkeys registered</Text>
-									) : (
-										passkeys.map((passkey) => (
-											<View key={passkey.id} style={styles.listRow}>
-												<View style={styles.listIcon}>
-													<Icon
-														icon={Key01Icon}
-														size={16}
-														color={NeonColors.text.secondary}
-														strokeWidth={1.8}
-													/>
-												</View>
-												<View style={styles.listCopy}>
-													<Text style={styles.listTitle}>{passkey.name}</Text>
-													<Text style={styles.listMeta}>
-														{passkey.deviceType}
-														{passkey.backedUp ? " · synced" : ""}
+						{/* Passkeys Section */}
+						<View className="mb-5">
+							<Text className="text-muted-foreground text-xs font-bold uppercase tracking-wider mb-2">
+								PASSKEYS & BIOMETRICS
+							</Text>
+							<Card className="p-5">
+								<CardHeader className="mb-3">
+									<CardDescription>
+										Sign in using Face ID, fingerprint, or your device screen lock.
+									</CardDescription>
+								</CardHeader>
+								<CardContent className="gap-3">
+									{passkeys.map((pk) => (
+										<View
+											key={pk.id}
+											className="flex-row items-center justify-between p-3 rounded-2xl bg-muted/40 border border-border"
+										>
+											<View className="flex-row items-center gap-3 flex-1 pr-2">
+												<Icon icon={FingerAccessIcon} size={20} className="text-primary" />
+												<View className="flex-1">
+													<Text className="text-foreground text-xs font-semibold" numberOfLines={1}>
+														{pk.name}
+													</Text>
+													<Text className="text-muted-foreground text-[10px]">
+														Added {new Date(pk.createdAt).toLocaleDateString()}
 													</Text>
 												</View>
-												<Pressable
-													onPress={() => confirmDeletePasskey(passkey.id, passkey.name)}
-													hitSlop={8}
-												>
-													<Text style={styles.dangerLink}>Remove</Text>
-												</Pressable>
 											</View>
-										))
-									)}
+											<Pressable
+												onPress={() => handleDeletePasskey(pk.id)}
+												className="px-2 py-1 rounded-lg bg-destructive/10"
+											>
+												<Text className="text-destructive text-xs font-bold">Remove</Text>
+											</Pressable>
+										</View>
+									))}
+
 									<AuthField
-										label="Device name"
+										label="Device / passkey name"
 										value={passkeyName}
 										onChangeText={setPasskeyName}
-										placeholder="This device"
+										placeholder="e.g. Work Phone"
 										maxLength={64}
 									/>
 									<AuthButton
-										label={registerPasskey.isPending ? "Adding…" : "Add passkey"}
+										label={registerPasskey.isPending ? "Registering…" : "Register new passkey"}
+										variant="outline"
 										pending={registerPasskey.isPending}
 										disabled={!passkeyName.trim()}
 										onPress={() => registerPasskey.mutate(passkeyName.trim())}
 									/>
-								</View>
-							</NeonCard>
+								</CardContent>
+							</Card>
 						</View>
 
-						{user.hasPassword ? (
-							<View style={styles.section}>
-								<Text style={styles.sectionLabel}>CHANGE PASSWORD</Text>
-								<NeonCard>
-									<View style={styles.sectionBody}>
-										<Text style={styles.sectionHelp}>
-											Changing it signs out every other active session.
-										</Text>
-										{passwordSaved && changePassword.isSuccess ? (
-											<AuthAlert
-												title="Password updated"
-												message="Use your new password next time."
-											/>
-										) : null}
+						{/* Password Management */}
+						<View className="mb-5">
+							<Text className="text-muted-foreground text-xs font-bold uppercase tracking-wider mb-2">
+								PASSWORD
+							</Text>
+							<Card className="p-5">
+								<CardContent className="gap-3">
+									{passwordSaved ? (
+										<AuthAlert
+											title="Password updated"
+											message="Your new password is now active."
+										/>
+									) : null}
+
+									{user.hasPassword ? (
 										<AuthField
 											label="Current password"
 											value={currentPassword}
@@ -362,101 +358,103 @@ export function SecurityScreen() {
 											secureTextEntry={!showCurrent}
 											showPasswordToggle
 											onTogglePassword={() => setShowCurrent((v) => !v)}
-											autoComplete="password"
 										/>
-										<AuthField
-											label="New password"
-											value={newPassword}
-											onChangeText={setNewPassword}
-											secureTextEntry={!showNew}
-											showPasswordToggle
-											onTogglePassword={() => setShowNew((v) => !v)}
-											autoComplete="new-password"
-											hint="Use at least 12 characters."
-										/>
-										<AuthButton
-											label={changePassword.isPending ? "Updating…" : "Change password"}
-											pending={changePassword.isPending}
-											disabled={currentPassword.length === 0 || newPassword.length < 12}
-											onPress={() => {
-												setPasswordSaved(true);
-												changePassword.mutate(
-													{ currentPassword, newPassword },
-													{
-														onSuccess: () => {
-															setCurrentPassword("");
-															setNewPassword("");
-														},
-													},
-												);
-											}}
-										/>
-									</View>
-								</NeonCard>
-							</View>
-						) : null}
+									) : null}
 
-						<View style={styles.section}>
-							<Text style={styles.sectionLabel}>ACTIVE SESSIONS</Text>
-							<NeonCard>
-								<View style={styles.sectionBody}>
-									{sessions.isLoading ? (
-										<ActivityIndicator color={NeonColors.accent.green} />
-									) : sessions.data?.length ? (
-										sessions.data.map((session) => (
-											<View key={session.id} style={styles.listRow}>
-												<View style={styles.listIcon}>
-													<Icon
-														icon={ComputerIcon}
-														size={16}
-														color={NeonColors.text.secondary}
-														strokeWidth={1.8}
-													/>
-												</View>
-												<View style={styles.listCopy}>
-													<Text style={styles.listTitle} numberOfLines={2}>
-														{session.userAgent ?? "Unknown device"}
-													</Text>
-													<Text style={styles.listMeta}>
-														{session.ipAddress ?? "Unknown IP"} ·{" "}
-														{new Date(session.lastUsedAt).toLocaleString()}
-														{session.isCurrent ? " · Current" : ""}
-													</Text>
-												</View>
-												<Pressable
-													onPress={() => confirmRevoke(session.id, session.isCurrent)}
-													hitSlop={8}
-												>
-													<Text style={styles.dangerLink}>Revoke</Text>
-												</Pressable>
-											</View>
-										))
-									) : (
-										<Text style={styles.empty}>No active sessions found.</Text>
-									)}
-									<Pressable style={styles.logoutAll} onPress={confirmLogoutAll}>
-										<Icon
-											icon={ShieldOffIcon}
-											size={16}
-											color={NeonColors.accent.red}
-											strokeWidth={1.8}
-										/>
-										<Text style={styles.logoutAllText}>Sign out everywhere</Text>
-									</Pressable>
-								</View>
-							</NeonCard>
+									<AuthField
+										label="New password"
+										value={newPassword}
+										onChangeText={setNewPassword}
+										secureTextEntry={!showNew}
+										showPasswordToggle
+										onTogglePassword={() => setShowNew((v) => !v)}
+										hint="Must be at least 12 characters."
+									/>
+
+									<AuthButton
+										label={changePassword.isPending ? "Updating…" : "Update password"}
+										pending={changePassword.isPending}
+										disabled={newPassword.length < 12}
+										onPress={() => {
+											changePassword.mutate(
+												{
+													currentPassword,
+													newPassword,
+												},
+												{
+													onSuccess: () => {
+														setPasswordSaved(true);
+														setCurrentPassword("");
+														setNewPassword("");
+													},
+												},
+											);
+										}}
+									/>
+								</CardContent>
+							</Card>
 						</View>
 
-						<View style={styles.footerHint}>
-							<Icon
-								icon={SmartPhone01Icon}
-								size={14}
-								color={NeonColors.text.muted}
-								strokeWidth={1.8}
-							/>
-							<Text style={styles.footerHintText}>
-								Google account linking is available on the web account settings for now.
+						{/* Active Sessions */}
+						<View className="mb-5">
+							<Text className="text-muted-foreground text-xs font-bold uppercase tracking-wider mb-2">
+								ACTIVE SESSIONS
 							</Text>
+							<Card className="p-5">
+								<CardHeader className="mb-3">
+									<CardDescription>
+										Devices and browsers currently signed in to your account.
+									</CardDescription>
+								</CardHeader>
+								<CardContent className="gap-2.5">
+									{sessions.isLoading ? (
+										<ActivityIndicator className="text-primary" />
+									) : (
+										(sessions.data ?? []).map((s) => (
+											<View
+												key={s.id}
+												className="flex-row items-center justify-between p-3 rounded-2xl bg-muted/40 border border-border"
+											>
+												<View className="flex-row items-center gap-3 flex-1 pr-2">
+													<Icon
+														icon={s.userAgent?.includes("Mobile") ? SmartPhone01Icon : ComputerIcon}
+														size={18}
+														className="text-muted-foreground"
+													/>
+													<View className="flex-1">
+														<View className="flex-row items-center gap-1.5">
+															<Text
+																className="text-foreground text-xs font-semibold"
+																numberOfLines={1}
+															>
+																{s.userAgent ?? "Unknown device"}
+															</Text>
+															{s.isCurrent ? <Badge variant="success">This device</Badge> : null}
+														</View>
+														<Text className="text-muted-foreground text-[10px]">
+															Expires {new Date(s.expiresAt).toLocaleDateString()}
+														</Text>
+													</View>
+												</View>
+												{!s.isCurrent ? (
+													<Pressable
+														onPress={() => revoke.mutate(s.id)}
+														className="px-2 py-1 rounded-lg bg-destructive/10"
+													>
+														<Text className="text-destructive text-xs font-bold">Revoke</Text>
+													</Pressable>
+												) : null}
+											</View>
+										))
+									)}
+
+									<View className="pt-2">
+										<Button variant="destructive" onPress={confirmLogoutAll}>
+											Sign out everywhere
+										</Button>
+									</View>
+								</CardContent>
+							</Card>
 						</View>
 					</View>
 				</ScrollView>
@@ -467,253 +465,23 @@ export function SecurityScreen() {
 
 function OverviewChip({ label, value, active }: { label: string; value: string; active: boolean }) {
 	return (
-		<View style={styles.chip}>
-			<View style={styles.chipIcon}>
-				{label === "Two-factor" ? (
-					<Icon icon={Shield01Icon} size={14} color={NeonColors.text.secondary} strokeWidth={1.8} />
-				) : label === "Passkeys" ? (
-					<Icon
-						icon={FingerAccessIcon}
-						size={14}
-						color={NeonColors.text.secondary}
-						strokeWidth={1.8}
-					/>
-				) : (
-					<Icon icon={LockIcon} size={14} color={NeonColors.text.secondary} strokeWidth={1.8} />
-				)}
+		<View
+			className={cn(
+				"flex-1 min-w-[45%] p-3 rounded-2xl border",
+				active ? "bg-primary/10 border-primary/30" : "bg-muted/40 border-border",
+			)}
+		>
+			<View className="flex-row items-center gap-1.5 mb-1">
+				<Icon
+					icon={active ? Shield01Icon : ShieldOffIcon}
+					size={14}
+					className={active ? "text-primary" : "text-muted-foreground"}
+				/>
+				<Text className="text-muted-foreground text-xs font-semibold">{label}</Text>
 			</View>
-			<Text style={styles.chipLabel}>{label}</Text>
-			<View style={styles.chipValueRow}>
-				<View style={[styles.dot, active ? styles.dotActive : styles.dotInactive]} />
-				<Text style={styles.chipValue} numberOfLines={1}>
-					{value}
-				</Text>
-			</View>
+			<Text className="text-foreground text-xs font-bold" numberOfLines={1}>
+				{value}
+			</Text>
 		</View>
 	);
 }
-
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		backgroundColor: NeonColors.background,
-	},
-	safeArea: {
-		flex: 1,
-	},
-	scrollContent: {
-		paddingBottom: 48,
-	},
-	viewContainer: {
-		paddingHorizontal: 16,
-		paddingTop: 8,
-		gap: 24,
-	},
-	viewHeader: {
-		gap: 4,
-	},
-	eyebrow: {
-		color: NeonColors.text.secondary,
-		fontSize: 12,
-		fontWeight: "700",
-		letterSpacing: 1.5,
-	},
-	viewTitle: {
-		color: NeonColors.text.primary,
-		fontSize: 32,
-		fontWeight: "300",
-	},
-	viewSubtitle: {
-		color: NeonColors.text.secondary,
-		fontSize: 14,
-		marginTop: 4,
-		lineHeight: 20,
-	},
-	overviewGrid: {
-		flexDirection: "row",
-		flexWrap: "wrap",
-		gap: 8,
-	},
-	chip: {
-		width: "48%",
-		flexGrow: 1,
-		gap: 6,
-		padding: 12,
-		borderRadius: 14,
-		borderWidth: 1,
-		borderColor: NeonColors.card.border,
-		backgroundColor: "rgba(255,255,255,0.03)",
-	},
-	chipIcon: {
-		width: 28,
-		height: 28,
-		borderRadius: 8,
-		alignItems: "center",
-		justifyContent: "center",
-		backgroundColor: "rgba(255,255,255,0.04)",
-	},
-	chipLabel: {
-		color: NeonColors.text.muted,
-		fontSize: 11,
-		fontWeight: "600",
-		textTransform: "uppercase",
-		letterSpacing: 0.4,
-	},
-	chipValueRow: {
-		flexDirection: "row",
-		alignItems: "center",
-		gap: 6,
-	},
-	dot: {
-		width: 6,
-		height: 6,
-		borderRadius: 3,
-	},
-	dotActive: {
-		backgroundColor: NeonColors.accent.green,
-	},
-	dotInactive: {
-		backgroundColor: NeonColors.text.muted,
-	},
-	chipValue: {
-		flex: 1,
-		color: NeonColors.text.primary,
-		fontSize: 13,
-		fontWeight: "600",
-	},
-	protectionHint: {
-		color: NeonColors.text.muted,
-		fontSize: 12,
-		marginTop: -12,
-		paddingHorizontal: 4,
-	},
-	section: {
-		gap: 12,
-	},
-	sectionLabel: {
-		color: NeonColors.text.secondary,
-		fontSize: 12,
-		fontWeight: "700",
-		letterSpacing: 1.5,
-		paddingHorizontal: 4,
-	},
-	sectionBody: {
-		gap: 14,
-	},
-	sectionHelp: {
-		color: NeonColors.text.secondary,
-		fontSize: 13,
-		lineHeight: 18,
-	},
-	statusRow: {
-		flexDirection: "row",
-		alignItems: "center",
-		gap: 8,
-	},
-	statusText: {
-		flex: 1,
-		color: NeonColors.text.primary,
-		fontSize: 13,
-		fontWeight: "500",
-	},
-	qr: {
-		width: 160,
-		height: 160,
-		alignSelf: "center",
-		borderRadius: 12,
-		backgroundColor: "#fff",
-	},
-	secret: {
-		color: NeonColors.text.secondary,
-		fontSize: 11,
-		fontFamily: "monospace",
-	},
-	recoveryBox: {
-		gap: 6,
-		padding: 12,
-		borderRadius: 12,
-		borderWidth: 1,
-		borderColor: "rgba(0, 230, 118, 0.35)",
-		backgroundColor: "rgba(0, 230, 118, 0.08)",
-	},
-	recoveryTitle: {
-		color: NeonColors.accent.green,
-		fontSize: 13,
-		fontWeight: "700",
-		marginBottom: 4,
-	},
-	recoveryCode: {
-		color: NeonColors.text.primary,
-		fontSize: 12,
-		fontFamily: "monospace",
-	},
-	empty: {
-		color: NeonColors.text.muted,
-		fontSize: 13,
-		textAlign: "center",
-		paddingVertical: 8,
-	},
-	listRow: {
-		flexDirection: "row",
-		alignItems: "center",
-		gap: 10,
-		paddingVertical: 10,
-		borderBottomWidth: StyleSheet.hairlineWidth,
-		borderBottomColor: "rgba(255,255,255,0.06)",
-	},
-	listIcon: {
-		width: 32,
-		height: 32,
-		borderRadius: 10,
-		alignItems: "center",
-		justifyContent: "center",
-		backgroundColor: "rgba(255,255,255,0.04)",
-	},
-	listCopy: {
-		flex: 1,
-		gap: 2,
-	},
-	listTitle: {
-		color: NeonColors.text.primary,
-		fontSize: 13,
-		fontWeight: "600",
-	},
-	listMeta: {
-		color: NeonColors.text.muted,
-		fontSize: 11,
-	},
-	dangerLink: {
-		color: NeonColors.accent.red,
-		fontSize: 13,
-		fontWeight: "600",
-	},
-	logoutAll: {
-		flexDirection: "row",
-		alignItems: "center",
-		justifyContent: "center",
-		gap: 8,
-		minHeight: 48,
-		borderRadius: 14,
-		borderWidth: 1,
-		borderColor: "rgba(255, 23, 68, 0.35)",
-		backgroundColor: "rgba(255, 23, 68, 0.08)",
-		marginTop: 4,
-	},
-	logoutAllText: {
-		color: NeonColors.accent.red,
-		fontSize: 15,
-		fontWeight: "700",
-	},
-	footerHint: {
-		flexDirection: "row",
-		alignItems: "flex-start",
-		gap: 8,
-		paddingHorizontal: 4,
-	},
-	footerHintText: {
-		flex: 1,
-		color: NeonColors.text.muted,
-		fontSize: 12,
-		lineHeight: 16,
-	},
-});

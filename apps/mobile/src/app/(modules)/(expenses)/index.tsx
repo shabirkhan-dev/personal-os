@@ -1,16 +1,9 @@
 import { PlusSignIcon, ShoppingBag01Icon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
-import {
-	ActivityIndicator,
-	Pressable,
-	RefreshControl,
-	ScrollView,
-	StyleSheet,
-	Text,
-	View,
-} from "react-native";
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { BottomNav, FINANCE_TABS } from "@/components/ui/bottom-nav";
+import { Card } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
 import { OSHeader } from "@/components/ui/os-header";
 import {
@@ -23,10 +16,8 @@ import {
 	useMonthSummaryQuery,
 	useTransactionsQuery,
 } from "@/modules/finance";
-import { useTheme } from "@/providers/theme-provider";
 
 export default function ExpensesIndex() {
-	const { colors } = useTheme();
 	const [modalVisible, setModalVisible] = useState(false);
 	const {
 		data: summary,
@@ -52,43 +43,29 @@ export default function ExpensesIndex() {
 	};
 
 	return (
-		<View style={[styles.container, { backgroundColor: colors.background }]}>
-			<SafeAreaView edges={["top"]} style={styles.safeArea}>
+		<View className="flex-1 bg-background">
+			<SafeAreaView edges={["top"]} className="flex-1">
 				<OSHeader />
 
 				<ScrollView
 					showsVerticalScrollIndicator={false}
-					contentContainerStyle={styles.scrollContent}
-					refreshControl={
-						<RefreshControl
-							refreshing={refreshing}
-							onRefresh={handleRefresh}
-							tintColor={colors.accent.orange}
-						/>
-					}
+					contentContainerStyle={{ paddingBottom: 60 }}
+					refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
 				>
-					<View style={styles.viewContainer}>
+					<View className="px-4 pt-2">
 						<View className="flex-row items-center justify-between mb-2">
 							<View>
-								<Text style={[styles.viewTitle, { color: colors.text.primary }]}>Capital</Text>
-								<Text style={[styles.viewSubtitle, { color: colors.text.secondary }]}>
+								<Text className="text-foreground text-3xl font-light tracking-tight">Capital</Text>
+								<Text className="text-muted-foreground text-xs mt-1">
 									Live cash flow & budget tracking.
 								</Text>
 							</View>
 							<Pressable
 								onPress={() => setModalVisible(true)}
-								style={({ pressed }) => [{ opacity: pressed ? 0.8 : 1 }]}
-								className="bg-orange-500/20 px-3.5 py-2 rounded-xl flex-row items-center gap-1.5 border border-orange-500/30"
+								className="bg-amber-500/20 px-3.5 py-2 rounded-xl flex-row items-center gap-1.5 border border-amber-500/30 active:opacity-80"
 							>
-								<Icon
-									icon={PlusSignIcon}
-									size={16}
-									color={colors.accent.orange}
-									strokeWidth={2.5}
-								/>
-								<Text style={{ color: colors.accent.orange }} className="font-bold text-xs">
-									Add
-								</Text>
+								<Icon icon={PlusSignIcon} size={16} className="text-amber-500" strokeWidth={2.5} />
+								<Text className="text-amber-500 font-bold text-xs">Add</Text>
 							</Pressable>
 						</View>
 
@@ -96,78 +73,49 @@ export default function ExpensesIndex() {
 
 						{/* Net Summary Card */}
 						{summaryLoading && !summary ? (
-							<View
-								style={{
-									backgroundColor: colors.surface,
-									borderColor: colors.card.border,
-								}}
-								className="h-44 rounded-3xl border items-center justify-center mb-5"
-							>
-								<ActivityIndicator color={colors.accent.orange} />
-							</View>
+							<Card className="h-44 items-center justify-center mb-5">
+								<ActivityIndicator className="text-amber-500" />
+							</Card>
 						) : (
 							<FinanceSummaryCard summary={summary} />
 						)}
 
 						{/* Category Spending Breakdown */}
-						{summary && summary.categories.length > 0 && (
+						{summary && summary.categories.length > 0 ? (
 							<View className="mb-5">
-								<Text
-									style={{ color: colors.text.primary }}
-									className="font-bold text-sm uppercase tracking-wider mb-3"
-								>
+								<Text className="text-foreground font-bold text-sm uppercase tracking-wider mb-3">
 									Monthly Budgets & Spend
 								</Text>
 								{summary.categories.map((cat) => (
 									<BudgetProgressCard key={cat.category} item={cat} />
 								))}
 							</View>
-						)}
+						) : null}
 
 						{/* Recent Transactions */}
 						<View className="mb-4">
 							<View className="flex-row items-center justify-between mb-3">
-								<Text
-									style={{ color: colors.text.primary }}
-									className="font-bold text-sm uppercase tracking-wider"
-								>
+								<Text className="text-foreground font-bold text-sm uppercase tracking-wider">
 									Recent Transactions
 								</Text>
-								<Text style={{ color: colors.text.secondary }} className="text-xs">
-									Hold to delete
-								</Text>
+								<Text className="text-muted-foreground text-xs">Hold to delete</Text>
 							</View>
 
 							{txLoading && !transactions ? (
-								<View
-									style={{
-										backgroundColor: colors.surface,
-										borderColor: colors.card.border,
-									}}
-									className="h-24 rounded-2xl border items-center justify-center"
-								>
-									<ActivityIndicator color={colors.accent.orange} />
-								</View>
+								<Card className="h-24 items-center justify-center">
+									<ActivityIndicator className="text-amber-500" />
+								</Card>
 							) : transactions && transactions.length > 0 ? (
 								transactions.map((tx) => (
 									<TransactionCard key={tx.id} transaction={tx} onDelete={handleDelete} />
 								))
 							) : (
-								<View
-									style={{
-										backgroundColor: colors.surface,
-										borderColor: colors.card.border,
-									}}
-									className="p-8 rounded-2xl items-center justify-center border"
-								>
-									<Icon icon={ShoppingBag01Icon} size={32} color={colors.text.muted} />
-									<Text
-										style={{ color: colors.text.secondary }}
-										className="font-medium text-sm mt-2"
-									>
+								<Card className="p-8 items-center justify-center">
+									<Icon icon={ShoppingBag01Icon} size={32} className="text-muted-foreground" />
+									<Text className="text-muted-foreground font-medium text-sm mt-2">
 										No transactions recorded yet
 									</Text>
-								</View>
+								</Card>
 							)}
 						</View>
 					</View>
@@ -183,27 +131,3 @@ export default function ExpensesIndex() {
 		</View>
 	);
 }
-
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-	},
-	safeArea: {
-		flex: 1,
-	},
-	scrollContent: {
-		paddingBottom: 60,
-	},
-	viewContainer: {
-		paddingHorizontal: 16,
-		paddingTop: 8,
-	},
-	viewTitle: {
-		fontSize: 32,
-		fontWeight: "300",
-	},
-	viewSubtitle: {
-		fontSize: 14,
-		marginTop: 4,
-	},
-});

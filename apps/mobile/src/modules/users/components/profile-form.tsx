@@ -1,6 +1,6 @@
 import * as ImagePicker from "expo-image-picker";
 import { useEffect, useState } from "react";
-import { Alert, StyleSheet, View } from "react-native";
+import { Alert, View } from "react-native";
 import { AuthAlert } from "@/modules/auth/components/auth-alert";
 import { AuthButton } from "@/modules/auth/components/auth-button";
 import { AuthField } from "@/modules/auth/components/auth-field";
@@ -70,7 +70,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
 	};
 
 	return (
-		<View style={styles.form}>
+		<View className="gap-4">
 			{errorMessage ? (
 				<AuthAlert variant="destructive" title="Could not update profile" message={errorMessage} />
 			) : null}
@@ -124,8 +124,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
 				}}
 			/>
 
-			<View style={styles.row}>
-				<View style={styles.half}>
+			<View className="flex-row gap-3">
+				<View className="flex-1">
 					<AuthField
 						label="Timezone"
 						value={form.timezone ?? ""}
@@ -136,7 +136,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
 						maxLength={64}
 					/>
 				</View>
-				<View style={styles.half}>
+				<View className="flex-1">
 					<AuthField
 						label="Locale"
 						value={form.locale ?? ""}
@@ -190,16 +190,3 @@ function emptyToNull(value: string | null | undefined): string | null | undefine
 	const trimmed = value.trim();
 	return trimmed.length === 0 ? null : trimmed;
 }
-
-const styles = StyleSheet.create({
-	form: {
-		gap: 16,
-	},
-	row: {
-		flexDirection: "row",
-		gap: 12,
-	},
-	half: {
-		flex: 1,
-	},
-});

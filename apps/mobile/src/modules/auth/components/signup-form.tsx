@@ -1,10 +1,9 @@
 import { Link, router } from "expo-router";
 import { useState } from "react";
-import { StyleSheet, Text } from "react-native";
+import { Text } from "react-native";
 import { useAuth } from "@/modules/auth/context/auth-context";
 import { devCodeRouteParams } from "@/modules/auth/lib/dev-auth-code";
 import { registerSchema } from "@/modules/auth/schemas/auth.schemas";
-import { useTheme } from "@/providers/theme-provider";
 import { AuthAlert } from "./auth-alert";
 import { AuthButton } from "./auth-button";
 import { AuthField } from "./auth-field";
@@ -12,7 +11,6 @@ import { AuthScreen } from "./auth-screen";
 
 export function SignupForm() {
 	const { user, loading, error, clearError, register } = useAuth();
-	const { colors } = useTheme();
 	const [email, setEmail] = useState("");
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
@@ -63,7 +61,7 @@ export function SignupForm() {
 			title="Create your account"
 			description="Create your secure Personal OS account"
 			footer={
-				<Text style={[styles.terms, { color: colors.text.muted }]}>
+				<Text className="text-xs text-muted-foreground text-center px-4">
 					By continuing, you agree to our Terms of Service and Privacy Policy.
 				</Text>
 			}
@@ -116,28 +114,12 @@ export function SignupForm() {
 				pending={submitting}
 				disabled={passwordsMismatch}
 			/>
-			<Text style={[styles.footerText, { color: colors.text.secondary }]}>
+			<Text className="text-center text-sm text-muted-foreground mt-2">
 				Already have an account?{" "}
-				<Link href="/(auth)/login" style={[styles.link, { color: colors.accent.green }]}>
+				<Link href="/(auth)/login" className="text-primary font-semibold underline">
 					Sign in
 				</Link>
 			</Text>
 		</AuthScreen>
 	);
 }
-
-const styles = StyleSheet.create({
-	footerText: {
-		textAlign: "center",
-		fontSize: 14,
-	},
-	link: {
-		textDecorationLine: "underline",
-		fontWeight: "600",
-	},
-	terms: {
-		fontSize: 12,
-		textAlign: "center",
-		paddingHorizontal: 12,
-	},
-});

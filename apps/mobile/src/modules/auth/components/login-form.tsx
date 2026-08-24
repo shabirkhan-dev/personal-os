@@ -1,6 +1,6 @@
 import { Link, router } from "expo-router";
 import { useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { getApiOrigin } from "@/lib/api/client";
 import { useAuth } from "@/modules/auth/context/auth-context";
 import {
@@ -11,7 +11,6 @@ import {
 } from "@/modules/auth/hooks/use-auth-mutations";
 import { loginSchema } from "@/modules/auth/schemas/auth.schemas";
 import type { TwoFactorChallenge } from "@/modules/auth/types/auth.types";
-import { useTheme } from "@/providers/theme-provider";
 import { AuthAlert } from "./auth-alert";
 import { AuthButton } from "./auth-button";
 import { AuthScreen } from "./auth-screen";
@@ -20,7 +19,6 @@ import { TwoFactorForm } from "./presentation/two-factor-form";
 
 export function LoginForm() {
 	const { user, loading, error, clearError } = useAuth();
-	const { colors } = useTheme();
 	const login = useLoginMutation();
 	const twoFactor = useTwoFactorMutation();
 	const magicLink = useMagicLinkRequestMutation();
@@ -104,7 +102,7 @@ export function LoginForm() {
 							});
 						}}
 					/>
-					<View style={[styles.divider, { borderTopColor: colors.card.border }]}>
+					<View className="pt-4 mt-1 border-t border-border/40 gap-2.5">
 						<AuthButton
 							label="Sign in with fingerprint / passkey"
 							variant="outline"
@@ -139,9 +137,9 @@ export function LoginForm() {
 							}}
 						/>
 					</View>
-					<Text style={[styles.footerText, { color: colors.text.secondary }]}>
+					<Text className="text-center text-sm text-muted-foreground mt-2">
 						Don't have an account?{" "}
-						<Link href="/(auth)/register" style={[styles.link, { color: colors.accent.green }]}>
+						<Link href="/(auth)/register" className="text-primary font-semibold underline">
 							Create one
 						</Link>
 					</Text>
@@ -150,20 +148,3 @@ export function LoginForm() {
 		</AuthScreen>
 	);
 }
-
-const styles = StyleSheet.create({
-	divider: {
-		borderTopWidth: 1,
-		paddingTop: 16,
-		marginTop: 4,
-		gap: 10,
-	},
-	footerText: {
-		textAlign: "center",
-		fontSize: 14,
-	},
-	link: {
-		textDecorationLine: "underline",
-		fontWeight: "600",
-	},
-});

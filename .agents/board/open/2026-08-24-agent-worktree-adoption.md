@@ -14,7 +14,7 @@ branch: none
 worktree: none
 scope:
   - .agents/worktrees.md
-  - scripts/bash/worktree.sh
+  - .wtp.yml
 allowed_shared: []
 created: 2026-08-24
 updated: 2026-08-24
@@ -33,8 +33,8 @@ claiming new work.
 
 ## Proposal or Ask
 
-Use `bun run worktree -- add <role> <card-slug>`, record the resulting branch and path on the
-card, choose unique ports, and push the agent branch for review. Existing work already started on
+Use `wtp add -b agent/<role>/<card-slug> main`, record the resulting branch and path on the card,
+choose unique ports, and push the agent branch for review. Existing work already started on
 `main` may finish during the migration window; do not move uncommitted files implicitly.
 
 ## Resolution

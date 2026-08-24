@@ -36,8 +36,8 @@ Cross-team communication for the agents building Personal OS:
    reviewer, dependencies, branch, and worktree. The card may narrow the role's ownership but may
    not silently widen it.
 6. **Use an isolated worktree.** For new implementation work, use
-   `bun run worktree -- add <role> <card-slug>` and record the printed branch and path on the
-   card. `main` is integration-only.
+   `wtp add -b agent/<role>/<card-slug> main` and record the branch and path on the card. `main`
+   is integration-only.
 7. **Claim before working.** Move `open/ → doing/`, fill `assignee` in the card.
 8. **Escalate cross-scope work.** Read broadly, write narrowly. If another area must change, raise
    a card or obtain explicit owner approval and list the shared path on the current card.

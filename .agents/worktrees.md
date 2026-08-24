@@ -3,45 +3,46 @@
 Every new implementation card gets its own Git branch and worktree. The shared `main` worktree
 is an integration and inspection area; agents do not use it for new feature work.
 
+This repository uses [WTP (Worktree Plus)](https://github.com/satococoa/wtp) for worktree
+lifecycle management. Project configuration lives in `.wtp.yml`; the agent contract, ownership
+map, board scope, and CI remain the authority for who may change what.
+
 ## Create a worktree
 
 From the repository root:
 
 ```bash
-bun run worktree -- list
-bun run worktree -- add backend-auth auth-refresh
+wtp list
+wtp add -b agent/backend-auth/auth-refresh main
 ```
 
-This creates:
+WTP creates a branch-based path under:
 
 ```text
-../personal-os-worktrees/backend-auth/auth-refresh/
-branch: agent/backend-auth/auth-refresh
+../personal-os-worktrees/agent/backend-auth/auth-refresh/
 ```
 
-The role must have a charter under `.agents/roles/`. The card slug should match the board card or
-be a short, stable description of the change.
+The `.wtp.yml` post-create hook runs `bun install --frozen-lockfile` in the new worktree. It does
+not copy `.env` files or symlink dependency directories. Configure local environment files and
+ports explicitly in the new worktree.
 
-The helper warns when `main` has uncommitted changes. A new worktree starts from the selected base
-commit and does not include uncommitted changes from another worktree. Finish or explicitly hand
-off active shared-main work before moving that card.
+The command uses the selected base commit and does not include uncommitted changes from another
+worktree. Finish or explicitly hand off active shared-main work before moving that card.
 
 ## Agent start sequence
 
 1. Claim the card and set `assignee`, `branch`, `worktree`, `scope`, and `reviewer`.
-2. Create the worktree with `bun run worktree -- add <role> <card-slug>`.
-3. Enter the printed path.
-4. Run `bun install --frozen-lockfile`.
-5. Configure a unique local port set and environment values; never commit `.env` files.
-6. Read the root instructions, `.agents/agent-contract.md`, the role charter, the card, and the
+2. Create the worktree with `wtp add -b agent/<role>/<card-slug> main`.
+3. Enter it with `cd "$(wtp cd agent/<role>/<card-slug>)"` or use the shell integration from
+   `wtp shell-init zsh`.
+4. Confirm dependencies finished installing and configure local environment values.
+5. Read the root instructions, `.agents/agent-contract.md`, the role charter, the card, and the
    relevant source-of-truth docs.
-7. Work only within the card scope.
+6. Work only within the card scope.
 
 ## Branch and port conventions
 
-Branches use `agent/<role>/<card-slug>`. Worktrees live outside the repository at
-`../personal-os-worktrees/<role>/<card-slug>` by default. Override the parent directory with
-`PERSONAL_OS_WORKTREE_ROOT` when required.
+Branches use `agent/<role>/<card-slug>`. WTP preserves the branch hierarchy in the worktree path.
 
 The canonical single-worktree development ports are:
 
@@ -66,19 +67,20 @@ backend-platform `+30`, web `+40`, and mobile `+50`.
 5. Push the agent branch, not `main`.
 6. Record validation, review, commit, and follow-up work on the card.
 7. Merge only after owner review, independent review, scope checks, and CI pass.
-8. Remove the worktree only after it is clean:
+8. After merge, remove the clean worktree and branch when appropriate:
 
 ```bash
-bun run worktree -- remove backend-auth auth-refresh
+wtp remove --with-branch agent/backend-auth/auth-refresh
 ```
 
-The helper refuses to remove a dirty worktree. Use `remove --force` only after confirming that
-uncommitted work is disposable.
+Use `--force` or `--force-branch` only after confirming that uncommitted or unmerged work is
+disposable.
 
 ## Coordination rules
 
-- A worktree prevents filesystem collisions; it does not replace scope ownership or review.
+- WTP prevents filesystem collisions; it does not replace scope ownership or review.
 - If a change crosses ownership, raise a card and list the shared paths and required reviewers.
 - Do not copy uncommitted files between worktrees. Commit, cherry-pick, or hand off explicitly.
 - Do not delete or reset another agent's branch or worktree.
-- The PM tool should eventually create this branch/worktree metadata automatically from the card.
+- The PM tool should eventually create the card, branch, worktree, reviewer, and port metadata
+  together.

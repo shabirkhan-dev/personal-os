@@ -8,7 +8,6 @@ Scripts live under **`scripts/`** at repo root, organized by language: **bash**,
 scripts/
 ├── bash/           # Bash – ShellCheck, shfmt
 │   ├── main.sh
-│   ├── worktree.sh  # Agent worktree lifecycle helper
 │   └── .shellcheckrc
 ├── python/         # Python – ruff (lint + format)
 │   ├── main.py
@@ -25,9 +24,6 @@ scripts/
 | `bun run scripts:run` | Run bash main script (same as `scripts:run:bash`) |
 | `bun run scripts:run:bash` | Run `scripts/bash/main.sh` |
 | `bun run scripts:run:python` | Run `scripts/python/main.py` |
-| `bun run worktree -- list` | List isolated Git worktrees |
-| `bun run worktree -- add <role> [card-slug]` | Create an agent branch and worktree |
-| `bun run worktree -- remove <role> [card-slug]` | Remove a clean agent worktree |
 | `bun run test:scripts` | Run script tests for bash and python |
 
 ## Prerequisites

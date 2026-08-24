@@ -29,7 +29,7 @@ Agents may read broadly to understand dependencies. They may write only to the c
 explicitly approved shared paths. Git worktrees isolate branches; they do not grant permission to
 edit every file in the repository.
 
-New implementation work uses the helper described in `.agents/worktrees.md`. The shared `main`
+New implementation work uses WTP as described in `.agents/worktrees.md`. The shared `main`
 worktree is integration-only. Existing work that began on `main` may finish there during the
 migration window, but it must not be mixed with a newly claimed card.
 
@@ -87,7 +87,7 @@ reasonable interpretation, and record the decision. Quiet guessing is not accept
 For a new implementation card, create the role worktree before editing:
 
 ```bash
-bun run worktree -- add <role> <card-slug>
+wtp add -b agent/<role>/<card-slug> main
 ```
 
 ### During implementation

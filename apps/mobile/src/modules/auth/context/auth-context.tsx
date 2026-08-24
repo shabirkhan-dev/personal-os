@@ -41,13 +41,13 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-// The backend rotates refresh tokens and revokes sessions on reuse, so all
-// triggers (bootstrap, timer, foreground resume, 401 retry) must share one
-// in-flight network refresh per session. Module-level so it survives re-renders.
-let inFlightRefresh: Promise<AuthSession> | null = null;
-
 export function AuthProvider({ children }: { children: ReactNode }) {
 	const queryClient = useQueryClient();
+	// The backend rotates refresh tokens and revokes sessions on reuse, so all
+	// triggers (bootstrap, timer, foreground resume, 401 retry) must share one
+	// in-flight network refresh for the current provider session.
+	const sessionGenerationRef = useRef(0);
+	const inFlightRefreshRef = useRef<Promise<AuthSession | null> | null>(null);
 	// Tracked with a ref so identity comparisons never appear in effect
 	// dependency lists and cannot retrigger the bootstrap refresh loop.
 	const previousUserIdRef = useRef<string | null>(null);
@@ -66,6 +66,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	}, [queryClient]);
 
 	const clearSession = useCallback(async () => {
+		sessionGenerationRef.current += 1;
+		inFlightRefreshRef.current = null;
 		setToken(null);
 		setTokenExpiresAt(null);
 		setUser(null);
@@ -74,7 +76,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	}, [purgeAuthenticatedCaches]);
 
 	const establishSession = useCallback(
-		async (session: AuthSession) => {
+		async (session: AuthSession, expectedGeneration?: number) => {
+			const generation = expectedGeneration ?? sessionGenerationRef.current + 1;
+			if (expectedGeneration === undefined) sessionGenerationRef.current = generation;
+			if (generation !== sessionGenerationRef.current) return false;
+
 			const nextUserId = session.user.id;
 			if (previousUserIdRef.current && previousUserIdRef.current !== nextUserId) {
 				// Account switch without an intervening logout: drop the previous
@@ -88,41 +94,54 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			if (session.refreshToken) {
 				await tokenStorage.setRefreshToken(session.refreshToken);
 			}
+			if (generation !== sessionGenerationRef.current) return false;
 			// Auth session payloads omit profile; hydrate from /users/me like web.
 			try {
-				setUser(await usersService.getCurrent(session.accessToken));
+				const profile = await usersService.getCurrent(session.accessToken);
+				if (generation === sessionGenerationRef.current) setUser(profile);
 			} catch {
 				// Keep session.user if profile fetch fails (offline, transient errors).
 			}
+			return generation === sessionGenerationRef.current;
 		},
 		[purgeAuthenticatedCaches],
 	);
 
 	const refreshSession = useCallback(() => {
-		inFlightRefresh ??= authService
+		if (inFlightRefreshRef.current) return inFlightRefreshRef.current;
+		const generation = sessionGenerationRef.current;
+		let refreshPromise: Promise<AuthSession | null>;
+		refreshPromise = authService
 			.refresh()
 			.then(async (session) => {
-				await establishSession(session);
-				return session;
+				if (generation !== sessionGenerationRef.current) return null;
+				return (await establishSession(session, generation)) ? session : null;
 			})
 			.finally(() => {
-				inFlightRefresh = null;
+				if (inFlightRefreshRef.current === refreshPromise) {
+					inFlightRefreshRef.current = null;
+				}
 			});
-		return inFlightRefresh;
+		inFlightRefreshRef.current = refreshPromise;
+		return refreshPromise;
 	}, [establishSession]);
 
 	useEffect(() => {
+		const generation = sessionGenerationRef.current;
 		refreshSession()
-			.catch(() => clearSession())
+			.catch(() => {
+				if (generation === sessionGenerationRef.current) return clearSession();
+			})
 			.finally(() => setLoading(false));
 	}, [clearSession, refreshSession]);
 
 	useEffect(() => {
 		if (!tokenExpiresAt) return;
+		const generation = sessionGenerationRef.current;
 		const delay = Math.max(1_000, new Date(tokenExpiresAt).getTime() - Date.now() - 60_000);
 		const timer = setTimeout(() => {
 			refreshSession().catch(() => {
-				void clearSession();
+				if (generation === sessionGenerationRef.current) void clearSession();
 			});
 		}, delay);
 		return () => clearTimeout(timer);
@@ -135,8 +154,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			if (state !== "active" || !token) return;
 			const expiresAtMs = tokenExpiresAt ? new Date(tokenExpiresAt).getTime() : 0;
 			if (Date.now() >= expiresAtMs - 60_000) {
+				const generation = sessionGenerationRef.current;
 				refreshSession().catch(() => {
-					void clearSession();
+					if (generation === sessionGenerationRef.current) void clearSession();
 				});
 			}
 		});
@@ -148,11 +168,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	// session has already been torn down.
 	useEffect(() => {
 		setAccessTokenRefresher(async () => {
+			const generation = sessionGenerationRef.current;
 			try {
 				const session = await refreshSession();
+				if (!session || generation !== sessionGenerationRef.current) return null;
 				return session.accessToken;
 			} catch {
-				await clearSession();
+				if (generation === sessionGenerationRef.current) await clearSession();
 				return null;
 			}
 		});
@@ -227,6 +249,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		}
 	}, [refreshSession, token]);
 
+	const establishSessionForContext = useCallback(
+		async (session: AuthSession) => {
+			await establishSession(session);
+		},
+		[establishSession],
+	);
+
 	return (
 		<AuthContext.Provider
 			value={{
@@ -238,7 +267,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 				verifyTwoFactor,
 				register,
 				consumeMagicLink,
-				establishSession,
+				establishSession: establishSessionForContext,
 				logout,
 				logoutAll,
 				refreshUser,

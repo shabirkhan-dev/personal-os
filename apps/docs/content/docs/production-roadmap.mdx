@@ -64,13 +64,54 @@ Status: planned.
 - Meals, planning, preferences, and lightweight nutrition context.
 - Shared timeline events without forcing unrelated domains into one schema.
 
-### M4 — Fashion and assistive intelligence
+### M4 — Fashion
 
 Status: planned.
 
 - Wardrobe inventory, outfits, and style notes.
-- AI suggestions grounded in the user's own data and explicit preferences.
-- Explainable suggestions, user approval, and a clear way to correct the system.
+
+### M5 — Personal OS Intelligence
+
+Status: planned — the first implementation program is tracked on the coordination board.
+
+Personal OS Intelligence is the product's AI control layer with two equal entry points:
+
+- **Daily Intelligence:** proactive, explainable insights about routines, spending, goals, and
+  current state.
+- **Personal OS Chat:** context-aware conversation that understands screens, records, dates,
+  projects, and prior decisions.
+
+The initial release is read-only so the product can earn trust quickly. It must answer from the
+user's authorized Personal OS context, show which context it used, and never pretend that a write
+was completed. Confirmed actions, project creation, long-term memory, and automations follow as
+separate milestones.
+
+#### Intelligence delivery sequence
+
+1. **Foundation:** define AI context, insight, session, message, and suggested-action contracts.
+   Nest remains the public auth, authorization, rate-limit, and audit boundary; the internal AI
+   API remains provider/model-specific.
+2. **Daily Intelligence v0:** generate a small number of high-signal routine and finance insights
+   with source references, priority, explanation, and a useful next step.
+3. **Personal OS Chat v0:** provide mobile and web chat with screen/entity/date context, history,
+   loading/error/retry states, and context chips. Chat is a command center, not a blank chatbot.
+4. **Confirmed actions:** allow typed action intents such as creating a routine or project only
+   after a structured preview, explicit confirmation, idempotent execution, and an audit entry.
+5. **Memory and projects:** add user-approved preferences, decisions, project spaces, and durable
+   references. Users must be able to inspect, correct, export, and delete memory.
+6. **Proactive automations:** let users opt into bounded recurring agents with schedules,
+   permissions, rate limits, failure notifications, and complete activity history.
+
+The north-star loop is:
+
+```text
+Observe authorized state → understand context → explain insight → propose action
+→ confirm when needed → execute through typed tools → record outcome → learn with permission
+```
+
+The product may eventually cover general research and external tools, but the first wedge is a
+trusted assistant for the user's own life. Provider keys remain server-side and model output is
+untrusted until validated.
 
 ## Engineering sequence
 
@@ -82,9 +123,12 @@ Status: planned.
    still changing.
 4. **Instrument trust.** Add auditability, idempotency, rate limits, and useful operational metrics
    before automation becomes important.
-5. **Introduce AI carefully.** Nest remains the policy boundary; the internal AI service handles
-   provider-specific work and can be replaced without changing clients.
-6. **Split only with evidence.** A service boundary needs a measured workload, independent ownership,
+5. **Introduce AI carefully.** Start with the M5 read-only vertical slice. Nest remains the policy
+   boundary; the internal AI service handles provider-specific work and can be replaced without
+   changing clients.
+6. **Add actions only after trust.** Every AI write needs typed tool validation, ownership checks,
+   confirmation policy, idempotency, auditability, and undo or correction behavior.
+7. **Split only with evidence.** A service boundary needs a measured workload, independent ownership,
    or a concrete reliability/security reason.
 
 ## Definition of done for a product slice

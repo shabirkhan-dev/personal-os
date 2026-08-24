@@ -3,9 +3,30 @@ title: Team Coordination
 description: How backend, web, mobile, and documentation work stays aligned.
 ---
 
-Personal OS is developed by independent backend, web, mobile, and documentation contributors. The
+Personal OS is developed by independent backend, AI/Python, web, mobile, UI/UX, QA, reviewer, PM,
+and documentation contributors. The
 `.agents/` directory is the shared coordination layer for work that cannot be solved safely inside
 one team's files.
+
+## Current program: Personal OS Intelligence
+
+The AI program is delivered as one vertical slice rather than a large parallel rewrite. The first
+release is **Daily Intelligence + Personal OS Chat**, read-only and grounded in authorized Personal
+OS data. The parent card is `2026-08-24-personal-os-intelligence.md`.
+
+| Role | First responsibility | Boundary |
+| --- | --- | --- |
+| UI/UX | Design intelligence cards, chat command center, context references, action preview, and all states | `DESIGN.md` and approved shared tokens only |
+| Backend | Own public AI gateway, context contracts, auth, authorization, rate limits, and API documentation | NestJS plus `backend-api.mdx` |
+| AI/Python | Own structured insight/chat orchestration, provider adapter, output validation, evaluation, and cost/latency behavior | `apps/ai-api/**` |
+| Web | Build responsive intelligence and chat surfaces from the documented contract | `apps/web/**` |
+| Mobile | Build native intelligence and chat surfaces from the documented contract | `apps/mobile/**` |
+| QA | Verify cross-client behavior, privacy, failure states, accessibility, and device/browser flows | Read-only; raises findings |
+| Reviewer | Independently gate scope, contracts, security, evidence, and regression risk | Read-only; approves or requests changes |
+| PM | Maintain sequence, dependencies, decisions, board cards, and release readiness | Board and product docs |
+
+No client may call a model provider directly. No agent may implement confirmed mutations in the
+first slice; action execution is a later parent-linked card with explicit confirmation and audit.
 
 ## The coordination map
 

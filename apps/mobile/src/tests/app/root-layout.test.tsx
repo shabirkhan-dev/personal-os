@@ -2,7 +2,7 @@ import { render, waitFor } from "@testing-library/react-native";
 import * as SplashScreen from "expo-splash-screen";
 import type { ReactNode } from "react";
 import { useAuth } from "@/modules/auth";
-import RootLayout from "./_layout";
+import RootLayout from "../../app/_layout";
 
 jest.mock("@/modules/auth", () => ({
 	useAuth: jest.fn(),

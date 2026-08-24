@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react-native";
 import type { ReactNode } from "react";
 import { useAuth } from "@/modules/auth";
-import ModulesLayout from "./_layout";
+import ModulesLayout from "../../app/(modules)/_layout";
 
 jest.mock("@/modules/auth", () => ({
 	useAuth: jest.fn(),

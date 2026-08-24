@@ -3,44 +3,46 @@ import { useAuth } from "@/modules/auth";
 import { routinesService } from "../services/routines.service";
 import type { RoutineListQuery } from "../types/routine.types";
 
-export const ROUTINES_QUERY_KEY = ["routines"] as const;
+const ROUTINES_QUERY_KEY = ["routines"] as const;
 
-export function routinesQueryKeys() {
-	return ROUTINES_QUERY_KEY;
+// Every protected key carries the authenticated user id so cached rows can
+// never resolve for a different account during sign-out/sign-in windows.
+export function routinesQueryKeys(userId: string | undefined) {
+	return [...ROUTINES_QUERY_KEY, userId] as const;
 }
 
 export function useTodayQuery() {
-	const { token } = useAuth();
+	const { token, user } = useAuth();
 	return useQuery({
-		queryKey: [...ROUTINES_QUERY_KEY, "today"],
+		queryKey: [...routinesQueryKeys(user?.id), "today"],
 		queryFn: () => {
-			if (!token) throw new Error("Authentication required");
+			if (!token || !user) throw new Error("Authentication required");
 			return routinesService.getToday(token);
 		},
-		enabled: Boolean(token),
+		enabled: Boolean(token && user),
 	});
 }
 
 export function useRoutinesListQuery(query?: RoutineListQuery) {
-	const { token } = useAuth();
+	const { token, user } = useAuth();
 	return useQuery({
-		queryKey: [...ROUTINES_QUERY_KEY, "list", query],
+		queryKey: [...routinesQueryKeys(user?.id), "list", query],
 		queryFn: () => {
-			if (!token) throw new Error("Authentication required");
+			if (!token || !user) throw new Error("Authentication required");
 			return routinesService.list(token, query);
 		},
-		enabled: Boolean(token),
+		enabled: Boolean(token && user),
 	});
 }
 
 export function useRoutineQuery(id?: string) {
-	const { token } = useAuth();
+	const { token, user } = useAuth();
 	return useQuery({
-		queryKey: [...ROUTINES_QUERY_KEY, "detail", id],
+		queryKey: [...routinesQueryKeys(user?.id), "detail", id],
 		queryFn: () => {
-			if (!token || !id) throw new Error("Authentication and valid routine ID required");
+			if (!token || !user || !id) throw new Error("Authentication and valid routine ID required");
 			return routinesService.getById(token, id);
 		},
-		enabled: Boolean(token && id),
+		enabled: Boolean(token && user && id),
 	});
 }

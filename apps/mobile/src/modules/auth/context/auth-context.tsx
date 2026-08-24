@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { ApiError } from "@/lib/api/client";
 import { usersService } from "@/modules/users/services/users.service";
@@ -32,18 +33,22 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+	const queryClient = useQueryClient();
 	const [token, setToken] = useState<string | null>(null);
 	const [tokenExpiresAt, setTokenExpiresAt] = useState<string | null>(null);
 	const [user, setUser] = useState<User | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
+	// Cached query data is user-scoped and sensitive: dropping the tokens alone
+	// would leave the previous account's rows readable until refetch.
 	const clearSession = useCallback(async () => {
 		setToken(null);
 		setTokenExpiresAt(null);
 		setUser(null);
+		queryClient.clear();
 		await tokenStorage.setRefreshToken(null);
-	}, []);
+	}, [queryClient]);
 
 	const establishSession = useCallback(async (session: AuthSession) => {
 		setToken(session.accessToken);

@@ -1,5 +1,13 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
+import {
+	createContext,
+	type ReactNode,
+	useCallback,
+	useContext,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 import { ApiError } from "@/lib/api/client";
 import { usersService } from "@/modules/users/services/users.service";
 import type { User } from "@/modules/users/types/user.types";
@@ -34,6 +42,9 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
 	const queryClient = useQueryClient();
+	// Tracked with a ref so identity comparisons never appear in effect
+	// dependency lists and cannot retrigger the bootstrap refresh loop.
+	const previousUserIdRef = useRef<string | null>(null);
 	const [token, setToken] = useState<string | null>(null);
 	const [tokenExpiresAt, setTokenExpiresAt] = useState<string | null>(null);
 	const [user, setUser] = useState<User | null>(null);
@@ -41,29 +52,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	const [error, setError] = useState<string | null>(null);
 
 	// Cached query data is user-scoped and sensitive: dropping the tokens alone
-	// would leave the previous account's rows readable until refetch.
+	// would leave the previous account's rows readable until refetch. Cancel
+	// in-flight requests first so aborted responses never repopulate the cache.
+	const purgeAuthenticatedCaches = useCallback(() => {
+		queryClient.cancelQueries();
+		queryClient.clear();
+	}, [queryClient]);
+
 	const clearSession = useCallback(async () => {
 		setToken(null);
 		setTokenExpiresAt(null);
 		setUser(null);
-		queryClient.clear();
+		purgeAuthenticatedCaches();
 		await tokenStorage.setRefreshToken(null);
-	}, [queryClient]);
+	}, [purgeAuthenticatedCaches]);
 
-	const establishSession = useCallback(async (session: AuthSession) => {
-		setToken(session.accessToken);
-		setTokenExpiresAt(session.accessTokenExpiresAt);
-		setUser(session.user);
-		if (session.refreshToken) {
-			await tokenStorage.setRefreshToken(session.refreshToken);
-		}
-		// Auth session payloads omit profile; hydrate from /users/me like web.
-		try {
-			setUser(await usersService.getCurrent(session.accessToken));
-		} catch {
-			// Keep session.user if profile fetch fails (offline, transient errors).
-		}
-	}, []);
+	const establishSession = useCallback(
+		async (session: AuthSession) => {
+			const nextUserId = session.user.id;
+			if (previousUserIdRef.current && previousUserIdRef.current !== nextUserId) {
+				// Account switch without an intervening logout: drop the previous
+				// account's data before the new identity becomes visible.
+				purgeAuthenticatedCaches();
+			}
+			setToken(session.accessToken);
+			setTokenExpiresAt(session.accessTokenExpiresAt);
+			setUser(session.user);
+			previousUserIdRef.current = nextUserId;
+			if (session.refreshToken) {
+				await tokenStorage.setRefreshToken(session.refreshToken);
+			}
+			// Auth session payloads omit profile; hydrate from /users/me like web.
+			try {
+				setUser(await usersService.getCurrent(session.accessToken));
+			} catch {
+				// Keep session.user if profile fetch fails (offline, transient errors).
+			}
+		},
+		[purgeAuthenticatedCaches],
+	);
 
 	const refreshSession = useCallback(async () => {
 		const session = await authService.refresh();

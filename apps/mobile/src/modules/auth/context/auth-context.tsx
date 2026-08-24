@@ -8,7 +8,8 @@ import {
 	useRef,
 	useState,
 } from "react";
-import { ApiError } from "@/lib/api/client";
+import { AppState } from "react-native";
+import { ApiError, setAccessTokenRefresher } from "@/lib/api/client";
 import { usersService } from "@/modules/users/services/users.service";
 import type { User } from "@/modules/users/types/user.types";
 import { authService } from "../services/auth.service";
@@ -39,6 +40,11 @@ interface AuthContextValue {
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
+
+// The backend rotates refresh tokens and revokes sessions on reuse, so all
+// triggers (bootstrap, timer, foreground resume, 401 retry) must share one
+// in-flight network refresh per session. Module-level so it survives re-renders.
+let inFlightRefresh: Promise<AuthSession> | null = null;
 
 export function AuthProvider({ children }: { children: ReactNode }) {
 	const queryClient = useQueryClient();
@@ -92,10 +98,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		[purgeAuthenticatedCaches],
 	);
 
-	const refreshSession = useCallback(async () => {
-		const session = await authService.refresh();
-		await establishSession(session);
-		return session;
+	const refreshSession = useCallback(() => {
+		inFlightRefresh ??= authService
+			.refresh()
+			.then(async (session) => {
+				await establishSession(session);
+				return session;
+			})
+			.finally(() => {
+				inFlightRefresh = null;
+			});
+		return inFlightRefresh;
 	}, [establishSession]);
 
 	useEffect(() => {
@@ -114,6 +127,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		}, delay);
 		return () => clearTimeout(timer);
 	}, [clearSession, refreshSession, tokenExpiresAt]);
+
+	// Revalidate on foreground resume: after sleep or connectivity loss the
+	// access token is often expired even though a valid refresh token remains.
+	useEffect(() => {
+		const subscription = AppState.addEventListener("change", (state) => {
+			if (state !== "active" || !token) return;
+			const expiresAtMs = tokenExpiresAt ? new Date(tokenExpiresAt).getTime() : 0;
+			if (Date.now() >= expiresAtMs - 60_000) {
+				refreshSession().catch(() => {
+					void clearSession();
+				});
+			}
+		});
+		return () => subscription.remove();
+	}, [clearSession, refreshSession, token, tokenExpiresAt]);
+
+	// Give the transport layer a guarded single retry for 401s on requests we
+	// sent with a bearer token. Null outcome means recovery failed and the
+	// session has already been torn down.
+	useEffect(() => {
+		setAccessTokenRefresher(async () => {
+			try {
+				const session = await refreshSession();
+				return session.accessToken;
+			} catch {
+				await clearSession();
+				return null;
+			}
+		});
+		return () => setAccessTokenRefresher(null);
+	}, [clearSession, refreshSession]);
 
 	const login = useCallback(
 		async (input: LoginInput) => {

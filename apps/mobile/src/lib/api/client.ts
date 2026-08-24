@@ -33,6 +33,19 @@ const apiPrefix = "/api/v1";
 
 export type ApiRequestOptions = RequestInit & { accessToken?: string };
 
+/**
+ * Called by the API client once per request when a bearer-authenticated call
+ * is rejected with 401. Resolves the replacement access token (single-flight
+ * refresh owned by AuthProvider) or null when the session cannot be recovered.
+ */
+export type AccessTokenRefresher = () => Promise<string | null>;
+
+let accessTokenRefresher: AccessTokenRefresher | null = null;
+
+export function setAccessTokenRefresher(refresher: AccessTokenRefresher | null): void {
+	accessTokenRefresher = refresher;
+}
+
 export const apiClient = {
 	get<T>(path: string, options?: ApiRequestOptions): Promise<T> {
 		return request<T>(path, { ...options, method: "GET" });
@@ -65,7 +78,7 @@ export function getApiOrigin(): string {
 async function request<T>(
 	path: string,
 	options: ApiRequestOptions = {},
-	flags: { multipart?: boolean } = {},
+	flags: { multipart?: boolean; isAuthRetry?: boolean } = {},
 ): Promise<T> {
 	const { accessToken, signal: outerSignal, ...init } = options;
 	const headers = new Headers(init.headers);
@@ -89,6 +102,17 @@ async function request<T>(
 			signal: controller.signal,
 		});
 		if (response.status === 204) return undefined as T;
+
+		if (response.status === 401 && accessToken && !flags.isAuthRetry && accessTokenRefresher) {
+			const freshToken = await accessTokenRefresher();
+			if (freshToken) {
+				return request<T>(
+					path,
+					{ ...options, accessToken: freshToken },
+					{ ...flags, isAuthRetry: true },
+				);
+			}
+		}
 
 		const payload: unknown = await response.json().catch(() => ({}));
 		if (!response.ok) {

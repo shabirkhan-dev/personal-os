@@ -9,6 +9,7 @@ import { FinanceTransactionsController } from './finance-transactions.controller
 @Module({
 	imports: [AuthModule],
 	controllers: [FinanceTransactionsController, FinanceBudgetsController],
+	exports: [FinanceService],
 	providers: [FinanceRepository, FinanceService],
 })
 export class FinanceModule {}

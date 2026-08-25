@@ -1,3 +1,5 @@
+export * from './ai-chat.schema';
+export * from './auth-challenges.schema';
 export * from './auth-challenges.schema';
 export * from './auth-identities.schema';
 export * from './finance-budgets.schema';

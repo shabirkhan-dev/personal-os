@@ -8,6 +8,7 @@ import { RoutinesService } from './routines.service';
 @Module({
 	imports: [AuthModule],
 	controllers: [RoutinesController],
+	exports: [RoutinesService],
 	providers: [RoutinesRepository, RoutinesService],
 })
 export class RoutinesModule {}

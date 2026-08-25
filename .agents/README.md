@@ -77,6 +77,8 @@ The contract distinguishes an honest blocker from a violation. Repeated failures
 from evidence on cards, commits, reviews, and CI—not from subjective labels such as "lazy".
 
 Implementation agents own code. QA and the reviewer are independent and read-only by default.
-The PM coordinates delivery but cannot waive review, scope, or validation gates.
+The PM coordinates delivery and may perform controlled integration only when the PM charter's
+gates are satisfied and the human has explicitly approved it. The PM cannot waive review, scope,
+or validation gates.
 
 See `worktrees.md` for the complete lifecycle, port convention, and safe cleanup rules.

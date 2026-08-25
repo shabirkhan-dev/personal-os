@@ -51,8 +51,12 @@ migration window, but it must not be mixed with a newly claimed card.
 8. Stage explicit paths only. Never use `git add -A` or `git add .` in a shared repository.
 9. Do not commit secrets, `.env` files, build output, generated caches, or another agent's
    changes.
-10. Do not merge or push another agent's work. Integration requires the required review and CI
-    evidence.
+10. Implementation agents and reviewers must not merge or push another agent's work. The PM is a
+    controlled exception only when the human product owner explicitly approves the integration
+    and every PM integration gate is satisfied: independent review of the exact commits, required
+    CI and validation evidence, a clean target worktree, a recorded merge order, and no unresolved
+    conflicts. The PM must not waive those gates, force-push, reset or delete unmerged work, or
+    resolve unrelated conflicts silently.
 
 ## Senior engineering bar
 

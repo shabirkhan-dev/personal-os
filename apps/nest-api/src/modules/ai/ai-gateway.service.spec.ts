@@ -1,14 +1,12 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { beforeEach, describe, expect, it, type Mocked, vi } from 'vitest';
 
-import type { AccessTokenPayload } from '@/modules/auth/auth.types';
 import { AiClient } from './ai.client';
 import { AiGatewayRepository } from './ai-gateway.repository';
 import { AiGatewayService } from './ai-gateway.service';
 
 const userId = 'a1111111-1111-4111-8111-111111111111';
 const sessionId = 'b2222222-2222-4222-8222-222222222222';
-const payload: AccessTokenPayload = { sub: userId, sid: 'cccccccc-cccc-cccc-cccc-cccccccccccc' };
 
 function sessionRow() {
 	return {
@@ -142,12 +140,7 @@ describe('AiGatewayService', () => {
 			}),
 		]);
 
-		const result = await service.sendMessage(
-			userId,
-			sessionId,
-			{ message: 'How am I doing?' },
-			payload,
-		);
+		const result = await service.sendMessage(userId, sessionId, { message: 'How am I doing?' });
 
 		expect(repository.insertMessage).toHaveBeenCalledWith(
 			expect.objectContaining({ role: 'user', content: 'How am I doing?' }),
@@ -162,12 +155,7 @@ describe('AiGatewayService', () => {
 	});
 
 	it('grounds general chat with a minimal authorized snapshot when no context is given', async () => {
-		await service.sendMessage(
-			userId,
-			sessionId,
-			{ message: 'What is the capital of France?' },
-			payload,
-		);
+		await service.sendMessage(userId, sessionId, { message: 'What is the capital of France?' });
 
 		const call = vi.mocked(client.chat).mock.calls[0][0];
 		expect(call.context?.personalOS).toEqual(
@@ -187,12 +175,10 @@ describe('AiGatewayService', () => {
 		});
 		repository.listMessages.mockResolvedValue([messageRow()]);
 
-		await service.sendMessage(
-			userId,
-			sessionId,
-			{ message: 'focus on this', context: { route: '/admin/today' } },
-			payload,
-		);
+		await service.sendMessage(userId, sessionId, {
+			message: 'focus on this',
+			context: { route: '/admin/today' },
+		});
 
 		const call = vi.mocked(client.chat).mock.calls[0][0];
 		expect(call.context?.route).toBe('/admin/today');
@@ -205,14 +191,14 @@ describe('AiGatewayService', () => {
 	it('enforces the per-session message limit', async () => {
 		repository.countMessages.mockResolvedValue(200);
 		await expect(
-			service.sendMessage(userId, sessionId, { message: 'one more?' }, payload),
+			service.sendMessage(userId, sessionId, { message: 'one more?' }),
 		).rejects.toBeInstanceOf(BadRequestException);
 	});
 
 	it('throws when the session does not belong to the user', async () => {
 		repository.findSession.mockResolvedValue(null);
-		await expect(
-			service.sendMessage(userId, sessionId, { message: 'hi' }, payload),
-		).rejects.toBeInstanceOf(NotFoundException);
+		await expect(service.sendMessage(userId, sessionId, { message: 'hi' })).rejects.toBeInstanceOf(
+			NotFoundException,
+		);
 	});
 });

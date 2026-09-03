@@ -57,6 +57,7 @@ mobile: `src/lib/api/client.ts`).
 | AI proxy | ✅ beta | Nest proxies `apps/ai-api`; provider keys stay server-side |
 | **Routines** | ✅ ready | Phase 1 core loop — see contract below |
 | **Finance** | ✅ ready | Transactions + budgets + month summary — see contract below |
+| **AI gateway (Daily Intelligence + Chat)** | ✅ ready | Read-only v0 — see contract below |
 | Care / Food / Fashion | 🚧 planned | Phases 3–4 |
 
 ---
@@ -261,7 +262,110 @@ interface MonthSummary {
 
 ---
 
+## AI gateway (read-only v0) — Daily Intelligence + Chat
+
+The public AI surface for web and mobile. Nest authenticates the user, resolves only
+authorized Personal OS context, and proxies to the internal AI service. Provider keys
+never leave the server. **v0 is strictly read-only** — the assistant never mutates data;
+suggested actions are informational only.
+
+Chat works for **general questions too** — Personal OS context is optional enrichment,
+not a requirement.
+
+### Types
+
+```ts
+type InsightKind = "routine" | "finance" | "general";
+type InsightPriority = "low" | "medium" | "high";
+
+interface SourceRef {
+	type: string; // e.g. "routine", "finance_category"
+	id: string;
+	label: string;
+}
+
+interface SuggestedAction {
+	title: string;
+	detail?: string;
+	kind: "navigation" | "informational"; // v0: never executed automatically
+}
+
+interface Insight {
+	id: string;
+	kind: InsightKind;
+	priority: InsightPriority;
+	title: string;
+	detail: string;
+	sourceRefs: SourceRef[];
+	suggestedAction?: SuggestedAction;
+}
+
+interface DailyIntelligence {
+	date: string; // "YYYY-MM-DD" in the user's timezone
+	timeZone: string;
+	insights: Insight[];
+	provider?: string;
+	model?: string;
+}
+
+interface ChatSession {
+	id: string;
+	title: string | null;
+	context: {
+		route: string | null;
+		entity: { type: string; id: string } | null;
+		date: string | null;
+	};
+	createdAt: string;
+	updatedAt: string;
+}
+
+interface ChatMessage {
+	id: string;
+	role: "user" | "assistant";
+	content: string;
+	sources: SourceRef[] | null;
+	suggestions: SuggestedAction[] | null;
+	provider: string | null;
+	model: string | null;
+	latencyMs: number | null;
+	createdAt: string;
+}
+```
+
+### Endpoints (all under `/ai`, auth required)
+
+| Method | Path | Purpose | Returns |
+| --- | --- | --- | --- |
+| GET | `/ai/daily` | Daily Intelligence for today (routines + finance grounding) | `DailyIntelligence` |
+| POST | `/ai/chat/sessions` | Create a session (optional title + context) | `ChatSession` (201) |
+| GET | `/ai/chat/sessions?limit=&offset=` | List own sessions (newest first) | `{ sessions: ChatSession[] }` |
+| GET | `/ai/chat/sessions/:sessionId/messages?limit=` | History (oldest first, ≤ 200) | `{ messages: ChatMessage[] }` |
+| POST | `/ai/chat/sessions/:sessionId/messages` | Send a message, get the assistant reply | `{ message: ChatMessage }` |
+
+### Rules
+
+- `message`: 1–4 000 chars; history window sent to the model is the last 20 turns.
+- `context` (optional, on session and/or message): `route` ≤ 200 chars,
+  `entity: { type: "routine" | "routine_item" | "finance_transaction" | "budget", id: uuid }`,
+  `date: YYYY-MM-DD`. Per-message context overrides session context per field.
+- Sessions are capped at 200 messages; further sends return `400 AI_SESSION_MESSAGE_LIMIT`.
+- Rate limits: daily 30/min, session create 10/min, send 20/min.
+- Upstream failures map to stable errors: `AI_UNAVAILABLE` (503, timeout/unreachable),
+  `AI_UPSTREAM_ERROR` (502), `AI_INVALID_INSIGHT_RESPONSE` / `AI_INVALID_CHAT_RESPONSE` (502).
+- Ownership is enforced everywhere: sessions and messages are user-scoped.
+- No raw tokens, provider keys, or unnecessary personal data enter logs.
+
+---
+
 ## Changelog
+
+### 2026-08-25 — AI gateway v0 (read-only)
+
+- New public surface under `/ai`: Daily Intelligence + context-aware read-only chat.
+- Chat supports general questions; Personal OS context is optional enrichment (session and/or per-message).
+- New tables: `ai_chat_sessions`, `ai_chat_messages` (migration 0007). Sessions cap at 200 messages.
+- Web/mobile are not wired yet; contract feedback welcome via board cards before UI work starts.
 
 ### 2026-08-24 — Auth security hardening + step-up
 

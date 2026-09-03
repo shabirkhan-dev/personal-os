@@ -17,12 +17,7 @@ import { makePaginationSchema } from '@/common/schemas/pagination';
 import type { AccessTokenPayload } from '@/modules/auth/auth.types';
 import { CurrentUser } from '@/modules/auth/current-user.decorator';
 import { JwtAuthGuard } from '@/modules/auth/jwt-auth.guard';
-import {
-	CreateChatSessionDto,
-	createChatSessionSchema,
-	SendMessageDto,
-	sendMessageSchema,
-} from './ai-gateway.dto';
+import { CreateChatSessionDto, SendMessageDto } from './ai-gateway.dto';
 import { AiGatewayService } from './ai-gateway.service';
 
 const listSessionsQuerySchema = makePaginationSchema(100, 20);
@@ -93,6 +88,6 @@ export class AiGatewayController {
 		@Param('sessionId', ParseUUIDPipe) sessionId: string,
 		@Body() body: SendMessageDto,
 	) {
-		return this.gateway.sendMessage(user.sub, sessionId, body, user);
+		return this.gateway.sendMessage(user.sub, sessionId, body);
 	}
 }

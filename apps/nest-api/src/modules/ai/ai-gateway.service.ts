@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import type { AiChatMessageRecord, AiChatSessionRecord } from '@/database/schema';
-import type { AccessTokenPayload } from '@/modules/auth/auth.types';
+import type { AiChatSessionRecord } from '@/database/schema';
 import { FinanceService } from '@/modules/finance/finance.service';
 import { RoutinesService } from '@/modules/routines/routines.service';
 import { AiClient } from './ai.client';
@@ -75,12 +74,7 @@ export class AiGatewayService {
 		return { messages };
 	}
 
-	async sendMessage(
-		userId: string,
-		sessionId: string,
-		input: SendMessageInput,
-		payload: AccessTokenPayload,
-	) {
+	async sendMessage(userId: string, sessionId: string, input: SendMessageInput) {
 		const session = await this.requireSession(userId, sessionId);
 
 		const total = await this.repository.countMessages(sessionId);

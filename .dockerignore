@@ -2,7 +2,6 @@
 .git
 .github
 .devcontainer
-.cursor
 .agents
 .vscode
 .idea

@@ -5,19 +5,19 @@ type: feature
 from: pm
 to: ai-python
 priority: high
-status: open
+status: doing
 assignee: ai-python
 reviewer: reviewer
 parent: 2026-08-24-personal-os-intelligence.md
 depends_on:
   - 2026-08-24-ai-control-plane-v0.md
-branch: none
-worktree: none
+branch: agent/ai-python/ai-orchestrator-v0
+worktree: ../personal-os-worktrees/agent/ai-python/ai-orchestrator-v0
 scope:
   - apps/ai-api/**
 allowed_shared: []
 created: 2026-08-24
-updated: 2026-08-24
+updated: 2026-09-16
 ---
 
 ## What

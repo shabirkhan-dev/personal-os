@@ -60,8 +60,24 @@ Do not implement database access, public Nest routes, client UI, or durable muta
 
 ## Resolution
 
-Implemented on `agent/ai-python/ai-orchestrator-v0`. **Not closed — independent review pending**,
-and the `2026-08-24-ai-control-plane-v0.md` dependency is still open.
+Implemented on `agent/ai-python/ai-orchestrator-v0` and merged into `main` via PR #18
+(`b0f9a18`, 2026-09-16) on explicit human product-owner approval.
+
+**Review status: changes requested.** See the `Review:` section below. The reviewer's findings are
+recorded on this card rather than on PR #18, so the merge commit carries no review state. The card
+is deliberately **back in `doing/`**: the reviewer's instruction was not to move it to `done/`
+while the end-to-end verification and the `ai-product-design.md` dependency are outstanding.
+
+**Undisclosed gap, now disclosed (V1 remedy).** The Proposal asked for "provider timeout, bounded
+retries, safe provider-error mapping, latency/cost metadata, and privacy-safe structured logs."
+That work **did not land**. `openai_compatible.py` keeps the pre-existing hardcoded `timeout=60.0`
+with no retry policy, no latency/cost metadata, and no new structured logging on this branch. It is
+a deliberate deferral tracked by `2026-09-16-ai-provider-reliability.md`, not an omission.
+
+**Deferred, not forgotten.** True end-to-end verification against a live Nest gateway plus
+Postgres is covered by the existing `2026-08-24-ai-mvp-verification.md` (QA) rather than a new
+duplicate card. `2026-08-24-ai-control-plane-v0.md` still owns review of the Nest-side gateway and
+remains in `doing/`.
 
 Changed:
 - `apps/ai-api/src/ai_api/schemas/` — `base.py` (camelCase wire base), `intelligence.py`
@@ -98,7 +114,37 @@ Commits:
 - `80df400` — feature
 
 Review:
-- Pending. `reviewer: reviewer`.
+- **Changes requested** (reviewer, 2026-09-16). Independent review of `agent/ai-python/ai-orchestrator-v0`
+  (`099a15e`, `80df400`) in its own worktree, re-running validation rather than trusting the
+  self-report.
+  - Confirmed: `bun --cwd apps/ai-api run test` — 32 passed; `ruff check`/`format --check` — clean;
+    `bun run architecture:check` — pass. `conftest.py` fix is real and correct (`setdefault`
+    silently no-ops when the root `.env` already exports `AI_SERVICE_TOKEN`). Mock provider
+    genuinely derives output from context and never cites an unsupplied id (asserted in
+    `test_evaluation.py`). `DailyIntelligenceResponse.insights` is required, not defaulted —
+    confirmed via the malformed-output test. `/assist` is untouched (empty diff). Fixture cases
+    cover all five Definition-of-Done categories. No DB/Nest/web/mobile files touched — scope held.
+    Auth (`InternalAuthDep`) is wired on both new routes.
+  - **V1 — undisclosed gap in the Resolution.** The card's Proposal explicitly asked for "provider
+    timeout, bounded retries, safe provider-error mapping, latency/cost metadata, and privacy-safe
+    structured logs." None of that landed — `openai_compatible.py` still has the pre-existing
+    hardcoded `timeout=60.0` with no retry logic, no metadata, no structured logging added on this
+    branch (confirmed by diff and by grepping `src/` for retry/latency/logging). This isn't in the
+    formal Definition of Done, so it does not block merge, but the Resolution section does not
+    disclose the deviation. Contract §"Communication": state the ambiguity/gap explicitly rather
+    than omitting it. Action: either implement it or record it as an accepted deferral/follow-up
+    card before this moves to `done/`.
+  - Non-blocking structural note: grounding ("never invent an id") is enforced by prompt
+    instructions for the real `openai_compatible` provider but is only test-verified against the
+    mock provider — no code-level check exists that a real model's cited ids are in context.
+    Acceptable for v0 (shape violations still fail via `InvalidStructuredOutputError`); worth a
+    follow-up card once a real provider is live.
+  - The `apps/ai-api` implementation itself is sound on its own scope. Do not move this card to
+    `done/` yet: (1) add the retry/metadata/logging disclosure or follow-up above, and (2) the
+    still-missing true end-to-end check against a live Nest gateway + Postgres (noted in the card's
+    own "Notes for the reviewer") is a legitimate reason to keep this in `doing/` independent of
+    code quality, as is the still-open `ai-product-design.md` dependency on the sibling
+    `ai-control-plane-v0.md` card.
 
 ## Notes for the reviewer
 

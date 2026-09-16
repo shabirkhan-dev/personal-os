@@ -23,7 +23,8 @@ Do **not** stop at typecheck alone for these changes.
 
 ## Preferred path: Playwright MCP
 
-Project MCP (`.cursor/mcp.json`) includes `playwright` (`@playwright/mcp`).
+Requires a `playwright` MCP server (`@playwright/mcp`). This repo ships no MCP config, so
+register that server in your own client before using this path.
 
 1. Ensure web is running (`bun run dev` or `bun --cwd apps/web run dev`). Default local URL: `http://localhost:3000` (e2e config uses `:3005`).
 2. Call `GetMcpTools` for server `playwright`, then use tools to:

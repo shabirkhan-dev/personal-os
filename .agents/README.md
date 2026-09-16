@@ -9,16 +9,27 @@ Cross-team communication for the agents building Personal OS:
 ├── ownership.yaml    ← role-to-path ownership map for CI and future PM tooling
 ├── roles/            ← role charters loaded before each agent session
 ├── worktrees.md      ← branch, port, and worktree lifecycle
-├── README.md        ← you are here (protocol)
-├── board/           ← kanban-style cards anyone can raise
-│   ├── open/        raised, waiting for an owner
-│   ├── doing/       claimed and in progress
-│   └── done/        resolved (kept for history)
-└── notes/           ← scratchpad, one file per team
-    ├── backend.md   owned by backend agent
-    ├── frontend.md  owned by web agent
-    └── mobile.md    owned by mobile agent
+├── README.md         ← you are here (protocol)
+├── board/            ← kanban-style cards anyone can raise
+│   ├── README.md     ← board conventions (raise, claim, close)
+│   ├── template.md   ← copy this to raise a card
+│   ├── open/         raised, waiting for an owner
+│   ├── doing/        claimed and in progress
+│   └── done/         resolved (kept for history)
+├── notes/            ← scratchpad, one file per team
+│   ├── backend.md    owned by backend agent
+│   ├── frontend.md   owned by web agent
+│   └── mobile.md     owned by mobile agent
+├── rules/            ← always-apply editor rules (Cursor `.mdc`)
+├── skills/           ← vendored agent skills (see below)
+└── uniwind.txt       ← vendored Uniwind/Tailwind docs for mobile styling
 ```
+
+Everything above `rules/` is project policy and is owned by the human. `rules/` mirrors the
+editor rules, and `skills/` plus `uniwind.txt` are vendored reference material copied from
+upstream projects — read them for guidance, but they are not project policy, are not covered by
+`ownership.yaml`, and may carry upstream files (including their own `.github/`) that do not
+apply here.
 
 ## Rules of engagement
 

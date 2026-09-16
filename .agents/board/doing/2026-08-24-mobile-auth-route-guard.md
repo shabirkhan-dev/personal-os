@@ -6,8 +6,8 @@ status: doing
 assignee: mobile
 reviewer: reviewer (independent agent session)
 type: implementation
-branch: agent/mobile/auth-route-guard
-worktree: ../personal-os-worktrees/agent/mobile/auth-route-guard
+branch: none
+worktree: none
 scope:
   - apps/mobile/src/app/**
   - apps/mobile/src/modules/auth/**

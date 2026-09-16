@@ -11,8 +11,8 @@ reviewer: reviewer
 parent: 2026-08-24-personal-os-intelligence.md
 depends_on:
   - 2026-08-24-ai-control-plane-v0.md
-branch: agent/ai-python/ai-orchestrator-v0
-worktree: ../personal-os-worktrees/agent/ai-python/ai-orchestrator-v0
+branch: none
+worktree: none
 scope:
   - apps/ai-api/**
 allowed_shared: []
@@ -61,7 +61,9 @@ Do not implement database access, public Nest routes, client UI, or durable muta
 ## Resolution
 
 Implemented on `agent/ai-python/ai-orchestrator-v0` and merged into `main` via PR #18
-(`b0f9a18`, 2026-09-16) on explicit human product-owner approval.
+(`b0f9a18`, 2026-09-16) on explicit human product-owner approval. The branch and its worktree were
+retired on 2026-09-16 once the merge was verified (`git merge-base --is-ancestor`); the frontmatter
+above no longer names an active branch, and the commit hashes below preserve traceability.
 
 **Review status: changes requested.** See the `Review:` section below. The reviewer's findings are
 recorded on this card rather than on PR #18, so the merge commit carries no review state. The card

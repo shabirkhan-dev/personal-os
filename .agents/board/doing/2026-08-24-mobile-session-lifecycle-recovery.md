@@ -6,8 +6,8 @@ status: doing
 assignee: mobile
 reviewer: reviewer (independent agent session)
 type: implementation
-branch: agent/mobile/session-lifecycle
-worktree: ../personal-os-worktrees/agent/mobile/session-lifecycle
+branch: none
+worktree: none
 scope:
   - apps/mobile/src/modules/auth/context/auth-context.tsx
   - apps/mobile/src/lib/api/**

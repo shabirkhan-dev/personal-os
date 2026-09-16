@@ -11,8 +11,8 @@ reviewer: reviewer
 parent: 2026-08-24-personal-os-intelligence.md
 depends_on:
   - 2026-08-24-ai-product-design.md
-branch: agent/backend-product/ai-control-plane
-worktree: ../personal-os-worktrees/agent/backend-product/ai-control-plane
+branch: none
+worktree: none
 scope:
   - apps/nest-api/**
   - apps/docs/content/docs/backend-api.mdx
@@ -95,13 +95,17 @@ Commits:
 Review:
 - Pending. `reviewer: reviewer` — the implementation owner must not self-approve.
 
-## Blocking gap
+## Blocking gap (resolved 2026-09-16)
 
 The gateway calls `POST /api/v1/intelligence/daily` and `POST /api/v1/chat` on the internal AI
-service (`apps/nest-api/src/modules/ai/ai.client.ts`), but `apps/ai-api` mounts only
-`/api/v1/assist` and `/api/v1/health`. No upstream handler exists, so both structured paths return
-502 `AI_UPSTREAM_ERROR` outside of stubbed tests — the gateway fails safely, but it is not
-functional end-to-end.
+service (`apps/nest-api/src/modules/ai/ai.client.ts`), but `apps/ai-api` originally mounted only
+`/api/v1/assist` and `/api/v1/health`. Both structured paths therefore returned 502
+`AI_UPSTREAM_ERROR` outside of stubbed tests: the gateway failed safely, but it was not functional
+end-to-end.
 
-`2026-08-24-ai-orchestrator-v0.md` (ai-python) must land before this card is genuinely done.
-The declared `depends_on: 2026-08-24-ai-product-design.md` is also still open.
+**Resolved.** `2026-08-24-ai-orchestrator-v0.md` implemented both endpoints and they are now in
+`main` (merge commit `b0f9a18`), so this gateway has a real upstream. See that card for the
+endpoint contract and its own outstanding review.
+
+Still outstanding before this card closes: independent review of the gateway commits, and the
+declared `depends_on: 2026-08-24-ai-product-design.md` remains open.

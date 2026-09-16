@@ -6,8 +6,8 @@ status: doing
 assignee: mobile
 reviewer: reviewer (independent agent session)
 type: implementation
-branch: agent/mobile/query-cache-isolation
-worktree: ../personal-os-worktrees/agent/mobile/query-cache-isolation
+branch: none
+worktree: none
 scope:
   - apps/mobile/src/modules/routines/hooks/**
   - apps/mobile/src/modules/auth/context/auth-context.tsx

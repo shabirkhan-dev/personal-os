@@ -2,10 +2,15 @@
 from: human
 to: web
 priority: normal
-status: open
-assignee: none
+status: doing
+assignee: web
+reviewer: reviewer
+branch: agent/web/query-error-states
+worktree: ../personal-os-worktrees/agent/web/query-error-states
+scope:
+  - apps/web/**
 created: 2026-08-24
-updated: 2026-08-24
+updated: 2026-09-16
 ---
 
 # Add actionable query and mutation error states to routines

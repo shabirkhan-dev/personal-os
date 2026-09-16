@@ -2,7 +2,7 @@
 from: human
 to: mobile
 priority: high
-status: doing
+status: done
 assignee: mobile
 reviewer: reviewer (independent agent session)
 type: implementation
@@ -16,7 +16,7 @@ scope:
   - apps/mobile/jest.config.ts
 allowed_shared: []
 created: 2026-08-24
-updated: 2026-08-24
+updated: 2026-09-16
 ---
 
 # Guard mobile module routes during auth bootstrap
@@ -106,6 +106,34 @@ None (no API change).
 
 ### Review
 
-Pending — reviewer: independent reviewer agent session. Round-2 items addressed
-in `e93bc44` + `b75f0fa`; merge requires sign-off on
-`agent/mobile/auth-route-guard` (tip `b75f0fa`).
+**Approved** (reviewer, 2026-09-16) — independent session, re-running the checks rather than
+trusting the self-report. Reviewed tip `b75f0fa`; delivered to `main` via `fbc6eb2`.
+
+Confirmed:
+
+- `bun --cwd apps/mobile run test -- --runInBand` — **7 suites, 34 tests pass** (cumulative across
+  the wave-1 mobile stack); `typecheck` — 0 errors; `bun run architecture:check` — boundaries +
+  naming OK (753 paths).
+- Guards are correct and complete: `_layout.tsx` hides the splash only after `loading` resolves;
+  `(modules)/_layout.tsx` returns `null` while loading and redirects to `/(auth)/login` without a
+  token; `(auth)/_layout.tsx` bounces an authenticated user to `(modules)/(dashboard)`. No
+  protected screen renders during bootstrap.
+- Every DoD line has a matching test: cold start, splash gate, unauthenticated redirect,
+  authenticated deep-link bounce, sign-out teardown (sharing `clearSession` with expired-refresh
+  failure), sign-in re-entry.
+- Round-2 items are genuinely addressed, including the phantom-route defect: colocated
+  `*.test.tsx` under `src/app/**` were exported as routes (`/(modules)/modules-layout.test`);
+  moving them to `src/tests/app/` is verified by a clean `expo export --platform web` route list.
+- Accepted honest limitation: no native device/emulator verification was possible. The DoD
+  permits "focused tests or an equivalent e2e check", so unit coverage satisfies it. Device smoke
+  coverage belongs to `2026-08-24-mobile-accessibility-baseline.md` and
+  `2026-08-24-ai-mvp-verification.md`, not here.
+
+Findings (non-blocking, frontmatter only — no rework required):
+
+- **V1 (low) — `scope` names a file that does not exist.** Scope lists
+  `apps/mobile/jest.config.ts`; the delivered file is `apps/mobile/jest.config.js` (the card's own
+  Changed list says `.js`). Scope also omits paths the work needed and which the body discloses:
+  `apps/mobile/src/tests/**`, `apps/mobile/tests/stubs/**`, `apps/mobile/src/types/css-modules.d.ts`,
+  `apps/mobile/tsconfig.json`, `bun.lock`. The claim-note disclosure is accepted as the required
+  declaration; only the frontmatter is imprecise.

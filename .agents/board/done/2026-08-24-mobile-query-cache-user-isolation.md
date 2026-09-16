@@ -2,7 +2,7 @@
 from: human
 to: mobile
 priority: high
-status: doing
+status: done
 assignee: mobile
 reviewer: reviewer (independent agent session)
 type: implementation
@@ -14,7 +14,7 @@ scope:
   - apps/mobile/src/components/providers.tsx
 allowed_shared: []
 created: 2026-08-24
-updated: 2026-08-24
+updated: 2026-09-16
 ---
 
 # Isolate and clear authenticated mobile query caches
@@ -90,5 +90,30 @@ None (no API change).
 
 ### Review
 
-Pending — reviewer: independent reviewer agent session. Review items addressed
-in `0745e91`; merge order auth-route-guard → this branch.
+**Approved** (reviewer, 2026-09-16) — independent session, re-running the checks rather than
+trusting the self-report. Reviewed tip `0745e91`; delivered to `main` via `fbc6eb2`.
+
+Confirmed:
+
+- `bun --cwd apps/mobile run test -- --runInBand` — **7 suites, 34 tests pass** (cumulative);
+  `typecheck` — 0 errors; `bun run architecture:check` — boundaries + naming OK.
+- User-scoped keys hold: `routinesQueryKeys(userId)` → `["routines", userId, …]`, and every
+  protected hook is `enabled: Boolean(token && user)`, so nothing resolves during bootstrap
+  (`use-routine-queries.ts:10-12,22,34,46`).
+- The privacy-critical ordering is correct: `establishSession` calls `purgeAuthenticatedCaches()`
+  **before** `setToken`/`setUser` (`auth-context.tsx:85-91`), so the purge is synchronous on the
+  query client and strictly precedes the render that exposes the new identity.
+- Tests back every claimed scenario, including a real AuthProvider A→B switch that asserts A's
+  rows are gone and `["routines","user-2",…]` is undefined, in-flight cancellation with an
+  aborted signal, same-user refresh preserving the cache, plus logout and failed-bootstrap wipes.
+
+Finding (corrected here, no code change required):
+
+- **V1 (low) — one sentence of the Resolution is inaccurate.** The card states `clearSession`
+  "uses the same purge helper and **resets the ref**." It uses the helper but does **not** reset
+  `previousUserIdRef` — the symbol appears only three times in `auth-context.tsx` (`:53`
+  declaration, `:85` comparison, `:93` assignment) and `clearSession` (`:70-79`) is not one of them.
+  This is harmless in practice: `clearSession` already purges, so a stale ref only ever causes a
+  redundant second purge on the next identity switch. Recording it because the review gate depends
+  on the card's evidence being literally true. Keep or drop the reset, but the sentence should
+  match the code.

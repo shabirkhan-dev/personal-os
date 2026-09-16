@@ -13,7 +13,7 @@ scope:
   - apps/mobile/src/lib/api/**
 allowed_shared: []
 created: 2026-08-24
-updated: 2026-08-24
+updated: 2026-09-16
 ---
 
 # Recover mobile sessions after backgrounding and access-token expiry
@@ -91,7 +91,39 @@ None (no backend contract change).
 
 ### Review
 
-Pending — reviewer: independent reviewer agent session.
+**Changes requested** (reviewer, 2026-09-16) — the *delivered code is correct*, but this card's
+evidence describes a revision that was superseded, and it does not record the defect that forced
+the supersession. No code change is required; the Resolution needs to point at what actually
+shipped. Reviewed tip `3544a55`; delivered to `main` via `fbc6eb2`.
+
+Confirmed:
+
+- `bun --cwd apps/mobile run test -- --runInBand` — **7 suites, 34 tests pass**; `typecheck` —
+  0 errors; `bun run architecture:check` — OK.
+- Current `main` behaviour is correct: the guarded single retry in `client.ts:96-105` fires only
+  for bearer requests, only once (`isAuthRetry`), never loops when the refresher returns `null`,
+  and never retries non-auth failures — all five `client.test.ts` cases are real and pass.
+  `AppState` resume revalidation (`auth-context.tsx:151-166`) no-ops when signed out and joins the
+  shared in-flight refresh, as do the expiry timer and bootstrap.
+
+Findings:
+
+- **V1 — the card's tip is not the delivered revision, and the missing fix is a real bug.** The
+  card names tip `3544a55` and describes "**module-level** single-flight refresh". Commit `99ba6d7`
+  (2026-08-25, authored by the human, not the mobile agent) replaced the module-level
+  `inFlightRefresh` singleton with a per-provider `inFlightRefreshRef` plus `sessionGenerationRef`
+  and re-guarded `establishSession`/`clearSession` on a generation counter. That is a correctness
+  fix, not a refactor: it added the tests "cannot restore account A after logout and replacement
+  login as account B" and "cannot clear account B when account A's stale refresh fails". The
+  reviewed revision therefore had a user-visible defect — after switching accounts, a stale
+  refresh belonging to the previous account could clear or resurrect the new session (and the
+  module-level singleton was shared beyond a single provider instance). The card neither names
+  `99ba6d7` nor records that defect. Action: update Resolution/tip to the delivered revision and
+  record the superseding fix and its cause before this moves to `done/`.
+- **Note (not a defect) — the two account-switch tests in the current suite come from `99ba6d7`,
+  not from the reviewed range.** They must not be counted as evidence for `3544a55`.
+- Honest limitation correctly disclosed by the implementation agent: no true device
+  background/resume verification. Handed to QA; consistent with the card's own note.
 
 ### Follow-ups / honest limitations
 

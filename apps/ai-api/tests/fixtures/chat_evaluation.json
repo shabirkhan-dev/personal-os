@@ -1,0 +1,61 @@
+{
+  "cases": [
+    {
+      "name": "entity grounding",
+      "request": {
+        "messages": [{"role": "user", "content": "How is this routine going?"}],
+        "context": {"entity": {"type": "routine", "id": "r-1"}, "date": "2026-09-16"}
+      },
+      "expect": {"mustCite": true, "replyContains": ["read-only"]}
+    },
+    {
+      "name": "personal os snapshot grounding",
+      "request": {
+        "messages": [{"role": "user", "content": "What does my day look like?"}],
+        "context": {
+          "personalOS": {
+            "date": "2026-09-16",
+            "routines": [{"name": "Morning reset", "completedItems": 2, "totalItems": 3}],
+            "finance": {
+              "month": "2026-09",
+              "incomeTotal": 500000,
+              "expenseTotal": 620000,
+              "netTotal": -120000
+            }
+          }
+        }
+      },
+      "expect": {
+        "noSources": true,
+        "replyContains": ["From your current context", "2/3 items complete", "net balance is negative"]
+      }
+    },
+    {
+      "name": "refusal of unsupported claims",
+      "request": {"messages": [{"role": "user", "content": "What is my net worth?"}]},
+      "expect": {
+        "noSources": true,
+        "replyContains": ["can't answer it from your data"]
+      }
+    },
+    {
+      "name": "date alone grounds the day",
+      "request": {
+        "messages": [{"role": "user", "content": "Anything on for today?"}],
+        "context": {"date": "2026-09-16"}
+      },
+      "expect": {"mustCite": true, "replyContains": ["read-only"]}
+    },
+    {
+      "name": "a route is not a citable record",
+      "request": {
+        "messages": [{"role": "user", "content": "What is on this screen?"}],
+        "context": {"route": "admin/routines"}
+      },
+      "expect": {
+        "noSources": true,
+        "replyContains": ["can't answer it from your data"]
+      }
+    }
+  ]
+}

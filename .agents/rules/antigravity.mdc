@@ -28,5 +28,5 @@ I am Antigravity, an advanced agentic coding assistant. When working in this rep
 - **Concise Updates**: Keep the USER informed with brief, actionable summaries.
 
 ## 5. Environment Awareness
-- Check `AGENTS.md` and existing `.cursor/rules/*.mdc` before starting new tasks.
+- Check `AGENTS.md` and existing `.agents/rules/*.mdc` before starting new tasks.
 - Respect the multi-language nature of the repo (TS, Rust, C, Python, Lua, Bash).

@@ -168,7 +168,7 @@ More details: docs app `/docs/docker` and `docker/README.md`.
 ## Conventions and development rules
 
 - Primary repository guidance: `AGENTS.md`
-- Cursor-specific rules: `.cursor/rules/`
+- Always-apply agent rules: `.agents/rules/`
 - Architecture baseline: docs app `/docs/architecture`
 - Override process: docs app `/docs/overrides`
 - Use workspace imports as `@personal-os/<package>`

@@ -16,7 +16,7 @@ Remote skills are discovered when you work on Expo-related tasks (they are not s
 
 ## Bundled skill in this repo
 
-See **`.cursor/skills/expo-mobile/SKILL.md`** for monorepo-specific commands, **Tailwind CSS / NativeWind** (plus remote skill `expo-tailwind-setup`), layout (`src/app`), and EAS.
+See **`.agents/skills/expo-mobile/SKILL.md`** for monorepo-specific commands, **Tailwind CSS / NativeWind** (plus remote skill `expo-tailwind-setup`), layout (`src/app`), and EAS.
 
 ## Expo Skills (official plugin)
 
@@ -29,6 +29,8 @@ See **`.cursor/skills/expo-mobile/SKILL.md`** for monorepo-specific commands, **
 | `expo-dev-client` | Dev clients, TestFlight |
 | `expo-module` | Expo Modules API (Swift, Kotlin, TS), config plugins |
 | `expo-tailwind-setup` | Tailwind v4 + react-native-css + NativeWind v5 |
+| `expo-ui-jetpack-compose` | `@expo/ui/jetpack-compose` |
+| `expo-ui-swift-ui` | `@expo/ui/swift-ui` |
 | `native-data-fetching` | fetch, React Query, SWR, loaders, offline |
 | `upgrading-expo` | SDK upgrades and dependency fixes |
 | `use-dom` | Expo DOM / web code in webview |

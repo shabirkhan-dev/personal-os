@@ -1,0 +1,139 @@
+{
+  "cases": [
+    {
+      "name": "routine insight accuracy",
+      "request": {
+        "date": "2026-09-16",
+        "timeZone": "Asia/Karachi",
+        "context": {
+          "routines": [
+            {
+              "id": "r-1",
+              "name": "Morning reset",
+              "description": null,
+              "completedItems": 1,
+              "totalItems": 3,
+              "items": [
+                {"id": "i-1", "name": "Stretch", "targetTime": null, "sortOrder": 0, "completed": true},
+                {"id": "i-2", "name": "Journal", "targetTime": null, "sortOrder": 1, "completed": false},
+                {"id": "i-3", "name": "Meditate", "targetTime": null, "sortOrder": 2, "completed": false}
+              ]
+            },
+            {
+              "id": "r-2",
+              "name": "Evening wind-down",
+              "description": null,
+              "completedItems": 0,
+              "totalItems": 2,
+              "items": [
+                {"id": "i-4", "name": "Read", "targetTime": null, "sortOrder": 0, "completed": false},
+                {"id": "i-5", "name": "Plan tomorrow", "targetTime": null, "sortOrder": 1, "completed": false}
+              ]
+            }
+          ],
+          "financeMonth": "2026-09",
+          "financeSummary": null
+        }
+      },
+      "expect": {"kinds": ["routine"], "cites": ["i-2"], "minInsights": 2}
+    },
+    {
+      "name": "finance context grounding",
+      "request": {
+        "date": "2026-09-16",
+        "timeZone": "UTC",
+        "context": {
+          "routines": [],
+          "financeMonth": "2026-09",
+          "financeSummary": {
+            "month": "2026-09",
+            "incomeTotal": 500000,
+            "expenseTotal": 620000,
+            "netTotal": -120000,
+            "byCategory": {"food": 120000}
+          }
+        }
+      },
+      "expect": {"kinds": ["finance"], "cites": ["2026-09"], "minInsights": 1}
+    },
+    {
+      "name": "routine and finance together",
+      "request": {
+        "date": "2026-09-16",
+        "timeZone": "Asia/Karachi",
+        "context": {
+          "routines": [
+            {
+              "id": "r-1",
+              "name": "Morning reset",
+              "description": null,
+              "completedItems": 1,
+              "totalItems": 2,
+              "items": [
+                {"id": "i-2", "name": "Journal", "targetTime": null, "sortOrder": 1, "completed": false}
+              ]
+            }
+          ],
+          "financeMonth": "2026-09",
+          "financeSummary": {
+            "month": "2026-09",
+            "incomeTotal": 500000,
+            "expenseTotal": 120000,
+            "netTotal": 380000
+          }
+        }
+      },
+      "expect": {"kinds": ["routine", "finance"], "cites": ["i-2", "2026-09"], "minInsights": 2}
+    },
+    {
+      "name": "empty context",
+      "request": {
+        "date": "2026-09-16",
+        "timeZone": "UTC",
+        "context": {"routines": [], "financeMonth": "2026-09", "financeSummary": null}
+      },
+      "expect": {"kinds": ["general"], "minInsights": 1, "noSources": true}
+    },
+    {
+      "name": "completed routines are not surfaced",
+      "request": {
+        "date": "2026-09-16",
+        "timeZone": "UTC",
+        "context": {
+          "routines": [
+            {"id": "r-9", "name": "All done", "completedItems": 2, "totalItems": 2, "items": []}
+          ],
+          "financeMonth": "2026-09",
+          "financeSummary": null
+        }
+      },
+      "expect": {"kinds": ["general"], "minInsights": 1, "noSources": true}
+    },
+    {
+      "name": "zero-activity finance stays quiet",
+      "request": {
+        "date": "2026-09-16",
+        "timeZone": "UTC",
+        "context": {
+          "routines": [],
+          "financeMonth": "2026-09",
+          "financeSummary": {"month": "2026-09", "incomeTotal": 0, "expenseTotal": 0, "netTotal": 0}
+        }
+      },
+      "expect": {"kinds": ["general"], "minInsights": 1, "noSources": true}
+    },
+    {
+      "name": "malformed context does not invent insights",
+      "request": {
+        "date": "2026-09-16",
+        "timeZone": "UTC",
+        "context": {
+          "routines": "not-a-list",
+          "financeMonth": "2026-09",
+          "financeSummary": {"month": "2026-09", "incomeTotal": "nope", "expenseTotal": null}
+        }
+      },
+      "expect": {"kinds": ["general"], "minInsights": 1, "noSources": true}
+    }
+  ]
+}

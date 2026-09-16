@@ -15,3 +15,13 @@ class UnauthorizedServiceError(AiApiError):
 class ProviderError(AiApiError):
     def __init__(self, message: str) -> None:
         super().__init__(message, code="AI_PROVIDER_ERROR")
+
+
+class InvalidStructuredOutputError(AiApiError):
+    """The provider replied, but the payload did not match the expected schema."""
+
+    def __init__(self, task: str) -> None:
+        super().__init__(
+            f"Provider output does not match the {task} schema",
+            code="AI_INVALID_STRUCTURED_OUTPUT",
+        )

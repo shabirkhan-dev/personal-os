@@ -5,18 +5,19 @@ type: bug
 from: reviewer
 to: backend
 priority: normal
-status: open
-assignee: none
+status: doing
+assignee: backend
 reviewer: reviewer
 parent: none
 depends_on: []
-branch: none
-worktree: none
+branch: agent/backend/nest-test-env-hermeticity
+worktree: ../personal-os-worktrees/agent/backend/nest-test-env-hermeticity
 scope:
   - apps/nest-api/**
 allowed_shared: []
+ports: none (targeted test runs only)
 created: 2026-09-16
-updated: 2026-09-16
+updated: 2026-09-17
 ---
 
 ## What
@@ -94,5 +95,69 @@ or assert on env-derived flags.
 
 ## Resolution
 
-Open. Raised by the reviewer during the `2026-08-24-ai-control-plane-v0.md` review; not yet
-claimed. Not attributable to that card — it is pre-existing on `main`.
+Implementation complete on `agent/backend/nest-test-env-hermeticity` (tip `1296828`).
+**PR #19 open; awaiting independent review.** Not closed yet — the review state is pending.
+
+### Changed
+
+- `apps/nest-api/test/setup-unit-env.ts` (new) — vitest setup that assigns `NODE_ENV`,
+  `AUTH_DEV_EXPOSE_CODES`, `AUTH_TOKEN_SECRET`, and `JWT_SECRET` **outright**, so an ambient value
+  cannot win.
+- `apps/nest-api/vitest.config.ts` — registers that file via `setupFiles`.
+
+### Decision recorded
+
+Pinned at the harness rather than giving each spec an explicit config. `AuthService` alone reads
+**eleven** config getters (`exposeAuthCodes`, the TTLs, `maxLoginAttempts`, `webAppUrl`, ...), so a
+hand-rolled stub would be large and easy to get subtly wrong, and `AppConfigService` hardcodes
+`createAppConfig()` with no injection seam to pass one through. Adding a constructor seam is a
+change to a production class for test convenience and deserves its own card if wanted.
+
+`NODE_ENV` is pinned to `test` so a shell exporting `production` cannot trip the production
+`superRefine` guards and throw at config construction; the two secrets are pinned so a malformed
+ambient value cannot. Only one of the four variables is what broke the suite.
+
+### Validation
+
+- `bun --cwd apps/nest-api run test`, unmodified shell (`AUTH_DEV_EXPOSE_CODES=false`):
+  15 files, **70 passed** (was 1 failed | 69 passed)
+- `env -u AUTH_DEV_EXPOSE_CODES bun --cwd apps/nest-api run test`: 15 files, **70 passed**
+- `AUTH_DEV_EXPOSE_CODES=true bun --cwd apps/nest-api run test`: 15 files, **70 passed**
+- `bun --cwd apps/nest-api run lint`: Biome clean (133 files)
+- `bun --cwd apps/nest-api run typecheck`: 0 errors
+- root `bun run typecheck` (turbo): 5/5 tasks successful
+- `bun run architecture:check`: boundaries pass, naming OK (753 paths)
+
+### Contract impact
+
+None. Production config resolution is unchanged — `parseEnv()`/`createAppConfig()` and the
+`dotenv/config` imports in `main.ts` and `migrate.ts` are untouched. Only the unit-suite process is
+pinned. No `backend-api.mdx` change.
+
+### Audit this card asked for
+
+- `new AppConfigService()` appears in **4** files: three unit specs (`auth.service.spec.ts`,
+  `auth-crypto.service.spec.ts`, `mfa.service.spec.ts`), all covered by the new setup file, plus
+  `test/auth.database.integration-spec.ts`, which uses a separate vitest config and imports
+  `dotenv/config` for a real database. `dotenv` does not override an existing variable, so it has
+  the same theoretical exposure, but it asserts nothing env-derived and needs Postgres — left
+  unchanged and flagged here for whoever hardens the integration suite.
+- `developmentCode` / `exposeAuthCodes` / `isProduction` / `swaggerEnabled` / `nodeEnv` are
+  asserted in **exactly one** place: `auth.service.spec.ts:91`, the assertion that was failing.
+  No other spec asserts on an env-derived flag.
+- No spec reads `process.env` directly.
+
+### Review
+
+- Pending. `reviewer: reviewer`. PR #19:
+  https://github.com/shabirkhan-dev/personal-os/pull/19
+
+### Known limitations (disclosed, not blocking)
+
+- The suite still **reads** `process.env`; it is pinned, not decoupled. The DoD's "or the
+  dependency is removed" option was not taken.
+- The pinned harness makes the `exposeAuthCodes === false` branch unreachable in unit tests. No
+  test covered that branch before or after, so nothing was lost, but a future one must override
+  the config explicitly.
+- The new setup file is **not typechecked**: `typecheck` runs `tsc -p tsconfig.build.json`, which
+  excludes `test/` and `**/*.spec.ts`. Pre-existing for every spec in the repo.

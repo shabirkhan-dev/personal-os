@@ -15,6 +15,7 @@ import { Card } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
 import { OSHeader } from "@/components/ui/os-header";
 import { cn } from "@/lib/utils";
+import { DailyInsightsWidget, useDailyIntelligenceQuery } from "@/modules/ai";
 import { useAuth } from "@/modules/auth";
 import {
 	AddTransactionModal,
@@ -40,15 +41,17 @@ export default function DashboardIndex() {
 		isLoading: txLoading,
 		refetch: refetchTx,
 	} = useTransactionsQuery({ limit: 3 });
+	const { isLoading: aiLoading, refetch: refetchAi } = useDailyIntelligenceQuery();
 
 	const toggleMutation = useToggleItemMutation();
 
-	const refreshing = routinesLoading || financeLoading || txLoading;
+	const refreshing = routinesLoading || financeLoading || txLoading || aiLoading;
 
 	const handleRefresh = () => {
 		refetchRoutines();
 		refetchFinance();
 		refetchTx();
+		refetchAi();
 	};
 
 	// Calculate overall routine completion
@@ -87,6 +90,7 @@ export default function DashboardIndex() {
 								Welcome, <Text className="font-semibold">{displayName}</Text>
 							</Text>
 						</View>
+						<DailyInsightsWidget />
 
 						{/* Daily Routine Summary Card */}
 						<Pressable

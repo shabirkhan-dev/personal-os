@@ -74,7 +74,9 @@ authorship line does not by itself identify the implementing agent.
 Refs:
 - `c3266c3 feat(web): add daily intelligence and chat command center v0` — 13 files, +795/-238,
   on `agent/web/web-ai-command-center`, **pushed** to origin.
-- **Not merged.** `main` is unaffected by this commit.
+- **PR #20**: https://github.com/shabirkhan-dev/personal-os/pull/20
+- **Merged** into `main` by the human product owner as `91b790a` on 2026-09-18 — an owner merge
+  after CI went green, not a completed independent review.
 - Worktree retained at `../personal-os-worktrees/agent/web/web-ai-command-center`.
 
 Changed in `agent/web/web-ai-command-center`:
@@ -107,7 +109,8 @@ Independent re-run by the committing session on `c3266c3` (2026-09-18):
   28/28 static pages). The failure was Next's internal Google-font CSS resolving as
   `module-not-found`; no application module was involved. Disclosed because a single green run
   would overstate confidence — the build has a flaky local dependency.
-- **Not re-run:** `test:e2e:web`, root lint, root format.
+- **Not re-run locally:** `test:e2e:web`, root lint, root format. `e2e-web` did run in CI — see
+  below.
 
 Contract impact:
 - No backend API modifications. Reference: `apps/docs/content/docs/backend-api.mdx`.
@@ -116,8 +119,12 @@ Contract impact:
   Backend owner still needs to reconcile the source-of-truth documentation.
 
 Remaining work and integration gates:
-- Independent review has not completed; the review-agent invocation was aborted.
-- The branch is pushed but **no PR exists**, so required CI has still never run on this change.
+- Independent review has not completed; the review-agent invocation was aborted. The change is
+  already in `main`, so that review now has to happen against the merged revision.
+- **Required CI now has run**, on PR #20 against `c3266c3`: `lint`, `typecheck`, `test` (3m27s),
+  `e2e-web` (1m17s), `codeql`, and `CodeQL` all pass. This independently corroborates the e2e
+  claim above on the committed revision. `dependency-review` fails — pre-existing on every PR
+  since July, a repo-settings issue unrelated to this change.
 - Main advanced past `f28aeb2` to `0684669`; the staged coordination edits the implementation
   agent noted were never reset, stashed, or taken over by it, and were committed separately by
   their owners.

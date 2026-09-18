@@ -1,226 +1,277 @@
 "use client";
 
-import { CodeIcon, Globe02Icon, SearchFocusIcon, SparklesIcon } from "@hugeicons/core-free-icons";
-import { useEffect, useRef, useState } from "react";
-import { useTheme } from "@/components/theme";
-import { useAuth } from "@/context/auth-context";
-import { userFirstName, userInitials } from "@/lib/user-display";
+import { Alert, AlertDescription } from "@personal-os/ui/components/alert";
+import { Button } from "@personal-os/ui/components/button";
+import { useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { useAuth } from "@/modules/auth/context/auth-context";
 import { ChatComposer } from "@/modules/chat/components/chat/chat-composer";
-import { ChatHugeIcon } from "@/modules/chat/components/chat/chat-icon";
-import { AceMarkIcon } from "@/modules/chat/components/icons";
+import { readChatContext } from "../ai.context";
+import { aiErrorMessage } from "../ai.errors";
+import { aiService } from "../ai.service";
+import type { ChatMessageList } from "../ai.types";
+import { useChatMessages, useChatSessions } from "../use-ai-queries";
 import "@/modules/chat/styles/chat.css";
-import { type AssistMessage, aiService } from "../ai.service";
-
-type ChatTurn = {
-	id: string;
-	role: "user" | "assistant";
-	content: string;
-};
-
-const QUICK_PROMPTS = [
-	{
-		label: "Run locally",
-		description: "Dev + install steps",
-		icon: CodeIcon,
-		prompt: "How do I install dependencies and run the Personal OS monorepo locally?",
-	},
-	{
-		label: "Nest auth",
-		description: "JWT, MFA, sessions",
-		icon: SearchFocusIcon,
-		prompt: "Explain how Nest auth, refresh cookies, and MFA fit together in Personal OS.",
-	},
-	{
-		label: "AI pipeline",
-		description: "Web → Nest → FastAPI",
-		icon: Globe02Icon,
-		prompt:
-			"How does in-app AI assistance flow from the web app through Nest to the FastAPI service?",
-	},
-] as const;
 
 export function AiAssistScreen() {
-	const { token, user } = useAuth();
-	const { resolvedTheme } = useTheme();
-	const [theme, setTheme] = useState<"light" | "dark">("dark");
+	const { user, token, loading } = useAuth();
+	if (loading) return <p role="status">Loading your session…</p>;
+	if (!user || !token)
+		return (
+			<p>
+				<Link href="/login">Sign in to use Personal OS AI</Link>
+			</p>
+		);
+	return (
+		<Suspense fallback={<p role="status">Loading chat…</p>}>
+			<ChatWorkspace key={user.id} token={token} userId={user.id} />
+		</Suspense>
+	);
+}
+
+function ChatWorkspace({ token, userId }: { token: string; userId: string }) {
+	const params = useSearchParams();
+	const initialSession = params.get("session");
+	const [sessionId, setSessionId] = useState<string | null>(initialSession);
 	const [draft, setDraft] = useState("");
-	const [turns, setTurns] = useState<ChatTurn[]>([]);
 	const [busy, setBusy] = useState(false);
-	const [error, setError] = useState<string | null>(null);
-	const [modelLabel, setModelLabel] = useState("Assist");
-	const endRef = useRef<HTMLDivElement | null>(null);
-	const initials = user ? userInitials(user.username) : "?";
+	const [error, setError] = useState<unknown>(null);
+	const [failedSend, setFailedSend] = useState(false);
+	const active = useRef(true);
+	const sending = useRef(false);
+	const queryClient = useQueryClient();
+	const sessions = useChatSessions();
+	const history = useChatMessages(sessionId);
+	const messages = history.data?.messages ?? [];
+	const incomingContext = readChatContext(params);
+	const selectedSession = sessions.data?.pages
+		.flatMap((page) => page.sessions)
+		.find((session) => session.id === sessionId);
+	const displayContext = sessionId ? selectedSession?.context : incomingContext;
 
 	useEffect(() => {
-		if (resolvedTheme === "light" || resolvedTheme === "dark") {
-			setTheme(resolvedTheme);
-		}
-	}, [resolvedTheme]);
-
-	useEffect(() => {
-		if (!token) return;
-		void aiService
-			.status(token)
-			.then((status) => {
-				setModelLabel(status.ok ? (status.provider ?? "Assist") : "Offline");
-			})
-			.catch(() => setModelLabel("Offline"));
-	}, [token]);
-
-	const greeting = user
-		? `Where should we begin, ${userFirstName(user.profile?.displayName || user.username)}?`
-		: "Where should we begin?";
-
-	const send = async (content: string) => {
-		if (!token || busy) return;
-		const trimmed = content.trim();
-		if (!trimmed) return;
-
-		const userTurn: ChatTurn = {
-			id: crypto.randomUUID(),
-			role: "user",
-			content: trimmed,
+		active.current = true;
+		return () => {
+			active.current = false;
 		};
-		const nextTurns = [...turns, userTurn];
-		setTurns(nextTurns);
+	}, []);
+
+	useEffect(() => {
+		setSessionId(initialSession);
+	}, [initialSession]);
+
+	function selectSession(id: string | null) {
+		setSessionId(id);
 		setDraft("");
+		setError(null);
+		setFailedSend(false);
+		const url = new URL(window.location.href);
+		if (id) url.searchParams.set("session", id);
+		else url.searchParams.delete("session");
+		window.history.replaceState(null, "", url);
+	}
+
+	async function send(content: string) {
+		const message = content.trim();
+		if (!message || message.length > 4000 || sending.current) return;
+		sending.current = true;
 		setBusy(true);
 		setError(null);
-		queueMicrotask(() => endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }));
-
-		const history: AssistMessage[] = nextTurns.map((turn) => ({
-			role: turn.role,
-			content: turn.content,
-		}));
-
+		setFailedSend(false);
+		let id = sessionId;
 		try {
-			const result = await aiService.assist(token, {
-				messages: history,
-				context: "admin/ai · chat UX assist",
+			if (!id) {
+				const session = await aiService.createSession(token, {
+					title: message.slice(0, 120),
+					context: incomingContext,
+				});
+				if (!active.current) return;
+				id = session.id;
+				selectSession(id);
+			}
+			await queryClient.cancelQueries({ queryKey: ["ai", userId, "messages", id] });
+			const result = await aiService.sendMessage(token, id, { message });
+			if (!active.current) return;
+			await queryClient.cancelQueries({ queryKey: ["ai", userId, "messages", id] });
+			if (!active.current) return;
+			queryClient.setQueryData<ChatMessageList>(["ai", userId, "messages", id], {
+				messages: [
+					...messages,
+					{
+						id: crypto.randomUUID(),
+						role: "user",
+						content: message,
+						sources: null,
+						suggestions: null,
+						provider: null,
+						model: null,
+						latencyMs: null,
+						createdAt: new Date().toISOString(),
+					},
+					result.message,
+				],
 			});
-			setTurns((prev) => [
-				...prev,
-				{
-					id: crypto.randomUUID(),
-					role: "assistant",
-					content: result.reply,
-				},
-			]);
-			setModelLabel(`${result.provider}`);
-		} catch (err) {
-			setError(err instanceof Error ? err.message : "Assist request failed");
+			selectSession(id);
+			await sessions.refetch();
+		} catch (caught) {
+			if (!active.current) return;
+			setDraft(message);
+			setError(caught);
+			setFailedSend(Boolean(id));
+			if (id) {
+				await queryClient.invalidateQueries({ queryKey: ["ai", userId, "messages", id] });
+			}
 		} finally {
-			setBusy(false);
-			queueMicrotask(() => endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }));
+			sending.current = false;
+			if (active.current) setBusy(false);
 		}
-	};
-
-	const hasTurns = turns.length > 0;
+	}
 
 	return (
-		<div
-			className="chat-design-system chat-design-system--dashboard h-full min-h-0"
-			data-chat-design-system
-			data-theme={theme}
+		<section
+			aria-label="Personal OS Chat"
+			className="flex h-full min-h-0 flex-col gap-4 overflow-y-auto p-4 text-foreground sm:p-6"
 		>
-			<main className={`new-chat-screen new-chat-screen--assist${hasTurns ? " is-threaded" : ""}`}>
-				<div className="dot-field new-chat-screen__dots" />
-				<section className="new-chat-screen__content">
-					{!hasTurns ? (
-						<>
-							<div className="new-chat-screen__intro">
-								<AceMarkIcon size={24} />
-								<h1>{greeting}</h1>
-							</div>
-							<ChatComposer
-								value={draft}
-								onChange={setDraft}
-								onSubmitPrompt={(value) => void send(value)}
-								disabled={!token}
-								busy={busy}
-								placeholder="Ask Personal OS Assist..."
-								modelLabel={modelLabel}
-								showUpgradeRail={false}
-							/>
-							<section className="chat-quick-actions" aria-label="Suggested prompts">
-								{QUICK_PROMPTS.map((item) => (
-									<button
-										key={item.label}
-										className="chat-quick-card"
-										type="button"
-										disabled={!token || busy}
-										onClick={() => void send(item.prompt)}
-									>
-										<ChatHugeIcon icon={item.icon} size={18} />
-										<span className="chat-quick-card__label">{item.label}</span>
-										<span className="chat-quick-card__description">{item.description}</span>
-									</button>
-								))}
-							</section>
-							{error ? <p className="assist-thread__error">{error}</p> : null}
-						</>
-					) : (
-						<>
-							<div className="assist-thread" aria-live="polite">
-								{turns.map((turn) => (
-									<article key={turn.id} className={`assist-turn assist-turn--${turn.role}`}>
-										<div className="assist-turn__meta">
-											<span className="assist-turn__avatar" aria-hidden>
-												{turn.role === "user" ? (
-													initials
-												) : (
-													<ChatHugeIcon icon={SparklesIcon} size={14} />
-												)}
-											</span>
-											<span className="assist-turn__role">
-												{turn.role === "user" ? "You" : "Assist"}
-											</span>
-										</div>
-										<div className="assist-turn__bubble">
-											<p>{turn.content}</p>
-										</div>
-									</article>
-								))}
-								{busy ? (
-									<article className="assist-turn assist-turn--assistant assist-turn--pending">
-										<div className="assist-turn__meta">
-											<span className="assist-turn__avatar" aria-hidden>
-												<ChatHugeIcon icon={SparklesIcon} size={14} />
-											</span>
-											<span className="assist-turn__role">Assist</span>
-										</div>
-										<div
-											className="assist-turn__bubble assist-turn__bubble--pending"
-											role="status"
-											aria-label="Thinking"
-										>
-											<span className="assist-typing">
-												<span />
-												<span />
-												<span />
-											</span>
-										</div>
-									</article>
-								) : null}
-								<div ref={endRef} />
-							</div>
-							{error ? <p className="assist-thread__error">{error}</p> : null}
-							<div className="assist-composer-dock">
-								<ChatComposer
-									value={draft}
-									onChange={setDraft}
-									onSubmitPrompt={(value) => void send(value)}
-									disabled={!token}
-									busy={busy}
-									placeholder="Ask a follow-up..."
-									modelLabel={modelLabel}
-									showUpgradeRail={false}
-								/>
-							</div>
-						</>
-					)}
-				</section>
-			</main>
-		</div>
+			<header>
+				<h1 className="font-semibold text-xl">Personal OS Chat</h1>
+				<p className="text-muted-foreground text-sm">
+					Read-only guidance. Suggestions never change your data.
+				</p>
+			</header>
+			<div className="flex flex-wrap gap-2 text-sm">
+				{displayContext?.route && <span>Screen: {displayContext.route}</span>}
+				{displayContext?.date && <span>Date: {displayContext.date}</span>}
+				{displayContext?.entity && (
+					<span>
+						Entity: {displayContext.entity.type} · {displayContext.entity.id}
+					</span>
+				)}
+				{!displayContext?.route && !displayContext?.date && !displayContext?.entity && (
+					<span>General conversation</span>
+				)}
+			</div>
+			<nav aria-label="Conversations" className="flex flex-wrap items-center gap-2">
+				<Button variant="outline" disabled={busy} onClick={() => selectSession(null)}>
+					New conversation
+				</Button>
+				{sessions.isLoading && <p role="status">Loading conversations…</p>}
+				{sessions.isSuccess && sessions.data.pages.every((page) => page.sessions.length === 0) && (
+					<p>No conversations yet. Send a message to begin.</p>
+				)}
+				{sessions.data?.pages
+					.flatMap((page) => page.sessions)
+					.map((session) => (
+						<Button
+							key={session.id}
+							variant={session.id === sessionId ? "secondary" : "ghost"}
+							disabled={busy}
+							onClick={() => selectSession(session.id)}
+							aria-pressed={session.id === sessionId}
+						>
+							<span className="max-w-48 truncate">{session.title || "Untitled conversation"}</span>
+						</Button>
+					))}
+				{sessions.hasNextPage && (
+					<Button
+						disabled={sessions.isFetchingNextPage}
+						onClick={() => void sessions.fetchNextPage()}
+					>
+						More conversations
+					</Button>
+				)}
+			</nav>
+			{sessions.isError && (
+				<Alert>
+					<AlertDescription>
+						{aiErrorMessage(sessions.error)}
+						<Button
+							variant="outline"
+							disabled={sessions.isFetching}
+							onClick={() => void sessions.refetch()}
+						>
+							Retry conversations
+						</Button>
+					</AlertDescription>
+				</Alert>
+			)}
+			{sessionId && history.isLoading && <p role="status">Loading messages…</p>}
+			{history.isError && (
+				<Alert>
+					<AlertDescription>
+						{aiErrorMessage(history.error)}
+						<Button
+							variant="outline"
+							disabled={history.isFetching}
+							onClick={() => void history.refetch()}
+						>
+							Reload messages
+						</Button>
+					</AlertDescription>
+				</Alert>
+			)}
+			<div className="flex flex-col gap-4" role="log" aria-label="Messages" aria-live="polite">
+				{messages.map((message) => (
+					<article
+						key={message.id}
+						className="flex flex-col gap-2 rounded-lg border p-4 wrap-anywhere"
+					>
+						<h2 className="font-semibold">{message.role === "user" ? "You" : "Personal OS"}</h2>
+						<p className="whitespace-pre-wrap">{message.content}</p>
+						{Boolean(message.sources?.length) && (
+							<details>
+								<summary>Sources</summary>
+								<ul>
+									{message.sources?.map((source) => (
+										<li key={`${source.type}:${source.id}`}>{source.label}</li>
+									))}
+								</ul>
+							</details>
+						)}
+						{message.suggestions?.map((suggestion) => (
+							<p key={suggestion.title}>
+								<strong>Suggestion: {suggestion.title}</strong> {suggestion.detail}
+							</p>
+						))}
+					</article>
+				))}
+				{sessionId && history.isSuccess && messages.length === 0 && (
+					<p>This conversation has no messages yet.</p>
+				)}
+			</div>
+			{busy && <p role="status">Waiting for the assistant…</p>}
+			{error !== null && (
+				<Alert>
+					<AlertDescription>
+						{aiErrorMessage(error)}
+						{failedSend && (
+							<p>
+								Your message may already be saved. Reload messages before resending to avoid
+								duplicates.
+							</p>
+						)}
+					</AlertDescription>
+				</Alert>
+			)}
+			{messages.length >= 200 && <p>This conversation is full. Start a new conversation.</p>}
+			<div className="chat-design-system">
+				<ChatComposer
+					value={draft}
+					onChange={setDraft}
+					onSubmitPrompt={(value) => void send(value)}
+					busy={busy}
+					disabled={
+						history.isError ||
+						Boolean(sessionId && history.isLoading) ||
+						messages.length >= 200 ||
+						draft.length > 4000
+					}
+					modelLabel="Personal OS"
+					showUpgradeRail={false}
+				/>
+			</div>
+			<p className="text-muted-foreground text-sm">{draft.length}/4000 characters</p>
+		</section>
 	);
 }

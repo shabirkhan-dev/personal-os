@@ -1,6 +1,7 @@
 "use client";
 
 import { Sun03Icon } from "@hugeicons/core-free-icons";
+import { DailyIntelligencePanel } from "@/modules/ai";
 import {
 	ModulePageHeader,
 	TodayView,
@@ -21,6 +22,7 @@ export default function AdminTodayPage() {
 				icon={Sun03Icon}
 			/>
 			<div className="mx-auto w-full max-w-[820px] px-3 py-5 sm:px-6 lg:px-8">
+				<DailyIntelligencePanel />
 				<TodayView
 					view={view}
 					loading={isLoading}

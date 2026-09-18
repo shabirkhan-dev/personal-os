@@ -149,8 +149,18 @@ pinned. No `backend-api.mdx` change.
 
 ### Review
 
-- Pending. `reviewer: reviewer`. PR #19:
-  https://github.com/shabirkhan-dev/personal-os/pull/19
+- **No independent review was recorded.** PR #19 has zero reviews, zero inline comments, and
+  zero issue comments; no `.agents/notes/` file records a verdict. The card's declared
+  `reviewer` never signed off.
+- **Merged by the human product owner** on 2026-09-17 as `f7676a6`, once CI was green. That
+  approval stands on its own authority (`roles/pm.md` names the human as final approver), but it
+  is recorded here as an owner merge, **not** as a completed independent review, so the two are not
+  confused later.
+- The implementation role and the role recording this are the same, and `agent-contract.md` bars
+  self-approval. An independent verdict against the merged commit would need a different session.
+- CI on the merged revision: `lint`, `typecheck`, `test` (4m10s), `e2e-web`, `codeql`, and
+  `CodeQL` all pass. `dependency-review` fails — pre-existing on every PR since July, tracked at
+  the repo-settings level, not attributable to this change.
 
 ### Known limitations (disclosed, not blocking)
 

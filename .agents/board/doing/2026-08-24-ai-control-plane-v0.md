@@ -136,6 +136,8 @@ Review:
     vitest loads neither. Reproduced independently: `env -u AUTH_DEV_EXPOSE_CODES bunx vitest run
     ...auth.service.spec.ts` → 3/3 pass. Same defect class as the ai-api `AI_SERVICE_TOKEN` bug.
     Raised as `2026-09-16-nest-test-env-hermeticity.md`; do not attribute it to this card.
+    **Resolved** by that card — fixed in `f7676a6` (merged 2026-09-17), suite now 70/70 on a
+    plain dev shell; that card is in `done/`.
   - Verified as **not** defects: `listSessions`/`listMessages` are validated by the global pipe
     (initially suspected unvalidated, disproved by `app.setup.ts:52`); `/ai/chat/sessions`
     pagination bounds via `makePaginationSchema`; the structured paths deliberately omit

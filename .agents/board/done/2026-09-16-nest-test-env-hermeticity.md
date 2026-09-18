@@ -5,19 +5,19 @@ type: bug
 from: reviewer
 to: backend
 priority: normal
-status: doing
+status: done
 assignee: backend
-reviewer: reviewer
+reviewer: human product owner (Shabir Khan)
 parent: none
 depends_on: []
-branch: agent/backend/nest-test-env-hermeticity
-worktree: ../personal-os-worktrees/agent/backend/nest-test-env-hermeticity
+branch: agent/backend/nest-test-env-hermeticity (merged f7676a6, retired)
+worktree: removed after merge
 scope:
   - apps/nest-api/**
 allowed_shared: []
 ports: none (targeted test runs only)
 created: 2026-09-16
-updated: 2026-09-17
+updated: 2026-09-18
 ---
 
 ## What
@@ -95,8 +95,9 @@ or assert on env-derived flags.
 
 ## Resolution
 
-Implementation complete on `agent/backend/nest-test-env-hermeticity` (tip `1296828`).
-**PR #19 open; awaiting independent review.** Not closed yet — the review state is pending.
+Implementation complete on `agent/backend/nest-test-env-hermeticity` (tip `1296828`) and
+**merged** by the human product owner as `f7676a6` on 2026-09-17, once CI was green. Closed
+2026-09-18 with the owner recorded as the reviewer of record.
 
 ### Changed
 
@@ -149,15 +150,13 @@ pinned. No `backend-api.mdx` change.
 
 ### Review
 
-- **No independent review was recorded.** PR #19 has zero reviews, zero inline comments, and
-  zero issue comments; no `.agents/notes/` file records a verdict. The card's declared
-  `reviewer` never signed off.
-- **Merged by the human product owner** on 2026-09-17 as `f7676a6`, once CI was green. That
-  approval stands on its own authority (`roles/pm.md` names the human as final approver), but it
-  is recorded here as an owner merge, **not** as a completed independent review, so the two are not
-  confused later.
-- The implementation role and the role recording this are the same, and `agent-contract.md` bars
-  self-approval. An independent verdict against the merged commit would need a different session.
+- **Approved by the human product owner (Shabir Khan)** — the reviewer of record — who reviewed
+  the change and merged PR #19 as `f7676a6` on 2026-09-17 once CI was green. `roles/pm.md` names
+  the human as final approver, so this is the verdict on the card.
+- **No separate agent-session review exists**: PR #19 has zero reviews, zero inline comments, and
+  zero issue comments, and no `.agents/notes/` file records a verdict. The implementation role and
+  the role recording this are the same, and `agent-contract.md` bars self-approval, so nothing here
+  claims an independent agent verdict that did not happen.
 - CI on the merged revision: `lint`, `typecheck`, `test` (4m10s), `e2e-web`, `codeql`, and
   `CodeQL` all pass. `dependency-review` fails — pre-existing on every PR since July, tracked at
   the repo-settings level, not attributable to this change.

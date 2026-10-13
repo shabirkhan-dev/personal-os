@@ -7,192 +7,143 @@ import {
 	useMemo,
 	useState,
 } from "react";
-import { ApiError } from "@/lib/api/client";
 import { usersService } from "@/modules/users/services/users.service";
 import type { User } from "@/modules/users/types/user.types";
 import { authService } from "../services/auth.service";
+import { restoreSession } from "../services/restore-session";
 import { tokenStorage } from "../services/token-storage";
 import type {
+	AuthChallengeResult,
 	AuthSession,
-	LoginInput,
-	LoginResult,
-	RegisterInput,
-	RegistrationResult,
-	TwoFactorInput,
+	AuthStatus,
+	EmailCodeRequest,
+	EmailCodeVerify,
 } from "../types/auth.types";
 
 interface AuthContextValue {
+	status: AuthStatus;
 	token: string | null;
 	user: User | null;
-	loading: boolean;
+	/** Why the session could not be restored (only with `offline`). */
 	error: string | null;
-	login: (input: LoginInput) => Promise<LoginResult>;
-	verifyTwoFactor: (input: TwoFactorInput) => Promise<void>;
-	register: (input: RegisterInput) => Promise<RegistrationResult>;
-	consumeMagicLink: (token: string) => Promise<void>;
-	establishSession: (session: AuthSession) => Promise<void>;
+	requestEmailCode: (input: EmailCodeRequest) => Promise<AuthChallengeResult>;
+	verifyEmailCode: (input: EmailCodeVerify) => Promise<void>;
+	/** Retries restoring the saved session after `offline`. */
+	retry: () => Promise<void>;
 	logout: () => Promise<void>;
-	logoutAll: () => Promise<void>;
-	refreshUser: () => Promise<void>;
-	clearError: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-	const [token, setToken] = useState<string | null>(null);
-	const [tokenExpiresAt, setTokenExpiresAt] = useState<string | null>(null);
-	const [user, setUser] = useState<User | null>(null);
-	const [loading, setLoading] = useState(true);
+	const [status, setStatus] = useState<AuthStatus>("loading");
+	const [session, setSession] = useState<AuthSession | null>(null);
 	const [error, setError] = useState<string | null>(null);
 
 	const clearSession = useCallback(async () => {
-		setToken(null);
-		setTokenExpiresAt(null);
-		setUser(null);
-		await tokenStorage.setRefreshToken(null);
-	}, []);
-
-	const establishSession = useCallback(async (session: AuthSession) => {
-		setToken(session.accessToken);
-		setTokenExpiresAt(session.accessTokenExpiresAt);
-		setUser(session.user);
-		if (session.refreshToken) {
-			await tokenStorage.setRefreshToken(session.refreshToken);
-		}
-		// Auth session payloads omit profile; hydrate from /users/me like web.
+		setSession(null);
+		setStatus("signed-out");
 		try {
-			setUser(await usersService.getCurrent(session.accessToken));
-		} catch {
-			// Keep session.user if profile fetch fails (offline, transient errors).
+			await tokenStorage.setRefreshToken(null);
+		} catch (caught) {
+			console.warn("[auth] could not clear the saved session", caught);
 		}
 	}, []);
 
-	const refreshSession = useCallback(async () => {
-		const session = await authService.refresh();
-		await establishSession(session);
-		return session;
-	}, [establishSession]);
-
-	useEffect(() => {
-		// oxlint-disable-next-line react/set-state-in-effect
-		refreshSession()
-			.catch(() => clearSession())
-			.finally(() => setLoading(false));
-	}, [clearSession, refreshSession]);
-
-	useEffect(() => {
-		if (!tokenExpiresAt) return;
-		const delay = Math.max(1_000, new Date(tokenExpiresAt).getTime() - Date.now() - 60_000);
-		const timer = setTimeout(() => {
-			refreshSession().catch(() => {
-				void clearSession();
-			});
-		}, delay);
-		return () => clearTimeout(timer);
-	}, [clearSession, refreshSession, tokenExpiresAt]);
-
-	const login = useCallback(
-		async (input: LoginInput) => {
-			setError(null);
+	const establishSession = useCallback(async (next: AuthSession) => {
+		if (next.refreshToken) {
 			try {
-				const result = await authService.login(input);
-				if (!("requiresTwoFactor" in result)) await establishSession(result);
-				return result;
+				await tokenStorage.setRefreshToken(next.refreshToken);
 			} catch (caught) {
-				setError(toMessage(caught, "Login failed"));
-				throw caught;
+				// Still signed in for this run; the session just won't survive a restart.
+				console.warn("[auth] could not save the session", caught);
+			}
+		}
+		setSession(next);
+		setError(null);
+		setStatus("signed-in");
+		// Session payloads omit the profile; fill it in when the API answers.
+		try {
+			const user = await usersService.getCurrent(next.accessToken);
+			setSession((current) => (current ? { ...current, user } : current));
+		} catch (caught) {
+			console.warn("[auth] could not load the profile; keeping the session user", caught);
+		}
+	}, []);
+
+	/** `quiet` keeps the current status while refreshing in the background. */
+	const restore = useCallback(
+		async (quiet = false) => {
+			if (!quiet) setStatus("loading");
+			const result = await restoreSession({
+				readToken: tokenStorage.getRefreshToken,
+				refresh: authService.refresh,
+				clearToken: () => tokenStorage.setRefreshToken(null),
+			});
+			if (result.status === "signed-in") {
+				await establishSession(result.session);
+			} else if (result.status === "offline") {
+				setError(result.error);
+				setStatus("offline");
+			} else {
+				setStatus("signed-out");
 			}
 		},
 		[establishSession],
 	);
 
-	const verifyTwoFactor = useCallback(
-		async (input: TwoFactorInput) => {
-			await establishSession(await authService.verifyTwoFactor(input));
-		},
-		[establishSession],
+	useEffect(() => {
+		restore().catch((caught: unknown) => {
+			console.warn("[auth] session restore failed", caught);
+			setStatus("signed-out");
+		});
+	}, [restore]);
+
+	const tokenExpiresAt = session?.accessTokenExpiresAt ?? null;
+	useEffect(() => {
+		if (!tokenExpiresAt) return;
+		const delay = Math.max(1_000, new Date(tokenExpiresAt).getTime() - Date.now() - 60_000);
+		const timer = setTimeout(() => {
+			restore(true).catch((caught: unknown) => console.warn("[auth] token refresh failed", caught));
+		}, delay);
+		return () => clearTimeout(timer);
+	}, [restore, tokenExpiresAt]);
+
+	const requestEmailCode = useCallback(
+		(input: EmailCodeRequest) => authService.requestEmailCode(input),
+		[],
 	);
 
-	const register = useCallback(async (input: RegisterInput) => {
-		setError(null);
-		try {
-			return await authService.register(input);
-		} catch (caught) {
-			setError(toMessage(caught, "Registration failed"));
-			throw caught;
-		}
-	}, []);
-
-	const consumeMagicLink = useCallback(
-		async (magicToken: string) => {
-			await establishSession(await authService.consumeMagicLink(magicToken));
+	const verifyEmailCode = useCallback(
+		async (input: EmailCodeVerify) => {
+			await establishSession(await authService.verifyEmailCode(input));
 		},
 		[establishSession],
 	);
 
 	const logout = useCallback(async () => {
 		try {
-			await authService.logout();
+			await authService.logout(await tokenStorage.getRefreshToken());
+		} catch (caught) {
+			// The local session is cleared either way; the server session expires on its own.
+			console.warn("[auth] server logout failed", caught);
 		} finally {
 			await clearSession();
 		}
 	}, [clearSession]);
 
-	const logoutAll = useCallback(async () => {
-		try {
-			if (token) await authService.logoutAll(token);
-		} finally {
-			await clearSession();
-		}
-	}, [clearSession, token]);
-
-	const refreshUser = useCallback(async () => {
-		if (!token) return;
-		try {
-			setUser(await usersService.getCurrent(token));
-		} catch (caught) {
-			if (caught instanceof ApiError && caught.statusCode === 401) {
-				await refreshSession();
-				return;
-			}
-			throw caught;
-		}
-	}, [refreshSession, token]);
-
-	const clearError = useCallback(() => setError(null), []);
-
 	const value = useMemo(
 		() => ({
-			token,
-			user,
-			loading,
+			status,
+			token: session?.accessToken ?? null,
+			user: session?.user ?? null,
 			error,
-			login,
-			verifyTwoFactor,
-			register,
-			consumeMagicLink,
-			establishSession,
+			requestEmailCode,
+			verifyEmailCode,
+			retry: () => restore(),
 			logout,
-			logoutAll,
-			refreshUser,
-			clearError,
 		}),
-		[
-			token,
-			user,
-			loading,
-			error,
-			login,
-			verifyTwoFactor,
-			register,
-			consumeMagicLink,
-			establishSession,
-			logout,
-			logoutAll,
-			refreshUser,
-			clearError,
-		],
+		[status, session, error, requestEmailCode, verifyEmailCode, restore, logout],
 	);
 
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -200,10 +151,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth(): AuthContextValue {
 	const context = useContext(AuthContext);
-	if (!context) throw new Error("useAuth must be used within AuthProvider");
+	if (!context) throw new Error("useAuth must be used inside AuthProvider");
 	return context;
-}
-
-function toMessage(error: unknown, fallback: string): string {
-	return error instanceof Error ? error.message : fallback;
 }

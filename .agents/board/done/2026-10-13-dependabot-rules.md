@@ -5,7 +5,7 @@ type: chore
 from: pm
 to: human
 priority: normal
-status: open
+status: done
 assignee: none
 reviewer: human
 parent: none
@@ -42,4 +42,4 @@ Add `ignore` entries for Expo-managed packages, `groups` for minor/patch updates
 
 ## Resolution
 
-_Open._
+Rejected by the owner on 2026-10-13: not planned. Dependabot PRs are triaged by hand.

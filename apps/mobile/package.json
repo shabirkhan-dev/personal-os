@@ -18,9 +18,11 @@
     "test": "bun -e \"console.log('[mobile] No unit tests yet; skipping.');\""
   },
   "dependencies": {
+    "@expo-google-fonts/jetbrains-mono": "^0.4.1",
     "@expo/metro-runtime": "~58.0.10",
     "@hugeicons/core-free-icons": "^4.3.5",
     "@hugeicons/react-native": "^1.0.16",
+    "@personal-os/tokens": "workspace:*",
     "@react-navigation/bottom-tabs": "^7.20.0",
     "@react-navigation/elements": "^2.9.44",
     "@react-navigation/native": "^7.5.0",
@@ -44,6 +46,7 @@
     "expo-status-bar": "~58.0.3",
     "expo-symbols": "~58.0.3",
     "expo-system-ui": "~58.0.5",
+    "expo-updates": "~58.0.15",
     "expo-web-browser": "~58.0.4",
     "lucide-react-native": "^1.49.0",
     "react": "19.3.0",

@@ -183,6 +183,14 @@
         "react": ">=19",
       },
     },
+    "packages/tokens": {
+      "name": "@personal-os/tokens",
+      "version": "0.0.0",
+      "devDependencies": {
+        "@starter/typescript-config": "workspace:*",
+        "typescript": "^7.0.2",
+      },
+    },
     "packages/typescript-config": {
       "name": "@starter/typescript-config",
       "version": "0.0.0",
@@ -857,6 +865,8 @@
     "@peculiar/utils": ["@peculiar/utils@2.0.3", "", { "dependencies": { "tslib": "^2.8.1" } }, "sha512-+oL3HPFRIZ1St2K50lWCXiioIgSoxzz7R1J3uF6neO2yl1sgmpgY6XXJH4BdpoDkMWznQTeYF6oWNDZLCdQ4eQ=="],
 
     "@peculiar/x509": ["@peculiar/x509@2.1.0", "", { "dependencies": { "@peculiar/asn1-cms": "^2.9.4", "@peculiar/asn1-csr": "^2.9.4", "@peculiar/asn1-ecc": "^2.9.4", "@peculiar/asn1-pkcs9": "^2.9.4", "@peculiar/asn1-rsa": "^2.9.4", "@peculiar/asn1-schema": "^2.9.4", "@peculiar/asn1-x509": "^2.9.4", "@peculiar/asn1-x509-post-quantum": "^2.9.4", "pvtsutils": "^1.3.6", "tslib": "^2.8.1", "tsyringe": "^4.10.0" } }, "sha512-IYbg1R03CSQGWwl24kGyqrdVtixNSbRaDvBg1r5wyYjTP+VwPQkka1BzTgU5+vxiuwqg04OxdvdJ1xYYFIdUSA=="],
+
+    "@personal-os/tokens": ["@personal-os/tokens@workspace:packages/tokens"],
 
     "@rabtx/ui": ["@rabtx/ui@workspace:packages/rabtx"],
 

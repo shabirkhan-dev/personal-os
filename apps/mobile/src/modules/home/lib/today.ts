@@ -80,7 +80,8 @@ export function todayItems(
 			tone: "statusCaution",
 		});
 	}
-	return items.toSorted((a, b) => a.minutes - b.minutes);
+	// Not `toSorted`: the ES2023 array methods are not guaranteed on Hermes, and nothing polyfills them.
+	return [...items].sort((a, b) => a.minutes - b.minutes);
 }
 
 /** Splits the timeline around the current minute; after the last item it rolls to tomorrow. */

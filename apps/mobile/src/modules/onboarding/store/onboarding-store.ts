@@ -45,7 +45,7 @@ type OnboardingActions = {
 	set: <K extends keyof OnboardingAnswers>(key: K, value: OnboardingAnswers[K]) => void;
 	/** Adds a goal at the next rank or removes it and closes the gap. */
 	toggleGoal: (goal: GoalId) => void;
-	toggleModule: (module: ModuleId) => void;
+	toggleModule: (moduleId: ModuleId) => void;
 	toggleWorkday: (index: number) => void;
 	toggleConnection: (connection: ConnectionId) => void;
 	toggleReminder: (reminder: ReminderId) => void;
@@ -89,8 +89,8 @@ export const initialAnswers: OnboardingAnswers = {
 export function modulesForGoals(goals: readonly GoalId[]): ModuleId[] {
 	const modules: ModuleId[] = ["daily-life"];
 	for (const goal of goals) {
-		const module = goalModule[goal];
-		if (module && !modules.includes(module)) modules.push(module);
+		const moduleId = goalModule[goal];
+		if (moduleId && !modules.includes(moduleId)) modules.push(moduleId);
 	}
 	return modules;
 }
@@ -106,12 +106,12 @@ export const useOnboardingStore = create<OnboardingAnswers & OnboardingActions>(
 			set({ goals: [...goals, goal] });
 		}
 	},
-	toggleModule: (module) => {
+	toggleModule: (moduleId) => {
 		const modules = get().modules;
 		set({
-			modules: modules.includes(module)
-				? modules.filter((item) => item !== module)
-				: [...modules, module],
+			modules: modules.includes(moduleId)
+				? modules.filter((item) => item !== moduleId)
+				: [...modules, moduleId],
 		});
 	},
 	toggleWorkday: (index) => {

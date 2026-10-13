@@ -26,3 +26,15 @@ export const stroke = {
 	/** Unchecked checkbox ring. */
 	ring: 1.75,
 } as const;
+
+/** Drop shadows from the Kit v2 card effects (the shadow colour is black in both modes). */
+export const elevation = {
+	/** Personal card (frame 15): 0 24 24 at 50%. */
+	card: { color: "#000000", opacity: 0.5, offsetY: 24, radius: 24 },
+	/** OS card (frame 18): 0 24 48 at 50%. */
+	floating: { color: "#000000", opacity: 0.5, offsetY: 24, radius: 48 },
+	/** OS card pocket lip (frame 18): 0 −8 24 at 35%. */
+	pocket: { color: "#000000", opacity: 0.35, offsetY: -8, radius: 24 },
+} as const;
+
+export type ElevationToken = (typeof elevation)[keyof typeof elevation];

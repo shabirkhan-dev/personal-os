@@ -11,16 +11,18 @@ export type TextBlockProps = {
 	body: readonly RichPart[];
 	/** Welcome screens show a coloured dot before a text/secondary eyebrow. */
 	dot?: keyof ColorTokens;
+	/** Keeps the 8px rhythm even with a dot (plan reveal). */
+	compact?: boolean;
 };
 
 /** Eyebrow (JetBrains Mono), PO/Title 30 heading and PO/Body 15 copy. */
-export function TextBlock({ eyebrow, title, body, dot }: TextBlockProps) {
+export function TextBlock({ eyebrow, title, body, dot, compact = false }: TextBlockProps) {
 	const { colors } = usePoTheme();
 
 	return (
 		<Animated.View
 			entering={FadeInDown.duration(380).delay(60)}
-			style={[styles.block, dot ? styles.welcome : null]}
+			style={[styles.block, dot && !compact ? styles.welcome : null]}
 		>
 			<View style={styles.eyebrow}>
 				{dot ? <View style={[styles.dot, { backgroundColor: colors[dot] }]} /> : null}

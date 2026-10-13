@@ -72,3 +72,33 @@ export function insightChips(input: InsightInput, today: Date): InsightChip[] {
 		{ id: "sleep", label: "Sleep", value: dayRhythm(input.wakeMinutes, input.bedMinutes).sleep },
 	];
 }
+
+export type CalorieInput = {
+	weightKg: number;
+	heightCm: number;
+	age: number;
+	gender: "male" | "female" | "other" | null;
+	loseWeight: boolean;
+};
+
+/**
+ * Daily calorie target: Mifflin–St Jeor BMR × 1.35 (lightly active), minus 300 kcal when
+ * losing weight, rounded to the nearest 50.
+ */
+export function dailyCalories({
+	weightKg,
+	heightCm,
+	age,
+	gender,
+	loseWeight,
+}: CalorieInput): number {
+	const sexOffset = gender === "male" ? 5 : gender === "female" ? -161 : -78;
+	const bmr = 10 * weightKg + 6.25 * heightCm - 5 * age + sexOffset;
+	const target = bmr * 1.35 - (loseWeight ? 300 : 0);
+	return Math.round(target / 50) * 50;
+}
+
+/** "8,000" style grouping without relying on Intl being present on every engine. */
+export function formatThousands(value: number): string {
+	return String(Math.round(value)).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}

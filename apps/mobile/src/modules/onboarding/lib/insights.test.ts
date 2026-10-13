@@ -4,7 +4,9 @@ import {
 	ageFromBirthday,
 	bmi,
 	bmiBand,
+	dailyCalories,
 	dayRhythm,
+	formatThousands,
 	insightChips,
 	waterGoalLiters,
 } from "./insights";
@@ -58,5 +60,18 @@ describe("insights", () => {
 			["water", "2.5 L"],
 			["sleep", "7h 30m"],
 		]);
+	});
+
+	test("calorie target matches the plan card (1,950 kcal)", () => {
+		const kcal = dailyCalories({
+			weightKg: 72,
+			heightCm: 175,
+			age: 28,
+			gender: "male",
+			loseWeight: true,
+		});
+		expect(kcal).toBe(1950);
+		expect(formatThousands(kcal)).toBe("1,950");
+		expect(formatThousands(8000)).toBe("8,000");
 	});
 });

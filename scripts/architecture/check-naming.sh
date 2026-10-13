@@ -19,7 +19,7 @@ SCOPES=(
     apps/nest-api/src
     apps/mobile/src
     apps/docs/src
-    packages/ui/src
+    packages/tokens/src
     packages/logger/src
 )
 

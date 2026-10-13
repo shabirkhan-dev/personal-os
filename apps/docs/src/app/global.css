@@ -2,9 +2,6 @@
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
 
-/* Shared design tokens — same file the web and mobile apps use. */
-@import '../../../../packages/ui/src/styles/globals.css';
-
 html {
   scrollbar-gutter: stable;
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;

@@ -6,7 +6,7 @@
 		"suspicious": "warn",
 		"perf": "warn"
 	},
-	"ignorePatterns": ["apps/mobile/src/uniwind-types.d.ts", "**/.next", "**/dist"],
+	"ignorePatterns": ["**/.next", "**/dist"],
 	"rules": {
 		"react/exhaustive-deps": "warn",
 		"react/rules-of-hooks": "error",
@@ -52,11 +52,7 @@
 			}
 		},
 		{
-			"files": [
-				"apps/mobile/**/*.ts",
-				"apps/mobile/**/*.tsx",
-				"packages/ui/src/components/mobile/**/*.tsx"
-			],
+			"files": ["apps/mobile/**/*.ts", "apps/mobile/**/*.tsx"],
 			"rules": {
 				"react/no-array-index-key": "off",
 				"react/no-unstable-nested-components": ["warn", { "allowAsProps": true }],

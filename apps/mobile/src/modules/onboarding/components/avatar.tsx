@@ -23,7 +23,7 @@ export function Avatar({ name, size }: { name: string; size: number }) {
 				{ width: size, height: size, borderRadius: size / 2, backgroundColor: colors.accentSubtle },
 			]}
 		>
-			<PoText variant="title18" tone="textLink">
+			<PoText variant={size < 40 ? "text14Medium" : "title18"} tone="textLink">
 				{initials(name)}
 			</PoText>
 		</View>

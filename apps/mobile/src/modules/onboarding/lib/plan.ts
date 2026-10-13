@@ -18,7 +18,15 @@ export type PlanInput = {
 	calories: number;
 };
 
-export type PlanRow = { time: string; title: string; meta: string; icon: IconName; iconTone: Tone };
+export type PlanRow = {
+	/** Minute of the day (0..1439). */
+	minutes: number;
+	time: string;
+	title: string;
+	meta: string;
+	icon: IconName;
+	iconTone: Tone;
+};
 
 const LUNCH = 13 * 60;
 const WORKOUT = 18 * 60 + 30;
@@ -35,6 +43,7 @@ export function buildDayPlan(input: PlanInput): PlanRow[] {
 	const rhythm = dayRhythm(input.wakeMinutes, input.bedMinutes);
 	const rows: PlanRow[] = [
 		{
+			minutes: wrapMinutes(input.wakeMinutes),
 			time: formatClock(input.wakeMinutes),
 			title: "Wake up",
 			meta: `Morning plan at ${rhythm.morningPlan}`,
@@ -44,6 +53,7 @@ export function buildDayPlan(input: PlanInput): PlanRow[] {
 	];
 	if (input.workdays.some(Boolean)) {
 		rows.push({
+			minutes: wrapMinutes(input.workStartMinutes),
 			time: formatClock(input.workStartMinutes),
 			title: `Work · ${styleLabel[input.workStyle]}`,
 			meta: `Until ${formatClock(input.workEndMinutes)}`,
@@ -52,6 +62,7 @@ export function buildDayPlan(input: PlanInput): PlanRow[] {
 		});
 	}
 	rows.push({
+		minutes: wrapMinutes(LUNCH),
 		time: formatClock(LUNCH),
 		title: "Lunch",
 		meta: `~${formatThousands(Math.round(input.calories / 3 / 50) * 50)} kcal`,
@@ -60,6 +71,7 @@ export function buildDayPlan(input: PlanInput): PlanRow[] {
 	});
 	if (input.modules.includes("workout")) {
 		rows.push({
+			minutes: wrapMinutes(WORKOUT),
 			time: formatClock(WORKOUT),
 			title: "Push day",
 			meta: `${WORKOUT_LENGTH} min`,
@@ -69,6 +81,7 @@ export function buildDayPlan(input: PlanInput): PlanRow[] {
 	}
 	if (input.modules.includes("skincare")) {
 		rows.push({
+			minutes: wrapMinutes(input.bedMinutes - 60),
 			time: formatClock(input.bedMinutes - 60),
 			title: "Skincare · PM",
 			meta: "4 steps",
@@ -77,6 +90,7 @@ export function buildDayPlan(input: PlanInput): PlanRow[] {
 		});
 	}
 	rows.push({
+		minutes: wrapMinutes(input.bedMinutes),
 		time: formatClock(input.bedMinutes),
 		title: "Sleep",
 		meta: rhythm.sleep,

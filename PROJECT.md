@@ -21,7 +21,7 @@ personal-os/
 │   ├── nest-api/             # NestJS API
 │   ├── ai-api/               # FastAPI AI assist (uv); the Nest API proxies it
 │   ├── docs/                 # Documentation app (Next.js + Fumadocs)
-│   └── web/                  # Next.js landing page, static export for Cloudflare Pages
+│   └── web/                  # Next.js landing page, static export on Cloudflare Workers
 ├── packages/
 │   ├── tokens/               # @personal-os/tokens: Figma Kit v2 colours, spacing, radii, type
 │   ├── logger/               # @starter/logger: structured logger (TypeScript)
@@ -47,7 +47,7 @@ There is no root `docs/` directory.
 | `apps/nest-api` | NestJS 11, Zod, Jest | Production API spine |
 | `apps/ai-api` | FastAPI, uv | AI assist; never exposes LLM keys publicly |
 | `apps/docs` | Next.js + Fumadocs + MDX | Project docs site |
-| `apps/web` | Next.js 16 | Landing page, static export deployed to Cloudflare Pages |
+| `apps/web` | Next.js 16 | Landing page, static export deployed to Cloudflare Workers |
 
 ## Shared packages
 

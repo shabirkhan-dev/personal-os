@@ -1,0 +1,19 @@
+{
+	// Cloudflare Workers (Workers Builds): root directory `apps/web`, build command
+	// `bun run build`, deploy command `npx wrangler deploy`. Serves the static export in `out/`;
+	// only `/api/*` runs the Worker in `worker/index.ts`.
+	"name": "personal-os",
+	"main": "worker/index.ts",
+	"compatibility_date": "2026-10-01",
+	"assets": {
+		"directory": "./out",
+		"binding": "ASSETS",
+		"not_found_handling": "404-page",
+		"run_worker_first": ["/api/*"],
+	},
+	"observability": { "enabled": true },
+	// Launch-day sign-ups. Create the namespace (Storage & Databases → KV → Create, or
+	// `bunx wrangler kv namespace create personal-os-waitlist`), then uncomment and paste its id.
+	// Until then /api/notify answers 503 and the form asks people to try again.
+	// "kv_namespaces": [{ "binding": "WAITLIST", "id": "<namespace id>" }],
+}

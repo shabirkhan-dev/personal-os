@@ -1,13 +1,13 @@
 ---
 title: Deploy
-description: Landing page on Cloudflare Pages, docs on Vercel, Nest API on Render with Neon Postgres.
+description: Landing page on Cloudflare Workers, docs on Vercel, Nest API on Render with Neon Postgres.
 ---
 
 Ship the Starter stack without Docker on the public internet:
 
 | App | Platform | Notes |
 |-----|----------|--------|
-| `apps/web` | [Cloudflare Pages](https://pages.cloudflare.com) | Next.js static export + one Pages Function |
+| `apps/web` | [Cloudflare Workers](https://workers.cloudflare.com) | Next.js static export served as Worker assets + `/api/notify` |
 | `apps/docs` | [Vercel](https://vercel.com) | Separate Vercel project |
 | `apps/nest-api` | [Render](https://render.com) | Docker Blueprint + Neon `DATABASE_URL` |
 | Database | [Neon](https://neon.tech) | Serverless Postgres (TLS auto-detected) |
@@ -48,18 +48,15 @@ Migrations run on container start when `RUN_MIGRATIONS=true` (default in the Blu
 
 **Note:** Free Render services spin down when idle; the first request can take ~30s. AI assist still needs a hosted `apps/ai-api` (`AI_API_URL`) later — Nest will boot without it.
 
-## 3) Landing page on Cloudflare Pages
+## 3) Landing page on Cloudflare Workers
 
-`apps/web` is a static export (`out/`) plus a Pages Function for launch-day sign-ups. It does not
-call Nest.
+`apps/web` is a static export (`out/`) served as Worker static assets, plus a small Worker for
+launch-day sign-ups (`/api/notify`, Workers KV). It does not call Nest.
 
-1. **Workers & Pages → Create → Pages → Connect to Git**, this repo, branch `main`.
-2. Framework preset **None**, root directory `apps/web`, build command
-   `bun install --frozen-lockfile && bun run build`, output directory `out`.
-3. Environment variables: `NODE_VERSION=22`, `BUN_VERSION=1.4.2`.
-4. Create a KV namespace and bind it to the project as `WAITLIST` (Settings → Bindings), then
-   redeploy.
-5. Add a custom domain, for example `personalos.rabtx.dev`.
+1. **Workers & Pages → Create → Workers → Import a repository**, this repo, branch `main`.
+2. Root directory `apps/web`, build command `bun run build`, deploy command `npx wrangler deploy`.
+3. Create a KV namespace and put its id in `apps/web/wrangler.jsonc` (`WAITLIST` binding).
+4. Add a custom domain, for example `personalos.rabtx.dev`.
 
 Full steps: `apps/web/README.md`.
 

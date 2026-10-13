@@ -51,3 +51,9 @@ Validation:
 - Rendered at 1440px and 390px with headless Chromium
 
 Not done: no Turnstile or rate limiting on the sign-up yet; add Turnstile if it gets spam.
+
+Follow-up: the owner deployed with Workers Builds, whose `npx wrangler deploy` tried to convert the
+app with OpenNext and failed on `workspace:*`. Added `wrangler.jsonc` (static assets from `out/`,
+`run_worker_first: ["/api/*"]`) and moved the sign-up into `worker/` (was a Pages Function).
+Checked with `wrangler deploy --dry-run` and `wrangler dev`: page 200 with `_headers` applied,
+404 page, `/api/notify` 200/400/405 as expected.

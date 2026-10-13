@@ -62,7 +62,7 @@ personal-os/
 │   ├── nest-api/        # NestJS production API (PostgreSQL in later phases)
 │   ├── ai-api/          # FastAPI AI assist (uv); Nest proxies, never public LLM keys
 │   ├── docs/            # Docs site (Fumadocs); source in apps/docs/content/docs/
-│   └── web/             # Next.js landing page (static export → Cloudflare Pages), see apps/web/README.md
+│   └── web/             # Next.js landing page (static export → Cloudflare Workers), see apps/web/README.md
 ├── packages/
 │   ├── tokens/          # @personal-os/tokens: Figma Kit v2 colours, spacing, radii, text styles
 │   ├── typescript-config/ # Shared tsconfig bases (base.json, nextjs.json)

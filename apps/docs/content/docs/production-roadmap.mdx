@@ -371,7 +371,6 @@ apps/nest-api/src/
       users.schema.ts
       user-profiles.schema.ts
       sessions.schema.ts
-      subscriptions.schema.ts
       passkeys.schema.ts
       totp-factors.schema.ts
       auth-identities.schema.ts
@@ -381,7 +380,6 @@ apps/nest-api/src/
     auth/
     users/
     profiles/
-    billing/
     mfa/
     passkeys/
     social-auth/
@@ -439,10 +437,8 @@ apps/nest-api/src/
 - Accept/reject invite with token verification
 - Member status lifecycle (active, pending, suspended)
 
-### Phase 6 — Billing & Subscriptions (Completed)
-- Stripe and Razorpay payment provider integrations
-- Subscription checkout sessions and portal redirects
-- Webhook signature verification and entitlement updates
+### Phase 6 — Billing & Subscriptions (Removed)
+- The Starter's Stripe/Razorpay billing module was removed for Personal OS (card pos-10)
 
 ### Phase 7 — Audit Logs & Security Trails
 - Immutable audit log table and service

@@ -33,22 +33,6 @@ export type AppConfig = {
 	webAuthnRpId: string;
 	webAuthnOrigins: string[];
 	googleClientId?: string;
-	billingDefaultProvider: 'stripe' | 'razorpay';
-	stripeSecretKey?: string;
-	stripeWebhookSecret?: string;
-	razorpayKeyId?: string;
-	razorpayKeySecret?: string;
-	razorpayWebhookSecret?: string;
-	billingPrices: {
-		stripe: {
-			team: { monthly?: string; yearly?: string };
-			enterprise: { monthly?: string; yearly?: string };
-		};
-		razorpay: {
-			team: { monthly?: string; yearly?: string };
-			enterprise: { monthly?: string; yearly?: string };
-		};
-	};
 	aiApiUrl: string;
 	aiServiceToken: string;
 };
@@ -92,42 +76,6 @@ export function createAppConfig(env: Env = parseEnv()): AppConfig {
 			.map((origin) => origin.trim().replace(/\/$/, ''))
 			.filter(Boolean),
 		...(env.GOOGLE_CLIENT_ID ? { googleClientId: env.GOOGLE_CLIENT_ID } : {}),
-		billingDefaultProvider: env.BILLING_DEFAULT_PROVIDER,
-		...(env.STRIPE_SECRET_KEY ? { stripeSecretKey: env.STRIPE_SECRET_KEY } : {}),
-		...(env.STRIPE_WEBHOOK_SECRET ? { stripeWebhookSecret: env.STRIPE_WEBHOOK_SECRET } : {}),
-		...(env.RAZORPAY_KEY_ID ? { razorpayKeyId: env.RAZORPAY_KEY_ID } : {}),
-		...(env.RAZORPAY_KEY_SECRET ? { razorpayKeySecret: env.RAZORPAY_KEY_SECRET } : {}),
-		...(env.RAZORPAY_WEBHOOK_SECRET ? { razorpayWebhookSecret: env.RAZORPAY_WEBHOOK_SECRET } : {}),
-		billingPrices: {
-			stripe: {
-				team: {
-					...(env.STRIPE_PRICE_TEAM_MONTHLY ? { monthly: env.STRIPE_PRICE_TEAM_MONTHLY } : {}),
-					...(env.STRIPE_PRICE_TEAM_YEARLY ? { yearly: env.STRIPE_PRICE_TEAM_YEARLY } : {}),
-				},
-				enterprise: {
-					...(env.STRIPE_PRICE_ENTERPRISE_MONTHLY
-						? { monthly: env.STRIPE_PRICE_ENTERPRISE_MONTHLY }
-						: {}),
-					...(env.STRIPE_PRICE_ENTERPRISE_YEARLY
-						? { yearly: env.STRIPE_PRICE_ENTERPRISE_YEARLY }
-						: {}),
-				},
-			},
-			razorpay: {
-				team: {
-					...(env.RAZORPAY_PLAN_TEAM_MONTHLY ? { monthly: env.RAZORPAY_PLAN_TEAM_MONTHLY } : {}),
-					...(env.RAZORPAY_PLAN_TEAM_YEARLY ? { yearly: env.RAZORPAY_PLAN_TEAM_YEARLY } : {}),
-				},
-				enterprise: {
-					...(env.RAZORPAY_PLAN_ENTERPRISE_MONTHLY
-						? { monthly: env.RAZORPAY_PLAN_ENTERPRISE_MONTHLY }
-						: {}),
-					...(env.RAZORPAY_PLAN_ENTERPRISE_YEARLY
-						? { yearly: env.RAZORPAY_PLAN_ENTERPRISE_YEARLY }
-						: {}),
-				},
-			},
-		},
 		aiApiUrl: env.AI_API_URL.replace(/\/$/, ''),
 		aiServiceToken: env.AI_SERVICE_TOKEN,
 	};

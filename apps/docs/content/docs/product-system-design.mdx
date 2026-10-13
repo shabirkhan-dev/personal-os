@@ -73,7 +73,7 @@ Primary personas:
 | Service | Path | Role | Technology |
 | --- | --- | --- | --- |
 | **Mobile App** | `apps/mobile` | The Personal OS client | Expo Router, Reanimated, `@personal-os/tokens` |
-| **API Spine** | `apps/nest-api` | Auth, tenancy, users, billing, MFA, passkeys, AI proxy | NestJS, Drizzle ORM, Zod |
+| **API Spine** | `apps/nest-api` | Auth, users, profiles, MFA, passkeys, AI proxy | NestJS, Drizzle ORM, Zod |
 | **AI Assist** | `apps/ai-api` | LLM orchestration, structured assist pipelines | FastAPI, Python 3, uv |
 | **Documentation** | `apps/docs` | Technical documentation and architecture guides | Fumadocs, MDX |
 | **Landing shell** | `apps/web` | Disabled landing page, kept for later | Next.js |
@@ -103,7 +103,6 @@ Primary personas:
 | `permissions` | Granular permission catalog | `id`, `code unique`, `module`, `description` |
 | `role_permissions` | Permissions assigned to roles | `role_id`, `permission_id` |
 | `sessions` | Active user sessions | `id`, `user_id`, `token_hash`, `expires_at`, `ip`, `userAgent` |
-| `subscriptions` | Billing and plan state | `id`, `user_id`, `provider`, `plan_id`, `status` |
 
 ---
 
@@ -134,7 +133,6 @@ All critical events follow the outbox pattern inside database transactions to en
 | --- | --- | --- |
 | `starter.workspace.events.v1` | `workspaceId` | Workspace creation, update, and quota telemetry |
 | `starter.auth.events.v1` | `userId` | Login, password reset, MFA factor activation |
-| `starter.billing.events.v1` | `organizationId` | Checkout, subscription renewal, invoice payment |
 | `starter.notification.events.v1` | `recipientId` | Transactional emails, in-app alerts |
 | `starter.audit.events.v1` | `workspaceId` | Immutable audit trail for compliance |
 | `starter.ai.actions.v1` | `workspaceId` | Prompt telemetry, assist proposals, approval queue |

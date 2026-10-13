@@ -3,11 +3,8 @@ import { useEffect } from "react";
 import { onboardingRoutes } from "@/modules/onboarding/lib/flow";
 import { useOnboardingProgress } from "@/modules/onboarding/store/onboarding-progress";
 
-export const unstable_settings = {
-	initialRouteName: "(dashboard)",
-};
-
-export default function ModulesLayout() {
+/** The main app; first launch goes through onboarding. */
+export default function HomeLayout() {
 	const { hydrated, completed, hydrate } = useOnboardingProgress();
 
 	useEffect(() => {

@@ -1,4 +1,3 @@
-import "../global.css";
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
@@ -53,9 +52,8 @@ function RootNavigator() {
 			<Stack
 				screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bgApp } }}
 			>
+				<Stack.Screen name="(home)" />
 				<Stack.Screen name="(onboarding)" />
-				<Stack.Screen name="(modules)" />
-				<Stack.Screen name="ui" />
 			</Stack>
 		</ThemeProvider>
 	);

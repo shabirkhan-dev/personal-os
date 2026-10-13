@@ -12,6 +12,7 @@ import type { WorkStyle } from "@/modules/onboarding/lib/options";
 import { formatClock, wrapMinutes } from "@/modules/onboarding/lib/time";
 import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
 import { usePoTheme } from "@/theme";
+import { haptics } from "@/lib/haptics";
 
 const STEP_MINUTES = 15;
 const DAY_LETTERS = ["M", "T", "W", "T", "F", "S", "S"];
@@ -90,7 +91,10 @@ export default function YourDayScreen() {
 					<Pressable
 						accessibilityRole="button"
 						accessibilityHint="Changes your work hours"
-						onPress={cycleWorkHours}
+						onPress={() => {
+							haptics.select();
+							cycleWorkHours();
+						}}
 						style={({ pressed }) => [
 							styles.field,
 							{
@@ -116,7 +120,10 @@ export default function YourDayScreen() {
 									accessibilityRole="checkbox"
 									accessibilityLabel={DAY_NAMES[index]}
 									accessibilityState={{ checked: on }}
-									onPress={() => state.toggleWorkday(index)}
+									onPress={() => {
+										haptics.select();
+										state.toggleWorkday(index);
+									}}
 									style={[
 										styles.day,
 										on

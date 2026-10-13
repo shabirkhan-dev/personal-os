@@ -1,7 +1,7 @@
 import { router } from "expo-router";
 import { useState } from "react";
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import { LogoMark } from "@/components/icons";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
@@ -11,6 +11,7 @@ import { OnboardingScreen } from "@/modules/onboarding/components/onboarding-scr
 import { SetupTop } from "@/modules/onboarding/components/top-bars";
 import { onboardingRoutes } from "@/modules/onboarding/lib/flow";
 import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
+import { rise } from "@/theme";
 
 const continueToAllSet = () => router.push(onboardingRoutes.allSet);
 
@@ -64,7 +65,7 @@ export default function SignInScreen() {
 		>
 			<SetupTop onBack={() => router.back()} />
 			<View style={styles.spacer} />
-			<Animated.View entering={FadeInDown.duration(480)} style={styles.brand}>
+			<Animated.View entering={rise()} style={styles.brand}>
 				<LogoMark size={72} />
 				<View style={styles.text}>
 					<PoText variant="eyebrow11" tone="textTertiary">

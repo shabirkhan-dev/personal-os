@@ -8,6 +8,7 @@ import Animated, {
 	withTiming,
 } from "react-native-reanimated";
 import { usePoTheme } from "@/theme";
+import { haptics } from "@/lib/haptics";
 
 export type SelectCardProps = {
 	selected: boolean;
@@ -53,7 +54,14 @@ export function SelectCard({
 			accessibilityRole="radio"
 			accessibilityState={{ selected }}
 			accessibilityLabel={accessibilityLabel}
-			onPress={onPress}
+			onPress={
+				onPress
+					? () => {
+							haptics.select();
+							onPress();
+						}
+					: undefined
+			}
 			style={[
 				styles.card,
 				{ backgroundColor: colors.bgSurface, borderRadius: radius },

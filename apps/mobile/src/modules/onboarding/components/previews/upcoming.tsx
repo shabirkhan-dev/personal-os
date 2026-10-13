@@ -1,9 +1,9 @@
 import type { ColorTokens } from "@personal-os/tokens";
 import { StyleSheet, View } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import { Icon } from "@/components/icons";
 import { PoText } from "@/components/ui/po-text";
-import { usePoTheme } from "@/theme";
+import { rise, usePoTheme } from "@/theme";
 
 type Item = {
 	time: string;
@@ -35,7 +35,7 @@ export function UpcomingPreview() {
 					</PoText>
 				</View>
 			</View>
-			<Animated.View entering={FadeInDown.duration(420)} style={[styles.next, card]}>
+			<Animated.View entering={rise()} style={[styles.next, card]}>
 				<View style={[styles.nextTile, { backgroundColor: colors.statusSuccessSubtle }]}>
 					<Icon name="Dumbbell" color={colors.statusSuccess} />
 				</View>
@@ -52,7 +52,7 @@ export function UpcomingPreview() {
 			{items.map((item, index) => (
 				<Animated.View
 					key={item.title}
-					entering={FadeInDown.duration(420).delay(80 * (index + 1))}
+					entering={rise(80 * (index + 1))}
 					style={[styles.row, card, item.action ? styles.rowAction : null]}
 				>
 					<PoText variant="mono13" tone="textTertiary" style={styles.time}>
@@ -76,7 +76,7 @@ export function UpcomingPreview() {
 				</Animated.View>
 			))}
 			<Animated.View
-				entering={FadeInDown.duration(420).delay(320)}
+				entering={rise(320)}
 				style={[styles.add, { borderColor: colors.borderDefault }]}
 			>
 				<PoText variant="row15" tone="textSecondary">

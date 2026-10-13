@@ -1,11 +1,12 @@
 import { elevation } from "@personal-os/tokens";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
-import Animated, { FadeIn, FadeInUp, FadeOut } from "react-native-reanimated";
+import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { Icon, type IconName } from "@/components/icons";
 import { PoText } from "@/components/ui/po-text";
 import type { ModuleId } from "@/modules/onboarding/lib/options";
-import { toShadowStyle, usePoTheme } from "@/theme";
+import { rise, toShadowStyle, usePoTheme } from "@/theme";
 import type { ModuleStatus } from "../lib/today";
+import { haptics } from "@/lib/haptics";
 
 export type ModulePickerProps = {
 	top: number;
@@ -44,7 +45,14 @@ function Row({
 			accessibilityLabel={`${name}, ${status}`}
 			accessibilityHint={accessibilityHint}
 			accessibilityState={{ selected: Boolean(selected) }}
-			onPress={onPress}
+			onPress={
+				onPress
+					? () => {
+							haptics.select();
+							onPress();
+						}
+					: undefined
+			}
 			style={({ pressed }) => [
 				styles.row,
 				{ backgroundColor: selected || pressed ? colors.bgHover : "transparent" },
@@ -101,7 +109,7 @@ export function ModulePicker({ top, modules, onClose, onAddModule }: ModulePicke
 				/>
 			</Animated.View>
 			<Animated.View
-				entering={FadeInUp.duration(260)}
+				entering={rise()}
 				exiting={FadeOut.duration(150)}
 				style={[
 					styles.card,

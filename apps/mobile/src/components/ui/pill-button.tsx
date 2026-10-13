@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, type StyleProp, type ViewStyle } from "react-nat
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { Icon } from "@/components/icons";
 import { toTextStyle, usePoTheme } from "@/theme";
+import { haptics } from "@/lib/haptics";
 
 export type PillButtonVariant = "primary" | "secondary" | "ghost";
 
@@ -57,7 +58,14 @@ export function PillButton({
 			accessibilityRole="button"
 			accessibilityState={{ disabled }}
 			disabled={disabled}
-			onPress={onPress}
+			onPress={
+				onPress
+					? () => {
+							haptics.tap();
+							onPress();
+						}
+					: undefined
+			}
 			onPressIn={() => {
 				pressed.value = withSpring(1, { damping: 20, stiffness: 400 });
 			}}

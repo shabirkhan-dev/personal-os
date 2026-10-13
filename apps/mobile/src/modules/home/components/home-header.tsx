@@ -5,6 +5,7 @@ import { HeaderButton } from "@/components/ui/header-button";
 import { PoText } from "@/components/ui/po-text";
 import { Avatar } from "@/modules/onboarding/components/avatar";
 import { usePoTheme } from "@/theme";
+import { haptics } from "@/lib/haptics";
 
 export type HomeHeaderProps = {
 	name: string;
@@ -37,7 +38,10 @@ export function HomeHeader({
 					accessibilityLabel={pickerOpen ? "Close modules" : "Open modules"}
 					accessibilityState={{ expanded: pickerOpen }}
 					hitSlop={8}
-					onPress={onAppsPress}
+					onPress={() => {
+						haptics.tap();
+						onAppsPress();
+					}}
 					style={[
 						styles.round,
 						pickerOpen
@@ -50,7 +54,10 @@ export function HomeHeader({
 				<Pressable
 					accessibilityRole="button"
 					accessibilityLabel={`Profile, ${firstName}`}
-					onPress={onProfilePress}
+					onPress={() => {
+						haptics.tap();
+						onProfilePress();
+					}}
 					style={({ pressed }) => [
 						styles.pill,
 						{

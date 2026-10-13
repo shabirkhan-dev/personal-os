@@ -1,13 +1,14 @@
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
-import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
+import Animated, { FadeIn } from "react-native-reanimated";
 import { PoText } from "@/components/ui/po-text";
 import { OnboardingScreen } from "@/modules/onboarding/components/onboarding-screen";
 import { BuildStatus, PersonalCard } from "@/modules/onboarding/components/personal-card";
 import { onboardingRoutes } from "@/modules/onboarding/lib/flow";
 import { moduleOptions } from "@/modules/onboarding/lib/options";
 import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
+import { rise } from "@/theme";
 
 const STEP_MS = 750;
 const HOLD_MS = 900;
@@ -42,7 +43,7 @@ export default function BuildingScreen() {
 				<PoText variant="title30">Your personal card</PoText>
 			</Animated.View>
 			<View style={styles.gap24} />
-			<Animated.View entering={FadeInDown.duration(520).delay(120)}>
+			<Animated.View entering={rise(120)}>
 				<PersonalCard ready={ready} />
 			</Animated.View>
 			<View style={styles.spacer} />

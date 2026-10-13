@@ -4,6 +4,7 @@ import Animated, { FadeIn } from "react-native-reanimated";
 import { Icon, type IconName } from "@/components/icons";
 import { PoText } from "@/components/ui/po-text";
 import { usePoTheme } from "@/theme";
+import { haptics } from "@/lib/haptics";
 
 export type StepperCardProps = {
 	label: string;
@@ -73,7 +74,10 @@ function RoundButton({
 			accessibilityRole="button"
 			accessibilityLabel={label}
 			hitSlop={6}
-			onPress={onPress}
+			onPress={() => {
+				haptics.select();
+				onPress();
+			}}
 			style={({ pressed }) => [
 				styles.round,
 				{ backgroundColor: pressed ? colors.bgSelected : colors.bgSubtle },

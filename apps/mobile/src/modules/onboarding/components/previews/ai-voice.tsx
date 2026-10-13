@@ -1,8 +1,8 @@
 import { StyleSheet, View } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import { Icon, type IconName } from "@/components/icons";
 import { PoText } from "@/components/ui/po-text";
-import { usePoTheme } from "@/theme";
+import { rise, usePoTheme } from "@/theme";
 
 const inputModes: readonly { icon: IconName; label: string }[] = [
 	{ icon: "Mic", label: "Voice" },
@@ -17,14 +17,11 @@ export function AiVoicePreview() {
 
 	return (
 		<View style={styles.stack}>
-			<Animated.View entering={FadeInDown.duration(380)} style={[styles.hey, surface]}>
+			<Animated.View entering={rise()} style={[styles.hey, surface]}>
 				<Icon name="Filled/Sparkle" size={14} color={colors.statusViolet} />
 				<PoText variant="meta13">“Hey OS” · works with the app closed</PoText>
 			</Animated.View>
-			<Animated.View
-				entering={FadeInDown.duration(380).delay(80)}
-				style={[styles.ask, { backgroundColor: colors.bgSubtle }]}
-			>
+			<Animated.View entering={rise(80)} style={[styles.ask, { backgroundColor: colors.bgSubtle }]}>
 				<Icon name="Filled/Sparkle" color={colors.textTertiary} />
 				<PoText variant="body15" style={styles.flex} numberOfLines={1}>
 					Add a meeting with Ali at 9:20
@@ -33,7 +30,7 @@ export function AiVoicePreview() {
 					<Icon name="Line/Arrow up" color={colors.textInverse} />
 				</View>
 			</Animated.View>
-			<Animated.View entering={FadeInDown.duration(380).delay(160)} style={styles.reply}>
+			<Animated.View entering={rise(160)} style={styles.reply}>
 				<View style={styles.from}>
 					<Icon name="Filled/Sparkle" size={14} color={colors.textTertiary} />
 					<PoText variant="eyebrow11" tone="textTertiary">

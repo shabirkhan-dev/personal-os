@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet } from "react-native";
 import { PoText } from "@/components/ui/po-text";
 import { usePoTheme } from "@/theme";
+import { haptics } from "@/lib/haptics";
 
 /** Small surface pill used for "Skip" and "Type instead". */
 export function ChipButton({ label, onPress }: { label: string; onPress?: () => void }) {
@@ -10,7 +11,14 @@ export function ChipButton({ label, onPress }: { label: string; onPress?: () => 
 		<Pressable
 			accessibilityRole="button"
 			hitSlop={8}
-			onPress={onPress}
+			onPress={
+				onPress
+					? () => {
+							haptics.tap();
+							onPress();
+						}
+					: undefined
+			}
 			style={({ pressed }) => [
 				styles.chip,
 				{

@@ -4,6 +4,7 @@ import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native
 import { Icon } from "@/components/icons";
 import { PoText } from "@/components/ui/po-text";
 import { toTextStyle, usePoTheme } from "@/theme";
+import { haptics } from "@/lib/haptics";
 
 export type AskBarProps = {
 	suggestions: readonly string[];
@@ -20,6 +21,7 @@ export function AskBar({ suggestions, onSubmit }: AskBarProps) {
 
 	const submit = () => {
 		if (!canSend) return;
+		haptics.tap();
 		onSubmit(text.trim());
 		setText("");
 	};
@@ -60,7 +62,10 @@ export function AskBar({ suggestions, onSubmit }: AskBarProps) {
 						key={suggestion}
 						accessibilityRole="button"
 						accessibilityHint="Fills the ask bar"
-						onPress={() => setText(suggestion)}
+						onPress={() => {
+							haptics.select();
+							setText(suggestion);
+						}}
 						style={({ pressed }) => [
 							styles.chip,
 							{

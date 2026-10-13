@@ -1,5 +1,5 @@
 import { StyleSheet, View } from "react-native";
-import Animated, { ZoomIn } from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import { Icon } from "@/components/icons";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PoText } from "@/components/ui/po-text";
@@ -10,7 +10,7 @@ import { SetupFrame } from "@/modules/onboarding/components/setup-frame";
 import { onboardingRoutes } from "@/modules/onboarding/lib/flow";
 import { type GoalId, type GoalOption, goalOptions } from "@/modules/onboarding/lib/options";
 import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
-import { usePoTheme } from "@/theme";
+import { pop, usePoTheme } from "@/theme";
 
 function focusOf(goal: GoalId): string {
 	return goalOptions.find((option) => option.id === goal)?.focus ?? goal;
@@ -88,7 +88,7 @@ function GoalCard({
 				{selected ? (
 					<Animated.View
 						key={rank}
-						entering={ZoomIn.springify().damping(14)}
+						entering={pop()}
 						style={[styles.rank, { backgroundColor: colors.accentDefault }]}
 					>
 						<PoText variant="row15" tone="textOnAccent">

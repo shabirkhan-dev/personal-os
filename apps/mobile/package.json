@@ -15,7 +15,7 @@
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "typecheck": "tsc --noEmit",
-    "test": "bun -e \"console.log('[mobile] No unit tests yet; skipping.');\""
+    "test": "bun test src"
   },
   "dependencies": {
     "@expo-google-fonts/jetbrains-mono": "^0.4.1",
@@ -64,6 +64,7 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@types/bun": "^1.4.3",
     "@types/react": "~19.3.0",
     "typescript": "~6.0.3"
   },

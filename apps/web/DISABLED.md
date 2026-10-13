@@ -1,7 +1,11 @@
 # apps/web is disabled
 
-Personal OS is mobile-only. This Next.js app is kept for reference but is excluded from the Bun
-workspace (`"!apps/web"` in the root `package.json`), Turborepo, CI and Docker Compose.
+Personal OS is mobile-only. This is a minimal Next.js landing-page shell kept for later. It is
+excluded from the Bun workspace (`"!apps/web"` in the root `package.json`), Turborepo, CI and
+Docker Compose, and only depends on `@personal-os/tokens`.
 
-To re-enable it, remove the `"!apps/web"` workspace entry, restore `docker/compose/web.yml` in
-`docker-compose.yml`, and re-add the web e2e job to `.github/workflows/ci.yml`.
+To enable it:
+
+1. Remove the `"!apps/web"` workspace entry and run `bun install`.
+2. Run `bun --cwd=apps/web run dev` (port 3000).
+3. Deploy with `vercel.json` (Vercel builds it from the repo root).

@@ -8,12 +8,11 @@ WORKDIR /app
 FROM base AS deps
 COPY package.json bun.lock ./
 COPY apps/nest-api/package.json ./apps/nest-api/
-COPY apps/web/package.json ./apps/web/
 COPY apps/mobile/package.json ./apps/mobile/
 COPY apps/docs/package.json ./apps/docs/
-COPY apps/rust/package.json ./apps/rust/
-COPY packages/ui/package.json ./packages/ui/
+COPY apps/ai-api/package.json ./apps/ai-api/
 COPY packages/logger/package.json ./packages/logger/
+COPY packages/tokens/package.json ./packages/tokens/
 COPY packages/typescript-config/package.json ./packages/typescript-config/
 RUN bun install --frozen-lockfile
 

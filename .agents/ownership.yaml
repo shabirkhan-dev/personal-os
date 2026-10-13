@@ -39,13 +39,6 @@ roles:
       - reviewer
       - qa
       - ui-ux
-  rust:
-    team: backend
-    paths:
-      - apps/rust/**
-    reviewers:
-      - reviewer
-      - qa
   qa:
     team: quality
     mode: read-only
@@ -62,9 +55,8 @@ roles:
     team: design
     paths:
       - DESIGN.md
-      - packages/ui/**
-      - packages/rabtx/**
-      - apps/web/src/app/ui/**
+      - packages/tokens/**
+      - apps/mobile/src/components/**
     reviewers:
       - reviewer
       - web

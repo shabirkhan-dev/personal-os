@@ -6,15 +6,15 @@ description: A clear map of the monorepo layout and responsibilities.
 ## Repository layout
 
 ```text
-starter/
+personal-os/
 ├── apps/
-│   ├── web/
-│   ├── mobile/
-│   ├── docs/          # Fumadocs site; MDX in apps/docs/content/docs/
+│   ├── mobile/        # The Expo app
 │   ├── nest-api/
-│   └── rust/
+│   ├── ai-api/        # FastAPI AI assist
+│   ├── docs/          # Fumadocs site; MDX in apps/docs/content/docs/
+│   └── web/           # Disabled landing-page shell
 ├── packages/
-│   ├── ui/
+│   ├── tokens/        # @personal-os/tokens
 │   ├── typescript-config/
 │   └── logger/
 ├── scripts/
@@ -27,7 +27,7 @@ starter/
 
 - Keep app-specific code inside each app folder.
 - Move reusable logic into `packages/*`.
-- Prefer workspace imports (`@starter/*`) over copy-paste.
+- Prefer workspace imports (`@personal-os/tokens`, `@starter/logger`) over copy-paste.
 - Keep tooling centralized at repository root.
 
 ## Where to add new code

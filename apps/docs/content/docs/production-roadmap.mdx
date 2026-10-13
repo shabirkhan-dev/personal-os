@@ -54,13 +54,12 @@ The monorepo already exists and uses:
 ```txt
 Bun workspaces
 Turborepo
-Next.js web app (apps/web)
-Expo mobile app (apps/mobile)
+Expo mobile app (apps/mobile), the product
+Next.js landing shell (apps/web), disabled
 NestJS API app (apps/nest-api)
 FastAPI AI service (apps/ai-api)
-Rust service (apps/rust)
 Docs app (apps/docs)
-Shared packages (@starter/ui, @starter/logger, @starter/typescript-config)
+Shared packages (@personal-os/tokens, @starter/logger, @starter/typescript-config)
 CI/CD, Docker, security workflows, dev container, git hooks
 ```
 
@@ -87,10 +86,8 @@ Database: PostgreSQL
 ORM/query layer: Drizzle ORM
 Validation: Zod
 API style first: REST
-Frontend: Next.js
-Mobile: Expo / React Native
+Client: Expo / React Native
 AI Assist: FastAPI (apps/ai-api)
-Performance service: Rust (apps/rust)
 Docs: Fumadocs
 ```
 
@@ -472,14 +469,12 @@ apps/nest-api/src/
 - Prompt orchestration with role, context, and guardrails
 - Secure token-based service authentication
 
-### Phase 12 — Web Admin Console Integration (Completed)
-- Modern Next.js admin dashboard
-- Operational pulse strip, growth metrics, and member management
-- Responsive sidebar, command search, and profile settings
+### Phase 12 — Web Admin Console (Retired)
+- The Starter admin console was removed; `apps/web` is now a disabled landing-page shell
 
 ### Phase 13 — Mobile App Integration (Completed)
-- Expo Router mobile app with Uniwind styling
-- Shared auth, profile, and navigation patterns
+- Expo Router app on the Figma Kit v2 tokens (`StyleSheet`, Reanimated)
+- Onboarding v5, then home; the Starter auth screens were removed and will be rebuilt
 - Safe area compliance and mobile-first ergonomics
 
 ### Phase 14 — Observability & Production Hardening

@@ -28,15 +28,10 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy
 
       - name: Validate release gate
         run: bun run preflight
         env:
-          # sqlx compile-time checks need a URL shape; no live DB required for demo app skips
           DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/ci
 
   deploy-staging:

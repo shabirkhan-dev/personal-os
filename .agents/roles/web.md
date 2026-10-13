@@ -34,8 +34,7 @@ Raise a card to the owning role when the web client exposes a backend defect.
 
 - `bun --cwd=apps/web run lint`
 - `bun --cwd=apps/web run typecheck`
-- `bun --cwd=apps/web run test`
-- `bun run test:e2e:web` for changed interactive flows
+- `bun --cwd=apps/web run build` (temporarily enable the workspace, see `apps/web/DISABLED.md`)
 - Browser verification for UI behavior where applicable
 
 ## Escalation

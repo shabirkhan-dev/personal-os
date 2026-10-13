@@ -10,8 +10,7 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "turbo run dev --continue --filter=!rust --concurrency=12",
-    "dev:rust": "bun --cwd=apps/rust run dev",
+    "dev": "turbo run dev --continue --concurrency=12",
     "dev:ai": "bun --cwd=apps/ai-api run dev",
     "dev:all": "turbo run dev --continue --concurrency=12",
     "build": "turbo run build",
@@ -19,10 +18,10 @@
     "preflight": "bun run lint && bun run typecheck && bun run test",
     "lint": "turbo run lint && bun run scripts:lint",
     "lint:fix": "turbo run lint:fix",
-    "format": "oxfmt && bun run scripts:format && (cd apps/rust && cargo fmt || true)",
+    "format": "oxfmt && bun run scripts:format",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test && bun run test:scripts",
-    "test:coverage": "(cd apps/nest-api && bun run test:cov) && (cd packages/logger && bun run test:coverage) && (cd apps/mobile && bun run test) && (cd apps/rust && bun run test) && bun run test:scripts",
+    "test:coverage": "(cd apps/nest-api && bun run test:cov) && (cd packages/logger && bun run test:coverage) && (cd apps/mobile && bun run test) && bun run test:scripts",
     "test:scripts": "bash scripts/bash/tests/main.test.sh && python -m unittest scripts/python/tests/test_main.py",
     "architecture:check": "bash scripts/architecture/check-boundaries.sh",
     "naming:check": "bash scripts/architecture/check-naming.sh",

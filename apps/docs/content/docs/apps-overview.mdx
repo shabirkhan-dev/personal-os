@@ -3,13 +3,10 @@ title: Apps Overview
 description: What each app does and where it fits in the platform.
 ---
 
-## `apps/web`
-
-Next.js web frontend with shared design primitives and Tailwind-based styling.
-
 ## `apps/mobile`
 
-Expo Router mobile app styled with Uniwind (Tailwind `className` for React Native) and shared workspace conventions.
+The Personal OS app: Expo Router, Reanimated and Zustand, styled with `StyleSheet` and
+`@personal-os/tokens` (Figma Kit v2). Onboarding v5 runs first, then the home screen.
 
 ## `apps/docs`
 
@@ -23,9 +20,10 @@ NestJS production API: auth, tenancy, users, billing, MFA and passkeys, backed b
 
 FastAPI service for LLM-assisted workflows. The Nest API proxies it; LLM keys are never exposed to clients.
 
-## `apps/rust`
+## `apps/web`
 
-Rust (Axum) service for performance-sensitive or systems-level workloads.
+A disabled Next.js landing-page shell, excluded from the workspace. See `apps/web/DISABLED.md`
+to enable it.
 
 ## Cross-app strategy
 

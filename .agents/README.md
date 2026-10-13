@@ -1,8 +1,8 @@
 # Agent coordination hub
 
 Cross-team communication for the agents building this monorepo:
-**backend** (NestJS), **web** (Next.js), **mobile** (Expo), **rust** (Axum),
-**ai-python** (FastAPI), **ui-ux** (the design system), and the human.
+**mobile** (Expo, the Personal OS app), **backend** (NestJS), **ai-python** (FastAPI),
+**web** (the disabled landing-page shell), **ui-ux** (the Kit v2 design system), and the human.
 
 ```
 .agents/
@@ -21,16 +21,13 @@ Cross-team communication for the agents building this monorepo:
 │   ├── backend.md    owned by backend agent
 │   ├── frontend.md   owned by web agent
 │   ├── mobile.md     owned by mobile agent
-│   ├── rust.md       owned by rust agent
 │   └── design.md     owned by ui-ux agent
-├── plans/            ← long-form implementation plans
 ├── rules/            ← always-apply editor rules (`.mdc`)
-├── skills/           ← vendored agent skills (see below)
-└── uniwind.txt       ← vendored Uniwind/Tailwind docs for mobile styling
+└── skills/           ← vendored agent skills (see below)
 ```
 
 Everything above `rules/` is project policy and is owned by the human. `rules/` mirrors the
-editor rules, and `skills/` plus `uniwind.txt` are vendored reference material copied from
+editor rules, and `skills/` is vendored reference material copied from
 upstream projects — read them for guidance, but they are not project policy, are not covered by
 `ownership.yaml`, and may carry upstream files (including their own `.github/`) that do not
 apply here.

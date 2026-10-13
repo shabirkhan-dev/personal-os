@@ -32,15 +32,12 @@ export function HomesPreview() {
 	return (
 		<View style={styles.list}>
 			{stats.map((stat, index) => (
-				<Animated.View
-					key={stat.label}
-					entering={FadeInDown.duration(420).delay(90 * index)}
-					style={stat.dimmed ? styles.dimmed : null}
-				>
+				<Animated.View key={stat.label} entering={FadeInDown.duration(420).delay(90 * index)}>
 					<View
 						style={[
 							styles.card,
 							{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
+							stat.dimmed ? styles.dimmed : null,
 						]}
 					>
 						<Glow

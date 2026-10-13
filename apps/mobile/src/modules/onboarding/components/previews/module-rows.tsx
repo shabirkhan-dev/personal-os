@@ -58,15 +58,12 @@ export function ModuleRowsPreview() {
 	return (
 		<View style={styles.list}>
 			{rows.map((row, index) => (
-				<Animated.View
-					key={row.title}
-					entering={FadeInDown.duration(420).delay(80 * index)}
-					style={row.dimmed ? styles.dimmed : null}
-				>
+				<Animated.View key={row.title} entering={FadeInDown.duration(420).delay(80 * index)}>
 					<View
 						style={[
 							styles.row,
 							{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
+							row.dimmed ? styles.dimmed : null,
 						]}
 					>
 						<View style={[styles.tile, { backgroundColor: colors[row.tileTone] }]}>

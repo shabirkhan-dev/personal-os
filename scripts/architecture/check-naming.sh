@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Enforce kebab-case file and folder names under TS/JS app and package src trees.
 # Allows Next.js / Expo Router special segments: (groups), [params], @slots, _private.
-# Skips Python (ai-api) and Rust — those use language-native naming.
+# Skips Python (ai-api), which uses language-native naming.
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -19,7 +19,7 @@ SCOPES=(
     apps/nest-api/src
     apps/mobile/src
     apps/docs/src
-    packages/ui/src
+    packages/tokens/src
     packages/logger/src
 )
 

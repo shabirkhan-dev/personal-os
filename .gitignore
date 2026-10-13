@@ -67,9 +67,6 @@ test-results/
 coverage/
 **/coverage/
 
-# rust (Cargo)
-target/
-
 # curl cookie jars (may contain live auth tokens)
 cookie.txt
 *.cookie.txt

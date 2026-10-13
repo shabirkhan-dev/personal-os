@@ -3,17 +3,17 @@ description: Monorepo structure, tooling, and conventions
 alwaysApply: true
 ---
 
-# Starter Conventions
+# Personal OS Conventions
 
 - **Monorepo**: Turborepo with `apps/*` and `packages/*`. Run from root: `bun run dev`, `bun run build`, `bun run lint`, `bun run format`.
 - **Package manager**: Bun only. Use `bun` for install/run — never npm, yarn, or pnpm.
 - **Lint/format**: oxlint and oxfmt only (no ESLint/Prettier). Config: root `.oxlintrc.json` and `.oxfmtrc.json`. Pre-commit hook (lefthook) runs `oxlint --fix`.
 - **Style**: Tabs, line width 100. oxlint and oxfmt apply to `apps/**/*.ts(x)`, `packages/**/*.ts(x)`, `*.config.ts`, `*.config.mjs`.
-- **Shared packages**: `packages/rabtx` (`@rabtx/ui`, the component library being rebuilt; see `DESIGN.md`), `packages/ui` (legacy shadcn-style components + design tokens in `src/styles/globals.css`), `packages/typescript-config` (tsconfig bases), `packages/logger` (TS + Rust logger).
-- **Apps**: `apps/web` (Next.js), `apps/mobile` (Expo Router + Uniwind), `apps/docs` (Fumadocs), `apps/nest-api` (NestJS), `apps/ai-api` (FastAPI), `apps/rust` (Axum). Add new apps under `apps/` and wire in `turbo.json`.
-- **Expo mobile**: Use file-based routes in `apps/mobile/src/app`, shared logic in `apps/mobile/src`, and UI primitives in `apps/mobile/src/components/ui`.
+- **Shared packages**: `packages/tokens` (`@personal-os/tokens`, Figma Kit v2 tokens; see `DESIGN.md`), `packages/typescript-config` (tsconfig bases), `packages/logger` (TS logger).
+- **Apps**: `apps/mobile` (Expo Router, the product), `apps/nest-api` (NestJS), `apps/ai-api` (FastAPI), `apps/docs` (Fumadocs), `apps/web` (disabled Next.js landing shell). Add new apps under `apps/` and wire in `turbo.json`.
+- **Expo mobile**: Use file-based routes in `apps/mobile/src/app`, feature code in `apps/mobile/src/modules`, and UI primitives in `apps/mobile/src/components/ui`. Style with `StyleSheet` and `@personal-os/tokens` via `usePoTheme()`; no raw colours.
 - **Safe area**: In React Native use `react-native-safe-area-context` (`SafeAreaProvider`, `SafeAreaView`) instead of deprecated `react-native` `SafeAreaView`.
-- **Workspace imports**: Use `@starter/<package>` (e.g. `@starter/ui`, `@starter/logger`). Prefer shared packages over duplicating code across apps.
+- **Workspace imports**: Use the package names (e.g. `@personal-os/tokens`, `@starter/logger`). Prefer shared packages over duplicating code across apps.
 - **Git hooks**: Lefthook handles format, lint, typecheck, large-file guard (2 MB), secret scan, and commit-msg checks. Install with `bun run prepare`.
 - **Before finishing**: Run `bun run lint` and `bun run format` from root. Don't leave errors. Separate lint/format fixes from feature commits.
 - **Full reference**: See `AGENTS.md` at repo root for universal agent instructions.

@@ -14,9 +14,7 @@
 		"qol",
 		"production-roadmap",
 		"product-system-design",
-		"ai-first-workflow",
 		"architecture",
-		"overrides",
-		"dependency-upgrade-report"
+		"overrides"
 	]
 }

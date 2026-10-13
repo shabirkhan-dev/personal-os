@@ -29,21 +29,6 @@
 		"editor.defaultFormatter": "oxc.oxc-vscode"
 	},
 
-	// —— C/C++ ——
-	"[c]": {
-		"editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd"
-	},
-	"[cpp]": {
-		"editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd"
-	},
-	"C_Cpp.clang_format_style": "file",
-
-	// —— Rust (apps/rust: rustfmt.toml, rust-toolchain, Clippy) ——
-	"[rust]": {
-		"editor.defaultFormatter": "rust-lang.rust"
-	},
-	"rust-analyzer.check.command": "clippy",
-
 	// —— Python (scripts/python: ruff check, ruff format) ——
 	"[python]": {
 		"editor.defaultFormatter": "charliermarsh.ruff"
@@ -57,11 +42,6 @@
 		"editor.insertSpaces": true
 	},
 	"shfmt.arguments": ["-i", "4"],
-
-	// —— Lua (scripts/lua: luacheck, stylua) ——
-	"[lua]": {
-		"editor.defaultFormatter": "JohnnyMorganz.stylua"
-	},
 
 	// —— CSS / Tailwind ——
 	"css.lint.unknownAtRules": "ignore",

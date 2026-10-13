@@ -1,57 +1,62 @@
 import "../global.css";
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
+import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useColorScheme } from "react-native";
-import { AnimatedSplashOverlay } from "@/components/animated-icon";
+import { StatusBar } from "expo-status-bar";
+import { useEffect, useMemo } from "react";
 import { AppProviders } from "@/components/providers";
-import { useAuth } from "@/modules/auth";
+import { PoThemeProvider, poFontAssets, usePoTheme } from "@/theme";
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
-export const unstable_settings = {
-	initialRouteName: "(modules)",
-};
-
 export default function RootLayout() {
-	const colorScheme = useColorScheme();
-
 	return (
 		<AppProviders>
-			<ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-				<AnimatedSplashOverlay />
-				<SplashScreenController />
+			<PoThemeProvider>
 				<RootNavigator />
-			</ThemeProvider>
+			</PoThemeProvider>
 		</AppProviders>
 	);
 }
 
-function SplashScreenController() {
-	const { loading } = useAuth();
-	if (!loading) {
-		SplashScreen.hideAsync().catch(() => undefined);
-	}
-	return null;
-}
-
 function RootNavigator() {
-	const { loading } = useAuth();
+	const { mode, colors } = usePoTheme();
+	const [fontsLoaded, fontError] = useFonts(poFontAssets);
+	const ready = fontsLoaded || fontError !== null;
 
-	if (loading) {
-		return null;
-	}
+	useEffect(() => {
+		if (fontError) console.warn("[fonts] JetBrains Mono failed to load", fontError);
+		if (ready) SplashScreen.hideAsync().catch(() => undefined);
+	}, [ready, fontError]);
+
+	const navigationTheme = useMemo(() => {
+		const base = mode === "dark" ? DarkTheme : DefaultTheme;
+		return {
+			...base,
+			colors: {
+				...base.colors,
+				background: colors.bgApp,
+				card: colors.bgSurface,
+				text: colors.textPrimary,
+				border: colors.borderDefault,
+				primary: colors.accentDefault,
+			},
+		};
+	}, [mode, colors]);
+
+	if (!ready) return null;
 
 	return (
-		<Stack screenOptions={{ headerShown: false }}>
-			{/* <Stack.Protected guard={signedIn}> */}
-			<Stack.Screen name="ui" />
-
-			<Stack.Screen name="(modules)" />
-			{/* </Stack.Protected> */}
-			{/* <Stack.Protected guard={!signedIn}>
-				<Stack.Screen name="(auth)" />
-			</Stack.Protected> */}
-		</Stack>
+		<ThemeProvider value={navigationTheme}>
+			<StatusBar style={mode === "dark" ? "light" : "dark"} />
+			<Stack
+				screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bgApp } }}
+			>
+				<Stack.Screen name="(onboarding)" />
+				<Stack.Screen name="(modules)" />
+				<Stack.Screen name="ui" />
+			</Stack>
+		</ThemeProvider>
 	);
 }

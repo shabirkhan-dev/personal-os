@@ -20,9 +20,10 @@ Multi-agent coordination lives in [.agents/](.agents/README.md). Load these in o
 5. [.agents/worktrees.md](.agents/worktrees.md) — branch, port and worktree lifecycle
 6. Your board card from [.agents/board/](.agents/board/README.md)
 
-The short version: claim a card before coding, work in your own worktree on
-`agent/<role>/<card-slug>`, write only inside the card's scope, stage explicit paths rather than
-`git add -A`, and record real validation output on the card. `main` is integration-only.
+The short version (light mode, the default): claim a card before coding, work on a branch
+(`agent/<role>/<card-slug>` or the session's branch), write only inside the card's scope, stage
+explicit paths rather than `git add -A`, and record real validation output on the card. `main` is
+integration-only. Worktrees and a separate reviewer agent are only needed in parallel mode.
 [.agents/ownership.yaml](.agents/ownership.yaml) is the machine-readable role-to-path map.
 
 ## UI design context

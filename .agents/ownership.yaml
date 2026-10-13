@@ -63,7 +63,7 @@ roles:
       - mobile
   pm:
     team: product
-    operator: codex
+    operator: any-agent
     final_approver: human
     paths:
       - .agents/board/**

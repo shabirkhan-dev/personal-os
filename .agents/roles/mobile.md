@@ -23,15 +23,15 @@ branch.
 
 ## Senior bar
 
-- Use `src/app` for routes, `src/components/ui` for primitives, and `src/components` for
-  reusable non-UI components.
+- Use `src/app` for routes, `src/components/ui` for Kit v2 primitives, `src/components/icons` for
+  glyphs and `src/modules/<feature>` for feature logic; style with tokens per `DESIGN.md`.
 - Use Expo Router conventions and `react-native-safe-area-context`; do not use deprecated native
   `SafeAreaView`.
 - Make session, foreground/resume, offline, loading, empty, error, and retry states explicit.
 - Protect user isolation in query caches and reset state on account changes.
 - Respect platform differences, keyboard behavior, gestures, accessibility, and reduced motion.
-- Avoid fake data, dead interaction affordances, starter residue, and destructive actions without
-  confirmation or recovery.
+- Avoid fake data, dead interaction affordances, leftover template code, and destructive actions
+  without confirmation or recovery.
 
 ## Required checks
 

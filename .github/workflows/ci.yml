@@ -78,8 +78,6 @@ jobs:
         with:
           bun-version: 1.4.2
 
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
 
       - name: Cache Bun
         uses: actions/cache@v4
@@ -106,10 +104,6 @@ jobs:
         with:
           bun-version: 1.4.2
 
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy
 
       - name: Cache Bun
         uses: actions/cache@v4

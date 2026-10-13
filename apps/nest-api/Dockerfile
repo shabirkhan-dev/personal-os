@@ -11,7 +11,6 @@ COPY apps/nest-api/package.json ./apps/nest-api/
 COPY apps/web/package.json ./apps/web/
 COPY apps/mobile/package.json ./apps/mobile/
 COPY apps/docs/package.json ./apps/docs/
-COPY apps/rust/package.json ./apps/rust/
 COPY packages/ui/package.json ./packages/ui/
 COPY packages/logger/package.json ./packages/logger/
 COPY packages/typescript-config/package.json ./packages/typescript-config/

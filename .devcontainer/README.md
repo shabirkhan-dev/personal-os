@@ -1,6 +1,6 @@
 # Dev Container
 
-Reproducible environment for Starter: **Bun**, **Rust**, **Python** (script tooling), and Bash lint/format helpers.
+Reproducible environment for Starter: **Bun**, **Python** (script tooling), and Bash lint/format helpers.
 
 ## How to use
 
@@ -14,7 +14,6 @@ After start, `postCreateCommand` runs `bun install` and `bun run prepare` (git h
 | Tool | Why |
 |------|-----|
 | **Bun** `1.4.2` | Package manager + JS/TS runtime |
-| **Rust** (stable, rustfmt, clippy) | `apps/rust` and Rust logger bits |
 | **Python 3** + **Ruff** | `scripts/python` lint/format |
 | **ShellCheck** + **shfmt** | Bash script quality |
 

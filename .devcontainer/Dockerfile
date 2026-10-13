@@ -1,8 +1,7 @@
-# Dev container: Bun, Rust, Python (scripts), Bash tooling.
+# Dev container: Bun, Python (scripts), Bash tooling.
 FROM mcr.microsoft.com/devcontainers/base:ubuntu-22.04
 
 ARG BUN_VERSION=1.3.13
-ARG RUST_CHANNEL=stable
 
 # Shell/Python tooling used by repo scripts (no C/Lua toolchain).
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -25,10 +24,6 @@ RUN curl -fsSL https://bun.sh/install | bash -s "bun-v${BUN_VERSION}" \
 ENV BUN_INSTALL="/home/vscode/.bun" \
 	PATH="/home/vscode/.bun/bin:${PATH}"
 
-# Rust (apps/rust + packages/logger Rust side)
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain "${RUST_CHANNEL}" --profile minimal \
-	&& . "${HOME}/.cargo/env" \
-	&& rustup component add rustfmt clippy
 
 # Ruff for scripts/python
 RUN pip install --user ruff 2>/dev/null || true
@@ -44,6 +39,6 @@ RUN set -e; \
 ENV PATH="/home/vscode/.local/bin:${PATH}"
 
 USER root
-RUN echo 'export PATH="/home/vscode/.bun/bin:/home/vscode/.cargo/bin:/home/vscode/.local/bin:${PATH}"' >> /etc/profile.d/devcontainer-path.sh
+RUN echo 'export PATH="/home/vscode/.bun/bin:/home/vscode/.local/bin:${PATH}"' >> /etc/profile.d/devcontainer-path.sh
 USER vscode
-ENV PATH="/home/vscode/.bun/bin:/home/vscode/.cargo/bin:/home/vscode/.local/bin:${PATH}"
+ENV PATH="/home/vscode/.bun/bin:/home/vscode/.local/bin:${PATH}"

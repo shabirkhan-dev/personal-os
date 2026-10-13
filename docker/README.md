@@ -8,8 +8,7 @@ Compose is split into **fragments** under `compose/` and merged by the root
 |------|------|
 | `compose/postgres.yml` | Postgres 16, volume, healthcheck |
 | `compose/nest-api.yml` | NestJS API image (Bun multi-stage build) |
-| `compose/web.yml` | Next.js web image (standalone output) |
-| `compose/rust-api.yml` | Optional Rust API (`--profile rust`) |
+| `compose/web.yml` | Next.js web image (disabled; not included by `docker-compose.yml`) |
 
 **Env:** copy `env.docker.example` from the repo root to `.env`.
 
@@ -23,7 +22,6 @@ docker compose up -d --build
 | Postgres | 5433 → 5432 |
 | Nest API | 4000 |
 | Web | 3000 |
-| Rust API (profile) | 3002 |
 
 `NEXT_PUBLIC_NEST_API_URL` must be a URL the **browser** can reach (usually `http://localhost:4000`), not the Docker service hostname.
 
@@ -31,12 +29,6 @@ docker compose up -d --build
 
 ```bash
 docker compose up -d postgres
-```
-
-**With Rust API:**
-
-```bash
-docker compose --profile rust up -d --build
 ```
 
 **Manual fragment (no `include`):**

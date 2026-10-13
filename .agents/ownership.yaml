@@ -39,13 +39,6 @@ roles:
       - reviewer
       - qa
       - ui-ux
-  rust:
-    team: backend
-    paths:
-      - apps/rust/**
-    reviewers:
-      - reviewer
-      - qa
   qa:
     team: quality
     mode: read-only

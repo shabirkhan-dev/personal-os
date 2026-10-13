@@ -19,7 +19,7 @@ and colour used to carry meaning (a module, a status, a highlight), not decorati
 
 ## Platform and dependency policy
 
-- Mobile first: Expo Router + React Native. `apps/web` is a disabled landing-page shell.
+- Mobile first: Expo Router + React Native. `apps/web` is the landing page (Figma page "Landing").
 - Styling is `StyleSheet` with tokens. No Tailwind, NativeWind or Uniwind.
 - Motion is Reanimated 4 (`react-native-worklets`). Respect reduced motion.
 - Icons are the Kit v2 `Icon/*` glyphs in `apps/mobile/src/components/icons`, drawn with

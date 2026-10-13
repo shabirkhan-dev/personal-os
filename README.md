@@ -5,8 +5,8 @@ Bun workspaces + Turborepo. The pre-reset tree is archived on the `archive/main-
 
 **Mobile-first.** The Expo app (`apps/mobile`) is the product. It is backed by the NestJS API and
 the FastAPI AI service, and styled with the Figma Kit v2 tokens in `packages/tokens`
-(`@personal-os/tokens`). The Next.js app in `apps/web` is a disabled landing-page shell, kept for
-later (see `apps/web/DISABLED.md`). To install the app on a phone, see
+(`@personal-os/tokens`). The Next.js app in `apps/web` is the public landing page, a static export
+for Cloudflare Pages (see `apps/web/README.md`). To install the app on a phone, see
 [apps/mobile/README.md](apps/mobile/README.md).
 
 Dual-licensed **MIT OR Apache-2.0**.
@@ -47,7 +47,7 @@ To work on one app in isolation: `bun --cwd=apps/mobile run start` (same pattern
 | `apps/nest-api` | NestJS API spine, Drizzle over Postgres/Neon |
 | `apps/ai-api` | FastAPI AI assist; Nest proxies it, never public |
 | `apps/docs` | Fumadocs site — project docs at `/docs` |
-| `apps/web` | Disabled Next.js landing-page shell |
+| `apps/web` | Landing page: Next.js static export on Cloudflare Pages |
 | `packages/tokens` | `@personal-os/tokens`: Kit v2 colours, spacing, radii, text styles |
 | `packages/logger` | `@starter/logger`: shared structured logging |
 | `packages/typescript-config` | `@starter/typescript-config`: base tsconfigs |

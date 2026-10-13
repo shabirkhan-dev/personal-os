@@ -1,18 +1,18 @@
 ---
 title: Deploy
-description: Host web and docs on Vercel, Nest API on Render with Neon Postgres.
+description: Landing page on Cloudflare Pages, docs on Vercel, Nest API on Render with Neon Postgres.
 ---
 
 Ship the Starter stack without Docker on the public internet:
 
 | App | Platform | Notes |
 |-----|----------|--------|
-| `apps/web` | [Vercel](https://vercel.com) | Next.js, Bun monorepo install |
+| `apps/web` | [Cloudflare Pages](https://pages.cloudflare.com) | Next.js static export + one Pages Function |
 | `apps/docs` | [Vercel](https://vercel.com) | Separate Vercel project |
 | `apps/nest-api` | [Render](https://render.com) | Docker Blueprint + Neon `DATABASE_URL` |
 | Database | [Neon](https://neon.tech) | Serverless Postgres (TLS auto-detected) |
 
-Repo files: `apps/web/vercel.json`, `apps/docs/vercel.json`, root `render.yaml`.
+Repo files: `apps/web/README.md`, `apps/docs/vercel.json`, root `render.yaml`.
 
 ## 1) Neon database
 
@@ -48,22 +48,20 @@ Migrations run on container start when `RUN_MIGRATIONS=true` (default in the Blu
 
 **Note:** Free Render services spin down when idle; the first request can take ~30s. AI assist still needs a hosted `apps/ai-api` (`AI_API_URL`) later — Nest will boot without it.
 
-## 3) Web on Vercel
+## 3) Landing page on Cloudflare Pages
 
-1. **Add New Project** → import the same repo.
-2. **Root Directory:** `apps/web`.
-3. Enable **Bun** (Project Settings → General → Package Manager, or rely on `vercel.json` install).
-4. `vercel.json` already sets install/build via Turbo (`--filter=web`).
-5. Environment variables:
+`apps/web` is a static export (`out/`) plus a Pages Function for launch-day sign-ups. It does not
+call Nest.
 
-| Variable | Value |
-|----------|--------|
-| `NEXT_PUBLIC_NEST_API_URL` | `https://<your-service>.onrender.com` (no `/api` path) |
-| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | optional; must match Nest `GOOGLE_CLIENT_ID` |
+1. **Workers & Pages → Create → Pages → Connect to Git**, this repo, branch `main`.
+2. Framework preset **None**, root directory `apps/web`, build command
+   `bun install --frozen-lockfile && bun run build`, output directory `out`.
+3. Environment variables: `NODE_VERSION=22`, `BUN_VERSION=1.4.2`.
+4. Create a KV namespace and bind it to the project as `WAITLIST` (Settings → Bindings), then
+   redeploy.
+5. Add a custom domain, for example `personalos.rabtx.dev`.
 
-6. Deploy. Then go back to Render and set `WEB_APP_URL` / `CORS_ORIGIN` / WebAuthn to this Vercel URL, and **redeploy Nest** if needed.
-
-`NEXT_PUBLIC_*` is baked at **build** time — change the API URL → redeploy web.
+Full steps: `apps/web/README.md`.
 
 ## 4) Docs on Vercel
 

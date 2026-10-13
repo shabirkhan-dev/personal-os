@@ -10,9 +10,14 @@ function variables(tokens: ColorTokens): string {
 		.join("");
 }
 
-/** Colour tokens as CSS variables: Dark by default, Light when the system asks. */
+const sans = `"SF Pro Text","SF Pro Display",-apple-system,BlinkMacSystemFont,system-ui,"Segoe UI",Roboto,sans-serif`;
+const mono = `"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace`;
+
+/** Colour tokens as CSS variables. The landing page is designed in Dark only (Figma "Landing"). */
 export const themeCss = [
-	`:root{color-scheme:dark;${variables(colors.dark)}}`,
-	`@media (prefers-color-scheme: light){:root{color-scheme:light;${variables(colors.light)}}}`,
-	`body{margin:0;background:var(--bg-app);color:var(--text-primary);font-family:"SF Pro Text",-apple-system,system-ui,"Segoe UI",Roboto,sans-serif;font-size:${textStyles.body15.size}px;line-height:${textStyles.body15.lineHeight}px}`,
+	`:root{color-scheme:dark;${variables(colors.dark)}--font-sans:${sans};--font-mono:${mono};}`,
+	`*,*::before,*::after{box-sizing:border-box}`,
+	`html{scroll-behavior:smooth}`,
+	`@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}`,
+	`body{margin:0;background:var(--bg-canvas);color:var(--text-primary);font-family:var(--font-sans);font-size:${textStyles.body15.size}px;line-height:${textStyles.body15.lineHeight}px;-webkit-font-smoothing:antialiased}`,
 ].join("");

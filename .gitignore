@@ -17,6 +17,7 @@ node_modules
 # next.js (any .next dir in repo)
 .next/
 .out/
+out/
 
 # expo / react native
 .expo/

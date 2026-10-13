@@ -9,9 +9,8 @@ design-system decisions.
 ## Owned paths
 
 - `DESIGN.md`
-- `packages/ui/**` — the shadcn base
-- `packages/rabtx/**` — the polished Rabtx layer built on top of it
-- `apps/web/src/app/ui/**` — the component playground at `/ui`
+- `packages/tokens/**` — `@personal-os/tokens`, the Figma Kit v2 tokens
+- `apps/mobile/src/components/**` — the Kit v2 components and icons
 
 Web and mobile remain the owners of their application code. UI/UX may provide specifications,
 review screens, and change shared UI primitives. A UI implementation inside `apps/web/**` or
@@ -45,7 +44,7 @@ the docs app is coordinated with PM/human ownership through an explicit card.
 - Product prioritization or assignment
 - QA approval
 
-`DESIGN.md` is the source of truth for what the Rabtx materials mean. Read it before changing a
+`DESIGN.md` is the source of truth for the Kit v2 design system. Read it before changing a
 component, and never infer the design from what the code currently does.
 
 Raise a PM card when product direction or scope is unclear.

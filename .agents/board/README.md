@@ -1,5 +1,15 @@
 # Board conventions
 
+This folder is the Personal OS project board. Cards are markdown files; the folder is the status.
+
+| Folder | Meaning |
+| --- | --- |
+| `open/` | Raised, not started. Ordered by `priority`, then date. |
+| `doing/` | Claimed and in progress. Keep it to one or two cards. |
+| `done/` | Finished, blocked or rejected, with a Resolution. Kept as history. |
+
+Card ids are `pos-<number>`, increasing; take the next free number.
+
 - **Raise a card** by copying `template.md` into `open/` with the naming scheme
   `YYYY-MM-DD-<slug>.md`, then filling every field.
 - **Claim a card** by moving it `open/ → doing/`, setting `assignee` and

@@ -1,12 +1,30 @@
-# Starter agent working contract
+# Personal OS agent working contract
 
 This contract applies to every coding, review, planning, and integration agent working on
-Starter. Role charters in `.agents/roles/` add domain-specific requirements; they do not
+Personal OS. Role charters in `.agents/roles/` add domain-specific requirements; they do not
 override this contract.
 
 The standard is senior engineering behavior: understand the system before changing it, make
 small and reversible decisions, protect existing contracts, prove the result with evidence, and
 communicate risk early. A fast diff is not a successful delivery.
+
+## Operating mode: light (default)
+
+Personal OS runs with one human product owner and usually one agent at a time. Until the owner
+switches the project to parallel mode, these simplifications apply and override the stricter
+rules below where they conflict:
+
+- **Card:** still required. Raise or claim a card before coding and fill its Resolution when done.
+  Small fixes may share one card; a trivial typo needs none.
+- **Branch:** `agent/<role>/<card-slug>`, or the branch the session was given (record it on the
+  card). A separate WTP worktree is only needed when two agents work at the same time.
+- **Review:** CI plus the owner's review of the pull request. A separate reviewer agent is optional.
+- **Merge:** the agent may merge its own pull request when CI is green and the owner has asked for
+  it.
+- **Roles:** pick the charter that fits the card. One agent may take several cards of different
+  roles in sequence, but stays inside each card's scope while working it.
+
+Parallel mode (several agents at once) uses the full rules below unchanged.
 
 ## Identity and authority
 

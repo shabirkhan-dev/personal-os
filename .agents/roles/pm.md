@@ -2,7 +2,7 @@
 
 ## Assignment
 
-- **PM operator:** Codex (this agent)
+- **PM operator:** whichever agent the owner asks to coordinate (Claude Code, Codex, …)
 - **Product owner:** human project owner
 - **Final authority:** human product owner
 
@@ -71,7 +71,7 @@ maintained docs and linked board cards.
 The default team is intentionally small:
 
 - human product owner — direction, approvals, and final decisions;
-- PM — Codex delivery coordination;
+- PM — agent delivery coordination;
 - backend, web, mobile — implementation owners;
 - AI/Python and UI/UX — specialist implementation/support roles;
 - QA and reviewer — activated when the risk or change requires them.

@@ -1,6 +1,8 @@
 # Agent worktree workflow
 
-Every new implementation card gets its own Git branch and worktree. The shared `main` worktree
+In parallel mode every implementation card gets its own Git branch and worktree. In light mode
+(the default, see `agent-contract.md`) a branch is enough; use a worktree only when two agents
+work at the same time. The shared `main` worktree
 is an integration and inspection area; agents do not use it for new feature work.
 
 This repository uses [WTP (Worktree Plus)](https://github.com/satococoa/wtp) for worktree
@@ -19,7 +21,7 @@ wtp add -b agent/ui-ux/solid-button-material main
 WTP creates a branch-based path under:
 
 ```text
-../starter-worktrees/agent/ui-ux/solid-button-material/
+../personal-os-worktrees/agent/ui-ux/solid-button-material/
 ```
 
 The `.wtp.yml` post-create hook runs `bun install --frozen-lockfile` in the new worktree. It does

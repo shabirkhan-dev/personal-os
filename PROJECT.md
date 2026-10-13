@@ -21,7 +21,7 @@ personal-os/
 │   ├── nest-api/             # NestJS API
 │   ├── ai-api/               # FastAPI AI assist (uv); the Nest API proxies it
 │   ├── docs/                 # Documentation app (Next.js + Fumadocs)
-│   └── web/                  # Disabled Next.js landing-page shell, see apps/web/DISABLED.md
+│   └── web/                  # Next.js landing page, static export for Cloudflare Pages
 ├── packages/
 │   ├── tokens/               # @personal-os/tokens: Figma Kit v2 colours, spacing, radii, type
 │   ├── logger/               # @starter/logger: structured logger (TypeScript)
@@ -47,7 +47,7 @@ There is no root `docs/` directory.
 | `apps/nest-api` | NestJS 11, Zod, Jest | Production API spine |
 | `apps/ai-api` | FastAPI, uv | AI assist; never exposes LLM keys publicly |
 | `apps/docs` | Next.js + Fumadocs + MDX | Project docs site |
-| `apps/web` | Next.js 16 | Disabled landing-page shell, excluded from the workspace |
+| `apps/web` | Next.js 16 | Landing page, static export deployed to Cloudflare Pages |
 
 ## Shared packages
 
@@ -81,7 +81,7 @@ Run one app directly with `bun --cwd=<app-path> run <script>`, for example
 
 ## Tooling and quality system
 
-- **Bun** is the only package manager; workspaces are `apps/*` (minus `apps/web`) and `packages/*`
+- **Bun** is the only package manager; workspaces are `apps/*` and `packages/*`
 - **Turborepo** orchestrates shared tasks (`turbo.json`)
 - **oxlint** lints and **oxfmt** formats TS/JS (tabs, line width 100)
 - **Bash:** `shellcheck`, `shfmt` · **Python:** `ruff`, `pytest`

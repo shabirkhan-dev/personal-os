@@ -1,7 +1,7 @@
 # Personal OS · mobile
 
-Expo Router app (React Native, Reanimated, Zustand). Personal OS is mobile-only; the Next.js web
-app in `apps/web` is disabled.
+Expo Router app (React Native, Reanimated, Zustand). Personal OS is mobile-only; `apps/web` is just
+the landing page.
 
 ## Run locally
 

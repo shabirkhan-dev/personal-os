@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import { StyleSheet, View } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import { Icon } from "@/components/icons";
 import { HeaderButton } from "@/components/ui/header-button";
 import { PillButton } from "@/components/ui/pill-button";
@@ -10,7 +10,7 @@ import { TextBlock } from "@/modules/onboarding/components/text-block";
 import { onboardingRoutes } from "@/modules/onboarding/lib/flow";
 import { buildDayPlan, planHighlights } from "@/modules/onboarding/lib/plan";
 import { usePlan } from "@/modules/onboarding/store/use-plan";
-import { usePoTheme } from "@/theme";
+import { rise, usePoTheme } from "@/theme";
 
 /** 16 Plan reveal */
 export default function PlanRevealScreen() {
@@ -55,7 +55,7 @@ export default function PlanRevealScreen() {
 				{rows.map((row, index) => (
 					<Animated.View
 						key={`${row.time}-${row.title}`}
-						entering={FadeInDown.duration(360).delay(70 * index)}
+						entering={rise(70 * index)}
 						style={[
 							styles.row,
 							index < rows.length - 1
@@ -83,7 +83,7 @@ export default function PlanRevealScreen() {
 				{highlights.map((tile, index) => (
 					<Animated.View
 						key={tile.label}
-						entering={FadeInDown.duration(360).delay(450 + 80 * index)}
+						entering={rise(450 + 80 * index)}
 						style={[
 							styles.goal,
 							{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },

@@ -9,6 +9,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { scheduleOnRN, scheduleOnUI } from "react-native-worklets";
 import { toTextStyle, usePoTheme } from "@/theme";
+import { haptics } from "@/lib/haptics";
 
 /** Tick pitch measured from the Figma ruler (40 units across 326px). */
 export const TICK_SPACING = 8.2;
@@ -56,7 +57,13 @@ export function RulerSlider({
 		});
 	}, [width, initialX, scrollRef]);
 
-	const emit = useCallback((next: number) => onChange(next), [onChange]);
+	const emit = useCallback(
+		(next: number) => {
+			haptics.select();
+			onChange(next);
+		},
+		[onChange],
+	);
 
 	const onScroll = useAnimatedScrollHandler((event) => {
 		const next = Math.min(

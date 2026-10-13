@@ -9,6 +9,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { scheduleOnRN, scheduleOnUI } from "react-native-worklets";
 import { toTextStyle, usePoTheme } from "@/theme";
+import { haptics } from "@/lib/haptics";
 
 export const WHEEL_ROW = 30;
 export const WHEEL_HEIGHT = 176;
@@ -37,7 +38,13 @@ export function WheelColumn({ items, index, onChange, accessibilityLabel }: Whee
 			scrollTo(scrollRef, 0, initialY, false);
 		});
 	}, [initialY, scrollRef]);
-	const emit = useCallback((next: number) => onChange(next), [onChange]);
+	const emit = useCallback(
+		(next: number) => {
+			haptics.select();
+			onChange(next);
+		},
+		[onChange],
+	);
 
 	const onScroll = useAnimatedScrollHandler((event) => {
 		const next = Math.min(

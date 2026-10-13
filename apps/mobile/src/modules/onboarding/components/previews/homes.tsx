@@ -1,9 +1,9 @@
 import type { ColorTokens } from "@personal-os/tokens";
 import { StyleSheet, View } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import { Glow } from "@/components/ui/glow";
 import { PoText } from "@/components/ui/po-text";
-import { usePoTheme } from "@/theme";
+import { rise, usePoTheme } from "@/theme";
 
 type Stat = {
 	label: string;
@@ -32,7 +32,7 @@ export function HomesPreview() {
 	return (
 		<View style={styles.list}>
 			{stats.map((stat, index) => (
-				<Animated.View key={stat.label} entering={FadeInDown.duration(420).delay(90 * index)}>
+				<Animated.View key={stat.label} entering={rise(90 * index)}>
 					<View
 						style={[
 							styles.card,

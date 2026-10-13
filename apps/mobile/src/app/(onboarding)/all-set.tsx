@@ -2,7 +2,7 @@ import { elevation } from "@personal-os/tokens";
 import { router } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
-import Animated, { FadeInDown, ZoomIn } from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import { Glow } from "@/components/ui/glow";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
@@ -12,7 +12,8 @@ import { SetupTop } from "@/modules/onboarding/components/top-bars";
 import { moduleOptions } from "@/modules/onboarding/lib/options";
 import { useOnboardingProgress } from "@/modules/onboarding/store/onboarding-progress";
 import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
-import { toShadowStyle, usePoTheme } from "@/theme";
+import { pop, rise, toShadowStyle, usePoTheme } from "@/theme";
+import { haptics } from "@/lib/haptics";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -27,6 +28,7 @@ export default function AllSetScreen() {
 
 	const openOs = async () => {
 		complete();
+		haptics.success();
 		await markCompleted();
 		router.replace("/");
 	};
@@ -35,7 +37,7 @@ export default function AllSetScreen() {
 		<OnboardingScreen glow="statusViolet">
 			<SetupTop onBack={() => router.back()} />
 			<View style={styles.spacer} />
-			<Animated.View entering={FadeInDown.duration(420)} style={styles.text}>
+			<Animated.View entering={rise()} style={styles.text}>
 				<PoText variant="eyebrow11" tone="textTertiary">
 					All set
 				</PoText>
@@ -46,7 +48,7 @@ export default function AllSetScreen() {
 			</Animated.View>
 			<View style={styles.gap26} />
 			<Animated.View
-				entering={ZoomIn.duration(520).delay(160)}
+				entering={pop(160)}
 				style={[
 					styles.card,
 					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },

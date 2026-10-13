@@ -1,9 +1,9 @@
 import type { ColorTokens } from "@personal-os/tokens";
 import { StyleSheet, View } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import { Icon, type IconName } from "@/components/icons";
 import { PoText } from "@/components/ui/po-text";
-import { usePoTheme } from "@/theme";
+import { rise, usePoTheme } from "@/theme";
 
 type Row = {
 	title: string;
@@ -58,7 +58,7 @@ export function ModuleRowsPreview() {
 	return (
 		<View style={styles.list}>
 			{rows.map((row, index) => (
-				<Animated.View key={row.title} entering={FadeInDown.duration(420).delay(80 * index)}>
+				<Animated.View key={row.title} entering={rise(80 * index)}>
 					<View
 						style={[
 							styles.row,

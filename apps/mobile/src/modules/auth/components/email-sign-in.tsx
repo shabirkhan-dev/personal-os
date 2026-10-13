@@ -1,13 +1,14 @@
 import { textStyles } from "@personal-os/tokens";
 import { useState } from "react";
 import { StyleSheet, TextInput, View } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
 import { ApiError } from "@/lib/api/client";
-import { toTextStyle, usePoTheme } from "@/theme";
+import { rise, toTextStyle, usePoTheme } from "@/theme";
 import { useAuth } from "../context/auth-context";
 import { isEmail } from "../lib/email";
+import { haptics } from "@/lib/haptics";
 
 type Step = { kind: "email" } | { kind: "code"; email: string; developmentCode?: string };
 
@@ -65,8 +66,10 @@ export function EmailSignIn({ name, onSignedIn, onCancel }: EmailSignInProps) {
 		setError(null);
 		try {
 			await verifyEmailCode({ email: address, code });
+			haptics.success();
 			onSignedIn();
 		} catch (caught) {
+			haptics.error();
 			setError(messageFor(caught));
 			setBusy(false);
 		}
@@ -74,7 +77,7 @@ export function EmailSignIn({ name, onSignedIn, onCancel }: EmailSignInProps) {
 
 	if (step.kind === "email") {
 		return (
-			<Animated.View entering={FadeInDown.duration(320)} style={styles.block}>
+			<Animated.View entering={rise()} style={styles.block}>
 				<PoText variant="title30">Your email</PoText>
 				<PoText variant="body15" tone="textSecondary">
 					We'll send a 6-digit code. No password needed.
@@ -112,7 +115,7 @@ export function EmailSignIn({ name, onSignedIn, onCancel }: EmailSignInProps) {
 	}
 
 	return (
-		<Animated.View entering={FadeInDown.duration(320)} style={styles.block}>
+		<Animated.View entering={rise()} style={styles.block}>
 			<PoText variant="title30">Check your email</PoText>
 			<PoText variant="body15" tone="textSecondary">
 				Enter the code we sent to {step.email}.

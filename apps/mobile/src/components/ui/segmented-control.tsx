@@ -8,6 +8,7 @@ import Animated, {
 	withSpring,
 } from "react-native-reanimated";
 import { type PoTextStyle, toTextStyle, usePoTheme } from "@/theme";
+import { haptics } from "@/lib/haptics";
 
 export type SegmentedOption<T extends string> = { value: T; label: string };
 
@@ -85,7 +86,10 @@ export function SegmentedControl<T extends string>({
 					key={option.value}
 					label={option.label}
 					active={optionIndex === index}
-					onPress={() => onChange(option.value)}
+					onPress={() => {
+						if (option.value !== value) haptics.select();
+						onChange(option.value);
+					}}
 					large={isLarge}
 					width={isLarge ? undefined : segmentWidth}
 					labelStyle={labelStyle}

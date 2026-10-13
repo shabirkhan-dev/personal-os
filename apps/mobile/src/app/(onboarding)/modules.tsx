@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, View } from "react-native";
-import Animated, { FadeInDown, LinearTransition } from "react-native-reanimated";
+import Animated, { LinearTransition } from "react-native-reanimated";
 import { Icon } from "@/components/icons";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PoText } from "@/components/ui/po-text";
@@ -13,7 +13,8 @@ import {
 	moduleOptions,
 } from "@/modules/onboarding/lib/options";
 import { modulesForGoals, useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
-import { usePoTheme } from "@/theme";
+import { rise, usePoTheme } from "@/theme";
+import { haptics } from "@/lib/haptics";
 
 /** 12 Setup 5 · Modules: recommended from the ranked goals, plus optional extras. */
 export default function ModulesScreen() {
@@ -59,10 +60,13 @@ export default function ModulesScreen() {
 				{recommended.map((option, index) => {
 					const on = modules.includes(option.id);
 					return (
-						<Animated.View key={option.id} entering={FadeInDown.duration(360).delay(60 * index)}>
+						<Animated.View key={option.id} entering={rise(60 * index)}>
 							<SelectCard
 								selected={on}
-								onPress={() => toggleModule(option.id)}
+								onPress={() => {
+									haptics.select();
+									toggleModule(option.id);
+								}}
 								radius={28}
 								accessibilityLabel={option.label}
 								style={styles.row}

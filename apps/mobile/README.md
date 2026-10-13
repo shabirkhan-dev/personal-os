@@ -35,6 +35,14 @@ Commit the `app.json` changes those commands make.
 
 Then run `bun run start:dev-client` and scan the QR code with the installed app.
 
+### Build size
+
+`app.config.js` adds per-profile Android settings on top of `app.json`. The `development` and
+`preview` APKs contain only `arm64-v8a`, which every current phone uses (Galaxy S2x included), and
+compress their native libraries. All release builds use R8 code shrinking and resource shrinking.
+`production` keeps every ABI because Google Play splits the AAB per device. A local
+`expo run:android` keeps all ABIs so emulators still work.
+
 ### EAS Update (over the air)
 
 Builds are bound to a channel (`development`, `preview`, `production`, see `eas.json`) and to the

@@ -1,8 +1,8 @@
 import { StyleSheet, View } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import { Icon } from "@/components/icons";
 import { PoText } from "@/components/ui/po-text";
-import { usePoTheme } from "@/theme";
+import { rise, usePoTheme } from "@/theme";
 import { tileToneFor, type Upcoming } from "../lib/today";
 
 export type UpcomingListProps = {
@@ -29,7 +29,7 @@ export function UpcomingList({ upcoming, now }: UpcomingListProps) {
 				</View>
 			</View>
 			{next ? (
-				<Animated.View entering={FadeInDown.duration(420)} style={[styles.next, card]}>
+				<Animated.View entering={rise()} style={[styles.next, card]}>
 					<View style={[styles.nextTile, { backgroundColor: colors[tileToneFor(next.tone)] }]}>
 						<Icon name={next.icon} color={colors[next.tone]} />
 					</View>
@@ -53,11 +53,7 @@ export function UpcomingList({ upcoming, now }: UpcomingListProps) {
 				</View>
 			)}
 			{later.map((item, index) => (
-				<Animated.View
-					key={item.id}
-					entering={FadeInDown.duration(420).delay(80 * (index + 1))}
-					style={[styles.row, card]}
-				>
+				<Animated.View key={item.id} entering={rise(80 * (index + 1))} style={[styles.row, card]}>
 					<PoText variant="mono13" tone="textTertiary" style={styles.time}>
 						{item.time}
 					</PoText>

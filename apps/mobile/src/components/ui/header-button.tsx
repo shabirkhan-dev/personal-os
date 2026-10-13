@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, View } from "react-native";
 import { Icon, type IconName } from "@/components/icons";
 import { usePoTheme } from "@/theme";
+import { haptics } from "@/lib/haptics";
 
 export type HeaderButtonProps = {
 	icon?: IconName;
@@ -24,7 +25,14 @@ export function HeaderButton({
 			accessibilityRole="button"
 			accessibilityLabel={accessibilityLabel}
 			hitSlop={8}
-			onPress={onPress}
+			onPress={
+				onPress
+					? () => {
+							haptics.tap();
+							onPress();
+						}
+					: undefined
+			}
 			style={({ pressed }) => [
 				styles.button,
 				{

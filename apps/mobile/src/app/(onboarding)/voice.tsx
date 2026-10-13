@@ -2,6 +2,7 @@ import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import Animated, {
+	Easing,
 	FadeIn,
 	useAnimatedStyle,
 	useSharedValue,
@@ -9,7 +10,6 @@ import Animated, {
 	withRepeat,
 	withSequence,
 	withTiming,
-	ZoomIn,
 } from "react-native-reanimated";
 import { Icon } from "@/components/icons";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -20,7 +20,8 @@ import { SetupTop } from "@/modules/onboarding/components/top-bars";
 import { onboardingRoutes } from "@/modules/onboarding/lib/flow";
 import { mockTranscript, transcriptFacts } from "@/modules/onboarding/lib/transcript";
 import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
-import { usePoTheme } from "@/theme";
+import { pop, usePoTheme } from "@/theme";
+import { haptics } from "@/lib/haptics";
 
 /** Waveform bar heights from the Figma recorder; the first 26 are already "heard". */
 const WAVE = [
@@ -89,7 +90,10 @@ export default function VoiceScreen() {
 							variant="secondary"
 							label="Fix something"
 							style={styles.flex}
-							onPress={() => finish(onboardingRoutes.aboutYou)}
+							onPress={() => {
+								haptics.tap();
+								finish(onboardingRoutes.aboutYou);
+							}}
 						/>
 						<PillButton
 							label="Looks right"
@@ -142,7 +146,7 @@ export default function VoiceScreen() {
 					fact.known ? (
 						<Animated.View
 							key={fact.id}
-							entering={ZoomIn.springify().damping(16)}
+							entering={pop()}
 							style={[
 								styles.fact,
 								{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
@@ -216,7 +220,10 @@ function Recorder({ recording, clock, onToggle }: RecorderProps) {
 			<Pressable
 				accessibilityRole="button"
 				accessibilityLabel={recording ? "Stop recording" : "Resume recording"}
-				onPress={onToggle}
+				onPress={() => {
+					haptics.tap();
+					onToggle();
+				}}
 				style={[styles.stop, { backgroundColor: colors.statusDanger }]}
 			>
 				{recording ? (
@@ -247,7 +254,10 @@ function WaveBar({
 			? withDelay(
 					(index % 7) * 60,
 					withRepeat(
-						withSequence(withTiming(0.45, { duration: 260 }), withTiming(1, { duration: 260 })),
+						withSequence(
+							withTiming(0.7, { duration: 420, easing: Easing.inOut(Easing.sin) }),
+							withTiming(1, { duration: 420, easing: Easing.inOut(Easing.sin) }),
+						),
 						-1,
 					),
 				)

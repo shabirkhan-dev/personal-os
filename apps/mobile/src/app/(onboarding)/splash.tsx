@@ -2,8 +2,8 @@ import { router } from "expo-router";
 import { useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import Animated, {
+	Easing,
 	FadeIn,
-	FadeInDown,
 	useAnimatedStyle,
 	useSharedValue,
 	withDelay,
@@ -15,7 +15,7 @@ import { LogoMark } from "@/components/icons";
 import { PoText } from "@/components/ui/po-text";
 import { OnboardingScreen } from "@/modules/onboarding/components/onboarding-screen";
 import { onboardingRoutes } from "@/modules/onboarding/lib/flow";
-import { usePoTheme } from "@/theme";
+import { rise, usePoTheme } from "@/theme";
 
 const SPLASH_MS = 1800;
 
@@ -29,7 +29,7 @@ export default function SplashScreen() {
 	return (
 		<OnboardingScreen glow="accentDefault">
 			<View style={styles.center}>
-				<Animated.View entering={FadeInDown.duration(500)} style={styles.brand}>
+				<Animated.View entering={rise()} style={styles.brand}>
 					<LogoMark size={72} />
 					<View style={styles.words}>
 						<PoText variant="title30">Personal OS</PoText>
@@ -67,9 +67,12 @@ function LoaderDot({ color, index }: { color: string; index: number }) {
 
 	useEffect(() => {
 		opacity.value = withDelay(
-			index * 200,
+			index * 160,
 			withRepeat(
-				withSequence(withTiming(1, { duration: 300 }), withTiming(0.5, { duration: 300 })),
+				withSequence(
+					withTiming(1, { duration: 520, easing: Easing.inOut(Easing.sin) }),
+					withTiming(0.5, { duration: 520, easing: Easing.inOut(Easing.sin) }),
+				),
 				-1,
 			),
 		);

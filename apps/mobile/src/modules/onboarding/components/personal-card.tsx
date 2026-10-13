@@ -1,10 +1,10 @@
 import { elevation } from "@personal-os/tokens";
 import { StyleSheet, View } from "react-native";
-import Animated, { ZoomIn } from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import { Icon } from "@/components/icons";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PoText } from "@/components/ui/po-text";
-import { toShadowStyle, usePoTheme } from "@/theme";
+import { pop, toShadowStyle, usePoTheme } from "@/theme";
 import { formatThousands, waterGoalLiters } from "../lib/insights";
 import { type ModuleOption, moduleOptions } from "../lib/options";
 import { rhythmSegments } from "../lib/plan";
@@ -202,7 +202,7 @@ export function PersonalCard({ ready }: { ready: number }) {
 							<Icon name={module.icon} color={colors[module.iconTone]} />
 							{index < ready ? (
 								<Animated.View
-									entering={ZoomIn.springify().damping(14)}
+									entering={pop()}
 									style={[styles.badge, { borderColor: colors.bgSurface }]}
 								>
 									<Checkbox checked size={20} />

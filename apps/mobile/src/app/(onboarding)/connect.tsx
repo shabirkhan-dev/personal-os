@@ -9,6 +9,7 @@ import { onboardingRoutes } from "@/modules/onboarding/lib/flow";
 import type { ConnectionId } from "@/modules/onboarding/lib/options";
 import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
 import { usePoTheme } from "@/theme";
+import { haptics } from "@/lib/haptics";
 
 type Tone = keyof ColorTokens;
 
@@ -161,7 +162,10 @@ export default function ConnectScreen() {
 									accessibilityLabel={`${item.title} connected`}
 									accessibilityState={{ checked: true }}
 									hitSlop={8}
-									onPress={() => toggleConnection(item.id)}
+									onPress={() => {
+										haptics.select();
+										toggleConnection(item.id);
+									}}
 								>
 									<Checkbox checked size={24} />
 								</Pressable>
@@ -169,7 +173,10 @@ export default function ConnectScreen() {
 								<Pressable
 									accessibilityRole="button"
 									accessibilityLabel={`${item.action} ${item.title}`}
-									onPress={() => toggleConnection(item.id)}
+									onPress={() => {
+										haptics.select();
+										toggleConnection(item.id);
+									}}
 									style={({ pressed }) => [
 										styles.action,
 										{

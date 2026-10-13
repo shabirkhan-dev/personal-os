@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import { StyleSheet, View } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import { Icon } from "@/components/icons";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PillButton } from "@/components/ui/pill-button";
@@ -11,7 +11,7 @@ import { TextBlock } from "@/modules/onboarding/components/text-block";
 import { SetupTop } from "@/modules/onboarding/components/top-bars";
 import { onboardingRoutes } from "@/modules/onboarding/lib/flow";
 import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
-import { usePoTheme } from "@/theme";
+import { rise, usePoTheme } from "@/theme";
 
 /** 06 Setup · Choose how */
 export default function ChooseHowScreen() {
@@ -45,7 +45,7 @@ export default function ChooseHowScreen() {
 				body={["Both get you the same plan. Talking is faster."]}
 			/>
 			<View style={styles.gap24} />
-			<Animated.View entering={FadeInDown.duration(380).delay(120)}>
+			<Animated.View entering={rise(120)}>
 				<SelectCard
 					selected={talking}
 					onPress={() => setAnswer("path", "talk")}
@@ -78,7 +78,7 @@ export default function ChooseHowScreen() {
 				</SelectCard>
 			</Animated.View>
 			<View style={styles.gap12} />
-			<Animated.View entering={FadeInDown.duration(380).delay(200)}>
+			<Animated.View entering={rise(200)}>
 				<SelectCard
 					selected={!talking}
 					onPress={() => setAnswer("path", "steps")}

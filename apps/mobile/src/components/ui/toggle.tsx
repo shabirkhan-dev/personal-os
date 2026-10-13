@@ -7,6 +7,7 @@ import Animated, {
 	withSpring,
 } from "react-native-reanimated";
 import { usePoTheme } from "@/theme";
+import { haptics } from "@/lib/haptics";
 
 export type ToggleProps = {
 	value: boolean;
@@ -40,7 +41,10 @@ export function Toggle({ value, onChange, accessibilityLabel }: ToggleProps) {
 			accessibilityLabel={accessibilityLabel}
 			accessibilityState={{ checked: value }}
 			hitSlop={8}
-			onPress={() => onChange(!value)}
+			onPress={() => {
+				haptics.select();
+				onChange(!value);
+			}}
 		>
 			<Animated.View style={[styles.track, trackStyle]}>
 				<Animated.View style={[styles.knob, { backgroundColor: colors.textOnAccent }, knobStyle]} />

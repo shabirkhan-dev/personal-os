@@ -1,8 +1,8 @@
 import type { ColorTokens } from "@personal-os/tokens";
 import { StyleSheet, View } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import { PoText } from "@/components/ui/po-text";
-import { usePoTheme } from "@/theme";
+import { rise, usePoTheme } from "@/theme";
 import { type RichPart, RichText } from "./rich-text";
 
 export type TextBlockProps = {
@@ -21,7 +21,7 @@ export function TextBlock({ eyebrow, title, body, dot, compact = false }: TextBl
 
 	return (
 		<Animated.View
-			entering={FadeInDown.duration(380).delay(60)}
+			entering={rise(60)}
 			style={[styles.block, dot && !compact ? styles.welcome : null]}
 		>
 			<View style={styles.eyebrow}>

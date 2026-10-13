@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { Icon, type IconName } from "@/components/icons";
 import { PoText } from "@/components/ui/po-text";
 import { toShadowStyle, usePoTheme } from "@/theme";
+import { haptics } from "@/lib/haptics";
 
 type Tab = { id: "today" | "areas" | "insights" | "profile"; label: string; icon: IconName };
 
@@ -51,7 +52,14 @@ export function FloatingTabBar({ bottomInset, onAreasPress, onProfilePress }: Fl
 							accessibilityLabel={tab.label}
 							accessibilityState={{ selected: active, disabled }}
 							disabled={disabled}
-							onPress={onPress}
+							onPress={
+								onPress
+									? () => {
+											haptics.tap();
+											onPress();
+										}
+									: undefined
+							}
 							style={[
 								active ? styles.active : styles.icon,
 								active ? { backgroundColor: colors.bgHover } : styles.inactive,

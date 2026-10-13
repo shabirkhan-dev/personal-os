@@ -7,6 +7,7 @@ import { DatabaseModule } from '@/database/database.module';
 import { AiModule } from '@/modules/ai/ai.module';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { HealthModule } from '@/modules/health/health.module';
+import { OnboardingModule } from '@/modules/onboarding/onboarding.module';
 import { ProfilesModule } from '@/modules/profiles/profiles.module';
 import { UsersModule } from '@/modules/users/users.module';
 
@@ -19,6 +20,7 @@ import { UsersModule } from '@/modules/users/users.module';
 		UsersModule,
 		AuthModule,
 		ProfilesModule,
+		OnboardingModule,
 		AiModule,
 	],
 	providers: [

@@ -20,10 +20,12 @@ import { CsrfGuard } from './csrf.guard';
 import {
 	ChallengeTokenBodyDto,
 	EmailBodyDto,
+	EmailCodeRequestBodyDto,
 	GoogleCredentialBodyDto,
 	MagicLinkBodyDto,
 	PasskeyAuthenticationBodyDto,
 	PasskeyOptionsBodyDto,
+	VerifyEmailBodyDto,
 } from './dto/auth.dto';
 import { RefreshCookieService } from './refresh-cookie.service';
 import { presentSession } from './session-response';
@@ -52,6 +54,27 @@ export class AuthMethodsController {
 		@Res({ passthrough: true }) response: Response,
 	): Promise<ClientAuthSession> {
 		const result = await this.auth.completeMfaLogin(body, metadata(request));
+		return presentSession(this.auth, this.refreshCookie, request, response, result);
+	}
+
+	@Post('email-code/request')
+	@Throttle({ default: { limit: 3, ttl: 60_000 } })
+	@HttpCode(HttpStatus.ACCEPTED)
+	@ApiOperation({ summary: 'Send a 6-digit sign-in code, creating the account on first use' })
+	requestEmailCode(@Body() body: EmailCodeRequestBodyDto) {
+		return this.auth.requestEmailCode(body);
+	}
+
+	@Post('email-code/verify')
+	@Throttle({ default: { limit: 8, ttl: 60_000 } })
+	@HttpCode(HttpStatus.OK)
+	@ApiOperation({ summary: 'Exchange a sign-in code for a session' })
+	async verifyEmailCode(
+		@Body() body: VerifyEmailBodyDto,
+		@Req() request: Request,
+		@Res({ passthrough: true }) response: Response,
+	): Promise<ClientAuthSession> {
+		const result = await this.auth.verifyEmailCode(body, metadata(request));
 		return presentSession(this.auth, this.refreshCookie, request, response, result);
 	}
 

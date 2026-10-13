@@ -19,7 +19,7 @@ services:
       AUTH_TOKEN_SECRET: ${AUTH_TOKEN_SECRET:?Set AUTH_TOKEN_SECRET in .env (min 32 chars)}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
       AUTH_DEV_EXPOSE_CODES: ${AUTH_DEV_EXPOSE_CODES:-false}
-      AUTH_EMAIL_FROM: ${AUTH_EMAIL_FROM:-Starter <auth@example.com>}
+      AUTH_EMAIL_FROM: ${AUTH_EMAIL_FROM:-Personal OS <auth@example.com>}
       RESEND_API_KEY: ${RESEND_API_KEY:?Set RESEND_API_KEY in .env}
       RUN_MIGRATIONS: ${RUN_MIGRATIONS:-true}
       TRUST_PROXY: ${TRUST_PROXY:-false}

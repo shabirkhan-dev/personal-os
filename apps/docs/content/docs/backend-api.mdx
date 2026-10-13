@@ -7,9 +7,8 @@ This page is the one place the NestJS API contract lives. The agent contract in
 `.agents/agent-contract.md` points every role here: web and mobile read it before consuming an
 endpoint, and backend updates it in the same commit as any public API change.
 
-It is a stub in the starter, because the API surface is yours to define. The convention matters
-more than the current contents — a contract that lives in one file stays consistent, while one
-scattered across cards and notes drifts immediately.
+Endpoints are listed here as clients start using them. A contract that lives in one file stays
+consistent; one scattered across cards and notes drifts immediately.
 
 ## What belongs here
 
@@ -25,12 +24,55 @@ scattered across cards and notes drifts immediately.
 
 ## Endpoints
 
-The starter ships a health check and Swagger. Document real endpoints here as you add them.
+All paths are under `/api/v1`. Errors use `{ "code": string, "message": string }` with the HTTP
+status. Native clients send `X-Client-Platform: native` so session responses include the refresh
+token in the body (browsers get an httpOnly cookie instead).
 
 | Method | Path | Auth | Purpose |
 | --- | --- | --- | --- |
-| `GET` | `/api/v1/health` | none | Liveness probe |
+| `GET` | `/health` | none | Liveness probe |
 | — | `/api/docs` | none in dev | Swagger UI |
+| `POST` | `/auth/methods/email-code/request` | none | Send a 6-digit sign-in code; creates the account on first use |
+| `POST` | `/auth/methods/email-code/verify` | none | Exchange the code for a session |
+| `POST` | `/auth/refresh` | refresh token | Rotate the session |
+| `POST` | `/auth/logout` | refresh token | End the session |
+| `GET` | `/auth/me` | bearer | Current user |
+| `GET` | `/users/me/onboarding` | bearer | Saved onboarding answers, or `null` before the first save |
+| `PUT` | `/users/me/onboarding` | bearer | Save the onboarding answers |
+
+### Email-code sign-in
+
+`POST /auth/methods/email-code/request`, throttled to 3 per minute:
+
+```json
+{ "email": "you@example.com", "name": "Shabir" }
+```
+
+`name` is optional and only used when the account is created. The response is always `202`
+`{ "accepted": true, "message": "A sign-in code has been sent." }`, whether or not the account
+existed; outside production it also carries `developmentCode`.
+
+`POST /auth/methods/email-code/verify`, throttled to 8 per minute:
+
+```json
+{ "email": "you@example.com", "code": "123456" }
+```
+
+`200` returns the session `{ accessToken, accessTokenExpiresAt, refreshToken (native only), user }`
+and marks the email verified. A wrong or expired code returns `401` `AUTH_OTP_INVALID`; codes
+lock after the configured number of attempts.
+
+### Onboarding answers
+
+`PUT /users/me/onboarding` takes `{ "answers": OnboardingAnswers }`, the same shape as the mobile
+store (`apps/mobile/src/modules/onboarding/store/onboarding-store.ts`). Unknown keys and
+out-of-range values are rejected with `400`. Both endpoints return
+`{ answers, schemaVersion, updatedAt }`, and `GET` returns `null` before the first save.
+
+The plan is not stored: the app derives it from the answers. When the stored row no longer matches
+the current schema, `GET` returns `null` and the app uploads its copy. After sign-in the app keeps
+whichever side changed last (`updatedAt` against the device's own timestamp), then uploads changes
+about a second after they happen.
 
 ## Changelog
 
@@ -38,4 +80,6 @@ Record every public API change, newest first, so consumers can see what moved.
 
 | Date | Change | Breaking |
 | --- | --- | --- |
-| — | Nothing documented yet | — |
+| 2026-10-13 | Added `GET`/`PUT /users/me/onboarding` | No |
+| 2026-10-13 | Added email-code sign-in (`/auth/methods/email-code/*`) | No |
+| 2026-10-13 | Removed `/billing/*` (Stripe and Razorpay) | Yes, unused by clients |

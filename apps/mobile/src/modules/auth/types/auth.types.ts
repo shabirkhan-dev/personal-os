@@ -8,98 +8,28 @@ export interface AuthSession {
 	user: User;
 }
 
-export interface TwoFactorChallenge {
-	requiresTwoFactor: true;
-	challengeToken: string;
-	expiresAt: string;
-	methods: Array<"totp" | "recovery_code">;
-}
-
-export type LoginResult = AuthSession | TwoFactorChallenge;
-
 export interface AuthChallengeResult {
 	accepted: true;
 	message: string;
+	/** Only outside production: the code, so local testing works without email. */
 	developmentCode?: string;
-	developmentToken?: string;
 }
 
-export interface RegistrationResult extends AuthChallengeResult {
-	user: User;
-}
-
-export interface LoginInput {
+export interface EmailCodeRequest {
 	email: string;
-	password: string;
+	/** Used as the display name when the account is created. */
+	name?: string;
 }
 
-export interface RegisterInput {
-	email: string;
-	username: string;
-	password: string;
-}
-
-export interface VerifyEmailInput {
+export interface EmailCodeVerify {
 	email: string;
 	code: string;
 }
 
-export interface ResetPasswordInput {
-	email: string;
-	code: string;
-	newPassword: string;
-}
-
-export interface ChangePasswordInput {
-	currentPassword: string;
-	newPassword: string;
-}
-
-export interface TwoFactorInput {
-	challengeToken: string;
-	code: string;
-}
-
-export interface SessionInfo {
-	id: string;
-	userAgent: string | null;
-	ipAddress: string | null;
-	createdAt: string;
-	lastUsedAt: string;
-	expiresAt: string;
-	isCurrent: boolean;
-}
-
-export interface PasskeyView {
-	id: string;
-	name: string;
-	deviceType: string;
-	backedUp: boolean;
-	lastUsedAt: string | null;
-	createdAt: string;
-}
-
-export interface SecurityStatus {
-	mfa: { totpEnabled: boolean; recoveryCodesRemaining: number };
-	passkeys: PasskeyView[];
-	social: { googleLinked: boolean };
-}
-
-export interface TotpSetup {
-	secret: string;
-	uri: string;
-	qrCodeDataUrl: string;
-}
-
-export interface PasskeyRegistrationOptions {
-	challengeId: string;
-	options: Record<string, unknown>;
-}
-
-export interface PasskeyAuthenticationOptions {
-	challengeId: string;
-	options: Record<string, unknown>;
-}
-
-export type AuthenticationResponseJSON = Record<string, unknown>;
-export type RegistrationResponseJSON = Record<string, unknown>;
+/**
+ * - `loading`: reading the saved session on launch
+ * - `signed-out`: no session (never signed in, signed out, or the session expired)
+ * - `signed-in`: a valid session
+ * - `offline`: a session is saved but the API could not be reached to restore it
+ */
+export type AuthStatus = "loading" | "signed-out" | "signed-in" | "offline";

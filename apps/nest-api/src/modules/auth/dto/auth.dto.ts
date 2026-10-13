@@ -44,6 +44,9 @@ export const changePasswordBodySchema = z
 export const challengeTokenBodySchema = z
 	.object({ challengeToken: z.string().min(20).max(512), code: z.string().min(6).max(32) })
 	.strict();
+export const emailCodeRequestBodySchema = z
+	.object({ email: emailSchema, name: z.string().trim().min(1).max(80).optional() })
+	.strict();
 export const magicLinkBodySchema = z.object({ token: z.string().min(20).max(512) }).strict();
 export const totpCodeBodySchema = z.object({ code: z.string().min(6).max(32) }).strict();
 export const googleCredentialBodySchema = z
@@ -109,6 +112,11 @@ export class ChallengeTokenBodyDto {
 	static schema = challengeTokenBodySchema;
 	challengeToken!: string;
 	code!: string;
+}
+export class EmailCodeRequestBodyDto {
+	static schema = emailCodeRequestBodySchema;
+	email!: string;
+	name?: string;
 }
 export class MagicLinkBodyDto {
 	static schema = magicLinkBodySchema;

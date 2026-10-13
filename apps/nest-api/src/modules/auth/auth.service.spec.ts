@@ -43,9 +43,12 @@ describe('AuthService', () => {
 		email = {
 			sendVerificationCode: vi.fn().mockResolvedValue(undefined),
 			sendPasswordResetCode: vi.fn().mockResolvedValue(undefined),
+			sendSignInCode: vi.fn().mockResolvedValue(undefined),
 		} as unknown as Mocked<EmailService>;
 		usersService = {
 			createUser: vi.fn().mockResolvedValue(user),
+			createEmailOnlyUser: vi.fn().mockResolvedValue({ ...user, passwordHash: null }),
+			findByEmail: vi.fn().mockResolvedValue(null),
 		} as unknown as Mocked<UsersService>;
 		service = new AuthService(
 			new AppConfigService(),
@@ -126,5 +129,46 @@ describe('AuthService', () => {
 
 		expect(service.toClientSession(session, true)).toEqual(session);
 		expect(service.toClientSession(session, false)).not.toHaveProperty('refreshToken');
+	});
+
+	it('creates a passwordless account on the first email-code request', async () => {
+		const result = await service.requestEmailCode({ email: user.email, name: 'Shabir' });
+
+		expect(usersService.createEmailOnlyUser).toHaveBeenCalledWith({
+			email: user.email,
+			displayName: 'Shabir',
+		});
+		expect(authRepository.createChallenge).toHaveBeenCalledWith(
+			expect.objectContaining({ purpose: 'email_sign_in', codeHash: 'otp-hash' }),
+		);
+		expect(email.sendSignInCode).toHaveBeenCalledWith(user.email, '123456');
+		expect(result).toMatchObject({ accepted: true, message: 'A sign-in code has been sent.' });
+	});
+
+	it('reuses an existing account for an email-code request', async () => {
+		usersService.findByEmail.mockResolvedValue(user);
+
+		await service.requestEmailCode({ email: user.email });
+
+		expect(usersService.createEmailOnlyUser).not.toHaveBeenCalled();
+		expect(email.sendSignInCode).toHaveBeenCalledWith(user.email, '123456');
+	});
+
+	it('sends no code to a deactivated account but answers the same way', async () => {
+		usersService.findByEmail.mockResolvedValue({ ...user, isActive: false });
+
+		const result = await service.requestEmailCode({ email: user.email });
+
+		expect(email.sendSignInCode).not.toHaveBeenCalled();
+		expect(result).toMatchObject({ accepted: true, message: 'A sign-in code has been sent.' });
+	});
+
+	it('rejects an email-code verification for an unknown account', async () => {
+		await expect(
+			service.verifyEmailCode(
+				{ email: user.email, code: '123456' },
+				{ userAgent: null, ipAddress: null },
+			),
+		).rejects.toMatchObject({ status: 401 });
 	});
 });

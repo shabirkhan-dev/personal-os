@@ -1,6 +1,8 @@
+import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { Alert, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useAuth } from "@/modules/auth/context/auth-context";
 import { AskBar } from "@/modules/home/components/ask-bar";
 import { FloatingTabBar } from "@/modules/home/components/floating-tab-bar";
 import { HomeHeader } from "@/modules/home/components/home-header";
@@ -52,6 +54,7 @@ export default function HomeScreen() {
 	const resetAnswers = useOnboardingStore((state) => state.reset);
 	const { persistAnswers, restart } = useOnboardingProgress();
 	const [pickerOpen, setPickerOpen] = useState(false);
+	const auth = useAuth();
 
 	const items = useMemo(
 		() => todayItems(plan.input, answers.reminders),
@@ -62,7 +65,24 @@ export default function HomeScreen() {
 	const modules = useMemo(() => moduleStatuses(plan.input, items), [plan.input, items]);
 
 	const openProfileMenu = () => {
-		Alert.alert(answers.name.trim() || "Your profile", undefined, [
+		const account =
+			auth.status === "signed-in" && auth.user
+				? {
+						text: "Sign out",
+						style: "destructive" as const,
+						onPress: () => {
+							auth.logout().catch(() => undefined);
+						},
+					}
+				: { text: "Sign in", onPress: () => router.push("/(home)/sign-in") };
+		const detail =
+			auth.status === "signed-in" && auth.user
+				? `Signed in as ${auth.user.email}`
+				: auth.status === "offline"
+					? "Can't reach Personal OS. Your plan is saved on this phone."
+					: "Not signed in. Your plan is saved on this phone.";
+		Alert.alert(answers.name.trim() || "Your profile", detail, [
+			account,
 			{
 				text: "Replay onboarding",
 				onPress: () => {

@@ -1,7 +1,12 @@
 import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 
 import { AppConfigService } from '@/config/app-config.service';
-import { magicLinkEmail, passwordResetEmail, verificationEmail } from './email.templates';
+import {
+	magicLinkEmail,
+	passwordResetEmail,
+	signInCodeEmail,
+	verificationEmail,
+} from './email.templates';
 
 @Injectable()
 export class EmailService {
@@ -15,6 +20,10 @@ export class EmailService {
 
 	sendPasswordResetCode(to: string, code: string): Promise<void> {
 		return this.send(to, passwordResetEmail(code));
+	}
+
+	sendSignInCode(to: string, code: string): Promise<void> {
+		return this.send(to, signInCodeEmail(code));
 	}
 
 	sendMagicLink(to: string, url: string): Promise<void> {

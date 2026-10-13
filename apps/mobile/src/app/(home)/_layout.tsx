@@ -2,13 +2,17 @@ import { Redirect, Stack } from "expo-router";
 import { useEffect } from "react";
 import { onboardingRoutes } from "@/modules/onboarding/lib/flow";
 import { useOnboardingProgress } from "@/modules/onboarding/store/onboarding-progress";
+import { useOnboardingSync } from "@/modules/onboarding/store/use-onboarding-sync";
 
 /** The main app; first launch goes through onboarding. */
 export default function HomeLayout() {
 	const { hydrated, completed, hydrate } = useOnboardingProgress();
+	useOnboardingSync();
 
 	useEffect(() => {
-		if (!hydrated) hydrate().catch(() => undefined);
+		if (!hydrated) {
+			hydrate().catch((error: unknown) => console.warn("[onboarding] hydrate failed", error));
+		}
 	}, [hydrated, hydrate]);
 
 	if (!hydrated) return null;

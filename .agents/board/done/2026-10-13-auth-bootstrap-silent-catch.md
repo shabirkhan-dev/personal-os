@@ -5,12 +5,12 @@ type: bug
 from: pm
 to: mobile
 priority: low
-status: open
-assignee: none
+status: done
+assignee: claude-code
 reviewer: human
 parent: none
 depends_on: [pos-6]
-branch: none
+branch: ccr-f7a44e55-46aj0i
 worktree: none
 scope: ["apps/mobile/src/modules/auth/context/auth-context.tsx"]
 allowed_shared: []
@@ -42,4 +42,10 @@ Distinguish no-session, offline and server errors; log in dev; surface a retry w
 
 ## Resolution
 
-_Open._
+Changed:
+- `services/restore-session.ts` (tested): no request without a saved token; a rejected token is cleared; an unreachable API keeps the token and reports `offline`; storage failures are logged
+- `AuthProvider` rewritten around `status` (`loading` / `signed-out` / `signed-in` / `offline`) with `retry`; every catch logs or reports; background refresh no longer flips the UI to loading
+- refresh token key renamed to `personal-os.auth.refreshToken`
+
+Validation:
+- `restore-session.test.ts` 5 pass; in the browser run, the old "deleteValueWithKeyAsync is not a function" page error is gone and replaced by a logged warning

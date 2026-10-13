@@ -54,8 +54,8 @@ export function setupApp(app: INestApplication, config: AppConfigService): void 
 	app.useGlobalFilters(new HttpExceptionFilter());
 
 	const swaggerConfig = new DocumentBuilder()
-		.setTitle('Starter API')
-		.setDescription('Starter authentication and user API')
+		.setTitle('Personal OS API')
+		.setDescription('Personal OS authentication and user API')
 		.setVersion(config.apiVersion)
 		.addBearerAuth()
 		.build();

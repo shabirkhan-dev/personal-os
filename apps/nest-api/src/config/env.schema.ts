@@ -15,7 +15,7 @@ export const envSchema = z
 		API_PREFIX: z.string().min(1).default('api'),
 		API_VERSION: z.string().regex(/^\d+$/).default('1'),
 		SERVICE_NAME: z.string().min(1).default('starter-api'),
-		APP_NAME: z.string().min(1).max(80).default('Starter'),
+		APP_NAME: z.string().min(1).max(80).default('Personal OS'),
 		WEB_APP_URL: z.url().default('http://localhost:3000'),
 		DATABASE_URL: z.url().default('postgresql://starter:starter@localhost:5433/starter'),
 		DATABASE_POOL_MAX: z.coerce.number().int().min(1).max(50).default(10),
@@ -48,7 +48,7 @@ export const envSchema = z
 			.default('true')
 			.transform((value) => value === 'true'),
 		RESEND_API_KEY: z.string().min(1).optional(),
-		AUTH_EMAIL_FROM: z.string().min(3).default('Starter <auth@example.com>'),
+		AUTH_EMAIL_FROM: z.string().min(3).default('Personal OS <auth@example.com>'),
 		WEBAUTHN_RP_ID: z.string().min(1).default('localhost'),
 		/** Comma-separated allowed WebAuthn origins (web + native). */
 		WEBAUTHN_ORIGIN: z.string().min(1).default('http://localhost:3000'),

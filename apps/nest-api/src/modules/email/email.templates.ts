@@ -8,6 +8,10 @@ export function passwordResetEmail(code: string): EmailTemplate {
 	return codeEmail('Reset your password', 'Reset your password', 'password reset', code);
 }
 
+export function signInCodeEmail(code: string): EmailTemplate {
+	return codeEmail('Your Personal OS sign-in code', 'Sign in to Personal OS', 'signing in', code);
+}
+
 export function magicLinkEmail(url: string): EmailTemplate {
 	const safeUrl = escapeHtml(url);
 	return {

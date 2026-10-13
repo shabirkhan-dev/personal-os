@@ -1,52 +1,131 @@
-import { StyleSheet, View } from "react-native";
+import { useEffect, useMemo, useState } from "react";
+import { Alert, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { LogoMark } from "@/components/icons";
-import { PillButton } from "@/components/ui/pill-button";
-import { PoText } from "@/components/ui/po-text";
+import { AskBar } from "@/modules/home/components/ask-bar";
+import { FloatingTabBar } from "@/modules/home/components/floating-tab-bar";
+import { HomeHeader } from "@/modules/home/components/home-header";
+import { ModulePicker } from "@/modules/home/components/module-picker";
+import { MoneyCard } from "@/modules/home/components/money-card";
+import { UpcomingList } from "@/modules/home/components/upcoming-list";
+import {
+	moduleStatuses,
+	nowLabel,
+	periodLabel,
+	todayItems,
+	upcoming,
+} from "@/modules/home/lib/today";
+import type { ModuleId } from "@/modules/onboarding/lib/options";
 import { useOnboardingProgress } from "@/modules/onboarding/store/onboarding-progress";
 import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
+import { usePlan } from "@/modules/onboarding/store/use-plan";
 import { usePoTheme } from "@/theme";
 
-/** Placeholder home until the Figma "Home" page is built. */
+const HEADER_HEIGHT = 76;
+
+/** Re-renders once a minute so "Now" and "Next · in …" stay current. */
+function useNow(): Date {
+	const [now, setNow] = useState(() => new Date());
+	useEffect(() => {
+		const timer = setInterval(() => setNow(new Date()), 60_000);
+		return () => clearInterval(timer);
+	}, []);
+	return now;
+}
+
+function suggestionsFor(modules: readonly ModuleId[]): string[] {
+	const suggestions: string[] = [];
+	if (modules.includes("food")) suggestions.push("Log a meal");
+	if (modules.includes("finance")) suggestions.push("Add expense");
+	if (modules.includes("workout")) suggestions.push("Start workout");
+	suggestions.push("Plan tomorrow");
+	return suggestions.slice(0, 3);
+}
+
+/** Home · Overview (Figma page "Home"). */
 export default function HomeScreen() {
 	const { colors } = usePoTheme();
 	const insets = useSafeAreaInsets();
-	const name = useOnboardingStore((state) => state.name);
+	const now = useNow();
+	const plan = usePlan();
+	const { answers } = plan;
+	const toggleModule = useOnboardingStore((state) => state.toggleModule);
 	const resetAnswers = useOnboardingStore((state) => state.reset);
-	const restart = useOnboardingProgress((state) => state.restart);
+	const { persistAnswers, restart } = useOnboardingProgress();
+	const [pickerOpen, setPickerOpen] = useState(false);
 
-	const replayOnboarding = async () => {
-		resetAnswers();
-		await restart();
+	const items = useMemo(
+		() => todayItems(plan.input, answers.reminders),
+		[plan.input, answers.reminders],
+	);
+	const nowMinutes = now.getHours() * 60 + now.getMinutes();
+	const next = useMemo(() => upcoming(items, nowMinutes), [items, nowMinutes]);
+	const modules = useMemo(() => moduleStatuses(plan.input, items), [plan.input, items]);
+
+	const openProfileMenu = () => {
+		Alert.alert(answers.name.trim() || "Your profile", undefined, [
+			{
+				text: "Replay onboarding",
+				onPress: () => {
+					resetAnswers();
+					restart().catch(() => undefined);
+				},
+			},
+			{ text: "Cancel", style: "cancel" },
+		]);
+	};
+
+	const addModule = (id: ModuleId) => {
+		toggleModule(id);
+		persistAnswers().catch(() => undefined);
 	};
 
 	return (
-		<View
-			style={[
-				styles.root,
-				{
-					backgroundColor: colors.bgApp,
-					paddingTop: insets.top + 24,
-					paddingBottom: Math.max(34, insets.bottom),
-				},
-			]}
-		>
-			<View style={styles.center}>
-				<LogoMark size={56} />
-				<PoText variant="title30">
-					{name.trim() ? `Hi, ${name.trim().split(" ")[0]}` : "Personal OS"}
-				</PoText>
-				<PoText variant="body15" tone="textSecondary" style={styles.text}>
-					Your home is on its way. Onboarding is set up; the Home screen comes next.
-				</PoText>
-			</View>
-			<PillButton variant="secondary" label="Replay onboarding" onPress={replayOnboarding} />
+		<View style={[styles.root, { backgroundColor: colors.bgApp }]}>
+			<ScrollView
+				contentContainerStyle={[styles.scroll, { paddingBottom: 120 + insets.bottom }]}
+				keyboardShouldPersistTaps="handled"
+			>
+				<HomeHeader
+					name={answers.name}
+					topInset={insets.top}
+					pickerOpen={pickerOpen}
+					onAppsPress={() => setPickerOpen((open) => !open)}
+					onProfilePress={openProfileMenu}
+					onNotificationsPress={() => Alert.alert("Notifications", "You're all caught up.")}
+				/>
+				<View style={styles.content}>
+					{answers.modules.includes("finance") ? <MoneyCard period={periodLabel(now)} /> : null}
+					<AskBar
+						suggestions={suggestionsFor(answers.modules)}
+						onSubmit={() =>
+							Alert.alert(
+								"Assistant",
+								"Logging and asking arrive with your account. Your note was not saved.",
+							)
+						}
+					/>
+					<UpcomingList upcoming={next} now={nowLabel(now)} />
+				</View>
+			</ScrollView>
+			{pickerOpen ? (
+				<ModulePicker
+					top={insets.top + HEADER_HEIGHT - 2}
+					modules={modules}
+					onClose={() => setPickerOpen(false)}
+					onAddModule={addModule}
+				/>
+			) : null}
+			<FloatingTabBar
+				bottomInset={insets.bottom}
+				onAreasPress={() => setPickerOpen(true)}
+				onProfilePress={openProfileMenu}
+			/>
 		</View>
 	);
 }
 
 const styles = StyleSheet.create({
-	root: { flex: 1, paddingHorizontal: 16 },
-	center: { flex: 1, alignItems: "center", justifyContent: "center", gap: 12 },
-	text: { textAlign: "center" },
+	root: { flex: 1 },
+	scroll: { flexGrow: 1 },
+	content: { gap: 16, paddingHorizontal: 16 },
 });

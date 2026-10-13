@@ -33,6 +33,8 @@ export const elevation = {
 	card: { color: "#000000", opacity: 0.5, offsetY: 24, radius: 24 },
 	/** OS card (frame 18): 0 24 48 at 50%. */
 	floating: { color: "#000000", opacity: 0.5, offsetY: 24, radius: 48 },
+	/** Home floating tab bar: 0 12 16 at 28%. */
+	tabBar: { color: "#000000", opacity: 0.28, offsetY: 12, radius: 16 },
 	/** OS card pocket lip (frame 18): 0 −8 24 at 35%. */
 	pocket: { color: "#000000", opacity: 0.35, offsetY: -8, radius: 24 },
 } as const;

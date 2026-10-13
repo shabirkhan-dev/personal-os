@@ -1,4 +1,5 @@
-import { radius, textStyles } from "@personal-os/tokens";
+import { textStyles } from "@personal-os/tokens";
+import Image from "next/image";
 import type { CSSProperties } from "react";
 
 const title = textStyles.title30;
@@ -14,12 +15,6 @@ const styles = {
 		gap: 16,
 		padding: 24,
 		textAlign: "center",
-	},
-	mark: {
-		width: 72,
-		height: 72,
-		borderRadius: radius["2xl"],
-		background: "var(--accent-default)",
 	},
 	title: {
 		margin: 0,
@@ -40,7 +35,7 @@ const styles = {
 export default function Home() {
 	return (
 		<main style={styles.main}>
-			<div aria-hidden style={styles.mark} />
+			<Image src="/roz-mark.svg" alt="" width={96} height={96} priority />
 			<h1 style={styles.title}>Personal OS</h1>
 			<p style={styles.body}>Your life, in one place. Coming soon to iOS and Android.</p>
 		</main>

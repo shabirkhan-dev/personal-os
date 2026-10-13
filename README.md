@@ -1,4 +1,17 @@
-# Starter
+# Personal OS
+
+Personal life operating system: routines, finance, skincare, food and fashion in one **mobile** app.
+Built on the Rabtx Starter (Bun workspaces + Turborepo). The pre-reset tree is archived on the
+`archive/main-pre-starter` branch.
+
+**Mobile-only.** The Expo app (`apps/mobile`), Nest API, shared UI/tokens and CI are active; the
+Next.js web app (`apps/web`) is disabled (excluded from the workspace, CI and Compose, see
+`apps/web/DISABLED.md`). Design tokens from the Figma Kit v2 live in `packages/tokens`
+(`@personal-os/tokens`). To install the app on a phone, see `apps/mobile/README.md`.
+
+The rest of this file is the starter's documentation.
+
+---
 
 A production-ready monorepo starter kit for modern SaaS applications, built on **Bun workspaces + Turborepo**.
 

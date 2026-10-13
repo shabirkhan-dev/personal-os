@@ -58,7 +58,7 @@ Before any Next.js work, find and read the relevant doc in `node_modules/next/di
 ```
 starter/
 ├── apps/
-│   ├── web/             # Next.js (React, Tailwind, shadcn-style UI)
+│   ├── web/             # Next.js — DISABLED for Personal OS (mobile-only), see apps/web/DISABLED.md
 │   ├── mobile/          # Expo Router + Uniwind app (TypeScript)
 │   ├── nest-api/        # NestJS production API (PostgreSQL in later phases)
 │   ├── docs/            # Docs site (Fumadocs); source in apps/docs/content/docs/
@@ -69,6 +69,7 @@ starter/
 │   ├── typescript-config/ # Shared tsconfig bases (base.json, nextjs.json)
 │   ├── ui/              # @starter/ui: legacy shadcn-style components (being replaced) + shared tokens
 │   ├── rabtx/           # @rabtx/ui: the from-scratch component library (web + native), see DESIGN.md
+│   ├── tokens/          # @personal-os/tokens: Figma Kit v2 colours, spacing, radii, text styles
 │   └── logger/          # Shared logger (TS + Rust)
 ├── scripts/             # Utility scripts: bash/, python/
 ├── docker/              # Docker Compose fragments (see docker/README.md)

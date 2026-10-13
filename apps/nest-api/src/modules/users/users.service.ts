@@ -48,10 +48,28 @@ export class UsersService {
 		}
 	}
 
-	async createFederatedUser(input: {
+	/** Account from a verified identity provider: the email is already verified. */
+	createFederatedUser(input: {
 		email: string;
 		displayName?: string | null;
 		avatarUrl?: string | null;
+	}): Promise<UserRecord> {
+		return this.createWithGeneratedUsername({ ...input, emailVerifiedAt: new Date() });
+	}
+
+	/** Passwordless account for email-code sign-in; verified when the first code is used. */
+	createPasswordlessUser(input: {
+		email: string;
+		displayName?: string | null;
+	}): Promise<UserRecord> {
+		return this.createWithGeneratedUsername(input);
+	}
+
+	private async createWithGeneratedUsername(input: {
+		email: string;
+		displayName?: string | null;
+		avatarUrl?: string | null;
+		emailVerifiedAt?: Date;
 	}): Promise<UserRecord> {
 		const email = normalizeEmail(input.email);
 		const base = normalizeUsername(email.split('@')[0] ?? 'user')
@@ -66,7 +84,7 @@ export class UsersService {
 					email,
 					username,
 					passwordHash: null,
-					emailVerifiedAt: new Date(),
+					emailVerifiedAt: input.emailVerifiedAt,
 					displayName: input.displayName,
 					avatarUrl: input.avatarUrl,
 				});

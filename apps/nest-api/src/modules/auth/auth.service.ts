@@ -183,6 +183,39 @@ export class AuthService {
 		};
 	}
 
+	/**
+	 * Passwordless sign-in and sign-up: sends a 6-digit code, creating an unverified account on
+	 * first use. The response is the same whether or not the account existed.
+	 */
+	async requestEmailCode(body: { email: string; name?: string }): Promise<AuthChallengeResult> {
+		const existing = await this.usersService.findByEmail(body.email);
+		const user =
+			existing ??
+			(await this.usersService.createPasswordlessUser({
+				email: body.email,
+				displayName: body.name ?? null,
+			}));
+		if (!user.isActive) return acceptedChallenge('A sign-in code has been sent.');
+		return this.issueChallenge(user, 'email_sign_in');
+	}
+
+	async verifyEmailCode(
+		body: { email: string; code: string },
+		metadata: RequestMetadata,
+	): Promise<AuthSessionResult> {
+		const user = await this.usersService.findByEmail(body.email);
+		if (!user?.isActive) throw invalidOtpException();
+		const challenge = await this.validateChallenge(user.email, 'email_sign_in', body.code);
+		// Atomic single use: of two requests racing with the same code, only one gets a session.
+		if (!(await this.authRepository.consumeChallenge(challenge.id))) throw invalidOtpException();
+		if (!user.emailVerifiedAt) {
+			await this.authRepository.completeEmailVerification(challenge.id, user.id);
+		}
+		const verifiedUser = await this.usersService.findById(user.id);
+		if (!verifiedUser) throw new Error('Signed-in user could not be loaded');
+		return this.createSession(verifiedUser, metadata);
+	}
+
 	async consumeMagicLink(token: string, metadata: RequestMetadata): Promise<AuthSessionResult> {
 		const challenge = await this.requireTokenChallenge(token, 'magic_link');
 		if (!(await this.authRepository.consumeChallenge(challenge.id))) throw invalidMagicLink();
@@ -467,16 +500,15 @@ export class AuthService {
 
 		if (purpose === 'email_verification') {
 			await this.email.sendVerificationCode(user.email, code);
+		} else if (purpose === 'email_sign_in') {
+			await this.email.sendSignInCode(user.email, code);
 		} else {
 			await this.email.sendPasswordResetCode(user.email, code);
 		}
 
 		return {
 			accepted: true,
-			message:
-				purpose === 'email_verification'
-					? 'A verification code has been sent.'
-					: 'If an account exists, a password reset code has been sent.',
+			message: challengeMessages[purpose] ?? 'A code has been sent.',
 			...(this.config.exposeAuthCodes ? { developmentCode: code } : {}),
 		};
 	}
@@ -545,6 +577,12 @@ function invalidOtpException(): UnauthorizedException {
 		message: 'The code is invalid or expired',
 	});
 }
+
+const challengeMessages: Partial<Record<AuthChallengePurpose, string>> = {
+	email_verification: 'A verification code has been sent.',
+	email_sign_in: 'A sign-in code has been sent.',
+	password_reset: 'If an account exists, a password reset code has been sent.',
+};
 
 function invalidMagicLink(): UnauthorizedException {
 	return new UnauthorizedException({

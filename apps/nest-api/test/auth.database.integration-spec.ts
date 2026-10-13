@@ -26,6 +26,7 @@ describe('database-backed authentication', () => {
 	const email = {
 		sendVerificationCode: vi.fn().mockResolvedValue(undefined),
 		sendPasswordResetCode: vi.fn().mockResolvedValue(undefined),
+		sendSignInCode: vi.fn().mockResolvedValue(undefined),
 	} as unknown as EmailService;
 	const auth = new AuthService(
 		config,
@@ -38,9 +39,42 @@ describe('database-backed authentication', () => {
 		{} as SocialAuthService,
 	);
 	const emailAddress = `auth-integration-${randomUUID()}@example.com`;
+	const codeEmailAddress = `auth-code-${randomUUID()}@example.com`;
 
 	beforeAll(async () => {
 		await database.db.delete(users).where(eq(users.email, emailAddress));
+	});
+
+	it('signs up and signs in with an email code, verifying the address', async () => {
+		const request = await auth.requestEmailCode({ email: codeEmailAddress, name: 'Code User' });
+		expect(request.developmentCode).toMatch(/^\d{6}$/);
+		const created = await usersService.findByEmail(codeEmailAddress);
+		expect(created?.emailVerifiedAt).toBeNull();
+		expect(created?.passwordHash).toBeNull();
+
+		await expect(
+			auth.verifyEmailCode(
+				{
+					email: codeEmailAddress,
+					code: request.developmentCode === '000000' ? '111111' : '000000',
+				},
+				{ ipAddress: '127.0.0.1', userAgent: 'integration-test' },
+			),
+		).rejects.toMatchObject({ status: 401 });
+
+		const session = await auth.verifyEmailCode(
+			{ email: codeEmailAddress, code: request.developmentCode ?? '' },
+			{ ipAddress: '127.0.0.1', userAgent: 'integration-test' },
+		);
+		expect(session.user.emailVerified).toBe(true);
+		expect(session.refreshToken).toBeTruthy();
+
+		const again = await auth.requestEmailCode({ email: codeEmailAddress });
+		const second = await auth.verifyEmailCode(
+			{ email: codeEmailAddress, code: again.developmentCode ?? '' },
+			{ ipAddress: '127.0.0.1', userAgent: 'integration-test' },
+		);
+		expect(second.user.id).toBe(session.user.id);
 	});
 
 	it('completes registration, verification, login, rotation, and password change', async () => {
@@ -83,6 +117,7 @@ describe('database-backed authentication', () => {
 
 	afterAll(async () => {
 		await database.db.delete(users).where(eq(users.email, emailAddress));
+		await database.db.delete(users).where(eq(users.email, codeEmailAddress));
 		await database.onModuleDestroy();
 	});
 });

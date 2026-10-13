@@ -31,7 +31,7 @@ services:
       - key: JWT_ACCESS_EXPIRES_IN
         value: 15m
       - key: APP_NAME
-        value: Starter
+        value: Personal OS
       # Paste from Neon console (pooled URL recommended).
       - key: DATABASE_URL
         sync: false

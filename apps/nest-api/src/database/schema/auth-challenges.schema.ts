@@ -6,6 +6,7 @@ export const authChallengePurpose = pgEnum('auth_challenge_purpose', [
 	'email_verification',
 	'password_reset',
 	'magic_link',
+	'email_sign_in',
 	'mfa_login',
 	'webauthn_registration',
 	'webauthn_authentication',

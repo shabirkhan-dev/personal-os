@@ -1,11 +1,12 @@
 {
-  "name": "starter",
+  "name": "personal-os",
   "version": "0.1.0",
   "private": true,
   "license": "MIT OR Apache-2.0",
   "packageManager": "bun@1.4.2",
   "workspaces": [
     "apps/*",
+    "!apps/web",
     "packages/*"
   ],
   "scripts": {
@@ -21,16 +22,14 @@
     "format": "oxfmt && bun run scripts:format && (cd apps/rust && cargo fmt || true)",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test && bun run test:scripts",
-    "test:coverage": "(cd apps/web && bun run test:coverage) && (cd apps/nest-api && bun run test:cov) && (cd packages/logger && bun run test:coverage) && (cd apps/mobile && bun run test) && (cd apps/rust && bun run test) && bun run test:scripts",
+    "test:coverage": "(cd apps/nest-api && bun run test:cov) && (cd packages/logger && bun run test:coverage) && (cd apps/mobile && bun run test) && (cd apps/rust && bun run test) && bun run test:scripts",
     "test:scripts": "bash scripts/bash/tests/main.test.sh && python -m unittest scripts/python/tests/test_main.py",
-    "test:e2e:web": "cd apps/web && bun run test:e2e",
     "architecture:check": "bash scripts/architecture/check-boundaries.sh",
     "naming:check": "bash scripts/architecture/check-naming.sh",
     "ci:lint": "bun run lint && bun run architecture:check",
     "ci:typecheck": "bun run typecheck",
     "ci:build": "bun run build",
     "ci:test": "bun run test:coverage",
-    "ci:e2e:web": "bun run test:e2e:web",
     "scripts:lint": "shellcheck scripts/bash/*.sh scripts/bash/tests/*.sh scripts/git-hooks/*.sh scripts/architecture/*.sh && (ruff check scripts/python 2>/dev/null || true)",
     "scripts:format": "shfmt -i 4 -w scripts/bash/*.sh scripts/bash/tests/*.sh scripts/git-hooks/*.sh scripts/architecture/*.sh || true",
     "scripts:run": "bash scripts/bash/main.sh",

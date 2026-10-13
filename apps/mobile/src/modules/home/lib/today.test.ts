@@ -37,6 +37,17 @@ describe("today", () => {
 		expect(items.find((item) => item.title === "Evening check-in")?.time).toBe("22:30");
 	});
 
+	test("works without ES2023 array methods, as on Hermes", () => {
+		const prototype = Array.prototype as { toSorted?: unknown };
+		const toSorted = prototype.toSorted;
+		delete prototype.toSorted;
+		try {
+			expect(todayItems(input, allReminders)).toHaveLength(7);
+		} finally {
+			prototype.toSorted = toSorted;
+		}
+	});
+
 	test("skips reminders that are off", () => {
 		const items = todayItems(input, { ...allReminders, "evening-check-in": false });
 		expect(items.some((item) => item.title === "Evening check-in")).toBe(false);

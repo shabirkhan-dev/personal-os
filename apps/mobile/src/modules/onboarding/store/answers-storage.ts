@@ -2,6 +2,7 @@ import * as SecureStore from "expo-secure-store";
 import { initialAnswers, type OnboardingAnswers } from "./onboarding-store";
 
 const ANSWERS_KEY = "personal-os.onboarding.answers";
+const UPDATED_AT_KEY = "personal-os.onboarding.answersUpdatedAt";
 
 /**
  * Rebuilds answers from stored JSON. Unknown keys are dropped and any value whose type does not
@@ -30,14 +31,30 @@ export async function loadAnswers(): Promise<OnboardingAnswers | null> {
 	return mergeStoredAnswers(JSON.parse(json));
 }
 
-export async function saveAnswers(answers: OnboardingAnswers): Promise<void> {
+/** Only the answer fields, without the store's actions. */
+export function pickAnswers(answers: OnboardingAnswers): OnboardingAnswers {
 	const data: Record<string, unknown> = {};
 	for (const key of Object.keys(initialAnswers) as (keyof OnboardingAnswers)[]) {
 		data[key] = answers[key];
 	}
-	await SecureStore.setItemAsync(ANSWERS_KEY, JSON.stringify(data));
+	return data as OnboardingAnswers;
+}
+
+/** Saves the answers and when they last changed (used to decide the sync direction). */
+export async function saveAnswers(
+	answers: OnboardingAnswers,
+	updatedAt: string = new Date().toISOString(),
+): Promise<void> {
+	await SecureStore.setItemAsync(ANSWERS_KEY, JSON.stringify(pickAnswers(answers)));
+	await SecureStore.setItemAsync(UPDATED_AT_KEY, updatedAt);
+}
+
+/** When the saved answers last changed on this device; `null` when unknown. */
+export function loadAnswersUpdatedAt(): Promise<string | null> {
+	return SecureStore.getItemAsync(UPDATED_AT_KEY);
 }
 
 export async function clearAnswers(): Promise<void> {
 	await SecureStore.deleteItemAsync(ANSWERS_KEY);
+	await SecureStore.deleteItemAsync(UPDATED_AT_KEY);
 }

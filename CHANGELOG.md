@@ -15,8 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Onboarding v5 (frames 01–18) with a persisted Zustand store, insight chips and Reanimated motion.
 - EAS development builds, channels and EAS Update for the mobile app.
 - Home placeholder behind the onboarding gate.
-- Landing page (`apps/web`): Next.js static export for Cloudflare Pages, built from the Figma
-  "Landing" page, with a Pages Function for launch-day email sign-ups in Workers KV.
+- Landing page (`apps/web`): Next.js static export served by Cloudflare Workers, built from the
+  Figma "Landing" page, with a Worker for launch-day email sign-ups in Workers KV.
 
 ### Changed
 

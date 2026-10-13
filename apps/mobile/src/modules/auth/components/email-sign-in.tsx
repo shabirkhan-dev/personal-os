@@ -7,6 +7,7 @@ import { PoText } from "@/components/ui/po-text";
 import { ApiError } from "@/lib/api/client";
 import { toTextStyle, usePoTheme } from "@/theme";
 import { useAuth } from "../context/auth-context";
+import { isEmail } from "../lib/email";
 
 type Step = { kind: "email" } | { kind: "code"; email: string; developmentCode?: string };
 
@@ -17,7 +18,6 @@ export type EmailSignInProps = {
 	onCancel: () => void;
 };
 
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const inputStyle = toTextStyle(textStyles.body15);
 const codeStyle = toTextStyle(textStyles.title30);
 
@@ -44,7 +44,7 @@ export function EmailSignIn({ name, onSignedIn, onCancel }: EmailSignInProps) {
 	const [error, setError] = useState<string | null>(null);
 
 	const field = { backgroundColor: colors.bgSubtle, color: colors.textPrimary };
-	const emailValid = EMAIL.test(email.trim());
+	const emailValid = isEmail(email.trim());
 
 	const sendCode = async (address: string) => {
 		setBusy(true);

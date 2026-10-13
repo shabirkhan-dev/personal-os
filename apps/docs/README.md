@@ -1,6 +1,6 @@
 # docs
 
-Starter documentation site (Next.js + Fumadocs).
+Personal OS documentation site (Next.js + Fumadocs).
 
 All project docs live in `content/docs/` and are served from this app.
 
@@ -21,7 +21,6 @@ Open http://localhost:3002/docs
 | `/docs/architecture` | Boundaries + ADRs |
 | `/docs/docker` | Compose / Postgres |
 | `/docs/qol` | Hooks, CI, tooling |
-| `/docs/ai-first-workflow` | AI-assisted workflow |
 | `/docs/overrides` | Architecture override policy |
 
 Agents should use these pages plus root `AGENTS.md` / `DESIGN.md` / `PROJECT.md`.

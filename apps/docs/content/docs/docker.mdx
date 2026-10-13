@@ -1,8 +1,8 @@
 ---
 title: Docker
-description: Compose stack for Postgres, Nest API, and Next.js web.
+description: Compose stack for Postgres, the Nest API and the optional AI API.
 ---
-Run the Starter stack with Docker Compose. Fragments live under **`docker/compose/`** and are merged by the root **`docker-compose.yml`** via [`include`](https://docs.docker.com/compose/how-tos/multiple-compose-files/include/) (Compose **v2.20+**). Compose files follow the Compose Spec (**no** top-level `version` key).
+Run the backend stack with Docker Compose. Fragments live under **`docker/compose/`** and are merged by the root **`docker-compose.yml`** via [`include`](https://docs.docker.com/compose/how-tos/multiple-compose-files/include/) (Compose **v2.20+**). Compose files follow the Compose Spec (**no** top-level `version` key).
 
 ## Layout
 
@@ -10,8 +10,7 @@ Run the Starter stack with Docker Compose. Fragments live under **`docker/compos
 |----------|----------|
 | `docker/compose/postgres.yml` | Postgres 16, named volume, healthcheck |
 | `docker/compose/nest-api.yml` | NestJS API (multi-stage Bun image) |
-| `docker/compose/web.yml` | Next.js web (standalone image) |
-| `docker/compose/rust-api.yml` | Optional Rust demo API (`--profile rust`) |
+| `docker/compose/ai-api.yml` | Optional FastAPI AI service (`--profile ai`) |
 
 See **`docker/README.md`** for the manual `-f` fallback.
 
@@ -33,7 +32,6 @@ See **`docker/README.md`** for the manual `-f` fallback.
 
 3. Open:
 
-   - Web: http://localhost:3000
    - Nest health: http://localhost:4000/api/v1/health
    - Nest Swagger: http://localhost:4000/api/docs
 
@@ -43,12 +41,11 @@ See **`docker/README.md`** for the manual `-f` fallback.
 |---------|---------------------|
 | Postgres | 5433 (container 5432) |
 | Nest API | 4000 |
-| Web | 3000 |
-| Rust API (profile) | 3002 |
+| AI API (profile) | 8000 |
 
 ## Notes
 
 - Nest runs migrations on startup when `RUN_MIGRATIONS=true` (default).
-- `NEXT_PUBLIC_NEST_API_URL` is baked in at **web image build** time and must be reachable from the browser (typically `http://localhost:4000`).
-- Host-only API/web development: `docker compose up -d postgres`, then `bun run dev`.
-- Optional Rust service: `docker compose --profile rust up -d --build`.
+- Host-only API development: `docker compose up -d postgres`, then `bun run dev`.
+- Optional AI service: `docker compose --profile ai up -d --build`.
+- The mobile app is not containerised; run it with Metro and a development build.

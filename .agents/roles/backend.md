@@ -42,7 +42,7 @@ they do not patch backend internals.
 ## Not owned
 
 - Web or mobile implementation
-- Design-system implementation in `packages/ui`
+- Design-system implementation in `packages/tokens` and `apps/mobile/src/components`
 - QA approval, review approval, or PM status decisions
 
 Raise a card when another role must act; do not silently edit its scope.

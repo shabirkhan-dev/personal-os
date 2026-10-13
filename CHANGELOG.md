@@ -9,23 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- NestJS auth API (`/api/v1/auth/*`) with JWT login/register/me for the web app.
-- Shared UI auth components via shadcn (`alert`, `spinner`, `input-group`) in `@starter/ui`.
-- Web login/register flows that call Nest only (no multi-backend API switcher).
-- Conventional Commits enforcement in `commit-msg` hook (typed prefixes + all-lowercase subjects).
-- Docker Compose services for Nest API and Next.js web (multi-stage images, healthchecks, no Compose `version` key).
+- Personal OS reset onto the Starter monorepo; the previous tree is on `archive/main-pre-starter`.
+- `@personal-os/tokens`: the Figma Kit v2 colours, spacing, radii and text styles (light and dark).
+- Kit v2 components and `Icon/*` glyphs (`react-native-svg`) in `apps/mobile`.
+- Onboarding v5 (frames 01–18) with a persisted Zustand store, insight chips and Reanimated motion.
+- EAS development builds, channels and EAS Update for the mobile app.
+- Home placeholder behind the onboarding gate.
 
 ### Changed
 
-- Documentation lives only in `apps/docs` (Fumadocs). Removed the root `docs/` pointer folder.
-- Architecture boundary check scopes deep `@/modules/*/*/*` imports to consumers outside `src/modules/`.
-- Root `format` script tolerates missing local `cargo`/`shfmt` tooling.
-- Agent and README docs maps point at `apps/docs` routes (`http://localhost:3002/docs`).
+- Personal OS is mobile-first: `apps/web` is reduced to a disabled landing-page shell.
+- Mobile styling is `StyleSheet` + tokens; Uniwind/Tailwind removed from the app.
 
 ### Removed
 
-- Root `docs/` directory (stale pointer after the docs app migration).
-- Web API backend switcher (Python / Rust / Hono).
+- The Rust demo app (`apps/rust`) and its tooling, Compose profile and agent skills.
+- `@starter/ui` (`packages/ui`) and `@rabtx/ui` (`packages/rabtx`).
+- The Starter mobile screens (auth, billing, users, component playground).
+- The web app's admin, auth, billing and e2e suites.
+- Starter leftovers: shadcn and browser-test agent skills, old plans and done cards, `glass.html`.
 
 ## [0.1.0] - 2026-02-10
 
@@ -34,5 +36,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial Starter monorepo layout (Turborepo + Bun).
 - Dual license: MIT and Apache-2.0.
 
-[Unreleased]: https://github.com/shabirkhan-dev/starter/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/shabirkhan-dev/starter/releases/tag/v0.1.0
+[Unreleased]: https://github.com/shabirkhan-dev/personal-os/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/shabirkhan-dev/personal-os/releases/tag/v0.1.0

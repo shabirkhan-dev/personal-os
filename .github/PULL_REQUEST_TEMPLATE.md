@@ -16,7 +16,6 @@
 - [ ] `bun run lint`
 - [ ] `bun run typecheck`
 - [ ] `bun run test`
-- [ ] `bun run test:e2e:web` when web flows changed
 - [ ] Secret scan / no credentials committed
 
 ## AI-Agent Notes

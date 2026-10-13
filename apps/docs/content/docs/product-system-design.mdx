@@ -3,11 +3,11 @@ title: Product System Design
 description: Product architecture, data model, services, and security model.
 ---
 
-Status: Working architecture blueprint for the universal **Starter Kit** monorepo—a production-grade baseline for multi-tenant web, mobile, and API applications.
+Status: Working architecture blueprint for the **Personal OS** monorepo. The Nest API spine was inherited from the Starter kit; the mobile app is the product client.
 
 ## 1. System Vision & Architecture Principles
 
-Starter is built as a secure modular monolith first, with event-driven seams and clear module boundaries, designed to scale into independent services when load or compliance requires it.
+Personal OS is built as a secure modular monolith first, with event-driven seams and clear module boundaries, designed to scale into independent services when load or compliance requires it.
 
 The core operational loop is:
 
@@ -46,17 +46,17 @@ Primary personas:
                     |   Fumadocs site      |
                     +----------------------+
 
-+----------------+     +------------------+      +------------------+
-| apps/web       |     | apps/nest-api    |      | apps/mobile      |
-| Next.js App    |<--->| NestJS API Spine |<---->| Expo App         |
-+----------------+     +--------+---------+      +------------------+
-                                |
-               +----------------+----------------+
-               |                |                |
-       +-------v--------+ +-----v----------+ +---v--------------+
-       | Postgres       | | apps/ai-api    | | apps/rust        |
-       | Source of truth| | FastAPI Assist | | Axum Performance |
-       +-------+--------+ +----------------+ +------------------+
+                        +------------------+      +------------------+
+                        | apps/nest-api    |      | apps/mobile      |
+                        | NestJS API Spine |<---->| Expo App         |
+                        +--------+---------+      +------------------+
+                                 |
+                +----------------+
+                |                |
+       +--------v-------+ +------v---------+
+       | Postgres       | | apps/ai-api    |
+       | Source of truth| | FastAPI Assist |
+       +-------+--------+ +----------------+
                |
        +-------v--------+
        | Redis          |
@@ -72,19 +72,18 @@ Primary personas:
 
 | Service | Path | Role | Technology |
 | --- | --- | --- | --- |
-| **Web Console** | `apps/web` | Public landing, admin dashboard, user settings, billing | Next.js, React, Tailwind CSS |
-| **Mobile App** | `apps/mobile` | Cross-platform mobile client | Expo Router, Uniwind |
+| **Mobile App** | `apps/mobile` | The Personal OS client | Expo Router, Reanimated, `@personal-os/tokens` |
 | **API Spine** | `apps/nest-api` | Auth, tenancy, users, billing, MFA, passkeys, AI proxy | NestJS, Drizzle ORM, Zod |
 | **AI Assist** | `apps/ai-api` | LLM orchestration, structured assist pipelines | FastAPI, Python 3, uv |
-| **Performance Service** | `apps/rust` | High-throughput data processing & micro-benchmarks | Rust, Axum, Tokio |
 | **Documentation** | `apps/docs` | Technical documentation and architecture guides | Fumadocs, MDX |
+| **Landing shell** | `apps/web` | Disabled landing page, kept for later | Next.js |
 
 ### Shared Monorepo Packages
 
 | Package | Workspace Name | Responsibility |
 | --- | --- | --- |
-| **UI Primitives** | `@starter/ui` | Shadcn-style primitives, tokens, and motion components |
-| **Logger** | `@starter/logger` | Injectable logger for TypeScript and Rust |
+| **Design Tokens** | `@personal-os/tokens` | Figma Kit v2 colours, spacing, radii and text styles |
+| **Logger** | `@starter/logger` | Injectable logger for TypeScript |
 | **TypeScript Config** | `@starter/typescript-config` | Shared `tsconfig.json` bases across apps and packages |
 
 ---
@@ -144,9 +143,9 @@ All critical events follow the outbox pattern inside database transactions to en
 
 ## 8. Deployment & Infrastructure
 
-The starter supports multiple deployment targets out of the box:
+Deployment targets:
 
-- **Local Development:** `docker-compose.yml` orchestrates PostgreSQL, Nest API, Web, AI API, and optional Rust.
-- **Production Web:** Next.js deployed on Vercel with standalone output.
+- **Local Development:** `docker-compose.yml` orchestrates PostgreSQL, the Nest API and the optional AI API.
+- **Mobile:** EAS development, preview and production builds, plus EAS Update.
 - **Production API:** NestJS container deployed on Render, Fly.io, or AWS ECS with pooled PostgreSQL (e.g. Neon).
 - **Object Storage:** S3-compatible private buckets (Cloudflare R2, AWS S3) with pre-signed upload URLs.

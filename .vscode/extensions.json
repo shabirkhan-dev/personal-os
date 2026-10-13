@@ -2,14 +2,10 @@
 	"recommendations": [
 		"oxc.oxc-vscode",
 		"bradlc.vscode-tailwindcss",
-		"rust-lang.rust-analyzer",
-		"llvm-vs-code-extensions.vscode-clangd",
 		"ms-python.python",
 		"charliermarsh.ruff",
 		"timonwong.shellcheck",
-		"mkhl.shfmt",
-		"sumneko.lua",
-		"JohnnyMorganz.stylua"
+		"mkhl.shfmt"
 	],
 	"unwantedRecommendations": [
 		"dbaeumer.vscode-eslint",

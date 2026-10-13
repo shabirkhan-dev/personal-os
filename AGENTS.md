@@ -1,12 +1,13 @@
-# Agent instructions (Starter)
+# Agent instructions (Personal OS)
 
 Universal instructions for AI agents (Cursor, Copilot, Claude Code, Windsurf, Cline, Aider, etc.).
 Read this file first when working in this repo.
 
 ## Project overview
 
-Monorepo Starter managed with **Turborepo + Bun**. Apps, shared packages, and
-multi-language scripts, all wired into a single lint/format/build/test surface.
+Personal OS: a mobile-first life app in a **Turborepo + Bun** monorepo. The Expo app is the
+product; the Nest API, FastAPI AI service, design tokens and scripts share one
+lint/format/build/test surface.
 
 ## Before you write code
 
@@ -26,13 +27,11 @@ The short version: claim a card before coding, work in your own worktree on
 
 ## UI design context
 
-Before changing UI components, read [DESIGN.md](DESIGN.md), especially **Rabtx UI: shared design intent**.
-It records the agreed direction (rebuild `@rabtx/ui` from scratch against the Reptex/Grid Figma
-system, with its file key and section IDs), the dependency policy (no animation library; motion is
-CSS only), the tiered radius and the Flat / Floating depth (no shadows), the beUI spring values and
-the open decisions. Do not infer the design solely from existing code, and do not extend
-`@starter/ui` components: new work goes in `@rabtx/ui`.
-Keep that document as the shared source of truth instead of copying design rules into agent-specific folders.
+Before changing UI, read [DESIGN.md](DESIGN.md). The design source is the Figma **Kit v2** file
+(`3KjKY0nbjCHqKZb0xRhWIh`). Screens use `@personal-os/tokens` through the theme provider and the
+Kit v2 components in `apps/mobile/src/components`; no raw colour values. Do not infer the design
+solely from existing code. Keep DESIGN.md as the shared source of truth instead of copying design
+rules into agent-specific folders.
 
 ## Documentation
 
@@ -43,38 +42,34 @@ There is **no root `docs/` folder**. Project docs live in the docs app:
 - Browse: http://localhost:3002/docs
 
 Key routes: `/docs/quick-start`, `/docs/production-roadmap`, `/docs/architecture`,
-`/docs/docker`, `/docs/deploy`, `/docs/qol`, `/docs/ai-first-workflow`, `/docs/overrides`,
+`/docs/docker`, `/docs/deploy`, `/docs/qol`, `/docs/overrides`,
 `/docs/product-system-design`. Also see root `README.md`, `PROJECT.md`, and `DESIGN.md`.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
 # Next.js: ALWAYS read docs before coding
 
-Before any Next.js work, find and read the relevant doc in `node_modules/next/dist/docs/`. Your training data is outdated — the docs are the source of truth.
+Before any Next.js work (`apps/docs`, `apps/web`), find and read the relevant doc in
+`node_modules/next/dist/docs/`. Your training data is outdated — the docs are the source of truth.
 
-<!-- END:nextjs-agent-rules -->
 ## Repository layout
 
 ```
-starter/
+personal-os/
 ├── apps/
-│   ├── web/             # Next.js — DISABLED for Personal OS (mobile-only), see apps/web/DISABLED.md
-│   ├── mobile/          # Expo Router + Uniwind app (TypeScript)
+│   ├── mobile/          # Expo Router app — the product (StyleSheet + tokens, Reanimated, Zustand)
 │   ├── nest-api/        # NestJS production API (PostgreSQL in later phases)
-│   ├── docs/            # Docs site (Fumadocs); source in apps/docs/content/docs/
 │   ├── ai-api/          # FastAPI AI assist (uv); Nest proxies, never public LLM keys
-│   └── rust/            # Rust binary (Cargo, Axum)
-
+│   ├── docs/            # Docs site (Fumadocs); source in apps/docs/content/docs/
+│   └── web/             # Next.js landing-page shell — DISABLED, see apps/web/DISABLED.md
 ├── packages/
-│   ├── typescript-config/ # Shared tsconfig bases (base.json, nextjs.json)
-│   ├── ui/              # @starter/ui: legacy shadcn-style components (being replaced) + shared tokens
-│   ├── rabtx/           # @rabtx/ui: the from-scratch component library (web + native), see DESIGN.md
 │   ├── tokens/          # @personal-os/tokens: Figma Kit v2 colours, spacing, radii, text styles
-│   └── logger/          # Shared logger (TS + Rust)
-├── scripts/             # Utility scripts: bash/, python/
+│   ├── typescript-config/ # Shared tsconfig bases (base.json, nextjs.json)
+│   └── logger/          # Shared logger (TypeScript)
+├── scripts/             # Utility scripts: bash/, python/, architecture/, git-hooks/
 ├── docker/              # Docker Compose fragments (see docker/README.md)
-├── .agents/rules/       # Cursor-specific rules (also summarised below)
-├── .devcontainer/       # Dev Container (Bun, Rust, Python, Bash tooling)
+├── .agents/             # Agent hub: roles, board, rules, vendored skills
+├── .devcontainer/       # Dev Container (Bun, Python, Bash tooling)
 ├── .github/workflows/   # CI (lint, typecheck, build, test)
 └── (root config)        # .oxlintrc.json, .oxfmtrc.json, turbo.json, lefthook.yml, etc.
 ```
@@ -100,11 +95,10 @@ starter/
 | `bun run build` | Build all apps (Turbo) |
 | `bun run lint` | Lint: oxlint (TS/JS) + ShellCheck + ruff |
 | `bun run lint:fix` | Lint with auto-fix |
-| `bun run format` | Format: oxfmt + shfmt + ruff + cargo fmt |
+| `bun run format` | Format: oxfmt + shfmt |
 | `bun run typecheck` | TypeScript typecheck |
-| `bun run test` | Run tests (e.g. cargo test) |
-| `bun run test:coverage` | Run TS coverage + all language tests |
-| `bun run test:e2e:web` | Run web Playwright e2e tests |
+| `bun run test` | Run workspace and script tests |
+| `bun run test:coverage` | Run TS coverage + script tests |
 | `bun run architecture:check` | Enforce architecture import boundaries + kebab-case naming |
 | `bun run naming:check` | Enforce kebab-case (dotted Nest-style) file/folder names |
 
@@ -117,7 +111,7 @@ starter/
 - **No ESLint/Prettier**: oxlint and oxfmt are the only lint/format tools for TS/JS in this project.
 - **Naming**: PascalCase for components; files match component name. Hooks use `use*` prefix;
   utility functions are plain named exports.
-- **Imports**: Prefer workspace imports as `@starter/<package>` (e.g. `@starter/ui`).
+- **Imports**: Prefer workspace imports (e.g. `@personal-os/tokens`, `@starter/logger`).
   Group: external → workspace → relative. No unused imports.
 - **Types**: Explicit types for props and public APIs. Avoid `any`; use `unknown` and narrow.
 - **Errors**: Handle explicitly — log and rethrow, or use result types. No silent catches.
@@ -128,15 +122,15 @@ starter/
 - **Monorepo**: Apps in `apps/`, shared code in `packages/`. When a change applies across apps,
   prefer changing a shared package.
 - **New apps**: Add under `apps/`, wire into `turbo.json` tasks if needed.
-- **New packages**: Add under `packages/`, export via `@starter/<name>`.
-- **Shared UI**: new and rebuilt components live in `packages/rabtx` (`@rabtx/ui`), built on
-  platform features first (see the dependency policy in `DESIGN.md`). `packages/ui` (`@starter/ui`)
-  is the legacy shadcn-style set being replaced; do not add to it. Shared Tailwind tokens still
-  live in `packages/ui/src/styles/globals.css`. Icons are HugeIcons only; do not add lucide.
+- **New packages**: Add under `packages/`, export via `@personal-os/<name>`.
+- **Design system**: tokens live in `packages/tokens` (`@personal-os/tokens`); Kit v2 components
+  and icons live in `apps/mobile/src/components`. Icons are the Kit v2 glyphs drawn with
+  `react-native-svg`; do not add icon libraries.
 - **TypeScript config**: Extend from `packages/typescript-config/base.json` (or `nextjs.json`
   for Next.js apps).
-- **Expo mobile structure**: Use `src/app` for routes, `src/components/ui` for UI primitives,
-  and `src/components` for non-UI reusable components.
+- **Expo mobile structure**: `src/app` for routes, `src/components/ui` for Kit v2 primitives,
+  `src/components/icons` for glyphs, `src/modules/<feature>` for feature logic, `src/theme` for
+  the theme provider.
 - **Safe area in mobile**: Use `react-native-safe-area-context` instead of deprecated
   `react-native` `SafeAreaView`.
 
@@ -155,14 +149,13 @@ starter/
 
 | Language | Lint | Format | Test |
 |----------|------|--------|------|
-| **TypeScript/JS** | oxlint | oxfmt | Vitest/Jest (if added) |
-| **Rust** | Clippy | rustfmt | `cargo test` |
+| **TypeScript/JS** | oxlint | oxfmt | Jest (Nest), `bun test` (mobile) |
 | **Bash** | ShellCheck | shfmt | — |
 | **Python** | ruff check | ruff format | — |
 
 ### Docker
 
-Postgres, Nest API, and Next.js via Compose fragments under `docker/compose/`
+Postgres, Nest API and the optional AI API via Compose fragments under `docker/compose/`
 (merged by root `docker-compose.yml`, Compose v2.20+, no `version:` key):
 
 ```bash
@@ -170,9 +163,8 @@ cp env.docker.example .env
 docker compose up -d --build
 ```
 
-Defaults: web `:3000`, Nest `:4000`, Postgres host `:5433`. Optional Rust:
-`docker compose --profile rust up -d --build`. Host-only API/web: start `postgres`
-only, then `bun run dev`. See `/docs/docker` and `docker/README.md`.
+Defaults: Nest `:4000`, Postgres host `:5433`. Optional AI API:
+`docker compose --profile ai up -d --build`. See `/docs/docker` and `docker/README.md`.
 
 ## Before finishing any task
 
@@ -184,10 +176,9 @@ only, then `bun run dev`. See `/docs/docker` and `docker/README.md`.
 ## Key files to read for deeper context
 
 - `PROJECT.md` — detailed layout, tooling, and commands.
-- `DESIGN.md` — design-system brief for UI generation and review.
+- `DESIGN.md` — Kit v2 design brief for UI generation and review.
 - **Docs app** (`apps/docs`, run with `bun --cwd=apps/docs run dev`):
   - `/docs/production-roadmap` — production build phases and Nest API spine
-  - `/docs/ai-first-workflow` — starter audit and AI-first workflow roadmap
   - `/docs/qol` — full QoL stack (hooks, CI, per-language tools)
   - `/docs/architecture` — architecture baseline and enforceable boundaries
   - `/docs/overrides` — policy for project-specific architecture overrides
@@ -195,7 +186,6 @@ only, then `bun run dev`. See `/docs/docker` and `docker/README.md`.
   - `/docs/deploy` — Vercel (web/docs) + Render (Nest) + Neon
   - `/docs/product-system-design` — product architecture and security model
 - `.agents/skills/expo-mobile/SKILL.md` — Expo Router + EAS + official Expo Skills / LLM doc links for `apps/mobile`.
-- `.agents/skills/browser-ui-test/SKILL.md` — Browser UI/UX verification via Playwright MCP + `apps/web` e2e after interactive web changes.
 - `.agents/rules/expo-ai-agents.mdc` — Expo remote skills URL, skill table, `llms.txt` bundles (when working under `apps/mobile/**`).
 - `docker/README.md` — Compose fragment layout and `-f` fallback.
 - `.oxlintrc.json` — oxlint rules. `.oxfmtrc.json` — oxfmt formatting.

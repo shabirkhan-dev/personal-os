@@ -12,7 +12,6 @@
 	"bracketSameLine": false,
 	"bracketSpacing": true,
 	"ignorePatterns": [
-		"apps/mobile/src/uniwind-types.d.ts",
 		"**/.next",
 		"**/dist",
 		"**/*.md",

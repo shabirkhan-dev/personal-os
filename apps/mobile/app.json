@@ -63,8 +63,14 @@
     "updates": {
       "enabled": true,
       "checkAutomatically": "ON_LOAD",
-      "fallbackToCacheTimeout": 0
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/ebd7c656-cf18-46ce-80f3-0fc034481946"
     },
-    "backgroundColor": "#141414"
+    "backgroundColor": "#141414",
+    "extra": {
+      "eas": {
+        "projectId": "ebd7c656-cf18-46ce-80f3-0fc034481946"
+      }
+    }
   }
 }

@@ -18,8 +18,13 @@ const sansMediumFamily = Platform.select({
 	default: sansFamily,
 });
 
+export type PoTextStyle = Pick<
+	TextStyle,
+	"fontFamily" | "fontSize" | "lineHeight" | "letterSpacing" | "fontWeight" | "textTransform"
+>;
+
 /** Converts a PO text-style token into a React Native text style. */
-export function toTextStyle(token: TextStyleToken): TextStyle {
+export function toTextStyle(token: TextStyleToken): PoTextStyle {
 	const isMono = token.family === "mono";
 	const isMedium = token.weight === "medium";
 	const fontFamily = isMono ? "JetBrainsMono_400Regular" : isMedium ? sansMediumFamily : sansFamily;

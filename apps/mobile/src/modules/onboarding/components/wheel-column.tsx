@@ -1,8 +1,13 @@
 import { textStyles } from "@personal-os/tokens";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
-import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
-import { scheduleOnRN } from "react-native-worklets";
+import Animated, {
+	scrollTo,
+	useAnimatedRef,
+	useAnimatedScrollHandler,
+	useSharedValue,
+} from "react-native-reanimated";
+import { scheduleOnRN, scheduleOnUI } from "react-native-worklets";
 import { toTextStyle, usePoTheme } from "@/theme";
 
 export const WHEEL_ROW = 30;
@@ -23,7 +28,15 @@ export type WheelColumnProps = {
 export function WheelColumn({ items, index, onChange, accessibilityLabel }: WheelColumnProps) {
 	const { colors } = usePoTheme();
 	const last = useSharedValue(index);
-	const [initialOffset] = useState(() => ({ x: 0, y: index * WHEEL_ROW }));
+	const scrollRef = useAnimatedRef<Animated.ScrollView>();
+	const [initialY] = useState(() => index * WHEEL_ROW);
+
+	useEffect(() => {
+		scheduleOnUI(() => {
+			"worklet";
+			scrollTo(scrollRef, 0, initialY, false);
+		});
+	}, [initialY, scrollRef]);
 	const emit = useCallback((next: number) => onChange(next), [onChange]);
 
 	const onScroll = useAnimatedScrollHandler((event) => {
@@ -51,12 +64,13 @@ export function WheelColumn({ items, index, onChange, accessibilityLabel }: Whee
 			style={styles.column}
 		>
 			<Animated.ScrollView
+				ref={scrollRef}
 				showsVerticalScrollIndicator={false}
 				snapToInterval={WHEEL_ROW}
 				decelerationRate="fast"
 				scrollEventThrottle={16}
 				onScroll={onScroll}
-				contentOffset={initialOffset}
+				contentOffset={{ x: 0, y: initialY }}
 				contentContainerStyle={styles.content}
 				nestedScrollEnabled
 			>
@@ -75,7 +89,7 @@ export function WheelColumn({ items, index, onChange, accessibilityLabel }: Whee
 											: distance === 1
 												? colors.textSecondary
 												: colors.textTertiary,
-										opacity: distance >= 2 ? 0.5 : 1,
+										opacity: distance >= 3 ? 0 : distance === 2 ? 0.5 : 1,
 									},
 									styles.text,
 								]}

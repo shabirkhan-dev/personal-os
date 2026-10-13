@@ -7,13 +7,14 @@ import Animated, {
 	useSharedValue,
 	withSpring,
 } from "react-native-reanimated";
-import { toTextStyle, usePoTheme } from "@/theme";
+import { type PoTextStyle, toTextStyle, usePoTheme } from "@/theme";
 
 export type SegmentedOption<T extends string> = { value: T; label: string };
 
 export type SegmentedControlProps<T extends string> = {
 	options: readonly SegmentedOption<T>[];
-	value: T;
+	/** `null` shows no selection yet. */
+	value: T | null;
 	onChange: (value: T) => void;
 	/** "lg" = full-width 48px segments (Gender); "sm" = 52×28 unit switch (cm / ft). */
 	size?: "lg" | "sm";
@@ -40,15 +41,12 @@ export function SegmentedControl<T extends string>({
 			? (trackWidth - 2 - padding * 2 - gap * (options.length - 1)) / options.length
 			: 0
 		: 52;
-	const index = Math.max(
-		0,
-		options.findIndex((option) => option.value === value),
-	);
+	const index = options.findIndex((option) => option.value === value);
 
 	const offset = useSharedValue(0);
 	const placed = useRef(false);
 	useEffect(() => {
-		if (segmentWidth <= 0) return;
+		if (segmentWidth <= 0 || index < 0) return;
 		const target = index * (segmentWidth + gap);
 		// Snap into place on first layout, spring on later changes.
 		offset.value = placed.current ? withSpring(target, spring) : target;
@@ -72,7 +70,7 @@ export function SegmentedControl<T extends string>({
 				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
 			]}
 		>
-			{segmentWidth > 0 ? (
+			{segmentWidth > 0 && index >= 0 ? (
 				<Animated.View
 					style={[
 						styles.thumb,
@@ -105,7 +103,7 @@ type SegmentProps = {
 	onPress: () => void;
 	large: boolean;
 	width?: number;
-	labelStyle: ReturnType<typeof toTextStyle>;
+	labelStyle: PoTextStyle;
 	activeColor: string;
 	idleColor: string;
 };

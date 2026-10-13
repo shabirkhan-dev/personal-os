@@ -5,7 +5,7 @@ type: decision
 from: pm
 to: human
 priority: low
-status: open
+status: done
 assignee: none
 reviewer: human
 parent: none
@@ -42,4 +42,4 @@ Owner decides per module: keep, park (disable route) or remove. Each removal bec
 
 ## Resolution
 
-_Open._
+Decided by the owner on 2026-10-13: **remove billing only** (Stripe/Razorpay). MFA, passkeys, email and social auth stay. Removal tracked in pos-10.

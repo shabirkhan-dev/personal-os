@@ -70,23 +70,6 @@ Additional authentication methods live under `/api/v1/auth/methods` and authenti
 management lives under `/api/v1/auth/security`. User profile reads and writes use
 `/api/v1/users/me` and `/api/v1/users/me/profile`.
 
-## Billing endpoints
-
-Subscriptions use Stripe Checkout and/or Razorpay Subscriptions with a shared Nest billing module.
-Configure keys in `.env` (see `.env.example`), create Price/Plan IDs in each dashboard, then expose
-webhooks to:
-
-- Stripe: `POST /api/v1/billing/webhooks/stripe`
-- Razorpay: `POST /api/v1/billing/webhooks/razorpay`
-
-| Method | Route                         | Purpose                           |
-| ------ | ----------------------------- | --------------------------------- |
-| `GET`  | `/billing/providers`          | Providers with keys configured    |
-| `GET`  | `/billing/subscription`       | Current user subscription (auth)  |
-| `POST` | `/billing/checkout`           | Create hosted checkout URL (auth) |
-| `POST` | `/billing/portal`             | Stripe customer portal (auth)     |
-| `POST` | `/billing/webhooks/:provider` | Provider webhook                  |
-
 Refresh tokens never appear in JSON responses. Browser clients must use `credentials: "include"`.
 Unsafe browser requests must send `X-Requested-With: XMLHttpRequest`.
 

@@ -5,12 +5,12 @@ type: chore
 from: pm
 to: mobile
 priority: high
-status: open
-assignee: none
+status: done
+assignee: claude-code
 reviewer: human
 parent: none
 depends_on: []
-branch: none
+branch: ccr-f7a44e55-46aj0i
 worktree: none
 scope: ["apps/mobile/package.json", "bun.lock", "package.json"]
 allowed_shared: []
@@ -44,4 +44,12 @@ Run `bunx expo install --check` in `apps/mobile`, apply the expected versions (a
 
 ## Resolution
 
-_Open._
+Changed:
+- `apps/mobile/package.json`: `react-native` 0.88.0-rc.3 → 0.88.0-rc.4; `bun.lock`
+
+Validation:
+- `EXPO_OFFLINE=1 bunx expo install --check`: Dependencies are up to date
+- `bunx expo-doctor`: 18/20; the 2 failures are network-only (exp.host and React Native Directory unreachable from the sandbox)
+- mobile typecheck, lint: clean; `bun test`: 13 pass
+
+Contract impact: none. Needs a new EAS build (native change).

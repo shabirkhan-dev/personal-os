@@ -5,7 +5,7 @@ type: chore
 from: pm
 to: mobile
 priority: normal
-status: open
+status: done
 assignee: none
 reviewer: human
 parent: none
@@ -43,4 +43,4 @@ Add the script; decide with the owner whether `production` builds an APK until t
 
 ## Resolution
 
-_Open._
+Rejected by the owner on 2026-10-13: not planned. APK builds use the `preview` profile from the EAS dashboard.

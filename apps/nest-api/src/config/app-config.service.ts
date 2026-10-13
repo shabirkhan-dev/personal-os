@@ -109,27 +109,6 @@ export class AppConfigService {
 	get googleClientId(): string | undefined {
 		return this.config.googleClientId;
 	}
-	get billingDefaultProvider(): AppConfig['billingDefaultProvider'] {
-		return this.config.billingDefaultProvider;
-	}
-	get stripeSecretKey(): string | undefined {
-		return this.config.stripeSecretKey;
-	}
-	get stripeWebhookSecret(): string | undefined {
-		return this.config.stripeWebhookSecret;
-	}
-	get razorpayKeyId(): string | undefined {
-		return this.config.razorpayKeyId;
-	}
-	get razorpayKeySecret(): string | undefined {
-		return this.config.razorpayKeySecret;
-	}
-	get razorpayWebhookSecret(): string | undefined {
-		return this.config.razorpayWebhookSecret;
-	}
-	get billingPrices(): AppConfig['billingPrices'] {
-		return this.config.billingPrices;
-	}
 	get aiApiUrl(): string {
 		return this.config.aiApiUrl;
 	}

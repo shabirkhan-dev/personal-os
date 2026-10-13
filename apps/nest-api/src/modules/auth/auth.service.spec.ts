@@ -47,7 +47,7 @@ describe('AuthService', () => {
 		} as unknown as Mocked<EmailService>;
 		usersService = {
 			createUser: vi.fn().mockResolvedValue(user),
-			createPasswordlessUser: vi.fn().mockResolvedValue({ ...user, passwordHash: null }),
+			createEmailOnlyUser: vi.fn().mockResolvedValue({ ...user, passwordHash: null }),
 			findByEmail: vi.fn().mockResolvedValue(null),
 		} as unknown as Mocked<UsersService>;
 		service = new AuthService(
@@ -134,7 +134,7 @@ describe('AuthService', () => {
 	it('creates a passwordless account on the first email-code request', async () => {
 		const result = await service.requestEmailCode({ email: user.email, name: 'Shabir' });
 
-		expect(usersService.createPasswordlessUser).toHaveBeenCalledWith({
+		expect(usersService.createEmailOnlyUser).toHaveBeenCalledWith({
 			email: user.email,
 			displayName: 'Shabir',
 		});
@@ -150,7 +150,7 @@ describe('AuthService', () => {
 
 		await service.requestEmailCode({ email: user.email });
 
-		expect(usersService.createPasswordlessUser).not.toHaveBeenCalled();
+		expect(usersService.createEmailOnlyUser).not.toHaveBeenCalled();
 		expect(email.sendSignInCode).toHaveBeenCalledWith(user.email, '123456');
 	});
 

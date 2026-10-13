@@ -191,7 +191,7 @@ export class AuthService {
 		const existing = await this.usersService.findByEmail(body.email);
 		const user =
 			existing ??
-			(await this.usersService.createPasswordlessUser({
+			(await this.usersService.createEmailOnlyUser({
 				email: body.email,
 				displayName: body.name ?? null,
 			}));

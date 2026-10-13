@@ -58,10 +58,7 @@ export class UsersService {
 	}
 
 	/** Passwordless account for email-code sign-in; verified when the first code is used. */
-	createPasswordlessUser(input: {
-		email: string;
-		displayName?: string | null;
-	}): Promise<UserRecord> {
+	createEmailOnlyUser(input: { email: string; displayName?: string | null }): Promise<UserRecord> {
 		return this.createWithGeneratedUsername(input);
 	}
 

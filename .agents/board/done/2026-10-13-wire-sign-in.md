@@ -48,7 +48,7 @@ served existing, verified accounts and linked to the disabled web app, so I adde
 
 Changed (backend):
 - `POST /auth/methods/email-code/request` (creates an unverified passwordless account on first use, same answer either way) and `POST /auth/methods/email-code/verify` (single-use code, consumed atomically; marks the email verified; returns the session)
-- challenge purpose `email_sign_in` + migration `0005_email_sign_in_challenge.sql`; `UsersService.createPasswordlessUser`; sign-in code email
+- challenge purpose `email_sign_in` + migration `0005_email_sign_in_challenge.sql`; `UsersService.createEmailOnlyUser`; sign-in code email
 - contract documented in `backend-api.mdx`; user-facing "Starter" names → "Personal OS" (app name, email sender, Swagger)
 
 Changed (mobile):

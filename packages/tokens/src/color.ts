@@ -112,3 +112,9 @@ export const colors: Record<ColorMode, ColorTokens> = {
 
 /** Default mode when the system does not report a colour scheme. */
 export const defaultColorMode: ColorMode = "dark";
+
+/** Fill opacity of the blurred colour glows per mode (Onboarding v5 frames). */
+export const glowOpacity: Record<ColorMode, { hero: number; card: number; member: number }> = {
+	light: { hero: 0.16, card: 0.16, member: 0.16 },
+	dark: { hero: 1, card: 0.22, member: 0.18 },
+};

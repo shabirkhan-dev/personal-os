@@ -61,26 +61,29 @@ export function ModuleRowsPreview() {
 				<Animated.View
 					key={row.title}
 					entering={FadeInDown.duration(420).delay(80 * index)}
-					style={[
-						styles.row,
-						{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-						row.dimmed ? styles.dimmed : null,
-					]}
+					style={row.dimmed ? styles.dimmed : null}
 				>
-					<View style={[styles.tile, { backgroundColor: colors[row.tileTone] }]}>
-						<Icon name={row.icon} color={colors[row.iconTone]} />
-					</View>
-					<View style={styles.text}>
-						<PoText variant="row15" numberOfLines={1}>
-							{row.title}
+					<View
+						style={[
+							styles.row,
+							{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
+						]}
+					>
+						<View style={[styles.tile, { backgroundColor: colors[row.tileTone] }]}>
+							<Icon name={row.icon} color={colors[row.iconTone]} />
+						</View>
+						<View style={styles.text}>
+							<PoText variant="row15" numberOfLines={1}>
+								{row.title}
+							</PoText>
+							<PoText variant="meta13" tone="textSecondary" numberOfLines={1}>
+								{row.meta}
+							</PoText>
+						</View>
+						<PoText variant="mono13" tone="textSecondary">
+							{row.value}
 						</PoText>
-						<PoText variant="meta13" tone="textSecondary" numberOfLines={1}>
-							{row.meta}
-						</PoText>
 					</View>
-					<PoText variant="mono13" tone="textSecondary">
-						{row.value}
-					</PoText>
 				</Animated.View>
 			))}
 		</View>

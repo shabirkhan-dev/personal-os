@@ -1,4 +1,4 @@
-import type { ColorTokens } from "@personal-os/tokens";
+import { type ColorTokens, glowOpacity } from "@personal-os/tokens";
 import { StyleSheet, View } from "react-native";
 import Svg, { Defs, Ellipse, RadialGradient, Stop } from "react-native-svg";
 import { usePoTheme } from "@/theme";
@@ -12,7 +12,8 @@ export type GlowProps = {
 	top?: number;
 	/** Figma layer-blur radius; widens the gradient falloff. */
 	blur?: number;
-	opacity?: number;
+	/** Which glow strength token to use (hero light, card light or member card). */
+	strength?: "hero" | "card" | "member";
 };
 
 /**
@@ -26,9 +27,10 @@ export function Glow({
 	left = 5,
 	top = -150,
 	blur = 120,
-	opacity = 1,
+	strength = "hero",
 }: GlowProps) {
-	const { colors } = usePoTheme();
+	const { colors, mode } = usePoTheme();
+	const opacity = glowOpacity[mode][strength];
 	const color = colors[tone];
 	const boxWidth = width + blur * 2;
 	const boxHeight = height + blur * 2;

@@ -61,7 +61,7 @@ export default function AllSetScreen() {
 						left={59}
 						top={-111}
 						blur={70}
-						opacity={0.18}
+						strength="member"
 					/>
 					<View style={[styles.tab, { backgroundColor: colors.bgSubtle }]}>
 						<View style={styles.inline8}>

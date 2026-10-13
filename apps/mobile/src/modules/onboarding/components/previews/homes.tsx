@@ -35,30 +35,33 @@ export function HomesPreview() {
 				<Animated.View
 					key={stat.label}
 					entering={FadeInDown.duration(420).delay(90 * index)}
-					style={[
-						styles.card,
-						{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-						stat.dimmed ? styles.dimmed : null,
-					]}
+					style={stat.dimmed ? styles.dimmed : null}
 				>
-					<Glow
-						tone={stat.tone}
-						width={240}
-						height={120}
-						left={59}
-						top={-96}
-						blur={60}
-						opacity={0.22}
-					/>
-					<PoText variant="meta13" tone="textSecondary">
-						{stat.label}
-					</PoText>
-					<PoText variant="hero40">
-						{stat.value}
-						<PoText variant="hero40" tone="textTertiary">
-							{stat.suffix}
+					<View
+						style={[
+							styles.card,
+							{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
+						]}
+					>
+						<Glow
+							tone={stat.tone}
+							width={240}
+							height={120}
+							left={59}
+							top={-96}
+							blur={60}
+							strength="card"
+						/>
+						<PoText variant="meta13" tone="textSecondary">
+							{stat.label}
 						</PoText>
-					</PoText>
+						<PoText variant="hero40">
+							{stat.value}
+							<PoText variant="hero40" tone="textTertiary">
+								{stat.suffix}
+							</PoText>
+						</PoText>
+					</View>
 				</Animated.View>
 			))}
 		</View>

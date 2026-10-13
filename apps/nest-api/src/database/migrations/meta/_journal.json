@@ -43,6 +43,13 @@
 			"when": 1791861204507,
 			"tag": "0005_email_sign_in_challenge",
 			"breakpoints": true
+		},
+		{
+			"idx": 6,
+			"version": "7",
+			"when": 1791861768300,
+			"tag": "0006_onboarding_profiles",
+			"breakpoints": true
 		}
 	]
 }

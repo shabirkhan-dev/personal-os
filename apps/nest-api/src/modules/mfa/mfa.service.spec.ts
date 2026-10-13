@@ -34,8 +34,8 @@ describe('MfaService', () => {
 		const users = {
 			getCurrentUser: vi.fn().mockResolvedValue({
 				id: 'a01a0cab-a947-44f0-bfcd-4b8e8c907534',
-				email: 'personal@example.com',
-				username: 'personal',
+				email: 'starter@example.com',
+				username: 'starter',
 				isActive: true,
 				emailVerified: true,
 				hasPassword: true,

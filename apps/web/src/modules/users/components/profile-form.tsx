@@ -1,10 +1,10 @@
 import { SaveIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Button } from "@personal-os/ui/components/button";
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "@personal-os/ui/components/field";
-import { Input } from "@personal-os/ui/components/input";
-import { Spinner } from "@personal-os/ui/components/spinner";
-import { Textarea } from "@personal-os/ui/components/textarea";
+import { Button } from "@starter/ui/components/button";
+import { Field, FieldDescription, FieldGroup, FieldLabel } from "@starter/ui/components/field";
+import { Input } from "@starter/ui/components/input";
+import { Spinner } from "@starter/ui/components/spinner";
+import { Textarea } from "@starter/ui/components/textarea";
 import type { UpdateUserProfileInput } from "../types/user.types";
 import { AvatarPicker } from "./avatar-picker";
 
@@ -23,7 +23,7 @@ export function ProfileForm({
 	onSubmit: (event: React.FormEvent) => void;
 	onUploadAvatar: (file: File) => void;
 }) {
-	const seed = value.username?.trim() || value.displayName?.trim() || "personal-os";
+	const seed = value.username?.trim() || value.displayName?.trim() || "starter";
 
 	return (
 		<form onSubmit={onSubmit}>

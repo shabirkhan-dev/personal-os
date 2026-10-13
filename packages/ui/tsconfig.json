@@ -3,9 +3,8 @@
 	"compilerOptions": {
 		"types": ["react"],
 		"ignoreDeprecations": "6.0",
-		"baseUrl": ".",
 		"paths": {
-			"@personal-os/ui/*": ["./src/*"]
+			"@starter/ui/*": ["./src/*"]
 		}
 	},
 	"include": ["src/**/*.ts", "src/**/*.tsx"],

@@ -18,12 +18,12 @@ import {
 	SmartPhone01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Alert, AlertDescription, AlertTitle } from "@personal-os/ui/components/alert";
-import { Badge } from "@personal-os/ui/components/badge";
-import { Button } from "@personal-os/ui/components/button";
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "@personal-os/ui/components/field";
-import { Input } from "@personal-os/ui/components/input";
-import { Spinner } from "@personal-os/ui/components/spinner";
+import { Alert, AlertDescription, AlertTitle } from "@starter/ui/components/alert";
+import { Badge } from "@starter/ui/components/badge";
+import { Button } from "@starter/ui/components/button";
+import { Field, FieldDescription, FieldGroup, FieldLabel } from "@starter/ui/components/field";
+import { Input } from "@starter/ui/components/input";
+import { Spinner } from "@starter/ui/components/spinner";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { type ComponentProps, useState } from "react";

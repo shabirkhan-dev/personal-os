@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Providers } from "@/components/providers";
 import { themeInitScript } from "@/components/theme";
@@ -11,46 +11,11 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-	metadataBase: new URL(
-		process.env.NEXT_PUBLIC_SITE_URL ?? "https://github.com/shabirkhan-dev/personal-os",
-	),
 	title: {
-		default: "Personal OS",
-		template: "%s | Personal OS",
+		default: "Starter",
+		template: "%s | Starter",
 	},
-	description:
-		"Personal life operating system — track routines, finance, skincare, food, fashion, and daily habits in one web and mobile app.",
-	keywords: [
-		"personal-os",
-		"life-os",
-		"routines",
-		"finance",
-		"skincare",
-		"food",
-		"fashion",
-		"wellness",
-		"habits",
-		"productivity",
-		"nextjs",
-		"expo",
-	],
-	applicationName: "Personal OS",
-	creator: "Personal OS",
-	openGraph: {
-		type: "website",
-		locale: "en_US",
-		siteName: "Personal OS",
-		title: "Personal OS — life in one place",
-		description:
-			"Personal life operating system — track routines, finance, skincare, food, fashion, and daily habits in one web and mobile app.",
-	},
-	twitter: {
-		card: "summary_large_image",
-		title: "Personal OS — life in one place",
-		description:
-			"Personal life operating system — track routines, finance, skincare, food, fashion, and daily habits in one web and mobile app.",
-	},
-	robots: { index: true, follow: true },
+	description: "Production-ready application starter",
 };
 
 export default function RootLayout({
@@ -61,7 +26,7 @@ export default function RootLayout({
 	return (
 		<html lang="en" className={inter.variable} suppressHydrationWarning>
 			<head>
-				{/* biome-ignore lint/security/noDangerouslySetInnerHtml: static FOUC bootstrap, not user input */}
+				{/* Intentional: static FOUC bootstrap, not user input. No oxlint equivalent for Biome's noDangerouslySetInnerHtml, so this documents the choice rather than suppressing. */}
 				<script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
 			</head>
 			<body className="font-sans antialiased" suppressHydrationWarning>

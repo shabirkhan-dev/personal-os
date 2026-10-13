@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import { Fraunces, JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { atlasThemeScript, SITE } from "@/modules/landing";
@@ -25,17 +25,6 @@ const jetbrains = JetBrains_Mono({
 export const metadata: Metadata = {
 	title: SITE.title,
 	description: SITE.description,
-	openGraph: {
-		title: SITE.title,
-		description: SITE.description,
-		siteName: SITE.name,
-		type: "website",
-	},
-	twitter: {
-		card: "summary_large_image",
-		title: SITE.title,
-		description: SITE.description,
-	},
 };
 
 export default function LandingLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -43,7 +32,7 @@ export default function LandingLayout({ children }: Readonly<{ children: React.R
 		<>
 			{/* Apply the stored landing theme before paint to avoid a flash. */}
 			<script
-				// biome-ignore lint/security/noDangerouslySetInnerHtml: required to run the theme script before hydration
+				// Intentional: required to run the theme script before hydration. No oxlint equivalent for Biome's noDangerouslySetInnerHtml, so this documents the choice rather than suppressing.
 				dangerouslySetInnerHTML={{ __html: atlasThemeScript }}
 			/>
 			<div className={cn(jakarta.variable, fraunces.variable, jetbrains.variable)}>{children}</div>

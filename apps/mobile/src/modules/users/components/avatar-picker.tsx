@@ -1,9 +1,8 @@
-import { ImageAdd01Icon, Tick01Icon } from "@hugeicons/core-free-icons";
+import { Check, ImagePlus } from "lucide-react-native";
 import { useState } from "react";
 import { ActivityIndicator, Alert, Image, Pressable, Text, View } from "react-native";
-import { Icon } from "@/components/ui/icon";
+import { NeonColors } from "@/constants/design-system";
 import { resolveMediaUrl } from "@/lib/media-url";
-import { cn } from "@/lib/utils";
 import { buildAvatarTemplates } from "../lib/avatar-templates";
 
 interface AvatarPickerProps {
@@ -31,40 +30,39 @@ export function AvatarPicker({
 
 	return (
 		<View className="gap-3">
-			<Text className="text-foreground text-sm font-semibold">Avatar</Text>
+			<Text className="text-white text-sm font-semibold">Avatar</Text>
 			<View className="flex-row items-center gap-3.5">
-				<View className="w-18 h-18 rounded-full overflow-hidden border border-border bg-card items-center justify-center">
+				<View className="w-18 h-18 rounded-full overflow-hidden border border-zinc-800 bg-zinc-900 items-center justify-center">
 					{previewUri && !previewFailed ? (
 						<Image
 							key={previewUri}
 							source={{ uri: previewUri }}
-							className="w-full h-full"
+							style={{ width: "100%", height: "100%" }}
 							onError={() => setFailedUri(previewUri)}
 						/>
 					) : (
-						<Text className="text-muted-foreground text-xs">None</Text>
+						<Text className="text-zinc-500 text-xs">None</Text>
 					)}
 				</View>
 				<Pressable
+					className={`flex-row items-center gap-2 min-h-[44px] px-3.5 rounded-xl border border-zinc-800 bg-zinc-900/40 active:opacity-80 ${
+						busy ? "opacity-50" : ""
+					}`}
 					disabled={busy}
 					onPress={onPickFromDevice}
-					className={cn(
-						"flex-row items-center gap-2 min-h-[44px] px-3.5 rounded-xl border border-border bg-muted/40",
-						busy && "opacity-50",
-					)}
 				>
 					{uploading ? (
-						<ActivityIndicator className="text-primary" />
+						<ActivityIndicator color={NeonColors.accent.green} />
 					) : (
 						<>
-							<Icon icon={ImageAdd01Icon} size={16} className="text-foreground" strokeWidth={1.8} />
-							<Text className="text-foreground text-sm font-semibold">Upload photo</Text>
+							<ImagePlus size={16} color={NeonColors.text.primary} strokeWidth={1.8} />
+							<Text className="text-white text-sm font-semibold">Upload photo</Text>
 						</>
 					)}
 				</Pressable>
 			</View>
 
-			<Text className="text-muted-foreground text-xs mt-1">Or pick a template</Text>
+			<Text className="text-zinc-500 text-xs mt-1">Or pick a template</Text>
 			<View className="flex-row flex-wrap gap-2.5">
 				{templates.map((template) => {
 					const selected = value === template.url;
@@ -73,28 +71,21 @@ export function AvatarPicker({
 							key={template.id}
 							disabled={busy}
 							onPress={() => onSelectTemplate(template.url)}
-							className={cn(
-								"w-16 h-16 rounded-2xl overflow-hidden border border-border relative",
-								selected && "border-primary border-2",
-								busy && "opacity-50",
-							)}
+							className={`w-16 h-16 rounded-2xl overflow-hidden border active:opacity-80 ${
+								selected ? "border-emerald-500 border-2" : "border-zinc-800"
+							} ${busy ? "opacity-50" : ""}`}
 						>
-							<Image source={{ uri: template.url }} className="w-full h-full" />
+							<Image source={{ uri: template.url }} style={{ width: "100%", height: "100%" }} />
 							{selected ? (
-								<View className="absolute right-1 bottom-1 w-4.5 h-4.5 rounded-full bg-primary items-center justify-center">
-									<Icon
-										icon={Tick01Icon}
-										size={12}
-										className="text-primary-foreground"
-										strokeWidth={3}
-									/>
+								<View className="absolute right-1 bottom-1 w-4.5 h-4.5 rounded-full bg-emerald-500 items-center justify-center">
+									<Check size={12} color={NeonColors.background} strokeWidth={3} />
 								</View>
 							) : null}
 						</Pressable>
 					);
 				})}
 			</View>
-			<Text className="text-muted-foreground text-xs">JPEG, PNG, or WebP · max 2 MB</Text>
+			<Text className="text-zinc-500 text-xs">JPEG, PNG, or WebP · max 2 MB</Text>
 		</View>
 	);
 }

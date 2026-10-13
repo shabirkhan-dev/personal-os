@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - NestJS auth API (`/api/v1/auth/*`) with JWT login/register/me for the web app.
-- Shared UI auth components via shadcn (`alert`, `spinner`, `input-group`) in `@personal-os/ui`.
+- Shared UI auth components via shadcn (`alert`, `spinner`, `input-group`) in `@starter/ui`.
 - Web login/register flows that call Nest only (no multi-backend API switcher).
 - Conventional Commits enforcement in `commit-msg` hook (typed prefixes + all-lowercase subjects).
 - Docker Compose services for Nest API and Next.js web (multi-stage images, healthchecks, no Compose `version` key).
@@ -25,14 +25,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - Root `docs/` directory (stale pointer after the docs app migration).
-- Removed the legacy multi-backend web API switcher.
+- Web API backend switcher (Python / Rust / Hono).
 
 ## [0.1.0] - 2026-02-10
 
 ### Added
 
-- Initial Personal OS monorepo layout (Turborepo + Bun).
+- Initial Starter monorepo layout (Turborepo + Bun).
 - Dual license: MIT and Apache-2.0.
 
-[Unreleased]: https://github.com/shabirkhan-dev/personal-os/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/shabirkhan-dev/personal-os/releases/tag/v0.1.0
+[Unreleased]: https://github.com/shabirkhan-dev/starter/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/shabirkhan-dev/starter/releases/tag/v0.1.0

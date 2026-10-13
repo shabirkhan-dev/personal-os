@@ -23,16 +23,16 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-	title: "Pricing — Personal OS",
+	title: "Pricing — Starter",
 	description:
-		"Personal OS is free to use. Upgrade when you need more workspace capacity — no surprise overages.",
+		"Starter is free to clone and run. Slide for team and enterprise seats — no surprise overages.",
 };
 
 export default function PricingPage() {
 	return (
 		<>
 			<script
-				// biome-ignore lint/security/noDangerouslySetInnerHtml: theme before paint
+				// Intentional: theme before paint. No oxlint equivalent for Biome's noDangerouslySetInnerHtml, so this documents the choice rather than suppressing.
 				dangerouslySetInnerHTML={{ __html: atlasThemeScript }}
 			/>
 			<div className={cn(jakarta.variable, fraunces.variable, jetbrains.variable)}>

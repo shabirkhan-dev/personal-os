@@ -2,9 +2,9 @@
 set -euo pipefail
 
 output="$(bash scripts/bash/main.sh)"
-if [[ "$output" != "Hello from Personal OS scripts (bash)" ]]; then
-	echo "unexpected output: $output"
-	exit 1
+if [[ "$output" != "Hello from Starter scripts (bash)" ]]; then
+    echo "unexpected output: $output"
+    exit 1
 fi
 
 echo "bash test passed"

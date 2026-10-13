@@ -1,4 +1,4 @@
-﻿import {
+import {
 	ApertureIcon,
 	CircleIcon,
 	CommandIcon,
@@ -12,31 +12,10 @@
 import type { IconSvgElement } from "@hugeicons/react";
 
 export const SITE = {
-	name: "Personal OS",
-	title: "Personal OS — your life operating system",
+	name: "Starter",
+	title: "Starter — production monorepo starter",
 	description:
-		"Personal life operating system — track routines, finance, skincare, food, fashion, and daily habits in one web and mobile app.",
-} as const;
-
-export const LANDING_COPY = {
-	heroBadge: "Built for your daily life",
-	heroTitlePrimary: "Run your life from one place",
-	heroTitleSecondary: "not ten scattered apps",
-	heroSubtitle:
-		"Finance, skincare routines, meals, fashion, habits, and personal care — Personal OS is your control plane for everyday life.",
-	workflowCardTitle: "Morning routine",
-	workflowCardSub: "personal-os",
-	chatCardTitle: "Life assistant",
-	chatCardSub: "Personal OS · ready",
-	productHeading: "From morning routine to monthly budget — one connected system.",
-	productBody:
-		"Personal OS connects the domains you actually live in: daily habits, personal care, food, fashion, and finance — web and mobile, with AI assist when you need it.",
-	whyLabel: "Why Personal OS",
-	whyHeading: "Built for people who want one home for their life.",
-	whySub: "Not another generic todo app — a personal operating system shaped around how you live.",
-	aboutTitle: "About Personal OS",
-	aboutLead:
-		"Personal OS is the place for your routines, money, care, food, and style — one dashboard, one mobile companion, one source of truth for you.",
+		"Bun + Turborepo starter with Next.js, Expo, NestJS, docs, and Rust — shared UI, hooks, CI, and Docker included.",
 } as const;
 
 export type NavLink = {
@@ -94,7 +73,7 @@ export const NAV_ITEMS: NavItem[] = [
 			},
 			{
 				label: "About",
-				description: "Why we built Personal OS",
+				description: "Why we built Starter",
 				href: "/about",
 			},
 		],
@@ -125,7 +104,7 @@ export const WORKFLOW_STEPS: WorkflowStep[] = [
 	{
 		id: "anomaly",
 		label: "Clone the repo",
-		detail: "git clone â†’ bun install",
+		detail: "git clone → bun install",
 	},
 	{
 		id: "investigating",
@@ -140,12 +119,12 @@ export const WORKFLOW_STEPS: WorkflowStep[] = [
 	{
 		id: "fix",
 		label: "Dev servers up",
-		detail: "bun run dev â€” apps online in minutes",
+		detail: "bun run dev — apps online in minutes",
 	},
 	{
 		id: "notify",
 		label: "Quality gates green",
-		detail: "lint Â· typecheck Â· architecture check pass",
+		detail: "lint · typecheck · architecture check pass",
 	},
 ];
 
@@ -157,19 +136,19 @@ export type ChatMessage = {
 export const AGENT_MESSAGES: ChatMessage[] = [
 	{
 		role: "user",
-		text: "Can Personal OS track my skincare routine and spending in one place?",
+		text: "Can we scaffold a production SaaS product with web + mobile + API?",
 	},
 	{
 		role: "agent",
-		text: "Yes — routines, finance, food, and fashion modules share one profile and timeline.",
+		text: "Starter already ships all three — plus docs and a Rust binary.",
 	},
 	{
 		role: "agent",
-		text: "Log a skincare step on mobile; see spend vs. budget on web the same day.",
+		text: "Shared @starter/ui and typescript-config keep stacks consistent.",
 	},
 	{
 		role: "agent",
-		text: "AI assist helps plan meals, outfits, and habits without leaving your OS.",
+		text: "Run bun install && bun run dev — Turbo starts the workspace.",
 	},
 ];
 
@@ -184,17 +163,15 @@ export const CUSTOMER_LOGOS: CustomerLogo[] = [
 	{ name: "NestJS", icon: ApertureIcon },
 	{ name: "Turbo", icon: Package01Icon },
 	{ name: "Bun", icon: GemIcon },
-	{ name: "Biome", icon: CommandIcon },
+	{ name: "oxc", icon: CommandIcon },
 	{ name: "Docker", icon: OctagonIcon },
 	{ name: "Rust", icon: CircleIcon },
 ];
 
 export const PRODUCT_BULLETS: string[] = [
-	"Finance, budgets, and spending in one timeline",
-	"Skincare and personal care routines you can follow daily",
-	"Meals, habits, and daily schedules on web and mobile",
-	"Fashion and wardrobe planning tied to your week",
-	"AI assist for planning without leaving your OS",
+	"Five apps in one workspace — web, mobile, Nest, docs, Rust",
+	"Shared UI tokens and TypeScript configs via @starter/*",
+	"Hooks, CI, architecture boundaries, and Compose out of the box",
 ];
 
 export type IncidentEvent = {
@@ -213,7 +190,7 @@ export const INCIDENT_TIMELINE: IncidentEvent[] = [
 	},
 	{
 		title: "Turbo pipeline",
-		detail: "dev Â· build Â· lint Â· typecheck orchestrated",
+		detail: "dev · build · lint · typecheck orchestrated",
 		tone: "info",
 		icon: "search",
 	},
@@ -231,7 +208,7 @@ export const INCIDENT_TIMELINE: IncidentEvent[] = [
 	},
 	{
 		title: "Ready to ship",
-		detail: "Docker Compose optional â€” personal-os is live",
+		detail: "Docker Compose optional — starter stack is live",
 		tone: "ok",
 		icon: "shield",
 	},
@@ -244,7 +221,7 @@ export type ToolCall = {
 
 export const AGENT_TOOL_CALLS: ToolCall[] = [
 	{ name: "turbo run build", status: "done" },
-	{ name: "biome check", status: "done" },
+	{ name: "oxlint", status: "done" },
 	{ name: "architecture:check", status: "done" },
 ];
 
@@ -262,7 +239,7 @@ export const CAPABILITY_CARDS: CapabilityCard[] = [
 	{
 		title: "See the monorepo reason",
 		description:
-			"Turbo graphs tasks across apps â€” watch install, lint, and build fan out from one command.",
+			"Turbo graphs tasks across apps — watch install, lint, and build fan out from one command.",
 		span: 4,
 		kind: "reasoning",
 		palette: "blue",
@@ -270,21 +247,21 @@ export const CAPABILITY_CARDS: CapabilityCard[] = [
 	{
 		title: "Add an app in one workspace",
 		description:
-			"Drop a package under apps/ or packages/, export as @personal-os/*, and wire it into turbo.json.",
+			"Drop a package under apps/ or packages/, export as @starter/*, and wire it into turbo.json.",
 		span: 2,
 		kind: "tools",
 		palette: "blue",
 	},
 	{
 		title: "Shared UI that sticks",
-		description: "Design tokens and primitives live in @personal-os/ui for web.",
+		description: "Design tokens and primitives live in @starter/ui for web.",
 		span: 2,
 		kind: "memory",
 		palette: "teal",
 	},
 	{
 		title: "Typed contracts end to end",
-		description: "Zod on Nest, TypeScript everywhere â€” schemas and configs stay honest.",
+		description: "Zod on Nest, TypeScript everywhere — schemas and configs stay honest.",
 		span: 2,
 		kind: "output",
 		palette: "lime",
@@ -313,14 +290,14 @@ export const STATS: Stat[] = [
 		suffix: "",
 		prefix: "",
 		label: "Runnable apps",
-		detail: "web Â· mobile Â· nest Â· docs Â· rust",
+		detail: "web · mobile · nest · docs · rust",
 	},
 	{
 		value: 3,
 		suffix: "",
 		prefix: "",
 		label: "Shared packages",
-		detail: "ui Â· logger Â· tsconfig",
+		detail: "ui · logger · tsconfig",
 	},
 	{
 		value: 0,
@@ -328,14 +305,14 @@ export const STATS: Stat[] = [
 		prefix: "",
 		label: "Time to first dev",
 		display: "<10m",
-		detail: "clone â†’ install â†’ run",
+		detail: "clone → install → run",
 	},
 	{
 		value: 4,
 		suffix: "+",
 		prefix: "",
 		label: "Languages wired",
-		detail: "TS Â· Rust Â· Bash Â· Python",
+		detail: "TS · Rust · Bash · Python",
 	},
 ];
 
@@ -348,9 +325,9 @@ export type AboutPrinciple = {
 export const ABOUT_PRINCIPLES: AboutPrinciple[] = [
 	{
 		icon: "bridge",
-		title: "Personal OS, not a demo dump",
+		title: "Starter, not a demo dump",
 		description:
-			"Every app and package earns its place by helping you ship a real product â€” not a throwaway scaffold.",
+			"Every app and package earns its place by helping you ship a real product — not a throwaway scaffold.",
 	},
 	{
 		icon: "eye",
@@ -362,7 +339,7 @@ export const ABOUT_PRINCIPLES: AboutPrinciple[] = [
 		icon: "shield",
 		title: "Quality by default",
 		description:
-			"Biome, Lefthook, Turbo, and CI run before code lands â€” so green hooks become the habit, not a hope.",
+			"oxlint, Lefthook, Turbo, and CI run before code lands — so green hooks become the habit, not a hope.",
 	},
 ];
 
@@ -400,7 +377,7 @@ export const ABOUT_TEAM: AboutTeamMember[] = [
 		name: "Lena Ortiz",
 		role: "DX & tooling",
 		seed: "LenaOrtiz",
-		bio: "Ships hooks, Biome rules, and agent guidance so every commit stays reviewable.",
+		bio: "Ships hooks, oxlint rules, and agent guidance so every commit stays reviewable.",
 		tone: "blue",
 		profileHref: "#",
 	},
@@ -409,7 +386,7 @@ export const ABOUT_TEAM: AboutTeamMember[] = [
 		name: "Theo Park",
 		role: "Mobile & UI",
 		seed: "TheoPark",
-		bio: "Expo Router + shared design tokens. Believes Personal OS should feel production-ready on day one.",
+		bio: "Expo Router + shared design tokens. Believes the starter should look production-ready on day one.",
 		tone: "amber",
 		profileHref: "#",
 	},
@@ -425,9 +402,9 @@ export type Testimonial = {
 export const TESTIMONIALS_ROW_ONE: Testimonial[] = [
 	{
 		quote:
-			"We skipped three weeks of wiring Turbo, hooks, and Docker. Personal OS was already opinionated the right way.",
+			"We skipped three weeks of wiring Turbo, hooks, and Docker. Starter was already opinionated the right way.",
 		name: "Maya Chen",
-		role: "Staff Eng, campus product",
+		role: "Staff Eng, SaaS platform",
 		seed: "Maya",
 	},
 	{
@@ -439,9 +416,9 @@ export const TESTIMONIALS_ROW_ONE: Testimonial[] = [
 	},
 	{
 		quote:
-			"Students can PR into a real monorepo without babysitting tooling. lint and typecheck just work.",
+			"Developers can PR into a real monorepo without babysitting tooling. lint and typecheck just work.",
 		name: "Priya Nair",
-		role: "CS faculty",
+		role: "Engineering lead",
 		seed: "Priya",
 	},
 ];
@@ -449,7 +426,7 @@ export const TESTIMONIALS_ROW_ONE: Testimonial[] = [
 export const TESTIMONIALS_ROW_TWO: Testimonial[] = [
 	{
 		quote:
-			"Adding a package under packages/ and exporting @personal-os/* took minutes. Turbo picked it up immediately.",
+			"Adding a package under packages/ and exporting @starter/* took minutes. Turbo picked it up immediately.",
 		name: "Theo Park",
 		role: "Mobile engineer",
 		seed: "Theo",
@@ -465,7 +442,7 @@ export const TESTIMONIALS_ROW_TWO: Testimonial[] = [
 		quote:
 			"Docs live in the same repo. New teammates read /docs/quick-start and are productive the same afternoon.",
 		name: "Maya Chen",
-		role: "Staff Eng, campus product",
+		role: "Staff Eng, SaaS platform",
 		seed: "MayaTwo",
 	},
 ];
@@ -487,7 +464,7 @@ export type PricingTier = {
 	monthly: number;
 };
 
-/** Slider steps: free â†’ team â†’ org (workspaces / projects included). */
+/** Slider steps: free → team → org (workspaces / projects included). */
 export const PRICING_TIERS: PricingTier[] = [
 	{ services: 1, monthly: 0 },
 	{ services: 5, monthly: 49 },
@@ -497,9 +474,9 @@ export const PRICING_TIERS: PricingTier[] = [
 ];
 
 export const PRICING_FEATURES: string[] = [
-	"Full Personal OS monorepo (web Â· mobile Â· Nest Â· docs Â· Rust)",
-	"Shared @personal-os packages and TS configs",
-	"Lefthook, Biome, Turbo, and architecture checks",
+	"Full monorepo starter (web · mobile · Nest · docs · Rust)",
+	"Shared @starter packages and TS configs",
+	"Lefthook, oxlint, Turbo, and architecture checks",
 	"Docker Compose fragments + Dev Container",
 	"Docs site and production roadmap baked in",
 ];
@@ -517,7 +494,7 @@ export const WHY_CARDS: WhyCard[] = [
 		id: "route",
 		title: "One graph for every app",
 		description:
-			"Turbo orchestrates install, lint, build, and test across the workspace â€” no glue scripts to invent.",
+			"Turbo orchestrates install, lint, build, and test across the workspace — no glue scripts to invent.",
 		palette: "blue",
 		kind: "route",
 	},
@@ -525,7 +502,7 @@ export const WHY_CARDS: WhyCard[] = [
 		id: "keys",
 		title: "Boundaries you can enforce",
 		description:
-			"Architecture checks and AGENTS.md keep apps and packages in their lanes â€” humans and AI included.",
+			"Architecture checks and AGENTS.md keep apps and packages in their lanes — humans and AI included.",
 		palette: "lime",
 		kind: "keys",
 	},
@@ -533,7 +510,7 @@ export const WHY_CARDS: WhyCard[] = [
 		id: "ready",
 		title: "Running in under ten minutes",
 		description:
-			"Clone, bun install, bun run prepare, bun run dev â€” web, API, and docs come up without a weekend of setup.",
+			"Clone, bun install, bun run prepare, bun run dev — web, API, and docs come up without a weekend of setup.",
 		palette: "amber",
 		kind: "ready",
 	},
@@ -558,35 +535,35 @@ export const FAQ_ITEMS: FaqItem[] = [
 		id: "approvals",
 		question: "Can we keep or drop apps we do not need?",
 		answer:
-			"Yes. Apps under apps/ are independent. Remove or ignore what you do not ship yet â€” keep packages you still share.",
+			"Yes. Apps under apps/ are independent. Remove or ignore what you do not ship yet — keep packages you still share.",
 		icon: SecurityCheckIcon,
 	},
 	{
 		id: "stack",
-		question: "What stacks does Personal OS include?",
+		question: "What stacks does Starter include?",
 		answer:
-			"Next.js web, Expo mobile, NestJS API, Fumadocs docs, and a Rust binary â€” plus shared UI, logger, and TypeScript configs.",
+			"Next.js web, Expo mobile, NestJS API, Fumadocs docs, and a Rust binary — plus shared UI, logger, and TypeScript configs.",
 		icon: Package01Icon,
 	},
 	{
 		id: "traces",
 		question: "How do architecture boundaries work?",
 		answer:
-			"scripts/architecture/check-boundaries.sh runs in hooks and CI so apps cannot import each otherâ€™s internals. Overrides are documented in /docs/overrides.",
+			"scripts/architecture/check-boundaries.sh runs in hooks and CI so apps cannot import each other’s internals. Overrides are documented in /docs/overrides.",
 		icon: CommandIcon,
 	},
 	{
 		id: "pricing",
-		question: "Is Personal OS free to use?",
+		question: "Is the starter free to use?",
 		answer:
-			"Personal OS is free to use. Paid tiers are optional for team capacity, support, and managed onboarding â€” annual billing includes two months free.",
+			"The monorepo starter is free to clone and run. Paid tiers are optional for team seats, support, and managed onboarding — annual billing includes two months free.",
 		icon: GemIcon,
 	},
 	{
 		id: "security",
 		question: "What quality gates run before a commit?",
 		answer:
-			"Lefthook formats with Biome, lints, typechecks, blocks large files, scans for obvious secrets, and runs the architecture check â€” Conventional Commits required.",
+			"Lefthook formats with oxfmt, lints with oxlint, typechecks, blocks large files, scans for obvious secrets, and runs the architecture check — Conventional Commits required.",
 		icon: OctagonIcon,
 	},
 ];

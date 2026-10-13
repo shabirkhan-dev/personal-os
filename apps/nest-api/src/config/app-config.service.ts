@@ -63,9 +63,6 @@ export class AppConfigService {
 	get mfaChallengeTtlMinutes(): number {
 		return this.config.mfaChallengeTtlMinutes;
 	}
-	get stepUpTtlMinutes(): number {
-		return this.config.stepUpTtlMinutes;
-	}
 	get passwordBcryptRounds(): number {
 		return this.config.passwordBcryptRounds;
 	}
@@ -138,11 +135,5 @@ export class AppConfigService {
 	}
 	get aiServiceToken(): string {
 		return this.config.aiServiceToken;
-	}
-	get externalRequestTimeoutMs(): number {
-		return this.config.externalRequestTimeoutMs;
-	}
-	get swaggerEnabled(): boolean {
-		return this.config.swaggerEnabled;
 	}
 }

@@ -2,7 +2,6 @@
 
 import {
 	BubbleChatIcon,
-	Calendar03Icon,
 	ClipboardIcon,
 	DashboardSquare01Icon,
 	File01Icon,
@@ -10,15 +9,10 @@ import {
 	Invoice01Icon,
 	Logout01Icon,
 	Megaphone01Icon,
-	Mortarboard01Icon,
 	PuzzleIcon,
 	SecurityIcon,
 	Settings02Icon,
 	SidebarLeftIcon,
-	StudentIcon,
-	Sun03Icon,
-	TaskDone01Icon,
-	TeacherIcon,
 	Tick02Icon,
 	UnfoldMoreIcon,
 	UserAdd01Icon,
@@ -35,13 +29,13 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "@personal-os/ui/components/dropdown-menu";
+} from "@starter/ui/components/dropdown-menu";
 import {
 	Tooltip,
 	TooltipContent,
 	TooltipProvider,
 	TooltipTrigger,
-} from "@personal-os/ui/components/tooltip";
+} from "@starter/ui/components/tooltip";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { type ComponentProps, useState } from "react";
@@ -58,38 +52,32 @@ const sections: NavSection[] = [
 		heading: "Main Menu",
 		items: [
 			{ id: "dashboard", label: "Dashboard", icon: DashboardSquare01Icon, href: "/admin" },
-			{ id: "today", label: "Today", icon: Sun03Icon, href: "/admin/today" },
-			{ id: "routines", label: "Routines", icon: TaskDone01Icon, href: "/admin/routines" },
 			{ id: "ai-assist", label: "AI Assist", icon: BubbleChatIcon, href: "/admin/ai" },
-			{ id: "attendance", label: "Attendance", icon: ClipboardIcon },
-			{ id: "timetable", label: "Timetable", icon: Calendar03Icon },
-			{ id: "exams", label: "Exams", icon: File01Icon },
+			{ id: "analytics", label: "Analytics", icon: ClipboardIcon },
+			{ id: "audit-logs", label: "Audit Logs", icon: File01Icon },
 			{ id: "announcements", label: "Announcements", icon: Megaphone01Icon },
 		],
 	},
 	{
-		heading: "People",
+		heading: "Team & Access",
 		items: [
-			{ id: "students", label: "Students", icon: StudentIcon },
-			{ id: "teachers", label: "Teachers", icon: TeacherIcon },
-			{ id: "guardians", label: "Guardians", icon: UserMultiple02Icon },
+			{ id: "members", label: "Members", icon: UserMultiple02Icon },
+			{ id: "teams", label: "Teams", icon: UserAdd01Icon },
+			{ id: "roles", label: "Roles & Permissions", icon: UserSettings01Icon },
 		],
 	},
 	{
-		heading: "Management",
+		heading: "Operations",
 		items: [
-			{ id: "admissions", label: "Admissions", icon: UserAdd01Icon },
-			{ id: "fees", label: "Fees & Invoices", icon: Invoice01Icon },
-			{ id: "academics", label: "Academics", icon: Mortarboard01Icon },
-			{ id: "roles", label: "Roles & Permissions", icon: UserSettings01Icon },
-			{ id: "integrations", label: "Integrations", icon: PuzzleIcon },
+			{ id: "billing", label: "Billing & Plans", icon: Invoice01Icon, href: "/billing" },
+			{ id: "integrations", label: "Integrations & API", icon: PuzzleIcon },
 		],
 	},
 	{
 		heading: "Settings",
 		items: [
-			{ id: "help", label: "Help Center", icon: HelpCircleIcon },
 			{ id: "system", label: "System Settings", icon: Settings02Icon },
+			{ id: "help", label: "Help Center", icon: HelpCircleIcon },
 			{
 				id: "account-profile",
 				label: "Profile",
@@ -109,9 +97,9 @@ const sections: NavSection[] = [
 type Workspace = { id: string; name: string; kind: string; mark: string };
 
 const workspaces: Workspace[] = [
-	{ id: "personal", name: "Personal OS", kind: "Life operating system", mark: "P" },
-	{ id: "health", name: "Health & Care", kind: "Personal workspace", mark: "H" },
-	{ id: "money", name: "Money & Plans", kind: "Personal workspace", mark: "M" },
+	{ id: "production", name: "Acme Production", kind: "Enterprise Plan", mark: "P" },
+	{ id: "staging", name: "Acme Staging", kind: "Developer Plan", mark: "S" },
+	{ id: "internal", name: "Internal Core", kind: "System Workspace", mark: "I" },
 ];
 
 type AdminSidebarProps = {
@@ -130,12 +118,6 @@ function activeNavId(pathname: string): string {
 	if (pathname.startsWith("/admin/ai")) {
 		return "ai-assist";
 	}
-	if (pathname.startsWith("/admin/today")) {
-		return "today";
-	}
-	if (pathname.startsWith("/admin/routines")) {
-		return "routines";
-	}
 	if (pathname === "/admin" || pathname === "/admin/") {
 		return "dashboard";
 	}
@@ -149,7 +131,7 @@ export function AdminSidebar({ className, mobile = false, onNavigate }: AdminSid
 	const [collapsed, setCollapsed] = useState(false);
 	const [workspaceId, setWorkspaceId] = useState(workspaces[0].id);
 
-	const workspace = workspaces.find((item) => item.id === workspaceId) ?? workspaces[0];
+	const workspace = workspaces.find((s) => s.id === workspaceId) ?? workspaces[0];
 	const isCollapsed = !mobile && collapsed;
 	const width = mobile ? "w-full" : isCollapsed ? "w-[76px]" : "w-[260px]";
 	const activeId = activeNavId(pathname);
@@ -248,20 +230,20 @@ export function AdminSidebar({ className, mobile = false, onNavigate }: AdminSid
 								</DropdownMenuLabel>
 							</DropdownMenuGroup>
 							<DropdownMenuSeparator className="bg-dashboard-border" />
-							{workspaces.map((item) => {
-								const selected = item.id === workspaceId;
+							{workspaces.map((s) => {
+								const selected = s.id === workspaceId;
 								return (
 									<DropdownMenuItem
-										key={item.id}
-										onClick={() => setWorkspaceId(item.id)}
+										key={s.id}
+										onClick={() => setWorkspaceId(s.id)}
 										className="gap-3 focus:bg-dashboard-hover-strong"
 									>
 										<div className="flex size-8 items-center justify-center rounded-md bg-dashboard-accent-soft font-bold text-[13px] text-dashboard-accent">
-											{item.mark}
+											{s.mark}
 										</div>
 										<div className="min-w-0 flex-1">
-											<div className="truncate font-medium text-[13px]">{item.name}</div>
-											<div className="text-[11px] text-dashboard-text-dim">{item.kind}</div>
+											<div className="truncate font-medium text-[13px]">{s.name}</div>
+											<div className="text-[11px] text-dashboard-text-dim">{s.kind}</div>
 										</div>
 										{selected && (
 											<HugeiconsIcon
@@ -299,7 +281,7 @@ export function AdminSidebar({ className, mobile = false, onNavigate }: AdminSid
 							<ul className="space-y-0.5">
 								{section.items.map((item) => {
 									const active = item.id === activeId;
-									const className = cn(
+									const itemClassName = cn(
 										"group/item relative flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left text-[13px] transition-all duration-150",
 										isCollapsed && "justify-center px-0",
 										active
@@ -329,13 +311,13 @@ export function AdminSidebar({ className, mobile = false, onNavigate }: AdminSid
 										<span className="truncate">{item.label}</span>
 									) : null;
 									const button = item.href ? (
-										<Link href={item.href} className={className} onClick={onNavigate}>
+										<Link href={item.href} className={itemClassName} onClick={onNavigate}>
 											{indicator}
 											{icon}
 											{label}
 										</Link>
 									) : (
-										<button type="button" className={className}>
+										<button type="button" className={itemClassName}>
 											{indicator}
 											{icon}
 											{label}

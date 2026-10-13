@@ -1,7 +1,7 @@
 version: "1.0"
 
 defaults:
-  base_dir: "../personal-os-worktrees"
+  base_dir: "../starter-worktrees"
 
 hooks:
   post_create:

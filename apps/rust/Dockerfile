@@ -19,9 +19,9 @@ WORKDIR /app
 # Install runtime dependencies
 RUN apt-get update && apt-get install -y libssl-dev ca-certificates && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /usr/src/app/apps/rust/target/release/personal-os-rust /app/personal-os-rust
+COPY --from=builder /usr/src/app/apps/rust/target/release/starter-rust /app/starter-rust
 
 ENV PORT=3002
 EXPOSE 3002
 
-CMD ["./personal-os-rust"]
+CMD ["./starter-rust"]

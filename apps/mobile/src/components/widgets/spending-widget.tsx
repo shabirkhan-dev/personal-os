@@ -1,55 +1,28 @@
-import { router } from "expo-router";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { NeonCard } from "@/components/ui/neon-card";
 import { NeonColors } from "@/constants/design-system";
-import { formatCurrency, useMonthSummaryQuery } from "@/modules/finance";
 
 export function SpendingWidget() {
-	const { data: summary } = useMonthSummaryQuery();
-
-	const totalExpenseMinor = summary?.expenseTotal ?? 19245;
-	const totalIncomeMinor = summary?.incomeTotal ?? 250000;
-	const spentPercentage =
-		totalIncomeMinor > 0
-			? Math.min(Math.round((totalExpenseMinor / totalIncomeMinor) * 100), 100)
-			: 0;
-
-	const colors = [
-		NeonColors.accent.orange,
-		NeonColors.accent.purple,
-		NeonColors.accent.blue,
-		NeonColors.accent.green,
-		NeonColors.accent.teal,
+	const categories = [
+		{ name: "Groceries", amount: 78.46, color: NeonColors.accent.orange },
+		{ name: "Entertainment", amount: 56.2, color: NeonColors.accent.purple },
+		{ name: "Transportation", amount: 33.58, color: NeonColors.accent.blue },
+		{ name: "Utilities", amount: 24.21, color: NeonColors.accent.green },
 	];
 
-	const categories =
-		summary && summary.categories.length > 0
-			? summary.categories.slice(0, 4).map((c, idx) => ({
-					name: c.category,
-					amountMinor: c.spent,
-					color: colors[idx % colors.length] ?? NeonColors.accent.orange,
-				}))
-			: [
-					{ name: "Groceries", amountMinor: 7846, color: NeonColors.accent.orange },
-					{ name: "Entertainment", amountMinor: 5620, color: NeonColors.accent.purple },
-					{ name: "Transportation", amountMinor: 3358, color: NeonColors.accent.blue },
-					{ name: "Utilities", amountMinor: 2421, color: NeonColors.accent.green },
-				];
-
 	return (
-		<Pressable
-			onPress={() => router.push("/(modules)/(expenses)" as never)}
-			style={({ pressed }) => [{ opacity: pressed ? 0.9 : 1 }]}
-		>
+		<Pressable className="active:opacity-90">
 			<NeonCard>
-				<Text style={styles.label}>MONTHLY SPENDING</Text>
-				<View style={styles.amountContainer}>
-					<Text style={styles.amount}>{formatCurrency(totalExpenseMinor)}</Text>
-					<Text style={styles.percentage}>{spentPercentage}% of income</Text>
+				<Text className="text-zinc-400 text-xs font-bold tracking-[2px] mb-2">TODAY SPENDING</Text>
+				<View className="flex-row justify-between items-baseline mb-5">
+					<Text className="text-white text-[42px] font-medium">
+						$192<Text className="text-2xl text-zinc-400">.45</Text>
+					</Text>
+					<Text className="text-zinc-400 text-xl font-normal">78%</Text>
 				</View>
 
 				{/* Segmented Progress Bar */}
-				<View style={styles.progressBar}>
+				<View className="flex-row justify-between mb-6">
 					{[...Array(30)].map((_, i) => {
 						let color = NeonColors.text.muted;
 						if (i < 8) color = NeonColors.accent.orange;
@@ -60,23 +33,24 @@ export function SpendingWidget() {
 						return (
 							<View
 								key={`segment-${i}`}
-								style={[styles.progressSegment, { backgroundColor: color }]}
+								className="w-[3px] h-3.5 rounded-sm"
+								style={{ backgroundColor: color }}
 							/>
 						);
 					})}
 				</View>
 
 				{/* Legend */}
-				<View style={styles.legend}>
+				<View className="gap-3">
 					{categories.map((cat) => (
-						<View key={cat.name} style={styles.legendItem}>
-							<View style={styles.legendLeft}>
-								<View style={[styles.dot, { backgroundColor: cat.color }]} />
-								<Text style={styles.categoryName} className="capitalize">
-									{cat.name}
-								</Text>
+						<View key={cat.name} className="flex-row justify-between items-center">
+							<View className="flex-row items-center gap-3">
+								<View className="w-1 h-3 rounded-sm" style={{ backgroundColor: cat.color }} />
+								<Text className="text-white text-sm font-medium">{cat.name}</Text>
 							</View>
-							<Text style={styles.categoryAmount}>{formatCurrency(cat.amountMinor)}</Text>
+							<Text className="text-zinc-400 text-sm font-normal font-mono">
+								${cat.amount.toFixed(2)}
+							</Text>
 						</View>
 					))}
 				</View>
@@ -84,72 +58,3 @@ export function SpendingWidget() {
 		</Pressable>
 	);
 }
-
-const styles = StyleSheet.create({
-	label: {
-		color: NeonColors.text.secondary,
-		fontSize: 12,
-		fontWeight: "700",
-		letterSpacing: 2,
-		marginBottom: 8,
-	},
-	amountContainer: {
-		flexDirection: "row",
-		justifyContent: "space-between",
-		alignItems: "baseline",
-		marginBottom: 20,
-	},
-	amount: {
-		color: NeonColors.text.primary,
-		fontSize: 42,
-		fontWeight: "500",
-	},
-	decimal: {
-		fontSize: 24,
-		color: NeonColors.text.secondary,
-	},
-	percentage: {
-		color: NeonColors.text.secondary,
-		fontSize: 20,
-		fontWeight: "400",
-	},
-	progressBar: {
-		flexDirection: "row",
-		justifyContent: "space-between",
-		marginBottom: 24,
-	},
-	progressSegment: {
-		width: 3,
-		height: 14,
-		borderRadius: 2,
-	},
-	legend: {
-		gap: 12,
-	},
-	legendItem: {
-		flexDirection: "row",
-		justifyContent: "space-between",
-		alignItems: "center",
-	},
-	legendLeft: {
-		flexDirection: "row",
-		alignItems: "center",
-		gap: 12,
-	},
-	dot: {
-		width: 3,
-		height: 12,
-		borderRadius: 2,
-	},
-	categoryName: {
-		color: NeonColors.text.primary,
-		fontSize: 14,
-		fontWeight: "500",
-	},
-	categoryAmount: {
-		color: NeonColors.text.secondary,
-		fontSize: 14,
-		fontWeight: "400",
-		fontFamily: "monospace",
-	},
-});

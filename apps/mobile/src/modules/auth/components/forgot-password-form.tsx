@@ -20,7 +20,7 @@ export function ForgotPasswordForm() {
 			const result = await authService.forgotPassword(email.trim().toLowerCase());
 			const normalizedEmail = email.trim().toLowerCase();
 			router.push({
-				pathname: "/(auth)/reset-password",
+				pathname: "/reset-password",
 				params: { email: normalizedEmail, ...devCodeRouteParams(result.developmentCode) },
 			});
 		} catch (caught) {
@@ -44,8 +44,8 @@ export function ForgotPasswordForm() {
 				autoComplete="email"
 			/>
 			<AuthButton label="Send reset code" onPress={handleSubmit} pending={submitting} />
-			<Text className="text-center text-sm text-muted-foreground mt-2">
-				<Link href="/(auth)/login" className="text-primary font-semibold underline">
+			<Text className="text-center text-sm">
+				<Link href="/login" className="text-teal-500 underline">
 					Back to sign in
 				</Link>
 			</Text>

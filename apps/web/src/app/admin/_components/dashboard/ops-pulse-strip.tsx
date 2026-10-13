@@ -14,11 +14,11 @@ const PULSE: PulseItem[] = [
 		id: "open",
 		label: "Open tasks",
 		value: "18",
-		hint: "6 due today · attendance + fees",
+		hint: "6 due today · verification + billing",
 	},
 	{
 		id: "alerts",
-		label: "Campus alerts",
+		label: "System alerts",
 		value: "3",
 		hint: "2 low · 1 needs review",
 	},
@@ -26,13 +26,13 @@ const PULSE: PulseItem[] = [
 		id: "sync",
 		label: "Last sync",
 		value: "2m ago",
-		hint: "SIS · attendance · billing",
+		hint: "API · database · webhooks",
 	},
 	{
 		id: "staff",
-		label: "On campus",
+		label: "Active sessions",
 		value: "186/214",
-		hint: "Staff checked in this morning",
+		hint: "Team members online now",
 	},
 ];
 

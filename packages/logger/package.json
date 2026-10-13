@@ -1,5 +1,5 @@
 {
-	"name": "@personal-os/logger",
+	"name": "@starter/logger",
 	"version": "0.0.0",
 	"private": true,
 	"sideEffects": false,
@@ -13,18 +13,18 @@
 		}
 	},
 	"scripts": {
-		"lint": "biome check .",
-		"lint:fix": "biome check --write .",
+		"lint": "oxlint",
+		"lint:fix": "oxlint --fix",
 		"typecheck": "tsc --noEmit",
 		"test": "vitest run",
 		"test:coverage": "vitest run --coverage",
 		"test:watch": "vitest"
 	},
 	"devDependencies": {
-		"@personal-os/typescript-config": "workspace:*",
-		"@types/node": "^25.9.5",
-		"typescript": "^6.0.3",
-		"@vitest/coverage-v8": "^4.1.6",
-		"vitest": "^4.1.6"
+		"@starter/typescript-config": "workspace:*",
+		"@types/node": "^26.6.3",
+		"typescript": "^7.0.2",
+		"@vitest/coverage-v8": "^5.0.3",
+		"vitest": "^5.0.3"
 	}
 }

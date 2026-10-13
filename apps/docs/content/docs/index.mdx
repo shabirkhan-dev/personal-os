@@ -1,57 +1,52 @@
 ---
-title: Personal OS
-description: The engineering handbook for the Personal OS monorepo.
+title: Starter Documentation
+description: Clean, practical docs for the Starter monorepo.
 ---
 
-Personal OS is a personal life operating system for routines, finance, personal care, food,
-fashion, and the small decisions that shape a day. This site documents the software that powers
-it: how to run the repo, how the apps fit together, and what is safe to build next.
+Welcome to the official documentation for the Starter monorepo.
 
-## Read this first
+This project combines modern tooling and a production-minded structure so you can ship web,
+mobile, and API apps from one workspace.
+
+## Why this starter
+
+- Monorepo by default with Turborepo workspaces (`apps/*`, `packages/*`)
+- Bun-first package and task management
+- Shared TypeScript and UI packages across apps
+- Built-in quality gates with oxlint, oxfmt and Lefthook
+- Multi-platform app setup (Web, Mobile, Nest API, Docs, Rust)
+
+## Start here
 
 <Cards>
   <Card
     title="Quick Start"
-    description="Install dependencies, choose a local runtime, and open the apps."
+    description="Install, bootstrap, and run your first dev session."
     href="/docs/quick-start"
   />
   <Card
     title="Project Structure"
-    description="Find the right app, package, script, or coordination file."
+    description="Understand how apps, packages, and tooling fit together."
     href="/docs/project-structure"
   />
   <Card
-    title="Backend API"
-    description="Check module readiness and the exact contracts before integrating."
-    href="/docs/backend-api"
+    title="Commands & Tooling"
+    description="Use the right commands for development and CI workflows."
+    href="/docs/commands-and-tooling"
   />
   <Card
-    title="Development Workflow"
-    description="Ship focused changes with the repository's review and hand-off rules."
-    href="/docs/development-workflow"
+    title="Production Roadmap"
+    description="Phased NestJS backend spine and product build plan."
+    href="/docs/production-roadmap"
+  />
+  <Card
+    title="Architecture"
+    description="Baseline layering, boundaries, and enforceable rules."
+    href="/docs/architecture"
+  />
+  <Card
+    title="Docker"
+    description="Postgres Compose setup for local development."
+    href="/docs/docker"
   />
 </Cards>
-
-## What is real today
-
-| Surface | Current state |
-| --- | --- |
-| Platform | Bun + Turborepo, Next.js web, Expo mobile, NestJS API, Fumadocs, CI, and Docker |
-| Identity | Auth, profiles, sessions, passkeys, MFA, and social sign-in spine |
-| Product | Routines and finance APIs are ready; care, food, and fashion are planned |
-| Intelligence | Nest owns the public AI proxy; `apps/ai-api` is an internal beta service |
-
-The [production roadmap](/docs/production-roadmap) explains the sequence. The [API status board](/docs/backend-api)
-is the contract for web and mobile callers.
-
-## Source of truth
-
-- [Production roadmap](/docs/production-roadmap) — product vision, domains, and milestones.
-- `AGENTS.md` — repository rules for humans and coding agents.
-- `DESIGN.md` — visual and interaction quality bar.
-- `.agents/` — team notes, work requests, and cross-team coordination.
-- `apps/docs/content/docs/backend-api.mdx` — API readiness and caller contracts.
-
-If implementation and a documentation page disagree, verify the code and update the relevant source of
-truth in the same change. Documentation should help a new developer make the right decision without
-having to reconstruct the project history.

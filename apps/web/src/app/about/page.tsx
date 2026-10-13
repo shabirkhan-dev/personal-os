@@ -23,16 +23,16 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-	title: "About — Personal OS",
+	title: "About — Starter",
 	description:
-		"A Bun + Turborepo monorepo for routines, finance, care, food, and style. Meet the team behind Personal OS.",
+		"A Bun + Turborepo monorepo starter for production-grade products. Meet the team behind Starter.",
 };
 
 export default function AboutPage() {
 	return (
 		<>
 			<script
-				// biome-ignore lint/security/noDangerouslySetInnerHtml: theme before paint
+				// Intentional: theme before paint. No oxlint equivalent for Biome's noDangerouslySetInnerHtml, so this documents the choice rather than suppressing.
 				dangerouslySetInnerHTML={{ __html: atlasThemeScript }}
 			/>
 			<div className={cn(jakarta.variable, fraunces.variable, jetbrains.variable)}>

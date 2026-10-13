@@ -62,8 +62,8 @@ function buildMatrix(view: Date) {
 }
 
 export function CalendarPicker({ value, onChange, className }: Props) {
-	const today = new Date();
-	const [view, setView] = useState<Date>(value ?? today);
+	const [today] = useState<Date>(() => new Date());
+	const [view, setView] = useState<Date>(() => value ?? today);
 	const [selected, setSelected] = useState<Date | undefined>(value);
 
 	const cells = useMemo(() => buildMatrix(view), [view]);

@@ -30,7 +30,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=4000
 
-RUN addgroup -S personalos && adduser -S personalos -G personalos \
+RUN addgroup -S starter && adduser -S starter -G starter \
 	&& apk add --no-cache wget
 
 COPY --from=deps /app/node_modules ./node_modules
@@ -41,9 +41,9 @@ COPY --from=build /app/apps/nest-api/src/database/migrate.ts ./apps/nest-api/src
 COPY apps/nest-api/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh \
-	&& chown -R personalos:personalos /app
+	&& chown -R starter:starter /app
 
-USER personalos
+USER starter
 WORKDIR /app/apps/nest-api
 
 EXPOSE 4000

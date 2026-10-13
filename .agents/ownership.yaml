@@ -39,6 +39,13 @@ roles:
       - reviewer
       - qa
       - ui-ux
+  rust:
+    team: backend
+    paths:
+      - apps/rust/**
+    reviewers:
+      - reviewer
+      - qa
   qa:
     team: quality
     mode: read-only
@@ -56,6 +63,8 @@ roles:
     paths:
       - DESIGN.md
       - packages/ui/**
+      - packages/rabtx/**
+      - apps/web/src/app/ui/**
     reviewers:
       - reviewer
       - web
@@ -67,7 +76,6 @@ roles:
     paths:
       - .agents/board/**
       - apps/docs/content/docs/production-roadmap.mdx
-      - apps/docs/content/docs/team-coordination.mdx
     reviewers:
       - human
 

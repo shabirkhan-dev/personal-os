@@ -1,21 +1,15 @@
-import {
-	CancelCircleIcon,
-	CheckmarkCircle02Icon,
-	CreditCardIcon,
-} from "@hugeicons/core-free-icons";
 import { router } from "expo-router";
+import { CheckCircle2, CreditCard, XCircle } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardDescription, CardTitle } from "@/components/ui/card";
-import { Icon } from "@/components/ui/icon";
+import { NeonCard } from "@/components/ui/neon-card";
 import { OSHeader } from "@/components/ui/os-header";
-import { cn } from "@/lib/utils";
+import { NeonColors } from "@/constants/design-system";
 import { useAuth } from "@/modules/auth";
 import { AccountTabs } from "@/modules/auth/components/account-tabs";
 import { AuthAlert } from "@/modules/auth/components/auth-alert";
+import { AuthButton } from "@/modules/auth/components/auth-button";
 import {
 	type BillingInterval,
 	billingService,
@@ -38,7 +32,7 @@ const PLANS: PlanOption[] = [
 	{
 		code: "team",
 		label: "Team",
-		tagline: "For people building a more intentional daily system.",
+		tagline: "For small crews shipping the starter into production.",
 		monthly: 49,
 		recommended: true,
 		features: ["Up to 5 workspaces", "Shared UI + Nest spine", "Email support", "Cancel anytime"],
@@ -59,19 +53,23 @@ const PLANS: PlanOption[] = [
 
 const PROVIDER_COPY: Record<PaymentProviderName, { label: string; hint: string }> = {
 	stripe: { label: "Stripe", hint: "Cards worldwide · hosted checkout" },
-	razorpay: { label: "Razorpay", hint: "Cards, UPI, netbanking (India)" },
+	razorpay: { label: "Razorpay", hint: "India-friendly · UPI & cards" },
 };
 
-function formatMoney(amount: number) {
-	return `$${amount}`;
-}
-
-function yearlyMonthly(monthly: number) {
+function yearlyMonthly(monthly: number): number {
 	return Math.round((monthly * 10) / 12);
 }
 
+function formatMoney(amount: number): string {
+	return new Intl.NumberFormat("en-US", {
+		style: "currency",
+		currency: "USD",
+		maximumFractionDigits: 0,
+	}).format(amount);
+}
+
 export function BillingScreen() {
-	const { user, token } = useAuth();
+	const { token, user } = useAuth();
 	const [providers, setProviders] = useState<PaymentProviderName[]>([]);
 	const [provider, setProvider] = useState<PaymentProviderName>("stripe");
 	const [planCode, setPlanCode] = useState<PlanCode>("team");
@@ -79,11 +77,10 @@ export function BillingScreen() {
 	const [subscription, setSubscription] = useState<SubscriptionView>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [busy, setBusy] = useState(false);
-	const [loading, setLoading] = useState(true);
+	const [ready, setReady] = useState(false);
 
 	const loadBilling = useCallback(async () => {
 		if (!token) return;
-		setLoading(true);
 		try {
 			const [providerResult, subscriptionResult] = await Promise.all([
 				billingService.listProviders(token),
@@ -109,11 +106,12 @@ export function BillingScreen() {
 			setProviders([]);
 			setError(err instanceof Error ? err.message : "Could not load billing");
 		} finally {
-			setLoading(false);
+			setReady(true);
 		}
 	}, [token]);
 
 	useEffect(() => {
+		// oxlint-disable-next-line react/set-state-in-effect
 		void loadBilling();
 	}, [loadBilling]);
 
@@ -174,32 +172,30 @@ export function BillingScreen() {
 	};
 
 	return (
-		<View className="flex-1 bg-background">
+		<View className="flex-1 bg-zinc-950">
 			<SafeAreaView edges={["top"]} className="flex-1">
 				<OSHeader />
 				<ScrollView
 					showsVerticalScrollIndicator={false}
-					contentContainerStyle={{ paddingBottom: 40 }}
+					contentContainerClassName="pb-12"
 					keyboardShouldPersistTaps="handled"
 				>
-					<View className="px-4 pt-2">
-						<View className="mb-4">
-							<Text className="text-muted-foreground text-xs font-bold uppercase tracking-wider mb-1">
-								ACCOUNT
-							</Text>
-							<Text className="text-foreground text-3xl font-light tracking-tight">Billing</Text>
-							<Text className="text-muted-foreground text-sm mt-1">
-								Upgrade when you need more workspace capacity or managed support. Personal OS stays
-								free to use.
+					<View className="px-5 gap-4">
+						<View className="gap-1.5 pt-2">
+							<Text className="text-zinc-500 text-[11px] font-bold tracking-[1.2px]">ACCOUNT</Text>
+							<Text className="text-white text-[28px] font-bold tracking-tight">Billing</Text>
+							<Text className="text-zinc-400 text-sm leading-5 max-w-[360px]">
+								Upgrade when you need team seats or managed support. Starter stays free to clone and
+								run.
 							</Text>
 						</View>
 
 						<AccountTabs active="billing" />
 
-						{loading ? (
-							<View className="h-48 items-center justify-center gap-3">
-								<ActivityIndicator className="text-primary" />
-								<Text className="text-muted-foreground text-xs font-medium">Loading billing…</Text>
+						{!ready ? (
+							<View className="items-center gap-3 py-12">
+								<ActivityIndicator color={NeonColors.accent.green} />
+								<Text className="text-zinc-400 text-sm">Loading billing…</Text>
 							</View>
 						) : (
 							<>
@@ -212,135 +208,142 @@ export function BillingScreen() {
 									canManage={canManageStripe}
 								/>
 
-								{/* Plan Selection Card */}
-								<View className="mb-5">
-									<Card className="p-5">
-										<View className="flex-row items-center justify-between mb-4">
-											<View>
-												<CardTitle className="text-base font-bold">Choose Plan</CardTitle>
-												<CardDescription>Select workspace capacity.</CardDescription>
-											</View>
-											<IntervalToggle value={billingInterval} onChange={setBillingInterval} />
+								<NeonCard className="gap-0">
+									<View className="gap-3 mb-4">
+										<View className="gap-1">
+											<Text className="text-white text-base font-bold">Plan</Text>
+											<Text className="text-zinc-400 text-[13px] leading-5 mt-1">
+												Select what you want after checkout.
+											</Text>
 										</View>
+										<IntervalToggle value={billingInterval} onChange={setBillingInterval} />
+									</View>
 
-										<View className="gap-3">
-											{PLANS.map((plan) => {
-												const selected = planCode === plan.code;
-												const price =
-													billingInterval === "yearly" ? yearlyMonthly(plan.monthly) : plan.monthly;
-												return (
-													<Pressable
-														key={plan.code}
-														onPress={() => setPlanCode(plan.code)}
-														className={cn(
-															"p-4 rounded-2xl border",
-															selected
-																? "bg-primary/10 border-primary"
-																: "bg-muted/40 border-border",
-														)}
-													>
-														<View className="flex-row items-center justify-between mb-1.5">
-															<Text className="text-foreground font-bold text-base">
-																{plan.label}
-															</Text>
-															{plan.recommended ? <Badge variant="default">Popular</Badge> : null}
-														</View>
-														<Text className="text-foreground font-bold text-2xl mb-1">
-															{formatMoney(price)}
-															<Text className="text-muted-foreground text-xs font-normal">/mo</Text>
+									<View className="gap-3">
+										{PLANS.map((plan) => {
+											const selected = planCode === plan.code;
+											const price =
+												billingInterval === "yearly" ? yearlyMonthly(plan.monthly) : plan.monthly;
+											return (
+												<Pressable
+													key={plan.code}
+													onPress={() => setPlanCode(plan.code)}
+													className={`rounded-2xl border p-4 gap-2 ${
+														selected
+															? "border-emerald-500/50 bg-emerald-500/10"
+															: "border-zinc-800 bg-zinc-900/40"
+													}`}
+												>
+													<View className="flex-row items-center justify-between gap-2">
+														<Text className="text-white text-base font-bold">{plan.label}</Text>
+														{plan.recommended ? (
+															<View className="rounded-lg px-2 py-0.5 bg-emerald-500/20">
+																<Text className="text-emerald-400 text-[11px] font-bold">
+																	Popular
+																</Text>
+															</View>
+														) : null}
+													</View>
+													<Text className="text-white text-2xl font-bold">
+														{formatMoney(price)}
+														<Text className="text-sm font-medium text-zinc-400">/mo</Text>
+													</Text>
+													{billingInterval === "yearly" ? (
+														<Text className="text-zinc-500 text-xs">
+															Billed {formatMoney(plan.monthly * 10)}/yr · 2 months free
 														</Text>
-														<Text className="text-muted-foreground text-xs mb-3">
-															{plan.tagline}
-														</Text>
-														<View className="gap-1.5 pt-2 border-t border-border/40">
-															{plan.features.map((feature) => (
-																<View key={feature} className="flex-row items-center gap-2">
-																	<Icon
-																		icon={CheckmarkCircle02Icon}
-																		size={14}
-																		className="text-primary"
-																		strokeWidth={2}
-																	/>
-																	<Text className="text-foreground text-xs font-medium">
-																		{feature}
-																	</Text>
-																</View>
-															))}
+													) : (
+														<Text className="text-zinc-500 text-xs">Billed monthly</Text>
+													)}
+													<Text className="text-zinc-400 text-[13px] leading-5 mb-1">
+														{plan.tagline}
+													</Text>
+													{plan.features.map((feature) => (
+														<View key={feature} className="flex-row items-center gap-2">
+															<CheckCircle2
+																size={14}
+																color={NeonColors.accent.green}
+																strokeWidth={2}
+															/>
+															<Text className="text-zinc-400 text-[13px] flex-1">{feature}</Text>
 														</View>
-													</Pressable>
-												);
-											})}
-										</View>
-									</Card>
-								</View>
+													))}
+												</Pressable>
+											);
+										})}
+									</View>
+								</NeonCard>
 
-								{/* Payment Method Selector */}
-								<View className="mb-5">
-									<Card className="p-5">
-										<CardTitle className="text-base font-bold mb-1">Payment Method</CardTitle>
-										<CardDescription className="mb-4">
-											{providers.length > 1
-												? "Pick where payment is processed."
-												: providers.length === 1
-													? `Checkout opens in your browser via ${PROVIDER_COPY[provider]?.label ?? "Stripe"}.`
-													: "Configure a payment provider on the API to enable checkout."}
-										</CardDescription>
-
-										{providers.length === 0 ? (
+								<NeonCard className="gap-0">
+									<Text className="text-white text-base font-bold">Payment method</Text>
+									<Text className="text-zinc-400 text-[13px] leading-5 mt-1">
+										{providers.length > 1
+											? "Same plan price — pick where payment is processed."
+											: providers.length === 1
+												? `Checkout opens in your browser via ${PROVIDER_COPY[provider].label}.`
+												: "Configure a payment provider on the API to enable checkout."}
+									</Text>
+									{providers.length === 0 ? (
+										<View className="mt-3.5">
 											<AuthAlert
 												title="Checkout not configured"
 												message="Add Stripe and/or Razorpay keys to the Nest API, then reopen this screen."
 												variant="info"
 											/>
-										) : (
-											<View className="flex-row gap-2.5">
-												{providers.map((name) => {
-													const selected = provider === name;
-													const copy = PROVIDER_COPY[name];
-													return (
-														<Pressable
-															key={name}
-															onPress={() => setProvider(name)}
-															className={cn(
-																"flex-1 p-3.5 rounded-2xl border",
-																selected
-																	? "bg-primary/10 border-primary"
-																	: "bg-muted/40 border-border",
-															)}
-														>
-															<Text className="text-foreground font-bold text-sm mb-0.5">
-																{copy?.label ?? name}
-															</Text>
-															<Text className="text-muted-foreground text-[10px] leading-tight">
-																{copy?.hint ?? ""}
-															</Text>
-														</Pressable>
-													);
-												})}
-											</View>
-										)}
-									</Card>
-								</View>
+										</View>
+									) : (
+										<View className="gap-2.5 mt-3.5">
+											{providers.map((name) => {
+												const selected = provider === name;
+												const copy = PROVIDER_COPY[name];
+												const selectable = providers.length > 1;
+												return (
+													<Pressable
+														key={name}
+														onPress={() => {
+															if (selectable) setProvider(name);
+														}}
+														disabled={!selectable}
+														className={`rounded-xl border p-3.5 gap-1 ${
+															selected
+																? "border-emerald-500/50 bg-emerald-500/10"
+																: "border-zinc-800 bg-zinc-900/40"
+														}`}
+													>
+														<CreditCard
+															size={18}
+															color={selected ? NeonColors.accent.green : NeonColors.text.secondary}
+														/>
+														<Text className="text-white text-[15px] font-bold mt-1">
+															{copy.label}
+														</Text>
+														<Text className="text-zinc-400 text-xs">{copy.hint}</Text>
+													</Pressable>
+												);
+											})}
+										</View>
+									)}
+								</NeonCard>
 
-								{/* Checkout CTA */}
-								<Card className="p-5 mb-6">
-									<View className="flex-row items-baseline justify-between mb-1">
-										<Text className="text-foreground text-base font-bold">
-											{selectedPlan.label} Plan
-										</Text>
-										<Text className="text-foreground text-xl font-bold">
-											{formatMoney(displayPrice)}
-											<Text className="text-muted-foreground text-xs font-normal">/mo</Text>
-										</Text>
-									</View>
-									<Text className="text-muted-foreground text-xs mb-4">
-										Billed as {formatMoney(billedToday)}{" "}
-										{billingInterval === "yearly" ? "annually" : "today"}. Cancel anytime.
+								<NeonCard className="gap-0">
+									<Text className="text-white text-base font-bold">Checkout</Text>
+									<Text className="text-zinc-400 text-[13px] mt-2 mb-3.5">
+										{selectedPlan.label} · {formatMoney(displayPrice)}/mo
+										{billingInterval === "yearly"
+											? ` · ${formatMoney(billedToday)} billed today`
+											: ""}
 									</Text>
-									<Button disabled={checkoutDisabled} loading={busy} onPress={startCheckout}>
-										Proceed to checkout
-									</Button>
-								</Card>
+									<AuthButton
+										label={
+											busy ? "Opening checkout…" : `Continue with ${PROVIDER_COPY[provider].label}`
+										}
+										onPress={() => {
+											void startCheckout();
+										}}
+										pending={busy}
+										disabled={checkoutDisabled}
+									/>
+								</NeonCard>
 							</>
 						)}
 					</View>
@@ -361,52 +364,41 @@ function SubscriptionBanner({
 	busy: boolean;
 	canManage: boolean;
 }) {
-	if (!subscription || subscription.status === "cancelled" || subscription.status === "ended") {
+	if (!subscription) {
 		return (
-			<Card className="p-4 mb-5 border-border bg-muted/40">
-				<View className="flex-row items-center gap-3">
-					<Icon icon={CreditCardIcon} size={20} className="text-muted-foreground" />
-					<View className="flex-1">
-						<Text className="text-foreground text-sm font-bold">Free Plan Active</Text>
-						<Text className="text-muted-foreground text-xs">
-							Upgrade for more workspace limits and dedicated support.
-						</Text>
-					</View>
-				</View>
-			</Card>
+			<NeonCard className="gap-0">
+				<Text className="text-white text-base font-bold">Current plan</Text>
+				<Text className="text-zinc-400 text-[13px] leading-5 mt-1">
+					Starter (free). Upgrade below when you need seats.
+				</Text>
+			</NeonCard>
 		);
 	}
 
-	const isActive = subscription.status === "active" || subscription.status === "trialing";
+	const periodEnd = subscription.currentPeriodEnd
+		? new Date(subscription.currentPeriodEnd).toLocaleDateString(undefined, {
+				year: "numeric",
+				month: "short",
+				day: "numeric",
+			})
+		: null;
 
 	return (
-		<Card
-			className={cn(
-				"p-4 mb-5 border",
-				isActive ? "bg-primary/10 border-primary/40" : "bg-destructive/10 border-destructive/40",
-			)}
-		>
-			<View className="flex-row items-center justify-between mb-2">
-				<View className="flex-row items-center gap-2">
-					<Icon
-						icon={isActive ? CheckmarkCircle02Icon : CancelCircleIcon}
-						size={18}
-						className={isActive ? "text-primary" : "text-destructive"}
-					/>
-					<Text className="text-foreground font-bold text-sm capitalize">
-						{subscription.planCode} ({subscription.status})
-					</Text>
-				</View>
-				{canManage ? (
-					<Pressable onPress={onManage} disabled={busy} className="px-2.5 py-1 rounded-lg bg-card">
-						<Text className="text-foreground text-xs font-bold">Manage</Text>
-					</Pressable>
-				) : null}
-			</View>
-			<Text className="text-muted-foreground text-xs">
-				Provider: {subscription.provider} · Interval: {subscription.billingInterval}
+		<NeonCard className="gap-0">
+			<Text className="text-white text-base font-bold">Current plan</Text>
+			<Text className="text-white text-[15px] font-semibold mt-1.5 capitalize">
+				{subscription.planCode} · {subscription.status}
+				{subscription.billingInterval ? ` · ${subscription.billingInterval}` : ""}
 			</Text>
-		</Card>
+			{periodEnd ? (
+				<Text className="text-zinc-400 text-[13px] leading-5 mt-1">
+					{subscription.cancelAtPeriodEnd ? "Ends" : "Renews"} {periodEnd}
+				</Text>
+			) : null}
+			{canManage ? (
+				<AuthButton label="Manage in Stripe" variant="outline" onPress={onManage} pending={busy} />
+			) : null}
+		</NeonCard>
 	);
 }
 
@@ -418,39 +410,56 @@ function IntervalToggle({
 	onChange: (next: BillingInterval) => void;
 }) {
 	return (
-		<View className="flex-row p-1 bg-muted/60 border border-border/40 rounded-xl">
-			<Pressable
-				onPress={() => onChange("monthly")}
-				className={cn(
-					"px-3 py-1.5 rounded-lg",
-					value === "monthly" && "bg-card border border-border/60 shadow-sm",
-				)}
-			>
-				<Text
-					className={cn(
-						"text-xs font-bold",
-						value === "monthly" ? "text-foreground" : "text-muted-foreground",
-					)}
-				>
-					Monthly
-				</Text>
-			</Pressable>
-			<Pressable
-				onPress={() => onChange("yearly")}
-				className={cn(
-					"px-3 py-1.5 rounded-lg",
-					value === "yearly" && "bg-card border border-border/60 shadow-sm",
-				)}
-			>
-				<Text
-					className={cn(
-						"text-xs font-bold",
-						value === "yearly" ? "text-foreground" : "text-muted-foreground",
-					)}
-				>
-					Yearly
-				</Text>
-			</Pressable>
+		<View className="flex-row gap-1.5 self-start p-1 rounded-xl border border-zinc-800 bg-zinc-900/60">
+			{(["monthly", "yearly"] as const).map((interval) => {
+				const active = value === interval;
+				return (
+					<Pressable
+						key={interval}
+						onPress={() => onChange(interval)}
+						className={`px-3 py-1.5 rounded-lg ${active ? "bg-emerald-500/20" : ""}`}
+					>
+						<Text
+							className={`text-xs font-semibold ${active ? "text-emerald-400" : "text-zinc-400"}`}
+						>
+							{interval === "monthly" ? "Monthly" : "Yearly"}
+						</Text>
+					</Pressable>
+				);
+			})}
+		</View>
+	);
+}
+
+export function BillingResultScreen({ variant }: { variant: "success" | "cancel" }) {
+	const success = variant === "success";
+	return (
+		<View className="flex-1 bg-zinc-950">
+			<SafeAreaView edges={["top"]} className="flex-1">
+				<OSHeader />
+				<View className="flex-1 px-5 justify-center">
+					<NeonCard className="items-center gap-2">
+						{success ? (
+							<CheckCircle2 size={40} color={NeonColors.accent.green} strokeWidth={2} />
+						) : (
+							<XCircle size={40} color={NeonColors.accent.orange} strokeWidth={2} />
+						)}
+						<Text className="text-zinc-500 text-[11px] font-bold tracking-[1.2px]">BILLING</Text>
+						<Text className="text-white text-[28px] font-bold tracking-tight text-center">
+							{success ? "Payment received" : "Checkout cancelled"}
+						</Text>
+						<Text className="text-zinc-400 text-sm leading-5 max-w-[360px] text-center">
+							{success
+								? "Your subscription activates once the provider webhook confirms it — usually within a few seconds."
+								: "No charge was made. You can return to billing and try again whenever you are ready."}
+						</Text>
+						<AuthButton
+							label="View billing"
+							onPress={() => router.replace("/(modules)/(profile)/billing")}
+						/>
+					</NeonCard>
+				</View>
+			</SafeAreaView>
 		</View>
 	);
 }

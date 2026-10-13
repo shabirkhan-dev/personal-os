@@ -2,11 +2,12 @@
 .git
 .github
 .devcontainer
+.cursor
 .agents
 .vscode
 .idea
 .turbo
-.biome
+.oxlintcache
 **/.next
 **/dist
 **/coverage

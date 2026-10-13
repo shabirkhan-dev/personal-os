@@ -1,40 +1,43 @@
-﻿{
+{
   "expo": {
     "name": "Personal OS",
     "slug": "personal-os",
-    "version": "1.0.0",
+    "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "personal-os",
+    "scheme": "personalos",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon",
-      "bundleIdentifier": "com.shabirkhandev.mobile"
+      "bundleIdentifier": "com.shabirkhandev.personalos",
+      "supportsTablet": false,
+      "icon": "./assets/images/icon.png",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSMicrophoneUsageDescription": "Personal OS uses the microphone when you talk to set up or ask \u201cHey OS\u201d."
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#2D7CF6",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.shabirkhandev.mobile",
-      "usesCleartextTraffic": true
-    },
-    "web": {
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "package": "com.shabirkhandev.personalos"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
-          "android": {
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 96,
+          "resizeMode": "contain",
+          "backgroundColor": "#FFFFFF",
+          "dark": {
             "image": "./assets/images/splash-icon.png",
-            "imageWidth": 76
+            "backgroundColor": "#141414"
           }
         }
       ],
@@ -47,11 +50,21 @@
         {
           "photosPermission": "Allow Personal OS to access your photos for your profile avatar."
         }
-      ]
+      ],
+      "expo-updates"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0
+    },
+    "backgroundColor": "#141414"
   }
 }

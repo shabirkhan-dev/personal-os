@@ -60,7 +60,7 @@ export function PricingSection() {
 				</FadeIn>
 				<FadeIn delay={0.1}>
 					<p className="mt-4 max-w-xl text-pretty text-muted-foreground leading-7">
-						Personal OS is free to use. Upgrade for team and enterprise capacity — no surprise
+						Starter is free to clone and run. Slide for team and enterprise seats — no surprise
 						overages, cancel anytime.
 					</p>
 				</FadeIn>
@@ -122,7 +122,7 @@ export function PricingSection() {
 							</Link>
 						</motion.div>
 						<p className="text-muted-foreground text-sm leading-5">
-							Personal OS is free to use — no card required.
+							Starter is free forever — clone and run, no card required.
 						</p>
 					</FadeIn>
 				</div>
@@ -141,7 +141,7 @@ function RollingPrice({ value, reduceMotion }: { value: number; reduceMotion: bo
 				<span>$</span>
 				{digits.map((digit, index) => (
 					<RollingDigit
-						// biome-ignore lint/suspicious/noArrayIndexKey: digit columns are positional
+						// oxlint-disable-next-line react/no-array-index-key -- digit columns are positional
 						key={`${digits.length}-${index}`}
 						digit={Number(digit)}
 						reduceMotion={reduceMotion}

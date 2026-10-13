@@ -4,13 +4,7 @@ import { File01Icon, Robot01Icon, SentIcon, Tick02Icon } from "@hugeicons/core-f
 import { HugeiconsIcon } from "@hugeicons/react";
 import { motion } from "motion/react";
 import Link from "next/link";
-import {
-	AGENT_MESSAGES,
-	dicebearUrl,
-	HERO_AVATARS,
-	LANDING_COPY,
-	WORKFLOW_STEPS,
-} from "../data/landing.data";
+import { AGENT_MESSAGES, dicebearUrl, HERO_AVATARS, WORKFLOW_STEPS } from "../data/landing.data";
 import { FadeIn } from "./fade-in";
 import { MeshCanvas } from "./mesh-canvas";
 
@@ -37,7 +31,7 @@ export function HeroSection() {
 					>
 						<span className="flex">
 							{HERO_AVATARS.map((avatar) => (
-								// biome-ignore lint/performance/noImgElement: external dicebear avatar SVG, not optimizable via next/image
+								// oxlint-disable-next-line nextjs/no-img-element -- external dicebear avatar SVG, not optimizable via next/image
 								<img
 									key={avatar.seed}
 									src={dicebearUrl(avatar.seed)}
@@ -48,7 +42,7 @@ export function HeroSection() {
 								/>
 							))}
 						</span>
-						{LANDING_COPY.heroBadge}
+						Built for teams shipping modern SaaS products
 					</motion.span>
 
 					<motion.h1
@@ -57,9 +51,9 @@ export function HeroSection() {
 						transition={{ duration: 0.8, delay: 0.08, ease: EASE }}
 						className="mt-6 text-balance font-semibold text-3xl leading-[1.1] tracking-tight sm:text-5xl"
 					>
-						<span className="text-foreground">{LANDING_COPY.heroTitlePrimary}</span>
+						<span className="text-foreground">Ship a production-grade monorepo</span>
 						<br />
-						<span className="text-foreground/40">{LANDING_COPY.heroTitleSecondary}</span>
+						<span className="text-foreground/40">without starting from zero</span>
 					</motion.h1>
 
 					<motion.p
@@ -68,7 +62,8 @@ export function HeroSection() {
 						transition={{ duration: 0.8, delay: 0.16, ease: EASE }}
 						className="mx-auto mt-5 max-w-xl text-pretty text-base text-muted-foreground leading-7"
 					>
-						{LANDING_COPY.heroSubtitle}
+						Bun + Turborepo starter with Next.js, Expo, NestJS, docs, and Rust — shared UI, hooks,
+						CI, and Docker included.
 					</motion.p>
 
 					<motion.div
@@ -127,12 +122,8 @@ function WorkflowCard() {
 						<HugeiconsIcon icon={File01Icon} className="size-4" aria-hidden={true} />
 					</span>
 					<div>
-						<p className="font-semibold text-neutral-900 text-sm">
-							{LANDING_COPY.workflowCardTitle}
-						</p>
-						<p className="text-[11px] text-neutral-500">
-							{LANDING_COPY.workflowCardSub} · just now
-						</p>
+						<p className="font-semibold text-neutral-900 text-sm">Workspace bootstrap</p>
+						<p className="text-[11px] text-neutral-500">starter · just now</p>
 					</div>
 				</div>
 
@@ -200,10 +191,10 @@ function AgentChatCard() {
 						<HugeiconsIcon icon={Robot01Icon} className="size-4" aria-hidden={true} />
 					</span>
 					<div>
-						<p className="font-semibold text-neutral-900 text-sm">{LANDING_COPY.chatCardTitle}</p>
+						<p className="font-semibold text-neutral-900 text-sm">Dev loop</p>
 						<p className="flex items-center gap-1.5 text-[11px] text-neutral-500">
 							<span className="size-1.5 rounded-full bg-emerald-500" />
-							{LANDING_COPY.chatCardSub}
+							Monorepo starter · ready
 						</p>
 					</div>
 				</div>

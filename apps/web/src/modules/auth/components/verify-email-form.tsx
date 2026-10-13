@@ -1,20 +1,20 @@
 "use client";
 
-import { Alert, AlertDescription, AlertTitle } from "@personal-os/ui/components/alert";
-import { Button } from "@personal-os/ui/components/button";
+import { Alert, AlertDescription, AlertTitle } from "@starter/ui/components/alert";
+import { Button } from "@starter/ui/components/button";
 import {
 	Card,
 	CardContent,
 	CardDescription,
 	CardHeader,
 	CardTitle,
-} from "@personal-os/ui/components/card";
-import { Field, FieldGroup, FieldLabel } from "@personal-os/ui/components/field";
-import { Input } from "@personal-os/ui/components/input";
-import { Spinner } from "@personal-os/ui/components/spinner";
+} from "@starter/ui/components/card";
+import { Field, FieldGroup, FieldLabel } from "@starter/ui/components/field";
+import { Input } from "@starter/ui/components/input";
+import { Spinner } from "@starter/ui/components/spinner";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import * as api from "@/lib/api-client";
 import {
 	buildAuthRedirectUrl,
@@ -26,14 +26,11 @@ export function VerifyEmailForm() {
 	const searchParams = useSearchParams();
 	const [email, setEmail] = useState(searchParams.get("email") ?? "");
 	const [code, setCode] = useState("");
-	const [developmentCode, setDevelopmentCode] = useState<string | null>(null);
+	const [resendDevCode, setResendDevCode] = useState<string | null>(null);
+	const developmentCode = resendDevCode ?? readDevCodeFromSearchParams(searchParams);
 	const [error, setError] = useState<string | null>(null);
 	const [submitting, setSubmitting] = useState(false);
 	const [resending, setResending] = useState(false);
-
-	useEffect(() => {
-		setDevelopmentCode(readDevCodeFromSearchParams(searchParams));
-	}, [searchParams]);
 
 	async function handleSubmit(event: React.FormEvent) {
 		event.preventDefault();
@@ -55,7 +52,7 @@ export function VerifyEmailForm() {
 		try {
 			const result = await api.resendVerification(email);
 			if (result.developmentCode) {
-				setDevelopmentCode(result.developmentCode);
+				setResendDevCode(result.developmentCode);
 				router.replace(buildAuthRedirectUrl("/verify-email", email, result.developmentCode));
 			}
 		} catch (caught) {

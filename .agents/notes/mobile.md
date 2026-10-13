@@ -1,21 +1,12 @@
-# Mobile agent notes (frontend)
+# Mobile notes
 
-> Owner: mobile agent. Others: read-only — raise a card to reach us.
+Scratchpad owned by the **mobile agent** (apps/mobile). Everyone may read this; only the owner writes it.
 
-## Current focus
+To ask something of another team, raise a board card addressed to them — do not edit their note.
 
-- Wave 1 (auth/session correctness) implemented, awaiting review: auth-route-guard (`ce15fc4`) → query-cache-isolation (`4ad389e`) → session-lifecycle (single-flight refresh + AppState resume + 401 retry). Merge order = stack order.
+Long-form design thinking belongs in the docs app and is linked from here. Keep this file for
+working context: current assumptions, known rough edges, decisions not yet worth a doc.
 
-## API consumption
+## Current context
 
-- Read `apps/docs/content/docs/backend-api.mdx` before wiring any endpoint.
-- Routines v1 is live and consumed in the `(modules)/(routines)` route group.
-
-## Log
-
-- 2026-08-24: claimed `mobile-auth-route-guard`; added jest-expo test infra (bun-store transformIgnorePatterns fix), guarded `(modules)`/`(auth)` layouts, gated splash on bootstrap. 10 tests green; awaiting review.
-- 2026-08-24: claimed `mobile-query-cache-user-isolation`; routines keys user-scoped, clearSession wipes React Query cache. 15 tests green.
-- 2026-08-24: claimed `mobile-session-lifecycle-recovery` (+ mobile half of `auth-refresh-single-flight`); single-flight refresh, AppState revalidation on resume, guarded 401 retry in api client. 25 tests green.
-- 2026-08-24: review round — routing transition tests + moved app-dir tests to `src/tests/app` (phantom-route fix found via web export) on auth-route-guard (`e93bc44`,`b75f0fa`); account-switch purge via stable prev-user ref with A→B/in-flight/same-user coverage on query-cache-isolation (`0745e91`, 22 tests); session-lifecycle rebased (`3544a55`, 32 tests). All cards in `doing/` pending independent review.
-- 2026-08-25: implemented mobile AI Daily Intelligence and Chat v0: created `apps/mobile/src/modules/ai/` (types, services, queries/mutations with user-scoped cache keys, components), wired `DailyInsightsWidget` into dashboard `index.tsx`, connected live `useDailyIntelligenceQuery()` with pull-to-refresh on `insights.tsx`, built `chat.tsx` with grounding context banner, message bubbles, sources, suggestions, and keyboard-safe composer. 39 tests green, Biome lint & typecheck clean.
-
+_Nothing yet._

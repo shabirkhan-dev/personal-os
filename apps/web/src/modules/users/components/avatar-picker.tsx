@@ -2,9 +2,9 @@
 
 import { ImageUploadIcon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Button } from "@personal-os/ui/components/button";
-import { Field, FieldDescription, FieldLabel } from "@personal-os/ui/components/field";
-import { Spinner } from "@personal-os/ui/components/spinner";
+import { Button } from "@starter/ui/components/button";
+import { Field, FieldDescription, FieldLabel } from "@starter/ui/components/field";
+import { Spinner } from "@starter/ui/components/spinner";
 import { useId, useRef, useState } from "react";
 import { buildAvatarTemplates } from "../lib/avatar-templates";
 
@@ -36,7 +36,7 @@ export function AvatarPicker({
 				<div className="flex items-center gap-4">
 					<div className="relative size-16 overflow-hidden rounded-full border border-dashboard-border bg-dashboard-surface">
 						{value ? (
-							// biome-ignore lint/performance/noImgElement: remote avatar URLs (upload + dicebear)
+							// oxlint-disable-next-line nextjs/no-img-element -- remote avatar URLs (upload + dicebear)
 							<img src={value} alt="" className="size-full object-cover" />
 						) : (
 							<div className="flex size-full items-center justify-center text-[11px] text-dashboard-text-muted">
@@ -107,7 +107,7 @@ export function AvatarPicker({
 										busy ? "opacity-60" : "",
 									].join(" ")}
 								>
-									{/* biome-ignore lint/performance/noImgElement: dicebear template previews */}
+									{/* oxlint-disable-next-line nextjs/no-img-element -- dicebear template previews */}
 									<img
 										src={template.url}
 										alt={template.label}

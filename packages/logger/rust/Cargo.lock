@@ -3,5 +3,5 @@
 version = 4
 
 [[package]]
-name = "personal-os-logger"
+name = "starter-logger"
 version = "0.1.0"

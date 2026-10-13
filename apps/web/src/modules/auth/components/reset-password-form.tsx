@@ -1,19 +1,19 @@
 "use client";
 
-import { Alert, AlertDescription, AlertTitle } from "@personal-os/ui/components/alert";
-import { Button } from "@personal-os/ui/components/button";
+import { Alert, AlertDescription, AlertTitle } from "@starter/ui/components/alert";
+import { Button } from "@starter/ui/components/button";
 import {
 	Card,
 	CardContent,
 	CardDescription,
 	CardHeader,
 	CardTitle,
-} from "@personal-os/ui/components/card";
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "@personal-os/ui/components/field";
-import { Input } from "@personal-os/ui/components/input";
-import { Spinner } from "@personal-os/ui/components/spinner";
+} from "@starter/ui/components/card";
+import { Field, FieldDescription, FieldGroup, FieldLabel } from "@starter/ui/components/field";
+import { Input } from "@starter/ui/components/input";
+import { Spinner } from "@starter/ui/components/spinner";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import * as api from "@/lib/api-client";
 import { readDevCodeFromSearchParams } from "@/modules/auth/lib/dev-auth-code";
 
@@ -24,13 +24,9 @@ export function ResetPasswordForm() {
 	const [code, setCode] = useState("");
 	const [password, setPassword] = useState("");
 	const [confirmPassword, setConfirmPassword] = useState("");
-	const [developmentCode, setDevelopmentCode] = useState<string | null>(null);
+	const developmentCode = readDevCodeFromSearchParams(searchParams);
 	const [error, setError] = useState<string | null>(null);
 	const [submitting, setSubmitting] = useState(false);
-
-	useEffect(() => {
-		setDevelopmentCode(readDevCodeFromSearchParams(searchParams));
-	}, [searchParams]);
 
 	async function handleSubmit(event: React.FormEvent) {
 		event.preventDefault();

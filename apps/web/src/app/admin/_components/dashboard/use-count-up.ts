@@ -13,13 +13,10 @@ function prefersReducedMotion(): boolean {
 
 /** Animates a number from 0 to target on mount; snaps instantly under reduced motion. */
 export function useCountUp(target: number, duration = 0.9): number {
-	const [value, setValue] = useState(() => (prefersReducedMotion() ? target : 0));
+	const [value, setValue] = useState(0);
 
 	useEffect(() => {
-		if (prefersReducedMotion()) {
-			setValue(target);
-			return;
-		}
+		if (prefersReducedMotion()) return;
 		const controls = animate(0, target, {
 			duration,
 			ease: EASE_OUT,
@@ -28,5 +25,5 @@ export function useCountUp(target: number, duration = 0.9): number {
 		return () => controls.stop();
 	}, [target, duration]);
 
-	return value;
+	return prefersReducedMotion() ? target : value;
 }

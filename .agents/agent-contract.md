@@ -1,7 +1,7 @@
-# Personal OS agent working contract
+# Starter agent working contract
 
 This contract applies to every coding, review, planning, and integration agent working on
-Personal OS. Role charters in `.agents/roles/` add domain-specific requirements; they do not
+Starter. Role charters in `.agents/roles/` add domain-specific requirements; they do not
 override this contract.
 
 The standard is senior engineering behavior: understand the system before changing it, make

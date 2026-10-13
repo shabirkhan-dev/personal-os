@@ -32,9 +32,9 @@ Raise a card to the owning role when the web client exposes a backend defect.
 
 ## Required checks
 
-- `bun --cwd apps/web run lint`
-- `bun --cwd apps/web run typecheck`
-- `bun --cwd apps/web run test`
+- `bun --cwd=apps/web run lint`
+- `bun --cwd=apps/web run typecheck`
+- `bun --cwd=apps/web run test`
 - `bun run test:e2e:web` for changed interactive flows
 - Browser verification for UI behavior where applicable
 

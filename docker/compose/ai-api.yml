@@ -5,10 +5,10 @@ services:
     build:
       context: ../..
       dockerfile: apps/ai-api/Dockerfile
-    image: personal-os-ai-api:local
+    image: starter-ai-api:local
     restart: unless-stopped
     environment:
-      APP_NAME: personal-os-ai-api
+      APP_NAME: starter-ai-api
       ENVIRONMENT: production
       PORT: 8000
       API_PREFIX: /api/v1

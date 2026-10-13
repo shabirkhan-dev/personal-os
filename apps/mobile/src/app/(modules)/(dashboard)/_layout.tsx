@@ -1,24 +1,41 @@
-import { ChatBotIcon } from "@hugeicons/core-free-icons";
-import { router, Tabs } from "expo-router";
-import { BottomNav } from "@/components/ui/bottom-nav";
+import { Tabs } from "expo-router";
+import { LayoutDashboard, Zap } from "lucide-react-native";
+import { NeonColors } from "@/constants/design-system";
 
 export default function DashboardLayout() {
 	return (
 		<Tabs
-			tabBar={() => (
-				<BottomNav
-					onAddPress={() => router.push("/(modules)/(dashboard)/chat" as never)}
-					addIcon={ChatBotIcon}
-					addAccessibilityLabel="Personal OS Assistant"
-				/>
-			)}
 			screenOptions={{
 				headerShown: false,
+				tabBarStyle: {
+					backgroundColor: NeonColors.background,
+					borderTopColor: "rgba(255, 255, 255, 0.05)",
+					height: 84,
+					paddingBottom: 24,
+				},
+				tabBarActiveTintColor: NeonColors.accent.green,
+				tabBarInactiveTintColor: NeonColors.text.muted,
+				tabBarLabelStyle: { fontSize: 10, fontWeight: "600" },
 			}}
 		>
-			<Tabs.Screen name="index" options={{ title: "Home" }} />
-			<Tabs.Screen name="insights" options={{ title: "Insights" }} />
-			<Tabs.Screen name="chat" options={{ title: "Assistant", href: null }} />
+			<Tabs.Screen
+				name="index"
+				options={{
+					title: "Home",
+					tabBarIcon: ({ color, focused }) => (
+						<LayoutDashboard color={color} size={22} strokeWidth={focused ? 2.5 : 1.5} />
+					),
+				}}
+			/>
+			<Tabs.Screen
+				name="insights"
+				options={{
+					title: "Insights",
+					tabBarIcon: ({ color, focused }) => (
+						<Zap color={color} size={22} strokeWidth={focused ? 2.5 : 1.5} />
+					),
+				}}
+			/>
 		</Tabs>
 	);
 }

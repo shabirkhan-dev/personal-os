@@ -1,9 +1,7 @@
-import { ViewIcon, ViewOffIcon } from "@hugeicons/core-free-icons";
-import { Pressable, Text, TextInput, View } from "react-native";
-import { Icon } from "@/components/ui/icon";
-import { cn } from "@/lib/utils";
+import { Eye, EyeOff } from "lucide-react-native";
+import { Pressable, Text, TextInput, type TextInputProps, View } from "react-native";
 
-export interface AuthFieldProps {
+interface AuthFieldProps {
 	label: string;
 	value: string;
 	onChangeText: (value: string) => void;
@@ -12,7 +10,7 @@ export interface AuthFieldProps {
 	showPasswordToggle?: boolean;
 	onTogglePassword?: () => void;
 	keyboardType?: "default" | "email-address" | "number-pad";
-	autoComplete?: TextInput["props"]["autoComplete"];
+	autoComplete?: TextInputProps["autoComplete"];
 	autoCapitalize?: "none" | "sentences" | "words" | "characters";
 	editable?: boolean;
 	hint?: string;
@@ -43,33 +41,24 @@ export function AuthField({
 	rightLink,
 }: AuthFieldProps) {
 	return (
-		<View className="flex-col gap-1.5 mb-3">
+		<View className="gap-2">
 			<View className="flex-row items-center justify-between">
-				<Text className="text-foreground text-xs font-semibold uppercase tracking-wider">
-					{label}
-				</Text>
+				<Text className="text-zinc-100 text-sm font-semibold">{label}</Text>
 				{rightLink ? (
 					<Pressable onPress={rightLink.onPress} hitSlop={8}>
-						<Text className="text-primary text-xs font-semibold">{rightLink.label}</Text>
+						<Text className="text-zinc-400 text-[13px]">{rightLink.label}</Text>
 					</Pressable>
 				) : null}
 			</View>
-
 			<View
-				className={cn(
-					"flex-row items-center bg-muted/40 border border-border rounded-2xl px-4 min-h-[48px]",
-					errorHint && "border-destructive bg-destructive/5",
-					multiline && "items-start min-h-[100px] py-2",
-				)}
+				className={`flex-row border border-zinc-800 rounded-2xl bg-white/5 px-3.5 min-h-[48px] ${multiline ? "items-start min-h-[112px] py-1" : "items-center"}`}
 			>
 				<TextInput
-					className={cn(
-						"flex-1 text-foreground text-sm py-2.5 font-medium placeholder:text-muted-foreground",
-						multiline && "min-h-[84px] pt-1",
-					)}
+					className={`flex-1 text-zinc-100 text-base py-3 ${multiline ? "min-h-[96px] pt-3" : ""}`}
 					value={value}
 					onChangeText={onChangeText}
 					placeholder={placeholder}
+					placeholderTextColor="#a1a1aa"
 					secureTextEntry={secureTextEntry}
 					keyboardType={keyboardType}
 					autoComplete={autoComplete}
@@ -81,18 +70,17 @@ export function AuthField({
 					textAlignVertical={multiline ? "top" : "center"}
 				/>
 				{showPasswordToggle ? (
-					<Pressable onPress={onTogglePassword} hitSlop={8} className="pl-2.5">
-						<Icon
-							icon={secureTextEntry ? ViewIcon : ViewOffIcon}
-							size={18}
-							className="text-muted-foreground"
-						/>
+					<Pressable onPress={onTogglePassword} hitSlop={8} className="pl-2">
+						{secureTextEntry ? (
+							<Eye size={18} color="#a1a1aa" />
+						) : (
+							<EyeOff size={18} color="#a1a1aa" />
+						)}
 					</Pressable>
 				) : null}
 			</View>
-
-			{errorHint ? <Text className="text-destructive text-xs">{errorHint}</Text> : null}
-			{!errorHint && hint ? <Text className="text-muted-foreground text-xs">{hint}</Text> : null}
+			{errorHint ? <Text className="text-red-500 text-xs">{errorHint}</Text> : null}
+			{!errorHint && hint ? <Text className="text-zinc-500 text-xs">{hint}</Text> : null}
 		</View>
 	);
 }

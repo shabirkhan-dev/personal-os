@@ -13,13 +13,13 @@ From the repository root:
 
 ```bash
 wtp list
-wtp add -b agent/backend/auth-refresh main
+wtp add -b agent/ui-ux/solid-button-material main
 ```
 
 WTP creates a branch-based path under:
 
 ```text
-../personal-os-worktrees/agent/backend/auth-refresh/
+../starter-worktrees/agent/ui-ux/solid-button-material/
 ```
 
 The `.wtp.yml` post-create hook runs `bun install --frozen-lockfile` in the new worktree. It does
@@ -53,6 +53,11 @@ The canonical single-worktree development ports are:
 | Nest API | 4000 |
 | AI API | 8000 |
 | Expo/Metro | 8081 |
+| Rust (Axum) | 3002 — collides with Docs, see below |
+
+The Rust service defaults `PORT` to `3002` in `apps/rust/src/server.rs`, which is also the docs
+app's dev port, so the two cannot run together in one worktree. Override `PORT` when you need
+both, and record it on the card.
 
 Parallel agents must choose non-conflicting ports and record them on the card. Do not maintain a
 large permanent role-to-port matrix. The PM assigns ports only to roles that actually run a local
@@ -71,7 +76,7 @@ commands without starting a service.
 8. After merge, remove the clean worktree and branch when appropriate:
 
 ```bash
-wtp remove --with-branch agent/backend/auth-refresh
+wtp remove --with-branch agent/ui-ux/solid-button-material
 ```
 
 Use `--force` or `--force-branch` only after confirming that uncommitted or unmerged work is

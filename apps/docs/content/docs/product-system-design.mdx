@@ -1,98 +1,152 @@
 ---
 title: Product System Design
-description: The current product architecture, boundaries, security model, and design principles.
+description: Product architecture, data model, services, and security model.
 ---
 
-Status: working blueprint for Personal OS. This page describes the direction of the current
-repository; implementation readiness belongs in [Backend API](/docs/backend-api).
+Status: Working architecture blueprint for the universal **Starter Kit** monorepo—a production-grade baseline for multi-tenant web, mobile, and API applications.
 
-## Product shape
+## 1. System Vision & Architecture Principles
 
-Personal OS is a personal-first system for routines, finance, personal care, food, fashion, and a
-unified view of daily life. The system should feel calm and useful before it feels intelligent.
+Starter is built as a secure modular monolith first, with event-driven seams and clear module boundaries, designed to scale into independent services when load or compliance requires it.
+
+The core operational loop is:
 
 ```text
-Web / Mobile
-     │
-     ▼
-NestJS API (/api/v1)
-     │
- ┌───┴───────────────┐
- ▼                   ▼
-PostgreSQL       Internal AI API
-(source of truth) (optional provider adapter)
+Action requested -> policy verification -> state transition in Postgres
+-> outbox event -> background worker (notifications, audit, AI assist)
+-> real-time sync to Web & Mobile clients
 ```
 
-Clients never receive provider keys and never bypass Nest to call the AI service. The API owns
-identity, authorization, validation, response envelopes, and the contract consumed by web and
-mobile.
+Engineering principles:
+- **Relational Source of Truth:** PostgreSQL with Drizzle ORM holds all primary records.
+- **Tenant Isolation:** Every multi-tenant operation is scoped by `organizationId` and `workspaceId`.
+- **Stateless Application Servers:** API containers scale horizontally without local file or session state.
+- **Defense in Depth:** Multi-factor authentication, passkeys (WebAuthn), CSRF protection, and strict Zod validation.
 
-## Architectural defaults
+---
 
-### One modular API first
+## 2. Product Boundaries & Personas
 
-Keep product modules inside `apps/nest-api/src/modules/` while the data model and ownership rules
-are evolving. A module should make its controller, service, repository, schema, and tests easy to
-find. Extract a service only when a measured boundary makes the system safer or easier to own.
+Primary personas:
 
-### One database source of truth
-
-PostgreSQL stores user-owned product data. Drizzle migrations are reviewed artifacts. Data access
-must be scoped to the authenticated user, and dates representing a user's day must use their
-profile timezone rather than the server timezone.
-
-### Thin clients, explicit state
-
-Web and mobile should compose product workflows, not recreate business rules. API clients unwrap the
-standard response envelope and normalize auth refresh, loading, empty, and error states in one place.
-
-### AI as an assistive boundary
-
-AI may summarize, suggest, classify, or draft. It must not silently mutate durable user data or make
-high-impact decisions. Important actions require user intent or confirmation, and prompts should be
-grounded in the minimum data required for the task.
-
-## Domain boundaries
-
-| Domain | Owns | Does not own |
+| Persona | Primary Surface | Core Capabilities |
 | --- | --- | --- |
-| Identity | Sessions, credentials, passkeys, MFA, social sign-in | Product-specific routine or finance rules |
-| Profile | User preferences, timezone, avatar, personal settings | Authentication secrets |
-| Routines | Schedules, ordered items, daily completion | Finance transactions or AI provider state |
-| Finance | Transactions, budgets, summaries, categories | Routine completion semantics |
-| Care/Food/Fashion | Future domain records and workflows | Generic identity/session behavior |
-| AI | Internal provider adapter and model-facing execution | Public auth, authorization, or direct client access |
+| **Organization Owner** | Web Dashboard | Workspace lifecycle, billing, plan management, audit trails |
+| **Workspace Admin** | Web Dashboard, Mobile | Member invitations, role assignment, policy rules, integrations |
+| **Team Member** | Web Console, Mobile | Day-to-day operations, task management, profile and security settings |
+| **Viewer / Auditor** | Web Console (Read-only) | Compliance review, audit inspection, activity telemetry |
 
-Cross-domain views should read stable module contracts. Avoid a giant shared table that couples every
-future product idea to every other domain.
+---
 
-## Security and privacy defaults
+## 3. High-Level Architecture
 
-- Use httpOnly cookies and short-lived access tokens according to the auth contract.
-- Validate and authorize every resource by user ownership.
-- Keep secrets in environment configuration; never send them to web or mobile.
-- Treat finance and personal-care data as sensitive; minimize logs and telemetry payloads.
-- Use rate limits, secure headers, CORS allowlists, and explicit production cookie settings.
-- Make mutation endpoints idempotent where retries are expected.
-- Record security-relevant events without storing raw credentials or provider tokens.
+```text
+                    +----------------------+
+                    |   apps/docs          |
+                    |   Fumadocs site      |
+                    +----------------------+
 
-## Contract rules
++----------------+     +------------------+      +------------------+
+| apps/web       |     | apps/nest-api    |      | apps/mobile      |
+| Next.js App    |<--->| NestJS API Spine |<---->| Expo App         |
++----------------+     +--------+---------+      +------------------+
+                                |
+               +----------------+----------------+
+               |                |                |
+       +-------v--------+ +-----v----------+ +---v--------------+
+       | Postgres       | | apps/ai-api    | | apps/rust        |
+       | Source of truth| | FastAPI Assist | | Axum Performance |
+       +-------+--------+ +----------------+ +------------------+
+               |
+       +-------v--------+
+       | Redis          |
+       | Cache / Queue  |
+       +----------------+
+```
 
-- Public routes are under `/api/v1`.
-- Responses use the documented `{ success, statusCode, data }` success envelope and structured
-  errors.
-- Breaking changes require a migration note and either a new version or an explicit changelog entry.
-- Dates are `YYYY-MM-DD` in the user's timezone when they represent a user day.
-- ISO weekdays use `1 = Monday` through `7 = Sunday`.
-- The backend agent updates `apps/docs/content/docs/backend-api.mdx` in the same commit as API work.
+---
 
-## Review questions
+## 4. Service Layout
 
-Before merging a design or implementation, ask:
+### Core Production Services
 
-1. Which module owns this behavior and its data?
-2. Can a user access another user's record through any identifier, filter, or summary?
-3. What happens when the request is retried, refreshed, offline, empty, or partially complete?
-4. Does this add a contract that web and mobile both need to understand?
-5. Is AI being used as a reversible assistant rather than an invisible authority?
-6. Is the new boundary enforced by tests, architecture checks, or a documented decision?
+| Service | Path | Role | Technology |
+| --- | --- | --- | --- |
+| **Web Console** | `apps/web` | Public landing, admin dashboard, user settings, billing | Next.js, React, Tailwind CSS |
+| **Mobile App** | `apps/mobile` | Cross-platform mobile client | Expo Router, Uniwind |
+| **API Spine** | `apps/nest-api` | Auth, tenancy, users, billing, MFA, passkeys, AI proxy | NestJS, Drizzle ORM, Zod |
+| **AI Assist** | `apps/ai-api` | LLM orchestration, structured assist pipelines | FastAPI, Python 3, uv |
+| **Performance Service** | `apps/rust` | High-throughput data processing & micro-benchmarks | Rust, Axum, Tokio |
+| **Documentation** | `apps/docs` | Technical documentation and architecture guides | Fumadocs, MDX |
+
+### Shared Monorepo Packages
+
+| Package | Workspace Name | Responsibility |
+| --- | --- | --- |
+| **UI Primitives** | `@starter/ui` | Shadcn-style primitives, tokens, and motion components |
+| **Logger** | `@starter/logger` | Injectable logger for TypeScript and Rust |
+| **TypeScript Config** | `@starter/typescript-config` | Shared `tsconfig.json` bases across apps and packages |
+
+---
+
+## 5. Data Model & Tenancy
+
+### Tenancy and Access Control
+
+| Table | Purpose | Key Attributes |
+| --- | --- | --- |
+| `organizations` | Top-level tenant account | `id`, `name`, `slug unique`, `status`, `createdAt` |
+| `workspaces` | Project / environment boundary | `id`, `organization_id`, `name`, `slug`, `environment` |
+| `users` | Global user identity | `id`, `email unique`, `status`, `password_hash` |
+| `user_profiles` | Personal details and avatar | `id`, `user_id`, `display_name`, `avatar_url`, `locale` |
+| `memberships` | User access to workspace | `id`, `workspace_id`, `user_id`, `status` |
+| `roles` | Role definitions | `id`, `workspace_id nullable`, `code`, `name` |
+| `permissions` | Granular permission catalog | `id`, `code unique`, `module`, `description` |
+| `role_permissions` | Permissions assigned to roles | `role_id`, `permission_id` |
+| `sessions` | Active user sessions | `id`, `user_id`, `token_hash`, `expires_at`, `ip`, `userAgent` |
+| `subscriptions` | Billing and plan state | `id`, `user_id`, `provider`, `plan_id`, `status` |
+
+---
+
+## 6. Security & Authentication Architecture
+
+1. **Password Authentication:**
+   - Hashed using Argon2id with per-user salt.
+2. **Session & Token Model:**
+   - Short-lived JWT access tokens (15 minutes).
+   - Long-lived secure, HTTP-only refresh cookies with rotation and revocation.
+3. **Multi-Factor Authentication (MFA):**
+   - RFC 6238 TOTP factors with encrypted secret storage.
+   - Encrypted backup codes generated on factor activation.
+4. **Passkeys (WebAuthn):**
+   - FIDO2 / WebAuthn standard support.
+   - Credential challenge verification stored with TTL.
+5. **CSRF & Rate Limiting:**
+   - Double-submit CSRF cookie guard on state-changing API endpoints.
+   - In-memory / Redis token-bucket rate limiting on authentication routes.
+
+---
+
+## 7. Event Streams & Outbox Pattern
+
+All critical events follow the outbox pattern inside database transactions to ensure consistency:
+
+| Topic | Partition Key | Purpose |
+| --- | --- | --- |
+| `starter.workspace.events.v1` | `workspaceId` | Workspace creation, update, and quota telemetry |
+| `starter.auth.events.v1` | `userId` | Login, password reset, MFA factor activation |
+| `starter.billing.events.v1` | `organizationId` | Checkout, subscription renewal, invoice payment |
+| `starter.notification.events.v1` | `recipientId` | Transactional emails, in-app alerts |
+| `starter.audit.events.v1` | `workspaceId` | Immutable audit trail for compliance |
+| `starter.ai.actions.v1` | `workspaceId` | Prompt telemetry, assist proposals, approval queue |
+
+---
+
+## 8. Deployment & Infrastructure
+
+The starter supports multiple deployment targets out of the box:
+
+- **Local Development:** `docker-compose.yml` orchestrates PostgreSQL, Nest API, Web, AI API, and optional Rust.
+- **Production Web:** Next.js deployed on Vercel with standalone output.
+- **Production API:** NestJS container deployed on Render, Fly.io, or AWS ECS with pooled PostgreSQL (e.g. Neon).
+- **Object Storage:** S3-compatible private buckets (Cloudflare R2, AWS S3) with pre-signed upload URLs.

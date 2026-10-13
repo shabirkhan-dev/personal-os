@@ -79,8 +79,7 @@ export class AuthService {
 		}
 
 		const challenge = await this.validateChallenge(body.email, 'email_verification', body.code);
-		const consumed = await this.authRepository.completeEmailVerification(challenge.id, user.id);
-		if (!consumed) throw invalidOtpException();
+		await this.authRepository.completeEmailVerification(challenge.id, user.id);
 		const verifiedUser = await this.usersService.findById(user.id);
 		if (!verifiedUser) {
 			throw new Error('Verified user could not be loaded');
@@ -118,7 +117,7 @@ export class AuthService {
 			: await this.consumePasswordTiming(body.password);
 		if (!passwordValid) {
 			await this.usersService.recordFailedLogin(
-				user.id,
+				user,
 				this.config.maxLoginAttempts,
 				this.config.loginLockMinutes,
 			);
@@ -285,12 +284,11 @@ export class AuthService {
 		}
 		const challenge = await this.validateChallenge(body.email, 'password_reset', body.code);
 		const passwordHash = await this.crypto.hashPassword(body.newPassword);
-		const consumed = await this.authRepository.completePasswordReset({
+		await this.authRepository.completePasswordReset({
 			challengeId: challenge.id,
 			userId: user.id,
 			passwordHash,
 		});
-		if (!consumed) throw invalidOtpException();
 		return acceptedChallenge('Password reset successfully. Sign in with your new password.');
 	}
 
@@ -315,34 +313,6 @@ export class AuthService {
 			passwordHash,
 		});
 		return acceptedChallenge('Password changed successfully. Other sessions were signed out.');
-	}
-
-	async beginStepUp(user: AccessTokenPayload, password: string, action: string) {
-		const record = await this.usersService.findById(user.sub);
-		if (
-			!record?.passwordHash ||
-			!(await this.crypto.verifyPassword(password, record.passwordHash))
-		) {
-			throw new UnauthorizedException({
-				code: 'AUTH_STEP_UP_PASSWORD_INVALID',
-				message: 'Password is incorrect',
-			});
-		}
-
-		const challengeId = randomUUID();
-		const token = this.crypto.createChallengeToken(challengeId);
-		const expiresAt = new Date(Date.now() + this.config.stepUpTtlMinutes * 60_000);
-		await this.authRepository.createChallenge({
-			id: challengeId,
-			userId: user.sub,
-			email: record.email,
-			purpose: 'step_up',
-			action,
-			sessionId: user.sid,
-			codeHash: this.crypto.hashChallengeToken('step_up', record.email, token),
-			expiresAt,
-		});
-		return { stepUpToken: token, expiresAt: expiresAt.toISOString() };
 	}
 
 	async authenticateAccessToken(token: string): Promise<AccessTokenPayload> {
@@ -460,7 +430,12 @@ export class AuthService {
 	}
 
 	private async recordInvalidChallengeAttempt(challenge: AuthChallengeRecord): Promise<void> {
-		await this.authRepository.recordChallengeAttempt(challenge.id, this.config.otpMaxAttempts);
+		const attempts = challenge.attempts + 1;
+		await this.authRepository.recordChallengeAttempt(
+			challenge.id,
+			attempts,
+			attempts >= this.config.otpMaxAttempts,
+		);
 	}
 
 	private async buildSessionResult(
@@ -521,7 +496,12 @@ export class AuthService {
 		}
 
 		if (!this.crypto.verifyOtp(purpose, email, code, challenge.codeHash)) {
-			await this.authRepository.recordChallengeAttempt(challenge.id, this.config.otpMaxAttempts);
+			const attempts = challenge.attempts + 1;
+			await this.authRepository.recordChallengeAttempt(
+				challenge.id,
+				attempts,
+				attempts >= this.config.otpMaxAttempts,
+			);
 			throw invalidOtpException();
 		}
 		return challenge;

@@ -86,7 +86,7 @@ export function AccountProfileScreen() {
 
 				<AccountPanel
 					title="Edit username"
-					description="Usernames are unique and shown across Personal OS."
+					description="Usernames are unique and shown across Starter."
 				>
 					<form className="account-form" onSubmit={handleSave}>
 						<label className="account-field" htmlFor="chat-profile-username">

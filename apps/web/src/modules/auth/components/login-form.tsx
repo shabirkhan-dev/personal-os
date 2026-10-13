@@ -2,16 +2,16 @@
 
 import { AlertCircleIcon, FingerPrintIcon, MailSend01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Alert, AlertDescription, AlertTitle } from "@personal-os/ui/components/alert";
-import { Button } from "@personal-os/ui/components/button";
+import { Alert, AlertDescription, AlertTitle } from "@starter/ui/components/alert";
+import { Button } from "@starter/ui/components/button";
 import {
 	Card,
 	CardContent,
 	CardDescription,
 	CardHeader,
 	CardTitle,
-} from "@personal-os/ui/components/card";
-import { FieldDescription } from "@personal-os/ui/components/field";
+} from "@starter/ui/components/card";
+import { FieldDescription } from "@starter/ui/components/field";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -71,7 +71,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 		<div className={cn("flex flex-col gap-6", className)} {...props}>
 			<Card className="rounded-[16px] border border-dashboard-border bg-dashboard-surface ring-0">
 				<CardHeader className="text-center">
-					<p className="text-muted-foreground text-sm font-medium">Personal OS</p>
+					<p className="text-muted-foreground text-sm font-medium">Starter</p>
 					<CardTitle className="text-2xl">
 						{challenge ? "Two-factor verification" : "Welcome back"}
 					</CardTitle>

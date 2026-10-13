@@ -2,7 +2,7 @@ import { Copy01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { useEffect, useState } from "react";
 
 import { WelcomeHugeIcon } from "@/modules/chat/components/welcome/welcome-icon";
-import { cn } from "@/modules/chat/lib/utils";
+import { cn } from "@starter/ui/lib/utils";
 
 type CommandCopyProps = {
 	command: string;

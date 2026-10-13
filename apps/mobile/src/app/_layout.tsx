@@ -1,37 +1,62 @@
 import "../global.css";
+import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
+import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
+import { StatusBar } from "expo-status-bar";
+import { useEffect, useMemo } from "react";
 import { AppProviders } from "@/components/providers";
-import { useAuth } from "@/modules/auth";
+import { PoThemeProvider, poFontAssets, usePoTheme } from "@/theme";
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
-
-export const unstable_settings = {
-	initialRouteName: "(modules)",
-};
 
 export default function RootLayout() {
 	return (
 		<AppProviders>
-			<RootNavigator />
+			<PoThemeProvider>
+				<RootNavigator />
+			</PoThemeProvider>
 		</AppProviders>
 	);
 }
 
 function RootNavigator() {
-	const { loading } = useAuth();
+	const { mode, colors } = usePoTheme();
+	const [fontsLoaded, fontError] = useFonts(poFontAssets);
+	const ready = fontsLoaded || fontError !== null;
 
-	// Reveal the app only after the session bootstrap has resolved so the first
-	// visible frame already reflects the guarded route decision.
 	useEffect(() => {
-		if (!loading) SplashScreen.hideAsync().catch(() => undefined);
-	}, [loading]);
+		if (fontError) console.warn("[fonts] JetBrains Mono failed to load", fontError);
+		if (ready) SplashScreen.hideAsync().catch(() => undefined);
+	}, [ready, fontError]);
+
+	const navigationTheme = useMemo(() => {
+		const base = mode === "dark" ? DarkTheme : DefaultTheme;
+		return {
+			...base,
+			colors: {
+				...base.colors,
+				background: colors.bgApp,
+				card: colors.bgSurface,
+				text: colors.textPrimary,
+				border: colors.borderDefault,
+				primary: colors.accentDefault,
+			},
+		};
+	}, [mode, colors]);
+
+	if (!ready) return null;
 
 	return (
-		<Stack screenOptions={{ headerShown: false }}>
-			<Stack.Screen name="(modules)" />
-			<Stack.Screen name="(auth)" />
-		</Stack>
+		<ThemeProvider value={navigationTheme}>
+			<StatusBar style={mode === "dark" ? "light" : "dark"} />
+			<Stack
+				screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bgApp } }}
+			>
+				<Stack.Screen name="(onboarding)" />
+				<Stack.Screen name="(modules)" />
+				<Stack.Screen name="ui" />
+			</Stack>
+		</ThemeProvider>
 	);
 }

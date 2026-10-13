@@ -1,3 +1,4 @@
+import { ServiceUnavailableException } from '@nestjs/common';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { AppConfigService } from '@/config/app-config.service';
@@ -27,7 +28,7 @@ describe('EmailService', () => {
 
 		expect(fetchMock).toHaveBeenCalledOnce();
 		const [, request] = fetchMock.mock.calls[0] as [string, RequestInit];
-		expect(request.body).toContain('Personal OS <onboarding@resend.dev>');
+		expect(request.body).toContain('Starter <onboarding@resend.dev>');
 		expect(request.body).not.toContain('test-resend-key');
 	});
 
@@ -44,7 +45,7 @@ describe('EmailService', () => {
 
 		await expect(
 			service.sendPasswordResetCode('person@example.com', '123456'),
-		).rejects.toMatchObject({
+		).rejects.toMatchObject<ServiceUnavailableException>({
 			response: {
 				code: 'EMAIL_DELIVERY_FAILED',
 				message: 'The email sender is not authorized. Verify the AUTH_EMAIL_FROM domain in Resend.',
@@ -56,8 +57,7 @@ describe('EmailService', () => {
 function config(overrides: { resendApiKey?: string } = {}): AppConfigService {
 	return {
 		resendApiKey: 'test-resend-key',
-		authEmailFrom: 'Personal OS <onboarding@resend.dev>',
-		externalRequestTimeoutMs: 5_000,
+		authEmailFrom: 'Starter <onboarding@resend.dev>',
 		...overrides,
 	} as AppConfigService;
 }

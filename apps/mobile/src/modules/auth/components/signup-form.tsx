@@ -44,7 +44,7 @@ export function SignupForm() {
 		try {
 			const result = await register(parsed.data);
 			router.push({
-				pathname: "/(auth)/verify-email",
+				pathname: "/verify-email",
 				params: { email: parsed.data.email, ...devCodeRouteParams(result.developmentCode) },
 			});
 		} catch {
@@ -59,9 +59,9 @@ export function SignupForm() {
 	return (
 		<AuthScreen
 			title="Create your account"
-			description="Create your secure Personal OS account"
+			description="Create your secure Starter account"
 			footer={
-				<Text className="text-xs text-muted-foreground text-center px-4">
+				<Text className="text-zinc-500 text-xs text-center px-3">
 					By continuing, you agree to our Terms of Service and Privacy Policy.
 				</Text>
 			}
@@ -114,9 +114,9 @@ export function SignupForm() {
 				pending={submitting}
 				disabled={passwordsMismatch}
 			/>
-			<Text className="text-center text-sm text-muted-foreground mt-2">
+			<Text className="text-zinc-400 text-center text-sm mt-2">
 				Already have an account?{" "}
-				<Link href="/(auth)/login" className="text-primary font-semibold underline">
+				<Link href="/login" className="text-emerald-400 underline font-medium">
 					Sign in
 				</Link>
 			</Text>

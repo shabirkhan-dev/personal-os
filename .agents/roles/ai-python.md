@@ -28,8 +28,8 @@ The AI/Python role owns the internal FastAPI implementation and Python runtime b
 
 ## Required checks
 
-- `bun --cwd apps/ai-api run lint`
-- `bun --cwd apps/ai-api run test`
+- `bun --cwd=apps/ai-api run lint`
+- `bun --cwd=apps/ai-api run test`
 - Relevant Python tests, evaluation scripts, and API checks
 - `bun run architecture:check` for cross-app boundary changes
 

@@ -4,8 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 
 export type AtlasTheme = "light" | "dark";
 
-export const ATLAS_THEME_STORAGE_KEY = "atlas-theme";
-export const ATLAS_DEFAULT_THEME: AtlasTheme = "light";
+const ATLAS_THEME_STORAGE_KEY = "atlas-theme";
+const ATLAS_DEFAULT_THEME: AtlasTheme = "light";
 
 /**
  * Small inline script (stringified) that runs before hydration to apply the

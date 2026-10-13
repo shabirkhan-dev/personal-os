@@ -1,1 +1,1 @@
-export { cn } from "@personal-os/ui/lib/utils";
+export { cn } from "@starter/ui/lib/utils";

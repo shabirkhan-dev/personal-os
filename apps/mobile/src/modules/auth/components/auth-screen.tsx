@@ -8,9 +8,9 @@ import {
 	View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { NeonCard } from "@/components/ui/neon-card";
 
-export interface AuthScreenProps {
+interface AuthScreenProps {
 	brand?: string;
 	title: string;
 	description: string;
@@ -20,7 +20,7 @@ export interface AuthScreenProps {
 }
 
 export function AuthScreen({
-	brand = "Personal OS",
+	brand = "Starter",
 	title,
 	description,
 	children,
@@ -29,38 +29,35 @@ export function AuthScreen({
 }: AuthScreenProps) {
 	if (busy) {
 		return (
-			<SafeAreaView className="flex-1 bg-background" edges={["top", "bottom"]}>
+			<SafeAreaView className="flex-1 bg-zinc-950" edges={["top", "bottom"]}>
 				<View className="flex-1 items-center justify-center">
-					<ActivityIndicator size="large" className="text-primary" />
+					<ActivityIndicator color="#14b8a6" size="large" />
 				</View>
 			</SafeAreaView>
 		);
 	}
 
 	return (
-		<SafeAreaView className="flex-1 bg-background" edges={["top", "bottom"]}>
+		<SafeAreaView className="flex-1 bg-zinc-950" edges={["top", "bottom"]}>
 			<KeyboardAvoidingView
 				className="flex-1"
 				behavior={Platform.OS === "ios" ? "padding" : undefined}
 			>
 				<ScrollView
-					contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
+					contentContainerClassName="flex-grow justify-center px-5 py-8"
 					keyboardShouldPersistTaps="handled"
 					showsVerticalScrollIndicator={false}
-					className="px-5 py-8"
 				>
-					<Card className="w-full max-w-[420px] self-center p-6">
-						<CardHeader className="items-center text-center mb-6">
-							<Text className="text-muted-foreground text-xs font-bold uppercase tracking-wider mb-1">
-								{brand}
-							</Text>
-							<CardTitle className="text-2xl font-bold text-center tracking-tight">
-								{title}
-							</CardTitle>
-							<CardDescription className="text-center mt-1 text-sm">{description}</CardDescription>
-						</CardHeader>
-						<CardContent className="gap-4">{children}</CardContent>
-					</Card>
+					<NeonCard className="w-full max-w-[420px] self-center">
+						<Text className="text-zinc-400 text-[13px] font-semibold text-center mb-2">
+							{brand}
+						</Text>
+						<Text className="text-zinc-100 text-2xl font-bold text-center mb-2">{title}</Text>
+						<Text className="text-zinc-400 text-[15px] text-center mb-6 leading-relaxed">
+							{description}
+						</Text>
+						<View className="gap-4">{children}</View>
+					</NeonCard>
 					{footer ? <View className="mt-5 items-center">{footer}</View> : null}
 				</ScrollView>
 			</KeyboardAvoidingView>

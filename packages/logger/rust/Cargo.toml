@@ -1,5 +1,5 @@
 [package]
-name = "personal-os-logger"
+name = "starter-logger"
 version = "0.1.0"
 edition = "2021"
 description = "Beautiful, injectable logger for Rust"

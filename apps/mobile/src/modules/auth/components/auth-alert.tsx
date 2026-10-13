@@ -1,43 +1,24 @@
 import { Text, View } from "react-native";
-import { cn } from "@/lib/utils";
 
-export interface AuthAlertProps {
+interface AuthAlertProps {
 	title?: string;
 	message: string;
-	variant?: "destructive" | "info" | "success";
-	className?: string;
+	variant?: "destructive" | "info";
 }
 
-export function AuthAlert({ title, message, variant = "info", className }: AuthAlertProps) {
-	const isDestructive = variant === "destructive";
-	const isSuccess = variant === "success" || variant === "info";
-
+export function AuthAlert({ title, message, variant = "info" }: AuthAlertProps) {
+	const destructive = variant === "destructive";
 	return (
 		<View
-			className={cn(
-				"p-4 rounded-2xl border mb-3 flex-col gap-1",
-				isDestructive && "bg-destructive/10 border-destructive/30",
-				isSuccess && "bg-emerald-500/10 border-emerald-500/30",
-				className,
-			)}
+			className={`rounded-xl border p-3 gap-1 ${destructive ? "border-red-500/40 bg-red-500/10" : "border-teal-500/35 bg-teal-500/10"}`}
 		>
 			{title ? (
-				<Text
-					className={cn(
-						"text-xs font-bold uppercase tracking-wider",
-						isDestructive && "text-destructive",
-						isSuccess && "text-emerald-500",
-					)}
-				>
+				<Text className={`font-bold text-sm ${destructive ? "text-red-400" : "text-zinc-100"}`}>
 					{title}
 				</Text>
 			) : null}
 			<Text
-				className={cn(
-					"text-xs leading-relaxed font-medium",
-					isDestructive && "text-destructive",
-					isSuccess && "text-foreground",
-				)}
+				className={`text-[13px] leading-relaxed ${destructive ? "text-red-400" : "text-zinc-400"}`}
 			>
 				{message}
 			</Text>

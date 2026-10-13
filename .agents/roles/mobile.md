@@ -35,9 +35,9 @@ branch.
 
 ## Required checks
 
-- `bun --cwd apps/mobile run lint`
-- `bun --cwd apps/mobile run typecheck`
-- `bun --cwd apps/mobile run test`
+- `bun --cwd=apps/mobile run lint`
+- `bun --cwd=apps/mobile run typecheck`
+- `bun --cwd=apps/mobile run test`
 - Device or simulator verification for changed native or interactive behavior
 - Relevant Expo/EAS validation for build or configuration changes
 

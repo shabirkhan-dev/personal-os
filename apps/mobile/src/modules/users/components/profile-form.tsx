@@ -1,5 +1,5 @@
 import * as ImagePicker from "expo-image-picker";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Alert, View } from "react-native";
 import { AuthAlert } from "@/modules/auth/components/auth-alert";
 import { AuthButton } from "@/modules/auth/components/auth-button";
@@ -15,12 +15,14 @@ interface ProfileFormProps {
 export function ProfileForm({ user }: ProfileFormProps) {
 	const update = useUpdateUserProfileMutation();
 	const uploadAvatar = useUploadAvatarMutation();
+	const [prevUser, setPrevUser] = useState(user);
 	const [form, setForm] = useState<UpdateUserProfileInput>(formFromUser(user));
 	const [saved, setSaved] = useState(false);
 
-	useEffect(() => {
+	if (user !== prevUser) {
+		setPrevUser(user);
 		setForm(formFromUser(user));
-	}, [user]);
+	}
 
 	const bioLength = (form.bio ?? "").length;
 	const seed = form.username?.trim() || user.username;
@@ -75,10 +77,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
 				<AuthAlert variant="destructive" title="Could not update profile" message={errorMessage} />
 			) : null}
 			{saved && (update.isSuccess || uploadAvatar.isSuccess) ? (
-				<AuthAlert
-					title="Profile updated"
-					message="Your changes are now active across Personal OS."
-				/>
+				<AuthAlert title="Profile updated" message="Your changes are now active across Starter." />
 			) : null}
 
 			<AuthField

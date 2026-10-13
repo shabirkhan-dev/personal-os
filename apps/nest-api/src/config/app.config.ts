@@ -19,7 +19,6 @@ export type AppConfig = {
 	otpMaxAttempts: number;
 	magicLinkTtlMinutes: number;
 	mfaChallengeTtlMinutes: number;
-	stepUpTtlMinutes: number;
 	passwordBcryptRounds: number;
 	maxLoginAttempts: number;
 	loginLockMinutes: number;
@@ -52,8 +51,6 @@ export type AppConfig = {
 	};
 	aiApiUrl: string;
 	aiServiceToken: string;
-	externalRequestTimeoutMs: number;
-	swaggerEnabled: boolean;
 };
 
 export function createAppConfig(env: Env = parseEnv()): AppConfig {
@@ -79,7 +76,6 @@ export function createAppConfig(env: Env = parseEnv()): AppConfig {
 		otpMaxAttempts: env.OTP_MAX_ATTEMPTS,
 		magicLinkTtlMinutes: env.MAGIC_LINK_TTL_MINUTES,
 		mfaChallengeTtlMinutes: env.MFA_CHALLENGE_TTL_MINUTES,
-		stepUpTtlMinutes: env.STEP_UP_TTL_MINUTES,
 		passwordBcryptRounds: env.PASSWORD_BCRYPT_ROUNDS,
 		maxLoginAttempts: env.MAX_LOGIN_ATTEMPTS,
 		loginLockMinutes: env.LOGIN_LOCK_MINUTES,
@@ -134,10 +130,5 @@ export function createAppConfig(env: Env = parseEnv()): AppConfig {
 		},
 		aiApiUrl: env.AI_API_URL.replace(/\/$/, ''),
 		aiServiceToken: env.AI_SERVICE_TOKEN,
-		externalRequestTimeoutMs: env.EXTERNAL_REQUEST_TIMEOUT_MS,
-		swaggerEnabled:
-			env.SWAGGER_ENABLED === undefined
-				? env.NODE_ENV !== 'production'
-				: env.SWAGGER_ENABLED === 'true',
 	};
 }

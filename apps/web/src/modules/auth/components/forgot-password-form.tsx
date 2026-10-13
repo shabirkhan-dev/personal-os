@@ -1,17 +1,17 @@
 "use client";
 
-import { Alert, AlertDescription, AlertTitle } from "@personal-os/ui/components/alert";
-import { Button } from "@personal-os/ui/components/button";
+import { Alert, AlertDescription, AlertTitle } from "@starter/ui/components/alert";
+import { Button } from "@starter/ui/components/button";
 import {
 	Card,
 	CardContent,
 	CardDescription,
 	CardHeader,
 	CardTitle,
-} from "@personal-os/ui/components/card";
-import { Field, FieldGroup, FieldLabel } from "@personal-os/ui/components/field";
-import { Input } from "@personal-os/ui/components/input";
-import { Spinner } from "@personal-os/ui/components/spinner";
+} from "@starter/ui/components/card";
+import { Field, FieldGroup, FieldLabel } from "@starter/ui/components/field";
+import { Input } from "@starter/ui/components/input";
+import { Spinner } from "@starter/ui/components/spinner";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";

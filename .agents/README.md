@@ -1,7 +1,8 @@
 # Agent coordination hub
 
-Cross-team communication for the agents building Personal OS:
-**backend** (NestJS), **web** (Next.js), **mobile** (Expo), and the human.
+Cross-team communication for the agents building this monorepo:
+**backend** (NestJS), **web** (Next.js), **mobile** (Expo), **rust** (Axum),
+**ai-python** (FastAPI), **ui-ux** (the design system), and the human.
 
 ```
 .agents/
@@ -19,8 +20,11 @@ Cross-team communication for the agents building Personal OS:
 ├── notes/            ← scratchpad, one file per team
 │   ├── backend.md    owned by backend agent
 │   ├── frontend.md   owned by web agent
-│   └── mobile.md     owned by mobile agent
-├── rules/            ← always-apply editor rules (Cursor `.mdc`)
+│   ├── mobile.md     owned by mobile agent
+│   ├── rust.md       owned by rust agent
+│   └── design.md     owned by ui-ux agent
+├── plans/            ← long-form implementation plans
+├── rules/            ← always-apply editor rules (`.mdc`)
 ├── skills/           ← vendored agent skills (see below)
 └── uniwind.txt       ← vendored Uniwind/Tailwind docs for mobile styling
 ```

@@ -1,13 +1,38 @@
-# Agent instructions (Personal OS)
+# Agent instructions (Starter)
 
 Universal instructions for AI agents (Cursor, Copilot, Claude Code, Windsurf, Cline, Aider, etc.).
 Read this file first when working in this repo.
 
 ## Project overview
 
-Monorepo **Personal OS** — a personal life operating system (routines, finance, skincare, food,
-fashion) — managed with **Turborepo + Bun**. Product direction lives in
-`apps/docs/content/docs/production-roadmap.mdx`.
+Monorepo Starter managed with **Turborepo + Bun**. Apps, shared packages, and
+multi-language scripts, all wired into a single lint/format/build/test surface.
+
+## Before you write code
+
+Multi-agent coordination lives in [.agents/](.agents/README.md). Load these in order:
+
+1. This file
+2. [.agents/README.md](.agents/README.md) — the protocol and directory map
+3. [.agents/agent-contract.md](.agents/agent-contract.md) — behaviour, evidence, violation policy
+4. Exactly one charter from [.agents/roles/](.agents/roles/README.md) — who you are and what you own
+5. [.agents/worktrees.md](.agents/worktrees.md) — branch, port and worktree lifecycle
+6. Your board card from [.agents/board/](.agents/board/README.md)
+
+The short version: claim a card before coding, work in your own worktree on
+`agent/<role>/<card-slug>`, write only inside the card's scope, stage explicit paths rather than
+`git add -A`, and record real validation output on the card. `main` is integration-only.
+[.agents/ownership.yaml](.agents/ownership.yaml) is the machine-readable role-to-path map.
+
+## UI design context
+
+Before changing UI components, read [DESIGN.md](DESIGN.md), especially **Rabtx UI: shared design intent**.
+It records the agreed direction (rebuild `@rabtx/ui` from scratch against the Reptex/Grid Figma
+system, with its file key and section IDs), the dependency policy (no animation library; motion is
+CSS only), the tiered radius and the Flat / Floating depth (no shadows), the beUI spring values and
+the open decisions. Do not infer the design solely from existing code, and do not extend
+`@starter/ui` components: new work goes in `@rabtx/ui`.
+Keep that document as the shared source of truth instead of copying design rules into agent-specific folders.
 
 ## Documentation
 
@@ -19,46 +44,7 @@ There is **no root `docs/` folder**. Project docs live in the docs app:
 
 Key routes: `/docs/quick-start`, `/docs/production-roadmap`, `/docs/architecture`,
 `/docs/docker`, `/docs/deploy`, `/docs/qol`, `/docs/ai-first-workflow`, `/docs/overrides`,
-`/docs/product-system-design`, `/docs/team-coordination`. Also see root `README.md`,
-`PROJECT.md`, and `DESIGN.md`.
-
-## Source of truth and coordination
-
-Keep project knowledge in the maintained docs and coordination board. Do not create parallel
-product plans in the repository root.
-
-- **Product direction and milestones:** `apps/docs/content/docs/production-roadmap.mdx`
-- **System architecture and security:** `apps/docs/content/docs/product-system-design.mdx` and
-  `apps/docs/content/docs/architecture/`
-- **API readiness and contracts:** `apps/docs/content/docs/backend-api.mdx`
-- **Team coordination and ownership:** `.agents/README.md`, `.agents/board/`, and
-  `.agents/notes/`
-- **Setup and repository conventions:** `README.md`, `PROJECT.md`, `DESIGN.md`, and this file
-
-There is intentionally no standalone root product-plan file. When direction changes, update the
-relevant docs page and raise or update a board card when another team needs to act. When
-implementation and documentation disagree, verify the code and update the appropriate source of
-truth in the same change.
-
-## Agent-to-agent API contract
-
-**Frontend agents (web/mobile): before consuming any NestJS endpoint, read
-`apps/docs/content/docs/backend-api.mdx`** — the backend status board. It lists every
-module's readiness, exact request/response contracts, error envelope, and a changelog.
-
-**Backend agent: any API change (new endpoint, contract change, deprecation) must be
-reflected in that file in the same commit**, with a changelog entry flagged BREAKING
-where callers are affected.
-
-## Agent coordination hub
-
-Cross-team coordination lives in **`.agents/`**:
-
-- `board/` — kanban cards (`open/`, `doing/`, `done/`) that any agent or the human
-  can raise to request work, report cross-team bugs, or announce changes.
-- `notes/backend.md`, `notes/frontend.md`, `notes/mobile.md` — per-team scratchpads,
-  owned by that team; everyone else reads.
-- Protocol and rules: `.agents/README.md`. Read it before your first card.
+`/docs/product-system-design`. Also see root `README.md`, `PROJECT.md`, and `DESIGN.md`.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
@@ -70,10 +56,10 @@ Before any Next.js work, find and read the relevant doc in `node_modules/next/di
 ## Repository layout
 
 ```
-personal-os/
+starter/
 ├── apps/
-│   ├── web/             # Next.js (React, Tailwind, shadcn-style UI)
-│   ├── mobile/          # Expo Router + NativeWind app (TypeScript)
+│   ├── web/             # Next.js — DISABLED for Personal OS (mobile-only), see apps/web/DISABLED.md
+│   ├── mobile/          # Expo Router + Uniwind app (TypeScript)
 │   ├── nest-api/        # NestJS production API (PostgreSQL in later phases)
 │   ├── docs/            # Docs site (Fumadocs); source in apps/docs/content/docs/
 │   ├── ai-api/          # FastAPI AI assist (uv); Nest proxies, never public LLM keys
@@ -81,14 +67,16 @@ personal-os/
 
 ├── packages/
 │   ├── typescript-config/ # Shared tsconfig bases (base.json, nextjs.json)
-│   ├── ui/              # Shared web UI primitives + shadcn styles/tokens
+│   ├── ui/              # @starter/ui: legacy shadcn-style components (being replaced) + shared tokens
+│   ├── rabtx/           # @rabtx/ui: the from-scratch component library (web + native), see DESIGN.md
+│   ├── tokens/          # @personal-os/tokens: Figma Kit v2 colours, spacing, radii, text styles
 │   └── logger/          # Shared logger (TS + Rust)
 ├── scripts/             # Utility scripts: bash/, python/
 ├── docker/              # Docker Compose fragments (see docker/README.md)
-├── .agents/rules/       # Always-apply agent rules (also summarised below)
+├── .agents/rules/       # Cursor-specific rules (also summarised below)
 ├── .devcontainer/       # Dev Container (Bun, Rust, Python, Bash tooling)
 ├── .github/workflows/   # CI (lint, typecheck, build, test)
-└── (root config)        # biome.json, turbo.json, lefthook.yml, .editorconfig, etc.
+└── (root config)        # .oxlintrc.json, .oxfmtrc.json, turbo.json, lefthook.yml, etc.
 ```
 
 ## Tooling and commands
@@ -97,7 +85,8 @@ personal-os/
 |------|---------|--------|
 | **Bun** | Package manager and script runner (not npm/yarn/pnpm) | `package.json` workspaces |
 | **Turborepo** | Monorepo orchestration | `turbo.json` |
-| **Biome** | Lint + format for TS/JS | `biome.json` (tabs, line width 100) |
+| **oxlint** | Lint for TS/JS | `.oxlintrc.json` |
+| **oxfmt** | Format for TS/JS | `.oxfmtrc.json` (tabs, line width 100) |
 | **Lefthook** | Git hooks (pre-commit, commit-msg) | `lefthook.yml` |
 | **EditorConfig** | Consistent indent/charset/line endings | `.editorconfig` |
 
@@ -109,9 +98,9 @@ personal-os/
 | `bun run prepare` | Install git hooks (lefthook) |
 | `bun run dev` | Start all dev servers (Turbo) |
 | `bun run build` | Build all apps (Turbo) |
-| `bun run lint` | Lint: Biome (TS/JS) + ShellCheck + ruff |
+| `bun run lint` | Lint: oxlint (TS/JS) + ShellCheck + ruff |
 | `bun run lint:fix` | Lint with auto-fix |
-| `bun run format` | Format: Biome + shfmt + ruff + cargo fmt |
+| `bun run format` | Format: oxfmt + shfmt + ruff + cargo fmt |
 | `bun run typecheck` | TypeScript typecheck |
 | `bun run test` | Run tests (e.g. cargo test) |
 | `bun run test:coverage` | Run TS coverage + all language tests |
@@ -123,12 +112,12 @@ personal-os/
 
 ### Code style
 
-- **Formatter**: Biome. Tabs, line width 100. Applies to `apps/**/*.ts(x)`, `packages/**/*.ts(x)`,
+- **Formatter**: oxfmt. Tabs, line width 100. Applies to `apps/**/*.ts(x)`, `packages/**/*.ts(x)`,
   root config files. Run `bun run format` or rely on pre-commit hook.
-- **No ESLint/Prettier**: Biome is the only lint/format tool for TS/JS in this project.
+- **No ESLint/Prettier**: oxlint and oxfmt are the only lint/format tools for TS/JS in this project.
 - **Naming**: PascalCase for components; files match component name. Hooks use `use*` prefix;
   utility functions are plain named exports.
-- **Imports**: Prefer workspace imports as `@personal-os/<package>` (e.g. `@personal-os/ui`).
+- **Imports**: Prefer workspace imports as `@starter/<package>` (e.g. `@starter/ui`).
   Group: external → workspace → relative. No unused imports.
 - **Types**: Explicit types for props and public APIs. Avoid `any`; use `unknown` and narrow.
 - **Errors**: Handle explicitly — log and rethrow, or use result types. No silent catches.
@@ -139,9 +128,11 @@ personal-os/
 - **Monorepo**: Apps in `apps/`, shared code in `packages/`. When a change applies across apps,
   prefer changing a shared package.
 - **New apps**: Add under `apps/`, wire into `turbo.json` tasks if needed.
-- **New packages**: Add under `packages/`, export via `@personal-os/<name>`.
-- **Shared UI**: `packages/ui` uses shadcn-style components. Shared Tailwind tokens live in
-  `packages/ui/src/styles/globals.css`.
+- **New packages**: Add under `packages/`, export via `@starter/<name>`.
+- **Shared UI**: new and rebuilt components live in `packages/rabtx` (`@rabtx/ui`), built on
+  platform features first (see the dependency policy in `DESIGN.md`). `packages/ui` (`@starter/ui`)
+  is the legacy shadcn-style set being replaced; do not add to it. Shared Tailwind tokens still
+  live in `packages/ui/src/styles/globals.css`. Icons are HugeIcons only; do not add lucide.
 - **TypeScript config**: Extend from `packages/typescript-config/base.json` (or `nextjs.json`
   for Next.js apps).
 - **Expo mobile structure**: Use `src/app` for routes, `src/components/ui` for UI primitives,
@@ -164,7 +155,7 @@ personal-os/
 
 | Language | Lint | Format | Test |
 |----------|------|--------|------|
-| **TypeScript/JS** | Biome | Biome | Vitest/Jest (if added) |
+| **TypeScript/JS** | oxlint | oxfmt | Vitest/Jest (if added) |
 | **Rust** | Clippy | rustfmt | `cargo test` |
 | **Bash** | ShellCheck | shfmt | — |
 | **Python** | ruff check | ruff format | — |
@@ -193,11 +184,10 @@ only, then `bun run dev`. See `/docs/docker` and `docker/README.md`.
 ## Key files to read for deeper context
 
 - `PROJECT.md` — detailed layout, tooling, and commands.
-- **Product roadmap** (`apps/docs/content/docs/production-roadmap.mdx`) — product direction and milestones.
 - `DESIGN.md` — design-system brief for UI generation and review.
 - **Docs app** (`apps/docs`, run with `bun --cwd=apps/docs run dev`):
   - `/docs/production-roadmap` — production build phases and Nest API spine
-  - `/docs/ai-first-workflow` — AI-assisted development and review standards
+  - `/docs/ai-first-workflow` — starter audit and AI-first workflow roadmap
   - `/docs/qol` — full QoL stack (hooks, CI, per-language tools)
   - `/docs/architecture` — architecture baseline and enforceable boundaries
   - `/docs/overrides` — policy for project-specific architecture overrides
@@ -207,8 +197,18 @@ only, then `bun run dev`. See `/docs/docker` and `docker/README.md`.
 - `.agents/skills/expo-mobile/SKILL.md` — Expo Router + EAS + official Expo Skills / LLM doc links for `apps/mobile`.
 - `.agents/skills/browser-ui-test/SKILL.md` — Browser UI/UX verification via Playwright MCP + `apps/web` e2e after interactive web changes.
 - `.agents/rules/expo-ai-agents.mdc` — Expo remote skills URL, skill table, `llms.txt` bundles (when working under `apps/mobile/**`).
-- `apps/mobile/AGENTS.md` — Short index for agents opening the mobile app folder.
 - `docker/README.md` — Compose fragment layout and `-f` fallback.
-- `biome.json` — Biome config (lint rules, formatter settings).
+- `.oxlintrc.json` — oxlint rules. `.oxfmtrc.json` — oxfmt formatting.
 - `lefthook.yml` — Git hook definitions.
 - `turbo.json` — Turborepo pipeline config.
+
+<!-- BEGIN:turborepo-agent-rules -->
+
+# This is NOT the Turborepo you know
+
+Turborepo configuration, task behavior, and CLI commands can vary between installed versions and may differ from your training data. Resolve the `turbo` package from this file's directory or relevant workspace; in monorepos, it may not be visible from the repository root. For example, run `node -p "require.resolve('turbo/package.json')"` from a workspace that depends on `turbo`.
+
+Read `docs/README.md` inside that installed package first, then read the relevant pages from its `docs/` directory before changing Turborepo configuration or commands. Heed deprecation notices. These bundled docs match the installed package version and are available without network access.
+
+This block is written and re-added by `turbo` before repository-scoped commands when an AI agent is detected. In the Turborepo source repository, its template is defined in `crates/turborepo-cli/src/cli/agent_guidance.rs`. Removing the managed block while updates are enabled means a later qualifying invocation will add it again. Set `"agentGuidance": false` in the root `turbo.json` or `turbo.jsonc` to opt out; this does not remove an existing block. Keep the block committed with your work to avoid an uncommitted change on the next agent invocation.
+<!-- END:turborepo-agent-rules -->

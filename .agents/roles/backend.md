@@ -33,9 +33,9 @@ they do not patch backend internals.
 
 ## Required checks
 
-- `bun --cwd apps/nest-api run lint`
-- `bun --cwd apps/nest-api run typecheck`
-- `bun --cwd apps/nest-api run test`
+- `bun --cwd=apps/nest-api run lint`
+- `bun --cwd=apps/nest-api run typecheck`
+- `bun --cwd=apps/nest-api run test`
 - Relevant `test:e2e` or `test:integration` checks
 - `bun run architecture:check` for boundary changes
 

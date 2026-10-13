@@ -1,16 +1,12 @@
-# Web agent notes (frontend)
+# Frontend notes
 
-> Owner: web agent. Others: read-only — raise a card to reach us.
+Scratchpad owned by the **web agent** (apps/web). Everyone may read this; only the owner writes it.
 
-## Current focus
+To ask something of another team, raise a board card addressed to them — do not edit their note.
 
-- (set by the web agent)
+Long-form design thinking belongs in the docs app and is linked from here. Keep this file for
+working context: current assumptions, known rough edges, decisions not yet worth a doc.
 
-## API consumption
+## Current context
 
-- Read `apps/docs/content/docs/backend-api.mdx` before wiring any endpoint.
-- Routines v1 is live and consumed at `admin/today` + `admin/routines`.
-
-## Log
-
-- (append one line per meaningful change)
+_Nothing yet._

@@ -61,6 +61,7 @@ export class UsersService {
 			const suffix = randomUUID().replaceAll('-', '').slice(0, 8);
 			const username = `${base || 'user'}-${suffix}`;
 			try {
+				// oxlint-disable-next-line eslint/no-await-in-loop
 				return await this.usersRepository.create({
 					email,
 					username,
@@ -98,8 +99,18 @@ export class UsersService {
 		return toPublicUser(user);
 	}
 
-	async recordFailedLogin(userId: string, maxAttempts: number, lockMinutes: number): Promise<void> {
-		await this.usersRepository.incrementFailedLogin(userId, maxAttempts, lockMinutes);
+	async recordFailedLogin(
+		user: UserRecord,
+		maxAttempts: number,
+		lockMinutes: number,
+	): Promise<void> {
+		const attempts = user.failedLoginAttempts + 1;
+		const lockedUntil =
+			attempts >= maxAttempts ? new Date(Date.now() + lockMinutes * 60_000) : user.lockedUntil;
+		await this.usersRepository.updateLoginSecurity(user.id, {
+			failedLoginAttempts: attempts,
+			lockedUntil,
+		});
 	}
 
 	async resetFailedLogins(userId: string): Promise<void> {

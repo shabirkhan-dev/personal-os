@@ -37,40 +37,42 @@ export function LoginForm() {
 
 	const currentError =
 		localError ??
-		error ??
-		(login.error instanceof Error ? login.error.message : null) ??
-		(twoFactor.error instanceof Error ? twoFactor.error.message : null) ??
-		(magicLink.error instanceof Error ? magicLink.error.message : null) ??
-		(passkey.error instanceof Error ? passkey.error.message : null);
+		(error
+			? error
+			: (login.error?.message ??
+				twoFactor.error?.message ??
+				magicLink.error?.message ??
+				passkey.error?.message ??
+				null));
+
+	const isSubmitting =
+		login.isPending || twoFactor.isPending || magicLink.isPending || passkey.isPending;
 
 	return (
 		<AuthScreen
-			title={challenge ? "Two-factor verification" : "Welcome back"}
+			title={challenge ? "Two-Factor Auth" : "Welcome Back"}
 			description={
-				challenge ? "Complete the second step to continue" : "Choose a secure sign-in method"
+				challenge
+					? "Enter the code from your authenticator app"
+					: "Sign in to access your workspace"
 			}
 		>
-			{__DEV__ ? <AuthAlert title="API" message={getApiOrigin()} /> : null}
-			{currentError ? (
-				<AuthAlert variant="destructive" title="Could not sign in" message={currentError} />
-			) : null}
-			{notice ? <AuthAlert message={notice} /> : null}
+			{notice ? <AuthAlert message={notice} variant="info" /> : null}
+			{currentError ? <AuthAlert message={currentError} variant="destructive" /> : null}
 
 			{challenge ? (
 				<TwoFactorForm
 					code={code}
-					pending={twoFactor.isPending}
 					onCodeChange={setCode}
-					onCancel={() => {
-						setChallenge(null);
-						setCode("");
-						clearError();
-						setLocalError(null);
-					}}
+					pending={twoFactor.isPending}
+					onCancel={() => setChallenge(null)}
 					onSubmit={() => {
+						setLocalError(null);
 						twoFactor.mutate(
 							{ challengeToken: challenge.challengeToken, code },
-							{ onSuccess: () => router.replace("/(modules)/(dashboard)") },
+							{
+								onError: (err) => setLocalError(err.message),
+							},
 						);
 					}}
 				/>
@@ -78,57 +80,74 @@ export function LoginForm() {
 				<>
 					<LoginCredentialsForm
 						email={email}
+						onEmailChange={(val) => {
+							setEmail(val);
+							clearError();
+							setLocalError(null);
+						}}
 						password={password}
+						onPasswordChange={(val) => {
+							setPassword(val);
+							clearError();
+							setLocalError(null);
+						}}
 						showPassword={showPassword}
-						pending={login.isPending}
-						onEmailChange={setEmail}
-						onPasswordChange={setPassword}
-						onTogglePassword={() => setShowPassword((value) => !value)}
-						onForgotPassword={() => router.push("/(auth)/forgot-password" as never)}
+						onTogglePassword={() => setShowPassword(!showPassword)}
+						onForgotPassword={() => router.push("/forgot-password")}
+						pending={isSubmitting}
 						onSubmit={() => {
 							clearError();
 							setLocalError(null);
-							setNotice(null);
-							const parsed = loginSchema.safeParse({ email, password });
-							if (!parsed.success) {
-								setLocalError(parsed.error.issues[0]?.message ?? "Invalid credentials");
+							const result = loginSchema.safeParse({ email, password });
+							if (!result.success) {
+								setLocalError(result.error.issues[0]?.message ?? "Invalid input");
 								return;
 							}
-							login.mutate(parsed.data, {
-								onSuccess: (result) => {
-									if ("requiresTwoFactor" in result) setChallenge(result);
-									else router.replace("/(modules)/(dashboard)");
+							login.mutate(
+								{ email, password },
+								{
+									onSuccess: (data) => {
+										if ("requiresTwoFactor" in data && data.requiresTwoFactor) {
+											setChallenge(data);
+										}
+									},
+									onError: (err) => setLocalError(err.message),
 								},
-							});
+							);
 						}}
 					/>
-					<View className="pt-4 mt-1 border-t border-border/40 gap-2.5">
+
+					<View className="border-t border-zinc-800 pt-4 mt-1 gap-2.5">
 						<AuthButton
-							label="Sign in with fingerprint / passkey"
+							label="Sign In with Passkey"
 							variant="outline"
 							pending={passkey.isPending}
 							onPress={() => {
 								clearError();
 								setLocalError(null);
-								passkey.mutate(email.trim() || undefined, {
-									onSuccess: () => router.replace("/(modules)/(dashboard)"),
+								passkey.mutate(undefined, {
+									onError: (err) => setLocalError(err.message),
 								});
 							}}
 						/>
+
 						<AuthButton
-							label="Email me a magic link"
+							label="Email Me Magic Link"
 							variant="outline"
 							pending={magicLink.isPending}
-							disabled={!email.trim()}
 							onPress={() => {
 								clearError();
 								setLocalError(null);
-								magicLink.mutate(email.trim(), {
+								if (!email.trim()) {
+									setLocalError("Enter your email address first");
+									return;
+								}
+								magicLink.mutate(email, {
 									onSuccess: (result) => {
-										setNotice(result.message);
+										setNotice(`Magic link sent! Check your inbox. API: ${getApiOrigin()}`);
 										if (result.developmentToken) {
 											router.push({
-												pathname: "/(auth)/magic-link",
+												pathname: "/magic-link",
 												params: { token: result.developmentToken },
 											});
 										}
@@ -136,10 +155,15 @@ export function LoginForm() {
 								});
 							}}
 						/>
+						<AuthButton
+							label="Explore Mobile UI Showcase (Motion Tabs)"
+							variant="outline"
+							onPress={() => router.push("/ui")}
+						/>
 					</View>
-					<Text className="text-center text-sm text-muted-foreground mt-2">
+					<Text className="text-zinc-400 text-center text-sm">
 						Don't have an account?{" "}
-						<Link href="/(auth)/register" className="text-primary font-semibold underline">
+						<Link href="/register" className="text-emerald-400 underline">
 							Create one
 						</Link>
 					</Text>

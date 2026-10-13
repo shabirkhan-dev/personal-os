@@ -2,16 +2,16 @@ import type { CallHandler, ExecutionContext, NestInterceptor } from '@nestjs/com
 import { Injectable } from '@nestjs/common';
 import type { Response } from 'express';
 import type { Observable } from 'rxjs';
-import { map, tap } from 'rxjs';
+import { map } from 'rxjs';
 
-import { logRequest } from '@/common/observability/http-logging';
 import type { ApiSuccessResponse } from '@/common/types/api-response.type';
 import type { RequestWithId } from '@/common/types/request-with-id.type';
 
 @Injectable()
-export class ResponseInterceptor<TData>
-	implements NestInterceptor<TData, ApiSuccessResponse<TData>>
-{
+export class ResponseInterceptor<TData> implements NestInterceptor<
+	TData,
+	ApiSuccessResponse<TData>
+> {
 	intercept(
 		context: ExecutionContext,
 		next: CallHandler<TData>,
@@ -21,7 +21,6 @@ export class ResponseInterceptor<TData>
 		const response = http.getResponse<Response>();
 
 		return next.handle().pipe(
-			tap(() => logRequest(request, response.statusCode)),
 			map((data) => ({
 				success: true,
 				statusCode: response.statusCode,

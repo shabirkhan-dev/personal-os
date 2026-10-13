@@ -29,7 +29,11 @@ config.resolver.blockList = existingBlockList
 	? [existingBlockList, ...ignoreSiblingApps].flat()
 	: ignoreSiblingApps;
 
-module.exports = withUniwindConfig(config, {
-	cssEntryFile: "./src/global.css",
-	dtsFile: "./src/uniwind-types.d.ts",
-});
+// `bun run preview:web` (PO_WEB_PREVIEW=1) skips Uniwind: its react-native-web shim hits a
+// circular import on web. The onboarding screens use StyleSheet + tokens, so they render as-is.
+module.exports = process.env.PO_WEB_PREVIEW
+	? config
+	: withUniwindConfig(config, {
+			cssEntryFile: "./src/global.css",
+			dtsFile: "./src/uniwind-types.d.ts",
+		});

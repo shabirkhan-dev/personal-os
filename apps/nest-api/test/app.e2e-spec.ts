@@ -53,7 +53,7 @@ describe('AppController (e2e)', () => {
 			timestamp: expect.any(String),
 			data: {
 				status: 'ok',
-				service: 'personal-os-api',
+				service: 'starter-api',
 			},
 		});
 	});

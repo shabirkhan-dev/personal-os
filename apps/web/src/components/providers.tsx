@@ -1,6 +1,6 @@
 "use client";
 
-import { ToastProvider } from "@personal-os/ui/components/toaster";
+import { ToastProvider } from "@starter/ui/components/toaster";
 import type { ReactNode } from "react";
 import { ThemeProvider } from "@/components/theme";
 import { AuthProvider } from "@/modules/auth/context";

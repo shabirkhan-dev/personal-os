@@ -1,12 +1,12 @@
-import { Button, type ButtonVariant } from "@/components/ui/button";
+import { ActivityIndicator, Pressable, Text, type ViewStyle } from "react-native";
 
-export interface AuthButtonProps {
+interface AuthButtonProps {
 	label: string;
 	onPress: () => void;
 	pending?: boolean;
 	disabled?: boolean;
-	variant?: "primary" | "outline" | "ghost" | "destructive";
-	className?: string;
+	variant?: "primary" | "outline" | "ghost";
+	style?: ViewStyle;
 }
 
 export function AuthButton({
@@ -15,20 +15,33 @@ export function AuthButton({
 	pending = false,
 	disabled = false,
 	variant = "primary",
-	className,
+	style,
 }: AuthButtonProps) {
-	const mappedVariant: ButtonVariant =
-		variant === "primary" ? "default" : variant === "destructive" ? "destructive" : variant;
-
+	const isDisabled = disabled || pending;
 	return (
-		<Button
+		<Pressable
 			onPress={onPress}
-			loading={pending}
-			disabled={disabled}
-			variant={mappedVariant}
-			className={className}
+			disabled={isDisabled}
+			style={style}
+			className={`min-h-[48px] rounded-2xl items-center justify-center px-4 active:opacity-85 ${
+				variant === "primary"
+					? "bg-teal-500"
+					: variant === "outline"
+						? "border border-zinc-800 bg-transparent"
+						: "bg-transparent"
+			} ${isDisabled ? "opacity-50" : ""}`}
 		>
-			{label}
-		</Button>
+			{pending ? (
+				<ActivityIndicator color={variant === "primary" ? "#000" : "#14b8a6"} />
+			) : (
+				<Text
+					className={`text-base font-bold ${
+						variant === "primary" ? "text-zinc-950" : "text-zinc-100"
+					}`}
+				>
+					{label}
+				</Text>
+			)}
+		</Pressable>
 	);
 }

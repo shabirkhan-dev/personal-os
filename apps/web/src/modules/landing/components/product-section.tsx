@@ -11,7 +11,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { motion } from "motion/react";
 import type { IncidentEvent } from "../data/landing.data";
-import { INCIDENT_TIMELINE, LANDING_COPY, PRODUCT_BULLETS } from "../data/landing.data";
+import { INCIDENT_TIMELINE, PRODUCT_BULLETS } from "../data/landing.data";
 import { ATLAS_EASE, springSnappy } from "../lib/motion";
 import { FadeIn } from "./fade-in";
 import { MeshCanvas } from "./mesh-canvas";
@@ -37,13 +37,15 @@ export function ProductSection() {
 
 					<FadeIn delay={0.08}>
 						<h2 className="mt-6 text-balance font-serif text-3xl text-foreground leading-tight sm:text-4xl">
-							{LANDING_COPY.productHeading}
+							From clone to running workspace — every step is wired in.
 						</h2>
 					</FadeIn>
 
 					<FadeIn delay={0.14}>
 						<p className="mt-5 text-pretty text-muted-foreground leading-8">
-							{LANDING_COPY.productBody}
+							Starter ships a complete Turborepo loop: install once, run shared tasks, enforce
+							architecture boundaries, and stand up web, mobile, API, docs, and Rust without
+							cobbling five repos together.
 						</p>
 					</FadeIn>
 
@@ -93,7 +95,7 @@ function IncidentTimelineCard() {
 	return (
 		<div className="relative rounded-2xl border border-white/10 bg-neutral-950/85 p-4 shadow-2xl backdrop-blur-md sm:p-5">
 			<div className="flex items-center justify-between border-white/10 border-b pb-3">
-				<span className="font-medium font-mono text-white text-xs">personal-os · turborepo</span>
+				<span className="font-medium font-mono text-white text-xs">starter · turborepo</span>
 				<span className="flex items-center gap-1.5 text-[10px] text-white/60">
 					<span className="size-1.5 rounded-full bg-emerald-400" />
 					resolving

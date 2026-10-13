@@ -2,9 +2,7 @@
 title: Architecture
 description: Baseline layering, boundaries, and enforceable rules.
 ---
-Personal OS uses a strong default architecture that is intentionally overridable. The current
-platform favors a modular monolith: one public NestJS API, one Postgres source of truth, and thin
-web/mobile clients. Split services only when a real workload or ownership boundary justifies it.
+This starter uses a strong default architecture that is intentionally overridable.
 
 ## Principles
 
@@ -12,8 +10,6 @@ web/mobile clients. Split services only when a real workload or ownership bounda
 - Prefer module public entrypoints over deep internal imports.
 - Keep domain logic separate from transport and framework concerns.
 - Enforce boundaries with automated checks, not only conventions.
-- Keep the AI service behind NestJS so provider keys and model policy never reach clients.
-- Treat `apps/docs/content/docs/backend-api.mdx` as the API contract for web and mobile.
 
 ## Layering
 

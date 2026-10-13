@@ -1,40 +1,12 @@
-﻿import { RootProvider } from "fumadocs-ui/provider/next";
 import type { Metadata } from "next";
-import { appDescription, appName } from "@/lib/shared";
+import { RootProvider } from "fumadocs-ui/provider/next";
 import "./global.css";
 
 export const metadata: Metadata = {
-	title: {
-		default: appName,
-		template: `%s | ${appName}`,
-	},
-	description: appDescription,
-	keywords: [
-		"personal-os",
-		"life-os",
-		"routines",
-		"finance",
-		"skincare",
-		"food",
-		"fashion",
-		"wellness",
-		"habits",
-		"productivity",
-		"nextjs",
-		"expo",
-	],
-	openGraph: {
-		title: appName,
-		description: appDescription,
-		siteName: appName,
-		type: "website",
-	},
-	twitter: {
-		card: "summary_large_image",
-		title: appName,
-		description: appDescription,
-	},
-	robots: { index: true, follow: true },
+	metadataBase: new URL(
+		process.env.NEXT_PUBLIC_DOCS_URL ||
+			(process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3002"),
+	),
 };
 
 export default function Layout({ children }: LayoutProps<"/">) {

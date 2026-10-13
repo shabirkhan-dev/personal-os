@@ -1,32 +1,30 @@
-import { Calendar01Icon, SparklesIcon } from "@hugeicons/core-free-icons";
+import { Calendar, Sparkles } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
-import { Icon } from "@/components/ui/icon";
 import { NeonCard } from "@/components/ui/neon-card";
+import { NeonColors } from "@/constants/design-system";
 
 export function SkincareWidget() {
 	const routine = [
-		{ name: "Cleanser", time: "08:00 AM", status: "Done", dot: "bg-accent-blue" },
-		{ name: "Moisturizer", time: "08:15 AM", status: "Done", dot: "bg-accent-green" },
-		{ name: "Sunscreen", time: "09:00 AM", status: "Pending", dot: "bg-accent-orange" },
+		{ name: "Cleanser", time: "08:00 AM", status: "Done", color: NeonColors.accent.blue },
+		{ name: "Moisturizer", time: "08:15 AM", status: "Done", color: NeonColors.accent.green },
+		{ name: "Sunscreen", time: "09:00 AM", status: "Pending", color: NeonColors.accent.orange },
 	];
 
 	return (
 		<Pressable className="active:opacity-90">
 			<NeonCard>
 				<View className="flex-row justify-between items-center mb-2">
-					<Text className="text-muted-foreground text-xs font-bold tracking-[2px]">
-						DAILY ROUTINE
-					</Text>
-					<Icon icon={SparklesIcon} size={18} className="text-accent-purple" />
+					<Text className="text-zinc-400 text-xs font-bold tracking-[2px]">DAILY ROUTINE</Text>
+					<Sparkles size={18} color={NeonColors.accent.purple} />
 				</View>
 
 				<View className="flex-row justify-between items-center mb-6">
-					<Text className="text-foreground text-3xl font-light">
-						Morning <Text className="text-muted-foreground text-lg">Set</Text>
+					<Text className="text-white text-[32px] font-light">
+						Morning <Text className="text-lg text-zinc-400">Set</Text>
 					</Text>
-					<View className="flex-row items-center gap-1.5 bg-muted px-2.5 py-1 rounded-xl">
-						<Icon icon={Calendar01Icon} size={12} className="text-muted-foreground" />
-						<Text className="text-muted-foreground text-xs font-semibold">May 7</Text>
+					<View className="flex-row items-center gap-1.5 bg-zinc-900 px-2.5 py-1 rounded-xl border border-zinc-800/50">
+						<Calendar size={12} color={NeonColors.text.secondary} />
+						<Text className="text-zinc-400 text-xs font-semibold">May 7</Text>
 					</View>
 				</View>
 
@@ -34,17 +32,25 @@ export function SkincareWidget() {
 					{routine.map((item) => (
 						<View key={item.name} className="flex-row justify-between items-center">
 							<View className="flex-row items-center gap-3">
-								<View className={`w-1 h-6 rounded-full ${item.dot}`} />
+								<View className="w-1 h-6 rounded-sm" style={{ backgroundColor: item.color }} />
 								<View>
-									<Text className="text-foreground text-[15px] font-semibold">{item.name}</Text>
-									<Text className="text-muted-foreground text-xs">{item.time}</Text>
+									<Text className="text-white text-[15px] font-semibold">{item.name}</Text>
+									<Text className="text-zinc-400 text-xs">{item.time}</Text>
 								</View>
 							</View>
 							<View
-								className={`px-2 py-1 rounded-lg ${item.status === "Done" ? "bg-accent-green/15" : "bg-accent-orange/10"}`}
+								className="px-2 py-1 rounded-lg"
+								style={{
+									backgroundColor:
+										item.status === "Done" ? "rgba(0, 230, 118, 0.15)" : "rgba(255, 109, 0, 0.1)",
+								}}
 							>
 								<Text
-									className={`text-[11px] font-bold uppercase ${item.status === "Done" ? "text-accent-green" : "text-accent-orange"}`}
+									className="text-[11px] font-bold uppercase"
+									style={{
+										color:
+											item.status === "Done" ? NeonColors.accent.green : NeonColors.accent.orange,
+									}}
 								>
 									{item.status}
 								</Text>

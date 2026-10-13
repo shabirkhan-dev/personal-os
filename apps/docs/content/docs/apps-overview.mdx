@@ -1,41 +1,34 @@
 ---
 title: Apps Overview
-description: What each application does and how the Personal OS platform is split.
+description: What each app does and where it fits in the platform.
 ---
 
-Personal OS is a monorepo, but the apps do not have equal responsibilities. The Nest API owns
-public product contracts; the AI service is an internal implementation detail; web and mobile are
-callers of those contracts.
+## `apps/web`
 
-| App | Runtime | Responsibility | Default command |
-| --- | --- | --- | --- |
-| `apps/web` | Next.js | Browser experience, feature workflows, and web authentication | `bun --cwd=apps/web run dev` |
-| `apps/mobile` | Expo Router | Native-first logging, routines, finance, and mobile authentication | `bun --cwd=apps/mobile run start` |
-| `apps/nest-api` | NestJS | Versioned REST API, auth, profiles, routines, finance, billing, and AI proxy | `bun --cwd=apps/nest-api run dev` |
-| `apps/ai-api` | FastAPI | Internal AI provider adapter and model-facing workflows | `bun run dev:ai` |
-| `apps/docs` | Next.js + Fumadocs | Project handbook, API status board, and engineering decisions | `bun --cwd=apps/docs run dev` |
-| `apps/rust` | Rust | Optional systems/performance service area; not on the default dev path | `bun run dev:rust` |
+Next.js web frontend with shared design primitives and Tailwind-based styling.
 
-## Dependency direction
+## `apps/mobile`
 
-```text
-web ───────┐
-mobile ────┼──> NestJS API ───> Postgres
-           │          │
-docs ──────┘          └──────> internal AI API (optional)
-```
+Expo Router mobile app styled with Uniwind (Tailwind `className` for React Native) and shared workspace conventions.
 
-The browser and mobile apps use the versioned API at `/api/v1`. The Nest API validates auth,
-authorization, input, and response envelopes. The AI service is never a client-facing bypass; keep
-provider credentials and model policy behind Nest.
+## `apps/docs`
 
-## What is implemented
+Fumadocs-powered documentation site for onboarding, architecture, and workflows.
 
-- Auth, sessions, profiles, passkeys, MFA, social sign-in, and health checks.
-- Routines with schedules, ordered items, today state, and completion logging.
-- Finance with transactions, budgets, month summaries, and category summaries.
-- A beta AI proxy with a mock provider for local development.
+## `apps/nest-api`
 
-Care, food, fashion, and the unified cross-domain timeline are future product slices. See the
-[production roadmap](/docs/production-roadmap) for sequencing and [Backend API](/docs/backend-api)
-for readiness before integration.
+NestJS production API: auth, tenancy, users, billing, MFA and passkeys, backed by PostgreSQL through Drizzle ORM.
+
+## `apps/ai-api`
+
+FastAPI service for LLM-assisted workflows. The Nest API proxies it; LLM keys are never exposed to clients.
+
+## `apps/rust`
+
+Rust (Axum) service for performance-sensitive or systems-level workloads.
+
+## Cross-app strategy
+
+- Keep domain boundaries explicit.
+- Share contracts and utilities through packages.
+- Evolve each app independently while maintaining one quality bar.

@@ -1,7 +1,7 @@
-import { Button } from "@personal-os/ui/components/button";
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "@personal-os/ui/components/field";
-import { Input } from "@personal-os/ui/components/input";
-import { Spinner } from "@personal-os/ui/components/spinner";
+import { Button } from "@starter/ui/components/button";
+import { Field, FieldDescription, FieldGroup, FieldLabel } from "@starter/ui/components/field";
+import { Input } from "@starter/ui/components/input";
+import { Spinner } from "@starter/ui/components/spinner";
 
 export function TwoFactorForm({
 	code,
@@ -28,7 +28,6 @@ export function TwoFactorForm({
 						autoComplete="one-time-code"
 						placeholder="123456 or recovery code"
 						required
-						autoFocus
 					/>
 					<FieldDescription>
 						Enter the code from your authenticator or a recovery code.

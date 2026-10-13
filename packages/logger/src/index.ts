@@ -1,5 +1,5 @@
 /**
- * @personal-os/logger — Beautiful, injectable logger for TS/JS. Use createLogger() and inject anywhere.
+ * @starter/logger — Beautiful, injectable logger for TS/JS. Use createLogger() and inject anywhere.
  */
 
 export { type FormatOptions, format, formatTimestamp } from "./format";

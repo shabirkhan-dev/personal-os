@@ -1,4 +1,4 @@
-﻿# Project entrypoint: Postgres + Nest API + Next.js web.
+# Project entrypoint: Postgres + Nest API (web app disabled; Personal OS is mobile-only).
 # Optional Rust API: docker compose --profile rust up -d
 # Requires Docker Compose v2.20+ (include). From repo root:
 #   cp env.docker.example .env && docker compose up -d --build
@@ -10,7 +10,5 @@ name: personal-os
 include:
   - path: docker/compose/postgres.yml
   - path: docker/compose/nest-api.yml
-  - path: docker/compose/web.yml
   - path: docker/compose/rust-api.yml
   - path: docker/compose/ai-api.yml
-

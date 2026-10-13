@@ -3,6 +3,7 @@ import {
 	createDecipheriv,
 	createHash,
 	createHmac,
+	hkdfSync,
 	randomBytes,
 	randomInt,
 	timingSafeEqual,
@@ -14,6 +15,9 @@ import { jwtVerify, SignJWT } from 'jose';
 import { AppConfigService } from '@/config/app-config.service';
 import type { AuthChallengePurpose } from '@/database/schema';
 import type { AccessTokenPayload } from './auth.types';
+
+const ENCRYPTION_KEY_SALT = 'personal-os.auth';
+const ENCRYPTION_KEY_INFO = 'authenticator-secret-encryption';
 
 @Injectable()
 export class AuthCryptoService {
@@ -157,8 +161,10 @@ export class AuthCryptoService {
 	}
 
 	private getEncryptionKey(): Buffer {
-		// codeql[js/insufficient-password-hash]: SHA-256 derives an AES key, not a password hash.
-		return createHash('sha256').update(this.config.authTokenSecret).digest();
+		// HKDF-SHA256 derives the AES-256 key from the server secret (a key, not a password).
+		return Buffer.from(
+			hkdfSync('sha256', this.config.authTokenSecret, ENCRYPTION_KEY_SALT, ENCRYPTION_KEY_INFO, 32),
+		);
 	}
 }
 

@@ -1,25 +1,20 @@
-import { PlusSignIcon } from "@hugeicons/core-free-icons";
+import { Plus } from "lucide-react-native";
 import { Pressable, View } from "react-native";
-import { Icon } from "@/components/ui/icon";
 
 interface FloatingActionButtonProps {
 	onPress?: () => void;
 	color?: string;
 }
 
-export function FloatingActionButton({ onPress, color }: FloatingActionButtonProps) {
-	if (!onPress) return null;
-
+export function FloatingActionButton({ onPress, color = "#34d399" }: FloatingActionButtonProps) {
 	return (
-		<View className="absolute bottom-[104px] right-6 z-[999]">
+		<View className="absolute bottom-26 right-6 z-50">
 			<Pressable
 				onPress={onPress}
-				className="w-16 h-16 rounded-full bg-primary items-center justify-center shadow-lg active:scale-95 active:opacity-90"
-				style={color ? { backgroundColor: color } : undefined}
-				accessibilityRole="button"
-				accessibilityLabel="Add entry"
+				className="w-16 h-16 rounded-full items-center justify-center bg-emerald-400 active:scale-95 active:opacity-90 shadow-xl shadow-emerald-400/40"
+				style={{ backgroundColor: color }}
 			>
-				<Icon icon={PlusSignIcon} size={32} className="text-primary-foreground" strokeWidth={2.5} />
+				<Plus size={32} color="#09090b" strokeWidth={2.5} />
 			</Pressable>
 		</View>
 	);

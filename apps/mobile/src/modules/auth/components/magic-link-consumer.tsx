@@ -36,14 +36,14 @@ export function MagicLinkConsumer() {
 				/>
 			) : (
 				<View className="items-center justify-center gap-3 py-7">
-					<ActivityIndicator className="text-primary" />
-					<Text className="text-muted-foreground text-sm font-medium">Signing you in...</Text>
+					<ActivityIndicator color="#14b8a6" />
+					<Text className="text-zinc-400 text-sm">Signing you in...</Text>
 				</View>
 			)}
 			<AuthButton
 				label="Back to login"
 				variant="outline"
-				onPress={() => router.replace("/(auth)/login")}
+				onPress={() => router.replace("/login")}
 			/>
 		</AuthScreen>
 	);

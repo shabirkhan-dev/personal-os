@@ -10,7 +10,7 @@ import { ATLAS_EASE, menuItemVariants, springSnappy, springSoft } from "../lib/m
 import { cn } from "../lib/utils";
 import { LandingAuthActions } from "./landing-auth-actions";
 
-function PersonalOSMark({ className }: { className?: string }) {
+function StarterMark({ className }: { className?: string }) {
 	return (
 		<span
 			className={cn(
@@ -45,7 +45,7 @@ export function SiteHeader() {
 						href="/"
 						className="flex shrink-0 items-center gap-2 rounded-lg px-1 font-semibold text-foreground outline-none focus-visible:ring-2 focus-visible:ring-foreground/30"
 					>
-						<PersonalOSMark />
+						<StarterMark />
 						{SITE.name}
 					</Link>
 
@@ -245,7 +245,7 @@ function DesktopDropdown({
 	const [hovered, setHovered] = useState<string | null>(items[0]?.label ?? null);
 
 	return (
-		// biome-ignore lint/a11y/noStaticElementInteractions: hover bridge for dropdown + keyboard via trigger
+		// oxlint-disable-next-line jsx_a11y/no-static-element-interactions -- hover bridge for dropdown + keyboard via trigger
 		<div
 			className="relative"
 			onMouseEnter={onOpen}

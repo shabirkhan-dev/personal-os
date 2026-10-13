@@ -1,6 +1,6 @@
 import type { Transition, Variants } from "motion/react";
 
-/** Shared Motion tokens for the Personal OS landing page. */
+/** Shared Motion tokens for the Starter landing page. */
 export const ATLAS_EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 export const springSnappy: Transition = {
@@ -15,38 +15,6 @@ export const springSoft: Transition = {
 	stiffness: 280,
 	damping: 26,
 	mass: 0.9,
-};
-
-export const fadeUpTransition: Transition = {
-	duration: 0.65,
-	ease: ATLAS_EASE,
-};
-
-export const menuPanelVariants: Variants = {
-	hidden: {
-		opacity: 0,
-		y: 10,
-		scale: 0.96,
-		filter: "blur(6px)",
-	},
-	visible: {
-		opacity: 1,
-		y: 0,
-		scale: 1,
-		filter: "blur(0px)",
-		transition: {
-			...springSnappy,
-			staggerChildren: 0.045,
-			delayChildren: 0.04,
-		},
-	},
-	exit: {
-		opacity: 0,
-		y: 8,
-		scale: 0.97,
-		filter: "blur(4px)",
-		transition: { duration: 0.15, ease: "easeIn" },
-	},
 };
 
 export const menuItemVariants: Variants = {

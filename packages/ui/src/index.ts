@@ -8,6 +8,7 @@ export {
 	AvatarImage,
 } from "./components/avatar";
 export { Badge, badgeVariants } from "./components/badge";
+export { BottomBar, BottomBarItem } from "./components/bottom-bar";
 export {
 	Breadcrumb,
 	BreadcrumbEllipsis,
@@ -82,6 +83,25 @@ export {
 	InputGroupTextarea,
 } from "./components/input-group";
 export { Label } from "./components/label";
+export { MotionButton, StatefulButton } from "./components/motion/button";
+export { MotionInput } from "./components/motion/input";
+export {
+	MotionSelect,
+	SelectContent as MotionSelectContent,
+	SelectGroup as MotionSelectGroup,
+	SelectItem as MotionSelectItem,
+	SelectLabel as MotionSelectLabel,
+	SelectSearch as MotionSelectSearch,
+	SelectTrigger as MotionSelectTrigger,
+	SelectValue as MotionSelectValue,
+} from "./components/motion/select";
+export { useTableSelection, useTableSort } from "./components/motion/table";
+export {
+	Tabs as MotionTabs,
+	TabsContent as MotionTabsContent,
+	TabsList as MotionTabsList,
+	TabsTrigger as MotionTabsTrigger,
+} from "./components/motion/tabs";
 export {
 	Select,
 	SelectContent,
@@ -139,7 +159,6 @@ export {
 	TableCaption,
 	TableCell,
 	TableFooter,
-	TableHead,
 	TableHeader,
 	TableRow,
 } from "./components/table";
@@ -159,5 +178,6 @@ export {
 export { Toggle, toggleVariants } from "./components/toggle";
 export { ToggleGroup, ToggleGroupItem } from "./components/toggle-group";
 export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./components/tooltip";
+export { NotTypeset, Typeset, TypesetScroll } from "./components/typeset";
 export { useIsMobile } from "./hooks/use-mobile";
 export { cn } from "./lib/utils";

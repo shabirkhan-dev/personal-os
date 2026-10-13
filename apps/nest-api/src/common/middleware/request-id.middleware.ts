@@ -15,12 +15,10 @@ export function requestIdMiddleware(
 	const requestId = isValidRequestId(inboundRequestId) ? inboundRequestId : `req_${randomUUID()}`;
 
 	request.requestId = requestId;
-	request.startedAt = Date.now();
 	response.setHeader(requestIdHeader, requestId);
 	next();
 }
 
-/** Only a constrained charset is accepted so arbitrary strings never enter logs. */
 function isValidRequestId(value: string | undefined): value is string {
-	return typeof value === 'string' && /^[a-zA-Z0-9._:-]{1,64}$/.test(value);
+	return typeof value === 'string' && value.trim().length > 0 && value.length <= 128;
 }

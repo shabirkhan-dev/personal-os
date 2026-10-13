@@ -1,15 +1,14 @@
-# Personal OS — Project overview
+# Starter - Project overview
 
-This document is the deeper technical reference for the Personal OS monorepo.
-For product direction see [the production roadmap](apps/docs/content/docs/production-roadmap.mdx). For
-quick setup, start with `README.md`.
+This document is the deeper technical reference for the Starter monorepo.
+For quick setup/use, start with `README.md`.
 
 ## What this repository includes
 
-Monorepo **Personal OS** managed by **Bun + Turborepo**, with:
+Monorepo starter managed by **Bun + Turborepo**, with:
 
 - Multiple app templates (web, mobile, API, docs, Rust)
-- Shared workspace packages (`@personal-os/*`)
+- Shared workspace packages (`@starter/*`)
 - Polyglot scripts and quality tooling
 - Architecture boundary checks
 - Git hooks and CI/CD/security pipelines
@@ -18,10 +17,10 @@ Monorepo **Personal OS** managed by **Bun + Turborepo**, with:
 ## Repository layout
 
 ```text
-personal-os/
+starter/
 ├── apps/                     # Runnable applications
 │   ├── web/                  # Next.js app
-│   ├── mobile/               # Expo Router + NativeWind app
+│   ├── mobile/               # Expo Router + Uniwind app
 │   ├── nest-api/             # NestJS production API
 │   ├── docs/                 # Documentation app (Next.js + Fumadocs)
 │   └── rust/                 # Rust binary app (Cargo)
@@ -33,7 +32,8 @@ personal-os/
 ├── docker/                   # Docker Compose fragments
 ├── .github/workflows/        # CI/CD/security workflows
 ├── .devcontainer/            # Reproducible development environment
-├── biome.json                # Formatter/linter config (TS/JS)
+├── .oxlintrc.json            # Linter config (TS/JS)
+├── .oxfmtrc.json             # Formatter config (TS/JS)
 ├── lefthook.yml              # Git hooks
 ├── turbo.json                # Turborepo pipeline
 ├── package.json              # Root scripts + workspaces
@@ -48,7 +48,7 @@ There is no root `docs/` directory.
 | App | Stack | Notes |
 | --- | --- | --- |
 | `apps/web` | Next.js 16, React 19, Tailwind 4 | Includes unit/integration and Playwright e2e flow |
-| `apps/mobile` | Expo SDK 57, Expo Router, React Native, NativeWind | Mobile-first file-based routing |
+| `apps/mobile` | Expo SDK 57, Expo Router, React Native, Uniwind | Mobile-first file-based routing |
 | `apps/nest-api` | NestJS 11, Zod, Jest | Production API spine |
 | `apps/docs` | Next.js + Fumadocs + MDX | Project docs site |
 | `apps/rust` | Cargo, clippy, rustfmt | Rust application template |
@@ -57,9 +57,9 @@ There is no root `docs/` directory.
 
 | Package | Workspace import | Purpose |
 | --- | --- | --- |
-| `packages/ui` | `@personal-os/ui` | Shared web UI primitives + design tokens |
-| `packages/logger` | `@personal-os/logger` | Shared structured logger for TypeScript and Rust |
-| `packages/typescript-config` | `@personal-os/typescript-config` | Reusable TypeScript config presets |
+| `packages/ui` | `@starter/ui` | Shared web UI primitives + design tokens |
+| `packages/logger` | `@starter/logger` | Shared structured logger for TypeScript and Rust |
+| `packages/typescript-config` | `@starter/typescript-config` | Reusable TypeScript config presets |
 
 ## Root command surface
 
@@ -91,11 +91,11 @@ bun --cwd <app-path> run <script>
 
 Examples:
 
-- `bun --cwd apps/web run dev`
-- `bun --cwd apps/mobile run start`
-- `bun --cwd apps/nest-api run dev`
-- `bun --cwd apps/docs run dev`
-- `bun --cwd apps/rust run dev`
+- `bun --cwd=apps/web run dev`
+- `bun --cwd=apps/mobile run start`
+- `bun --cwd=apps/nest-api run dev`
+- `bun --cwd=apps/docs run dev`
+- `bun --cwd=apps/rust run dev`
 
 ## Tooling and quality system
 
@@ -107,7 +107,7 @@ Examples:
 
 ### Linting and formatting
 
-- **Biome** is the TS/JS formatter+linter (`biome.json`)
+- **oxlint** lints and **oxfmt** formats TS/JS (`.oxlintrc.json`, `.oxfmtrc.json`)
 - Formatting style: tabs, line width 100
 - Root `format` and `lint` scripts also run language-specific tools
 
@@ -168,10 +168,10 @@ More details: docs app `/docs/docker` and `docker/README.md`.
 ## Conventions and development rules
 
 - Primary repository guidance: `AGENTS.md`
-- Always-apply agent rules: `.agents/rules/`
+- Cursor-specific rules: `.agents/rules/`
 - Architecture baseline: docs app `/docs/architecture`
 - Override process: docs app `/docs/overrides`
-- Use workspace imports as `@personal-os/<package>`
+- Use workspace imports as `@starter/<package>`
 
 ## Related docs
 

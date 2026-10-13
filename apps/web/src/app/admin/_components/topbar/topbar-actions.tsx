@@ -2,7 +2,7 @@
 
 import { Notification03Icon, PrinterIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@personal-os/ui/components/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@starter/ui/components/tooltip";
 import Link from "next/link";
 import type { ComponentProps } from "react";
 import { ThemeToggleControl } from "@/components/motion/theme-toggle";
@@ -79,7 +79,7 @@ export function TopbarActions({
 				className="ml-1 flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-linear-to-br from-zinc-600 to-zinc-800 font-semibold text-[12px] text-dashboard-text-primary ring-1 ring-dashboard-border-strong transition-all hover:ring-dashboard-border-focus active:scale-95"
 			>
 				{avatarSrc ? (
-					// biome-ignore lint/performance/noImgElement: simple avatar, no next/image wrap needed here
+					// oxlint-disable-next-line nextjs/no-img-element -- simple avatar, no next/image wrap needed here
 					<img src={avatarSrc} alt="Account" className="size-full object-cover" />
 				) : (
 					<span>{initials}</span>

@@ -1,5 +1,5 @@
 ---
-id: pos-<stable-id>
+id: str-<stable-id>
 title: <one-line summary>
 type: feature | bug | chore | spike | decision | risk | announcement
 from: backend | ai-python | web | mobile | qa | reviewer | ui-ux | pm | human

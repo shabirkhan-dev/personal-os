@@ -15,11 +15,11 @@
   "menuColor": "inverted",
   "menuAccent": "subtle",
   "aliases": {
-    "components": "@personal-os/ui/components",
-    "utils": "@personal-os/ui/lib/utils",
-    "ui": "@personal-os/ui/components",
-    "lib": "@personal-os/ui/lib",
-    "hooks": "@personal-os/ui/hooks"
+    "components": "@starter/ui/components",
+    "utils": "@starter/ui/lib/utils",
+    "ui": "@starter/ui/components",
+    "lib": "@starter/ui/lib",
+    "hooks": "@starter/ui/hooks"
   },
   "registries": {
     "@beui": "https://beui.dev/r/{name}.json"

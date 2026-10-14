@@ -2,6 +2,8 @@ import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { Alert, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { foodHome, useFoodStatus } from "@/modules/food";
+import { financeHome, useFinanceStatus, useFinanceSummary } from "@/modules/finance";
 import { AskBar } from "@/modules/home/components/ask-bar";
 import { FloatingTabBar } from "@/modules/home/components/floating-tab-bar";
 import { HomeHeader } from "@/modules/home/components/home-header";
@@ -9,7 +11,7 @@ import { ModulePicker } from "@/modules/home/components/module-picker";
 import { MoneyCard } from "@/modules/home/components/money-card";
 import { SoonView } from "@/modules/home/components/soon-view";
 import { UpcomingList } from "@/modules/home/components/upcoming-list";
-import type { HomeModule } from "@/modules/home/lib/module-home";
+import type { HomeHero, HomeModule } from "@/modules/home/lib/module-home";
 import {
 	moduleStatuses,
 	nowLabel,
@@ -23,12 +25,18 @@ import { moduleOptions } from "@/modules/onboarding/lib/options";
 import { useOnboardingProgress } from "@/modules/onboarding/store/onboarding-progress";
 import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
 import { usePlan } from "@/modules/onboarding/store/use-plan";
+import { skincareHome, useSkincareStatus } from "@/modules/skincare";
+import { useWorkoutStatus, workoutHome } from "@/modules/workout";
 import { usePoTheme } from "@/theme";
 
 const HEADER_HEIGHT = 66;
 
-/** Module Homes are registered here as they are built. */
-const moduleHomes: Partial<Record<ModuleId, HomeModule>> = {};
+const moduleHomes: Partial<Record<ModuleId, HomeModule>> = {
+	finance: financeHome,
+	workout: workoutHome,
+	skincare: skincareHome,
+	food: foodHome,
+};
 
 /** Re-renders once a minute so "Now" and "Next · in …" stay current. */
 function useNow(): Date {
@@ -63,7 +71,19 @@ export default function TodayScreen() {
 	const nowMinutes = now.getHours() * 60 + now.getMinutes();
 	const next = useMemo(() => upcoming(items, nowMinutes), [items, nowMinutes]);
 
-	const liveStatus: Partial<Record<ModuleId, string>> = {};
+	// Every module's hero is read on each render so the hooks stay in a fixed order.
+	const heroes: Partial<Record<ModuleId, HomeHero>> = {
+		finance: financeHome.useHero(),
+		workout: workoutHome.useHero(),
+		skincare: skincareHome.useHero(),
+		food: foodHome.useHero(),
+	};
+	const liveStatus: Partial<Record<ModuleId, string>> = {
+		finance: useFinanceStatus(),
+		workout: useWorkoutStatus(),
+		skincare: useSkincareStatus(),
+		food: useFoodStatus(),
+	};
 	const modules = moduleStatuses(plan.input, items);
 	for (const item of modules) item.status = liveStatus[item.id] ?? item.status;
 
@@ -97,6 +117,7 @@ export default function TodayScreen() {
 					<ModuleScreen
 						key={view}
 						module={moduleHome}
+						hero={heroes[view]}
 						label={moduleOptions.find((option) => option.id === view)?.label ?? "Module"}
 						name={answers.name}
 						topInset={insets.top}
@@ -168,6 +189,7 @@ export default function TodayScreen() {
 
 type ModuleScreenProps = {
 	module: HomeModule;
+	hero?: HomeHero;
 	label: string;
 	name: string;
 	topInset: number;
@@ -177,9 +199,8 @@ type ModuleScreenProps = {
 	onToggleHidden: () => void;
 };
 
-/** One module's Home. Keyed by module so each module's hooks start fresh. */
-function ModuleScreen({ module, label, ...header }: ModuleScreenProps) {
-	const hero = module.useHero();
+/** One module's Home. Keyed by module so its view starts fresh when switching. */
+function ModuleScreen({ module, hero, label, ...header }: ModuleScreenProps) {
 	const [actionRequest, setActionRequest] = useState(0);
 	const { View: ModuleView } = module;
 
@@ -213,7 +234,7 @@ type OverviewBodyProps = {
 
 /** Overview: money at a glance, the ask bar and what is coming up today. */
 function OverviewBody({ period, modules, amountsHidden, onOpen, upcomingList }: OverviewBodyProps) {
-	const finance = { leftToSpend: null };
+	const finance = useFinanceSummary();
 	const suggestions = [
 		modules.includes("food") ? { label: "Log a meal", onPress: () => onOpen("food") } : null,
 		modules.includes("finance") ? { label: "Add expense", onPress: () => onOpen("finance") } : null,

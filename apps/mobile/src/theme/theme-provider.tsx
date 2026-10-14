@@ -1,6 +1,16 @@
 import { type ColorMode, type ColorTokens, colors, defaultColorMode } from "@personal-os/tokens";
-import { createContext, type ReactNode, useContext, useMemo, useState } from "react";
+import {
+	createContext,
+	type ReactNode,
+	useCallback,
+	useContext,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import { useColorScheme } from "react-native";
+import { readJson, writeJson } from "@/lib/storage/json-file";
 
 export type ThemePreference = "system" | ColorMode;
 
@@ -12,6 +22,15 @@ type ThemeContextValue = {
 };
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
+
+/** Saved as theme.json in the app's documents (chosen on Profile). */
+const THEME_DOCUMENT = "theme";
+
+export function parseThemePreference(raw: unknown): ThemePreference {
+	const value =
+		typeof raw === "object" && raw !== null ? (raw as { preference?: unknown }).preference : raw;
+	return value === "light" || value === "dark" ? value : "system";
+}
 
 /** Resolves the system scheme, falling back to Dark (the Personal OS default). */
 export function resolveColorMode(
@@ -25,12 +44,31 @@ export function resolveColorMode(
 
 export function PoThemeProvider({ children }: { children: ReactNode }) {
 	const system = useColorScheme();
-	const [preference, setPreference] = useState<ThemePreference>("system");
+	const [preference, setPreferenceState] = useState<ThemePreference>("system");
+	/** True once the person picks a theme, so a slow read never overrides their choice. */
+	const chosen = useRef(false);
+
+	useEffect(() => {
+		readJson(THEME_DOCUMENT)
+			.then((raw) => {
+				if (!chosen.current) setPreferenceState(parseThemePreference(raw));
+			})
+			.catch((error: unknown) => console.error("Could not read the theme preference", error));
+	}, []);
+
+	const setPreference = useCallback((next: ThemePreference) => {
+		chosen.current = true;
+		setPreferenceState(next);
+		writeJson(THEME_DOCUMENT, { preference: next }).catch((error: unknown) =>
+			console.error("Could not save the theme preference", error),
+		);
+	}, []);
+
 	const mode = resolveColorMode(preference, system);
 
 	const value = useMemo(
 		() => ({ mode, colors: colors[mode], preference, setPreference }),
-		[mode, preference],
+		[mode, preference, setPreference],
 	);
 
 	return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

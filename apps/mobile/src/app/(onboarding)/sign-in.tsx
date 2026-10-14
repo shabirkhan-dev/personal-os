@@ -10,6 +10,7 @@ import { useAuth } from "@/modules/auth/context/auth-context";
 import { OnboardingScreen } from "@/modules/onboarding/components/onboarding-screen";
 import { SetupTop } from "@/modules/onboarding/components/top-bars";
 import { onboardingRoutes } from "@/modules/onboarding/lib/flow";
+import { goBack } from "@/modules/onboarding/lib/navigation";
 import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
 import { rise } from "@/theme";
 
@@ -63,7 +64,7 @@ export default function SignInScreen() {
 				</View>
 			}
 		>
-			<SetupTop onBack={() => router.back()} />
+			<SetupTop onBack={() => goBack(onboardingRoutes.signIn)} />
 			<View style={styles.spacer} />
 			<Animated.View entering={rise()} style={styles.brand}>
 				<LogoMark size={72} />

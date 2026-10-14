@@ -15,7 +15,7 @@ export default function WelcomeUpcomingScreen() {
 			preview={<UpcomingPreview />}
 			cta="Continue"
 			onNext={() => router.push(onboardingRoutes.welcomeVoice)}
-			onSkip={() => router.replace(onboardingRoutes.chooseHow)}
+			onSkip={() => router.push(onboardingRoutes.chooseHow)}
 		/>
 	);
 }

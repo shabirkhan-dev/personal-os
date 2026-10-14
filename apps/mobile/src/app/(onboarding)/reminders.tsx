@@ -1,4 +1,5 @@
 import { router } from "expo-router";
+import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Icon } from "@/components/icons";
 import { PillButton } from "@/components/ui/pill-button";
@@ -8,6 +9,7 @@ import { SetupFrame } from "@/modules/onboarding/components/setup-frame";
 import { nextSetupRoute, onboardingRoutes } from "@/modules/onboarding/lib/flow";
 import { dayRhythm } from "@/modules/onboarding/lib/insights";
 import type { ReminderId } from "@/modules/onboarding/lib/options";
+import { requestReminderPermission } from "@/modules/onboarding/services/reminders.service";
 import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
 import { usePoTheme } from "@/theme";
 
@@ -19,17 +21,47 @@ export default function RemindersScreen() {
 	const state = useOnboardingStore();
 	const rhythm = dayRhythm(state.wakeMinutes, state.bedMinutes);
 
-	const rows: readonly { id: ReminderId; title: string; meta: string }[] = [
-		{ id: "morning-plan", title: "Morning plan", meta: `${rhythm.morningPlan} · after you wake` },
-		{ id: "evening-check-in", title: "Evening check-in", meta: `${rhythm.checkIn} · before sleep` },
-		{ id: "workout-nudge", title: "Workout nudge", meta: "Mon, Wed, Fri · 18:30" },
-		{ id: "bill-reminders", title: "Bill reminders", meta: "One day before it's due" },
-	];
+	const [blocked, setBlocked] = useState(false);
+	const [asking, setAsking] = useState(false);
+
+	const rows = (
+		[
+			{ id: "morning-plan", title: "Morning plan", meta: `${rhythm.morningPlan} · after you wake` },
+			{
+				id: "evening-check-in",
+				title: "Evening check-in",
+				meta: `${rhythm.checkIn} · before sleep`,
+			},
+			state.modules.includes("workout")
+				? { id: "workout-nudge", title: "Workout nudge", meta: "Mon, Wed, Fri · 18:30" }
+				: null,
+			state.modules.includes("finance")
+				? { id: "bill-reminders", title: "Bill reminders", meta: "A day before each bill you add" }
+				: null,
+		] satisfies ({ id: ReminderId; title: string; meta: string } | null)[]
+	).filter((row) => row !== null);
+	const anyOn = rows.some((row) => state.reminders[row.id]);
 
 	const notNow = () => {
-		state.set("heyOs", false);
 		for (const row of rows) if (state.reminders[row.id]) state.toggleReminder(row.id);
 		goNext();
+	};
+
+	const allow = async () => {
+		if (!anyOn || blocked) {
+			goNext();
+			return;
+		}
+		setAsking(true);
+		try {
+			if (await requestReminderPermission()) goNext();
+			else setBlocked(true);
+		} catch (error) {
+			console.error("Notification permission request failed", error);
+			setBlocked(true);
+		} finally {
+			setAsking(false);
+		}
 	};
 
 	return (
@@ -37,23 +69,26 @@ export default function RemindersScreen() {
 			step={7}
 			route={onboardingRoutes.reminders}
 			title="Voice and reminders"
-			body={["Talk to Personal OS anytime, and get small nudges at the right moment."]}
+			body={["Small nudges at the right moment, timed to your day."]}
 			gap={20}
 			footer={
 				<>
-					<PillButton label="Allow and continue" onPress={goNext} />
+					{blocked ? (
+						<PoText variant="meta13" tone="textSecondary" style={styles.note}>
+							Notifications are off for Personal OS. Turn them on in Settings to get these.
+						</PoText>
+					) : null}
+					<PillButton
+						label={anyOn && !blocked ? "Allow and continue" : "Continue"}
+						disabled={asking}
+						onPress={() => void allow()}
+					/>
 					<PillButton variant="ghost" label="Not now" onPress={notNow} />
 				</>
 			}
 		>
 			<View
-				style={[
-					styles.hey,
-					{
-						backgroundColor: colors.bgHover,
-						borderColor: state.heyOs ? colors.textSecondary : colors.borderDefault,
-					},
-				]}
+				style={[styles.hey, { backgroundColor: colors.bgHover, borderColor: colors.borderDefault }]}
 			>
 				<View style={[styles.tile56, { backgroundColor: colors.statusVioletSubtle }]}>
 					<Icon name="Mic" color={colors.statusViolet} />
@@ -61,14 +96,14 @@ export default function RemindersScreen() {
 				<View style={styles.text}>
 					<PoText variant="title18">Say “Hey OS”</PoText>
 					<PoText variant="meta13" tone="textSecondary">
-						Works with the app closed
+						Talk to it with the app closed
 					</PoText>
 				</View>
-				<Toggle
-					value={state.heyOs}
-					onChange={(value) => state.set("heyOs", value)}
-					accessibilityLabel="Hey OS"
-				/>
+				<View style={[styles.soon, { backgroundColor: colors.bgSubtle }]}>
+					<PoText variant="eyebrow11" tone="textSecondary">
+						Soon
+					</PoText>
+				</View>
 			</View>
 			<View style={styles.gap12} />
 			<View
@@ -124,6 +159,8 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 	},
 	text: { flex: 1, gap: 2 },
+	soon: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12 },
+	note: { textAlign: "center" },
 	gap12: { height: 12 },
 	list: { paddingHorizontal: 18, paddingVertical: 4, borderRadius: 28, borderWidth: 1 },
 	row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 14 },

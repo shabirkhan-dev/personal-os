@@ -43,7 +43,24 @@
       ],
       "expo-font",
       "expo-secure-store",
-      "expo-updates"
+      "expo-updates",
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "Personal OS uses the microphone when you talk to set up or ask \u201cHey OS\u201d.",
+          "speechRecognitionPermission": "Personal OS turns what you say into text so it can fill in your answers.",
+          "androidSpeechServicePackages": [
+            "com.google.android.googlequicksearchbox",
+            "com.google.android.tts"
+          ]
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#2D7CF6"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

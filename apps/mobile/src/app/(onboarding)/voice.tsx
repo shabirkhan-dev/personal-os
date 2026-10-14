@@ -1,78 +1,113 @@
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
-import Animated, {
-	Easing,
-	FadeIn,
-	useAnimatedStyle,
-	useSharedValue,
-	withDelay,
-	withRepeat,
-	withSequence,
-	withTiming,
-} from "react-native-reanimated";
+import Animated, { FadeIn, useAnimatedStyle, withTiming } from "react-native-reanimated";
 import { Icon } from "@/components/icons";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
 import { OnboardingScreen } from "@/modules/onboarding/components/onboarding-screen";
 import { SetupTop } from "@/modules/onboarding/components/top-bars";
-import { onboardingRoutes } from "@/modules/onboarding/lib/flow";
-import { mockTranscript, transcriptFacts } from "@/modules/onboarding/lib/transcript";
+import { type SpeechStatus, useSpeechCapture } from "@/modules/onboarding/hooks/use-speech-capture";
+import { type OnboardingRoute, onboardingRoutes } from "@/modules/onboarding/lib/flow";
+import { goBack } from "@/modules/onboarding/lib/navigation";
+import type { Gender } from "@/modules/onboarding/lib/options";
+import {
+	type FactChip,
+	type FactId,
+	highlightSpans,
+	introAnswers,
+	introChips,
+	parseIntro,
+} from "@/modules/onboarding/lib/parse-intro";
 import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
 import { pop, usePoTheme } from "@/theme";
 import { haptics } from "@/lib/haptics";
 
-/** Waveform bar heights from the Figma recorder; the first 26 are already "heard". */
-const WAVE = [
-	3, 19, 23, 11, 3, 3, 8, 10, 3, 21, 28, 16, 4, 15, 10, 3, 3, 13, 21, 13, 8, 24, 23, 8, 4, 3, 5, 5,
-	8, 24, 25, 9, 11, 19,
+const PROMPT =
+	"Tell me your name and age, your height and weight, when you wake up and sleep, how you work, and what you want to change.";
+
+/** The step that asks for a fact that was not heard. */
+const factRoute: Record<Exclude<FactId, "gender">, OnboardingRoute> = {
+	name: onboardingRoutes.aboutYou,
+	age: onboardingRoutes.aboutYou,
+	body: onboardingRoutes.body,
+	day: onboardingRoutes.yourDay,
+	work: onboardingRoutes.yourDay,
+	goal: onboardingRoutes.goals,
+};
+
+const genders: { id: Gender; label: string }[] = [
+	{ id: "male", label: "Male" },
+	{ id: "female", label: "Female" },
+	{ id: "other", label: "Other" },
 ];
-const HEARD = 26;
-const WORD_MS = 140;
 
-type Word = { text: string; fact: boolean };
+function clockLabel(seconds: number): string {
+	return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+}
 
-/** Transcript split into words (keeping trailing spaces) so it can reveal live. */
-const WORDS: readonly Word[] = mockTranscript.flatMap((span) =>
-	(span.text.match(/\S+\s*|\s+/g) ?? []).map((text) => ({ text, fact: Boolean(span.fact) })),
-);
+function statusLabel(status: SpeechStatus, clock: string): string {
+	switch (status) {
+		case "starting":
+			return "Getting the mic ready…";
+		case "listening":
+			return `Listening · ${clock}`;
+		case "stopped":
+		case "idle":
+			return `Paused · ${clock}`;
+		case "denied":
+			return "Microphone is off";
+		case "unavailable":
+			return "Voice isn’t available on this phone";
+		case "error":
+			return "Couldn’t hear you";
+	}
+}
 
-/** 07 Setup · Voice ("Just talk"): mock live transcript and the facts it understood. */
+/** 07 Setup · Voice ("Just talk"): live speech-to-text, understood on the phone. */
 export default function VoiceScreen() {
 	const { colors } = usePoTheme();
-	const applyTranscript = useOnboardingStore((state) => state.applyTranscript);
-	const words = WORDS;
-	const [revealed, setRevealed] = useState(0);
-	const [recording, setRecording] = useState(true);
-	const [seconds, setSeconds] = useState(0);
-	const done = revealed >= words.length;
+	const applyIntro = useOnboardingStore((state) => state.applyIntro);
+	const setAnswer = useOnboardingStore((state) => state.set);
+	const speech = useSpeechCapture();
+	const { start, stop } = speech;
+	const [gender, setGender] = useState<Gender | undefined>();
+	const [pickingGender, setPickingGender] = useState(false);
 
 	useEffect(() => {
-		if (!recording || done) return;
-		const timer = setInterval(() => setRevealed((count) => count + 1), WORD_MS);
-		return () => clearInterval(timer);
-	}, [recording, done]);
+		void start();
+	}, [start]);
 
-	useEffect(() => {
-		if (!recording) return;
-		const timer = setInterval(() => setSeconds((value) => value + 1), 1000);
-		return () => clearInterval(timer);
-	}, [recording]);
+	const facts = useMemo(() => {
+		const parsed = parseIntro(speech.transcript);
+		return gender ? { ...parsed, gender } : parsed;
+	}, [speech.transcript, gender]);
+	const chips = useMemo(() => introChips(facts), [facts]);
+	const spans = useMemo(
+		() => highlightSpans(speech.transcript, facts.highlights),
+		[speech.transcript, facts.highlights],
+	);
+	const topics = new Set(chips.map((chip) => chip.fact));
+	const known = new Set(chips.filter((chip) => chip.known).map((chip) => chip.fact));
+	const heard = speech.transcript.length > 0;
+	const listening = speech.status === "listening" || speech.status === "starting";
+	const blocked =
+		speech.status === "denied" || speech.status === "unavailable" || speech.status === "error";
+	const clock = clockLabel(speech.seconds);
 
-	useEffect(() => {
-		if (done) setRecording(false);
-	}, [done]);
-
-	const clock = `0:${String(Math.max(seconds, done ? 21 : 0)).padStart(2, "0")}`;
-	const knownFacts = transcriptFacts.filter((fact) => fact.known);
-	const visibleFacts = done
-		? transcriptFacts
-		: knownFacts.slice(0, Math.floor((revealed / words.length) * knownFacts.length));
-
-	const finish = (route: typeof onboardingRoutes.building | typeof onboardingRoutes.aboutYou) => {
-		applyTranscript();
+	/** Keeps whatever was understood, then moves on. */
+	const finish = (route: OnboardingRoute) => {
+		stop();
+		if (known.size > 0) applyIntro(introAnswers(facts));
+		else setAnswer("path", "steps");
 		router.push(route);
+	};
+
+	const onFact = (chip: FactChip) => {
+		haptics.tap();
+		if (chip.fact === "gender") setPickingGender((value) => !value);
+		else finish(factRoute[chip.fact]);
 	};
 
 	return (
@@ -80,16 +115,20 @@ export default function VoiceScreen() {
 			glow="statusViolet"
 			footer={
 				<>
-					<Recorder
-						recording={recording}
-						clock={clock}
-						onToggle={() => setRecording((value) => !value)}
-					/>
+					{blocked ? null : (
+						<Recorder
+							listening={listening}
+							levels={speech.levels}
+							clock={clock}
+							onToggle={() => (listening ? stop() : void start())}
+						/>
+					)}
 					<View style={styles.footerRow}>
 						<PillButton
 							variant="secondary"
 							label="Fix something"
 							style={styles.flex}
+							disabled={!heard}
 							onPress={() => {
 								haptics.tap();
 								finish(onboardingRoutes.aboutYou);
@@ -98,16 +137,22 @@ export default function VoiceScreen() {
 						<PillButton
 							label="Looks right"
 							style={styles.flex}
-							onPress={() => finish(onboardingRoutes.building)}
+							disabled={known.size === 0}
+							onPress={() =>
+								finish(facts.name ? onboardingRoutes.building : onboardingRoutes.aboutYou)
+							}
 						/>
 					</View>
 				</>
 			}
 		>
 			<SetupTop
-				onBack={() => router.back()}
+				onBack={() => {
+					stop();
+					goBack(onboardingRoutes.voice);
+				}}
 				actionLabel="Type instead"
-				onAction={() => router.replace(onboardingRoutes.aboutYou)}
+				onAction={() => finish(onboardingRoutes.aboutYou)}
 			/>
 			<View style={styles.gap20} />
 			<View
@@ -116,85 +161,156 @@ export default function VoiceScreen() {
 					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
 				]}
 			>
-				<View style={[styles.dot8, { backgroundColor: colors.statusDanger }]} />
-				<PoText variant="meta13">{recording ? `Listening · ${clock}` : `Paused · ${clock}`}</PoText>
+				<View
+					style={[
+						styles.dot8,
+						{ backgroundColor: listening ? colors.statusDanger : colors.textTertiary },
+					]}
+				/>
+				<PoText variant="meta13">{statusLabel(speech.status, clock)}</PoText>
 			</View>
 			<View style={styles.gap16} />
-			<PoText variant="title18" tone="textSecondary" accessibilityLiveRegion="polite">
-				{words.slice(0, revealed).map((word, index) =>
-					word.fact ? (
-						<PoText key={`${index}-${word.text}`} variant="title18">
-							{word.text}
-						</PoText>
-					) : (
-						word.text
-					),
-				)}
-			</PoText>
+			{blocked ? (
+				<Blocked status={speech.status} onRetry={start} onSettings={speech.openSettings} />
+			) : heard ? (
+				<PoText variant="title18" tone="textSecondary" accessibilityLiveRegion="polite">
+					{spans.map((span, index) =>
+						span.fact ? (
+							<PoText key={`${index}-${span.text}`} variant="title18">
+								{span.text}
+							</PoText>
+						) : (
+							span.text
+						),
+					)}
+				</PoText>
+			) : (
+				<PoText variant="title18" tone="textTertiary">
+					{PROMPT}
+				</PoText>
+			)}
 			<View style={styles.gap20} />
-			{visibleFacts.length > 0 ? (
-				<Animated.View entering={FadeIn} style={styles.understood}>
-					<Icon name="Filled/Sparkle" size={14} color={colors.statusViolet} />
-					<PoText variant="eyebrow11" tone="textSecondary">
-						{`I understood ${Math.min(visibleFacts.length, knownFacts.length)} of ${transcriptFacts.length}`}
-					</PoText>
-				</Animated.View>
+			{heard ? (
+				<>
+					<Animated.View entering={FadeIn} style={styles.understood}>
+						<Icon name="Filled/Sparkle" size={14} color={colors.statusViolet} />
+						<PoText variant="eyebrow11" tone="textSecondary">
+							{`I understood ${known.size} of ${topics.size}`}
+						</PoText>
+					</Animated.View>
+					<View style={styles.gap10} />
+					<View style={styles.facts}>
+						{chips.map((chip) =>
+							chip.known ? (
+								<Animated.View
+									key={chip.id}
+									entering={pop()}
+									style={[
+										styles.fact,
+										{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
+									]}
+								>
+									<Checkbox checked size={24} />
+									<View>
+										<PoText variant="eyebrow11" tone="textTertiary">
+											{chip.label}
+										</PoText>
+										<PoText variant="meta13">{chip.value}</PoText>
+									</View>
+								</Animated.View>
+							) : (
+								<Animated.View key={chip.id} entering={FadeIn}>
+									<Pressable
+										accessibilityRole="button"
+										accessibilityLabel={`Add ${chip.value}`}
+										onPress={() => onFact(chip)}
+										style={[
+											styles.fact,
+											styles.missing,
+											{ backgroundColor: colors.bgApp, borderColor: colors.textTertiary },
+										]}
+									>
+										<View style={[styles.help, { backgroundColor: colors.bgSubtle }]}>
+											<Icon name="Help" size={14} color={colors.textSecondary} />
+										</View>
+										<View>
+											<PoText variant="eyebrow11" tone="textTertiary">
+												{chip.label}
+											</PoText>
+											<PoText variant="meta13" tone="textSecondary">
+												{chip.value}
+											</PoText>
+										</View>
+									</Pressable>
+								</Animated.View>
+							),
+						)}
+					</View>
+					{pickingGender && !facts.gender ? (
+						<Animated.View entering={FadeIn} style={styles.genderRow}>
+							{genders.map((option) => (
+								<Pressable
+									key={option.id}
+									accessibilityRole="button"
+									onPress={() => {
+										haptics.select();
+										setGender(option.id);
+										setPickingGender(false);
+									}}
+									style={({ pressed }) => [
+										styles.genderOption,
+										{
+											backgroundColor: pressed ? colors.bgHover : colors.bgSurface,
+											borderColor: colors.borderDefault,
+										},
+									]}
+								>
+									<PoText variant="meta13">{option.label}</PoText>
+								</Pressable>
+							))}
+						</Animated.View>
+					) : null}
+				</>
 			) : null}
-			<View style={styles.gap10} />
-			<View style={styles.facts}>
-				{visibleFacts.map((fact) =>
-					fact.known ? (
-						<Animated.View
-							key={fact.id}
-							entering={pop()}
-							style={[
-								styles.fact,
-								{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-							]}
-						>
-							<Checkbox checked size={24} />
-							<View>
-								<PoText variant="eyebrow11" tone="textTertiary">
-									{fact.label}
-								</PoText>
-								<PoText variant="meta13">{fact.value}</PoText>
-							</View>
-						</Animated.View>
-					) : (
-						<Animated.View key={fact.id} entering={FadeIn.delay(200)}>
-							<Pressable
-								accessibilityRole="button"
-								accessibilityLabel={`Add ${fact.value}`}
-								onPress={() => finish(onboardingRoutes.aboutYou)}
-								style={[
-									styles.fact,
-									styles.missing,
-									{ backgroundColor: colors.bgApp, borderColor: colors.textTertiary },
-								]}
-							>
-								<View style={[styles.help, { backgroundColor: colors.bgSubtle }]}>
-									<Icon name="Help" size={14} color={colors.textSecondary} />
-								</View>
-								<View>
-									<PoText variant="eyebrow11" tone="textTertiary">
-										{fact.label}
-									</PoText>
-									<PoText variant="meta13" tone="textSecondary">
-										{fact.value}
-									</PoText>
-								</View>
-							</Pressable>
-						</Animated.View>
-					),
-				)}
-			</View>
 		</OnboardingScreen>
 	);
 }
 
-type RecorderProps = { recording: boolean; clock: string; onToggle: () => void };
+type BlockedProps = { status: SpeechStatus; onRetry: () => Promise<void>; onSettings: () => void };
 
-function Recorder({ recording, clock, onToggle }: RecorderProps) {
+/** Mic off, no recogniser, or a failure: say so and offer the way forward. */
+function Blocked({ status, onRetry, onSettings }: BlockedProps) {
+	const { colors } = usePoTheme();
+	const copy =
+		status === "denied"
+			? "Allow the microphone in Settings to talk, or type your answers instead."
+			: status === "unavailable"
+				? "This phone has no speech recognition service. Type your answers instead; it takes about a minute."
+				: "Something stopped the recording. Try again, or type your answers instead.";
+
+	return (
+		<View
+			style={[
+				styles.blocked,
+				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
+			]}
+		>
+			<Icon name="Mic" size={20} color={colors.textSecondary} />
+			<PoText variant="body15" tone="textSecondary">
+				{copy}
+			</PoText>
+			{status === "denied" ? (
+				<PillButton variant="secondary" label="Open Settings" onPress={onSettings} />
+			) : status === "error" ? (
+				<PillButton variant="secondary" label="Try again" onPress={() => void onRetry()} />
+			) : null}
+		</View>
+	);
+}
+
+type RecorderProps = { listening: boolean; levels: number[]; clock: string; onToggle: () => void };
+
+function Recorder({ listening, levels, clock, onToggle }: RecorderProps) {
 	const { colors } = usePoTheme();
 
 	return (
@@ -204,29 +320,32 @@ function Recorder({ recording, clock, onToggle }: RecorderProps) {
 				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
 			]}
 		>
-			<View style={[styles.dot10, { backgroundColor: colors.statusDanger }]} />
+			<View
+				style={[
+					styles.dot10,
+					{ backgroundColor: listening ? colors.statusDanger : colors.textTertiary },
+				]}
+			/>
 			<View style={styles.wave}>
-				{WAVE.map((height, index) => (
+				{levels.map((level, index) => (
 					<WaveBar
 						key={`bar-${index}`}
-						height={height}
-						index={index}
-						active={recording}
-						color={index < HEARD ? colors.textPrimary : colors.textTertiary}
+						level={level}
+						color={listening ? colors.textPrimary : colors.textTertiary}
 					/>
 				))}
 			</View>
 			<PoText variant="mono13">{clock}</PoText>
 			<Pressable
 				accessibilityRole="button"
-				accessibilityLabel={recording ? "Stop recording" : "Resume recording"}
+				accessibilityLabel={listening ? "Pause recording" : "Resume recording"}
 				onPress={() => {
 					haptics.tap();
 					onToggle();
 				}}
 				style={[styles.stop, { backgroundColor: colors.statusDanger }]}
 			>
-				{recording ? (
+				{listening ? (
 					<View style={[styles.square, { backgroundColor: colors.textOnAccent }]} />
 				) : (
 					<Icon name="Mic" color={colors.textOnAccent} />
@@ -236,36 +355,15 @@ function Recorder({ recording, clock, onToggle }: RecorderProps) {
 	);
 }
 
-function WaveBar({
-	height,
-	index,
-	active,
-	color,
-}: {
-	height: number;
-	index: number;
-	active: boolean;
-	color: string;
-}) {
-	const scale = useSharedValue(1);
+const BAR_MIN = 3;
+const BAR_MAX = 28;
 
-	useEffect(() => {
-		scale.value = active
-			? withDelay(
-					(index % 7) * 60,
-					withRepeat(
-						withSequence(
-							withTiming(0.7, { duration: 420, easing: Easing.inOut(Easing.sin) }),
-							withTiming(1, { duration: 420, easing: Easing.inOut(Easing.sin) }),
-						),
-						-1,
-					),
-				)
-			: withTiming(1, { duration: 200 });
-	}, [active, index, scale]);
-
-	const style = useAnimatedStyle(() => ({ transform: [{ scaleY: scale.value }] }));
-	return <Animated.View style={[styles.bar, { height, backgroundColor: color }, style]} />;
+/** One waveform bar, its height following the measured loudness. */
+function WaveBar({ level, color }: { level: number; color: string }) {
+	const style = useAnimatedStyle(() => ({
+		height: withTiming(BAR_MIN + level * (BAR_MAX - BAR_MIN), { duration: 100 }),
+	}));
+	return <Animated.View style={[styles.bar, { backgroundColor: color }, style]} />;
 }
 
 const styles = StyleSheet.create({
@@ -300,6 +398,9 @@ const styles = StyleSheet.create({
 	},
 	missing: { borderStyle: "dashed" },
 	help: { width: 24, height: 24, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+	genderRow: { flexDirection: "row", gap: 8, marginTop: 12 },
+	genderOption: { paddingHorizontal: 16, paddingVertical: 9, borderRadius: 18, borderWidth: 1 },
+	blocked: { gap: 14, padding: 20, borderRadius: 24, borderWidth: 1, alignItems: "flex-start" },
 	recorder: {
 		height: 64,
 		flexDirection: "row",

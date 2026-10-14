@@ -8,6 +8,7 @@ import { PoText } from "@/components/ui/po-text";
 import { OnboardingScreen } from "@/modules/onboarding/components/onboarding-screen";
 import { TextBlock } from "@/modules/onboarding/components/text-block";
 import { onboardingRoutes } from "@/modules/onboarding/lib/flow";
+import { goBack } from "@/modules/onboarding/lib/navigation";
 import { buildDayPlan, planHighlights } from "@/modules/onboarding/lib/plan";
 import { usePlan } from "@/modules/onboarding/store/use-plan";
 import { rise, usePoTheme } from "@/theme";
@@ -33,7 +34,11 @@ export default function PlanRevealScreen() {
 			}
 		>
 			<View style={styles.top}>
-				<HeaderButton icon="Filled/Back" accessibilityLabel="Back" onPress={() => router.back()} />
+				<HeaderButton
+					icon="Filled/Back"
+					accessibilityLabel="Back"
+					onPress={() => goBack(onboardingRoutes.planReveal)}
+				/>
 				<View style={[styles.progress, { backgroundColor: colors.textPrimary }]} />
 				<View style={styles.balance} />
 			</View>

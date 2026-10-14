@@ -16,7 +16,7 @@ export default function WelcomeHomesScreen() {
 			cta="Get started"
 			showPlus
 			onNext={() => router.push(onboardingRoutes.chooseHow)}
-			onSkip={() => router.replace(onboardingRoutes.chooseHow)}
+			onSkip={() => router.push(onboardingRoutes.chooseHow)}
 		/>
 	);
 }

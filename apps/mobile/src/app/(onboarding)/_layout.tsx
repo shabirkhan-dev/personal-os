@@ -1,9 +1,11 @@
 import { Stack } from "expo-router";
 import { Platform } from "react-native";
+import { useDraftAutosave } from "@/modules/onboarding/store/use-draft-autosave";
 import { usePoTheme } from "@/theme";
 
 export default function OnboardingLayout() {
 	const { colors } = usePoTheme();
+	useDraftAutosave();
 
 	return (
 		<Stack

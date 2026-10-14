@@ -34,6 +34,7 @@ export default function AboutYouScreen() {
 			route={onboardingRoutes.aboutYou}
 			title="Tell us about you"
 			body={["So the AI can plan days that fit you."]}
+			canContinue={name.trim().length > 0}
 		>
 			<View style={styles.form}>
 				<View style={styles.group}>

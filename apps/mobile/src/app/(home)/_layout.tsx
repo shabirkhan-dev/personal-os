@@ -10,7 +10,7 @@ export const ErrorBoundary = RouteError;
 
 /** The main app; first launch goes through onboarding. */
 export default function HomeLayout() {
-	const { hydrated, completed, hydrate } = useOnboardingProgress();
+	const { hydrated, completed, resumeRoute, hydrate } = useOnboardingProgress();
 	useOnboardingSync();
 
 	useEffect(() => {
@@ -20,7 +20,7 @@ export default function HomeLayout() {
 	}, [hydrated, hydrate]);
 
 	if (!hydrated) return null;
-	if (!completed) return <Redirect href={onboardingRoutes.splash} />;
+	if (!completed) return <Redirect href={resumeRoute ?? onboardingRoutes.splash} />;
 
 	return <Stack screenOptions={{ headerShown: false }} />;
 }

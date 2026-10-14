@@ -47,7 +47,7 @@ services:
         sync: false
       - key: AUTH_EMAIL_FROM
         sync: false
-      # Set after Vercel web is live, e.g. https://starter.vercel.app
+      # Only needed for browser clients (the mobile app does not use cookies or CORS)
       - key: WEB_APP_URL
         sync: false
       - key: CORS_ORIGIN

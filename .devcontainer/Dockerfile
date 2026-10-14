@@ -25,7 +25,7 @@ ENV BUN_INSTALL="/home/vscode/.bun" \
 	PATH="/home/vscode/.bun/bin:${PATH}"
 
 
-# Ruff for scripts/python
+# Ruff for apps/ai-api (uv also installs it into the project venv)
 RUN pip install --user ruff 2>/dev/null || true
 
 # shfmt for bash scripts

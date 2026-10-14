@@ -14,7 +14,7 @@ export const envSchema = z
 		PORT: z.coerce.number().int().positive().default(4000),
 		API_PREFIX: z.string().min(1).default('api'),
 		API_VERSION: z.string().regex(/^\d+$/).default('1'),
-		SERVICE_NAME: z.string().min(1).default('starter-api'),
+		SERVICE_NAME: z.string().min(1).default('personal-os-api'),
 		APP_NAME: z.string().min(1).max(80).default('Personal OS'),
 		WEB_APP_URL: z.url().default('http://localhost:3000'),
 		DATABASE_URL: z.url().default('postgresql://starter:starter@localhost:5433/starter'),

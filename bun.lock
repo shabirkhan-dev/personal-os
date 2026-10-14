@@ -156,34 +156,23 @@
         "react-dom": "^19.3.0",
       },
       "devDependencies": {
-        "@starter/typescript-config": "workspace:*",
+        "@personal-os/typescript-config": "workspace:*",
         "@types/node": "^26.6.3",
         "@types/react": "^19.3.0",
         "@types/react-dom": "^19.3.0",
         "typescript": "^7.0.2",
       },
     },
-    "packages/logger": {
-      "name": "@starter/logger",
-      "version": "0.0.0",
-      "devDependencies": {
-        "@starter/typescript-config": "workspace:*",
-        "@types/node": "^26.6.3",
-        "@vitest/coverage-v8": "^5.0.3",
-        "typescript": "^7.0.2",
-        "vitest": "^5.0.3",
-      },
-    },
     "packages/tokens": {
       "name": "@personal-os/tokens",
       "version": "0.0.0",
       "devDependencies": {
-        "@starter/typescript-config": "workspace:*",
+        "@personal-os/typescript-config": "workspace:*",
         "typescript": "^7.0.2",
       },
     },
     "packages/typescript-config": {
-      "name": "@starter/typescript-config",
+      "name": "@personal-os/typescript-config",
       "version": "0.0.0",
     },
   },
@@ -813,6 +802,8 @@
 
     "@personal-os/tokens": ["@personal-os/tokens@workspace:packages/tokens"],
 
+    "@personal-os/typescript-config": ["@personal-os/typescript-config@workspace:packages/typescript-config"],
+
     "@radix-ui/number": ["@radix-ui/number@1.1.3", "", {}, "sha512-Road2bidD0uu/1BGDOWNdPI06g0lIRy6IF9GZcIrDK2KGItfor8IQwQa+yM2ERgHM1MmHxaxpTzk0/Jp42lNfA=="],
 
     "@radix-ui/primitive": ["@radix-ui/primitive@1.1.7", "", {}, "sha512-rqWnm76nYT8HoNNqEjpgJ7Pw/DrBj5iBTrmEPo6HTX5+VJyBNOqTdv4g89G63HuR5g0AaENoAcH7Is5fF2kZ8Q=="],
@@ -976,10 +967,6 @@
     "@sindresorhus/is": ["@sindresorhus/is@4.6.0", "", {}, "sha512-t09vSN3MdfsyCHoFcTRCH/iUtG7OJ0CsjzB8cjAmKc/va/kIgeDI/TxsigdncE/4be734m0cvIYwNaV4i2XqAw=="],
 
     "@standard-schema/spec": ["@standard-schema/spec@1.1.0", "", {}, "sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w=="],
-
-    "@starter/logger": ["@starter/logger@workspace:packages/logger"],
-
-    "@starter/typescript-config": ["@starter/typescript-config@workspace:packages/typescript-config"],
 
     "@swc/helpers": ["@swc/helpers@0.5.23", "", { "dependencies": { "tslib": "^2.8.0" } }, "sha512-5lSsMOTXURePglDfvuAQUqkGek9Hg2kksOYay2m0+XR++b2NWYL/4sWyuvVBIs8oKnJaxkdi9whaL/sqN13afw=="],
 

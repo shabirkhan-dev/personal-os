@@ -29,13 +29,13 @@
 		"editor.defaultFormatter": "oxc.oxc-vscode"
 	},
 
-	// —— Python (scripts/python: ruff check, ruff format) ——
+	// —— Python (apps/ai-api: ruff check, ruff format) ——
 	"[python]": {
 		"editor.defaultFormatter": "charliermarsh.ruff"
 	},
 	"ruff.lint.run": "onSave",
 
-	// —— Bash (scripts/bash: ShellCheck, shfmt -i 4) ——
+	// —— Bash (scripts/git-hooks, scripts/architecture: ShellCheck, shfmt -i 4) ——
 	"[shellscript]": {
 		"editor.defaultFormatter": "mkhl.shfmt",
 		"editor.tabSize": 4,

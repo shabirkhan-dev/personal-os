@@ -1,479 +1,55 @@
 ---
 title: Production Roadmap
-description: Phased NestJS backend spine and product build plan.
+description: What is built, what is next, and the engineering rules that hold throughout.
 ---
 
-> **Purpose:** This document defines how we build Starter from the clean `apps/nest-api` NestJS app onward. It summarizes the universal starter kit vision, product philosophy, backend/frontend/AI architecture, and the production roadmap for multi-tenant applications.
-
----
-
-## 1. Project Vision
-
-Starter is not another generic CRUD scaffold, digital form, or empty dashboard.
-
-Starter is an **AI-native, policy-native, workflow-native platform and starter kit for modern multi-tenant applications**.
-
-Traditional boilerplate software usually does this:
-
-```txt
-User enters data
-System stores data
-User checks dashboard manually
-User takes action manually
-```
-
-Starter does this:
-
-```txt
-System understands workspace and tenant state
-System detects anomalies, pending tasks, and policy violations
-System creates guided tasks and reminders
-AI drafts or assists the next action
-Policy engine verifies allowed operations and quotas
-Human approval is required for sensitive operations
-System executes approved workflow
-Audit log records everything
-```
-
-The long-term vision is a universal baseline for any SaaS or platform project—empowering developers to launch secure, compliant, multi-tenant products without reinventing the spine.
-
-Build focus:
-
-```txt
-Start with Starter.
-Build cleanly.
-One production-quality vertical slice at a time.
-```
-
----
-
-## 2. Current Starting Point
-
-The monorepo already exists and uses:
-
-```txt
-Bun workspaces
-Turborepo
-Expo mobile app (apps/mobile), the product
-Next.js landing page (apps/web), static export on Cloudflare Workers
-NestJS API app (apps/nest-api)
-FastAPI AI service (apps/ai-api)
-Docs app (apps/docs)
-Shared packages (@personal-os/tokens, @starter/logger, @starter/typescript-config)
-CI/CD, Docker, security workflows, dev container, git hooks
-```
-
-The backend production spine centers on:
-
-```txt
-apps/nest-api
-```
-
-We start the NestJS backend clean, modular, and strictly typed.
-
----
-
-## 3. Technical Decisions
-
-### Runtime and Tooling
-
-```txt
-Package manager: Bun
-Workspace orchestration: Turborepo
-Main backend framework: NestJS
-Production backend runtime: Node-compatible Nest build
-Database: PostgreSQL
-ORM/query layer: Drizzle ORM
-Validation: Zod
-API style first: REST
-Client: Expo / React Native
-AI Assist: FastAPI (apps/ai-api)
-Docs: Fumadocs
-```
-
-Bun handles fast local development and monorepo tasks. NestJS provides the enterprise spine: dependency injection, guards, interceptors, queues, WebSockets, auth, testing, and modular separation.
-
-Drizzle is TypeScript-first, lightweight, SQL-friendly, and optimal for PostgreSQL multi-tenancy.
-
----
-
-## 4. Core Product Philosophy
-
-Everything we build follows this principle:
-
-```txt
-Do not make operators, users, or admins do repetitive manual work.
-Use software to automate routine operations, guide decisions, and execute safe workflows.
-```
-
-Starter must be:
-
-```txt
-AI-native
-workflow-native
-policy-native
-task-first
-privacy-first
-audit-heavy
-operator-first
-tenant-safe
-integration-ready
-```
-
----
-
-## 5. What Makes Starter Different
-
-A standard CRUD app stores records:
-
-```txt
-users
-workspaces
-memberships
-resources
-invoices
-reports
-```
-
-Starter adds operational intelligence:
-
-```txt
-policies
-workflows
-tasks
-approvals
-AI assistance
-anomaly detection
-audit logs
-notifications
-webhooks
-```
-
-One-line positioning:
-
-```txt
-Starter turns product operations from manual data entry into guided, automated, policy-safe workflows.
-```
-
----
-
-## 6. Main Engines
-
-These engines form the foundation of Starter. Feature modules plug directly into these engines.
-
-### 6.1 Workflow Engine
-
-Manages multi-step processes across workspaces.
-
-Examples:
-
-```txt
-user onboarding workflow
-access escalation workflow
-resource provisioning workflow
-billing downgrade remediation workflow
-data export and cleanup workflow
-```
-
-A workflow has:
-
-```txt
-definition
-run
-steps
-owner
-status
-deadline
-approval
-escalation
-audit events
-```
-
-### 6.2 Policy Engine
-
-Turns business and security rules into executable logic.
-
-Examples:
-
-```txt
-If workspace quota exceeds 90% → create upgrade task
-If member inactive for 90 days → trigger security review
-If two-factor auth disabled on admin role → block access to production
-If sensitive export requested → require second admin approval
-```
-
-### 6.3 Task Engine
-
-Every actionable item becomes a trackable task.
-
-Examples:
-
-```txt
-Review pending invite
-Verify account credentials
-Rotate API credentials
-Resolve billing dispute
-Review elevated access request
-```
-
-### 6.4 Notification Engine
-
-Handles communication across channels:
-
-```txt
-in-app notifications
-transactional email (Resend)
-webhook dispatches
-push notifications (Expo)
-```
-
-### 6.5 AI Orchestration Engine
-
-AI assists human decisions rather than acting autonomously on sensitive state:
-
-```txt
-AI reads allowed context
-AI proposes action or draft
-Policy engine checks proposal
-Permission engine checks authorization
-Human approval occurs if required
-Backend executes command
-Audit log records everything
-```
-
-### 6.6 Document and Data Intelligence Engine
-
-Used for data intake and ingestion:
-
-```txt
-file parsing and extraction
-schema validation
-document classification
-form prefill
-human verification
-```
-
-### 6.7 Integration Engine
-
-Handles external services cleanly:
-
-```txt
-email provider (Resend)
-payment gateways (Stripe / Razorpay)
-object storage (S3 / Cloudflare R2)
-webhook deliveries
-OAuth providers (Google, GitHub)
-```
-
-### 6.8 Audit and Governance Engine
-
-Every state-changing action is traceable:
-
-```txt
-who performed it (actor ID, role, session)
-when (ISO timestamp)
-which organization / workspace
-what changed (structured diff)
-why (reason, task ID, or policy)
-from which IP / device / user-agent
-whether AI was involved
-whether human approval was given
-```
-
----
-
-## 7. Product Modules
-
-### Core Records
-
-```txt
-Organizations
-Workspaces
-Users
-Profiles
-Memberships
-Roles
-Permissions
-Invitations
-API Keys
-```
-
-### Platform Operations
-
-```txt
-Tasks
-Workflows
-Policies
-Audit Logs
-Webhooks
-Subscriptions & Invoices
-Notifications
-```
-
-### Intelligence
-
-```txt
-Usage anomaly detection
-Quota and capacity forecasting
-Operator cockpit
-AI summaries
-AI action drafts
-```
-
-### Governance
-
-```txt
-Immutable audit logs
-Data retention policies
-Tenant isolation
-Security policies
-Passkeys / WebAuthn
-MFA / TOTP factors
-```
-
----
-
-## 8. Backend Architecture Direction
-
-The backend lives in:
-
-```txt
-apps/nest-api
-```
-
-Directory structure:
-
-```txt
-apps/nest-api/src/
-  main.ts
-  app.module.ts
-  app.setup.ts
-
-  common/
-    filters/
-    interceptors/
-    middleware/
-    pipes/
-    types/
-
-  config/
-    app-config.service.ts
-    app.config.ts
-    config.module.ts
-    env.schema.ts
-
-  database/
-    database.module.ts
-    database.service.ts
-    migrate.ts
-    schema/
-      index.ts
-      users.schema.ts
-      user-profiles.schema.ts
-      sessions.schema.ts
-      passkeys.schema.ts
-      totp-factors.schema.ts
-      auth-identities.schema.ts
-
-  modules/
-    health/
-    auth/
-    users/
-    profiles/
-    mfa/
-    passkeys/
-    social-auth/
-    email/
-    ai/
-    organizations/   # next phase
-    workspaces/      # next phase
-    tasks/           # next phase
-    policies/        # next phase
-    workflows/       # next phase
-```
-
----
-
-## 9. Backend Engineering Rules
-
-1. **Explicit Module Boundaries:** Controllers handle HTTP routing; services handle business logic; repositories handle data access.
-2. **Strict Zod Validation:** All DTOs are validated with Zod via `ZodValidationPipe`.
-3. **Tenant Isolation:** Every query involving tenant data must filter by `organizationId` and `workspaceId`.
-4. **No Direct Secret Exposure:** Secrets never leak in API responses, logs, or client configs.
-5. **Idempotency:** Webhook handlers and critical mutations accept idempotency keys.
-
----
-
-## 10. Phased Roadmap
-
-### Phase 0 — Clean Base Architecture & Health Checks (Completed)
-- Clean NestJS baseline with structured modules
-- Request ID middleware and global HTTP exception filter
-- Health check endpoints (`/api/v1/health`)
-
-### Phase 1 — Database Connection and Migrations (Completed)
-- PostgreSQL database module with connection pooling
-- Drizzle ORM schema and migration tooling
-- Auth, users, profiles, and sessions schemas
-
-### Phase 2 — Organization and Workspace Slice
-- `OrganizationsModule` and `WorkspacesModule`
-- CRUD for organizations and workspaces
-- Workspace slug uniqueness and status lifecycle
-
-### Phase 3 — Auth, Sessions, and Security (Completed)
-- Password hashing (Argon2id)
-- JWT access tokens and secure HTTP-only refresh cookies
-- Multi-factor authentication (TOTP) and Passkeys (WebAuthn)
-- Social auth (OAuth) and magic link login
-
-### Phase 4 — Roles, Memberships, and Permissions
-- RBAC and ABAC guardrails
-- Role assignments per workspace
-- Fine-grained permission decorators
-
-### Phase 5 — Team Members & Invitations
-- Workspace member invitation flows
-- Accept/reject invite with token verification
-- Member status lifecycle (active, pending, suspended)
-
-### Phase 6 — Billing & Subscriptions (Removed)
-- The Starter's Stripe/Razorpay billing module was removed for Personal OS (card pos-10)
-
-### Phase 7 — Audit Logs & Security Trails
-- Immutable audit log table and service
-- Interceptor for automatic audit recording on mutating endpoints
-- Structured diff logging and IP/user-agent capture
-
-### Phase 8 — Task & Remediation Engine
-- Task creation, assignment, and status transitions
-- Due dates, priority levels, and notification triggers
-- Automated task creation from system events
-
-### Phase 9 — Policy & Guardrails Engine
-- Policy definitions stored as structured rules
-- Policy evaluation middleware on critical actions
-- Human-in-the-loop approval triggers
-
-### Phase 10 — Workflow Engine
-- Multi-step state machine runner
-- Step execution with timeout and retry capabilities
-- Execution history with full audit trail
-
-### Phase 11 — AI Assist Integration (Completed)
-- AI client in NestJS proxying requests to `apps/ai-api`
-- Prompt orchestration with role, context, and guardrails
-- Secure token-based service authentication
-
-### Phase 12 — Web Admin Console (Retired)
-- The Starter admin console was removed; `apps/web` is now a disabled landing-page shell
-
-### Phase 13 — Mobile App Integration (Completed)
-- Expo Router app on the Figma Kit v2 tokens (`StyleSheet`, Reanimated)
-- Onboarding v5, then home; the Starter auth screens were removed and will be rebuilt
-- Safe area compliance and mobile-first ergonomics
-
-### Phase 14 — Observability & Production Hardening
-- Docker Compose local stack and multi-stage container builds
-- Render / Vercel deployment blueprints
-- Rate limiting, CSRF protection, and security headers
+The engineering roadmap for Personal OS. The board in `.agents/board/` tracks individual cards;
+this page is the summary. Architecture context: [Product System Design](/docs/product-system-design).
+
+## Built
+
+### Foundation
+
+- Bun + Turborepo monorepo, oxlint/oxfmt, Lefthook hooks, architecture and naming checks, CI,
+  CodeQL and Dependabot.
+- `@personal-os/tokens`: Figma Kit v2 colours, spacing, radii and text styles, light and dark.
+
+### Mobile app
+
+- Onboarding end to end: voice input, saved progress, reminders, plan reveal and sign-in.
+- Today: Overview plus module Homes for Finance, Workout, Skincare and Food (with Recipes), and
+  Profile, all on what the person enters. Module data is stored on the phone
+  ([ADR 0001](/docs/architecture/adr-0001-on-device-module-data)).
+- Ask bar that parses typed lines into module entries.
+- EAS development builds, EAS Update channels and a one-command APK build.
+
+### API and services
+
+- Email-code sign-in with rotating refresh sessions; password, magic-link, TOTP, passkey and
+  Google flows kept for later use.
+- Profile and avatar endpoints; onboarding answers stored and synced.
+- AI service (FastAPI) behind the Nest proxy, with a mock provider for tests.
+- Landing page on Cloudflare Workers with a launch waitlist.
+
+## Next
+
+Roughly in order; each item becomes board cards.
+
+1. **Google and Apple sign-in on mobile** (pos-12).
+2. **Remaining module Homes**: Daily life and Fashion, then new modules as their designs are
+   final.
+3. **Avatars to object storage** (R2 or S3); the container disk is not durable.
+4. **On-device database and sync**: SQLite on the phone, a shared actions/entries core, and a
+   sync endpoint for backup and a second device. Decide first; see section 7 of the system design.
+5. **Insights**: AI over a per-module, opt-in daily digest, shown in the Insights tab.
+6. **Production hardening**: Redis-backed rate limits, structured request logs and error
+   tracking, and real deploy steps in `cd.yml` (it is still a template).
+7. **Desktop app**, once sync exists.
+
+## Engineering rules
+
+- Every API change updates [Backend API](/docs/backend-api) in the same commit.
+- Schema changes ship with a generated migration; no schema push outside local development.
+- Pure logic gets unit tests; screens handle loading, empty and error states.
+- No secrets in the app bundle; LLM keys stay in the AI service.
+- `bun run preflight` passes before a push.

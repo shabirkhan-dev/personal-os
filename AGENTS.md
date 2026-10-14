@@ -43,7 +43,7 @@ There is **no root `docs/` folder**. Project docs live in the docs app:
 - Browse: http://localhost:3002/docs
 
 Key routes: `/docs/quick-start`, `/docs/production-roadmap`, `/docs/architecture`,
-`/docs/docker`, `/docs/deploy`, `/docs/qol`, `/docs/overrides`,
+`/docs/docker`, `/docs/deploy`, `/docs/qol`,
 `/docs/product-system-design`. Also see root `README.md`, `PROJECT.md`, and `DESIGN.md`.
 
 <!-- BEGIN:nextjs-agent-rules -->
@@ -98,7 +98,7 @@ personal-os/
 | `bun run lint:fix` | Lint with auto-fix |
 | `bun run format` | Format: oxfmt + shfmt |
 | `bun run typecheck` | TypeScript typecheck |
-| `bun run test` | Run workspace and script tests |
+| `bun run test` | Run tests across the workspace |
 | `bun run test:coverage` | Run TS coverage + script tests |
 | `bun run architecture:check` | Enforce architecture import boundaries + kebab-case naming |
 | `bun run naming:check` | Enforce kebab-case (dotted Nest-style) file/folder names |
@@ -112,7 +112,7 @@ personal-os/
 - **No ESLint/Prettier**: oxlint and oxfmt are the only lint/format tools for TS/JS in this project.
 - **Naming**: PascalCase for components; files match component name. Hooks use `use*` prefix;
   utility functions are plain named exports.
-- **Imports**: Prefer workspace imports (e.g. `@personal-os/tokens`, `@starter/logger`).
+- **Imports**: Prefer workspace imports (e.g. `@personal-os/tokens`).
   Group: external → workspace → relative. No unused imports.
 - **Types**: Explicit types for props and public APIs. Avoid `any`; use `unknown` and narrow.
 - **Errors**: Handle explicitly — log and rethrow, or use result types. No silent catches.
@@ -179,13 +179,12 @@ Defaults: Nest `:4000`, Postgres host `:5433`. Optional AI API:
 - `PROJECT.md` — detailed layout, tooling, and commands.
 - `DESIGN.md` — Kit v2 design brief for UI generation and review.
 - **Docs app** (`apps/docs`, run with `bun --cwd=apps/docs run dev`):
-  - `/docs/production-roadmap` — production build phases and Nest API spine
+  - `/docs/production-roadmap` — what is built and what comes next
   - `/docs/qol` — full QoL stack (hooks, CI, per-language tools)
   - `/docs/architecture` — architecture baseline and enforceable boundaries
-  - `/docs/overrides` — policy for project-specific architecture overrides
   - `/docs/docker` — Docker Compose setup
-  - `/docs/deploy` — Vercel (web/docs) + Render (Nest) + Neon
-  - `/docs/product-system-design` — product architecture and security model
+  - `/docs/deploy` — Cloudflare Workers (landing) + Vercel (docs) + Render (Nest) + Neon
+  - `/docs/product-system-design` — how the system fits together, data, security, direction
 - `.agents/skills/expo-mobile/SKILL.md` — Expo Router + EAS + official Expo Skills / LLM doc links for `apps/mobile`.
 - `.agents/rules/expo-ai-agents.mdc` — Expo remote skills URL, skill table, `llms.txt` bundles (when working under `apps/mobile/**`).
 - `docker/README.md` — Compose fragment layout and `-f` fallback.

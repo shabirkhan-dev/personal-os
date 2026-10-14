@@ -1,0 +1,48 @@
+---
+title: "ADR 0001: Module data lives on the phone"
+description: Why expenses, meals, workouts and skincare logs are stored on the device, not the API.
+---
+
+## Status
+
+Accepted (2026-10-14). Revisit when backup or a second device is needed.
+
+## Context
+
+The module Homes (Finance, Workout, Skincare, Food) had to work on what the person enters, with no
+sample numbers. Building a server API for every module first would have delayed every screen and
+sent personal data (money, body, routines) to a server before there was a reason to.
+
+## Decision
+
+Each module keeps one JSON document in the app's document directory, through
+`createDocumentStore(name, initial, parse)` in `apps/mobile/src/lib/storage`:
+
+- a Zustand store that hydrates from `<name>.json` on first use;
+- writes are debounced (250 ms) and replace the whole document;
+- `parse` turns any stored value (missing, old, damaged) into a valid document, so a bad file
+  never crashes a screen;
+- module stores apply a change only after hydration finishes, so an early tap never overwrites
+  saved data.
+
+The API stores only the account, the profile and the onboarding answers.
+
+## Consequences
+
+### Positive
+
+- Logging is instant and works offline.
+- No module data leaves the phone.
+- New modules ship without backend work.
+
+### Negative
+
+- No backup: a lost or reset phone loses the logs.
+- No second device (desktop) without a sync layer.
+- Every write rewrites the whole file, and nothing can query across modules (insights that join
+  sleep, training and spending).
+
+## Follow-up
+
+The likely next step is an on-device SQLite database with a sync endpoint; see section 7 of
+[Product System Design](/docs/product-system-design). That change would supersede this ADR.

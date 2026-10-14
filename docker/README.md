@@ -30,5 +30,5 @@ docker compose up -d postgres
 **Manual fragment (no `include`):**
 
 ```bash
-docker compose -f docker/compose/postgres.yml --project-name starter up -d
+docker compose -f docker/compose/postgres.yml --project-name personal-os up -d
 ```

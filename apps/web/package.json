@@ -17,7 +17,7 @@
     "react-dom": "^19.3.0"
   },
   "devDependencies": {
-    "@starter/typescript-config": "workspace:*",
+    "@personal-os/typescript-config": "workspace:*",
     "@types/node": "^26.6.3",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",

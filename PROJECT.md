@@ -10,7 +10,7 @@ A **Bun + Turborepo** monorepo for Personal OS, a mobile-first life app:
 - The Expo app (`apps/mobile`): onboarding v5 from the Figma Kit v2 file, then the home screen
 - The NestJS API (`apps/nest-api`) and the FastAPI AI service (`apps/ai-api`)
 - The design tokens (`@personal-os/tokens`) shared by mobile and the web landing shell
-- A docs site, polyglot scripts, architecture checks, git hooks and CI/security pipelines
+- A docs site, architecture checks, git hooks and CI/security pipelines
 
 ## Repository layout
 
@@ -24,9 +24,8 @@ personal-os/
 │   └── web/                  # Next.js landing page, static export on Cloudflare Workers
 ├── packages/
 │   ├── tokens/               # @personal-os/tokens: Figma Kit v2 colours, spacing, radii, type
-│   ├── logger/               # @starter/logger: structured logger (TypeScript)
-│   └── typescript-config/    # @starter/typescript-config: shared TS config bases
-├── scripts/                  # Bash and Python scripts, architecture checks, git hooks
+│   └── typescript-config/    # @personal-os/typescript-config: shared TS config bases
+├── scripts/                  # Git hooks, architecture and naming checks (Bash)
 ├── docker/                   # Docker Compose fragments (Postgres, Nest API, AI API)
 ├── .agents/                  # Multi-agent coordination hub, rules and vendored skills
 ├── .github/workflows/        # CI/CD/security workflows
@@ -54,8 +53,7 @@ There is no root `docs/` directory.
 | Package | Workspace import | Purpose |
 | --- | --- | --- |
 | `packages/tokens` | `@personal-os/tokens` | Kit v2 design tokens (light and dark) |
-| `packages/logger` | `@starter/logger` | Shared structured logger |
-| `packages/typescript-config` | `@starter/typescript-config` | Reusable TypeScript config presets |
+| `packages/typescript-config` | `@personal-os/typescript-config` | Reusable TypeScript config presets |
 
 ## Root command surface
 
@@ -70,7 +68,7 @@ Run commands from repo root:
 | `bun run lint:fix` | Apply lint autofixes |
 | `bun run format` | Format TS/JS + shell |
 | `bun run typecheck` | TypeScript type checking |
-| `bun run test` | Run tests in workspace + scripts |
+| `bun run test` | Run tests across the workspace |
 | `bun run test:coverage` | Run the coverage-oriented pass |
 | `bun run architecture:check` | Enforce architecture boundaries + kebab-case naming |
 | `bun run preflight` | Lint + typecheck + test |
@@ -84,7 +82,7 @@ Run one app directly with `bun --cwd=<app-path> run <script>`, for example
 - **Bun** is the only package manager; workspaces are `apps/*` and `packages/*`
 - **Turborepo** orchestrates shared tasks (`turbo.json`)
 - **oxlint** lints and **oxfmt** formats TS/JS (tabs, line width 100)
-- **Bash:** `shellcheck`, `shfmt` · **Python:** `ruff`, `pytest`
+- **Bash:** `shellcheck`, `shfmt` (`scripts/`) · **Python:** `ruff`, `pytest` (`apps/ai-api`)
 - **Lefthook** (`lefthook.yml`): format, lint, typecheck, architecture check, large-file guard,
   secret scan, and the conventional-commit message check
 - **Architecture checks:** `scripts/architecture/check-boundaries.sh` and `check-naming.sh`; see
@@ -118,4 +116,4 @@ Defaults: Nest `4000`, Postgres host `5433`. More details: docs app `/docs/docke
 
 - Primary repository guidance: `AGENTS.md`; design brief: `DESIGN.md`
 - Editor rules: `.agents/rules/`
-- Architecture baseline: docs app `/docs/architecture`; overrides: `/docs/overrides`
+- Architecture baseline: docs app `/docs/architecture`; system design: `/docs/product-system-design`

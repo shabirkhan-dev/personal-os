@@ -1,0 +1,2 @@
+# ShellCheck config for scripts/git-hooks and scripts/architecture
+disable=SC2034

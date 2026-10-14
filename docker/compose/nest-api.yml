@@ -4,14 +4,14 @@ services:
     build:
       context: ../..
       dockerfile: apps/nest-api/Dockerfile
-    image: starter-nest-api:local
+    image: personal-os-nest-api:local
     restart: unless-stopped
     environment:
       NODE_ENV: production
       PORT: 4000
       API_PREFIX: api
       API_VERSION: "1"
-      SERVICE_NAME: starter-api
+      SERVICE_NAME: personal-os-api
       DATABASE_URL: postgresql://${POSTGRES_USER:-starter}:${POSTGRES_PASSWORD:-starter}@postgres:5432/${POSTGRES_DB:-starter}
       DATABASE_POOL_MAX: ${DATABASE_POOL_MAX:-10}
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env (min 32 chars)}

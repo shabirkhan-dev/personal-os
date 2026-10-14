@@ -1,4 +1,4 @@
 {
 	"title": "Architecture",
-	"pages": ["index", "adr-0001-strong-default-overridable"]
+	"pages": ["index", "adr-0001-on-device-module-data"]
 }

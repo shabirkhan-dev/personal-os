@@ -1,149 +1,147 @@
 ---
 title: Product System Design
-description: Product architecture, data model, services, and security model.
+description: How Personal OS is put together today, where data lives, and the direction it is heading.
 ---
 
-Status: Working architecture blueprint for the **Personal OS** monorepo. The Nest API spine was inherited from the Starter kit; the mobile app is the product client.
+Status: describes the code on `main` as of 2026-10-15. Section 7 lists the direction under
+discussion; nothing there is built yet.
 
-## 1. System Vision & Architecture Principles
+## 1. What the system is
 
-Personal OS is built as a secure modular monolith first, with event-driven seams and clear module boundaries, designed to scale into independent services when load or compliance requires it.
+Personal OS is a **single-person, mobile-first** app. One account belongs to one person; there
+are no organizations, workspaces, teams or roles. The Expo app is the product. The servers exist
+for sign-in, backing up what the person tells the app, and AI assistance.
 
-The core operational loop is:
+Principles:
+
+- **The phone works on its own.** Logging an expense, a meal or a workout never waits on the
+  network.
+- **Private by default.** The data is personal (money, body, routines). The server keeps only what
+  it needs, and AI never sees data the person has not chosen to share.
+- **One person, scoped by `userId`.** Every server row belongs to exactly one user.
+- **Stateless servers.** API containers keep no session or file state that a restart would lose
+  (see the avatar gap in section 6).
+
+## 2. High-level architecture
 
 ```text
-Action requested -> policy verification -> state transition in Postgres
--> outbox event -> background worker (notifications, audit, AI assist)
--> real-time sync to Web & Mobile clients
+ ┌────────────────────────────────────────────┐
+ │ apps/mobile  (Expo, the product)           │
+ │  Expo Router screens                        │
+ │  modules/*   one folder per life module     │
+ │  Zustand document stores ──► JSON files     │  on-device module data
+ │  SecureStore ──► session tokens             │
+ └───────────────┬────────────────────────────┘
+                 │ HTTPS, bearer token
+ ┌───────────────▼──────────────┐      ┌──────────────────────────┐
+ │ apps/nest-api (NestJS)        │─────►│ apps/ai-api (FastAPI)    │
+ │ auth · profile · onboarding   │token │ assist; LLM keys stay    │
+ │ AI proxy · health             │      │ server-side              │
+ └───────────────┬──────────────┘      └──────────────────────────┘
+                 │ Drizzle
+         ┌───────▼────────┐
+         │ Postgres (Neon)│
+         └────────────────┘
+
+ apps/web   landing page, Cloudflare Workers (+ KV waitlist); never calls the API
+ apps/docs  this site, Vercel
 ```
 
-Engineering principles:
-- **Relational Source of Truth:** PostgreSQL with Drizzle ORM holds all primary records.
-- **Tenant Isolation:** Every multi-tenant operation is scoped by `organizationId` and `workspaceId`.
-- **Stateless Application Servers:** API containers scale horizontally without local file or session state.
-- **Defense in Depth:** Multi-factor authentication, passkeys (WebAuthn), CSRF protection, and strict Zod validation.
+## 3. Mobile app
 
----
+| Path | Responsibility |
+| --- | --- |
+| `src/app/(onboarding)` | Onboarding flow: about you, body, goals, your day, modules, reminders, plan reveal, sign-in |
+| `src/app/(home)` | Today (Overview or one module Home), Profile, Recipes |
+| `src/modules/<name>` | One folder per feature: `components`, `hooks`, `lib` (pure logic, tested), `services` (I/O), `store` |
+| `src/lib/storage` | `createDocumentStore`: a Zustand store backed by one JSON file |
+| `src/lib/api` | Typed fetch client, token refresh |
+| `src/components`, `src/theme` | Kit v2 components and the theme provider over `@personal-os/tokens` |
 
-## 2. Product Boundaries & Personas
+Modules on the Home: Daily life, Workout, Finance, Skincare, Food, Fashion. Each module Home reads
+its own document store; the ask bar parses typed lines ("500 food", "45 min gym") into entries
+for the right module.
 
-Primary personas:
+### On-device data
 
-| Persona | Primary Surface | Core Capabilities |
-| --- | --- | --- |
-| **Organization Owner** | Web Dashboard | Workspace lifecycle, billing, plan management, audit trails |
-| **Workspace Admin** | Web Dashboard, Mobile | Member invitations, role assignment, policy rules, integrations |
-| **Team Member** | Web Console, Mobile | Day-to-day operations, task management, profile and security settings |
-| **Viewer / Auditor** | Web Console (Read-only) | Compliance review, audit inspection, activity telemetry |
+Each module keeps one JSON document in the app's document directory (`finance.json`,
+`workout.json`, …). The store hydrates on first use, writes are debounced (250 ms) and every
+document has a `parse` function that turns an old or damaged file into a valid document, so a
+bad file never crashes a screen. See [ADR 0001](/docs/architecture/adr-0001-on-device-module-data).
 
----
+Secrets (refresh token) go in SecureStore, never in the JSON documents.
 
-## 3. High-Level Architecture
+## 4. API
 
-```text
-                    +----------------------+
-                    |   apps/docs          |
-                    |   Fumadocs site      |
-                    +----------------------+
+`apps/nest-api` is a NestJS 11 modular monolith: controllers stay thin, services hold the logic,
+repositories own Drizzle queries. Zod validates every request and the environment.
 
-                        +------------------+      +------------------+
-                        | apps/nest-api    |      | apps/mobile      |
-                        | NestJS API Spine |<---->| Expo App         |
-                        +--------+---------+      +------------------+
-                                 |
-                +----------------+
-                |                |
-       +--------v-------+ +------v---------+
-       | Postgres       | | apps/ai-api    |
-       | Source of truth| | FastAPI Assist |
-       +-------+--------+ +----------------+
-               |
-       +-------v--------+
-       | Redis          |
-       | Cache / Queue  |
-       +----------------+
-```
+What the app uses today: email-code sign-in, refresh, logout, `GET /auth/me`, the profile and
+avatar endpoints, and `GET`/`PUT /users/me/onboarding`. The contract lives in
+[Backend API](/docs/backend-api).
 
----
+Kept but not yet used by the app (decided in board card pos-8): password sign-in, magic links,
+TOTP, passkeys and Google sign-in. Google and Apple sign-in on mobile is open as pos-12.
 
-## 4. Service Layout
+### Data model
 
-### Core Production Services
+| Table | Purpose |
+| --- | --- |
+| `users` | Identity: email, username, verification state, optional password hash |
+| `user_profiles` | Display name, avatar URL, bio, time zone, locale |
+| `sessions` | Refresh sessions: hashed token, expiry, user agent, IP, revocation |
+| `auth_challenges` | Email codes and magic links, hashed, with attempt counts |
+| `auth_identities` | Linked Google accounts |
+| `totp_factors`, `passkeys`, `webauthn_challenges` | Second factors and passkeys |
+| `onboarding_profiles` | The onboarding answers as JSON with a `schema_version`; the plan is derived on the device |
 
-| Service | Path | Role | Technology |
-| --- | --- | --- | --- |
-| **Mobile App** | `apps/mobile` | The Personal OS client | Expo Router, Reanimated, `@personal-os/tokens` |
-| **API Spine** | `apps/nest-api` | Auth, users, profiles, MFA, passkeys, AI proxy | NestJS, Drizzle ORM, Zod |
-| **AI Assist** | `apps/ai-api` | LLM orchestration, structured assist pipelines | FastAPI, Python 3, uv |
-| **Documentation** | `apps/docs` | Technical documentation and architecture guides | Fumadocs, MDX |
-| **Landing page** | `apps/web` | Public landing page and launch sign-ups | Next.js static export, Cloudflare Workers |
+Schema changes are made in `src/database/schema` and committed with the generated migration;
+migrations run on container start.
 
-### Shared Monorepo Packages
+### Onboarding sync
 
-| Package | Workspace Name | Responsibility |
-| --- | --- | --- |
-| **Design Tokens** | `@personal-os/tokens` | Figma Kit v2 colours, spacing, radii and text styles |
-| **Logger** | `@starter/logger` | Injectable logger for TypeScript |
-| **TypeScript Config** | `@starter/typescript-config` | Shared `tsconfig.json` bases across apps and packages |
+The one piece of user data synced today. After sign-in the app compares its own timestamp with the
+server's `updatedAt` and keeps whichever changed last, then uploads changes about a second after
+they happen. A stored row from an older schema version reads as `null`, and the app uploads its
+copy.
 
----
+## 5. AI service
 
-## 5. Data Model & Tenancy
+`apps/ai-api` (FastAPI, uv) exposes an assist endpoint behind a provider port, with an
+OpenAI-compatible provider and a mock for tests. Nest calls it with `AI_SERVICE_TOKEN`; clients
+never talk to it directly and never hold LLM keys. The app does not call `/ai/*` yet; the AI copy
+in onboarding is generated on the device.
 
-### Tenancy and Access Control
+## 6. Security and known gaps
 
-| Table | Purpose | Key Attributes |
-| --- | --- | --- |
-| `organizations` | Top-level tenant account | `id`, `name`, `slug unique`, `status`, `createdAt` |
-| `workspaces` | Project / environment boundary | `id`, `organization_id`, `name`, `slug`, `environment` |
-| `users` | Global user identity | `id`, `email unique`, `status`, `password_hash` |
-| `user_profiles` | Personal details and avatar | `id`, `user_id`, `display_name`, `avatar_url`, `locale` |
-| `memberships` | User access to workspace | `id`, `workspace_id`, `user_id`, `status` |
-| `roles` | Role definitions | `id`, `workspace_id nullable`, `code`, `name` |
-| `permissions` | Granular permission catalog | `id`, `code unique`, `module`, `description` |
-| `role_permissions` | Permissions assigned to roles | `role_id`, `permission_id` |
-| `sessions` | Active user sessions | `id`, `user_id`, `token_hash`, `expires_at`, `ip`, `userAgent` |
+- Access tokens: JWT, 15 minutes. Refresh tokens: rotated, stored hashed; native clients receive
+  them in the response body (`X-Client-Platform: native`) and keep them in SecureStore.
+- Email codes are hashed, throttled (3 requests, 8 verifies per minute) and lock after repeated
+  failures. Responses do not reveal whether an account exists.
+- Helmet, CORS allowlist, CSRF checks for browser requests, rate limiting on auth routes.
 
----
+Known gaps:
 
-## 6. Security & Authentication Architecture
+- **Avatars are written to the API container's disk** (`uploads/avatars`). On Render that disk is
+  wiped on every deploy and restart. Move them to object storage (R2 or S3) before relying on them.
+- **Module data has no backup.** Losing or resetting the phone loses expenses, meals and workouts.
+- Rate limits are in memory, per instance.
 
-1. **Password Authentication:**
-   - Hashed using Argon2id with per-user salt.
-2. **Session & Token Model:**
-   - Short-lived JWT access tokens (15 minutes).
-   - Long-lived secure, HTTP-only refresh cookies with rotation and revocation.
-3. **Multi-Factor Authentication (MFA):**
-   - RFC 6238 TOTP factors with encrypted secret storage.
-   - Encrypted backup codes generated on factor activation.
-4. **Passkeys (WebAuthn):**
-   - FIDO2 / WebAuthn standard support.
-   - Credential challenge verification stored with TTL.
-5. **CSRF & Rate Limiting:**
-   - Double-submit CSRF cookie guard on state-changing API endpoints.
-   - In-memory / Redis token-bucket rate limiting on authentication routes.
+## 7. Direction under discussion (not built)
 
----
+These follow from the gaps above and are open for decision:
 
-## 7. Event Streams & Outbox Pattern
-
-All critical events follow the outbox pattern inside database transactions to ensure consistency:
-
-| Topic | Partition Key | Purpose |
-| --- | --- | --- |
-| `starter.workspace.events.v1` | `workspaceId` | Workspace creation, update, and quota telemetry |
-| `starter.auth.events.v1` | `userId` | Login, password reset, MFA factor activation |
-| `starter.notification.events.v1` | `recipientId` | Transactional emails, in-app alerts |
-| `starter.audit.events.v1` | `workspaceId` | Immutable audit trail for compliance |
-| `starter.ai.actions.v1` | `workspaceId` | Prompt telemetry, assist proposals, approval queue |
-
----
-
-## 8. Deployment & Infrastructure
-
-Deployment targets:
-
-- **Local Development:** `docker-compose.yml` orchestrates PostgreSQL, the Nest API and the optional AI API.
-- **Mobile:** EAS development, preview and production builds, plus EAS Update.
-- **Production API:** NestJS container deployed on Render, Fly.io, or AWS ECS with pooled PostgreSQL (e.g. Neon).
-- **Object Storage:** S3-compatible private buckets (Cloudflare R2, AWS S3) with pre-signed upload URLs.
+1. **On-device database.** Move module documents to SQLite (`expo-sqlite` + Drizzle, the same ORM
+   as the API) so screens and insights can query across modules and writes stop rewriting whole
+   files.
+2. **One shared primitive under every module.** A small core of `actions` (what, when, whether it
+   is part of the minimum day) and `entries` (done or skipped, value, date), with module-specific
+   tables (expenses, meals, sessions) alongside. Streaks and "never miss twice" are then computed
+   once for every module.
+3. **Backup and multi-device sync.** Rows carry `updated_at` and soft-delete tombstones; the app
+   pushes and pulls changes since its last sync. One person on a phone (and later a desktop app)
+   does not need CRDTs; last write wins per row.
+4. **AI with consent per module.** AI reads a compact daily digest of the modules the person has
+   shared, only in the Insights tab, and proposes changes the person confirms.
+5. **Reminders on the device.** Scheduled local notifications, so the most important nudges do not
+   depend on the server.

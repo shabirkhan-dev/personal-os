@@ -5,4 +5,3 @@ bun = "1.4.2"
 # `bun run lint` and `bun run format` fail with "No version is set for shim".
 shellcheck = "0.11.0"
 shfmt = "3.14.1"
-ruff = "0.16.8"

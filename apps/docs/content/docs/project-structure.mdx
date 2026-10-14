@@ -12,12 +12,11 @@ personal-os/
 │   ├── nest-api/
 │   ├── ai-api/        # FastAPI AI assist
 │   ├── docs/          # Fumadocs site; MDX in apps/docs/content/docs/
-│   └── web/           # Disabled landing-page shell
+│   └── web/           # Landing page, Cloudflare Workers
 ├── packages/
 │   ├── tokens/        # @personal-os/tokens
-│   ├── typescript-config/
-│   └── logger/
-├── scripts/
+│   └── typescript-config/  # @personal-os/typescript-config
+├── scripts/           # git hooks, architecture and naming checks
 ├── docker/
 ├── turbo.json
 └── .oxlintrc.json
@@ -27,11 +26,13 @@ personal-os/
 
 - Keep app-specific code inside each app folder.
 - Move reusable logic into `packages/*`.
-- Prefer workspace imports (`@personal-os/tokens`, `@starter/logger`) over copy-paste.
+- Prefer workspace imports (`@personal-os/tokens`) over copy-paste.
 - Keep tooling centralized at repository root.
 
 ## Where to add new code
 
+- New feature in the app: `apps/mobile/src/modules/<feature>`
+- New API feature: `apps/nest-api/src/modules/<feature>`
 - New product surface: `apps/<new-app>`
 - Shared UI/utilities/types: `packages/<new-package>`
 - Docs pages: `apps/docs/content/docs/` (served at `/docs/...`)
@@ -39,5 +40,5 @@ personal-os/
 
 ## Why this works
 
-This structure keeps local iteration fast while preserving consistency at scale. Teams can ship
-independently inside each app, without losing shared standards across the repo.
+Each app evolves on its own while lint, format, typecheck and the architecture checks stay the
+same across the repo.

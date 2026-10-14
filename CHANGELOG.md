@@ -22,6 +22,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Personal OS is mobile-first: `apps/web` is only the landing page (re-enabled in the workspace).
 - Mobile styling is `StyleSheet` + tokens; Uniwind/Tailwind removed from the app.
+- `@starter/typescript-config` is now `@personal-os/typescript-config`; service, image and
+  container names say Personal OS instead of Starter.
+- Docs rewritten for a single-person, mobile-first app: product system design, roadmap,
+  architecture, deploy, quick start and the backend API contract (profile, avatar, AI endpoints).
 
 ### Removed
 
@@ -30,6 +34,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The Starter mobile screens (auth, billing, users, component playground).
 - The web app's admin, auth, billing and e2e suites.
 - Starter leftovers: shadcn and browser-test agent skills, old plans and done cards, `glass.html`.
+- `@starter/logger` (`packages/logger`), unused by any app.
+- The hello-world Bash and Python demo scripts and their tests (`scripts/bash`, `scripts/python`).
+- The Starter override policy page and ADR ("strong default, overridable"); replaced by ADR 0001
+  on on-device module data.
 
 ## [0.1.0] - 2026-02-10
 

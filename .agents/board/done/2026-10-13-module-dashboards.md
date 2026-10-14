@@ -5,7 +5,7 @@ type: feature
 from: pm
 to: mobile
 priority: normal
-status: open
+status: done
 assignee: none
 reviewer: human
 parent: pos-5
@@ -15,7 +15,7 @@ worktree: none
 scope: ["apps/mobile/src/app/(home)/**", "apps/mobile/src/modules/home/**"]
 allowed_shared: []
 created: 2026-10-13
-updated: 2026-10-13
+updated: 2026-10-15
 ---
 
 ## What
@@ -46,4 +46,5 @@ views. Real data needs the module APIs; until then show empty states, not sample
 
 ## Resolution
 
-_Open._
+Superseded on 2026-10-15: the module Homes shipped in `2026-10-14-home-module-screens`
+(Finance, Workout, Skincare, Food, Profile), with on-device data instead of module APIs.

@@ -6,15 +6,23 @@ import { PoText } from "@/components/ui/po-text";
 import { toTextStyle, usePoTheme } from "@/theme";
 import { haptics } from "@/lib/haptics";
 
+/** A chip either fills the bar with its text or runs its own action (opens a sheet). */
+export type AskSuggestion = string | { label: string; onPress: () => void };
+
 export type AskBarProps = {
-	suggestions: readonly string[];
+	suggestions: readonly AskSuggestion[];
 	onSubmit: (text: string) => void;
+	placeholder?: string;
 };
 
 const inputStyle = toTextStyle(textStyles.body15);
 
 /** Kit v2 "Ask Bar" with suggestion chips: one input for logging and asking. */
-export function AskBar({ suggestions, onSubmit }: AskBarProps) {
+export function AskBar({
+	suggestions,
+	onSubmit,
+	placeholder = "Log or ask anything…",
+}: AskBarProps) {
 	const { colors } = usePoTheme();
 	const [text, setText] = useState("");
 	const canSend = text.trim().length > 0;
@@ -34,7 +42,7 @@ export function AskBar({ suggestions, onSubmit }: AskBarProps) {
 					value={text}
 					onChangeText={setText}
 					onSubmitEditing={submit}
-					placeholder="Log or ask anything…"
+					placeholder={placeholder}
 					placeholderTextColor={colors.textTertiary}
 					returnKeyType="send"
 					accessibilityLabel="Log or ask anything"
@@ -57,28 +65,32 @@ export function AskBar({ suggestions, onSubmit }: AskBarProps) {
 				keyboardShouldPersistTaps="handled"
 				contentContainerStyle={styles.suggestions}
 			>
-				{suggestions.map((suggestion) => (
-					<Pressable
-						key={suggestion}
-						accessibilityRole="button"
-						accessibilityHint="Fills the ask bar"
-						onPress={() => {
-							haptics.select();
-							setText(suggestion);
-						}}
-						style={({ pressed }) => [
-							styles.chip,
-							{
-								borderColor: colors.borderDefault,
-								backgroundColor: pressed ? colors.bgHover : "transparent",
-							},
-						]}
-					>
-						<PoText variant="meta13" tone="textSecondary">
-							{suggestion}
-						</PoText>
-					</Pressable>
-				))}
+				{suggestions.map((suggestion) => {
+					const label = typeof suggestion === "string" ? suggestion : suggestion.label;
+					return (
+						<Pressable
+							key={label}
+							accessibilityRole="button"
+							accessibilityHint={typeof suggestion === "string" ? "Fills the ask bar" : undefined}
+							onPress={() => {
+								haptics.select();
+								if (typeof suggestion === "string") setText(suggestion);
+								else suggestion.onPress();
+							}}
+							style={({ pressed }) => [
+								styles.chip,
+								{
+									borderColor: colors.borderDefault,
+									backgroundColor: pressed ? colors.bgHover : "transparent",
+								},
+							]}
+						>
+							<PoText variant="meta13" tone="textSecondary">
+								{label}
+							</PoText>
+						</Pressable>
+					);
+				})}
 			</ScrollView>
 		</View>
 	);

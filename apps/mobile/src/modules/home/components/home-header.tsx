@@ -1,37 +1,48 @@
+import type { ColorTokens } from "@personal-os/tokens";
 import { Pressable, StyleSheet, View } from "react-native";
-import { Icon } from "@/components/icons";
+import { Icon, type IconName } from "@/components/icons";
 import { Glow } from "@/components/ui/glow";
 import { HeaderButton } from "@/components/ui/header-button";
 import { PoText } from "@/components/ui/po-text";
 import { Avatar } from "@/modules/onboarding/components/avatar";
 import { usePoTheme } from "@/theme";
+import type { HomeHero } from "../lib/module-home";
 import { haptics } from "@/lib/haptics";
 
 export type HomeHeaderProps = {
 	name: string;
 	topInset: number;
+	/** Text in the pill: the first name on Overview, the module name on a module Home. */
+	label: string;
+	glow: keyof ColorTokens;
 	/** Whether the module picker is open (the Apps button turns inverse). */
 	pickerOpen: boolean;
 	onAppsPress: () => void;
-	onProfilePress: () => void;
-	onNotificationsPress: () => void;
+	action: { icon: IconName; label: string; onPress: () => void };
+	hero?: HomeHero;
+	amountsHidden?: boolean;
+	onToggleHidden?: () => void;
 };
 
-/** Kit v2 "Home Header": glow, Apps button, profile pill and notifications. */
+/** Kit v2 "Home Header": glow, Apps button, module pill, a module action and the hero number. */
 export function HomeHeader({
 	name,
 	topInset,
+	label,
+	glow,
 	pickerOpen,
 	onAppsPress,
-	onProfilePress,
-	onNotificationsPress,
+	action,
+	hero,
+	amountsHidden = false,
+	onToggleHidden,
 }: HomeHeaderProps) {
 	const { colors } = usePoTheme();
-	const firstName = name.trim().split(/\s+/)[0] || "You";
+	const hidden = Boolean(hero?.hideable && amountsHidden);
 
 	return (
-		<View style={[styles.header, { paddingTop: topInset + 16 }]}>
-			<Glow tone="accentDefault" width={340} height={240} left={-90} top={-110} blur={110} />
+		<View style={[styles.header, { paddingTop: topInset + 6 }, hero ? styles.withHero : null]}>
+			<Glow tone={glow} width={340} height={240} left={-90} top={-110} blur={110} />
 			<View style={styles.row}>
 				<Pressable
 					accessibilityRole="button"
@@ -53,10 +64,10 @@ export function HomeHeader({
 				</Pressable>
 				<Pressable
 					accessibilityRole="button"
-					accessibilityLabel={`Profile, ${firstName}`}
+					accessibilityLabel={`${label}, switch module`}
 					onPress={() => {
 						haptics.tap();
-						onProfilePress();
+						onAppsPress();
 					}}
 					style={({ pressed }) => [
 						styles.pill,
@@ -68,22 +79,56 @@ export function HomeHeader({
 				>
 					<Avatar name={name} size={32} />
 					<PoText variant="text14Medium" numberOfLines={1} style={styles.name}>
-						{firstName}
+						{label}
 					</PoText>
 					<Icon name="Filled/Chevron down" size={16} color={colors.textSecondary} />
 				</Pressable>
 				<HeaderButton
-					icon="Filled/Bell"
-					accessibilityLabel="Notifications"
-					onPress={onNotificationsPress}
+					icon={action.icon}
+					accessibilityLabel={action.label}
+					onPress={action.onPress}
 				/>
 			</View>
+			{hero ? (
+				<View style={styles.hero}>
+					<View style={styles.labelRow}>
+						<PoText variant="text14" tone="textSecondary" numberOfLines={1}>
+							{hero.label}
+						</PoText>
+					</View>
+					<View style={styles.amountRow} accessibilityLabel={hidden ? "Amount hidden" : undefined}>
+						<PoText variant="display36" numberOfLines={1} adjustsFontSizeToFit>
+							{hidden ? "••••••" : hero.value}
+							{!hidden && hero.faint ? (
+								<PoText variant="display36" tone="textTertiary">
+									{hero.faint}
+								</PoText>
+							) : null}
+						</PoText>
+						{hero.hideable && onToggleHidden ? (
+							<Pressable
+								accessibilityRole="button"
+								accessibilityLabel={hidden ? "Show amounts" : "Hide amounts"}
+								hitSlop={10}
+								onPress={() => {
+									haptics.select();
+									onToggleHidden();
+								}}
+								style={styles.eye}
+							>
+								<Icon name="Filled/Eye" color={colors.textSecondary} />
+							</Pressable>
+						) : null}
+					</View>
+				</View>
+			) : null}
 		</View>
 	);
 }
 
 const styles = StyleSheet.create({
 	header: { alignItems: "center", paddingBottom: 20, paddingHorizontal: 24 },
+	withHero: { gap: 32, paddingBottom: 32 },
 	row: { flexDirection: "row", alignItems: "center", gap: 8 },
 	round: {
 		width: 40,
@@ -104,4 +149,8 @@ const styles = StyleSheet.create({
 		borderWidth: 1,
 	},
 	name: { maxWidth: 140 },
+	hero: { alignItems: "center", gap: 4, maxWidth: "100%" },
+	labelRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+	amountRow: { flexDirection: "row", alignItems: "center", maxWidth: "100%" },
+	eye: { paddingLeft: 10 },
 });

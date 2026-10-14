@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import Animated from "react-native-reanimated";
 import { Icon } from "@/components/icons";
@@ -30,6 +31,9 @@ export default function GoalsScreen() {
 	const goals = useOnboardingStore((state) => state.goals);
 	const toggleGoal = useOnboardingStore((state) => state.toggleGoal);
 	const syncModulesWithGoals = useOnboardingStore((state) => state.syncModulesWithGoals);
+	// Modules picked by hand survive a visit here; only new goals re-recommend them.
+	const [goalsOnArrival] = useState(goals);
+	const goalsChanged = goals.join() !== goalsOnArrival.join();
 	const rows = [0, 2, 4, 6].map((start) => goalOptions.slice(start, start + 2));
 
 	return (
@@ -39,7 +43,7 @@ export default function GoalsScreen() {
 			title="What matters most?"
 			body={["Pick up to 3, in order. The first one matters most."]}
 			gap={18}
-			onContinue={syncModulesWithGoals}
+			onContinue={goalsChanged ? syncModulesWithGoals : undefined}
 		>
 			<View style={styles.grid}>
 				{rows.map((row) => (

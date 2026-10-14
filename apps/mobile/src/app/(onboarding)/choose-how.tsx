@@ -10,6 +10,7 @@ import { OnboardingScreen } from "@/modules/onboarding/components/onboarding-scr
 import { TextBlock } from "@/modules/onboarding/components/text-block";
 import { SetupTop } from "@/modules/onboarding/components/top-bars";
 import { onboardingRoutes } from "@/modules/onboarding/lib/flow";
+import { goBack } from "@/modules/onboarding/lib/navigation";
 import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
 import { rise, usePoTheme } from "@/theme";
 
@@ -37,7 +38,7 @@ export default function ChooseHowScreen() {
 				</>
 			}
 		>
-			<SetupTop onBack={() => router.back()} />
+			<SetupTop onBack={() => goBack(onboardingRoutes.chooseHow)} />
 			<View style={styles.gap24} />
 			<TextBlock
 				eyebrow="Set up your OS"

@@ -18,7 +18,7 @@ export default function WelcomeModulesScreen() {
 			preview={<ModuleRowsPreview />}
 			cta="Continue"
 			onNext={() => router.push(onboardingRoutes.welcomeUpcoming)}
-			onSkip={() => router.replace(onboardingRoutes.chooseHow)}
+			onSkip={() => router.push(onboardingRoutes.chooseHow)}
 		/>
 	);
 }

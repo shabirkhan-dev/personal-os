@@ -19,7 +19,7 @@ export default function WelcomeVoiceScreen() {
 			preview={<AiVoicePreview />}
 			cta="Continue"
 			onNext={() => router.push(onboardingRoutes.welcomeHomes)}
-			onSkip={() => router.replace(onboardingRoutes.chooseHow)}
+			onSkip={() => router.push(onboardingRoutes.chooseHow)}
 		/>
 	);
 }

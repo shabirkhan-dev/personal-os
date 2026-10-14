@@ -1,10 +1,11 @@
 import type { ColorTokens } from "@personal-os/tokens";
-import { Pressable, StyleSheet, View } from "react-native";
+import { useEffect } from "react";
+import { Platform, Pressable, StyleSheet, View } from "react-native";
 import { Icon, type IconName } from "@/components/icons";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PoText } from "@/components/ui/po-text";
-import { SelectCard } from "@/components/ui/select-card";
 import { SetupFrame } from "@/modules/onboarding/components/setup-frame";
+import { useMicPermission } from "@/modules/onboarding/hooks/use-mic-permission";
 import { onboardingRoutes } from "@/modules/onboarding/lib/flow";
 import type { ConnectionId } from "@/modules/onboarding/lib/options";
 import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
@@ -24,7 +25,6 @@ const connections: readonly {
 	id: ConnectionId;
 	title: string;
 	meta: string;
-	action: string;
 	icon: IconName;
 	iconTone: Tone;
 	tileTone: Tone;
@@ -33,7 +33,6 @@ const connections: readonly {
 		id: "calendar",
 		title: "Calendar",
 		meta: "Meetings appear in Upcoming",
-		action: "Connect",
 		icon: "Filled/Calendar",
 		iconTone: "accentDefault",
 		tileTone: "accentSubtle",
@@ -42,7 +41,6 @@ const connections: readonly {
 		id: "smartwatch",
 		title: "Smartwatch",
 		meta: "Live heart rate and workouts",
-		action: "Connect",
 		icon: "Clock",
 		iconTone: "textPrimary",
 		tileTone: "bgSubtle",
@@ -51,7 +49,6 @@ const connections: readonly {
 		id: "bank-sms",
 		title: "Bank SMS",
 		meta: "Auto-log spending in PKR",
-		action: "Connect",
 		icon: "Wallet",
 		iconTone: "statusCaution",
 		tileTone: "statusCautionSubtle",
@@ -59,22 +56,36 @@ const connections: readonly {
 	{
 		id: "microphone",
 		title: "Microphone",
-		meta: "Needed for “Hey OS”",
-		action: "Allow",
+		meta: "Talk instead of typing",
 		icon: "Mic",
 		iconTone: "statusViolet",
 		tileTone: "statusVioletSubtle",
 	},
 ];
 
-/** 13 Setup 6 · Connect your devices */
+const HEALTH_NAME = Platform.OS === "ios" ? "Apple Health" : "Health Connect";
+
+/** 13 Setup 6 · Connect your devices. Only the microphone works today; the rest say so. */
 export default function ConnectScreen() {
 	const { colors } = usePoTheme();
-	const appleHealth = useOnboardingStore((state) => state.appleHealth);
-	const connected = useOnboardingStore((state) => state.connections);
-	const set = useOnboardingStore((state) => state.set);
+	const micOn = useOnboardingStore((state) => state.connections.microphone);
 	const toggleConnection = useOnboardingStore((state) => state.toggleConnection);
-	const onCount = connections.filter((item) => connected[item.id]).length;
+	const mic = useMicPermission();
+
+	// The store mirrors the real permission, which can change in Settings.
+	useEffect(() => {
+		if (mic.state === "unknown") return;
+		if ((mic.state === "granted") !== micOn) toggleConnection("microphone");
+	}, [mic.state, micOn, toggleConnection]);
+
+	const allowMic = async () => {
+		haptics.select();
+		try {
+			await mic.request();
+		} catch (error) {
+			console.error("Microphone permission request failed", error);
+		}
+	};
 
 	return (
 		<SetupFrame
@@ -84,12 +95,13 @@ export default function ConnectScreen() {
 			body={["Let Personal OS fill itself in. You stay in control."]}
 			gap={18}
 		>
-			<SelectCard
-				selected={appleHealth}
-				onPress={() => set("appleHealth", !appleHealth)}
-				radius={28}
-				accessibilityLabel="Apple Health"
-				style={styles.health}
+			<View
+				accessible
+				accessibilityLabel={`${HEALTH_NAME}, coming soon`}
+				style={[
+					styles.health,
+					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
+				]}
 			>
 				<View style={styles.healthTop}>
 					<View style={[styles.tile52, { backgroundColor: colors.bgSurface }]}>
@@ -97,35 +109,30 @@ export default function ConnectScreen() {
 					</View>
 					<View style={styles.flex}>
 						<View style={styles.nameRow}>
-							<PoText variant="title18">Apple Health</PoText>
-							<View style={[styles.tag, { backgroundColor: colors.bgSurface }]}>
-								<PoText variant="eyebrow11" tone="textSecondary">
-									Recommended
-								</PoText>
-							</View>
+							<PoText variant="title18">{HEALTH_NAME}</PoText>
 						</View>
 						<PoText variant="meta13" tone="textSecondary">
-							{appleHealth ? "Connected · synced 2 min ago" : "Tap to connect"}
+							Coming in an update
 						</PoText>
 					</View>
-					<Checkbox checked={appleHealth} size={28} />
+					<Soon />
 				</View>
 				<View style={styles.fills}>
 					{healthFills.map((fill) => (
-						<View key={fill.label} style={[styles.fill, { backgroundColor: colors.bgSurface }]}>
+						<View key={fill.label} style={[styles.fill, { backgroundColor: colors.bgSubtle }]}>
 							<Icon name={fill.icon} size={14} color={colors[fill.tone]} />
 							<PoText variant="meta13">{fill.label}</PoText>
 						</View>
 					))}
 				</View>
-			</SelectCard>
+			</View>
 			<View style={styles.gap18} />
 			<View style={styles.labelRow}>
 				<PoText variant="eyebrow11" tone="textSecondary">
 					More connections
 				</PoText>
 				<PoText variant="eyebrow11" tone="textTertiary">
-					{`${onCount} of ${connections.length} on`}
+					{micOn ? "Microphone on" : "More coming soon"}
 				</PoText>
 			</View>
 			<View style={styles.gap10} />
@@ -136,7 +143,6 @@ export default function ConnectScreen() {
 				]}
 			>
 				{connections.map((item, index) => {
-					const on = connected[item.id];
 					return (
 						<View
 							key={item.id}
@@ -156,27 +162,19 @@ export default function ConnectScreen() {
 									{item.meta}
 								</PoText>
 							</View>
-							{on ? (
-								<Pressable
-									accessibilityRole="checkbox"
-									accessibilityLabel={`${item.title} connected`}
-									accessibilityState={{ checked: true }}
-									hitSlop={8}
-									onPress={() => {
-										haptics.select();
-										toggleConnection(item.id);
-									}}
-								>
-									<Checkbox checked size={24} />
-								</Pressable>
+							{item.id !== "microphone" ? (
+								<Soon />
+							) : micOn ? (
+								<Checkbox checked size={24} />
+							) : mic.state === "unavailable" ? (
+								<Soon />
 							) : (
 								<Pressable
 									accessibilityRole="button"
-									accessibilityLabel={`${item.action} ${item.title}`}
-									onPress={() => {
-										haptics.select();
-										toggleConnection(item.id);
-									}}
+									accessibilityLabel={
+										mic.state === "blocked" ? "Open Settings" : "Allow microphone"
+									}
+									onPress={() => void allowMic()}
 									style={({ pressed }) => [
 										styles.action,
 										{
@@ -185,7 +183,7 @@ export default function ConnectScreen() {
 										},
 									]}
 								>
-									<PoText variant="meta13">{item.action}</PoText>
+									<PoText variant="meta13">{mic.state === "blocked" ? "Settings" : "Allow"}</PoText>
 								</Pressable>
 							)}
 						</View>
@@ -203,13 +201,24 @@ export default function ConnectScreen() {
 	);
 }
 
+function Soon() {
+	const { colors } = usePoTheme();
+	return (
+		<View style={[styles.tag, { backgroundColor: colors.bgSubtle }]}>
+			<PoText variant="eyebrow11" tone="textSecondary">
+				Soon
+			</PoText>
+		</View>
+	);
+}
+
 const styles = StyleSheet.create({
 	flex: { flex: 1, gap: 2 },
 	flexGap: { flex: 1, gap: 2 },
 	gap18: { height: 18 },
 	gap10: { height: 10 },
 	gap12: { height: 12 },
-	health: { padding: 16, gap: 14 },
+	health: { padding: 16, gap: 14, borderRadius: 28, borderWidth: 1 },
 	healthTop: { flexDirection: "row", alignItems: "center", gap: 12 },
 	tile52: {
 		width: 52,
@@ -219,7 +228,7 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 	},
 	nameRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-	tag: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10 },
+	tag: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12 },
 	fills: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
 	fill: {
 		flexDirection: "row",

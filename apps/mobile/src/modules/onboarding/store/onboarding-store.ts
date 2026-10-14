@@ -13,7 +13,7 @@ import {
 	type WeightUnit,
 	type WorkStyle,
 } from "../lib/options";
-import { transcriptAnswers } from "../lib/transcript";
+import type { IntroAnswers } from "../lib/parse-intro";
 
 export type OnboardingAnswers = {
 	path: StartPath;
@@ -49,8 +49,8 @@ type OnboardingActions = {
 	toggleWorkday: (index: number) => void;
 	toggleConnection: (connection: ConnectionId) => void;
 	toggleReminder: (reminder: ReminderId) => void;
-	/** Applies the facts understood from the "Just talk" transcript. */
-	applyTranscript: (today?: Date) => void;
+	/** Applies the facts understood from the "Just talk" introduction. */
+	applyIntro: (answers: IntroAnswers) => void;
 	/** Recommended modules from the ranked goals (daily life is always on). */
 	syncModulesWithGoals: () => void;
 	complete: () => void;
@@ -74,14 +74,14 @@ export const initialAnswers: OnboardingAnswers = {
 	workStyle: "hybrid",
 	goals: [],
 	modules: ["daily-life"],
-	connections: { calendar: true, smartwatch: false, "bank-sms": false, microphone: false },
-	appleHealth: true,
-	heyOs: true,
+	connections: { calendar: false, smartwatch: false, "bank-sms": false, microphone: false },
+	appleHealth: false,
+	heyOs: false,
 	reminders: {
 		"morning-plan": true,
 		"evening-check-in": true,
-		"workout-nudge": true,
-		"bill-reminders": true,
+		"workout-nudge": false,
+		"bill-reminders": false,
 	},
 	completed: false,
 };
@@ -125,9 +125,12 @@ export const useOnboardingStore = create<OnboardingAnswers & OnboardingActions>(
 		const reminders = get().reminders;
 		set({ reminders: { ...reminders, [reminder]: !reminders[reminder] } });
 	},
-	applyTranscript: (today = new Date()) => {
-		const answers = transcriptAnswers(today);
-		set({ ...answers, path: "talk", modules: modulesForGoals(answers.goals) });
+	applyIntro: (answers) => {
+		set({
+			...answers,
+			path: "talk",
+			...(answers.goals ? { modules: modulesForGoals(answers.goals) } : {}),
+		});
 	},
 	syncModulesWithGoals: () => set({ modules: modulesForGoals(get().goals) }),
 	complete: () => set({ completed: true }),

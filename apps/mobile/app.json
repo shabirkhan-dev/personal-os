@@ -60,6 +60,19 @@
         {
           "color": "#2D7CF6"
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Personal OS uses your photos when you attach one to a meal or skin check-in.",
+          "cameraPermission": "Personal OS uses the camera for meal and skin check-in photos."
+        }
+      ],
+      [
+        "expo-sensors",
+        {
+          "motionPermission": "Personal OS counts your steps for the Workout module."
+        }
       ]
     ],
     "experiments": {

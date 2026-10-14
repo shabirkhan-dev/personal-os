@@ -5,7 +5,9 @@ import { PoText } from "@/components/ui/po-text";
 import { toShadowStyle, usePoTheme } from "@/theme";
 import { haptics } from "@/lib/haptics";
 
-type Tab = { id: "today" | "areas" | "insights" | "profile"; label: string; icon: IconName };
+export type TabId = "today" | "areas" | "insights" | "profile";
+
+type Tab = { id: TabId; label: string; icon: IconName };
 
 const tabs: readonly Tab[] = [
 	{ id: "today", label: "Today", icon: "Filled/Home" },
@@ -15,24 +17,33 @@ const tabs: readonly Tab[] = [
 ];
 
 export type FloatingTabBarProps = {
+	active: "today" | "profile";
 	bottomInset: number;
-	onAreasPress: () => void;
-	onProfilePress: () => void;
+	onTodayPress?: () => void;
+	onAreasPress?: () => void;
+	onProfilePress?: () => void;
 };
 
 /**
- * Kit v2 "Floating Tab Bar". Today is the only screen so far: Areas opens the module picker,
- * Profile opens the profile menu, and Insights is shown disabled until it exists.
+ * Kit v2 "Floating Tab Bar". Areas opens the module picker; Insights is shown disabled until it
+ * exists. It sits just above the home indicator.
  */
-export function FloatingTabBar({ bottomInset, onAreasPress, onProfilePress }: FloatingTabBarProps) {
+export function FloatingTabBar({
+	active: activeTab,
+	bottomInset,
+	onTodayPress,
+	onAreasPress,
+	onProfilePress,
+}: FloatingTabBarProps) {
 	const { colors } = usePoTheme();
-	const handlers: Partial<Record<Tab["id"], () => void>> = {
+	const handlers: Partial<Record<TabId, () => void>> = {
+		today: onTodayPress,
 		areas: onAreasPress,
 		profile: onProfilePress,
 	};
 
 	return (
-		<View pointerEvents="box-none" style={[styles.wrap, { bottom: Math.max(28, bottomInset + 8) }]}>
+		<View pointerEvents="box-none" style={[styles.wrap, { bottom: Math.max(12, bottomInset + 2) }]}>
 			<View
 				accessibilityRole="tablist"
 				style={[
@@ -42,7 +53,7 @@ export function FloatingTabBar({ bottomInset, onAreasPress, onProfilePress }: Fl
 				]}
 			>
 				{tabs.map((tab) => {
-					const active = tab.id === "today";
+					const active = tab.id === activeTab;
 					const onPress = handlers[tab.id];
 					const disabled = !active && !onPress;
 					return (
@@ -53,7 +64,7 @@ export function FloatingTabBar({ bottomInset, onAreasPress, onProfilePress }: Fl
 							accessibilityState={{ selected: active, disabled }}
 							disabled={disabled}
 							onPress={
-								onPress
+								onPress && !active
 									? () => {
 											haptics.tap();
 											onPress();

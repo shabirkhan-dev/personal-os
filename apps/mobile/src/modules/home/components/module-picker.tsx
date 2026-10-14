@@ -6,13 +6,18 @@ import { PoText } from "@/components/ui/po-text";
 import type { ModuleId } from "@/modules/onboarding/lib/options";
 import { rise, toShadowStyle, usePoTheme } from "@/theme";
 import type { ModuleStatus } from "../lib/today";
+import type { HomeView } from "../store/home-view";
 import { haptics } from "@/lib/haptics";
 
 export type ModulePickerProps = {
 	top: number;
+	/** The Home showing now; its row is checked. */
+	view: HomeView;
 	modules: readonly ModuleStatus[];
 	onClose: () => void;
+	onSelect: (view: HomeView) => void;
 	onAddModule: (id: ModuleId) => void;
+	onEdit: () => void;
 };
 
 type RowProps = {
@@ -85,14 +90,27 @@ function SectionLabel({ children }: { children: string }) {
 }
 
 /**
- * Home "Module picker": a scrim plus a floating card. Overview is the current view; enabled
- * modules are listed under "Your modules" and the rest can be added. Module dashboards come
- * later, so choosing an enabled module only closes the picker.
+ * Home "Module picker": a scrim plus a floating card. Choosing Overview or an enabled module
+ * switches the Home below; modules that are not on yet can be added.
  */
-export function ModulePicker({ top, modules, onClose, onAddModule }: ModulePickerProps) {
+export function ModulePicker({
+	top,
+	view,
+	modules,
+	onClose,
+	onSelect,
+	onAddModule,
+	onEdit,
+}: ModulePickerProps) {
 	const { colors } = usePoTheme();
 	const enabled = modules.filter((item) => item.enabled);
 	const available = modules.filter((item) => !item.enabled);
+	const check = (
+		<View style={[styles.check, { backgroundColor: colors.bgInverse }]}>
+			<Icon name="Line/Check" size={16} color={colors.textInverse} />
+		</View>
+	);
+	const isShowing = (id: HomeView) => view === id || (id === "overview" && view === "daily-life");
 
 	return (
 		<View style={StyleSheet.absoluteFill}>
@@ -120,6 +138,20 @@ export function ModulePicker({ top, modules, onClose, onAddModule }: ModulePicke
 				<ScrollView contentContainerStyle={styles.content} bounces={false}>
 					<View style={styles.head}>
 						<PoText variant="title18">Modules</PoText>
+						<Pressable
+							accessibilityRole="button"
+							accessibilityLabel="Edit modules"
+							onPress={() => {
+								haptics.tap();
+								onEdit();
+							}}
+							style={({ pressed }) => [
+								styles.edit,
+								{ backgroundColor: pressed ? colors.bgHover : colors.bgSubtle },
+							]}
+						>
+							<PoText variant="meta13">Edit</PoText>
+						</Pressable>
 					</View>
 					<SectionLabel>Pinned</SectionLabel>
 					<Row
@@ -128,17 +160,20 @@ export function ModulePicker({ top, modules, onClose, onAddModule }: ModulePicke
 						tileTone="bgSubtle"
 						name="Overview"
 						status="All areas in one view"
-						selected
-						onPress={onClose}
-						trailing={
-							<View style={[styles.check, { backgroundColor: colors.bgInverse }]}>
-								<Icon name="Line/Check" size={16} color={colors.textInverse} />
-							</View>
-						}
+						selected={isShowing("overview")}
+						onPress={() => onSelect("overview")}
+						trailing={isShowing("overview") ? check : null}
 					/>
 					{enabled.length > 0 ? <SectionLabel>Your modules</SectionLabel> : null}
 					{enabled.map((item) => (
-						<Row key={item.id} {...item} name={item.label} onPress={onClose} />
+						<Row
+							key={item.id}
+							{...item}
+							name={item.label}
+							selected={isShowing(item.id)}
+							onPress={() => onSelect(item.id === "daily-life" ? "overview" : item.id)}
+							trailing={isShowing(item.id) && item.id !== "daily-life" ? check : null}
+						/>
 					))}
 					{available.length > 0 ? <SectionLabel>Add a module</SectionLabel> : null}
 					{available.map((item) => (
@@ -173,12 +208,15 @@ const styles = StyleSheet.create({
 	},
 	content: { gap: 6, paddingTop: 18, paddingBottom: 12, paddingHorizontal: 10 },
 	head: {
+		flexDirection: "row",
+		alignItems: "center",
+		justifyContent: "space-between",
 		paddingLeft: 10,
 		paddingRight: 4,
 		paddingBottom: 6,
 		minHeight: 34,
-		justifyContent: "center",
 	},
+	edit: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 16 },
 	section: { paddingLeft: 10, paddingTop: 8, paddingBottom: 2 },
 	row: {
 		height: 60,

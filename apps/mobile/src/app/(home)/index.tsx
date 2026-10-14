@@ -2,13 +2,14 @@ import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { Alert, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useAuth } from "@/modules/auth/context/auth-context";
 import { AskBar } from "@/modules/home/components/ask-bar";
 import { FloatingTabBar } from "@/modules/home/components/floating-tab-bar";
 import { HomeHeader } from "@/modules/home/components/home-header";
 import { ModulePicker } from "@/modules/home/components/module-picker";
 import { MoneyCard } from "@/modules/home/components/money-card";
+import { SoonView } from "@/modules/home/components/soon-view";
 import { UpcomingList } from "@/modules/home/components/upcoming-list";
+import type { HomeModule } from "@/modules/home/lib/module-home";
 import {
 	moduleStatuses,
 	nowLabel,
@@ -16,13 +17,18 @@ import {
 	todayItems,
 	upcoming,
 } from "@/modules/home/lib/today";
+import { type HomeView, useHomeView } from "@/modules/home/store/home-view";
 import type { ModuleId } from "@/modules/onboarding/lib/options";
+import { moduleOptions } from "@/modules/onboarding/lib/options";
 import { useOnboardingProgress } from "@/modules/onboarding/store/onboarding-progress";
 import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
 import { usePlan } from "@/modules/onboarding/store/use-plan";
 import { usePoTheme } from "@/theme";
 
-const HEADER_HEIGHT = 76;
+const HEADER_HEIGHT = 66;
+
+/** Module Homes are registered here as they are built. */
+const moduleHomes: Partial<Record<ModuleId, HomeModule>> = {};
 
 /** Re-renders once a minute so "Now" and "Next · in …" stay current. */
 function useNow(): Date {
@@ -34,27 +40,21 @@ function useNow(): Date {
 	return now;
 }
 
-function suggestionsFor(modules: readonly ModuleId[]): string[] {
-	const suggestions: string[] = [];
-	if (modules.includes("food")) suggestions.push("Log a meal");
-	if (modules.includes("finance")) suggestions.push("Add expense");
-	if (modules.includes("workout")) suggestions.push("Start workout");
-	suggestions.push("Plan tomorrow");
-	return suggestions.slice(0, 3);
-}
-
-/** Home · Overview (Figma page "Home"). */
-export default function HomeScreen() {
+/** Today: Overview or one module's Home, switched from the module picker. */
+export default function TodayScreen() {
 	const { colors } = usePoTheme();
 	const insets = useSafeAreaInsets();
 	const now = useNow();
 	const plan = usePlan();
 	const { answers } = plan;
 	const toggleModule = useOnboardingStore((state) => state.toggleModule);
-	const resetAnswers = useOnboardingStore((state) => state.reset);
-	const { persistAnswers, restart } = useOnboardingProgress();
+	const { persistAnswers } = useOnboardingProgress();
+	const { data: viewDoc, hydrate, update } = useHomeView();
 	const [pickerOpen, setPickerOpen] = useState(false);
-	const auth = useAuth();
+
+	useEffect(() => {
+		void hydrate();
+	}, [hydrate]);
 
 	const items = useMemo(
 		() => todayItems(plan.input, answers.reminders),
@@ -62,85 +62,188 @@ export default function HomeScreen() {
 	);
 	const nowMinutes = now.getHours() * 60 + now.getMinutes();
 	const next = useMemo(() => upcoming(items, nowMinutes), [items, nowMinutes]);
-	const modules = useMemo(() => moduleStatuses(plan.input, items), [plan.input, items]);
 
-	const openProfileMenu = () => {
-		const account =
-			auth.status === "signed-in" && auth.user
-				? {
-						text: "Sign out",
-						style: "destructive" as const,
-						onPress: () => {
-							auth.logout().catch(() => undefined);
-						},
-					}
-				: { text: "Sign in", onPress: () => router.push("/(home)/sign-in") };
-		const detail =
-			auth.status === "signed-in" && auth.user
-				? `Signed in as ${auth.user.email}`
-				: auth.status === "offline"
-					? "Can't reach Personal OS. Your plan is saved on this phone."
-					: "Not signed in. Your plan is saved on this phone.";
-		Alert.alert(answers.name.trim() || "Your profile", detail, [
-			account,
-			{
-				text: "Replay onboarding",
-				onPress: () => {
-					resetAnswers();
-					restart().catch(() => undefined);
-				},
-			},
-			{ text: "Cancel", style: "cancel" },
-		]);
+	const liveStatus: Partial<Record<ModuleId, string>> = {};
+	const modules = moduleStatuses(plan.input, items);
+	for (const item of modules) item.status = liveStatus[item.id] ?? item.status;
+
+	// A module turned off elsewhere falls back to Overview.
+	const view: HomeView =
+		viewDoc.view !== "overview" && !answers.modules.includes(viewDoc.view)
+			? "overview"
+			: viewDoc.view;
+	const moduleHome = view === "overview" ? undefined : moduleHomes[view];
+
+	const select = (target: HomeView) => {
+		update((doc) => ({ ...doc, view: target }));
+		setPickerOpen(false);
 	};
 
 	const addModule = (id: ModuleId) => {
 		toggleModule(id);
-		persistAnswers().catch(() => undefined);
+		persistAnswers().catch((error: unknown) => console.error("Could not save modules", error));
 	};
+
+	const togglePicker = () => setPickerOpen((open) => !open);
+	const toggleHidden = () => update((doc) => ({ ...doc, amountsHidden: !doc.amountsHidden }));
 
 	return (
 		<View style={[styles.root, { backgroundColor: colors.bgApp }]}>
 			<ScrollView
-				contentContainerStyle={[styles.scroll, { paddingBottom: 120 + insets.bottom }]}
+				contentContainerStyle={[styles.scroll, { paddingBottom: 110 + insets.bottom }]}
 				keyboardShouldPersistTaps="handled"
 			>
-				<HomeHeader
-					name={answers.name}
-					topInset={insets.top}
-					pickerOpen={pickerOpen}
-					onAppsPress={() => setPickerOpen((open) => !open)}
-					onProfilePress={openProfileMenu}
-					onNotificationsPress={() => Alert.alert("Notifications", "You're all caught up.")}
-				/>
-				<View style={styles.content}>
-					{answers.modules.includes("finance") ? <MoneyCard period={periodLabel(now)} /> : null}
-					<AskBar
-						suggestions={suggestionsFor(answers.modules)}
-						onSubmit={() =>
-							Alert.alert(
-								"Assistant",
-								"Logging and asking arrive with your account. Your note was not saved.",
-							)
-						}
+				{moduleHome && view !== "overview" ? (
+					<ModuleScreen
+						key={view}
+						module={moduleHome}
+						label={moduleOptions.find((option) => option.id === view)?.label ?? "Module"}
+						name={answers.name}
+						topInset={insets.top}
+						pickerOpen={pickerOpen}
+						onAppsPress={togglePicker}
+						amountsHidden={viewDoc.amountsHidden}
+						onToggleHidden={toggleHidden}
 					/>
-					<UpcomingList upcoming={next} now={nowLabel(now)} />
-				</View>
+				) : (
+					<>
+						<HomeHeader
+							name={answers.name}
+							topInset={insets.top}
+							label={answers.name.trim().split(/\s+/)[0] || "You"}
+							glow="accentDefault"
+							pickerOpen={pickerOpen}
+							onAppsPress={togglePicker}
+							action={{
+								icon: "Filled/Bell",
+								label: "Notifications",
+								onPress: () => Alert.alert("Notifications", "You're all caught up."),
+							}}
+						/>
+						<View style={styles.content}>
+							{view === "overview" ? (
+								<OverviewBody
+									period={periodLabel(now)}
+									modules={answers.modules}
+									amountsHidden={viewDoc.amountsHidden}
+									onOpen={select}
+									upcomingList={<UpcomingList upcoming={next} now={nowLabel(now)} />}
+								/>
+							) : (
+								<SoonView
+									icon={view === "fashion" ? "Shirt" : "Filled/Grid"}
+									title={`${moduleOptions.find((option) => option.id === view)?.label ?? "This module"} is coming`}
+									body="Its own Home is being built. Your plan for it still shows on Overview."
+									onBack={() => select("overview")}
+								/>
+							)}
+						</View>
+					</>
+				)}
 			</ScrollView>
 			{pickerOpen ? (
 				<ModulePicker
-					top={insets.top + HEADER_HEIGHT - 2}
+					top={insets.top + HEADER_HEIGHT}
+					view={view}
 					modules={modules}
 					onClose={() => setPickerOpen(false)}
+					onSelect={select}
 					onAddModule={addModule}
+					onEdit={() => {
+						setPickerOpen(false);
+						router.push("/profile");
+					}}
 				/>
 			) : null}
 			<FloatingTabBar
+				active="today"
 				bottomInset={insets.bottom}
+				onTodayPress={() => select("overview")}
 				onAreasPress={() => setPickerOpen(true)}
-				onProfilePress={openProfileMenu}
+				onProfilePress={() => router.replace("/profile")}
 			/>
 		</View>
+	);
+}
+
+type ModuleScreenProps = {
+	module: HomeModule;
+	label: string;
+	name: string;
+	topInset: number;
+	pickerOpen: boolean;
+	onAppsPress: () => void;
+	amountsHidden: boolean;
+	onToggleHidden: () => void;
+};
+
+/** One module's Home. Keyed by module so each module's hooks start fresh. */
+function ModuleScreen({ module, label, ...header }: ModuleScreenProps) {
+	const hero = module.useHero();
+	const [actionRequest, setActionRequest] = useState(0);
+	const { View: ModuleView } = module;
+
+	return (
+		<>
+			<HomeHeader
+				{...header}
+				label={label}
+				glow={module.glow}
+				hero={hero}
+				action={{
+					icon: module.action.icon,
+					label: module.action.label,
+					onPress: () => setActionRequest((count) => count + 1),
+				}}
+			/>
+			<View style={styles.content}>
+				<ModuleView actionRequest={actionRequest} />
+			</View>
+		</>
+	);
+}
+
+type OverviewBodyProps = {
+	period: string;
+	modules: readonly ModuleId[];
+	amountsHidden: boolean;
+	onOpen: (view: HomeView) => void;
+	upcomingList: React.ReactNode;
+};
+
+/** Overview: money at a glance, the ask bar and what is coming up today. */
+function OverviewBody({ period, modules, amountsHidden, onOpen, upcomingList }: OverviewBodyProps) {
+	const finance = { leftToSpend: null };
+	const suggestions = [
+		modules.includes("food") ? { label: "Log a meal", onPress: () => onOpen("food") } : null,
+		modules.includes("finance") ? { label: "Add expense", onPress: () => onOpen("finance") } : null,
+		modules.includes("workout")
+			? { label: "Start workout", onPress: () => onOpen("workout") }
+			: null,
+		modules.includes("skincare") ? { label: "Skincare", onPress: () => onOpen("skincare") } : null,
+	].filter((item): item is { label: string; onPress: () => void } => item !== null);
+
+	return (
+		<>
+			{modules.includes("finance") ? (
+				<MoneyCard
+					period={period}
+					leftToSpend={finance.leftToSpend}
+					hidden={amountsHidden}
+					onPress={() => onOpen("finance")}
+				/>
+			) : null}
+			<AskBar
+				suggestions={suggestions.slice(0, 3)}
+				onSubmit={(text) =>
+					Alert.alert(
+						"Pick a module",
+						`To log “${text}”, open the module it belongs to from the chips or the Apps button.`,
+					)
+				}
+			/>
+			{upcomingList}
+		</>
 	);
 }
 

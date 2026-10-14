@@ -1,47 +1,57 @@
 ---
 title: Architecture
-description: Baseline layering, boundaries, and enforceable rules.
+description: Layering, boundaries and the rules the checks enforce.
 ---
-This starter uses a strong default architecture that is intentionally overridable.
+
+How code is organized inside each app, and which rules are enforced by scripts rather than
+convention. For how the pieces fit together at runtime, see
+[Product System Design](/docs/product-system-design).
 
 ## Principles
 
-- Keep apps thin; keep reusable behavior in packages.
-- Prefer module public entrypoints over deep internal imports.
-- Keep domain logic separate from transport and framework concerns.
-- Enforce boundaries with automated checks, not only conventions.
+- Keep apps thin at the edges: screens and controllers compose, logic lives below them.
+- Pure logic is plain TypeScript with tests (`lib/` in mobile, services in Nest).
+- Reusable, app-agnostic code goes in `packages/*`.
+- Enforce boundaries with checks, not only conventions.
 
 ## Layering
 
-### `apps/web`
+### `apps/mobile`
 
-- `src/app/*` is routing and composition.
-- `src/modules/*` is feature-level UI and workflows.
-- `src/lib/*` contains framework-agnostic helpers for the app.
-- `src/components/*` contains reusable visual components.
+- `src/app/*` is Expo Router: routing and screen composition only.
+- `src/modules/<name>/` is one feature: `components`, `hooks`, `lib` (pure logic and parsing,
+  unit-tested), `services` (device and network I/O) and `store` (Zustand, usually a document store).
+- `src/lib/*` holds app-wide helpers: the API client, storage, dates.
+- `src/components/*` and `src/theme/*` hold Kit v2 components and the theme provider. Screens use
+  `@personal-os/tokens` through the theme; no raw colour values.
 
 ### `apps/nest-api`
 
-- `src/modules/*` holds feature modules (controller/service/repository).
-- `src/common/*` holds cross-cutting HTTP concerns (filters, interceptors, pipes, guards).
-- `src/config/*` holds validated environment configuration.
-- Controllers stay thin; business logic lives in services; database access in repositories.
+- `src/modules/*` holds feature modules (controller, service, repository, DTOs).
+- `src/common/*` holds cross-cutting HTTP concerns (filters, interceptors, pipes, middleware).
+- `src/config/*` holds Zod-validated environment configuration.
+- `src/database/*` holds the Drizzle schema and committed migrations.
+- Controllers stay thin; logic lives in services; database access lives in repositories.
+
+### `apps/ai-api`
+
+Ports and adapters: `api/` (FastAPI routes), `application/` (use cases), `domain/` (ports and
+errors), `infrastructure/` (LLM providers, the internal-token check).
 
 ### `packages/*`
 
-- Packages should remain app-agnostic and not import app aliases like `@/...`.
-- Shared packages expose public entrypoints and avoid framework lock-in when possible.
+- Packages never import app aliases like `@/...`.
+- Each package exposes a public entrypoint (`src/index.ts`).
 
 ## Enforcement
 
-- Run `bun run architecture:check` locally and in CI (import boundaries + kebab-case naming).
-- Boundary checks currently validate:
-  - no `@/...` imports inside `packages/*`
-  - no deep web module imports (`@/modules/*/*/*`) from outside `src/modules/`
-  - no cross-app relative imports via `../../apps/`
-  - no cross-app relative imports (`../../apps/...`)
-  - kebab-case file/folder names under TS/JS `src/` (allows Nest dotted names like `auth.service.ts`, route groups `(auth)`, and `[id]` params)
+`bun run architecture:check` runs locally (Lefthook) and in CI. It fails on:
+
+- `@/...` imports inside `packages/*`
+- cross-app relative imports (`../../apps/...`)
+- file or folder names under TS/JS `src/` that are not kebab-case (Nest dotted names like
+  `auth.service.ts`, route groups like `(home)` and `[id]` params are allowed)
 
 ## ADRs
 
-See `/docs/architecture/adr-0001-strong-default-overridable` for rationale and trade-offs.
+- [ADR 0001: Module data lives on the phone](/docs/architecture/adr-0001-on-device-module-data)

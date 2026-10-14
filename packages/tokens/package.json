@@ -19,7 +19,7 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"devDependencies": {
-		"@starter/typescript-config": "workspace:*",
+		"@personal-os/typescript-config": "workspace:*",
 		"typescript": "^7.0.2"
 	}
 }

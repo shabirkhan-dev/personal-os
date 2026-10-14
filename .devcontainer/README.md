@@ -1,6 +1,6 @@
 # Dev Container
 
-Reproducible environment for Starter: **Bun**, **Python** (script tooling), and Bash lint/format helpers.
+Reproducible environment for Personal OS: **Bun**, **Python** (the AI service), and Bash lint/format helpers.
 
 ## How to use
 
@@ -14,7 +14,7 @@ After start, `postCreateCommand` runs `bun install` and `bun run prepare` (git h
 | Tool | Why |
 |------|-----|
 | **Bun** `1.4.2` | Package manager + JS/TS runtime |
-| **Python 3** + **Ruff** | `scripts/python` lint/format |
+| **Python 3** + **Ruff** | `apps/ai-api` lint/format (uv manages the project venv) |
 | **ShellCheck** + **shfmt** | Bash script quality |
 
 C and Lua toolchains were removed — they are not part of the product stack.

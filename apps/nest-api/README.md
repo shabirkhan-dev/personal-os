@@ -1,28 +1,29 @@
-# Starter API
+# Personal OS API
 
-Production-oriented NestJS authentication and user foundation backed by PostgreSQL, Drizzle ORM,
-Zod validation, secure cookies, and explicit SQL migrations.
+The NestJS API behind the Personal OS mobile app, backed by PostgreSQL (Neon in production),
+Drizzle ORM, Zod validation and explicit SQL migrations.
 
-## Included
+Module data (expenses, meals, workouts, skincare) lives on the phone today. This API holds the
+account, the profile and the onboarding answers, and proxies the AI service. See the docs app
+`/docs/product-system-design` for the whole picture and `/docs/backend-api` for the contract the
+app consumes.
 
-- Account registration with email verification OTP
-- Login protection with failed-attempt lockout
-- Short-lived JWT access tokens
-- Rotating, hashed refresh tokens in HttpOnly cookies
-- Session listing, single-session revocation, logout, and logout-all
-- Forgot/reset password OTP flow
-- Authenticated password changes that revoke other sessions
-- TOTP two-factor authentication with one-time recovery codes
-- Passwordless magic-link sign in
-- Passkeys through WebAuthn (Touch ID, Face ID, Windows Hello, device PIN, or security key)
-- Google Identity Services sign in and explicit account linking
-- Separate user-profile, email-delivery, and authentication-provider modules
-- Generic account responses that avoid user enumeration
-- CSRF origin/header checks, CORS allowlist, Helmet, and rate limiting
-- OpenAPI docs at `http://localhost:4000/api/docs`
+## Modules
 
-Roles, permissions, additional social providers, and product-specific domain models are
-intentionally not part of this foundation.
+| Module                           | What it does                                                                  | Used by the app today             |
+| -------------------------------- | ----------------------------------------------------------------------------- | --------------------------------- |
+| `auth`                           | Email-code sign-in, sessions, refresh rotation, password and magic-link flows | Email code, refresh, logout, `me` |
+| `users`, `profiles`              | Account record, display name, avatar upload                                   | Yes                               |
+| `onboarding`                     | Stores the onboarding answers (`/users/me/onboarding`)                        | Yes                               |
+| `mfa`, `passkeys`, `social-auth` | TOTP, WebAuthn passkeys, Google sign-in                                       | Not yet (kept by decision, pos-8) |
+| `email`                          | Resend delivery for auth codes and links                                      | Yes                               |
+| `ai`                             | Proxies `apps/ai-api` with a service token                                    | Not yet                           |
+| `health`                         | Liveness probe                                                                | Deploy health checks              |
+
+Auth security in place: short-lived JWT access tokens, rotating hashed refresh tokens (HttpOnly
+cookie for browsers, response body for native clients that send `X-Client-Platform: native`),
+login lockout, generic responses that avoid user enumeration, CSRF origin/header checks, CORS
+allowlist, Helmet and rate limiting. OpenAPI docs run at `http://localhost:4000/api/docs`.
 
 ## Setup
 

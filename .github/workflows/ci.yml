@@ -132,5 +132,4 @@ jobs:
           name: coverage-reports
           path: |
             apps/nest-api/coverage
-            packages/logger/coverage
           if-no-files-found: warn

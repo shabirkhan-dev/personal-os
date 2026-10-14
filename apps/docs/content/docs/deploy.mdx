@@ -3,10 +3,11 @@ title: Deploy
 description: Landing page on Cloudflare Workers, docs on Vercel, Nest API on Render with Neon Postgres.
 ---
 
-Ship the Starter stack without Docker on the public internet:
+Where each piece of Personal OS runs in production:
 
 | App | Platform | Notes |
 |-----|----------|--------|
+| `apps/mobile` | [EAS](https://expo.dev/eas) | Builds and over-the-air updates; see `apps/mobile/README.md` |
 | `apps/web` | [Cloudflare Workers](https://workers.cloudflare.com) | Next.js static export served as Worker assets + `/api/notify` |
 | `apps/docs` | [Vercel](https://vercel.com) | Separate Vercel project |
 | `apps/nest-api` | [Render](https://render.com) | Docker Blueprint + Neon `DATABASE_URL` |
@@ -30,11 +31,11 @@ Repo files: `apps/web/README.md`, `apps/docs/vercel.json`, root `render.yaml`.
 |----------|---------|
 | `DATABASE_URL` | Neon pooled URL |
 | `RESEND_API_KEY` | `re_...` from [Resend](https://resend.com) |
-| `AUTH_EMAIL_FROM` | `Starter <noreply@your-domain.com>` |
-| `WEB_APP_URL` | `https://your-web.vercel.app` (set after step 3) |
-| `CORS_ORIGIN` | same as `WEB_APP_URL` (comma-separate preview URLs if needed) |
-| `WEBAUTHN_RP_ID` | `your-web.vercel.app` (hostname only) |
-| `WEBAUTHN_ORIGIN` | `https://your-web.vercel.app` |
+| `AUTH_EMAIL_FROM` | `Personal OS <noreply@your-domain.com>` |
+| `WEB_APP_URL` | Base URL for links in auth emails (magic links); any HTTPS origin you own |
+| `CORS_ORIGIN` | Browser origins allowed to call the API; the mobile app does not need one |
+| `WEBAUTHN_RP_ID` | Passkey relying-party hostname; only needed once passkeys are used |
+| `WEBAUTHN_ORIGIN` | Passkey origin, `https://` + the hostname above |
 
 Blueprint already sets `COOKIE_SAME_SITE=none`, `TRUST_PROXY=true`, and generates `JWT_SECRET`, `AUTH_TOKEN_SECRET`, and `AI_SERVICE_TOKEN`.
 
@@ -73,25 +74,21 @@ Full steps: `apps/web/README.md`.
 
 4. Deploy. Docs do not call Nest.
 
-## Cross-origin auth (important)
+## Sessions and cookies
 
-Web (`*.vercel.app`) and API (`*.onrender.com`) are **different sites**. Refresh cookies use:
-
-- `COOKIE_SAME_SITE=none`
-- `Secure` (HTTPS)
-
-Local Docker stays on `COOKIE_SAME_SITE=lax` (default). Do **not** set `COOKIE_DOMAIN` across Vercel and Render hostnames — it cannot glue them.
-
-Long-term option: put both under one parent domain (e.g. `app.example.com` + `api.example.com`) and tighten cookie settings.
+The mobile app sends `X-Client-Platform: native`, receives its refresh token in the response body
+and stores it in SecureStore, so it needs no cookies and no CORS. Cookie settings
+(`COOKIE_SAME_SITE`, `Secure`, `COOKIE_DOMAIN`) only matter for a browser client, and there is
+none today: the landing page and docs never call the API.
 
 ## Checklist
 
 - [ ] Neon `DATABASE_URL` on Render
 - [ ] Resend key + verified from-address
 - [ ] Nest health returns OK
-- [ ] Web `NEXT_PUBLIC_NEST_API_URL` → Render origin
-- [ ] Nest `CORS_ORIGIN` / `WEB_APP_URL` → Vercel web URL
-- [ ] Login works (cookie + credentials)
+- [ ] Mobile production build sets `EXPO_PUBLIC_NEST_API_URL` to the Render API URL
+- [ ] Email-code sign-in works on a device
+- [ ] Landing page live on its custom domain, waitlist KV bound
 - [ ] Docs project live (optional OpenRouter)
 
 ## Related

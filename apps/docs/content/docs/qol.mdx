@@ -2,7 +2,7 @@
 title: Quality of Life
 description: Hooks, CI, and developer quality tooling across the monorepo.
 ---
-Consistency, fast feedback, and automation across TS, Bash, and Python.
+Consistency, fast feedback, and automation across TypeScript, Python (the AI service) and Bash.
 
 ## Cross-repo (Tier 1)
 
@@ -14,29 +14,30 @@ Consistency, fast feedback, and automation across TS, Bash, and Python.
 | **CI** | `.github/workflows/ci.yml`: split quality gates (lint, typecheck, build, coverage tests) on push/PR to `main` |
 | **CD** | `.github/workflows/cd.yml`: staged deploy workflow template (staging on `main`, production on version tags) |
 | **Dev Container** | `.devcontainer/`: reproducible env (Bun, Python, shell tools). Reopen in Container; see `.devcontainer/README.md` |
+| **Security** | `.github/workflows/security.yml`, CodeQL and Dependabot |
 
 ## Per-language
 
 | Language | Lint / format | Test / types |
 |----------|----------------|--------------|
-| **TS/JS** | oxlint (lint), oxfmt (format) | tsc (typecheck), Jest (Nest), `bun test` (mobile) |
-| **Bash** | shellcheck, shfmt | (bats optional) |
-| **Python** | ruff (check + format) | (pytest optional); scripts/python |
+| **TS/JS** | oxlint (lint), oxfmt (format) | tsc (typecheck), Vitest (Nest), `bun test` (mobile) |
+| **Bash** (`scripts/`) | shellcheck, shfmt | — |
+| **Python** (`apps/ai-api`) | ruff (check + format) | pytest |
 
 ## One-command surface
 
 From repo root:
 
 - **`bun run format`** — oxfmt + scripts (shfmt)
-- **`bun run lint`** — Turbo lint + scripts (shellcheck, ruff)
+- **`bun run lint`** — Turbo lint (oxlint, ruff) + shellcheck over `scripts/`
 - **`bun run typecheck`** — TS only
-- **`bun run test`** — Turbo tests + script tests
-- **`bun run test:coverage`** — TS coverage runs + script tests
+- **`bun run test`** — Turbo tests
+- **`bun run test:coverage`** — Nest coverage + mobile tests
 - **`bun run build`** — Turbo build
 
 ## Next-level (Tier 2+)
 
-- **Python**: Pyright + pytest in CI
+- **Python**: Pyright type checks for `apps/ai-api`
 - **Releases**: changesets for versioning and changelogs
 - **Environments**: Dev Container (`.devcontainer/`) or Nix for pinned toolchains
 

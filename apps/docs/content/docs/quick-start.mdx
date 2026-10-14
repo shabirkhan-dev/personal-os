@@ -1,13 +1,14 @@
 ---
 title: Quick Start
-description: Get the Starter running in minutes.
+description: Get Personal OS running locally in minutes.
 ---
 
 ## Prerequisites
 
-- Bun (latest stable)
+- Bun `1.4.2` (pinned in `packageManager`)
 - Git
-- Node-compatible system dependencies for Next.js and Expo
+- An Android or iOS device or emulator with a development build of the app
+- Optional: Docker Compose (Postgres), Python 3 + uv (AI service)
 
 ## 1) Install dependencies
 
@@ -29,21 +30,24 @@ This enables Lefthook checks for formatting, linting, type checks, and commit hy
 bun run dev
 ```
 
-Turbo will run relevant app/dev tasks across the monorepo.
+Turbo starts every app's dev server: Metro, the Nest API, the AI service (needs uv), the docs and
+the landing page. The API needs Postgres: run `docker compose up -d postgres` first (see
+[Docker](/docs/docker)).
 
 ## 4) Open apps
 
-- Web app: `apps/web`
-- Mobile app: `apps/mobile`
-- API app: `apps/nest-api`
-- Docs app: `apps/docs`
+- Mobile app (`apps/mobile`): Metro on http://localhost:8081, opened from the development build
+- Nest API (`apps/nest-api`): http://localhost:4000/api/v1/health, Swagger at `/api/docs`
+- Docs (`apps/docs`): http://localhost:3002/docs
+- AI service (`apps/ai-api`): http://localhost:8000
+- Landing page (`apps/web`): http://localhost:3000
 
 ## 5) Validate quality before pushing
 
 ```bash
-bun run lint
-bun run format
-bun run typecheck
+bun run preflight
 ```
+
+`preflight` runs lint, typecheck and tests.
 
 If your change only touches one app, you can still run checks at the root to keep CI consistent.

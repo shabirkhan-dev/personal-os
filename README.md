@@ -1,7 +1,7 @@
 # Personal OS
 
-Personal life operating system: routines, finance, skincare, food and fashion in one **mobile** app.
-Bun workspaces + Turborepo. The pre-reset tree is archived on the `archive/main-pre-starter` branch.
+Personal life operating system: daily life, training, finance, skincare, food and fashion in one
+**mobile** app. Bun workspaces + Turborepo.
 
 **Mobile-first.** The Expo app (`apps/mobile`) is the product. It is backed by the NestJS API and
 the FastAPI AI service, and styled with the Figma Kit v2 tokens in `packages/tokens`
@@ -16,7 +16,7 @@ Dual-licensed **MIT OR Apache-2.0**.
 **Prerequisites**
 
 - [Bun](https://bun.sh) `1.4.2` (pinned via `packageManager`)
-- Optional: Docker Compose `v2.20+`, Python 3 + uv (`apps/ai-api`, script tests)
+- Optional: Docker Compose `v2.20+`, Python 3 + uv (`apps/ai-api`)
 
 ```bash
 git clone https://github.com/shabirkhan-dev/personal-os.git
@@ -26,8 +26,8 @@ bun run prepare
 bun run dev
 ```
 
-`bun run dev` starts Metro, the Nest API and the docs site. Start the AI service with
-`bun run dev:ai`.
+`bun run dev` starts every app's dev server (Turbo). Run `bun run dev:ai` to start only the AI
+service.
 
 | App | Dev URL |
 | --- | --- |
@@ -35,6 +35,7 @@ bun run dev
 | Nest API | http://localhost:4000 — `/api/v1/health`, `/api/docs` |
 | AI API | http://localhost:8000 |
 | Docs | http://localhost:3002/docs |
+| Landing page | http://localhost:3000 |
 
 To work on one app in isolation: `bun --cwd=apps/mobile run start` (same pattern for `nest-api`,
 `ai-api`, `docs`).
@@ -49,11 +50,10 @@ To work on one app in isolation: `bun --cwd=apps/mobile run start` (same pattern
 | `apps/docs` | Fumadocs site — project docs at `/docs` |
 | `apps/web` | Landing page: Next.js static export on Cloudflare Workers |
 | `packages/tokens` | `@personal-os/tokens`: Kit v2 colours, spacing, radii, text styles |
-| `packages/logger` | `@starter/logger`: shared structured logging |
-| `packages/typescript-config` | `@starter/typescript-config`: base tsconfigs |
+| `packages/typescript-config` | `@personal-os/typescript-config`: base tsconfigs |
 | `.agents/` | Agent coordination hub, rules and vendored skills |
 | `docker/` | Compose fragments: Postgres, Nest API, optional AI API |
-| `scripts/` | Bash and Python utilities, plus architecture and naming checks |
+| `scripts/` | Git hooks plus architecture and naming checks (Bash) |
 | `.github/workflows/` | `ci.yml`, `cd.yml`, `security.yml` |
 
 The design rules live in [DESIGN.md](DESIGN.md).
@@ -65,7 +65,7 @@ The design rules live in [DESIGN.md](DESIGN.md).
 | `bun run dev` | All dev servers (Turbo) |
 | `bun run dev:ai` | FastAPI only |
 | `bun run build` | Build every app |
-| `bun run lint` / `lint:fix` | oxlint, plus ShellCheck and Ruff over `scripts/` |
+| `bun run lint` / `lint:fix` | oxlint and Ruff (`apps/ai-api`), plus ShellCheck over `scripts/` |
 | `bun run format` | Format TS/JS and shell |
 | `bun run typecheck` | TypeScript across workspaces |
 | `bun run test` / `test:coverage` | Unit tests / coverage gates |
@@ -78,7 +78,7 @@ The design rules live in [DESIGN.md](DESIGN.md).
 - **Bun** workspaces and **Turborepo** for the task graph
 - **oxlint** for linting and **oxfmt** for formatting TS/JS — tabs, line width 100
 - **Lefthook** pre-commit and commit-msg, enforcing Conventional Commits
-- Bash: ShellCheck + shfmt · Python: Ruff
+- Bash: ShellCheck + shfmt · Python (`apps/ai-api`): Ruff + pytest
 - **EAS** for development builds and over-the-air updates of the mobile app
 
 ## Docker
@@ -99,6 +99,7 @@ More in [docker/README.md](docker/README.md) and `/docs/docker`.
 | Nest API | [Render](https://render.com) | `render.yaml` |
 | Database | [Neon](https://neon.tech) | `DATABASE_URL` |
 | Docs | [Vercel](https://vercel.com) | `apps/docs/vercel.json` |
+| Landing page | [Cloudflare Workers](https://workers.cloudflare.com) | `apps/web/wrangler.jsonc` |
 
 Walkthrough: `/docs/deploy` — [apps/docs/content/docs/deploy.mdx](apps/docs/content/docs/deploy.mdx).
 
@@ -117,6 +118,7 @@ bun --cwd=apps/docs run dev
 - [/docs/architecture](http://localhost:3002/docs/architecture)
 - [/docs/deploy](http://localhost:3002/docs/deploy)
 - [/docs/docker](http://localhost:3002/docs/docker)
+- [/docs/product-system-design](http://localhost:3002/docs/product-system-design)
 - [/docs/production-roadmap](http://localhost:3002/docs/production-roadmap)
 
 Also in the repo: [PROJECT.md](PROJECT.md), [DESIGN.md](DESIGN.md), [AGENTS.md](AGENTS.md),

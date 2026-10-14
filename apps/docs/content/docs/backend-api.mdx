@@ -37,8 +37,26 @@ token in the body (browsers get an httpOnly cookie instead).
 | `POST` | `/auth/refresh` | refresh token | Rotate the session |
 | `POST` | `/auth/logout` | refresh token | End the session |
 | `GET` | `/auth/me` | bearer | Current user |
+| `GET` | `/users/me` | bearer | Current user with profile |
+| `PATCH` | `/users/me/profile` | bearer | Update profile fields |
+| `POST` | `/users/me/avatar` | bearer | Upload an avatar image (multipart `file`) |
 | `GET` | `/users/me/onboarding` | bearer | Saved onboarding answers, or `null` before the first save |
 | `PUT` | `/users/me/onboarding` | bearer | Save the onboarding answers |
+| `GET` | `/ai/status` | bearer | Whether the AI service is reachable (not used by the app yet) |
+| `POST` | `/ai/assist` | bearer | AI assist through the AI service (not used by the app yet) |
+
+The API also serves password sign-in, magic links, TOTP, passkeys, Google sign-in and session
+management under `/auth`, `/auth/methods` and `/auth/security`. The app does not use them yet, so
+they are documented in Swagger (`/api/docs`) rather than here; each moves into this table when a
+client adopts it.
+
+### Profile
+
+`PATCH /users/me/profile` takes any of `username` (3–64 chars, `a-z 0-9 . _ -`), `displayName`
+(≤100), `avatarUrl`, `bio` (≤280), `timezone`, `locale`; unknown keys are rejected and at least one
+field is required. `POST /users/me/avatar` accepts JPEG, PNG or WebP up to 2 MB and returns the updated
+profile. Avatars are currently stored on the API container's disk, which is not durable in
+production (see [Product System Design](/docs/product-system-design), section 6).
 
 ### Email-code sign-in
 
@@ -80,6 +98,7 @@ Record every public API change, newest first, so consumers can see what moved.
 
 | Date | Change | Breaking |
 | --- | --- | --- |
+| 2026-10-15 | Documented the profile, avatar and AI endpoints already in use | No |
 | 2026-10-13 | Added `GET`/`PUT /users/me/onboarding` | No |
 | 2026-10-13 | Added email-code sign-in (`/auth/methods/email-code/*`) | No |
 | 2026-10-13 | Removed `/billing/*` (Stripe and Razorpay) | Yes, unused by clients |

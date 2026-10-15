@@ -1,16 +1,19 @@
 import { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
+import { AiWorkingCard } from "@/components/ai-working-card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
+import { useAiJob, useAiJobs } from "@/lib/ai-jobs/ai-jobs-store";
 import { usePoTheme } from "@/theme";
-import { savePrep, toggleTopic } from "../data/career-actions";
+import { toggleTopic } from "../data/career-actions";
 import { type CareerData, findApp, findPrep, useCareer } from "../hooks/use-career";
+import { PREP_STEPS, prepJobKey, useStartPrep } from "../hooks/use-career-jobs";
 import { dayAndTime, weekdayShort } from "../lib/career-math";
 import type { Story } from "../lib/career-model";
 import { dueBefore } from "../lib/flashcard-schedule";
 import { careerRoutes } from "../navigation";
-import { CareerAiError, useCareerAi } from "../services/career-ai";
+import { useCareerAi } from "../services/career-ai";
 import { CareerScreen } from "./career-screen";
 import {
 	AiTip,
@@ -61,10 +64,13 @@ export function InterviewPrepScreen({ id }: { id?: string }) {
 	const data = useCareer();
 	const ai = useCareerAi();
 	const [story, setStory] = useState<{ key: number; story: Story | null } | null>(null);
-	const [building, setBuilding] = useState(false);
+	const startPrep = useStartPrep();
 	const [error, setError] = useState<string | null>(null);
 
 	const app = id ? findApp(data, id) : null;
+	const job = useAiJob(prepJobKey(app?.id ?? ""));
+	const retry = useAiJobs((state) => state.retry);
+	const dismiss = useAiJobs((state) => state.dismiss);
 	const prep = app ? findPrep(data, app.id) : null;
 	const deck = app ? data.cards.filter((card) => card.deckId === app.id) : [];
 	const openStory = (value: Story | null) => setStory({ key: Date.now(), story: value });
@@ -92,25 +98,11 @@ export function InterviewPrepScreen({ id }: { id?: string }) {
 		);
 	}
 
-	const build = async () => {
-		setBuilding(true);
+	/** Builds in the background; the topics replace the working card when they're ready. */
+	const build = () => {
+		if (!ai.available) return setError("Sign in to build prep with AI.");
 		setError(null);
-		try {
-			const generated = await ai.interviewPrep({
-				company: app.company,
-				role: app.role,
-				round: app.interview?.round ?? "",
-				notes: app.notes,
-				stories: data.stories,
-			});
-			await savePrep(app.id, generated);
-		} catch (caught) {
-			setError(
-				caught instanceof CareerAiError ? caught.message : "Couldn't build the prep. Try again.",
-			);
-		} finally {
-			setBuilding(false);
-		}
+		startPrep(app, data.stories);
 	};
 
 	const done = prep ? prep.topics.filter((topic) => topic.done).length : 0;
@@ -152,7 +144,14 @@ export function InterviewPrepScreen({ id }: { id?: string }) {
 				{app.role ? <MetaChip icon="Briefcase" label={app.role} /> : null}
 			</ScreenTitle>
 
-			{prep ? (
+			{job ? (
+				<AiWorkingCard
+					job={job}
+					steps={PREP_STEPS}
+					onRetry={() => retry(job.key)}
+					onDismiss={() => dismiss(job.key)}
+				/>
+			) : prep ? (
 				<View
 					style={[
 						styles.topics,
@@ -190,11 +189,7 @@ export function InterviewPrepScreen({ id }: { id?: string }) {
 					title="Build your prep"
 					body={`Topics to revise, questions to ask and flashcards for ${app.company}, from the role and your notes.`}
 				>
-					<PillButton
-						label={building ? "Building…" : "Build my prep"}
-						disabled={building}
-						onPress={() => void build()}
-					/>
+					<PillButton label="Build my prep" onPress={build} />
 					{error ? (
 						<PoText variant="meta13" tone="textDanger" style={styles.center}>
 							{error}

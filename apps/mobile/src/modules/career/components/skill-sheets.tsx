@@ -4,9 +4,10 @@ import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
 import { Sheet } from "@/components/ui/sheet";
 import { TextField } from "@/components/ui/text-field";
-import { logSkillSession, startSkillPlan } from "../data/career-actions";
+import { logSkillSession } from "../data/career-actions";
+import { useStartSkillPath } from "../hooks/use-career-jobs";
 import type { Application } from "../lib/career-model";
-import { CareerAiError, useCareerAi } from "../services/career-ai";
+import { useCareerAi } from "../services/career-ai";
 import { FilterChip, Footer } from "./career-ui";
 
 const SUGGESTIONS = [
@@ -24,32 +25,22 @@ export type SkillFocusSheetProps = {
 	onClose: () => void;
 };
 
-/** Pick what to learn; the AI plans six weeks of 30-minute days around it. */
+/**
+ * Pick what to learn; the AI plans six weeks of 30-minute days around it. Planning runs in the
+ * background, so the sheet closes right away and the skill block shows the plan being written.
+ */
 export function SkillFocusSheet({ visible, current = "", apps, onClose }: SkillFocusSheetProps) {
 	const ai = useCareerAi();
+	const startSkillPath = useStartSkillPath();
 	const [focus, setFocus] = useState(current);
-	const [building, setBuilding] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
-	const build = async () => {
+	const build = () => {
 		const topic = focus.trim();
 		if (topic.length < 2) return setError("Name a skill, like System design.");
-		setBuilding(true);
-		setError(null);
-		const roles = apps
-			.filter((app) => app.stage === "applied" || app.stage === "interview")
-			.slice(0, 5)
-			.map((app) => `${app.role} at ${app.company}`)
-			.join("; ");
-		try {
-			const path = await ai.skillPath(topic, roles ? `Applying for: ${roles}` : "");
-			await startSkillPlan(path.title || topic, path.weeks);
-			onClose();
-		} catch (caught) {
-			setError(caught instanceof CareerAiError ? caught.message : "Couldn't plan it. Try again.");
-		} finally {
-			setBuilding(false);
-		}
+		if (!ai.available) return setError("Sign in to plan a path with AI.");
+		startSkillPath(topic, apps);
+		onClose();
 	};
 
 	return (
@@ -57,11 +48,7 @@ export function SkillFocusSheet({ visible, current = "", apps, onClose }: SkillF
 			visible={visible}
 			title={current ? "Change plan" : "Pick a skill"}
 			onClose={onClose}
-			action={{
-				label: building ? "Planning…" : "Build my path",
-				disabled: building,
-				onPress: () => void build(),
-			}}
+			action={{ label: "Build my path", onPress: build }}
 		>
 			<PoText variant="body15" tone="textSecondary">
 				Six weeks, 30 minutes a day, five days a week — ending with something you can show an

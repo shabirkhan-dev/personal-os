@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
+import { AiWorkingCard } from "@/components/ai-working-card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
+import { useAiJob, useAiJobs } from "@/lib/ai-jobs/ai-jobs-store";
 import { dayKey } from "@/lib/day";
 import { usePoTheme } from "@/theme";
 import { logSkillSession, removeSkillSession } from "../data/career-actions";
 import { useCareer, useNow } from "../hooks/use-career";
+import { SKILL_PATH_JOB, SKILL_PATH_STEPS } from "../hooks/use-career-jobs";
 import {
 	minutesThisMonth,
 	planWeek,
@@ -62,23 +65,44 @@ function useSkill() {
 	return { data, now, plan, sessions, week, day, isDone, streak: skillStreak(sessions, now) };
 }
 
+/** The path being planned in the background, if any. */
+function PlanningCard() {
+	const job = useAiJob(SKILL_PATH_JOB);
+	const retry = useAiJobs((state) => state.retry);
+	const dismiss = useAiJobs((state) => state.dismiss);
+	if (!job) return null;
+	return (
+		<AiWorkingCard
+			job={job}
+			steps={SKILL_PATH_STEPS}
+			onRetry={() => retry(SKILL_PATH_JOB)}
+			onDismiss={() => dismiss(SKILL_PATH_JOB)}
+		/>
+	);
+}
+
 /** Skill block: this week's five days, what comes next, and the 30-minute timer. */
 export function SkillBlockScreen() {
 	const { colors } = usePoTheme();
 	const { data, now, plan, sessions, week, day, isDone, streak } = useSkill();
+	const planning = useAiJob(SKILL_PATH_JOB) !== undefined;
 	const [sheet, setSheet] = useState<Sheet>(null);
 
 	if (!plan) {
 		return (
 			<CareerScreen>
 				<ScreenTitle eyebrow="30 min a day" title="Skill block" />
-				<EmptyCard
-					icon="Lightning"
-					title={data.loading ? "Loading…" : "Pick a skill"}
-					body="Choose one thing to get better at. I'll plan six weeks of 30-minute days around your applications."
-				>
-					<PillButton label="Pick a skill" onPress={() => setSheet("focus")} />
-				</EmptyCard>
+				{planning ? (
+					<PlanningCard />
+				) : (
+					<EmptyCard
+						icon="Lightning"
+						title={data.loading ? "Loading…" : "Pick a skill"}
+						body="Choose one thing to get better at. I'll plan six weeks of 30-minute days around your applications."
+					>
+						<PillButton label="Pick a skill" onPress={() => setSheet("focus")} />
+					</EmptyCard>
+				)}
 				{sheet === "focus" ? (
 					<SkillFocusSheet visible apps={data.apps} onClose={() => setSheet(null)} />
 				) : null}
@@ -111,6 +135,8 @@ export function SkillBlockScreen() {
 				<MetaChip icon="Clock" label={todayDone ? "Done today" : "30 min today"} />
 				<MetaChip icon="Layers" label={plan.title} onPress={careerRoutes.skillPath} />
 			</ScreenTitle>
+
+			<PlanningCard />
 
 			{thisWeek ? (
 				<View

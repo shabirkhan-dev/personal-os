@@ -64,12 +64,25 @@ for the right module.
 
 ### On-device data
 
-Each module keeps one JSON document in the app's document directory (`finance.json`,
-`workout.json`, …). The store hydrates on first use, writes are debounced (250 ms) and every
-document has a `parse` function that turns an old or damaged file into a valid document, so a
-bad file never crashes a screen. See [ADR 0001](/docs/architecture/adr-0001-on-device-module-data).
+Two stores live on the phone while modules move over:
 
-Secrets (refresh token) go in SecureStore, never in the JSON documents.
+- **Record store** (Career, and every module from now on): one SQLite database with typed
+  collections, read through React Query and backed up by sync. Works offline; writes are instant.
+  See [ADR 0002](/docs/architecture/adr-0002-offline-first-sync).
+- **JSON documents** (Finance, Workout, Skincare, Food for now): one file per module, hydrated on
+  first use with debounced writes. No backup yet. See
+  [ADR 0001](/docs/architecture/adr-0001-on-device-module-data).
+
+Both parse what they read, so old or damaged data never crashes a screen. Secrets (refresh token)
+go in SecureStore, never in either store.
+
+### Career
+
+Career Home shows runway (cash on hand ÷ monthly costs, the costs estimated from Finance when not
+set), the pipeline by stage, follow-ups due, recent activity, the next interview and the skill
+block. Inner screens: applications by stage, application detail with a status timeline,
+interview prep, flashcards (spaced review) and the skill path. The ask bar logs a line ("applied
+to tessera, senior typescript, 500k, remote") through AI, or with an on-device parser offline.
 
 ## 4. API
 
@@ -94,6 +107,7 @@ TOTP, passkeys and Google sign-in. Google and Apple sign-in on mobile is open as
 | `auth_identities` | Linked Google accounts |
 | `totp_factors`, `passkeys`, `webauthn_challenges` | Second factors and passkeys |
 | `onboarding_profiles` | The onboarding answers as JSON with a `schema_version`; the plan is derived on the device |
+| `sync_records` | Every synced document: user, collection, id, JSON data, `updated_at`, `deleted_at`, and a `seq` that sync cursors page through |
 
 Schema changes are made in `src/database/schema` and committed with the generated migration;
 migrations run on container start.
@@ -107,10 +121,15 @@ copy.
 
 ## 5. AI service
 
-`apps/ai-api` (FastAPI, uv) exposes an assist endpoint behind a provider port, with an
-OpenAI-compatible provider and a mock for tests. Nest calls it with `AI_SERVICE_TOKEN`; clients
-never talk to it directly and never hold LLM keys. The app does not call `/ai/*` yet; the AI copy
-in onboarding is generated on the device.
+`apps/ai-api` (FastAPI, uv) runs the AI tasks behind a provider port: an OpenAI-compatible cloud
+provider in production (no local models) and a deterministic mock for development and tests.
+Nest calls it with `AI_SERVICE_TOKEN`; clients never talk to it directly and never hold LLM keys.
+
+Career uses five tasks through `POST /ai/career/:task`: read a job post (from a link or pasted
+text, with a halal reading), parse a logged line, draft a follow-up, build interview prep with
+flashcards, and plan a skill path. Each asks the model for JSON matching a schema and validates
+the reply. Reading a link fetches only public addresses, checking every redirect, with size and
+time limits.
 
 ## 6. Security and known gaps
 
@@ -124,24 +143,22 @@ Known gaps:
 
 - **Avatars are written to the API container's disk** (`uploads/avatars`). On Render that disk is
   wiped on every deploy and restart. Move them to object storage (R2 or S3) before relying on them.
-- **Module data has no backup.** Losing or resetting the phone loses expenses, meals and workouts.
+- **Older modules have no backup yet.** Finance, Workout, Skincare and Food still live only in
+  their JSON files on the phone; Career is synced.
+- **Last write wins per record.** Two devices editing the same record offline keep only the newer
+  edit.
 - Rate limits are in memory, per instance.
 
 ## 7. Direction under discussion (not built)
 
-These follow from the gaps above and are open for decision:
-
-1. **On-device database.** Move module documents to SQLite (`expo-sqlite` + Drizzle, the same ORM
-   as the API) so screens and insights can query across modules and writes stop rewriting whole
-   files.
-2. **One shared primitive under every module.** A small core of `actions` (what, when, whether it
-   is part of the minimum day) and `entries` (done or skipped, value, date), with module-specific
-   tables (expenses, meals, sessions) alongside. Streaks and "never miss twice" are then computed
-   once for every module.
-3. **Backup and multi-device sync.** Rows carry `updated_at` and soft-delete tombstones; the app
-   pushes and pulls changes since its last sync. One person on a phone (and later a desktop app)
-   does not need CRDTs; last write wins per row.
-4. **AI with consent per module.** AI reads a compact daily digest of the modules the person has
-   shared, only in the Insights tab, and proposes changes the person confirms.
+1. **Move the other modules onto the record store** so Finance, Workout, Skincare and Food are
+   backed up and synced like Career.
+2. **One shared primitive under the daily modules.** `actions` (what, when, part of the minimum
+   day) and `entries` (done or skipped, value, date) as collections, so streaks and "never miss
+   twice" are computed once for every module.
+3. **Files on Cloudflare.** Avatars and photos in R2 with image resizing; long videos (training,
+   cooking) streamed from Google Drive rather than copied.
+4. **AI with consent per module.** Insights read a compact daily digest of the modules the person
+   has shared, and propose changes the person confirms.
 5. **Reminders on the device.** Scheduled local notifications, so the most important nudges do not
    depend on the server.

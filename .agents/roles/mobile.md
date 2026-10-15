@@ -9,12 +9,12 @@ and maintainable feature modules across iOS and Android.
 
 - `apps/mobile/**`
 
-Before consuming a NestJS endpoint, read `apps/docs/content/docs/backend-api.mdx`. Shared package
+Before consuming an API endpoint, read `apps/docs/content/docs/backend-api.mdx`. Shared package
 changes require an explicit card and package-owner review.
 
 ## Not owned
 
-- `apps/nest-api/**`, `apps/web/**`, or database code
+- `apps/api/**`, `apps/web/**`, or database code
 - Backend authentication internals or API contract design
 - Broad dependency upgrades without a dedicated migration card
 

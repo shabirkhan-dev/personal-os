@@ -4,7 +4,7 @@ export default function HomePage() {
 	return (
 		<div className="mx-auto flex w-full max-w-4xl flex-1 flex-col items-center justify-center px-6 py-20 text-center">
 			<p className="mb-4 inline-flex items-center rounded-full border px-3 py-1 text-sm text-fd-muted-foreground">
-				Turborepo + Bun + Expo + NestJS + FastAPI
+				Turborepo + Bun + Expo + Hono on Cloudflare
 			</p>
 			<h1 className="mb-6 text-4xl font-semibold tracking-tight sm:text-5xl">
 				Personal OS Documentation

@@ -3,8 +3,8 @@ import type { User } from "@/modules/users/types/user.types";
 export interface AuthSession {
 	accessToken: string;
 	accessTokenExpiresAt: string;
-	/** Present for native clients (SecureStore); omitted for cookie-based web clients. */
-	refreshToken?: string;
+	/** Kept in SecureStore; rotates on every refresh. */
+	refreshToken: string;
 	user: User;
 }
 

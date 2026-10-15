@@ -52,8 +52,7 @@ The canonical single-worktree development ports are:
 | --- | ---: |
 | Web | 3000 |
 | Docs | 3002 |
-| Nest API | 4000 |
-| AI API | 8000 |
+| API (`wrangler dev`) | 4000 |
 | Expo/Metro | 8081 |
 
 Parallel agents must choose non-conflicting ports and record them on the card. Do not maintain a

@@ -1,0 +1,139 @@
+import { settings } from "@/config/settings";
+import { AppError } from "@/core/app-error";
+
+const { maxBytes, maxRedirects, maxText, minText, timeoutMs } = settings.ai.page;
+
+const unreadable = (message: string) => new AppError("JOB_LINK_UNREADABLE", { message });
+
+/**
+ * Reads the text of a public job page. Redirects are followed by hand so every hop is checked;
+ * local names and private addresses are refused (a Worker cannot reach private networks anyway,
+ * this keeps it that way if the code ever runs elsewhere).
+ */
+export async function fetchPageText(url: string, fetcher: typeof fetch = fetch): Promise<string> {
+	let current = url;
+	for (let hop = 0; hop <= maxRedirects; hop += 1) {
+		assertPublicUrl(current);
+		let response: Response;
+		try {
+			// oxlint-disable-next-line eslint/no-await-in-loop -- each hop depends on the last
+			response = await fetcher(current, {
+				redirect: "manual",
+				headers: { "User-Agent": "PersonalOS/1.0 (job reader)", Accept: "text/html" },
+				signal: AbortSignal.timeout(timeoutMs),
+			});
+		} catch {
+			throw unreadable("The page could not be loaded.");
+		}
+		if (response.status >= 300 && response.status < 400) {
+			const location = response.headers.get("location");
+			if (!location) throw unreadable("The page redirected without a target.");
+			current = new URL(location, current).toString();
+			continue;
+		}
+		if (response.status >= 400) throw unreadable(`The page answered ${response.status}.`);
+		// oxlint-disable-next-line eslint/no-await-in-loop -- the loop ends here
+		const text = htmlToText(await readLimited(response));
+		if (text.length < minText) throw unreadable("The page needs a sign-in or blocks reading.");
+		return text.slice(0, maxText);
+	}
+	throw unreadable("The page redirected too many times.");
+}
+
+export function assertPublicUrl(value: string): void {
+	let url: URL;
+	try {
+		url = new URL(value);
+	} catch {
+		throw unreadable("That isn't a valid link.");
+	}
+	if (url.protocol !== "http:" && url.protocol !== "https:") {
+		throw unreadable("Only http and https links can be read.");
+	}
+	const host = url.hostname.toLowerCase().replace(/^\[|\]$/g, "");
+	if (isPrivateHost(host)) throw unreadable("Links to private or local addresses are not read.");
+}
+
+function isPrivateHost(host: string): boolean {
+	if (!host.includes(".") && !host.includes(":")) return true; // bare names: intranet hosts
+	if (/(^|\.)(localhost|local|internal|home\.arpa)$/.test(host)) return true;
+	const v4 = /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/.exec(host);
+	if (v4) {
+		const [a, b] = [Number(v4[1]), Number(v4[2])];
+		return (
+			a === 0 ||
+			a === 10 ||
+			a === 127 ||
+			a >= 224 ||
+			(a === 100 && b >= 64 && b <= 127) ||
+			(a === 169 && b === 254) ||
+			(a === 172 && b >= 16 && b <= 31) ||
+			(a === 192 && b === 168) ||
+			(a === 198 && (b === 18 || b === 19))
+		);
+	}
+	if (host.includes(":")) {
+		return (
+			host === "::" ||
+			host === "::1" ||
+			/^f[cd]/.test(host) ||
+			/^fe[89ab]/.test(host) ||
+			host.startsWith("::ffff:")
+		);
+	}
+	return false;
+}
+
+async function readLimited(response: Response): Promise<string> {
+	const reader = response.body?.getReader();
+	if (!reader) return "";
+	const decoder = new TextDecoder();
+	let size = 0;
+	let html = "";
+	for (;;) {
+		// oxlint-disable-next-line eslint/no-await-in-loop -- streaming read
+		const { done, value } = await reader.read();
+		if (done) break;
+		size += value.byteLength;
+		if (size > maxBytes) {
+			// oxlint-disable-next-line eslint/no-await-in-loop -- leaves the loop
+			await reader.cancel();
+			throw unreadable("The page is too large to read.");
+		}
+		html += decoder.decode(value, { stream: true });
+	}
+	return html + decoder.decode();
+}
+
+const ENTITIES: Record<string, string> = {
+	amp: "&",
+	lt: "<",
+	gt: ">",
+	quot: '"',
+	apos: "'",
+	nbsp: " ",
+};
+
+/** Visible text of an HTML page: scripts, styles and the head dropped, blocks on new lines. */
+export function htmlToText(html: string): string {
+	return html
+		.replace(/<!--[\s\S]*?-->/g, " ")
+		.replace(/<(script|style|noscript|svg|head|template)\b[\s\S]*?<\/\1\s*>/gi, " ")
+		.replace(/<\/?(p|div|li|br|h[1-6]|section|article|tr|ul|ol)\b[^>]*>/gi, "\n")
+		.replace(/<[^>]+>/g, " ")
+		.replace(/&(#x?[0-9a-f]+|[a-z]+);/gi, (match, entity: string) => {
+			if (entity.startsWith("#")) {
+				const code =
+					entity[1]?.toLowerCase() === "x"
+						? parseInt(entity.slice(2), 16)
+						: Number(entity.slice(1));
+				return Number.isFinite(code) && code > 0 && code < 0x110000
+					? String.fromCodePoint(code)
+					: " ";
+			}
+			return ENTITIES[entity.toLowerCase()] ?? match;
+		})
+		.replace(/[ \t\r\f\v]+/g, " ")
+		.replace(/ *\n[\s]*/g, "\n")
+		.trim();
+}

@@ -1,9 +1,9 @@
 ---
 title: Backend API
-description: The single home for the NestJS API contract.
+description: The single home for the API contract.
 ---
 
-This page is the one place the NestJS API contract lives. The agent contract in
+This page is the one place the API contract lives (`apps/api`, Hono on Cloudflare Workers). The agent contract in
 `.agents/agent-contract.md` points every role here: web and mobile read it before consuming an
 endpoint, and backend updates it in the same commit as any public API change.
 
@@ -20,67 +20,87 @@ consistent; one scattered across cards and notes drifts immediately.
 ## What does not
 
 - Implementation detail, internal service structure, database schema.
-- Anything still being designed — raise a board card for that instead.
+- Anything still being designed — raise a boa## Endpoints
 
-## Endpoints
+All paths are under `/api/v1`. Bodies are JSON. Signed-in routes take
+`Authorization: Bearer <accessToken>`.
 
-All paths are under `/api/v1`. Errors use `{ "code": string, "message": string }` with the HTTP
-status. Native clients send `X-Client-Platform: native` so session responses include the refresh
-token in the body (browsers get an httpOnly cookie instead).
+Every success is `{ success: true, statusCode, requestId, timestamp, data }`; the app reads
+`data`. Every failure is
+`{ success: false, statusCode, code, message, requestId, timestamp, path, method, errors? }`.
+`code` is stable and is what clients branch on; `message` is a sentence that can be shown as is;
+`errors` lists `{ path, message }` for `VALIDATION_FAILED`. Codes and statuses come from one
+table, `apps/api/src/config/messages.ts`.
 
 | Method | Path | Auth | Purpose |
 | --- | --- | --- | --- |
-| `GET` | `/health` | none | Liveness probe |
-| — | `/api/docs` | none in dev | Swagger UI |
-| `POST` | `/auth/methods/email-code/request` | none | Send a 6-digit sign-in code; creates the account on first use |
-| `POST` | `/auth/methods/email-code/verify` | none | Exchange the code for a session |
+| `GET` | `/health` | none | Liveness, environment, AI provider, whether uploads are set up |
+| `POST` | `/auth/email-code/request` | none | Send a 6-digit sign-in code |
+| `POST` | `/auth/email-code/verify` | none | Exchange the code for a session; creates the account on first use |
 | `POST` | `/auth/refresh` | refresh token | Rotate the session |
-| `POST` | `/auth/logout` | refresh token | End the session |
-| `GET` | `/auth/me` | bearer | Current user |
-| `GET` | `/users/me` | bearer | Current user with profile |
-| `PATCH` | `/users/me/profile` | bearer | Update profile fields |
-| `POST` | `/users/me/avatar` | bearer | Upload an avatar image (multipart `file`) |
+| `POST` | `/auth/logout` | refresh token | End the session (`204`) |
+| `GET` | `/users/me` | bearer | Current user |
+| `PATCH` | `/users/me/profile` | bearer | Update the display name or avatar |
+| `POST` | `/assets/uploads` | bearer | A presigned URL to upload a file straight to R2 |
 | `GET` | `/users/me/onboarding` | bearer | Saved onboarding answers, or `null` before the first save |
 | `PUT` | `/users/me/onboarding` | bearer | Save the onboarding answers |
 | `POST` | `/sync` | bearer | Push local record changes, pull changes after a cursor |
-| `POST` | `/ai/career/:task` | bearer | Career AI: `read-job`, `parse-line`, `nudge`, `interview-prep`, `skill-path` |
-| `GET` | `/ai/status` | bearer | Whether the AI service is reachable |
-| `POST` | `/ai/assist` | bearer | Free-form AI assist (not used by the app yet) |
+| `POST` | `/ai/career/<task>` | bearer | Career AI: `read-job`, `parse-line`, `nudge`, `interview-prep`, `skill-path` |
 
-The API also serves password sign-in, magic links, TOTP, passkeys, Google sign-in and session
-management under `/auth`, `/auth/methods` and `/auth/security`. The app does not use them yet, so
-they are documented in Swagger (`/api/docs`) rather than here; each moves into this table when a
-client adopts it.
+Rate limits (per IP, or per user when signed in, per minute): auth routes 10, `/sync` 60, AI 20.
+Over the limit: `429` `RATE_LIMITED`. Bodies over 1 MB (AI: 32 KB): `413` `BODY_TOO_LARGE`.
 
-### Profile
+### Sign-in
 
-`PATCH /users/me/profile` takes any of `username` (3–64 chars, `a-z 0-9 . _ -`), `displayName`
-(≤100), `avatarUrl`, `bio` (≤280), `timezone`, `locale`; unknown keys are rejected and at least one
-field is required. `POST /users/me/avatar` accepts JPEG, PNG or WebP up to 2 MB and returns the updated
-profile. Avatars are currently stored on the API container's disk, which is not durable in
-production (see [Product System Design](/docs/product-system-design), section 6).
-
-### Email-code sign-in
-
-`POST /auth/methods/email-code/request`, throttled to 3 per minute:
+`POST /auth/email-code/request`:
 
 ```json
 { "email": "you@example.com", "name": "Shabir" }
 ```
 
-`name` is optional and only used when the account is created. The response is always `202`
-`{ "accepted": true, "message": "A sign-in code has been sent." }`, whether or not the account
-existed; outside production it also carries `developmentCode`.
+`202` `{ accepted: true, message }`, the same whether or not the email has an account. `name` is
+used only if the code creates the account. Outside production, without an email key, the
+response also has `developmentCode`. A new code replaces the previous one.
 
-`POST /auth/methods/email-code/verify`, throttled to 8 per minute:
+`POST /auth/email-code/verify` with `{ email, code }` returns `200`:
 
 ```json
-{ "email": "you@example.com", "code": "123456" }
+{
+  "accessToken": "eyJ…",
+  "accessTokenExpiresAt": "2026-10-15T10:15:00.000Z",
+  "refreshToken": "<session id>.<secret>",
+  "user": { "id": "…", "email": "you@example.com", "displayName": "Shabir", "avatarUrl": null, "createdAt": "…" }
+}
 ```
 
-`200` returns the session `{ accessToken, accessTokenExpiresAt, refreshToken (native only), user }`
-and marks the email verified. A wrong or expired code returns `401` `AUTH_OTP_INVALID`; codes
-lock after the configured number of attempts.
+The account is created on the first successful code. A wrong, used or expired code is `401`
+`AUTH_CODE_INVALID`; a code stops working after 5 wrong tries. Access tokens last 15 minutes;
+sessions last 30 days from the last refresh.
+
+`POST /auth/refresh` with `{ refreshToken }` returns a new session (same shape) and a new refresh
+token. Presenting an old refresh token again ends the session (`401`
+`AUTH_REFRESH_TOKEN_INVALID`), since it means the token was copied. `POST /auth/logout` with
+`{ refreshToken }` answers `204` either way.
+
+Signed-in routes answer `401` with `AUTH_REQUIRED` (no token), `AUTH_ACCESS_TOKEN_INVALID`
+(expired or malformed) or `AUTH_SESSION_INVALID` (session ended).
+
+### Profile and avatar
+
+`PATCH /users/me/profile` takes `displayName` (≤ 100, or `null`) and/or `avatarKey`, and returns
+the user. Avatars never pass through the API:
+
+1. `POST /assets/uploads` with `{ "kind": "avatar", "contentType": "image/jpeg" }` (`image/png`
+   and `image/webp` also allowed) returns `201`
+   `{ key, uploadUrl, method: "PUT", headers, expiresAt }`. The URL is valid for 10 minutes.
+2. The app `PUT`s the file to `uploadUrl` with exactly those `headers`.
+3. `PATCH /users/me/profile` with `{ "avatarKey": key }`. The API checks the object is in R2,
+   under the caller's prefix, an allowed type and at most 5 MB, then saves it and deletes the
+   previous avatar. `avatarUrl` in the user is the public URL.
+
+Errors: `400` `ASSET_NOT_UPLOADED` (nothing at that key), `400` `ASSET_INVALID` (wrong prefix,
+type or size; a bad file is deleted), `503` `ASSETS_UNAVAILABLE` (R2 not configured).
+`"avatarKey": null` removes the avatar.
 
 ### Onboarding answers
 
@@ -96,7 +116,7 @@ about a second after they happen.
 
 ### Sync
 
-`POST /sync`, throttled to 60 per minute, body up to 1 MB:
+`POST /sync`:
 
 ```json
 {
@@ -133,21 +153,25 @@ Collections in use: `career-applications`, `career-preps`, `career-stories`, `ca
 
 ### Career AI
 
-`POST /ai/career/:task`, throttled to 20 per minute. The body is validated by the AI service;
-field names are snake_case.
+`POST /ai/career/<task>`. Field names are camelCase. Answers are checked against a schema before
+they are returned: long text is trimmed, and an answer of the wrong shape is an error rather than
+reaching the app.
 
 | Task | Body | Returns |
 | --- | --- | --- |
 | `read-job` | `{ url }` or `{ text }` (≤ 20,000 chars) | `{ company, role, pay, where, summary, halal: { status, note } }` |
-| `parse-line` | `{ text, today: "YYYY-MM-DD" }` | `{ application: { company, role, pay, where, stage, halal } \| null, follow_up_in_days, interview_at }` |
-| `nudge` | `{ sender_name, company, role, contact_name, days_since_applied, notes, stories[], tone, current_draft? }` | `{ subject, body }` |
-| `interview-prep` | `{ company, role, round, notes, stories[] }` | `{ topics[{ title, detail }], questions[], flashcards[{ topic, tag, front, back, code }] }` |
-| `skill-path` | `{ focus, weeks, context }` | `{ title, weeks[{ title, goal, days[5]{ title, detail } }] }` |
+| `parse-line` | `{ text, today: "YYYY-MM-DD" }` | `{ application: { company, role, pay, where, stage, halal } \| null, followUpInDays, interviewAt }` |
+| `nudge` | `{ senderName, company, role?, contactName?, daysSinceApplied, notes?, stories?, tone?, currentDraft? }` | `{ subject, body }` |
+| `interview-prep` | `{ company, role?, round?, notes?, stories? }` | `{ topics[{ title, detail }], questions[], flashcards[{ topic, tag, front, back, code }] }` |
+| `skill-path` | `{ focus, weeks?, context? }` | `{ title, weeks[{ title, goal, days[5]{ title, detail } }] }` |
 
-`halal.status` is `clean`, `flagged` or `unsure`; it is the model's reading, which the person
-confirms. `tone` is `as-is`, `shorter`, `warmer` or `formal`. Errors: `422` `JOB_LINK_UNREADABLE`
-(sign-in wall, blocked, private address, too large), `400` `VALIDATION_ERROR`, `502`
-`AI_INVALID_OUTPUT` / `AI_UPSTREAM_ERROR`, `503` `AI_UNAVAILABLE`.
+`stories` is up to 6 `{ title, summary }`. `halal.status` is `clean`, `flagged` or `unsure`; it is
+the model's reading, which the person confirms. `tone` is `as-is`, `shorter`, `warmer` or
+`formal`. Errors: `422` `JOB_LINK_UNREADABLE` (sign-in wall, blocked, private address, too large;
+the message says which), `400` `VALIDATION_FAILED`, `502` `AI_INVALID_OUTPUT`, `503`
+`AI_UNAVAILABLE`.
+
+, `503` `AI_UNAVAILABLE`.
 
 ## Changelog
 
@@ -155,6 +179,7 @@ Record every public API change, newest first, so consumers can see what moved.
 
 | Date | Change | Breaking |
 | --- | --- | --- |
+| 2026-10-15 | Moved to one Hono API on Cloudflare Workers. Sign-in paths are now `/auth/email-code/*`; `GET /auth/me` is gone (use `/users/me`); the user is `{ id, email, displayName, avatarUrl, createdAt }`; the refresh token is always in the body; avatars upload to R2 through `POST /assets/uploads` (`POST /users/me/avatar` removed); Career AI fields are camelCase; validation errors are `VALIDATION_FAILED`; password, magic-link, TOTP, passkey, Google and `/ai/assist` routes removed | Yes, the app moves in the same change |
 | 2026-10-15 | Added `POST /sync` and `POST /ai/career/:task`; `career` is a valid onboarding module | No |
 | 2026-10-15 | Documented the profile, avatar and AI endpoints already in use | No |
 | 2026-10-13 | Added `GET`/`PUT /users/me/onboarding` | No |

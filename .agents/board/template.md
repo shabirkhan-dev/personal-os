@@ -2,8 +2,8 @@
 id: pos-<number>
 title: <one-line summary>
 type: feature | bug | chore | spike | decision | risk | announcement
-from: backend | ai-python | web | mobile | qa | reviewer | ui-ux | pm | human
-to: backend | ai-python | web | mobile | qa | reviewer | ui-ux | pm | all
+from: backend | web | mobile | qa | reviewer | ui-ux | pm | human
+to: backend | web | mobile | qa | reviewer | ui-ux | pm | all
 priority: low | normal | high
 status: open
 assignee: none

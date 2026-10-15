@@ -1,7 +1,7 @@
 # Agent coordination hub
 
 Cross-team communication for the agents building this monorepo:
-**mobile** (Expo, the Personal OS app), **backend** (NestJS), **ai-python** (FastAPI),
+**mobile** (Expo, the Personal OS app), **backend** (the Hono API on Cloudflare Workers, AI included),
 **web** (the disabled landing-page shell), **ui-ux** (the Kit v2 design system), and the human.
 
 ```

@@ -19,7 +19,7 @@
 			"onAutoForward": "silent"
 		},
 		"4000": {
-			"label": "Nest API",
+			"label": "API (wrangler dev)",
 			"onAutoForward": "silent"
 		}
 	},
@@ -29,17 +29,12 @@
 			"extensions": [
 				"oxc.oxc-vscode",
 				"bradlc.vscode-tailwindcss",
-				"ms-python.python",
-				"charliermarsh.ruff",
 				"timonwong.shellcheck",
 				"mkhl.shfmt"
 			],
 			"settings": {
 				"editor.formatOnSave": true,
-				"editor.defaultFormatter": "oxc.oxc-vscode",
-				"[python]": {
-					"editor.defaultFormatter": "charliermarsh.ruff"
-				}
+				"editor.defaultFormatter": "oxc.oxc-vscode"
 			}
 		}
 	},

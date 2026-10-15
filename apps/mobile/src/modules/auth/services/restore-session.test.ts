@@ -14,10 +14,8 @@ const session = {
 	user: {
 		id: "u1",
 		email: "you@example.com",
-		username: "you",
-		isActive: true,
-		emailVerified: true,
-		hasPassword: false,
+		displayName: "You",
+		avatarUrl: null,
 		createdAt: "2026-10-13T00:00:00.000Z",
 	},
 };

@@ -1,58 +1,117 @@
 ---
 title: Deploy
-description: Landing page on Cloudflare Workers, docs on Vercel, Nest API on Render with Neon Postgres.
+description: The API on Cloudflare Workers with Neon through Hyperdrive and R2 for images, the app on EAS, the landing page on Workers, docs on Vercel.
 ---
 
 Where each piece of Personal OS runs in production:
 
 | App | Platform | Notes |
 |-----|----------|--------|
+| `apps/api` | [Cloudflare Workers](https://workers.cloudflare.com) | Hono; Neon through Hyperdrive, R2 for images, rate limiting |
 | `apps/mobile` | [EAS](https://expo.dev/eas) | Builds and over-the-air updates; see `apps/mobile/README.md` |
 | `apps/web` | [Cloudflare Workers](https://workers.cloudflare.com) | Next.js static export served as Worker assets + `/api/notify` |
 | `apps/docs` | [Vercel](https://vercel.com) | Separate Vercel project |
-| `apps/nest-api` | [Render](https://render.com) | Docker Blueprint + Neon `DATABASE_URL` |
-| Database | [Neon](https://neon.tech) | Serverless Postgres (TLS auto-detected) |
+| Database | [Neon](https://neon.tech) | Serverless Postgres |
 
-Repo files: `apps/web/README.md`, `apps/docs/vercel.json`, root `render.yaml`.
+Repo files: `apps/api/wrangler.jsonc`, `apps/web/README.md`, `apps/docs/vercel.json`.
+
+**Cost.** The Workers Free plan is enough to try it. The Workers Paid plan ($5/month) is the one to
+run on: it raises the CPU limit per request from 10 ms (a large sync can need more) and its
+allowance (10 million requests a month) covers a handful of users with nothing extra. Neon's and
+R2's free tiers cover the database and images; the AI provider bills per use.
+
+All commands below run from the repo root and need `bunx wrangler login` once.
 
 ## 1) Neon database
 
 1. Create a project at [console.neon.tech](https://console.neon.tech).
-2. Copy the **pooled** connection string (includes `sslmode=require`).
-3. You will paste it into Render as `DATABASE_URL`. Nest enables TLS automatically for `neon.tech` URLs.
+2. Copy the **direct** connection string (not the pooled one: Hyperdrive does the pooling). It
+   ends in `sslmode=require`.
+3. Apply the migrations:
 
-## 2) Nest API on Render
+   ```bash
+   DATABASE_URL="<Neon URL>" bun --cwd=apps/api run db:migrate
+   ```
 
-1. In Render, **New → Blueprint** and connect this GitHub repo (or create a Web Service with Docker).
-2. Use `render.yaml` at the repo root (dockerfile `apps/nest-api/Dockerfile`, context `.`).
-3. Fill **sync: false** env vars in the dashboard:
+   Run this again whenever a pull request adds a file under `apps/api/src/db/migrations`.
 
-| Variable | Example |
-|----------|---------|
-| `DATABASE_URL` | Neon pooled URL |
-| `RESEND_API_KEY` | `re_...` from [Resend](https://resend.com) |
-| `AUTH_EMAIL_FROM` | `Personal OS <noreply@your-domain.com>` |
-| `WEB_APP_URL` | Base URL for links in auth emails (magic links); any HTTPS origin you own |
-| `CORS_ORIGIN` | Browser origins allowed to call the API; the mobile app does not need one |
-| `WEBAUTHN_RP_ID` | Passkey relying-party hostname; only needed once passkeys are used |
-| `WEBAUTHN_ORIGIN` | Passkey origin, `https://` + the hostname above |
+## 2) The API on Cloudflare Workers
 
-Blueprint already sets `COOKIE_SAME_SITE=none`, `TRUST_PROXY=true`, and generates `JWT_SECRET`, `AUTH_TOKEN_SECRET`, and `AI_SERVICE_TOKEN`.
-
-4. Deploy and confirm health:
+### Hyperdrive (the database connection)
 
 ```bash
-curl -sS https://<your-service>.onrender.com/api/v1/health
+bunx wrangler hyperdrive create personal-os-db --connection-string="<Neon URL>"
 ```
 
-Migrations run on container start when `RUN_MIGRATIONS=true` (default in the Blueprint).
+Paste the printed `id` into `hyperdrive[0].id` in `apps/api/wrangler.jsonc`.
 
-**Note:** Free Render services spin down when idle; the first request can take ~30s. AI assist still needs a hosted `apps/ai-api` (`AI_API_URL`) later — Nest will boot without it.
+### R2 (images)
 
-## 3) Landing page on Cloudflare Workers
+1. Create the bucket: `bunx wrangler r2 bucket create personal-os-assets`.
+2. **Public reads:** in the dashboard, R2 → `personal-os-assets` → Settings → Public access, connect
+   a custom domain (for example `assets.your-domain.com`). The `r2.dev` address works for testing
+   but is rate limited.
+3. **Upload credentials:** R2 → Manage API tokens → Create API token, permission *Object Read &
+   Write*, limited to this bucket. Keep the Access Key ID and Secret Access Key.
+4. In `apps/api/wrangler.jsonc` → `vars`, set `R2_ACCOUNT_ID` (your account id, on the R2 overview
+   page) and `R2_PUBLIC_URL` (the public domain, no trailing slash).
+
+The app uploads straight to R2 with a presigned URL; the API only checks and saves the key. No
+bucket CORS rule is needed for the app (CORS only applies to browsers).
+
+### Settings and secrets
+
+In `wrangler.jsonc` → `vars`, set `AUTH_EMAIL_FROM` to an address on a domain verified in
+[Resend](https://resend.com), for example `Personal OS <auth@your-domain.com>`. The AI model is
+`OPENAI_MODEL` (default `gpt-4o-mini`); any OpenAI-compatible provider works by changing
+`OPENAI_BASE_URL`.
+
+Then the secrets, each prompted for its value:
+
+```bash
+cd apps/api
+openssl rand -base64 48 | bunx wrangler secret put JWT_SECRET
+openssl rand -base64 48 | bunx wrangler secret put AUTH_TOKEN_SECRET
+bunx wrangler secret put RESEND_API_KEY
+bunx wrangler secret put OPENAI_API_KEY
+bunx wrangler secret put R2_ACCESS_KEY_ID
+bunx wrangler secret put R2_SECRET_ACCESS_KEY
+```
+
+The Worker refuses to start in production without real `JWT_SECRET`, `AUTH_TOKEN_SECRET` and
+`RESEND_API_KEY`, and `AI_PROVIDER=openai_compatible` needs `OPENAI_API_KEY`. Changing a secret
+needs no app rebuild.
+
+### Deploy
+
+Either connect GitHub once: Workers & Pages → Create → Import a repository → this repo, root
+directory `apps/api`, deploy command `npx wrangler deploy` (every push to `main` then deploys), or
+deploy from your machine:
+
+```bash
+bun --cwd=apps/api run deploy
+```
+
+Check it:
+
+```bash
+curl -sS https://personal-os-api.<your-subdomain>.workers.dev/api/v1/health
+# "environment": "production", "ai": "openai_compatible", "assets": "ready"
+```
+
+## 3) The app on EAS
+
+1. On expo.dev, the project → **Settings → GitHub**: connect this repo, base directory
+   `apps/mobile`.
+2. **Environment variables:** add `EXPO_PUBLIC_API_URL` = the Worker URL (no path) to every
+   environment. It is baked in at build time, so add it before building.
+3. Build from the GitHub tab, or `bunx eas-cli build --profile preview --platform android` for a
+   standalone APK.
+
+## 4) Landing page on Cloudflare Workers
 
 `apps/web` is a static export (`out/`) served as Worker static assets, plus a small Worker for
-launch-day sign-ups (`/api/notify`, Workers KV). It does not call Nest.
+launch-day sign-ups (`/api/notify`, Workers KV). It does not call the API.
 
 1. **Workers & Pages → Create → Workers → Import a repository**, this repo, branch `main`.
 2. Root directory `apps/web`, build command `bun run build`, deploy command `npx wrangler deploy`.
@@ -61,7 +120,7 @@ launch-day sign-ups (`/api/notify`, Workers KV). It does not call Nest.
 
 Full steps: `apps/web/README.md`.
 
-## 4) Docs on Vercel
+## 5) Docs on Vercel
 
 1. **Add another project** from the same repo.
 2. **Root Directory:** `apps/docs`.
@@ -72,27 +131,23 @@ Full steps: `apps/web/README.md`.
 | `OPENROUTER_API_KEY` | from [OpenRouter](https://openrouter.ai) |
 | `OPENROUTER_MODEL` | e.g. `anthropic/claude-3.5-sonnet` |
 
-4. Deploy. Docs do not call Nest.
-
-## Sessions and cookies
-
-The mobile app sends `X-Client-Platform: native`, receives its refresh token in the response body
-and stores it in SecureStore, so it needs no cookies and no CORS. Cookie settings
-(`COOKIE_SAME_SITE`, `Secure`, `COOKIE_DOMAIN`) only matter for a browser client, and there is
-none today: the landing page and docs never call the API.
+4. Deploy. Docs do not call the API.
 
 ## Checklist
 
-- [ ] Neon `DATABASE_URL` on Render
-- [ ] Resend key + verified from-address
-- [ ] Nest health returns OK
-- [ ] Mobile production build sets `EXPO_PUBLIC_NEST_API_URL` to the Render API URL
+- [ ] Migrations applied to Neon
+- [ ] Hyperdrive id in `wrangler.jsonc`
+- [ ] R2 bucket with a public domain; `R2_ACCOUNT_ID`, `R2_PUBLIC_URL` and the two R2 secrets set
+- [ ] `AUTH_EMAIL_FROM` on a verified Resend domain; `RESEND_API_KEY` set
+- [ ] `JWT_SECRET`, `AUTH_TOKEN_SECRET`, `OPENAI_API_KEY` set
+- [ ] `/api/v1/health` shows production, `openai_compatible` and `assets: ready`
+- [ ] EAS builds have `EXPO_PUBLIC_API_URL`
 - [ ] Email-code sign-in works on a device
 - [ ] Landing page live on its custom domain, waitlist KV bound
 - [ ] Docs project live (optional OpenRouter)
 
 ## Related
 
-- [Docker](/docs/docker) — local Compose stack
-- [Production roadmap](/docs/production-roadmap) — product phases
-- Nest API README production notes under `apps/nest-api/`
+- [Local database](/docs/docker) — Postgres and `wrangler dev` locally
+- [Backend API](/docs/backend-api) — the contract
+- `apps/api/README.md` — layout and commands

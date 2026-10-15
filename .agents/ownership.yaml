@@ -11,15 +11,7 @@ roles:
   backend:
     team: backend
     paths:
-      - apps/nest-api/**
-    reviewers:
-      - reviewer
-      - qa
-  ai-python:
-    team: ai
-    paths:
-      - apps/ai-api/**
-      - scripts/python/**
+      - apps/api/**
     reviewers:
       - reviewer
       - qa

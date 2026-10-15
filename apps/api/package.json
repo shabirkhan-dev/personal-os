@@ -1,0 +1,39 @@
+{
+	"name": "@personal-os/api",
+	"version": "0.1.0",
+	"private": true,
+	"description": "Personal OS API on Cloudflare Workers (Hono): auth, profile, onboarding, sync, AI",
+	"license": "MIT OR Apache-2.0",
+	"type": "module",
+	"scripts": {
+		"dev": "wrangler dev",
+		"deploy": "wrangler deploy",
+		"build": "wrangler deploy --dry-run --outdir dist",
+		"db:generate": "drizzle-kit generate",
+		"db:migrate": "drizzle-kit migrate",
+		"db:studio": "drizzle-kit studio",
+		"cf-typegen": "wrangler types --env-interface CloudflareBindings src/worker-env.d.ts",
+		"lint": "oxlint",
+		"lint:fix": "oxlint --fix",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run",
+		"test:watch": "vitest"
+	},
+	"dependencies": {
+		"@hono/zod-validator": "^0.9.1",
+		"aws4fetch": "^1.0.20",
+		"drizzle-orm": "^0.45.4",
+		"hono": "^4.13.13",
+		"jose": "^6.2.12",
+		"postgres": "^3.4.9",
+		"zod": "^4.6.7"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^5.20261015.1",
+		"@types/node": "^26.6.3",
+		"drizzle-kit": "^0.31.11",
+		"typescript": "^6.0.3",
+		"vitest": "^5.0.4",
+		"wrangler": "^4.151.0"
+	}
+}

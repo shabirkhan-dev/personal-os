@@ -29,29 +29,30 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
 
 ### API and services
 
-- Email-code sign-in with rotating refresh sessions; password, magic-link, TOTP, passkey and
-  Google flows kept for later use.
-- Profile and avatar endpoints; onboarding answers stored and synced.
-- AI service (FastAPI) behind the Nest proxy, with a mock provider for tests.
+- One Hono API on Cloudflare Workers ([ADR 0003](/docs/architecture/adr-0003-one-api-on-workers)):
+  Neon through Hyperdrive, Cloudflare rate limiting, typed config and one table of error codes.
+- Email-code sign-in with rotating refresh sessions.
+- Profile with avatars uploaded straight to R2; onboarding answers stored and synced.
+- Career AI inside the API, with a mock provider for development and tests.
 - Landing page on Cloudflare Workers with a launch waitlist.
 
 ## Next
 
 Roughly in order; each item becomes board cards.
 
-1. **Google and Apple sign-in on mobile** (pos-12).
-2. **Remaining modules**: Faith next, then Daily life and Fashion, on the record store.
-3. **Move Finance, Workout, Skincare and Food onto the record store** so everything is synced.
-4. **Files on Cloudflare**: avatars and photos in R2; videos streamed from Google Drive.
-5. **Insights**: AI over a per-module, opt-in daily digest, shown in the Insights tab.
-6. **Production hardening**: Redis-backed rate limits, structured request logs and error
-   tracking, and real deploy steps in `cd.yml` (it is still a template).
-7. **Desktop app** on the same record store and sync.
+1. **Remaining modules**: Faith next, then Daily life and Fashion, on the record store.
+2. **Move Finance, Workout, Skincare and Food onto the record store** so everything is synced.
+3. **Files**: an avatar picker and photos through the R2 upload flow; videos streamed from Google
+   Drive.
+4. **Insights**: AI over a per-module, opt-in daily digest, shown in the Insights tab.
+5. **Production hardening**: error tracking, migrations in the deploy pipeline, and real deploy
+   steps in `cd.yml` (it is still a template).
+6. **Desktop app** on the same record store and sync.
 
 ## Engineering rules
 
 - Every API change updates [Backend API](/docs/backend-api) in the same commit.
 - Schema changes ship with a generated migration; no schema push outside local development.
 - Pure logic gets unit tests; screens handle loading, empty and error states.
-- No secrets in the app bundle; LLM keys stay in the AI service.
+- No secrets in the app bundle; provider keys are Worker secrets.
 - `bun run preflight` passes before a push.

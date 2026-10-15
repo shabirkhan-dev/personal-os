@@ -26,23 +26,13 @@
 	},
 	"overrides": [
 		{
-			"files": ["apps/nest-api/**/*.ts"],
+			"files": ["apps/api/**/*.ts"],
 			"rules": {
-				"typescript/consistent-type-imports": "off",
-				"typescript/no-explicit-any": "off",
-				"typescript/no-extraneous-class": ["warn", { "allowWithDecorator": true }],
-				"import/no-unassigned-import": "off",
-				"import/no-named-as-default": "off",
-				"unicorn/prefer-node-protocol": "error",
 				"react/exhaustive-deps": "off",
 				"react/rules-of-hooks": "off",
+				"react-hooks/rules-of-hooks": "off",
 				"nextjs/no-img-element": "off",
-				"nextjs/no-head-element": "off",
-				"nextjs/no-document-import-in-page": "off",
-				"nextjs/no-head-import-in-document": "off",
-				"nextjs/google-font-display": "off",
-				"nextjs/no-before-interactive-script-outside-document": "off",
-				"nextjs/no-assign-module-variable": "off"
+				"nextjs/no-head-element": "off"
 			}
 		},
 		{

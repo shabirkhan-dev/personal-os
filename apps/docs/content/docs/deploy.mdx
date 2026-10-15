@@ -62,9 +62,10 @@ bucket CORS rule is needed for the app (CORS only applies to browsers).
 ### Settings and secrets
 
 In `wrangler.jsonc` → `vars`, set `AUTH_EMAIL_FROM` to an address on a domain verified in
-[Resend](https://resend.com), for example `Personal OS <auth@your-domain.com>`. The AI model is
-`OPENAI_MODEL` (default `gpt-4o-mini`); any OpenAI-compatible provider works by changing
-`OPENAI_BASE_URL`.
+[Resend](https://resend.com), for example `Personal OS <auth@your-domain.com>`. The AI provider is
+DeepSeek: `OPENAI_BASE_URL` is `https://api.deepseek.com` and `OPENAI_MODEL` is `deepseek-flash`
+(DeepSeek V4.1 Flash), with the DeepSeek key in the `OPENAI_API_KEY` secret. Any
+OpenAI-compatible provider works by changing those two values.
 
 Then the secrets, each prompted for its value:
 

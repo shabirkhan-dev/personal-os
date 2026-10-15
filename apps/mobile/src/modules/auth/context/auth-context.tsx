@@ -7,7 +7,6 @@ import {
 	useMemo,
 	useState,
 } from "react";
-import { usersService } from "@/modules/users/services/users.service";
 import type { User } from "@/modules/users/types/user.types";
 import { authService } from "../services/auth.service";
 import { restoreSession } from "../services/restore-session";
@@ -51,24 +50,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	}, []);
 
 	const establishSession = useCallback(async (next: AuthSession) => {
-		if (next.refreshToken) {
-			try {
-				await tokenStorage.setRefreshToken(next.refreshToken);
-			} catch (caught) {
-				// Still signed in for this run; the session just won't survive a restart.
-				console.warn("[auth] could not save the session", caught);
-			}
+		try {
+			await tokenStorage.setRefreshToken(next.refreshToken);
+		} catch (caught) {
+			// Still signed in for this run; the session just won't survive a restart.
+			console.warn("[auth] could not save the session", caught);
 		}
 		setSession(next);
 		setError(null);
 		setStatus("signed-in");
-		// Session payloads omit the profile; fill it in when the API answers.
-		try {
-			const user = await usersService.getCurrent(next.accessToken);
-			setSession((current) => (current ? { ...current, user } : current));
-		} catch (caught) {
-			console.warn("[auth] could not load the profile; keeping the session user", caught);
-		}
 	}, []);
 
 	/** `quiet` keeps the current status while refreshing in the background. */

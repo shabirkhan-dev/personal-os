@@ -28,7 +28,7 @@ export class ApiError extends Error {
 }
 
 const REQUEST_TIMEOUT_MS = 15_000;
-const apiOrigin = resolveApiOrigin(process.env.EXPO_PUBLIC_NEST_API_URL ?? defaultApiOrigin());
+const apiOrigin = resolveApiOrigin(process.env.EXPO_PUBLIC_API_URL ?? defaultApiOrigin());
 const apiPrefix = "/api/v1";
 
 export type ApiRequestOptions = RequestInit & { accessToken?: string };
@@ -43,9 +43,6 @@ export const apiClient = {
 			method: "POST",
 			...(body === undefined ? {} : { body: JSON.stringify(body) }),
 		});
-	},
-	postForm<T>(path: string, body: FormData, options?: ApiRequestOptions): Promise<T> {
-		return request<T>(path, { ...options, method: "POST", body }, { multipart: true });
 	},
 	put<T>(path: string, body: unknown, options?: ApiRequestOptions): Promise<T> {
 		return request<T>(path, { ...options, method: "PUT", body: JSON.stringify(body) });
@@ -62,18 +59,10 @@ export function getApiOrigin(): string {
 	return apiOrigin;
 }
 
-async function request<T>(
-	path: string,
-	options: ApiRequestOptions = {},
-	flags: { multipart?: boolean } = {},
-): Promise<T> {
+async function request<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
 	const { accessToken, signal: outerSignal, ...init } = options;
 	const headers = new Headers(init.headers);
-	if (init.body && !flags.multipart) headers.set("Content-Type", "application/json");
-	if (init.method && init.method !== "GET") {
-		headers.set("X-Requested-With", "XMLHttpRequest");
-	}
-	headers.set("X-Client-Platform", "native");
+	if (init.body) headers.set("Content-Type", "application/json");
 	if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`);
 
 	const url = `${apiOrigin}${apiPrefix}${normalizePath(path)}`;
@@ -107,7 +96,7 @@ async function request<T>(
 		if (caught instanceof ApiError) throw caught;
 		if (isAbortError(caught)) {
 			throw new ApiError(
-				`Request timed out reaching ${apiOrigin}. Is Nest running and EXPO_PUBLIC_NEST_API_URL correct for this device?`,
+				`Request timed out reaching ${apiOrigin}. Is the API running and EXPO_PUBLIC_API_URL correct for this device?`,
 				408,
 				"API_TIMEOUT",
 			);
@@ -151,7 +140,7 @@ function resolveApiOrigin(value: string): string {
 	try {
 		return new URL(value).origin;
 	} catch {
-		throw new Error(`Invalid EXPO_PUBLIC_NEST_API_URL: ${value}`);
+		throw new Error(`Invalid EXPO_PUBLIC_API_URL: ${value}`);
 	}
 }
 

@@ -6,12 +6,12 @@ const monorepoRoot = path.resolve(projectRoot, "../..");
 
 const config = getDefaultConfig(projectRoot);
 
-// Watch only this app + shared packages. Sibling apps (nest-api, web, docs)
+// Watch only this app + shared packages. Sibling apps (api, web, docs)
 // emit/delete dist/.next/target while Turbo runs, which crashes Metro's watcher.
 config.watchFolders = [projectRoot, path.resolve(monorepoRoot, "packages")];
 
 const ignoreSiblingApps = [
-	/[\\/]apps[\\/]nest-api[\\/].*/,
+	/[\\/]apps[\\/]api[\\/].*/,
 	/[\\/]apps[\\/]docs[\\/].*/,
 	/[\\/]apps[\\/]web[\\/].*/,
 	// Build output folders — but only outside node_modules, since many npm

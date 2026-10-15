@@ -62,11 +62,6 @@ export type SkillPathResult = {
 	weeks: { title: string; goal: string; days: { title: string; detail: string }[] }[];
 };
 
-type RawParse = {
-	application: ParsedLineAi["application"];
-	follow_up_in_days: number | null;
-};
-
 function toCareerAiError(error: unknown): CareerAiError {
 	if (error instanceof CareerAiError) return error;
 	if (error instanceof ApiError) {
@@ -112,22 +107,14 @@ export function useCareerAi() {
 
 			readJob: (source: { url: string } | { text: string }) => call<JobDetails>("read-job", source),
 
-			parseLine: async (text: string, now = new Date()): Promise<ParsedLineAi> => {
-				const raw = await call<RawParse>("parse-line", { text, today: dayKey(now) });
-				return { application: raw.application, followUpInDays: raw.follow_up_in_days };
-			},
+			parseLine: (text: string, now = new Date()) =>
+				call<ParsedLineAi>("parse-line", { text, today: dayKey(now) }),
 
 			draftNudge: (input: NudgeInput) =>
 				call<{ subject: string; body: string }>("nudge", {
-					sender_name: input.senderName,
-					company: input.company,
-					role: input.role,
-					contact_name: input.contactName,
-					days_since_applied: Math.max(0, Math.min(365, input.daysSinceApplied)),
-					notes: input.notes,
+					...input,
+					daysSinceApplied: Math.max(0, Math.min(365, input.daysSinceApplied)),
 					stories: storyPayload(input.stories),
-					tone: input.tone,
-					...(input.currentDraft ? { current_draft: input.currentDraft } : {}),
 				}),
 
 			interviewPrep: (input: {

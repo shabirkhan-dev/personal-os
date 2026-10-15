@@ -3,7 +3,7 @@ import { bodyLimit } from "hono/body-limit";
 import { requestId } from "hono/request-id";
 import { secureHeaders } from "hono/secure-headers";
 
-import { type Config, loadConfig } from "@/config/env";
+import { type Config, ConfigError, loadConfig } from "@/config/env";
 import { settings } from "@/config/settings";
 import { AppError } from "@/core/app-error";
 import type { AppEnv } from "@/core/context";
@@ -45,7 +45,16 @@ export function createApp(options: AppOptions = {}) {
 		.use(requestId({ generator: () => `req_${crypto.randomUUID()}` }))
 		.use(secureHeaders())
 		.use(async (c, next) => {
-			c.set("config", loadConfig(c.env));
+			try {
+				c.set("config", loadConfig(c.env));
+			} catch (error) {
+				if (!(error instanceof ConfigError)) throw error;
+				console.error("[config]", error.message);
+				throw new AppError("CONFIG_INVALID", {
+					message: `The API's settings are incomplete: ${error.issues.join("; ")}`,
+					cause: error,
+				});
+			}
 			c.set("openDatabase", open);
 			try {
 				await next();

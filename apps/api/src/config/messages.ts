@@ -12,6 +12,8 @@ export const errors = {
 	NOT_FOUND: { status: 404, message: "Nothing lives at this address." },
 	RATE_LIMITED: { status: 429, message: "Too many requests. Wait a minute and try again." },
 	INTERNAL_ERROR: { status: 500, message: "Something went wrong on our side. Try again." },
+	/** The message lists the missing or invalid settings by name (never their values). */
+	CONFIG_INVALID: { status: 503, message: "The API's settings are incomplete." },
 
 	// Auth
 	AUTH_REQUIRED: { status: 401, message: "Sign in to continue." },

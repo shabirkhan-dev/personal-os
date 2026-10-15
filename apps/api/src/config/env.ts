@@ -68,13 +68,20 @@ export type Config = {
 	databaseUrl?: string;
 };
 
+/** The Worker's settings are incomplete. `issues` names the variables, never their values. */
+export class ConfigError extends Error {
+	constructor(readonly issues: readonly string[]) {
+		super(`Invalid environment configuration: ${issues.join("; ")}`);
+		this.name = "ConfigError";
+	}
+}
+
 export function parseConfig(source: Record<string, unknown>): Config {
 	const result = envSchema.safeParse(source);
 	if (!result.success) {
-		const issues = result.error.issues
-			.map((issue) => `${issue.path.join(".")}: ${issue.message}`)
-			.join("; ");
-		throw new Error(`Invalid environment configuration: ${issues}`);
+		throw new ConfigError(
+			result.error.issues.map((issue) => `${issue.path.join(".")}: ${issue.message}`),
+		);
 	}
 	const env = result.data;
 	const isProduction = env.ENVIRONMENT === "production";

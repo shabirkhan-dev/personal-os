@@ -10,6 +10,9 @@ import type { GeneratedPrep } from "../data/career-actions";
  * account; every failure comes back as a `CareerAiError` with a sentence the screen can show.
  */
 
+/** A six-week skill path is a long answer; the API itself allows the model 60 s. */
+const AI_TIMEOUT_MS = 75_000;
+
 export type CareerAiErrorKind = "offline" | "signed-out" | "unreadable" | "failed";
 
 export class CareerAiError extends Error {
@@ -65,8 +68,11 @@ export type SkillPathResult = {
 function toCareerAiError(error: unknown): CareerAiError {
 	if (error instanceof CareerAiError) return error;
 	if (error instanceof ApiError) {
-		if (error.statusCode === 0 || error.statusCode === 408) {
+		if (error.statusCode === 0) {
 			return new CareerAiError("offline", "You're offline. This needs a connection.");
+		}
+		if (error.statusCode === 408) {
+			return new CareerAiError("failed", "AI took too long to answer. Try again.");
 		}
 		if (error.statusCode === 401) {
 			return new CareerAiError("signed-out", "Sign in again to use AI.");
@@ -93,7 +99,10 @@ export function useCareerAi() {
 				throw new CareerAiError("signed-out", "Sign in to use AI.");
 			}
 			try {
-				return await apiClient.post<T>(`/ai/career/${task}`, body, { accessToken: token });
+				return await apiClient.post<T>(`/ai/career/${task}`, body, {
+					accessToken: token,
+					timeoutMs: AI_TIMEOUT_MS,
+				});
 			} catch (error) {
 				throw toCareerAiError(error);
 			}

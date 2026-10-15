@@ -1,7 +1,8 @@
 import Constants from "expo-constants";
+import { KeyboardAwareScrollView } from "@/components/ui/keyboard-aware-scroll-view";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Alert, ScrollView, StyleSheet, View } from "react-native";
+import { Alert, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PoText } from "@/components/ui/po-text";
 import { haptics } from "@/lib/haptics";
@@ -147,7 +148,7 @@ export function ProfileScreen() {
 
 	return (
 		<View style={[styles.root, { backgroundColor: colors.bgApp }]}>
-			<ScrollView contentContainerStyle={{ paddingBottom: 120 + insets.bottom }}>
+			<KeyboardAwareScrollView contentContainerStyle={{ paddingBottom: 120 + insets.bottom }}>
 				<HomeHeader
 					name={name}
 					topInset={insets.top}
@@ -251,6 +252,14 @@ export function ProfileScreen() {
 
 					<SectionLabel>Account</SectionLabel>
 					<SettingsCard>
+						<SettingsRow
+							icon="Filled/Edit"
+							iconTone="accentDefault"
+							tileTone="accentSubtle"
+							title="Photo and name"
+							meta={name || "Add your name and a photo"}
+							onPress={() => setSheet("edit")}
+						/>
 						{signedIn ? (
 							<SettingsRow
 								icon="Logout"
@@ -282,7 +291,7 @@ export function ProfileScreen() {
 						</PoText>
 					</View>
 				</View>
-			</ScrollView>
+			</KeyboardAwareScrollView>
 
 			<FloatingTabBar
 				active="profile"

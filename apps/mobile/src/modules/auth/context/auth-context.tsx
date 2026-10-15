@@ -30,6 +30,8 @@ interface AuthContextValue {
 	/** Retries restoring the saved session after `offline`. */
 	retry: () => Promise<void>;
 	logout: () => Promise<void>;
+	/** Shows a changed account (new name or avatar) without signing in again. */
+	updateUser: (user: User) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -122,6 +124,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		}
 	}, [clearSession]);
 
+	const updateUser = useCallback((user: User) => {
+		setSession((current) => (current ? { ...current, user } : current));
+	}, []);
+
 	const value = useMemo(
 		() => ({
 			status,
@@ -132,8 +138,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			verifyEmailCode,
 			retry: () => restore(),
 			logout,
+			updateUser,
 		}),
-		[status, session, error, requestEmailCode, verifyEmailCode, restore, logout],
+		[status, session, error, requestEmailCode, verifyEmailCode, restore, logout, updateUser],
 	);
 
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

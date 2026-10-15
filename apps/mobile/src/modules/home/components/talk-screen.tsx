@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FilterChip } from "@/components/module-ui";
@@ -21,7 +21,7 @@ const LISTENERS: ReadonlySet<ModuleId> = new Set<ModuleId>(["faith", "career", "
  * Talk to OS (`personalos://listen`): opens straight into listening, works out which module the
  * line is for and hands it over, so one phrase logs a prayer or a job without finding the screen.
  */
-export function TalkScreen() {
+export function TalkScreen({ say }: { say?: string }) {
 	const { colors } = usePoTheme();
 	const insets = useSafeAreaInsets();
 	const modules = useOnboardingStore((state) => state.modules);
@@ -47,6 +47,15 @@ export function TalkScreen() {
 		else setUnsure({ text, spoken });
 	};
 
+	// "Hey OS, prayed fajr": the words after the wake phrase are handled at once.
+	const handled = useRef(false);
+	useEffect(() => {
+		if (!say || handled.current) return;
+		handled.current = true;
+		onLine(say, true);
+		// oxlint-disable-next-line react/exhaustive-deps -- once, for the words that woke it
+	}, [say]);
+
 	return (
 		<View style={[styles.root, { backgroundColor: colors.bgApp, paddingTop: insets.top + 6 }]}>
 			<Glow tone="accentDefault" width={340} height={240} left={-90} top={-110} blur={110} />
@@ -67,7 +76,7 @@ export function TalkScreen() {
 				<AskBar
 					suggestions={[]}
 					placeholder="Listening… or type here"
-					autoListen
+					autoListen={!say}
 					onSubmit={onLine}
 				/>
 				{unsure ? (

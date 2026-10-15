@@ -5,6 +5,7 @@ import type {
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Linking, Platform } from "react-native";
 import { speech } from "./device-speech-module";
+import { speechOwner } from "./speech-owner";
 import type { VoiceInput, VoiceStatus } from "./voice";
 
 /** Waveform bars kept on screen, newest last. */
@@ -30,6 +31,8 @@ export function useDeviceVoiceInput(lang = "en-US"): VoiceInput {
 	const [seconds, setSeconds] = useState(0);
 	/** True while the person wants the mic on; native "end" restarts only then. */
 	const wanted = useRef(false);
+	/** This hook's claim on the phone's one recogniser (see speech-owner). */
+	const id = useRef<symbol>(Symbol("voice-input"));
 	const pendingRef = useRef("");
 	const hold = useCallback((text: string) => {
 		pendingRef.current = text;
@@ -48,7 +51,7 @@ export function useDeviceVoiceInput(lang = "en-US"): VoiceInput {
 
 	const stop = useCallback(() => {
 		wanted.current = false;
-		speech?.stop();
+		if (speechOwner.is(id.current)) speech?.stop();
 	}, []);
 
 	const start = useCallback(async () => {
@@ -65,6 +68,7 @@ export function useDeviceVoiceInput(lang = "en-US"): VoiceInput {
 				return;
 			}
 			wanted.current = true;
+			speechOwner.claim(id.current);
 			begin();
 		} catch (error) {
 			console.error("Speech recognition failed to start", error);
@@ -76,8 +80,11 @@ export function useDeviceVoiceInput(lang = "en-US"): VoiceInput {
 	useEffect(() => {
 		if (!speech) return;
 		const subscriptions = [
-			speech.addListener("start", () => setStatus("listening")),
+			speech.addListener("start", () => {
+				if (speechOwner.is(id.current)) setStatus("listening");
+			}),
 			speech.addListener("result", (event: ExpoSpeechRecognitionResultEvent) => {
+				if (!speechOwner.is(id.current)) return;
 				const text = event.results[0]?.transcript ?? "";
 				if (event.isFinal) {
 					setCommitted((value) => join(value, text));
@@ -87,10 +94,12 @@ export function useDeviceVoiceInput(lang = "en-US"): VoiceInput {
 				}
 			}),
 			speech.addListener("volumechange", ({ value }: { value: number }) => {
+				if (!speechOwner.is(id.current)) return;
 				const level = Math.min(1, Math.max(0, (value + 2) / 12));
 				setLevels((bars) => [...bars.slice(1 - LEVEL_COUNT), level]);
 			}),
 			speech.addListener("error", (event: ExpoSpeechRecognitionErrorEvent) => {
+				if (!speechOwner.is(id.current)) return;
 				if (event.error === "aborted" || event.error === "no-speech") return;
 				wanted.current = false;
 				if (event.error === "not-allowed") setStatus("denied");
@@ -100,15 +109,18 @@ export function useDeviceVoiceInput(lang = "en-US"): VoiceInput {
 				}
 			}),
 			speech.addListener("end", () => {
+				if (!speechOwner.is(id.current)) return;
 				// Keep what was still being recognised when the recogniser stopped.
 				const text = pendingRef.current;
 				if (text) setCommitted((value) => join(value, text));
 				hold("");
 				if (wanted.current) begin();
-				else
+				else {
+					speechOwner.release(id.current);
 					setStatus((current) =>
 						current === "listening" || current === "starting" ? "stopped" : current,
 					);
+				}
 			}),
 		];
 		return () => {
@@ -126,10 +138,27 @@ export function useDeviceVoiceInput(lang = "en-US"): VoiceInput {
 		if (seconds >= MAX_SECONDS) stop();
 	}, [seconds, stop]);
 
+	// Someone else took the recogniser (Talk to OS, another mic): this one has stopped.
+	useEffect(
+		() =>
+			speechOwner.subscribe((owner) => {
+				if (owner !== id.current && wanted.current) {
+					wanted.current = false;
+					setStatus((current) =>
+						current === "listening" || current === "starting" ? "stopped" : current,
+					);
+				}
+			}),
+		[],
+	);
+
 	useEffect(
 		() => () => {
 			wanted.current = false;
-			speech?.abort();
+			if (speechOwner.is(id.current)) {
+				speech?.abort();
+				speechOwner.release(id.current);
+			}
 		},
 		[],
 	);

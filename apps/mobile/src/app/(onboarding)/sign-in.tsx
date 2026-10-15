@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import { useState } from "react";
-import { KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import Animated from "react-native-reanimated";
 import { LogoMark } from "@/components/icons";
 import { PillButton } from "@/components/ui/pill-button";
@@ -28,20 +28,15 @@ export default function SignInScreen() {
 
 	if (usingEmail) {
 		return (
-			<KeyboardAvoidingView
-				style={styles.fill}
-				behavior={Platform.OS === "ios" ? "padding" : undefined}
-			>
-				<OnboardingScreen glow="accentDefault" scroll>
-					<SetupTop onBack={() => setUsingEmail(false)} />
-					<View style={styles.gap} />
-					<EmailSignIn
-						name={name}
-						onSignedIn={continueToAllSet}
-						onCancel={() => setUsingEmail(false)}
-					/>
-				</OnboardingScreen>
-			</KeyboardAvoidingView>
+			<OnboardingScreen glow="accentDefault" scroll>
+				<SetupTop onBack={() => setUsingEmail(false)} />
+				<View style={styles.gap} />
+				<EmailSignIn
+					name={name}
+					onSignedIn={continueToAllSet}
+					onCancel={() => setUsingEmail(false)}
+				/>
+			</OnboardingScreen>
 		);
 	}
 
@@ -88,7 +83,6 @@ export default function SignInScreen() {
 }
 
 const styles = StyleSheet.create({
-	fill: { flex: 1 },
 	spacer: { flex: 1 },
 	gap: { height: 32 },
 	brand: { alignItems: "center", gap: 22 },

@@ -7,3 +7,4 @@ import { deviceVoiceOutput } from "./device-voice-output";
  */
 export const useVoiceInput = useDeviceVoiceInput;
 export const voiceOut = deviceVoiceOutput;
+export { useDeviceWakeListener as useWakeListener } from "./device-wake-listener";

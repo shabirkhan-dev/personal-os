@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import type { ReactNode } from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Icon, type IconName } from "@/components/icons";
 import { HeaderButton } from "@/components/ui/header-button";
@@ -8,6 +8,7 @@ import { PoText } from "@/components/ui/po-text";
 import { FloatingTabBar } from "@/modules/home/components/floating-tab-bar";
 import { Avatar } from "@/modules/onboarding/components/avatar";
 import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
+import { KeyboardAwareScrollView } from "@/components/ui/keyboard-aware-scroll-view";
 import { usePoTheme } from "@/theme";
 
 export type ModuleScreenProps = {
@@ -72,13 +73,13 @@ export function ModuleScreen({
 	return (
 		<View style={[styles.root, { backgroundColor: colors.bgApp }]}>
 			{scroll ? (
-				<ScrollView
+				<KeyboardAwareScrollView
 					keyboardShouldPersistTaps="handled"
 					contentContainerStyle={[styles.content, padding]}
 				>
 					{header}
 					{children}
-				</ScrollView>
+				</KeyboardAwareScrollView>
 			) : (
 				<View style={[styles.root, styles.content, padding]}>
 					{header}

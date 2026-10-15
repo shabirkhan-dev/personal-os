@@ -9,6 +9,7 @@ import { AuthModule } from '@/modules/auth/auth.module';
 import { HealthModule } from '@/modules/health/health.module';
 import { OnboardingModule } from '@/modules/onboarding/onboarding.module';
 import { ProfilesModule } from '@/modules/profiles/profiles.module';
+import { SyncModule } from '@/modules/sync/sync.module';
 import { UsersModule } from '@/modules/users/users.module';
 
 @Module({
@@ -21,6 +22,7 @@ import { UsersModule } from '@/modules/users/users.module';
 		AuthModule,
 		ProfilesModule,
 		OnboardingModule,
+		SyncModule,
 		AiModule,
 	],
 	providers: [

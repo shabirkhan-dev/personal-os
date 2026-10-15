@@ -50,6 +50,13 @@
 			"when": 1791861768300,
 			"tag": "0006_onboarding_profiles",
 			"breakpoints": true
+		},
+		{
+			"idx": 7,
+			"version": "7",
+			"when": 1792024063641,
+			"tag": "0007_sync_records",
+			"breakpoints": true
 		}
 	]
 }

@@ -1,8 +1,8 @@
 /**
  * PO text styles from Figma (Kit v2). SF Pro is the platform UI font on iOS;
- * eyebrows and numerals use JetBrains Mono.
+ * eyebrows and numerals use JetBrains Mono; Quran text and duas use Amiri Quran.
  */
-export type FontFamilyToken = "sans" | "mono";
+export type FontFamilyToken = "sans" | "mono" | "quran";
 export type FontWeightToken = "regular" | "medium";
 
 export type TextStyleToken = {
@@ -40,6 +40,10 @@ export const textStyles = {
 		letterSpacing: 1,
 		uppercase: true,
 	},
+	/** Arabic: the Ayah card and the Tasbih list; the large size for flashcards. */
+	arabic20: { family: "quran", weight: "regular", size: 20, lineHeight: 36, letterSpacing: 0 },
+	arabic30: { family: "quran", weight: "regular", size: 30, lineHeight: 54, letterSpacing: 0 },
+	arabic56: { family: "quran", weight: "regular", size: 56, lineHeight: 96, letterSpacing: 0 },
 } as const satisfies Record<string, TextStyleToken>;
 
 export type TextStyleName = keyof typeof textStyles;

@@ -8,7 +8,7 @@ import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
 import { OnboardingScreen } from "@/modules/onboarding/components/onboarding-screen";
 import { SetupTop } from "@/modules/onboarding/components/top-bars";
-import { type SpeechStatus, useSpeechCapture } from "@/modules/onboarding/hooks/use-speech-capture";
+import { useVoiceInput, type VoiceStatus } from "@/lib/voice";
 import { type OnboardingRoute, onboardingRoutes } from "@/modules/onboarding/lib/flow";
 import { goBack } from "@/modules/onboarding/lib/navigation";
 import type { Gender } from "@/modules/onboarding/lib/options";
@@ -47,7 +47,7 @@ function clockLabel(seconds: number): string {
 	return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
 }
 
-function statusLabel(status: SpeechStatus, clock: string): string {
+function statusLabel(status: VoiceStatus, clock: string): string {
 	switch (status) {
 		case "starting":
 			return "Getting the mic ready…";
@@ -70,7 +70,7 @@ export default function VoiceScreen() {
 	const { colors } = usePoTheme();
 	const applyIntro = useOnboardingStore((state) => state.applyIntro);
 	const setAnswer = useOnboardingStore((state) => state.set);
-	const speech = useSpeechCapture();
+	const speech = useVoiceInput();
 	const { start, stop } = speech;
 	const [gender, setGender] = useState<Gender | undefined>();
 	const [pickingGender, setPickingGender] = useState(false);
@@ -276,7 +276,7 @@ export default function VoiceScreen() {
 	);
 }
 
-type BlockedProps = { status: SpeechStatus; onRetry: () => Promise<void>; onSettings: () => void };
+type BlockedProps = { status: VoiceStatus; onRetry: () => Promise<void>; onSettings: () => void };
 
 /** Mic off, no recogniser, or a failure: say so and offer the way forward. */
 function Blocked({ status, onRetry, onSettings }: BlockedProps) {

@@ -25,7 +25,7 @@ function RootNavigator() {
 	const ready = fontsLoaded || fontError !== null;
 
 	useEffect(() => {
-		if (fontError) console.warn("[fonts] JetBrains Mono failed to load", fontError);
+		if (fontError) console.warn("[fonts] a bundled font failed to load", fontError);
 		if (ready) SplashScreen.hideAsync().catch(() => undefined);
 	}, [ready, fontError]);
 

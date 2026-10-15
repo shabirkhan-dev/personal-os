@@ -46,6 +46,7 @@ table, `apps/api/src/config/messages.ts`.
 | `PUT` | `/users/me/onboarding` | bearer | Save the onboarding answers |
 | `POST` | `/sync` | bearer | Push local record changes, pull changes after a cursor |
 | `POST` | `/ai/career/<task>` | bearer | Career AI: `read-job`, `parse-line`, `nudge`, `interview-prep`, `skill-path` |
+| `POST` | `/ai/faith/ask` | bearer | Faith AI: a question answered in the person's tradition |
 
 Rate limits (per IP, or per user when signed in, per minute): auth routes 10, `/sync` 60, AI 20.
 Over the limit: `429` `RATE_LIMITED`. When the Worker's settings are incomplete, every route
@@ -150,7 +151,9 @@ about a second after they happen.
   `400` `SYNC_DUPLICATE_RECORD` when one record appears twice.
 
 Collections in use: `career-applications`, `career-preps`, `career-stories`, `career-flashcards`,
-`career-skill-plans`, `career-skill-sessions`, `career-settings`. Names are part of the contract.
+`career-skill-plans`, `career-skill-sessions`, `career-settings`, and for Faith `faith-settings`,
+`faith-prayer-logs`, `faith-tasbih`, `faith-recitations`, `faith-zakat`, `faith-zakat-payments`,
+`faith-resources`, `faith-challenge`, `faith-paths`, `faith-cards`. Names are part of the contract.
 
 ### Career AI
 
@@ -172,7 +175,13 @@ the model's reading, which the person confirms. `tone` is `as-is`, `shorter`, `w
 the message says which), `400` `VALIDATION_FAILED`, `502` `AI_INVALID_OUTPUT`, `503`
 `AI_UNAVAILABLE`.
 
-, `503` `AI_UNAVAILABLE`.
+### Faith AI
+
+`POST /ai/faith/ask` with `{ question, today: "YYYY-MM-DD", tradition?, prayers?, prayedToday? }`
+returns `{ answer, followUps[] }` (at most 120 words and three follow-ups). `tradition` is the
+person's own words ("Shia Ismaili", "Hanafi"); the model follows it, says where traditions differ
+and points rulings on the person's own case to a scholar. Prayer times, the Qibla, logging and
+everything else in Faith work on the phone without the API.
 
 ## Changelog
 
@@ -180,6 +189,7 @@ Record every public API change, newest first, so consumers can see what moved.
 
 | Date | Change | Breaking |
 | --- | --- | --- |
+| 2026-10-15 | Added `POST /ai/faith/ask`; `faith` is a valid onboarding module and up to 8 modules can be chosen | No |
 | 2026-10-15 | Moved to one Hono API on Cloudflare Workers. Sign-in paths are now `/auth/email-code/*`; `GET /auth/me` is gone (use `/users/me`); the user is `{ id, email, displayName, avatarUrl, createdAt }`; the refresh token is always in the body; avatars upload to R2 through `POST /assets/uploads` (`POST /users/me/avatar` removed); Career AI fields are camelCase; validation errors are `VALIDATION_FAILED`; password, magic-link, TOTP, passkey, Google and `/ai/assist` routes removed | Yes, the app moves in the same change |
 | 2026-10-15 | Added `POST /sync` and `POST /ai/career/:task`; `career` is a valid onboarding module | No |
 | 2026-10-15 | Documented the profile, avatar and AI endpoints already in use | No |

@@ -12,6 +12,8 @@ export type HomeHero = {
 	hideable?: boolean;
 	/** Makes the label a button with a chevron (e.g. Career's runway settings). */
 	onLabelPress?: () => void;
+	/** Overrides the module's glow while it applies (Faith follows the time of day). */
+	glow?: keyof ColorTokens;
 };
 
 export type HomeModuleViewProps = {
@@ -25,4 +27,8 @@ export type HomeModule = {
 	action: { icon: IconName; label: string };
 	useHero: () => HomeHero;
 	View: ComponentType<HomeModuleViewProps>;
+	/** Drawn behind the header, under the glow (Faith's Sky pattern and sun or moon). */
+	Backdrop?: ComponentType;
+	/** Where the Insights tab goes on this module's Home; the tab stays disabled without it. */
+	onInsights?: () => void;
 };

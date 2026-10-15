@@ -1,9 +1,10 @@
+import { AmiriQuran_400Regular } from "@expo-google-fonts/amiri-quran";
 import { JetBrainsMono_400Regular } from "@expo-google-fonts/jetbrains-mono";
 import type { TextStyleToken } from "@personal-os/tokens";
 import { Platform, type TextStyle } from "react-native";
 
 /** Fonts loaded at startup with `useFonts(poFontAssets)`. */
-export const poFontAssets = { JetBrainsMono_400Regular };
+export const poFontAssets = { JetBrainsMono_400Regular, AmiriQuran_400Regular };
 
 const sansFamily = Platform.select({
 	// SF Pro is the iOS system font, so no family is needed there.
@@ -25,9 +26,15 @@ export type PoTextStyle = Pick<
 
 /** Converts a PO text-style token into a React Native text style. */
 export function toTextStyle(token: TextStyleToken): PoTextStyle {
-	const isMono = token.family === "mono";
 	const isMedium = token.weight === "medium";
-	const fontFamily = isMono ? "JetBrainsMono_400Regular" : isMedium ? sansMediumFamily : sansFamily;
+	const fontFamily =
+		token.family === "quran"
+			? "AmiriQuran_400Regular"
+			: token.family === "mono"
+				? "JetBrainsMono_400Regular"
+				: isMedium
+					? sansMediumFamily
+					: sansFamily;
 
 	return {
 		fontFamily,

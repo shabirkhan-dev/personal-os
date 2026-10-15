@@ -5,7 +5,7 @@ import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
 import { Sheet } from "@/components/ui/sheet";
 import { usePoTheme } from "@/theme";
-import { type SpeechStatus, useSpeechCapture } from "@/modules/onboarding/hooks/use-speech-capture";
+import { useVoiceInput, type VoiceStatus } from "@/lib/voice";
 
 export type SayItSheetProps = {
 	onClose: () => void;
@@ -13,7 +13,7 @@ export type SayItSheetProps = {
 	onDone: (transcript: string) => void;
 };
 
-function statusLine(status: SpeechStatus): string {
+function statusLine(status: VoiceStatus): string {
 	switch (status) {
 		case "starting":
 			return "Starting the microphone…";
@@ -33,7 +33,7 @@ function statusLine(status: SpeechStatus): string {
 /** "Say it": dictate a meal; the words go into the Log meal sheet to check before saving. */
 export function SayItSheet({ onClose, onDone }: SayItSheetProps) {
 	const { colors } = usePoTheme();
-	const { status, transcript, start, stop, openSettings } = useSpeechCapture();
+	const { status, transcript, start, stop, openSettings } = useVoiceInput();
 	const listening = status === "listening" || status === "starting";
 	const blocked = status === "denied" || status === "unavailable";
 

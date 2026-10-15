@@ -7,16 +7,25 @@ const CHANNEL_ID = "reminders";
 const KIND = "personal-os.reminder";
 
 let prepared = false;
+let isQuiet: () => boolean = () => false;
 
-async function prepare(): Promise<void> {
+/** Lets a module hold this app's alerts back for a while (Faith: 15 minutes from each prayer). */
+export function setQuietCheck(check: () => boolean): void {
+	isQuiet = check;
+}
+
+export async function prepareNotifications(): Promise<void> {
 	if (prepared) return;
 	Notifications.setNotificationHandler({
-		handleNotification: async () => ({
-			shouldShowBanner: true,
-			shouldShowList: true,
-			shouldPlaySound: false,
-			shouldSetBadge: false,
-		}),
+		handleNotification: async () => {
+			const quiet = isQuiet();
+			return {
+				shouldShowBanner: !quiet,
+				shouldShowList: true,
+				shouldPlaySound: false,
+				shouldSetBadge: false,
+			};
+		},
 	});
 	if (Platform.OS === "android") {
 		await Notifications.setNotificationChannelAsync(CHANNEL_ID, {
@@ -29,7 +38,7 @@ async function prepare(): Promise<void> {
 
 /** Asks once; afterwards reports what the person chose. */
 export async function requestReminderPermission(): Promise<boolean> {
-	await prepare();
+	await prepareNotifications();
 	const current = await Notifications.getPermissionsAsync();
 	if (current.granted) return true;
 	if (!current.canAskAgain) return false;
@@ -39,7 +48,7 @@ export async function requestReminderPermission(): Promise<boolean> {
 
 /** Replaces this app's scheduled reminders with `plans`. Returns how many were scheduled. */
 export async function scheduleReminders(plans: readonly ReminderPlan[]): Promise<number> {
-	await prepare();
+	await prepareNotifications();
 	const scheduled = await Notifications.getAllScheduledNotificationsAsync();
 	await Promise.all(
 		scheduled

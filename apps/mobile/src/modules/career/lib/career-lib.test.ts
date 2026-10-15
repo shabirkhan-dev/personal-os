@@ -26,7 +26,7 @@ import {
 	todayLine,
 	weekdayIndex,
 } from "./career-math";
-import { dueCards, formatInterval, nextInterval, review } from "./flashcard-schedule";
+import { dueCards, formatInterval, nextInterval, review } from "@/lib/flashcards/schedule";
 import { looksLikeLink, normaliseLink, parseCareerLine } from "./parse-career-line";
 
 // Thursday 15 Oct 2026, 10:00 local time.

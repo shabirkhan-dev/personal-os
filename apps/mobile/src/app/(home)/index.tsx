@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Alert, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { careerHome, useCareerStatus } from "@/modules/career";
+import { faithHome, useFaithStatus } from "@/modules/faith";
 import { foodHome, useFoodStatus } from "@/modules/food";
 import { financeHome, useFinanceStatus, useFinanceSummary } from "@/modules/finance";
 import { AskBar } from "@/modules/home/components/ask-bar";
@@ -38,6 +39,7 @@ const moduleHomes: Partial<Record<ModuleId, HomeModule>> = {
 	workout: workoutHome,
 	skincare: skincareHome,
 	food: foodHome,
+	faith: faithHome,
 };
 
 /** Re-renders once a minute so "Now" and "Next · in …" stay current. */
@@ -80,6 +82,7 @@ export default function TodayScreen() {
 		workout: workoutHome.useHero(),
 		skincare: skincareHome.useHero(),
 		food: foodHome.useHero(),
+		faith: faithHome.useHero(),
 	};
 	const liveStatus: Partial<Record<ModuleId, string>> = {
 		career: useCareerStatus(),
@@ -87,6 +90,7 @@ export default function TodayScreen() {
 		workout: useWorkoutStatus(),
 		skincare: useSkincareStatus(),
 		food: useFoodStatus(),
+		faith: useFaithStatus(),
 	};
 	const modules = moduleStatuses(plan.input, items);
 	for (const item of modules) item.status = liveStatus[item.id] ?? item.status;
@@ -185,6 +189,7 @@ export default function TodayScreen() {
 				bottomInset={insets.bottom}
 				onTodayPress={() => select("overview")}
 				onAreasPress={() => setPickerOpen(true)}
+				onInsightsPress={moduleHome?.onInsights}
 				onProfilePress={() => router.replace("/profile")}
 			/>
 		</View>
@@ -206,15 +211,16 @@ type ModuleScreenProps = {
 /** One module's Home. Keyed by module so its view starts fresh when switching. */
 function ModuleScreen({ module, hero, label, ...header }: ModuleScreenProps) {
 	const [actionRequest, setActionRequest] = useState(0);
-	const { View: ModuleView } = module;
+	const { View: ModuleView, Backdrop } = module;
 
 	return (
 		<>
 			<HomeHeader
 				{...header}
 				label={label}
-				glow={module.glow}
+				glow={hero?.glow ?? module.glow}
 				hero={hero}
+				backdrop={Backdrop ? <Backdrop /> : null}
 				action={{
 					icon: module.action.icon,
 					label: module.action.label,
@@ -247,7 +253,9 @@ function OverviewBody({ period, modules, amountsHidden, onOpen, upcomingList }: 
 			? { label: "Start workout", onPress: () => onOpen("workout") }
 			: null,
 		modules.includes("skincare") ? { label: "Skincare", onPress: () => onOpen("skincare") } : null,
+		modules.includes("faith") ? { label: "Log a prayer", onPress: () => onOpen("faith") } : null,
 	].filter((item): item is { label: string; onPress: () => void } => item !== null);
+	const talk = { label: "Talk to OS", onPress: () => router.push("/listen") };
 
 	return (
 		<>
@@ -260,7 +268,7 @@ function OverviewBody({ period, modules, amountsHidden, onOpen, upcomingList }: 
 				/>
 			) : null}
 			<AskBar
-				suggestions={suggestions.slice(0, 3)}
+				suggestions={[...suggestions.slice(0, 3), talk]}
 				onSubmit={(text) =>
 					Alert.alert(
 						"Pick a module",

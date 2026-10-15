@@ -15,10 +15,10 @@ import {
 	nextInterval,
 	RATINGS,
 	type Rating,
-} from "../lib/flashcard-schedule";
+} from "@/lib/flashcards/schedule";
 import { careerRoutes } from "../navigation";
 import { CareerScreen } from "./career-screen";
-import { EmptyCard, ScreenTitle } from "./career-ui";
+import { EmptyCard, ScreenTitle } from "@/components/module-ui";
 
 const RATING_LABELS: Record<Rating, string> = {
 	again: "Again",

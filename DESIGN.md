@@ -40,9 +40,10 @@ system preference. **No raw colour values in screens.**
 | `radius` | `xs` 4, `lg` 12, `2xl` 20, `full` (pills and circles) |
 | `stroke` | hairline 1, selected 1.5, checkbox ring 1.75 |
 | `elevation` | `card`, `floating`, `pocket` shadows (converted by `toShadowStyle`) |
-| `textStyles` | `hero40`, `display36`, `title30`, `title18`, `body15`, `row15`, `text14`, `text14Medium`, `meta13`, `tab11`, `mono13`, `eyebrow11` |
+| `textStyles` | `hero40`, `display36`, `title30`, `title18`, `body15`, `row15`, `text14`, `text14Medium`, `meta13`, `tab11`, `mono13`, `eyebrow11`, `arabic20`, `arabic30`, `arabic56` |
 
-Type is SF Pro (system) for sans and JetBrains Mono for mono; `toTextStyle` maps a token to a
+Type is SF Pro (system) for sans, JetBrains Mono for mono and Amiri Quran for Arabic (Quran text,
+duas, Tasbih phrases); `toTextStyle` maps a token to a
 React Native style and `PoText` renders it. Do not invent one-off sizes or colours: add a token
 that matches Figma first.
 

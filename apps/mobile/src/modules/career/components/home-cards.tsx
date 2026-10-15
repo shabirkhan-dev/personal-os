@@ -1,9 +1,7 @@
 import type { ColorTokens } from "@personal-os/tokens";
 import { Pressable, StyleSheet, View } from "react-native";
-import { Icon, type IconName } from "@/components/icons";
-import { PillButton } from "@/components/ui/pill-button";
+import type { IconName } from "@/components/icons";
 import { PoText } from "@/components/ui/po-text";
-import { haptics } from "@/lib/haptics";
 import { usePoTheme } from "@/theme";
 import {
 	type ActivityItem,
@@ -14,7 +12,7 @@ import {
 	weekdayShort,
 } from "../lib/career-math";
 import type { CareerEventKind } from "../lib/career-model";
-import { HeadLink, IconTile, ListCard, ListRow, ProgressBar } from "./career-ui";
+import { ActionPills, HeadLink, ListCard, ListRow } from "@/components/module-ui";
 
 type Tone = keyof ColorTokens;
 
@@ -42,35 +40,14 @@ export function QuickActions({
 	onFollowUp: () => void;
 	onPrep: () => void;
 }) {
-	const actions: ReadonlyArray<{ label: string; icon: IconName; onPress: () => void }> = [
-		{ label: "Add job", icon: "Filled/Plus", onPress: onAdd },
-		{ label: "Follow up", icon: "Send", onPress: onFollowUp },
-		{ label: "Prep", icon: "Briefcase", onPress: onPrep },
-	];
-	const { colors } = usePoTheme();
 	return (
-		<View style={styles.quick}>
-			{actions.map((action) => (
-				<Pressable
-					key={action.label}
-					accessibilityRole="button"
-					onPress={() => {
-						haptics.tap();
-						action.onPress();
-					}}
-					style={({ pressed }) => [
-						styles.quickButton,
-						{
-							backgroundColor: pressed ? colors.bgHover : colors.bgSurface,
-							borderColor: colors.borderDefault,
-						},
-					]}
-				>
-					<Icon name={action.icon} size={16} color={colors.textPrimary} />
-					<PoText variant="meta13">{action.label}</PoText>
-				</Pressable>
-			))}
-		</View>
+		<ActionPills
+			actions={[
+				{ label: "Add job", icon: "Filled/Plus", onPress: onAdd },
+				{ label: "Follow up", icon: "Send", onPress: onFollowUp },
+				{ label: "Prep", icon: "Briefcase", onPress: onPrep },
+			]}
+		/>
 	);
 }
 
@@ -284,109 +261,8 @@ export function ActivityCard({
 	);
 }
 
-/** A head row with an icon tile, two lines and a mono value, over a progress bar. */
-export function ProgressCard({
-	icon,
-	title,
-	subtitle,
-	value,
-	share,
-	barTone,
-	onPress,
-}: {
-	icon: { name: IconName; tone: Tone; tile: Tone };
-	title: string;
-	subtitle: string;
-	value: string;
-	share: number;
-	barTone: Tone;
-	onPress: () => void;
-}) {
-	const { colors } = usePoTheme();
-	return (
-		<Pressable
-			accessibilityRole="button"
-			accessibilityLabel={`${title}, ${subtitle}`}
-			onPress={() => {
-				haptics.tap();
-				onPress();
-			}}
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
-			<View style={styles.progressHead}>
-				<IconTile name={icon.name} tone={icon.tone} tile={icon.tile} />
-				<View style={styles.flex}>
-					<PoText variant="row15" numberOfLines={1}>
-						{title}
-					</PoText>
-					<PoText variant="meta13" tone="textSecondary" numberOfLines={1}>
-						{subtitle}
-					</PoText>
-				</View>
-				<PoText variant="mono13">{value}</PoText>
-			</View>
-			<ProgressBar share={share} tone={barTone} />
-		</Pressable>
-	);
-}
-
 export function interviewTitle(company: string, at: string): string {
 	return `${company} · ${dayAndTime(new Date(at)).replace(",", "")}`;
-}
-
-/** "DONE FROM YOUR MESSAGE": what the ask bar just logged, with Undo and Looks right. */
-export function AiResultCard({
-	quote,
-	rows,
-	onUndo,
-	onDone,
-	offline,
-}: {
-	quote: string;
-	rows: ReadonlyArray<{ title: string; subtitle: string; value: string; onPress?: () => void }>;
-	onUndo: () => void;
-	onDone: () => void;
-	offline: boolean;
-}) {
-	const { colors } = usePoTheme();
-	return (
-		<View
-			style={[
-				styles.result,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.accentDefault },
-			]}
-		>
-			<View style={styles.eyebrow}>
-				<Icon name="Filled/Sparkle" size={14} color={colors.accentDefault} />
-				<PoText variant="eyebrow11" tone="textTertiary">
-					{offline ? "Saved offline from your message" : "Done from your message"}
-				</PoText>
-			</View>
-			<PoText variant="mono13" tone="textSecondary">
-				“{quote}”
-			</PoText>
-			<View>
-				{rows.map((row, index) => (
-					<ListRow
-						key={row.title}
-						title={row.title}
-						subtitle={row.subtitle}
-						value={row.value}
-						chevron={Boolean(row.onPress)}
-						onPress={row.onPress}
-						last={index === rows.length - 1}
-					/>
-				))}
-			</View>
-			<View style={styles.footer}>
-				<PillButton label="Undo" variant="secondary" style={styles.flex} onPress={onUndo} />
-				<PillButton label="Looks right" style={styles.flex} onPress={onDone} />
-			</View>
-		</View>
-	);
 }
 
 const styles = StyleSheet.create({

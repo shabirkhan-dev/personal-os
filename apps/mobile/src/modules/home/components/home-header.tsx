@@ -1,4 +1,5 @@
 import type { ColorTokens } from "@personal-os/tokens";
+import type { ReactNode } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Icon, type IconName } from "@/components/icons";
 import { Glow } from "@/components/ui/glow";
@@ -22,6 +23,8 @@ export type HomeHeaderProps = {
 	hero?: HomeHero;
 	amountsHidden?: boolean;
 	onToggleHidden?: () => void;
+	/** Drawn behind everything, under the glow (Faith's Sky). */
+	backdrop?: ReactNode;
 };
 
 /** Kit v2 "Home Header": glow, Apps button, module pill, a module action and the hero number. */
@@ -36,12 +39,14 @@ export function HomeHeader({
 	hero,
 	amountsHidden = false,
 	onToggleHidden,
+	backdrop,
 }: HomeHeaderProps) {
 	const { colors } = usePoTheme();
 	const hidden = Boolean(hero?.hideable && amountsHidden);
 
 	return (
 		<View style={[styles.header, { paddingTop: topInset + 6 }, hero ? styles.withHero : null]}>
+			{backdrop}
 			<Glow tone={glow} width={340} height={240} left={-90} top={-110} blur={110} />
 			<View style={styles.row}>
 				<Pressable

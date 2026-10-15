@@ -15,7 +15,7 @@ import type {
 	Stage,
 	Story,
 } from "../lib/career-model";
-import { review, type Rating } from "../lib/flashcard-schedule";
+import { review, type Rating } from "@/lib/flashcards/schedule";
 import {
 	applications,
 	careerSettings,

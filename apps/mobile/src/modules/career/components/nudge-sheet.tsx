@@ -10,7 +10,7 @@ import { recordNudge } from "../data/career-actions";
 import { daysBetween, lastEvent } from "../lib/career-math";
 import type { Application, Story } from "../lib/career-model";
 import { CareerAiError, type Tone, useCareerAi } from "../services/career-ai";
-import { FilterChip, Footer, ListRow } from "./career-ui";
+import { FilterChip, Footer, ListRow } from "@/components/module-ui";
 import { FieldGroup, FieldRow, TextBox } from "./field-rows";
 
 const TONES: ReadonlyArray<{ id: Tone; label: string }> = [

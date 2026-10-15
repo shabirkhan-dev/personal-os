@@ -1,18 +1,22 @@
 import { textStyles } from "@personal-os/tokens";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { Icon } from "@/components/icons";
 import { PoText } from "@/components/ui/po-text";
 import { toTextStyle, usePoTheme } from "@/theme";
 import { haptics } from "@/lib/haptics";
+import { deviceSpeechModule, useVoiceInput } from "@/lib/voice";
 
 /** A chip either fills the bar with its text or runs its own action (opens a sheet). */
 export type AskSuggestion = string | { label: string; onPress: () => void };
 
 export type AskBarProps = {
 	suggestions: readonly AskSuggestion[];
-	onSubmit: (text: string) => void;
+	/** `spoken` is true when the line came from the mic, so the reply can be spoken too. */
+	onSubmit: (text: string, spoken: boolean) => void;
 	placeholder?: string;
+	/** Starts listening as soon as the bar appears ("Talk to OS" shortcut). */
+	autoListen?: boolean;
 };
 
 const inputStyle = toTextStyle(textStyles.body15);
@@ -22,42 +26,98 @@ export function AskBar({
 	suggestions,
 	onSubmit,
 	placeholder = "Log or ask anything…",
+	autoListen = false,
 }: AskBarProps) {
 	const { colors } = usePoTheme();
 	const [text, setText] = useState("");
-	const canSend = text.trim().length > 0;
+	const voice = useVoiceInput();
+	const listening = voice.status === "listening" || voice.status === "starting";
+	const shown = listening ? voice.transcript : text;
+	const canSend = shown.trim().length > 0;
+	const canTalk = deviceSpeechModule !== null && voice.status !== "unavailable";
 
-	const submit = () => {
-		if (!canSend) return;
+	const submit = (value = text, spoken = false) => {
+		if (!value.trim()) return;
 		haptics.tap();
-		onSubmit(text.trim());
+		onSubmit(value.trim(), spoken);
 		setText("");
 	};
+
+	// Speaking a line sends it as soon as listening stops.
+	const heard = useRef(false);
+	useEffect(() => {
+		if (listening) heard.current = true;
+		else if (heard.current && voice.status === "stopped") {
+			heard.current = false;
+			submit(voice.transcript, true);
+		}
+		// oxlint-disable-next-line react/exhaustive-deps -- runs on status changes only
+	}, [voice.status]);
+
+	const started = useRef(false);
+	useEffect(() => {
+		if (autoListen && canTalk && !started.current) {
+			started.current = true;
+			voice.reset();
+			void voice.start();
+		}
+	}, [autoListen, canTalk, voice]);
+
+	const talk = () => {
+		haptics.tap();
+		if (listening) voice.stop();
+		else {
+			voice.reset();
+			void voice.start();
+		}
+	};
+	const showMic = canTalk && (listening || !canSend);
 
 	return (
 		<View style={styles.ask}>
 			<View style={[styles.bar, { backgroundColor: colors.bgSubtle }]}>
 				<Icon name="Filled/Sparkle" color={colors.textSecondary} />
 				<TextInput
-					value={text}
+					value={shown}
 					onChangeText={setText}
-					onSubmitEditing={submit}
-					placeholder={placeholder}
+					onSubmitEditing={() => submit()}
+					editable={!listening}
+					placeholder={listening ? "Listening…" : placeholder}
 					placeholderTextColor={colors.textTertiary}
 					returnKeyType="send"
 					accessibilityLabel="Log or ask anything"
 					style={[inputStyle, styles.input, { color: colors.textPrimary }]}
 				/>
-				<Pressable
-					accessibilityRole="button"
-					accessibilityLabel="Send"
-					accessibilityState={{ disabled: !canSend }}
-					disabled={!canSend}
-					onPress={submit}
-					style={[styles.send, { backgroundColor: colors.bgInverse, opacity: canSend ? 1 : 0.45 }]}
-				>
-					<Icon name="Line/Arrow up" color={colors.textInverse} />
-				</Pressable>
+				{showMic ? (
+					<Pressable
+						accessibilityRole="button"
+						accessibilityLabel={listening ? "Stop and send" : "Speak instead"}
+						onPress={talk}
+						style={[
+							styles.send,
+							{ backgroundColor: listening ? colors.accentDefault : colors.bgSurface },
+						]}
+					>
+						<Icon
+							name={listening ? "Line/Check" : "Mic"}
+							color={listening ? colors.textInverse : colors.textPrimary}
+						/>
+					</Pressable>
+				) : (
+					<Pressable
+						accessibilityRole="button"
+						accessibilityLabel="Send"
+						accessibilityState={{ disabled: !canSend }}
+						disabled={!canSend}
+						onPress={() => submit()}
+						style={[
+							styles.send,
+							{ backgroundColor: colors.bgInverse, opacity: canSend ? 1 : 0.45 },
+						]}
+					>
+						<Icon name="Line/Arrow up" color={colors.textInverse} />
+					</Pressable>
+				)}
 			</View>
 			<ScrollView
 				horizontal

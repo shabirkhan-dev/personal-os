@@ -28,7 +28,7 @@ import {
 	SectionLabel,
 	TimelineRow,
 	type TimelineState,
-} from "./career-ui";
+} from "@/components/module-ui";
 import { EditApplicationSheet } from "./edit-application-sheet";
 import { InterviewSheet } from "./interview-sheet";
 import { NudgeSheet } from "./nudge-sheet";

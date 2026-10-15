@@ -23,6 +23,13 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
 - Ask bar that parses typed lines into module entries.
 - Career module: pipeline, follow-ups with AI-drafted nudges, job links read by AI with a halal
   reading, interview prep with flashcards, and a 30-minute-a-day skill path.
+- Faith module: prayer times on the phone (location or typed times) with reminders, a Sky header
+  that follows the time of day, prayer logging and consistency, Qibla compass, Tasbih, Quran
+  recitation timer, ayah and dua cards read aloud, Zakat, Grow (challenges, paths, flashcards,
+  notes) and Insights, plus questions answered by the Faith AI.
+- Voice in and out on the phone behind one swappable layer (`src/lib/voice`), and Talk to OS
+  (`personalos://listen`), which opens listening and hands the line to the right module.
+- Long AI work runs in the background with a working card, so no screen waits on it.
 - Offline-first record store on the phone with sync to the API
   ([ADR 0002](/docs/architecture/adr-0002-offline-first-sync)).
 - EAS development builds, EAS Update channels and a one-command APK build.
@@ -40,7 +47,9 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
 
 Roughly in order; each item becomes board cards.
 
-1. **Remaining modules**: Faith next, then Daily life and Fashion, on the record store.
+1. **Remaining modules**: Daily life and Fashion, on the record store.
+1. **"Hey OS" wake phrase**: an on-device wake word in an Android foreground service (iOS does not
+   allow always-on listening), opening Talk to OS.
 2. **Move Finance, Workout, Skincare and Food onto the record store** so everything is synced.
 3. **Files**: an avatar picker and photos through the R2 upload flow; videos streamed from Google
    Drive.

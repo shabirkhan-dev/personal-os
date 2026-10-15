@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useCollection } from "@/lib/db/collection";
 import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
 import {
@@ -12,15 +12,7 @@ import {
 } from "../data/collections";
 import { type Application, defaultSettings, type Prep } from "../lib/career-model";
 
-/** Re-renders every `intervalMs` so "today", "due" and "this week" stay right. */
-export function useNow(intervalMs = 60_000): Date {
-	const [now, setNow] = useState(() => new Date());
-	useEffect(() => {
-		const timer = setInterval(() => setNow(new Date()), intervalMs);
-		return () => clearInterval(timer);
-	}, [intervalMs]);
-	return now;
-}
+export { useNow } from "@/lib/use-now";
 
 /** Everything Career keeps on the phone, read through React Query from the record store. */
 export function useCareer() {

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Linking } from "react-native";
-import { speech } from "../services/speech-module";
+import { deviceSpeechModule as speech } from "@/lib/voice";
 
 export type MicPermission = "unknown" | "granted" | "ask" | "blocked" | "unavailable";
 

@@ -13,7 +13,7 @@
       "icon": "./assets/images/icon.png",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "NSMicrophoneUsageDescription": "Personal OS uses the microphone when you talk to set up or ask \u201cHey OS\u201d."
+        "NSMicrophoneUsageDescription": "Personal OS uses the microphone when you talk to set up or ask “Hey OS”."
       }
     },
     "android": {
@@ -47,7 +47,7 @@
       [
         "expo-speech-recognition",
         {
-          "microphonePermission": "Personal OS uses the microphone when you talk to set up or ask \u201cHey OS\u201d.",
+          "microphonePermission": "Personal OS uses the microphone when you talk to set up or ask “Hey OS”.",
           "speechRecognitionPermission": "Personal OS turns what you say into text so it can fill in your answers.",
           "androidSpeechServicePackages": [
             "com.google.android.googlequicksearchbox",
@@ -72,6 +72,12 @@
         "expo-sensors",
         {
           "motionPermission": "Personal OS counts your steps for the Workout module."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Personal OS uses your location to work out prayer times and the Qibla direction where you are."
         }
       ]
     ],

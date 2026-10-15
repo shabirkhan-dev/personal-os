@@ -21,10 +21,12 @@ export type SheetProps = {
 	children: ReactNode;
 	/** Primary action at the bottom; omit for read-only sheets. */
 	action?: { label: string; onPress: () => void; disabled?: boolean };
+	/** Custom bottom row (e.g. two buttons); used instead of `action`. */
+	footer?: ReactNode;
 };
 
 /** Bottom sheet for quick entry (add expense, log a meal…). Tap outside or × to close. */
-export function Sheet({ visible, title, onClose, children, action }: SheetProps) {
+export function Sheet({ visible, title, onClose, children, action, footer }: SheetProps) {
 	const { colors } = usePoTheme();
 	const insets = useSafeAreaInsets();
 
@@ -71,9 +73,14 @@ export function Sheet({ visible, title, onClose, children, action }: SheetProps)
 					>
 						{children}
 					</ScrollView>
-					{action ? (
-						<PillButton label={action.label} disabled={action.disabled} onPress={action.onPress} />
-					) : null}
+					{footer ??
+						(action ? (
+							<PillButton
+								label={action.label}
+								disabled={action.disabled}
+								onPress={action.onPress}
+							/>
+						) : null)}
 				</View>
 			</KeyboardAvoidingView>
 		</Modal>

@@ -2,6 +2,7 @@ import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { Alert, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { careerHome, useCareerStatus } from "@/modules/career";
 import { foodHome, useFoodStatus } from "@/modules/food";
 import { financeHome, useFinanceStatus, useFinanceSummary } from "@/modules/finance";
 import { AskBar } from "@/modules/home/components/ask-bar";
@@ -32,6 +33,7 @@ import { usePoTheme } from "@/theme";
 const HEADER_HEIGHT = 66;
 
 const moduleHomes: Partial<Record<ModuleId, HomeModule>> = {
+	career: careerHome,
 	finance: financeHome,
 	workout: workoutHome,
 	skincare: skincareHome,
@@ -73,12 +75,14 @@ export default function TodayScreen() {
 
 	// Every module's hero is read on each render so the hooks stay in a fixed order.
 	const heroes: Partial<Record<ModuleId, HomeHero>> = {
+		career: careerHome.useHero(),
 		finance: financeHome.useHero(),
 		workout: workoutHome.useHero(),
 		skincare: skincareHome.useHero(),
 		food: foodHome.useHero(),
 	};
 	const liveStatus: Partial<Record<ModuleId, string>> = {
+		career: useCareerStatus(),
 		finance: useFinanceStatus(),
 		workout: useWorkoutStatus(),
 		skincare: useSkincareStatus(),
@@ -236,6 +240,7 @@ type OverviewBodyProps = {
 function OverviewBody({ period, modules, amountsHidden, onOpen, upcomingList }: OverviewBodyProps) {
 	const finance = useFinanceSummary();
 	const suggestions = [
+		modules.includes("career") ? { label: "Log a job", onPress: () => onOpen("career") } : null,
 		modules.includes("food") ? { label: "Log a meal", onPress: () => onOpen("food") } : null,
 		modules.includes("finance") ? { label: "Add expense", onPress: () => onOpen("finance") } : null,
 		modules.includes("workout")

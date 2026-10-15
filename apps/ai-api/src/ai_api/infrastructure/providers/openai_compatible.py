@@ -20,7 +20,9 @@ class OpenAICompatibleProvider:
     def model(self) -> str:
         return self._settings.openai_model
 
-    async def complete(self, messages: list[ChatMessage]) -> CompletionResult:
+    async def complete(
+        self, messages: list[ChatMessage], *, json_mode: bool = False
+    ) -> CompletionResult:
         url = f"{self._settings.openai_base_url.rstrip('/')}/chat/completions"
         payload = {
             "model": self.model,
@@ -29,6 +31,8 @@ class OpenAICompatibleProvider:
             ],
             "temperature": 0.4,
         }
+        if json_mode:
+            payload["response_format"] = {"type": "json_object"}
         headers = {
             "Authorization": f"Bearer {self._api_key}",
             "Content-Type": "application/json",

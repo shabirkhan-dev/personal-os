@@ -27,3 +27,20 @@ export type AssistResponse = {
 	provider: string;
 	model: string;
 };
+
+/** The Career AI tasks the app may call; each is proxied to `POST /api/v1/career/:task`. */
+export const careerTasks = [
+	'read-job',
+	'parse-line',
+	'nudge',
+	'interview-prep',
+	'skill-path',
+] as const;
+export type CareerTask = (typeof careerTasks)[number];
+
+export const careerTaskSchema = z.enum(careerTasks);
+
+/** The AI service validates the body per task; here it only has to be a small JSON object. */
+export const careerTaskBodySchema = z
+	.record(z.string(), z.unknown())
+	.refine((body) => JSON.stringify(body).length <= 32_000, 'Request is too large');

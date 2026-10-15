@@ -91,11 +91,20 @@ export function HomeHeader({
 			</View>
 			{hero ? (
 				<View style={styles.hero}>
-					<View style={styles.labelRow}>
+					<Pressable
+						accessibilityRole={hero.onLabelPress ? "button" : undefined}
+						disabled={!hero.onLabelPress}
+						hitSlop={8}
+						onPress={hero.onLabelPress}
+						style={styles.labelRow}
+					>
 						<PoText variant="text14" tone="textSecondary" numberOfLines={1}>
 							{hero.label}
 						</PoText>
-					</View>
+						{hero.onLabelPress ? (
+							<Icon name="Filled/Chevron down" size={16} color={colors.textSecondary} />
+						) : null}
+					</Pressable>
 					<View style={styles.amountRow} accessibilityLabel={hidden ? "Amount hidden" : undefined}>
 						<PoText variant="display36" numberOfLines={1} adjustsFontSizeToFit>
 							{hidden ? "••••••" : hero.value}

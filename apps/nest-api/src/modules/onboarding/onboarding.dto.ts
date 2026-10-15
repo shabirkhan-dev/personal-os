@@ -11,7 +11,15 @@ const goalId = z.enum([
 	'stay-organized',
 	'less-stress',
 ]);
-const moduleId = z.enum(['daily-life', 'workout', 'finance', 'skincare', 'food', 'fashion']);
+const moduleId = z.enum([
+	'daily-life',
+	'career',
+	'workout',
+	'finance',
+	'skincare',
+	'food',
+	'fashion',
+]);
 
 /** Mirrors `OnboardingAnswers` in `apps/mobile/src/modules/onboarding/store/onboarding-store.ts`. */
 export const onboardingAnswersSchema = z

@@ -10,6 +10,8 @@ export type HomeHero = {
 	faint?: string;
 	/** Money: the eye button hides it. */
 	hideable?: boolean;
+	/** Makes the label a button with a chevron (e.g. Career's runway settings). */
+	onLabelPress?: () => void;
 };
 
 export type HomeModuleViewProps = {

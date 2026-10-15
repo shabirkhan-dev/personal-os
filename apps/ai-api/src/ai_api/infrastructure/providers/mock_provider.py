@@ -10,7 +10,9 @@ class MockLlmProvider:
     def model(self) -> str:
         return "mock-assist-v1"
 
-    async def complete(self, messages: list[ChatMessage]) -> CompletionResult:
+    async def complete(
+        self, messages: list[ChatMessage], *, json_mode: bool = False
+    ) -> CompletionResult:
         user_turns = [message.content for message in messages if message.role == "user"]
         last = user_turns[-1] if user_turns else "Hello"
         reply = (

@@ -21,7 +21,8 @@ convention. For how the pieces fit together at runtime, see
 - `src/app/*` is Expo Router: routing and screen composition only.
 - `src/modules/<name>/` is one feature: `components`, `hooks`, `lib` (pure logic and parsing,
   unit-tested), `services` (device and network I/O) and `store` (Zustand, usually a document store).
-- `src/lib/*` holds app-wide helpers: the API client, storage, dates.
+- `src/lib/*` holds app-wide helpers: the API client, the record store (`lib/db`), sync
+  (`lib/sync`), storage, dates.
 - `src/components/*` and `src/theme/*` hold Kit v2 components and the theme provider. Screens use
   `@personal-os/tokens` through the theme; no raw colour values.
 
@@ -55,3 +56,4 @@ errors), `infrastructure/` (LLM providers, the internal-token check).
 ## ADRs
 
 - [ADR 0001: Module data lives on the phone](/docs/architecture/adr-0001-on-device-module-data)
+- [ADR 0002: Offline-first record store, sync and cloud AI](/docs/architecture/adr-0002-offline-first-sync)

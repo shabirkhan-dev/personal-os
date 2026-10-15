@@ -1,0 +1,74 @@
+---
+title: "ADR 0002: Offline-first record store, sync and cloud AI"
+description: One on-device SQLite store for every module, a push/pull sync endpoint, cloud-only AI, and where files live.
+---
+
+## Status
+
+Accepted (2026-10-15). Supersedes [ADR 0001](/docs/architecture/adr-0001-on-device-module-data)
+for every module that moves onto the store; Career is the first.
+
+## Context
+
+Module data lived in per-module JSON files with no backup and no second device. The app is
+AI-native, the owner wants everything to work offline, and the setup should stay simple.
+
+## Decision
+
+### On the phone
+
+- One SQLite database (`expo-sqlite`) with a single `records` table:
+  `(collection, id, data JSON, updated_at, deleted_at, dirty)`. Each module defines typed
+  collections (`defineCollection(name, parse)`); `parse` turns any stored value into a valid one.
+- Writes are local and instant, serialized in transactions, and mark the record dirty.
+  Versions (`updated_at`) only move forward per record, even if the clock steps back.
+- Reads go through React Query (`useCollection`), with `networkMode: "always"` so they work
+  offline; every committed write invalidates its collection's query.
+- Local records belong to the signed-in account. Data made before sign-in is kept by the first
+  account; a different account starts from an empty store.
+
+### Sync
+
+- `POST /sync` pushes dirty records and pulls everything changed after a cursor, in one round
+  trip, paged (200 pushed, 500 pulled, ~512 KB per request).
+- The newest `updated_at` wins per record. A push the server already has a newer copy of comes
+  back as a conflict and the phone takes the server copy. Deletes are tombstones.
+- The cursor is a per-row sequence number, not a timestamp, so device clocks never decide what
+  is pulled. A per-user advisory lock serializes a user's syncs so no change is skipped.
+- The app syncs after sign-in, on returning to the foreground, three seconds after local changes
+  and every five minutes. Offline it just waits.
+
+### AI
+
+- AI runs only in the cloud: the FastAPI service calls an OpenAI-compatible provider; no local
+  models. The app reaches it through `POST /ai/career/:task` on the Nest API.
+- Every AI feature has an offline path: logging a line falls back to an on-device parser, forms
+  can be filled by hand, and screens say plainly when a feature needs a connection.
+- The AI service only reads public pages: every redirect hop must resolve to a public address.
+
+### Files (direction, not built yet)
+
+- Images and other assets go to **Cloudflare R2** (served through Cloudflare's image resizing).
+- Long videos (training, cooking) stay in the owner's **Google Drive** and are streamed in the
+  app; they are not copied into R2.
+
+## Consequences
+
+### Positive
+
+- Offline by default, backed up, and ready for a second device.
+- A new module needs no server change: a collection name and a `parse` function.
+- AI features degrade to manual entry instead of breaking.
+
+### Negative
+
+- Last write wins per record: two devices editing the same record offline keep only the newer
+  edit. Acceptable for one person.
+- The server stores documents as JSON, so server-side queries across modules need care
+  (insights will read through the record shape).
+- `expo-sqlite` and `expo-clipboard` are native modules: the app needs a new development build.
+
+## Follow-up
+
+- Move Finance, Workout, Skincare and Food onto the record store (one card).
+- R2 for avatars and receipt photos; Drive streaming for videos.

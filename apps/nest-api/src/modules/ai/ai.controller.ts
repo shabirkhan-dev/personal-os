@@ -1,11 +1,27 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
+import {
+	Body,
+	Controller,
+	Get,
+	HttpCode,
+	HttpStatus,
+	Param,
+	Post,
+	UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 
 import { ZodValidationPipe } from '@/common/pipes/zod-validation.pipe';
 import type { AccessTokenPayload } from '@/modules/auth/auth.types';
 import { CurrentUser } from '@/modules/auth/current-user.decorator';
 import { JwtAuthGuard } from '@/modules/auth/jwt-auth.guard';
-import { AssistRequestDto, assistRequestSchema } from './ai.dto';
+import {
+	AssistRequestDto,
+	assistRequestSchema,
+	careerTaskBodySchema,
+	careerTaskSchema,
+	type CareerTask,
+} from './ai.dto';
 import { AiService } from './ai.service';
 
 @ApiTags('AI')
@@ -29,5 +45,19 @@ export class AiController {
 		@Body(new ZodValidationPipe(assistRequestSchema)) body: AssistRequestDto,
 	) {
 		return this.ai.assist(user.sub, body);
+	}
+
+	@Post('career/:task')
+	@HttpCode(HttpStatus.OK)
+	@Throttle({ default: { limit: 20, ttl: 60_000 } })
+	@ApiOperation({
+		summary: 'Run a Career AI task (read-job, parse-line, nudge, interview-prep, skill-path)',
+	})
+	careerTask(
+		@CurrentUser() user: AccessTokenPayload,
+		@Param('task', new ZodValidationPipe(careerTaskSchema)) task: CareerTask,
+		@Body(new ZodValidationPipe(careerTaskBodySchema)) body: Record<string, unknown>,
+	) {
+		return this.ai.careerTask(user.sub, task, body);
 	}
 }

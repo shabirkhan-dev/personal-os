@@ -20,6 +20,8 @@ export function setupApp(app: INestApplication, config: AppConfigService): void 
 			crossOriginResourcePolicy: { policy: 'cross-origin' },
 		}),
 	);
+	// Sync batches carry up to 200 small documents; the default 100 KB is too tight.
+	expressApp.useBodyParser('json', { limit: '1mb' });
 	expressApp.use(cookieParser());
 	expressApp.useStaticAssets(join(process.cwd(), 'uploads'), {
 		prefix: '/uploads/',

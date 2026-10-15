@@ -7,3 +7,4 @@ export * from './user-profiles.schema';
 export * from './users.schema';
 export * from './webauthn-challenges.schema';
 export * from './onboarding-profiles.schema';
+export * from './sync-records.schema';

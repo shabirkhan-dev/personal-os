@@ -21,6 +21,10 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
   Profile, all on what the person enters. Module data is stored on the phone
   ([ADR 0001](/docs/architecture/adr-0001-on-device-module-data)).
 - Ask bar that parses typed lines into module entries.
+- Career module: pipeline, follow-ups with AI-drafted nudges, job links read by AI with a halal
+  reading, interview prep with flashcards, and a 30-minute-a-day skill path.
+- Offline-first record store on the phone with sync to the API
+  ([ADR 0002](/docs/architecture/adr-0002-offline-first-sync)).
 - EAS development builds, EAS Update channels and a one-command APK build.
 
 ### API and services
@@ -36,15 +40,13 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
 Roughly in order; each item becomes board cards.
 
 1. **Google and Apple sign-in on mobile** (pos-12).
-2. **Remaining module Homes**: Daily life and Fashion, then new modules as their designs are
-   final.
-3. **Avatars to object storage** (R2 or S3); the container disk is not durable.
-4. **On-device database and sync**: SQLite on the phone, a shared actions/entries core, and a
-   sync endpoint for backup and a second device. Decide first; see section 7 of the system design.
+2. **Remaining modules**: Faith next, then Daily life and Fashion, on the record store.
+3. **Move Finance, Workout, Skincare and Food onto the record store** so everything is synced.
+4. **Files on Cloudflare**: avatars and photos in R2; videos streamed from Google Drive.
 5. **Insights**: AI over a per-module, opt-in daily digest, shown in the Insights tab.
 6. **Production hardening**: Redis-backed rate limits, structured request logs and error
    tracking, and real deploy steps in `cd.yml` (it is still a template).
-7. **Desktop app**, once sync exists.
+7. **Desktop app** on the same record store and sync.
 
 ## Engineering rules
 

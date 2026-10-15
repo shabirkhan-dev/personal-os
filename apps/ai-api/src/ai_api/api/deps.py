@@ -4,16 +4,23 @@ from typing import Annotated
 from fastapi import Depends, Header, HTTPException, status
 
 from ai_api.application.assist_service import AssistService
+from ai_api.application.career_tasks import CareerTasks
 from ai_api.config.settings import Settings, get_settings
 from ai_api.domain.errors import UnauthorizedServiceError
 from ai_api.infrastructure.providers import create_llm_provider
 from ai_api.infrastructure.security import verify_service_token
+from ai_api.infrastructure.web_page import fetch_page_text
 
 
 @lru_cache
 def get_assist_service() -> AssistService:
     settings = get_settings()
     return AssistService(create_llm_provider(settings))
+
+
+@lru_cache
+def get_career_tasks() -> CareerTasks:
+    return CareerTasks(create_llm_provider(get_settings()), fetch_page_text)
 
 
 def get_settings_dep() -> Settings:
@@ -40,4 +47,5 @@ async def require_internal_service(
 
 SettingsDep = Annotated[Settings, Depends(get_settings_dep)]
 AssistServiceDep = Annotated[AssistService, Depends(get_assist_service)]
+CareerTasksDep = Annotated[CareerTasks, Depends(get_career_tasks)]
 InternalAuthDep = Annotated[None, Depends(require_internal_service)]

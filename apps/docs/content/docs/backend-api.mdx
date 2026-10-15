@@ -42,8 +42,10 @@ token in the body (browsers get an httpOnly cookie instead).
 | `POST` | `/users/me/avatar` | bearer | Upload an avatar image (multipart `file`) |
 | `GET` | `/users/me/onboarding` | bearer | Saved onboarding answers, or `null` before the first save |
 | `PUT` | `/users/me/onboarding` | bearer | Save the onboarding answers |
-| `GET` | `/ai/status` | bearer | Whether the AI service is reachable (not used by the app yet) |
-| `POST` | `/ai/assist` | bearer | AI assist through the AI service (not used by the app yet) |
+| `POST` | `/sync` | bearer | Push local record changes, pull changes after a cursor |
+| `POST` | `/ai/career/:task` | bearer | Career AI: `read-job`, `parse-line`, `nudge`, `interview-prep`, `skill-path` |
+| `GET` | `/ai/status` | bearer | Whether the AI service is reachable |
+| `POST` | `/ai/assist` | bearer | Free-form AI assist (not used by the app yet) |
 
 The API also serves password sign-in, magic links, TOTP, passkeys, Google sign-in and session
 management under `/auth`, `/auth/methods` and `/auth/security`. The app does not use them yet, so
@@ -92,12 +94,68 @@ the current schema, `GET` returns `null` and the app uploads its copy. After sig
 whichever side changed last (`updatedAt` against the device's own timestamp), then uploads changes
 about a second after they happen.
 
+### Sync
+
+`POST /sync`, throttled to 60 per minute, body up to 1 MB:
+
+```json
+{
+  "cursor": "1834",
+  "changes": [
+    {
+      "collection": "career-applications",
+      "id": "lz3k9q-4f2a1b",
+      "data": { "id": "lz3k9q-4f2a1b", "company": "Tessera" },
+      "updatedAt": 1760486400000,
+      "deletedAt": null
+    }
+  ]
+}
+```
+
+`cursor` is `null` on the first sync. `collection` is lower-kebab-case (≤ 64), `id` is
+`[A-Za-z0-9_-]{1,64}`, `data` any JSON up to 64 KB, `updatedAt`/`deletedAt` milliseconds. At most
+200 changes, one per record. `200` returns:
+
+```json
+{ "cursor": "1902", "changes": [/* records changed after the cursor */], "conflicts": [], "hasMore": false }
+```
+
+- A change is kept when its `updatedAt` is newer than the stored copy. Otherwise the stored copy
+  is returned in `conflicts` and the client should take it.
+- `changes` may include records the client just pushed; applying them is harmless.
+- Keep calling with the returned cursor while `hasMore` is `true` (pages of 500).
+- `400` `SYNC_CLOCK_AHEAD` when a change is dated more than a day in the future;
+  `400` `SYNC_DUPLICATE_RECORD` when one record appears twice.
+
+Collections in use: `career-applications`, `career-preps`, `career-stories`, `career-flashcards`,
+`career-skill-plans`, `career-skill-sessions`, `career-settings`. Names are part of the contract.
+
+### Career AI
+
+`POST /ai/career/:task`, throttled to 20 per minute. The body is validated by the AI service;
+field names are snake_case.
+
+| Task | Body | Returns |
+| --- | --- | --- |
+| `read-job` | `{ url }` or `{ text }` (≤ 20,000 chars) | `{ company, role, pay, where, summary, halal: { status, note } }` |
+| `parse-line` | `{ text, today: "YYYY-MM-DD" }` | `{ application: { company, role, pay, where, stage, halal } \| null, follow_up_in_days, interview_at }` |
+| `nudge` | `{ sender_name, company, role, contact_name, days_since_applied, notes, stories[], tone, current_draft? }` | `{ subject, body }` |
+| `interview-prep` | `{ company, role, round, notes, stories[] }` | `{ topics[{ title, detail }], questions[], flashcards[{ topic, tag, front, back, code }] }` |
+| `skill-path` | `{ focus, weeks, context }` | `{ title, weeks[{ title, goal, days[5]{ title, detail } }] }` |
+
+`halal.status` is `clean`, `flagged` or `unsure`; it is the model's reading, which the person
+confirms. `tone` is `as-is`, `shorter`, `warmer` or `formal`. Errors: `422` `JOB_LINK_UNREADABLE`
+(sign-in wall, blocked, private address, too large), `400` `VALIDATION_ERROR`, `502`
+`AI_INVALID_OUTPUT` / `AI_UPSTREAM_ERROR`, `503` `AI_UNAVAILABLE`.
+
 ## Changelog
 
 Record every public API change, newest first, so consumers can see what moved.
 
 | Date | Change | Breaking |
 | --- | --- | --- |
+| 2026-10-15 | Added `POST /sync` and `POST /ai/career/:task`; `career` is a valid onboarding module | No |
 | 2026-10-15 | Documented the profile, avatar and AI endpoints already in use | No |
 | 2026-10-13 | Added `GET`/`PUT /users/me/onboarding` | No |
 | 2026-10-13 | Added email-code sign-in (`/auth/methods/email-code/*`) | No |

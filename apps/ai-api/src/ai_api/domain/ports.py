@@ -26,4 +26,8 @@ class LlmProvider(Protocol):
     @property
     def model(self) -> str: ...
 
-    async def complete(self, messages: list[ChatMessage]) -> CompletionResult: ...
+    async def complete(
+        self, messages: list[ChatMessage], *, json_mode: bool = False
+    ) -> CompletionResult:
+        """`json_mode` asks the model for a single JSON object."""
+        ...

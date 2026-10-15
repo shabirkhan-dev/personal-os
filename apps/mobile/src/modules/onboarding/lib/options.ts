@@ -98,7 +98,14 @@ export type HeightUnit = "cm" | "ft";
 export type WeightUnit = "kg" | "lb";
 export type StartPath = "talk" | "steps";
 
-export type ModuleId = "daily-life" | "workout" | "finance" | "skincare" | "food" | "fashion";
+export type ModuleId =
+	| "daily-life"
+	| "career"
+	| "workout"
+	| "finance"
+	| "skincare"
+	| "food"
+	| "fashion";
 
 export type ModuleOption = {
 	id: ModuleId;
@@ -119,6 +126,14 @@ export const moduleOptions: readonly ModuleOption[] = [
 		icon: "Sun",
 		iconTone: "statusSuccess",
 		tileTone: "statusSuccessSubtle",
+	},
+	{
+		id: "career",
+		label: "Career",
+		summary: "Applications · prep · skills",
+		icon: "Briefcase",
+		iconTone: "accentDefault",
+		tileTone: "accentSubtle",
 	},
 	{
 		id: "workout",

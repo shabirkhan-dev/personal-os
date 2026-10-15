@@ -66,8 +66,11 @@ describe("prayer times", () => {
 			{ place: gilgit, method: "karachi", asr: "standard", manual: {} },
 			day,
 		);
-		expect(calculated.prayers.fajr?.getHours()).toBeLessThan(6);
+		// Checked in order rather than by clock hour, so the test passes in any timezone (CI is UTC).
+		const { fajr, maghrib, isha } = calculated.prayers;
 		expect(calculated.sunrise).not.toBeNull();
+		expect(fajr && calculated.sunrise && fajr < calculated.sunrise).toBe(true);
+		expect(maghrib && isha && maghrib < isha).toBe(true);
 		const typed = dayTimes(
 			{ place: gilgit, method: "karachi", asr: "standard", manual: { maghrib: 1058 } },
 			day,

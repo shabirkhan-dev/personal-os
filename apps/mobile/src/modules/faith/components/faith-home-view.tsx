@@ -12,6 +12,7 @@ import { useAskInbox } from "@/modules/home/store/ask-inbox";
 import type { HomeModuleViewProps } from "@/modules/home/lib/module-home";
 import { addRecitation, logPrayer, restoreLog, saveSettings } from "../data/faith-actions";
 import { FAITH_ASK_JOB, useFaithUi } from "../hooks/faith-ui-store";
+import { locateLabel, useLocate } from "../hooks/locate-store";
 import { elapsedMinutes, useRecitationTimer } from "../hooks/recitation-timer";
 import { useFaithToday } from "../hooks/use-faith-today";
 import {
@@ -30,7 +31,6 @@ import { parseFaithLine } from "../lib/parse-faith-line";
 import { hhmm, PRAYER_LABELS, type PrayerId, untilLabel } from "../lib/prayer-times";
 import { faithRoutes } from "../navigation";
 import { faithAiMessage, useFaithAi } from "../services/faith-ai";
-import { currentPlace } from "../services/location";
 import {
 	requestReminderPermission,
 	scheduleOnce,
@@ -75,8 +75,8 @@ export function FaithHomeView({ actionRequest }: HomeModuleViewProps) {
 	const [logFor, setLogFor] = useState<{ key: number; prayer: PrayerId | null } | null>(null);
 	const [logged, setLogged] = useState<Logged | null>(null);
 	const [notice, setNotice] = useState<string | null>(null);
-	const [locating, setLocating] = useState(false);
-	const [locateError, setLocateError] = useState<string | null>(null);
+	const locating = useLocate((state) => state.stage);
+	const locateError = useLocate((state) => state.error);
 	const timer = useRecitationTimer();
 
 	const lastRequest = useRef(actionRequest);
@@ -223,23 +223,7 @@ export function FaithHomeView({ actionRequest }: HomeModuleViewProps) {
 	};
 
 	const locate = async () => {
-		setLocating(true);
-		setLocateError(null);
-		try {
-			const result = await currentPlace();
-			if (!result.ok) {
-				setLocateError(
-					result.reason === "denied"
-						? "Location is off for Personal OS. Allow it in Settings, or set the times yourself."
-						: "Couldn't find you just now. Try again, or set the times yourself.",
-				);
-				return;
-			}
-			update({ ...settings, setUp: true, place: result.place });
-			void requestReminderPermission();
-		} finally {
-			setLocating(false);
-		}
+		if (await useLocate.getState().locate(settings)) haptics.success();
 	};
 
 	const remind = async (at: Date, title: string, body: string, done: string) => {
@@ -373,7 +357,7 @@ export function FaithHomeView({ actionRequest }: HomeModuleViewProps) {
 				</>
 			) : (
 				<SetupCard
-					busy={locating}
+					busy={locateLabel(locating)}
 					error={locateError}
 					onLocation={() => void locate()}
 					onManual={() => ui.openSheet("setup")}
@@ -497,6 +481,8 @@ export function FaithHomeView({ actionRequest }: HomeModuleViewProps) {
 				rows={rows}
 				onClose={ui.closeSheet}
 				onChange={update}
+				locating={locateLabel(locating)}
+				locateError={locateError}
 				onChangeLocation={() => void locate()}
 				onEditTimes={() => ui.openSheet("setup")}
 			/>
@@ -504,7 +490,8 @@ export function FaithHomeView({ actionRequest }: HomeModuleViewProps) {
 				<PrayerSetupSheet
 					visible
 					settings={settings}
-					locating={locating}
+					locating={locateLabel(locating)}
+					locateError={locateError}
 					onClose={ui.closeSheet}
 					onLocate={() => void locate()}
 					onSave={(saved) => {

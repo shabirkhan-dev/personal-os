@@ -1,5 +1,5 @@
 import type { ColorTokens } from "@personal-os/tokens";
-import { Pressable, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 import { Icon, type IconName } from "@/components/icons";
 import { IconTile } from "@/components/module-ui";
 import { PillButton } from "@/components/ui/pill-button";
@@ -135,7 +135,8 @@ export function SetupCard({
 	onLocation,
 	onManual,
 }: {
-	busy: boolean;
+	/** "Finding where you are…" while locating. */
+	busy: string | null;
 	error: string | null;
 	onLocation: () => void;
 	onManual: () => void;
@@ -160,8 +161,9 @@ export function SetupCard({
 				</PoText>
 			) : null}
 			<PillButton
-				label={busy ? "Finding your times…" : "Use my location"}
-				disabled={busy}
+				label={busy ?? "Use my location"}
+				disabled={busy !== null}
+				accessory={busy ? <ActivityIndicator size="small" color={colors.textInverse} /> : undefined}
 				onPress={onLocation}
 				style={styles.full}
 			/>

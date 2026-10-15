@@ -19,7 +19,9 @@
     "typecheck": {
       "dependsOn": ["^build"]
     },
-    "test": {},
+    "test": {
+      "env": ["TEST_DATABASE_URL"]
+    },
     "test:coverage": {
       "dependsOn": ["test"]
     },

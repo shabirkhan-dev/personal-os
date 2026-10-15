@@ -15,7 +15,7 @@ import { useHomeView } from "../store/home-view";
 import { AskBar } from "./ask-bar";
 
 /** Modules whose Home takes a line from Talk to OS. */
-const LISTENERS: ReadonlySet<ModuleId> = new Set<ModuleId>(["faith", "career", "fashion"]);
+const LISTENERS: ReadonlySet<ModuleId> = new Set<ModuleId>(["faith", "career", "fashion", "food"]);
 
 /**
  * Talk to OS (`personalos://listen`): opens straight into listening, works out which module the

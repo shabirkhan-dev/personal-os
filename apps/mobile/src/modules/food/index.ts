@@ -1,35 +1,15 @@
-import { useEffect } from "react";
-import { dayKey } from "@/lib/day";
-import type { HomeHero, HomeModule } from "@/modules/home/lib/module-home";
-import { FoodView } from "./components/food-view";
-import { useFoodDay, useNow } from "./hooks/use-food-day";
-import { foodStatus, formatKcal } from "./lib/meals";
-import { useFoodStore } from "./store/food-store";
+import type { HomeModule } from "@/modules/home/lib/module-home";
+import { FoodHomeView } from "./components/food-home-view";
+import { useFoodHero } from "./hooks/use-food-hero";
+import { foodRoutes } from "./navigation";
 
-/** "Food · eaten today" / "1,240" / " / 1,950 kcal". */
-function useFoodHero(): HomeHero {
-	const { eaten, targets } = useFoodDay();
-	return {
-		label: "Food · eaten today",
-		value: formatKcal(eaten.kcal),
-		faint: ` / ${formatKcal(targets.kcal)} kcal`,
-	};
-}
+export { useFoodStatus } from "./hooks/use-food-hero";
 
-/** The module picker line: "2 meals logged" or "Log breakfast". */
-export function useFoodStatus(): string {
-	const now = useNow();
-	const meals = useFoodStore((state) => state.data.meals);
-	const hydrate = useFoodStore((state) => state.hydrate);
-	useEffect(() => {
-		hydrate().catch((error: unknown) => console.error("Could not load food log", error));
-	}, [hydrate]);
-	return foodStatus(meals, dayKey(now), now);
-}
-
+/** Food Home: a warm yellow glow, today's calories as the hero, the camera on the right. */
 export const foodHome: HomeModule = {
 	glow: "statusCaution",
-	action: { icon: "Filled/Camera", label: "Photo of a meal" },
+	action: { icon: "Filled/Camera", label: "Snap a meal" },
 	useHero: useFoodHero,
-	View: FoodView,
+	View: FoodHomeView,
+	onInsights: foodRoutes.insights,
 };

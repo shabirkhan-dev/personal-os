@@ -234,3 +234,56 @@ describe("Fashion AI", () => {
 		expect(JSON.parse(String(init.body)).messages[0].content).toContain("Fashion assistant");
 	});
 });
+
+describe("Food AI", () => {
+	it("reads a meal line with the mock provider", async () => {
+		const response = await mockApp.call("POST", "/ai/food/read-meal", {
+			token,
+			body: { text: "lunch 2 quinoa bowls and hummus" },
+		});
+		expect(response.json?.data).toEqual({
+			items: [
+				{ name: "Quinoa bowls", quantity: 2, unit: "", kcal: 0, protein: 0, carbs: 0, fat: 0 },
+				{ name: "Hummus", quantity: 1, unit: "", kcal: 0, protein: 0, carbs: 0, fat: 0 },
+			],
+			slot: "lunch",
+		});
+	});
+
+	it("rejects an empty meal line", async () => {
+		const response = await mockApp.call("POST", "/ai/food/read-meal", {
+			token,
+			body: { text: "  " },
+		});
+		expect(response.status).toBe(400);
+	});
+
+	it("asks the model as the Food assistant and trims the answer", async () => {
+		const spy = provider(
+			JSON.stringify({
+				answer: " Karahi with raita. ",
+				recipeId: "chicken-karahi",
+				followUps: ["a", "b", "c", "d"],
+			}),
+		);
+		const response = await realApp.call("POST", "/ai/food/ask", {
+			token,
+			body: {
+				question: "What should I eat for dinner?",
+				today: "2026-10-16",
+				goal: "lean bulk",
+				targets: { kcal: 2900, protein: 140, carbs: 380, fat: 85 },
+				eaten: { kcal: 1620, protein: 96, carbs: 230, fat: 52 },
+				meals: [{ slot: "breakfast", names: "Fried eggs, paratha, chai" }],
+				recipes: [{ id: "chicken-karahi", name: "Chicken karahi" }],
+			},
+		});
+		expect(response.json?.data).toEqual({
+			answer: "Karahi with raita.",
+			recipeId: "chicken-karahi",
+			followUps: ["a", "b", "c"],
+		});
+		const [, init] = spy.mock.calls[0] as unknown as [string, RequestInit];
+		expect(JSON.parse(String(init.body)).messages[0].content).toContain("Food assistant");
+	});
+});

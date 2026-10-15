@@ -17,7 +17,7 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
 ### Mobile app
 
 - Onboarding end to end: voice input, saved progress, reminders, plan reveal and sign-in.
-- Today: Overview plus module Homes for Finance, Workout, Skincare and Food (with Recipes), and
+- Today: Overview plus module Homes for Finance, Workout and Skincare, and
   Profile, all on what the person enters. Module data is stored on the phone
   ([ADR 0001](/docs/architecture/adr-0001-on-device-module-data)).
 - Ask bar that parses typed lines into module entries.
@@ -31,6 +31,11 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
   AI), today's look picked on the phone for the weather (Open-Meteo) with layer advice, a watch and
   a scent, a rotating week plan, piece detail with cost per wear, wishlist with a buying pause,
   watches and scents, and Insights.
+- Food module: meals logged from a line, Say it, a photo or a barcode (Open Food Facts), matched
+  on the phone with the Food AI reading what it doesn't know; goal and targets from height,
+  weight and age; macros, weight and water on Home; a week's meal plan with costs, a grocery list
+  in whole packs against a weekly budget, recipes with photos and cook mode read aloud, and
+  Insights. Synced through the record store.
 - Voice in and out on the phone behind one swappable layer (`src/lib/voice`), and Talk to OS
   (`personalos://listen`), which opens listening and hands the line to the right module.
 - "Hey OS" while the app is open (on-device speech, off until turned on in Profile), and a Talk to
@@ -56,11 +61,11 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
 Roughly in order; each item becomes board cards.
 
 1. **Remaining modules**: Daily life, on the record store.
-1. **Piece photos to R2** so a wardrobe syncs with its photos (they stay on the phone for now).
+1. **Piece and meal photos to R2** so a wardrobe and food log sync with their photos (they stay on the phone for now).
 1. **"Hey OS" with the app closed**: today it listens while the app is open (Profile → Hey OS) and
    Android has a Talk to OS launcher shortcut. Waking from the background needs an on-device
    wake-word engine in an Android foreground service; iOS does not allow always-on listening.
-2. **Move Finance, Workout, Skincare and Food onto the record store** so everything is synced.
+2. **Move Finance, Workout and Skincare onto the record store** so everything is synced.
 3. **Files**: an avatar picker and photos through the R2 upload flow; videos streamed from Google
    Drive.
 4. **Insights**: AI over a per-module, opt-in daily digest, shown in the Insights tab.

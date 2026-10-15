@@ -20,6 +20,8 @@ import { askFashionSchema, readPieceSchema } from "./fashion.schema";
 import { askFashion, readPiece } from "./fashion.tasks";
 import { askFaithSchema } from "./faith.schema";
 import { askFaith } from "./faith.tasks";
+import { askFoodSchema, readMealSchema } from "./food.schema";
+import { askFood, readMeal } from "./food.tasks";
 
 /** Module AI, `POST /ai/<module>/<task>`. Signed-in only; the provider key never leaves the API. */
 export const aiRoutes = new Hono<AppEnv>()
@@ -56,4 +58,10 @@ export const aiRoutes = new Hono<AppEnv>()
 	)
 	.post("/fashion/ask", validate("json", askFashionSchema), async (c) =>
 		ok(c, await askFashion({ config: c.get("config") }, c.req.valid("json"))),
+	)
+	.post("/food/read-meal", validate("json", readMealSchema), async (c) =>
+		ok(c, await readMeal({ config: c.get("config") }, c.req.valid("json"))),
+	)
+	.post("/food/ask", validate("json", askFoodSchema), async (c) =>
+		ok(c, await askFood({ config: c.get("config") }, c.req.valid("json"))),
 	);

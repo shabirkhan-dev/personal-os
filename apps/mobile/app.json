@@ -69,6 +69,15 @@
         }
       ],
       [
+        "expo-camera",
+        {
+          "cameraPermission": "Personal OS uses the camera to scan food barcodes and take meal photos.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false,
+          "barcodeScannerEnabled": true
+        }
+      ],
+      [
         "expo-sensors",
         {
           "motionPermission": "Personal OS counts your steps for the Workout module."

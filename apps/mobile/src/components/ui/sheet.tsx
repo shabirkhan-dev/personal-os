@@ -1,17 +1,11 @@
-import type { ReactNode } from "react";
-import {
-	KeyboardAvoidingView,
-	Modal,
-	Platform,
-	Pressable,
-	ScrollView,
-	StyleSheet,
-	View,
-} from "react-native";
+import { type ReactNode, useRef, type ComponentRef } from "react";
+import { Modal, Pressable, StyleSheet, useWindowDimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Icon } from "@/components/icons";
 import { PillButton } from "@/components/ui/pill-button";
+import { KeyboardAwareScrollView } from "@/components/ui/keyboard-aware-scroll-view";
 import { PoText } from "@/components/ui/po-text";
+import { useKeyboardOverlap } from "@/lib/use-keyboard";
 import { usePoTheme } from "@/theme";
 
 export type SheetProps = {
@@ -25,17 +19,27 @@ export type SheetProps = {
 	footer?: ReactNode;
 };
 
-/** Bottom sheet for quick entry (add expense, log a meal…). Tap outside or × to close. */
+/** Space the sheet's head and footer take, so the fields keep the rest when the keyboard is up. */
+const CHROME = 190;
+
+/**
+ * Bottom sheet for quick entry (add expense, log a meal…). Tap outside or × to close. It rises
+ * above the keyboard and keeps the focused field in view.
+ */
 export function Sheet({ visible, title, onClose, children, action, footer }: SheetProps) {
 	const { colors } = usePoTheme();
 	const insets = useSafeAreaInsets();
+	const { height: screenHeight } = useWindowDimensions();
+	const sheet = useRef<ComponentRef<typeof View>>(null);
+	const keyboard = useKeyboardOverlap(sheet);
+	const bodyHeight =
+		keyboard > 0
+			? Math.max(140, Math.min(460, screenHeight - keyboard - insets.top - CHROME))
+			: 460;
 
 	return (
 		<Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-			<KeyboardAvoidingView
-				behavior={Platform.OS === "ios" ? "padding" : undefined}
-				style={styles.fill}
-			>
+			<View style={styles.fill}>
 				<Pressable
 					accessibilityRole="button"
 					accessibilityLabel="Close"
@@ -43,12 +47,14 @@ export function Sheet({ visible, title, onClose, children, action, footer }: She
 					style={[styles.fill, { backgroundColor: colors.bgCanvas, opacity: 0.72 }]}
 				/>
 				<View
+					ref={sheet}
+					collapsable={false}
 					style={[
 						styles.sheet,
 						{
 							backgroundColor: colors.bgSurface,
 							borderColor: colors.borderDefault,
-							paddingBottom: Math.max(20, insets.bottom + 12),
+							paddingBottom: keyboard > 0 ? keyboard + 12 : Math.max(20, insets.bottom + 12),
 						},
 					]}
 				>
@@ -66,13 +72,13 @@ export function Sheet({ visible, title, onClose, children, action, footer }: She
 							<Icon name="Line/Close" size={16} color={colors.textSecondary} />
 						</Pressable>
 					</View>
-					<ScrollView
-						keyboardShouldPersistTaps="handled"
+					<KeyboardAwareScrollView
+						addRoom={false}
+						frameStyle={{ maxHeight: bodyHeight }}
 						contentContainerStyle={styles.body}
-						style={styles.scroll}
 					>
 						{children}
-					</ScrollView>
+					</KeyboardAwareScrollView>
 					{footer ??
 						(action ? (
 							<PillButton
@@ -82,7 +88,7 @@ export function Sheet({ visible, title, onClose, children, action, footer }: She
 							/>
 						) : null)}
 				</View>
-			</KeyboardAvoidingView>
+			</View>
 		</Modal>
 	);
 }
@@ -106,6 +112,5 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "center",
 	},
-	scroll: { maxHeight: 460 },
 	body: { gap: 14 },
 });

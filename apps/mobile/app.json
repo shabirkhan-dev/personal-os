@@ -79,7 +79,8 @@
         {
           "locationWhenInUsePermission": "Personal OS uses your location to work out prayer times and the Qibla direction where you are."
         }
-      ]
+      ],
+      "./plugins/with-talk-shortcut"
     ],
     "experiments": {
       "typedRoutes": true,

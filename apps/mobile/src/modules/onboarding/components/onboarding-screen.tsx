@@ -1,8 +1,10 @@
 import type { ColorTokens } from "@personal-os/tokens";
-import type { ReactNode } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { type ComponentRef, type ReactNode, useRef } from "react";
+import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Glow } from "@/components/ui/glow";
+import { KeyboardAwareScrollView } from "@/components/ui/keyboard-aware-scroll-view";
+import { useKeyboardOverlap } from "@/lib/use-keyboard";
 import { usePoTheme } from "@/theme";
 
 export type OnboardingScreenProps = {
@@ -28,22 +30,30 @@ export function OnboardingScreen({
 	const { colors } = usePoTheme();
 	const insets = useSafeAreaInsets();
 	const paddingTop = Math.max(60, insets.top + 12);
-	const paddingBottom = Math.max(34, insets.bottom);
+	const root = useRef<ComponentRef<typeof View>>(null);
+	// The footer and fields move up above the keyboard instead of hiding under it.
+	const keyboard = useKeyboardOverlap(root);
+	const paddingBottom = keyboard > 0 ? keyboard + 12 : Math.max(34, insets.bottom);
 
 	const body = scroll ? (
-		<ScrollView
+		<KeyboardAwareScrollView
+			addRoom={false}
 			style={styles.fill}
 			contentContainerStyle={styles.scrollContent}
 			showsVerticalScrollIndicator={false}
 		>
 			{children}
-		</ScrollView>
+		</KeyboardAwareScrollView>
 	) : (
 		<View style={styles.fill}>{children}</View>
 	);
 
 	return (
-		<View style={[styles.root, { backgroundColor: colors.bgApp, paddingTop, paddingBottom }]}>
+		<View
+			ref={root}
+			collapsable={false}
+			style={[styles.root, { backgroundColor: colors.bgApp, paddingTop, paddingBottom }]}
+		>
 			{glow ? <Glow tone={glow} /> : null}
 			{body}
 			{footer ? <View style={styles.footer}>{footer}</View> : null}

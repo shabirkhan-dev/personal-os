@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { Alert, ScrollView, StyleSheet, View } from "react-native";
+import { Alert, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { careerHome, useCareerStatus } from "@/modules/career";
 import { faithHome, useFaithStatus } from "@/modules/faith";
@@ -30,6 +30,7 @@ import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store"
 import { usePlan } from "@/modules/onboarding/store/use-plan";
 import { skincareHome, useSkincareStatus } from "@/modules/skincare";
 import { useWorkoutStatus, workoutHome } from "@/modules/workout";
+import { KeyboardAwareScrollView } from "@/components/ui/keyboard-aware-scroll-view";
 import { usePoTheme } from "@/theme";
 
 const HEADER_HEIGHT = 66;
@@ -121,7 +122,7 @@ export default function TodayScreen() {
 
 	return (
 		<View style={[styles.root, { backgroundColor: colors.bgApp }]}>
-			<ScrollView
+			<KeyboardAwareScrollView
 				contentContainerStyle={[styles.scroll, { paddingBottom: 110 + insets.bottom }]}
 				keyboardShouldPersistTaps="handled"
 			>
@@ -173,7 +174,7 @@ export default function TodayScreen() {
 						</View>
 					</>
 				)}
-			</ScrollView>
+			</KeyboardAwareScrollView>
 			{pickerOpen ? (
 				<ModulePicker
 					top={insets.top + HEADER_HEIGHT}

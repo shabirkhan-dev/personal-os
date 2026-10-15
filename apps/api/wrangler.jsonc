@@ -20,9 +20,9 @@
 		"AI_PROVIDER": "openai_compatible",
 		"OPENAI_BASE_URL": "https://api.deepseek.com",
 		"OPENAI_MODEL": "deepseek-flash",
-		"R2_ACCOUNT_ID": "",
+		"R2_ACCOUNT_ID": "2d8491daffdf5977ab85d2fb0edda3c5",
 		"R2_BUCKET_NAME": "personal-os-assets",
-		"R2_PUBLIC_URL": "",
+		"R2_PUBLIC_URL": "https://assets.rabtx.dev",
 	},
 
 	// Postgres (Neon) through Hyperdrive. Create it once:

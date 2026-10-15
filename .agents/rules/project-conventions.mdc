@@ -10,7 +10,7 @@ alwaysApply: true
 - **Lint/format**: oxlint and oxfmt only (no ESLint/Prettier). Config: root `.oxlintrc.json` and `.oxfmtrc.json`. Pre-commit hook (lefthook) runs `oxlint --fix`.
 - **Style**: Tabs, line width 100. oxlint and oxfmt apply to `apps/**/*.ts(x)`, `packages/**/*.ts(x)`, `*.config.ts`, `*.config.mjs`.
 - **Shared packages**: `packages/tokens` (`@personal-os/tokens`, Figma Kit v2 tokens; see `DESIGN.md`), `packages/typescript-config` (tsconfig bases), `packages/logger` (TS logger).
-- **Apps**: `apps/mobile` (Expo Router, the product), `apps/nest-api` (NestJS), `apps/ai-api` (FastAPI), `apps/docs` (Fumadocs), `apps/web` (disabled Next.js landing shell). Add new apps under `apps/` and wire in `turbo.json`.
+- **Apps**: `apps/mobile` (Expo Router, the product), `apps/api` (Hono on Cloudflare Workers, AI included), `apps/docs` (Fumadocs), `apps/web` (disabled Next.js landing shell). Add new apps under `apps/` and wire in `turbo.json`.
 - **Expo mobile**: Use file-based routes in `apps/mobile/src/app`, feature code in `apps/mobile/src/modules`, and UI primitives in `apps/mobile/src/components/ui`. Style with `StyleSheet` and `@personal-os/tokens` via `usePoTheme()`; no raw colours.
 - **Safe area**: In React Native use `react-native-safe-area-context` (`SafeAreaProvider`, `SafeAreaView`) instead of deprecated `react-native` `SafeAreaView`.
 - **Workspace imports**: Use the package names (e.g. `@personal-os/tokens`). Prefer shared packages over duplicating code across apps.

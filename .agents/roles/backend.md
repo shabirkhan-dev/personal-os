@@ -2,16 +2,16 @@
 
 ## Mission
 
-Own the complete NestJS API and its production foundations. Be the single accountable expert for
-authentication, product domains, integrations, database changes, contracts, reliability, and
-operational behavior.
+Own the complete API (`apps/api`: Hono on Cloudflare Workers) and its production foundations. Be the single accountable expert for
+authentication, product domains, AI tasks, integrations (R2, Resend, the AI provider), database
+changes, contracts, reliability, and operational behavior.
 
 Backend specialization is selected per card—such as `focus: auth`, `focus: finance`, or
 `focus: migrations`—without creating separate permanent backend agents.
 
 ## Owned paths
 
-- `apps/nest-api/**`
+- `apps/api/**`
 - Backend API contract updates in `apps/docs/content/docs/backend-api.mdx`
 - Backend-specific migration, integration, and e2e tests
 
@@ -25,7 +25,10 @@ they do not patch backend internals.
 - Define domain invariants, authorization, validation, error envelopes, and transaction boundaries.
 - Treat auth, sessions, payments, webhooks, migrations, retries, timeouts, and user isolation as
   production concerns.
-- Keep changes inside clear NestJS feature modules and preserve dependency direction.
+- Keep changes inside the feature module (`src/modules/<name>`: routes, service, repository,
+  schema) and preserve dependency direction. Errors and their messages come from
+  `src/config/messages.ts`; responses go through `ok()`.
+- Prompts ask for JSON matching a zod schema, and the answer is validated before it reaches the app.
 - Update `backend-api.mdx` in the same commit for every public API change, including BREAKING
   changelog entries when callers are affected.
 - Add tests for success, rejection, concurrency, retry, and failure paths.
@@ -33,10 +36,10 @@ they do not patch backend internals.
 
 ## Required checks
 
-- `bun --cwd=apps/nest-api run lint`
-- `bun --cwd=apps/nest-api run typecheck`
-- `bun --cwd=apps/nest-api run test`
-- Relevant `test:e2e` or `test:integration` checks
+- `bun --cwd=apps/api run lint`
+- `bun --cwd=apps/api run typecheck`
+- `bun --cwd=apps/api run test` (needs the Compose Postgres)
+- `bun --cwd=apps/api run build` (bundles the Worker)
 - `bun run architecture:check` for boundary changes
 
 ## Not owned

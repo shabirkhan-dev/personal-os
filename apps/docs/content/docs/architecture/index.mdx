@@ -10,7 +10,7 @@ convention. For how the pieces fit together at runtime, see
 ## Principles
 
 - Keep apps thin at the edges: screens and controllers compose, logic lives below them.
-- Pure logic is plain TypeScript with tests (`lib/` in mobile, services in Nest).
+- Pure logic is plain TypeScript with tests (`lib/` in mobile, services in the API).
 - Reusable, app-agnostic code goes in `packages/*`.
 - Enforce boundaries with checks, not only conventions.
 
@@ -26,18 +26,18 @@ convention. For how the pieces fit together at runtime, see
 - `src/components/*` and `src/theme/*` hold Kit v2 components and the theme provider. Screens use
   `@personal-os/tokens` through the theme; no raw colour values.
 
-### `apps/nest-api`
+### `apps/api`
 
-- `src/modules/*` holds feature modules (controller, service, repository, DTOs).
-- `src/common/*` holds cross-cutting HTTP concerns (filters, interceptors, pipes, middleware).
-- `src/config/*` holds Zod-validated environment configuration.
-- `src/database/*` holds the Drizzle schema and committed migrations.
-- Controllers stay thin; logic lives in services; database access lives in repositories.
-
-### `apps/ai-api`
-
-Ports and adapters: `api/` (FastAPI routes), `application/` (use cases), `domain/` (ports and
-errors), `infrastructure/` (LLM providers, the internal-token check).
+- `src/modules/<name>/` is one feature: `<name>.routes.ts` (Hono routes, validation, `ok()`),
+  `<name>.service.ts` (logic), `<name>.repository.ts` (Drizzle queries), `<name>.schema.ts` (zod
+  and response types).
+- `src/config/` holds the typed environment (`env.ts`), fixed settings (`settings.ts`) and the
+  error and message table (`messages.ts`).
+- `src/core/` holds the cross-cutting pieces: `AppError`, the response envelope, the error
+  handler, validation, rate limiting and the request context.
+- `src/db/` holds the Drizzle schema, the per-request client and the committed migrations.
+- Routes stay thin; services hold the logic; repositories hold the queries. Errors are thrown as
+  `AppError("CODE")`, never written inline.
 
 ### `packages/*`
 
@@ -50,10 +50,11 @@ errors), `infrastructure/` (LLM providers, the internal-token check).
 
 - `@/...` imports inside `packages/*`
 - cross-app relative imports (`../../apps/...`)
-- file or folder names under TS/JS `src/` that are not kebab-case (Nest dotted names like
+- file or folder names under TS/JS `src/` that are not kebab-case (dotted names like
   `auth.service.ts`, route groups like `(home)` and `[id]` params are allowed)
 
 ## ADRs
 
 - [ADR 0001: Module data lives on the phone](/docs/architecture/adr-0001-on-device-module-data)
 - [ADR 0002: Offline-first record store, sync and cloud AI](/docs/architecture/adr-0002-offline-first-sync)
+- [ADR 0003: One API on Cloudflare Workers](/docs/architecture/adr-0003-one-api-on-workers)

@@ -1,4 +1,9 @@
 {
 	"title": "Architecture",
-	"pages": ["index", "adr-0001-on-device-module-data", "adr-0002-offline-first-sync"]
+	"pages": [
+		"index",
+		"adr-0001-on-device-module-data",
+		"adr-0002-offline-first-sync",
+		"adr-0003-one-api-on-workers"
+	]
 }

@@ -8,7 +8,7 @@ description: Get Personal OS running locally in minutes.
 - Bun `1.4.2` (pinned in `packageManager`)
 - Git
 - An Android or iOS device or emulator with a development build of the app
-- Optional: Docker Compose (Postgres), Python 3 + uv (AI service)
+- Optional: Docker (local Postgres for the API)
 
 ## 1) Install dependencies
 
@@ -30,16 +30,20 @@ This enables Lefthook checks for formatting, linting, type checks, and commit hy
 bun run dev
 ```
 
-Turbo starts every app's dev server: Metro, the Nest API, the AI service (needs uv), the docs and
-the landing page. The API needs Postgres: run `docker compose up -d postgres` first (see
-[Docker](/docs/docker)).
+Turbo starts every app's dev server: Metro, the API (`wrangler dev`), the docs and the landing
+page. The API needs Postgres and local settings first (see [Local database](/docs/docker)):
+
+```bash
+docker compose up -d
+cp apps/api/.dev.vars.example apps/api/.dev.vars
+bun --cwd=apps/api run db:migrate
+```
 
 ## 4) Open apps
 
 - Mobile app (`apps/mobile`): Metro on http://localhost:8081, opened from the development build
-- Nest API (`apps/nest-api`): http://localhost:4000/api/v1/health, Swagger at `/api/docs`
+- API (`apps/api`): http://localhost:4000/api/v1/health
 - Docs (`apps/docs`): http://localhost:3002/docs
-- AI service (`apps/ai-api`): http://localhost:8000
 - Landing page (`apps/web`): http://localhost:3000
 
 ## 5) Validate quality before pushing

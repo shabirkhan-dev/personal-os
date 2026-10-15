@@ -5,17 +5,17 @@ type: feature
 from: mobile
 to: mobile
 priority: normal
-status: open
+status: done
 assignee: none
 reviewer: human
 parent: pos-6
 depends_on: []
 branch: none
 worktree: none
-scope: ["apps/mobile/**", "apps/nest-api/src/modules/social-auth/**", "apps/docs/content/docs/backend-api.mdx"]
+scope: ["apps/mobile/**", "apps/api/src/modules/auth/**", "apps/docs/content/docs/backend-api.mdx"]
 allowed_shared: []
 created: 2026-10-13
-updated: 2026-10-13
+updated: 2026-10-15
 ---
 
 ## What
@@ -47,4 +47,5 @@ has no Apple support; the app has no native Google or Apple sign-in.
 
 ## Resolution
 
-_Open._
+Rejected by the owner (2026-10-15): sign-in stays email code only. The Google and passkey
+code was removed with the move to the Hono API (pos-22).

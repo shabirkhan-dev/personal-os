@@ -12,15 +12,12 @@ The Personal OS app: Expo Router, Reanimated and Zustand, styled with `StyleShee
 
 Fumadocs-powered documentation site for onboarding, architecture, and workflows.
 
-## `apps/nest-api`
+## `apps/api`
 
-NestJS API: sign-in and sessions, profile and avatar, and the onboarding answers, backed by
-PostgreSQL through Drizzle ORM. Module data (expenses, meals, workouts) stays on the phone; see
-[Product System Design](/docs/product-system-design).
-
-## `apps/ai-api`
-
-FastAPI service for LLM-assisted workflows. The Nest API proxies it; LLM keys are never exposed to clients.
+One Hono app on Cloudflare Workers: email-code sign-in and sessions, the profile, onboarding
+answers, sync for the app's offline store, presigned avatar uploads to R2, and the Career AI tasks
+(the provider key never leaves the Worker). Postgres is Neon through Hyperdrive, with Drizzle. See
+[Backend API](/docs/backend-api) and [Product System Design](/docs/product-system-design).
 
 ## `apps/web`
 

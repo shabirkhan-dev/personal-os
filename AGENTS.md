@@ -6,7 +6,7 @@ Read this file first when working in this repo.
 ## Project overview
 
 Personal OS: a mobile-first life app in a **Turborepo + Bun** monorepo. The Expo app is the
-product; the Nest API, FastAPI AI service, design tokens and scripts share one
+product; the API (Hono on Cloudflare Workers, AI included), design tokens and scripts share one
 lint/format/build/test surface.
 
 ## Before you write code
@@ -59,18 +59,17 @@ Before any Next.js work (`apps/docs`, `apps/web`), find and read the relevant do
 personal-os/
 ├── apps/
 │   ├── mobile/          # Expo Router app — the product (StyleSheet + tokens, Reanimated, Zustand)
-│   ├── nest-api/        # NestJS production API (PostgreSQL in later phases)
-│   ├── ai-api/          # FastAPI AI assist (uv); Nest proxies, never public LLM keys
+│   ├── api/             # Hono API on Cloudflare Workers: auth, sync, R2 uploads, Career AI
 │   ├── docs/            # Docs site (Fumadocs); source in apps/docs/content/docs/
 │   └── web/             # Next.js landing page (static export → Cloudflare Workers), see apps/web/README.md
 ├── packages/
 │   ├── tokens/          # @personal-os/tokens: Figma Kit v2 colours, spacing, radii, text styles
 │   ├── typescript-config/ # Shared tsconfig bases (base.json, nextjs.json)
 │   └── logger/          # Shared logger (TypeScript)
-├── scripts/             # Utility scripts: bash/, python/, architecture/, git-hooks/
-├── docker/              # Docker Compose fragments (see docker/README.md)
+├── scripts/             # Utility scripts: architecture/, git-hooks/
+├── docker/              # Postgres init script for the root docker-compose.yml
 ├── .agents/             # Agent hub: roles, board, rules, vendored skills
-├── .devcontainer/       # Dev Container (Bun, Python, Bash tooling)
+├── .devcontainer/       # Dev Container (Bun, Bash tooling)
 ├── .github/workflows/   # CI (lint, typecheck, build, test)
 └── (root config)        # .oxlintrc.json, .oxfmtrc.json, turbo.json, lefthook.yml, etc.
 ```
@@ -94,14 +93,14 @@ personal-os/
 | `bun run prepare` | Install git hooks (lefthook) |
 | `bun run dev` | Start all dev servers (Turbo) |
 | `bun run build` | Build all apps (Turbo) |
-| `bun run lint` | Lint: oxlint (TS/JS) + ShellCheck + ruff |
+| `bun run lint` | Lint: oxlint (TS/JS) + ShellCheck |
 | `bun run lint:fix` | Lint with auto-fix |
 | `bun run format` | Format: oxfmt + shfmt |
 | `bun run typecheck` | TypeScript typecheck |
 | `bun run test` | Run tests across the workspace |
 | `bun run test:coverage` | Run TS coverage + script tests |
 | `bun run architecture:check` | Enforce architecture import boundaries + kebab-case naming |
-| `bun run naming:check` | Enforce kebab-case (dotted Nest-style) file/folder names |
+| `bun run naming:check` | Enforce kebab-case (dotted, e.g. `auth.routes.ts`) file/folder names |
 
 ## Conventions
 
@@ -141,7 +140,7 @@ personal-os/
   secret scan, architecture check. Hooks run automatically if installed via `bun run prepare`.
 - **Commit messages**: Enforced by `commit-msg` hook — Conventional Commits only
   (`feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert`), **all lowercase**,
-  10–200 chars, no WIP. Example: `feat(auth): add nestjs login and shared ui forms`.
+  10–200 chars, no WIP. Example: `feat(auth): add email code sign-in`.
 - **Do not commit**: build output (`.next/`, `dist/`, `target/`), `node_modules/`, `.env` files,
   cache dirs. These are in `.gitignore`.
 - **Separate concerns**: Don't mix lint/format-only fixes with feature changes in the same commit.
@@ -150,22 +149,21 @@ personal-os/
 
 | Language | Lint | Format | Test |
 |----------|------|--------|------|
-| **TypeScript/JS** | oxlint | oxfmt | Jest (Nest), `bun test` (mobile) |
+| **TypeScript/JS** | oxlint | oxfmt | Vitest (api, against Postgres), `bun test` (mobile) |
 | **Bash** | ShellCheck | shfmt | — |
-| **Python** | ruff check | ruff format | — |
 
-### Docker
+### Local API
 
-Postgres, Nest API and the optional AI API via Compose fragments under `docker/compose/`
-(merged by root `docker-compose.yml`, Compose v2.20+, no `version:` key):
+Docker only runs Postgres; the API runs on Workers locally through Wrangler:
 
 ```bash
-cp env.docker.example .env
-docker compose up -d --build
+docker compose up -d                      # Postgres on :5433 (dev + test databases)
+cp apps/api/.dev.vars.example apps/api/.dev.vars
+bun --cwd=apps/api run db:migrate
+bun --cwd=apps/api run dev                # http://localhost:4000/api/v1/health
 ```
 
-Defaults: Nest `:4000`, Postgres host `:5433`. Optional AI API:
-`docker compose --profile ai up -d --build`. See `/docs/docker` and `docker/README.md`.
+See `/docs/docker` and `apps/api/README.md`.
 
 ## Before finishing any task
 
@@ -183,11 +181,11 @@ Defaults: Nest `:4000`, Postgres host `:5433`. Optional AI API:
   - `/docs/qol` — full QoL stack (hooks, CI, per-language tools)
   - `/docs/architecture` — architecture baseline and enforceable boundaries
   - `/docs/docker` — Docker Compose setup
-  - `/docs/deploy` — Cloudflare Workers (landing) + Vercel (docs) + Render (Nest) + Neon
+  - `/docs/deploy` — Cloudflare Workers (API + landing), Hyperdrive + Neon, R2, Vercel (docs)
   - `/docs/product-system-design` — how the system fits together, data, security, direction
 - `.agents/skills/expo-mobile/SKILL.md` — Expo Router + EAS + official Expo Skills / LLM doc links for `apps/mobile`.
 - `.agents/rules/expo-ai-agents.mdc` — Expo remote skills URL, skill table, `llms.txt` bundles (when working under `apps/mobile/**`).
-- `docker/README.md` — Compose fragment layout and `-f` fallback.
+- `apps/api/README.md` — API layout, config, local dev and deploy commands.
 - `.oxlintrc.json` — oxlint rules. `.oxfmtrc.json` — oxfmt formatting.
 - `lefthook.yml` — Git hook definitions.
 - `turbo.json` — Turborepo pipeline config.

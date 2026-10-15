@@ -10,12 +10,12 @@ documented API and preserve the product's design and navigation systems.
 - `apps/web/**`
 
 Shared UI or package changes require an explicit card and package-owner review. API source code is
-never part of this role's scope. Before consuming a NestJS endpoint, read
+never part of this role's scope. Before consuming an API endpoint, read
 `apps/docs/content/docs/backend-api.mdx`.
 
 ## Not owned
 
-- `apps/nest-api/**`, `apps/mobile/**`, or database code
+- `apps/api/**`, `apps/mobile/**`, or database code
 - Public API behavior or backend security fixes
 - Unrelated design-system rewrites
 

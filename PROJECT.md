@@ -8,7 +8,8 @@ For quick setup, start with `README.md`.
 A **Bun + Turborepo** monorepo for Personal OS, a mobile-first life app:
 
 - The Expo app (`apps/mobile`): onboarding v5 from the Figma Kit v2 file, then the home screen
-- The NestJS API (`apps/nest-api`) and the FastAPI AI service (`apps/ai-api`)
+- The API (`apps/api`): Hono on Cloudflare Workers, Postgres (Neon) through Hyperdrive, R2 for
+  files, and the Career AI tasks
 - The design tokens (`@personal-os/tokens`) shared by mobile and the web landing shell
 - A docs site, architecture checks, git hooks and CI/security pipelines
 
@@ -18,15 +19,14 @@ A **Bun + Turborepo** monorepo for Personal OS, a mobile-first life app:
 personal-os/
 ├── apps/
 │   ├── mobile/               # Expo Router app (the product)
-│   ├── nest-api/             # NestJS API
-│   ├── ai-api/               # FastAPI AI assist (uv); the Nest API proxies it
+│   ├── api/                  # Hono API on Cloudflare Workers
 │   ├── docs/                 # Documentation app (Next.js + Fumadocs)
 │   └── web/                  # Next.js landing page, static export on Cloudflare Workers
 ├── packages/
 │   ├── tokens/               # @personal-os/tokens: Figma Kit v2 colours, spacing, radii, type
 │   └── typescript-config/    # @personal-os/typescript-config: shared TS config bases
 ├── scripts/                  # Git hooks, architecture and naming checks (Bash)
-├── docker/                   # Docker Compose fragments (Postgres, Nest API, AI API)
+├── docker/                   # Postgres init script (docker-compose.yml runs Postgres only)
 ├── .agents/                  # Multi-agent coordination hub, rules and vendored skills
 ├── .github/workflows/        # CI/CD/security workflows
 ├── .devcontainer/            # Reproducible development environment
@@ -43,8 +43,7 @@ There is no root `docs/` directory.
 | App | Stack | Notes |
 | --- | --- | --- |
 | `apps/mobile` | Expo SDK 58, Expo Router, Reanimated 4, react-native-svg, Zustand | The product; StyleSheet + tokens |
-| `apps/nest-api` | NestJS 11, Zod, Jest | Production API spine |
-| `apps/ai-api` | FastAPI, uv | AI assist; never exposes LLM keys publicly |
+| `apps/api` | Hono 4, Cloudflare Workers, Drizzle, Zod, Vitest | Auth, profile, onboarding, sync, R2 uploads, Career AI |
 | `apps/docs` | Next.js + Fumadocs + MDX | Project docs site |
 | `apps/web` | Next.js 16 | Landing page, static export deployed to Cloudflare Workers |
 
@@ -62,7 +61,6 @@ Run commands from repo root:
 | Command | Purpose |
 | --- | --- |
 | `bun run dev` | Start `dev` tasks via Turborepo |
-| `bun run dev:ai` | Start the FastAPI AI service |
 | `bun run build` | Build workspace targets |
 | `bun run lint` | Lint workspace + scripts |
 | `bun run lint:fix` | Apply lint autofixes |
@@ -75,14 +73,14 @@ Run commands from repo root:
 | `bun run prepare` | Install git hooks (Lefthook) |
 
 Run one app directly with `bun --cwd=<app-path> run <script>`, for example
-`bun --cwd=apps/mobile run start`, `bun --cwd=apps/nest-api run dev` or `bun --cwd=apps/docs run dev`.
+`bun --cwd=apps/mobile run start`, `bun --cwd=apps/api run dev` or `bun --cwd=apps/docs run dev`.
 
 ## Tooling and quality system
 
 - **Bun** is the only package manager; workspaces are `apps/*` and `packages/*`
 - **Turborepo** orchestrates shared tasks (`turbo.json`)
 - **oxlint** lints and **oxfmt** formats TS/JS (tabs, line width 100)
-- **Bash:** `shellcheck`, `shfmt` (`scripts/`) · **Python:** `ruff`, `pytest` (`apps/ai-api`)
+- **Bash:** `shellcheck`, `shfmt` (`scripts/`)
 - **Lefthook** (`lefthook.yml`): format, lint, typecheck, architecture check, large-file guard,
   secret scan, and the conventional-commit message check
 - **Architecture checks:** `scripts/architecture/check-boundaries.sh` and `check-naming.sh`; see
@@ -99,18 +97,18 @@ the build profiles, channels and update commands.
 - **CD:** `.github/workflows/cd.yml` is a staged deploy template (`main` and version tags)
 - **Security:** `.github/workflows/security.yml` + Dependabot + CodeQL
 
-## Docker workflow
+## Local API
 
-Postgres, the Nest API and the AI API are composed through root `docker-compose.yml` with fragment
-files under `docker/compose/`.
+`docker compose up -d` starts Postgres on host `5433` (databases `personal_os` and
+`personal_os_api_test`). The API runs on Workers locally with Wrangler on `4000`:
 
 ```bash
-cp env.docker.example .env
-docker compose up -d --build
+cp apps/api/.dev.vars.example apps/api/.dev.vars
+bun --cwd=apps/api run db:migrate
+bun --cwd=apps/api run dev
 ```
 
-Defaults: Nest `4000`, Postgres host `5433`. More details: docs app `/docs/docker` and
-`docker/README.md`.
+More: `apps/api/README.md` and docs app `/docs/docker`.
 
 ## Conventions
 

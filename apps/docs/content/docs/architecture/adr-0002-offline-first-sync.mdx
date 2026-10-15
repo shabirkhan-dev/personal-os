@@ -40,13 +40,14 @@ AI-native, the owner wants everything to work offline, and the setup should stay
 
 ### AI
 
-- AI runs only in the cloud: the FastAPI service calls an OpenAI-compatible provider; no local
-  models. The app reaches it through `POST /ai/career/:task` on the Nest API.
+- AI runs only in the cloud: the API calls an OpenAI-compatible provider; no local models. The
+  app reaches it through `POST /ai/career/<task>`. (Originally a separate FastAPI service behind
+  the Nest API; both became one Worker in [ADR 0003](/docs/architecture/adr-0003-one-api-on-workers).)
 - Every AI feature has an offline path: logging a line falls back to an on-device parser, forms
   can be filled by hand, and screens say plainly when a feature needs a connection.
-- The AI service only reads public pages: every redirect hop must resolve to a public address.
+- The API only reads public pages: local and private addresses are refused on every redirect hop.
 
-### Files (direction, not built yet)
+### Files
 
 - Images and other assets go to **Cloudflare R2** (served through Cloudflare's image resizing).
 - Long videos (training, cooking) stay in the owner's **Google Drive** and are streamed in the

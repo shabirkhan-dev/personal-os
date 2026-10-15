@@ -29,19 +29,20 @@ Principles:
  │ apps/mobile  (Expo, the product)           │
  │  Expo Router screens                        │
  │  modules/*   one folder per life module     │
- │  Zustand document stores ──► JSON files     │  on-device module data
+ │  SQLite record store ◄─► sync engine        │  offline first
  │  SecureStore ──► session tokens             │
- └───────────────┬────────────────────────────┘
-                 │ HTTPS, bearer token
- ┌───────────────▼──────────────┐      ┌──────────────────────────┐
- │ apps/nest-api (NestJS)        │─────►│ apps/ai-api (FastAPI)    │
- │ auth · profile · onboarding   │token │ assist; LLM keys stay    │
- │ AI proxy · health             │      │ server-side              │
- └───────────────┬──────────────┘      └──────────────────────────┘
-                 │ Drizzle
-         ┌───────▼────────┐
-         │ Postgres (Neon)│
-         └────────────────┘
+ └──────┬─────────────────────────────┬───────┘
+        │ HTTPS, bearer token          │ presigned PUT (images)
+ ┌──────▼──────────────────────────┐  ┌▼──────────────────┐
+ │ apps/api (Hono, Cloudflare      │  │ R2 bucket         │
+ │ Workers)                        │─►│ avatars, photos   │
+ │ auth · profile · onboarding     │  └───────────────────┘
+ │ sync · uploads · Career AI ─────┼──► OpenAI-compatible provider
+ └──────┬──────────────────────────┘
+        │ Drizzle over Hyperdrive
+ ┌──────▼─────────┐
+ │ Postgres (Neon)│
+ └────────────────┘
 
  apps/web   landing page, Cloudflare Workers (+ KV waitlist); never calls the API
  apps/docs  this site, Vercel
@@ -86,68 +87,71 @@ to tessera, senior typescript, 500k, remote") through AI, or with an on-device p
 
 ## 4. API
 
-`apps/nest-api` is a NestJS 11 modular monolith: controllers stay thin, services hold the logic,
-repositories own Drizzle queries. Zod validates every request and the environment.
-
-What the app uses today: email-code sign-in, refresh, logout, `GET /auth/me`, the profile and
-avatar endpoints, and `GET`/`PUT /users/me/onboarding`. The contract lives in
+`apps/api` is one Hono app on Cloudflare Workers
+([ADR 0003](/docs/architecture/adr-0003-one-api-on-workers)). Each feature is a module
+(`src/modules/<name>`: routes, service, repository, zod schemas). Zod checks every request and the
+environment; every error is an `AppError` whose code, status and message come from one table
+(`src/config/messages.ts`); every answer uses the same envelope. The contract lives in
 [Backend API](/docs/backend-api).
 
-Kept but not yet used by the app (decided in board card pos-8): password sign-in, magic links,
-TOTP, passkeys and Google sign-in. Google and Apple sign-in on mobile is open as pos-12.
+The app uses all of it: email-code sign-in, refresh and logout, `GET /users/me` and the profile,
+presigned avatar uploads, onboarding answers, `POST /sync` and the Career AI tasks. Sign-in is
+email code only (Google, passwords, TOTP and passkeys were removed; pos-12 closed).
 
 ### Data model
 
 | Table | Purpose |
 | --- | --- |
-| `users` | Identity: email, username, verification state, optional password hash |
-| `user_profiles` | Display name, avatar URL, bio, time zone, locale |
-| `sessions` | Refresh sessions: hashed token, expiry, user agent, IP, revocation |
-| `auth_challenges` | Email codes and magic links, hashed, with attempt counts |
-| `auth_identities` | Linked Google accounts |
-| `totp_factors`, `passkeys`, `webauthn_challenges` | Second factors and passkeys |
+| `users` | Email, display name, avatar key (R2), active flag |
+| `sessions` | Refresh sessions: hashed token, expiry, user agent, revocation |
+| `sign_in_codes` | Email codes, hashed, keyed by email, with attempt counts |
 | `onboarding_profiles` | The onboarding answers as JSON with a `schema_version`; the plan is derived on the device |
 | `sync_records` | Every synced document: user, collection, id, JSON data, `updated_at`, `deleted_at`, and a `seq` that sync cursors page through |
 
-Schema changes are made in `src/database/schema` and committed with the generated migration;
-migrations run on container start.
+Schema changes are made in `apps/api/src/db/schema` and committed with the generated migration
+(`bun --cwd=apps/api run db:generate`); migrations are applied with `db:migrate` before deploying.
 
 ### Onboarding sync
 
-The one piece of user data synced today. After sign-in the app compares its own timestamp with the
-server's `updatedAt` and keeps whichever changed last, then uploads changes about a second after
-they happen. A stored row from an older schema version reads as `null`, and the app uploads its
-copy.
+After sign-in the app compares its own timestamp with the server's `updatedAt` and keeps whichever
+changed last, then uploads changes about a second after they happen. A stored row from an older
+schema version reads as `null`, and the app uploads its copy.
 
-## 5. AI service
+### Files
 
-`apps/ai-api` (FastAPI, uv) runs the AI tasks behind a provider port: an OpenAI-compatible cloud
-provider in production (no local models) and a deterministic mock for development and tests.
-Nest calls it with `AI_SERVICE_TOKEN`; clients never talk to it directly and never hold LLM keys.
+Images go to R2. The app asks `POST /assets/uploads` for a presigned URL, uploads the file
+straight to R2, and sends back only the key; the API checks the object (prefix, type, size) before
+saving it. Long videos (training, cooking) will stream from Google Drive rather than be copied.
 
-Career uses five tasks through `POST /ai/career/:task`: read a job post (from a link or pasted
+## 5. AI
+
+AI runs only in the cloud, inside the API: an OpenAI-compatible provider in production (no local
+models) and a deterministic mock for development and tests. The provider key is a Worker secret;
+the app never holds it.
+
+Career uses five tasks through `POST /ai/career/<task>`: read a job post (from a link or pasted
 text, with a halal reading), parse a logged line, draft a follow-up, build interview prep with
-flashcards, and plan a skill path. Each asks the model for JSON matching a schema and validates
-the reply. Reading a link fetches only public addresses, checking every redirect, with size and
-time limits.
+flashcards, and plan a skill path. Each asks the model for JSON matching a zod schema and validates
+the answer before it reaches the app. Reading a link refuses local and private addresses on every
+redirect, with size and time limits.
 
 ## 6. Security and known gaps
 
-- Access tokens: JWT, 15 minutes. Refresh tokens: rotated, stored hashed; native clients receive
-  them in the response body (`X-Client-Platform: native`) and keep them in SecureStore.
-- Email codes are hashed, throttled (3 requests, 8 verifies per minute) and lock after repeated
-  failures. Responses do not reveal whether an account exists.
-- Helmet, CORS allowlist, CSRF checks for browser requests, rate limiting on auth routes.
+- Access tokens: JWT, 15 minutes. Refresh tokens: rotated on every refresh, stored hashed; reusing
+  an old one ends the session. The app keeps the refresh token in SecureStore.
+- Email codes are hashed, single use, replaced by a newer code and locked after 5 wrong tries.
+  Responses do not reveal whether an account exists.
+- Cloudflare rate limiting per IP or user (auth 10, sync 60, AI 20 per minute), secure headers,
+  body size limits.
 
 Known gaps:
 
-- **Avatars are written to the API container's disk** (`uploads/avatars`). On Render that disk is
-  wiped on every deploy and restart. Move them to object storage (R2 or S3) before relying on them.
 - **Older modules have no backup yet.** Finance, Workout, Skincare and Food still live only in
   their JSON files on the phone; Career is synced.
 - **Last write wins per record.** Two devices editing the same record offline keep only the newer
   edit.
-- Rate limits are in memory, per instance.
+- **No avatar picker yet.** The upload flow exists in `usersService.uploadAvatar`; no screen calls
+  it.
 
 ## 7. Direction under discussion (not built)
 
@@ -156,8 +160,8 @@ Known gaps:
 2. **One shared primitive under the daily modules.** `actions` (what, when, part of the minimum
    day) and `entries` (done or skipped, value, date) as collections, so streaks and "never miss
    twice" are computed once for every module.
-3. **Files on Cloudflare.** Avatars and photos in R2 with image resizing; long videos (training,
-   cooking) streamed from Google Drive rather than copied.
+3. **Files.** Photos (receipts, progress) through the same R2 upload flow, with Cloudflare image
+   resizing; long videos (training, cooking) streamed from Google Drive rather than copied.
 4. **AI with consent per module.** Insights read a compact daily digest of the modules the person
    has shared, and propose changes the person confirms.
 5. **Reminders on the device.** Scheduled local notifications, so the most important nudges do not

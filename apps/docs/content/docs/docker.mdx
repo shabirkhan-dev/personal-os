@@ -1,51 +1,44 @@
 ---
-title: Docker
-description: Compose stack for Postgres, the Nest API and the optional AI API.
+title: Local database
+description: Postgres in Docker for the API and its tests; the API itself runs with Wrangler.
 ---
-Run the backend stack with Docker Compose. Fragments live under **`docker/compose/`** and are merged by the root **`docker-compose.yml`** via [`include`](https://docs.docker.com/compose/how-tos/multiple-compose-files/include/) (Compose **v2.20+**). Compose files follow the Compose Spec (**no** top-level `version` key).
+The API runs on Cloudflare Workers, locally through `wrangler dev`. Docker only provides Postgres.
 
-## Layout
+## Start Postgres
 
-| Fragment | Contents |
-|----------|----------|
-| `docker/compose/postgres.yml` | Postgres 16, named volume, healthcheck |
-| `docker/compose/nest-api.yml` | NestJS API (multi-stage Bun image) |
-| `docker/compose/ai-api.yml` | Optional FastAPI AI service (`--profile ai`) |
+From the repo root:
 
-See **`docker/README.md`** for the manual `-f` fallback.
+```bash
+docker compose up -d
+```
 
-## Setup
+This starts Postgres 16 on host port **5433** with user and password `personal_os` and two
+databases:
 
-1. **Copy env file** (from repo root):
+| Database | Used by |
+|----------|---------|
+| `personal_os` | `wrangler dev` (Hyperdrive's `localConnectionString` in `apps/api/wrangler.jsonc`) |
+| `personal_os_api_test` | `bun --cwd=apps/api run test`, reset on every run |
 
-   ```bash
-   cp env.docker.example .env
-   ```
+The test database is created by `docker/postgres-init.sql` the first time the volume is created.
+On an older volume, create it once:
+`docker compose exec postgres createdb -U personal_os personal_os_api_test`.
 
-   Set `JWT_SECRET` and `AUTH_TOKEN_SECRET` (32+ characters). Adjust ports if needed.
+## Run the API
 
-2. **Build and start the stack**:
+```bash
+cp apps/api/.dev.vars.example apps/api/.dev.vars   # local secrets, mock AI
+bun --cwd=apps/api run db:migrate                   # apply migrations to personal_os
+bun --cwd=apps/api run dev                          # http://localhost:4000/api/v1/health
+```
 
-   ```bash
-   docker compose up -d --build
-   ```
-
-3. Open:
-
-   - Nest health: http://localhost:4000/api/v1/health
-   - Nest Swagger: http://localhost:4000/api/docs
-
-## Ports
-
-| Service | Host port (default) |
-|---------|---------------------|
-| Postgres | 5433 (container 5432) |
-| Nest API | 4000 |
-| AI API (profile) | 8000 |
+On a phone, point the app at your computer's LAN address: `EXPO_PUBLIC_API_URL=http://<LAN IP>:4000`
+in `apps/mobile/.env`.
 
 ## Notes
 
-- Nest runs migrations on startup when `RUN_MIGRATIONS=true` (default).
-- Host-only API development: `docker compose up -d postgres`, then `bun run dev`.
-- Optional AI service: `docker compose --profile ai up -d --build`.
+- Without `RESEND_API_KEY` in `.dev.vars`, sign-in codes come back in the response
+  (`developmentCode`), so no inbox is needed locally.
+- R2 is simulated by Wrangler locally. Presigned uploads need real R2 credentials; without them
+  `POST /assets/uploads` answers `503 ASSETS_UNAVAILABLE`.
 - The mobile app is not containerised; run it with Metro and a development build.

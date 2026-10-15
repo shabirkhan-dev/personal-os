@@ -1,0 +1,50 @@
+---
+title: "ADR 0003: One API on Cloudflare Workers"
+description: The Nest API and the Python AI service become one Hono app on Workers, with Neon through Hyperdrive and images uploaded straight to R2.
+---
+
+## Status
+
+Accepted (2026-10-15). Replaces the NestJS API and the FastAPI AI service. Amends
+[ADR 0002](/docs/architecture/adr-0002-offline-first-sync) where it named them.
+
+## Context
+
+The backend was two services: a NestJS API (Render, Docker) and a FastAPI AI service it called
+with a shared token. For one person and a few users that meant two deploys, two languages, a free
+host that sleeps (30 s wake-up against a 15 s app timeout) and avatars on a disk that is wiped on
+restart. The owner wants everything on Cloudflare at a flat cost, kept simple and module-based.
+
+## Decision
+
+- **One Hono app on Cloudflare Workers** (`apps/api`). The AI tasks move into it as a module; the
+  provider key is a Worker secret. No containers.
+- **Postgres stays on Neon**, reached through **Hyperdrive** (pooling and a warm connection near the
+  Worker). Drizzle stays; the schema starts fresh in one migration, without the unused auth tables.
+- **Sign-in is email code only.** Passwords, magic links, TOTP, passkeys and Google are removed,
+  since the app never used them.
+- **Images go straight to R2.** The API hands out a presigned PUT URL for a key under the user's
+  prefix; the app uploads; the API checks the object and saves only the key. Files never pass
+  through the Worker.
+- **Cloudflare's rate limiter** replaces the in-memory throttler.
+- **One way to answer.** Typed config (`config/env.ts`), fixed settings (`config/settings.ts`) and
+  one table of error codes with their status and message (`config/messages.ts`). Routes throw
+  `AppError("CODE")` and return `ok(data)`; nothing writes its own message or status.
+
+## Consequences
+
+### Positive
+
+- One service, one language, one deploy (`wrangler deploy` or Workers Builds).
+- No idle cold starts; a flat $5/month plan covers it for a handful of users.
+- Avatars are durable and never load the API.
+- Smaller codebase: about 2,400 lines against 6,300 before.
+
+### Negative
+
+- Breaking contract change for the app (new sign-in paths, user shape, camelCase AI fields). The
+  app moved in the same change; old builds stop signing in.
+- Workers have per-request CPU limits (10 ms free, more on the paid plan); heavy work must stay
+  out of request handlers.
+- Migrations are applied by hand (`db:migrate`) before a deploy until the pipeline does it.
+- No Swagger UI; the contract is the [Backend API](/docs/backend-api) page.

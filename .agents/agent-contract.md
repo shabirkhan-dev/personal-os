@@ -56,7 +56,7 @@ migration window, but it must not be mixed with a newly claimed card.
 1. Read the root `AGENTS.md`, `.agents/README.md`, this contract, the assigned role, and the
    relevant board card before editing.
 2. Read the current source of truth before making a decision. This includes
-   `apps/docs/content/docs/backend-api.mdx` before consuming or changing a NestJS API.
+   `apps/docs/content/docs/backend-api.mdx` before consuming or changing the API.
 3. Claim the card before coding. Do not start untracked implementation work.
 4. Make the smallest complete change that satisfies the card. Do not include drive-by cleanup,
    unrelated refactors, or speculative features.

@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Home placeholder behind the onboarding gate.
 - Landing page (`apps/web`): Next.js static export served by Cloudflare Workers, built from the
   Figma "Landing" page, with a Worker for launch-day email sign-ups in Workers KV.
+- `apps/api`: one Hono API on Cloudflare Workers (Neon through Hyperdrive, R2 presigned uploads,
+  Cloudflare rate limiting, Career AI) replacing `apps/nest-api` and `apps/ai-api`.
 
 ### Changed
 
@@ -36,6 +38,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Starter leftovers: shadcn and browser-test agent skills, old plans and done cards, `glass.html`.
 - `@starter/logger` (`packages/logger`), unused by any app.
 - The hello-world Bash and Python demo scripts and their tests (`scripts/bash`, `scripts/python`).
+- `apps/nest-api`, `apps/ai-api`, `render.yaml` and the Nest/AI Compose fragments; password,
+  magic-link, TOTP, passkey and Google sign-in (email code only).
 - The Starter override policy page and ADR ("strong default, overridable"); replaced by ADR 0001
   on on-device module data.
 

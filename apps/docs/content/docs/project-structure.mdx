@@ -9,15 +9,14 @@ description: A clear map of the monorepo layout and responsibilities.
 personal-os/
 ├── apps/
 │   ├── mobile/        # The Expo app
-│   ├── nest-api/
-│   ├── ai-api/        # FastAPI AI assist
+│   ├── api/           # Hono API on Cloudflare Workers
 │   ├── docs/          # Fumadocs site; MDX in apps/docs/content/docs/
 │   └── web/           # Landing page, Cloudflare Workers
 ├── packages/
 │   ├── tokens/        # @personal-os/tokens
 │   └── typescript-config/  # @personal-os/typescript-config
 ├── scripts/           # git hooks, architecture and naming checks
-├── docker/
+├── docker/          # Postgres init script for docker-compose.yml
 ├── turbo.json
 └── .oxlintrc.json
 ```
@@ -32,7 +31,7 @@ personal-os/
 ## Where to add new code
 
 - New feature in the app: `apps/mobile/src/modules/<feature>`
-- New API feature: `apps/nest-api/src/modules/<feature>`
+- New API feature: `apps/api/src/modules/<feature>` (routes, service, repository, schema)
 - New product surface: `apps/<new-app>`
 - Shared UI/utilities/types: `packages/<new-package>`
 - Docs pages: `apps/docs/content/docs/` (served at `/docs/...`)

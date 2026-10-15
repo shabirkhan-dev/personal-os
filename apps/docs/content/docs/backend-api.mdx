@@ -48,7 +48,8 @@ table, `apps/api/src/config/messages.ts`.
 | `POST` | `/ai/career/<task>` | bearer | Career AI: `read-job`, `parse-line`, `nudge`, `interview-prep`, `skill-path` |
 
 Rate limits (per IP, or per user when signed in, per minute): auth routes 10, `/sync` 60, AI 20.
-Over the limit: `429` `RATE_LIMITED`. Bodies over 1 MB (AI: 32 KB): `413` `BODY_TOO_LARGE`.
+Over the limit: `429` `RATE_LIMITED`. When the Worker's settings are incomplete, every route
+answers `503` `CONFIG_INVALID`, naming the missing settings (never their values). Bodies over 1 MB (AI: 32 KB): `413` `BODY_TOO_LARGE`.
 
 ### Sign-in
 

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { parseConfig } from "@/config/env";
 import { errors } from "@/config/messages";
+import { testApp } from "./support";
 
 describe("config", () => {
 	it("requires real secrets and an email key in production", () => {
@@ -36,5 +37,16 @@ describe("config", () => {
 			expect(entry.message.length, code).toBeGreaterThan(5);
 			expect(entry.status, code).toBeGreaterThanOrEqual(400);
 		}
+	});
+
+	it("answers 503 naming the missing settings, not their values", async () => {
+		const { call } = testApp({ ENVIRONMENT: "production", JWT_SECRET: "j".repeat(40) });
+		const response = await call("GET", "/health");
+		expect(response.status).toBe(503);
+		expect(response.json).toMatchObject({ code: "CONFIG_INVALID" });
+		const message = String(response.json?.message);
+		expect(message).toContain("AUTH_TOKEN_SECRET");
+		expect(message).toContain("RESEND_API_KEY");
+		expect(message).not.toContain("jjjj");
 	});
 });

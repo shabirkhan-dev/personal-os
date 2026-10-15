@@ -160,3 +160,35 @@ describe("Career AI with a real provider", () => {
 		});
 	});
 });
+
+describe("Faith AI", () => {
+	it("answers with the mock provider and validates the question", async () => {
+		const response = await mockApp.call("POST", "/ai/faith/ask", {
+			token,
+			body: { question: "What does sabr mean?", tradition: "Shia Ismaili", today: "2026-10-15" },
+		});
+		expect(response.status).toBe(200);
+		expect((response.json?.data as { answer: string } | undefined)?.answer).toContain(
+			"Shia Ismaili",
+		);
+		const empty = await mockApp.call("POST", "/ai/faith/ask", {
+			token,
+			body: { question: " ", today: "2026-10-15" },
+		});
+		expect(empty.json).toMatchObject({ code: "VALIDATION_FAILED" });
+	});
+
+	it("speaks as the Faith assistant and keeps three follow-ups", async () => {
+		const spy = provider(
+			JSON.stringify({ answer: "  Patience.  ", followUps: ["a", "b", "c", "d", ""] }),
+		);
+		const response = await realApp.call("POST", "/ai/faith/ask", {
+			token,
+			body: { question: "Sabr?", today: "2026-10-15", prayers: ["fajr", "maghrib", "isha"] },
+		});
+		expect(response.json?.data).toEqual({ answer: "Patience.", followUps: ["a", "b", "c"] });
+		const [, init] = spy.mock.calls[0] as unknown as [string, RequestInit];
+		const sent = JSON.parse(String(init.body)) as { messages: { content: string }[] };
+		expect(sent.messages[0]?.content).toContain("Faith assistant");
+	});
+});

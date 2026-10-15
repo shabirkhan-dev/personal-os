@@ -11,7 +11,7 @@ import { addApplication } from "../data/career-actions";
 import type { Halal } from "../lib/career-model";
 import { looksLikeLink, normaliseLink } from "../lib/parse-career-line";
 import { CareerAiError, type JobDetails, useCareerAi } from "../services/career-ai";
-import { Footer } from "./career-ui";
+import { Footer } from "@/components/module-ui";
 import { FieldGroup, FieldRow, TextBox } from "./field-rows";
 
 type Draft = { company: string; role: string; pay: string; where: string; cv: string };

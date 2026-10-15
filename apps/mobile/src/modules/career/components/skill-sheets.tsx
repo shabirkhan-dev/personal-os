@@ -8,7 +8,7 @@ import { logSkillSession } from "../data/career-actions";
 import { useStartSkillPath } from "../hooks/use-career-jobs";
 import type { Application } from "../lib/career-model";
 import { useCareerAi } from "../services/career-ai";
-import { FilterChip, Footer } from "./career-ui";
+import { FilterChip, Footer } from "@/components/module-ui";
 
 const SUGGESTIONS = [
 	"System design",

@@ -34,7 +34,7 @@ import {
 	Segments,
 	SectionLabel,
 	TimelineRow,
-} from "./career-ui";
+} from "@/components/module-ui";
 import { SkillFocusSheet, SkillTimerSheet } from "./skill-sheets";
 
 const DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri"];

@@ -105,7 +105,8 @@ export type ModuleId =
 	| "finance"
 	| "skincare"
 	| "food"
-	| "fashion";
+	| "fashion"
+	| "faith";
 
 export type ModuleOption = {
 	id: ModuleId;
@@ -178,6 +179,14 @@ export const moduleOptions: readonly ModuleOption[] = [
 		icon: "Shirt",
 		iconTone: "accentDefault",
 		tileTone: "accentSubtle",
+	},
+	{
+		id: "faith",
+		label: "Faith",
+		summary: "Prayers · Quran · Qibla",
+		icon: "Moon",
+		iconTone: "statusSuccess",
+		tileTone: "statusSuccessSubtle",
 	},
 ];
 

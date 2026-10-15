@@ -5,6 +5,7 @@ import { PoText } from "@/components/ui/po-text";
 import { type AiJob, useAiJobs } from "@/lib/ai-jobs/ai-jobs-store";
 import { useFinanceSummary } from "@/modules/finance";
 import { AskBar } from "@/modules/home/components/ask-bar";
+import { useAskInbox } from "@/modules/home/store/ask-inbox";
 import type { HomeModuleViewProps } from "@/modules/home/lib/module-home";
 import {
 	addApplication,
@@ -37,14 +38,12 @@ import { looksLikeLink, parseCareerLine } from "../lib/parse-career-line";
 import { careerRoutes } from "../navigation";
 import { type ParsedLineAi, useCareerAi } from "../services/career-ai";
 import { AddApplicationSheet } from "./add-application-sheet";
-import { AiTip, EmptyCard } from "./career-ui";
+import { AiTip, EmptyCard, ProgressCard, ResultCard } from "@/components/module-ui";
 import {
 	ActivityCard,
-	AiResultCard,
 	FollowUpsCard,
 	interviewTitle,
 	PipelineCard,
-	ProgressCard,
 	QuickActions,
 } from "./home-cards";
 import { NudgeSheet } from "./nudge-sheet";
@@ -186,6 +185,15 @@ export function CareerHomeView({ actionRequest }: HomeModuleViewProps) {
 		setLogged(null);
 	};
 
+	// A line said on Talk to OS lands here once the applications have loaded.
+	const inboxLine = useAskInbox((state) => state.line);
+	useEffect(() => {
+		if (data.loading || inboxLine?.module !== "career") return;
+		const line = useAskInbox.getState().take("career");
+		if (line) void logLine(line.text);
+		// oxlint-disable-next-line react/exhaustive-deps -- runs when a line arrives
+	}, [inboxLine, data.loading]);
+
 	const loggedApp = logged ? (apps.find((app) => app.id === logged.appId) ?? null) : null;
 	const nudgeApp = nudgeId ? (apps.find((app) => app.id === nudgeId) ?? null) : null;
 	const prep = prepProgress(view.prep);
@@ -217,7 +225,7 @@ export function CareerHomeView({ actionRequest }: HomeModuleViewProps) {
 				</PoText>
 			) : null}
 			{logged && loggedApp ? (
-				<AiResultCard
+				<ResultCard
 					quote={logged.quote}
 					offline={logged.offline}
 					onUndo={() => void undo()}

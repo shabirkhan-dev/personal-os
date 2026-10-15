@@ -11,7 +11,7 @@ import { type CareerData, findApp, findPrep, useCareer } from "../hooks/use-care
 import { PREP_STEPS, prepJobKey, useStartPrep } from "../hooks/use-career-jobs";
 import { dayAndTime, weekdayShort } from "../lib/career-math";
 import type { Story } from "../lib/career-model";
-import { dueBefore } from "../lib/flashcard-schedule";
+import { dueBefore } from "@/lib/flashcards/schedule";
 import { careerRoutes } from "../navigation";
 import { useCareerAi } from "../services/career-ai";
 import { CareerScreen } from "./career-screen";
@@ -26,7 +26,7 @@ import {
 	ScreenTitle,
 	Segments,
 	SectionLabel,
-} from "./career-ui";
+} from "@/components/module-ui";
 import { StorySheet } from "./story-sheet";
 
 /** The person's stories, with add and edit. */

@@ -7,7 +7,7 @@ import { addDays } from "@/lib/day";
 import { bookInterview } from "../data/career-actions";
 import { parseTime, shortDate, startOfDay, weekdayShort } from "../lib/career-math";
 import type { Application } from "../lib/career-model";
-import { FilterChip } from "./career-ui";
+import { FilterChip } from "@/components/module-ui";
 
 export type InterviewSheetProps = { visible: boolean; app: Application; onClose: () => void };
 

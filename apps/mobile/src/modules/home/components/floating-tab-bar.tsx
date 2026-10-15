@@ -17,28 +17,32 @@ const tabs: readonly Tab[] = [
 ];
 
 export type FloatingTabBarProps = {
-	active: "today" | "profile";
+	active: "today" | "insights" | "profile";
 	bottomInset: number;
 	onTodayPress?: () => void;
 	onAreasPress?: () => void;
+	/** Insights stays disabled until a module has one (Faith does). */
+	onInsightsPress?: () => void;
 	onProfilePress?: () => void;
 };
 
 /**
- * Kit v2 "Floating Tab Bar". Areas opens the module picker; Insights is shown disabled until it
- * exists. It sits just above the home indicator.
+ * Kit v2 "Floating Tab Bar". Areas opens the module picker; Insights is disabled unless the
+ * screen passes a handler. It sits just above the home indicator.
  */
 export function FloatingTabBar({
 	active: activeTab,
 	bottomInset,
 	onTodayPress,
 	onAreasPress,
+	onInsightsPress,
 	onProfilePress,
 }: FloatingTabBarProps) {
 	const { colors } = usePoTheme();
 	const handlers: Partial<Record<TabId, () => void>> = {
 		today: onTodayPress,
 		areas: onAreasPress,
+		insights: onInsightsPress,
 		profile: onProfilePress,
 	};
 

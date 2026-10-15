@@ -20,7 +20,7 @@ import {
 	ListRow,
 	ScreenTitle,
 	SectionLabel,
-} from "./career-ui";
+} from "@/components/module-ui";
 
 const ORDER: readonly Stage[] = ["offer", "interview", "applied", "saved", "closed"];
 

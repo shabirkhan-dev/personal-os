@@ -16,8 +16,10 @@ import {
 	skillPathSchema,
 } from "./career.schema";
 import { buildInterviewPrep, draftNudge, parseLine, planSkillPath, readJob } from "./career.tasks";
+import { askFaithSchema } from "./faith.schema";
+import { askFaith } from "./faith.tasks";
 
-/** Career AI, `POST /ai/career/<task>`. Signed-in only; the provider key never leaves the API. */
+/** Module AI, `POST /ai/<module>/<task>`. Signed-in only; the provider key never leaves the API. */
 export const aiRoutes = new Hono<AppEnv>()
 	.use(
 		requireAuth,
@@ -43,4 +45,7 @@ export const aiRoutes = new Hono<AppEnv>()
 	)
 	.post("/career/skill-path", validate("json", skillPathSchema), async (c) =>
 		ok(c, await planSkillPath({ config: c.get("config") }, c.req.valid("json"))),
+	)
+	.post("/faith/ask", validate("json", askFaithSchema), async (c) =>
+		ok(c, await askFaith({ config: c.get("config") }, c.req.valid("json"))),
 	);

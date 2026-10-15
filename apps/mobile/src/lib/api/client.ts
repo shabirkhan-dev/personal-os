@@ -31,7 +31,11 @@ const REQUEST_TIMEOUT_MS = 15_000;
 const apiOrigin = resolveApiOrigin(process.env.EXPO_PUBLIC_API_URL ?? defaultApiOrigin());
 const apiPrefix = "/api/v1";
 
-export type ApiRequestOptions = RequestInit & { accessToken?: string };
+export type ApiRequestOptions = RequestInit & {
+	accessToken?: string;
+	/** How long to wait before giving up; AI calls need longer than the default 15 s. */
+	timeoutMs?: number;
+};
 
 export const apiClient = {
 	get<T>(path: string, options?: ApiRequestOptions): Promise<T> {
@@ -60,14 +64,14 @@ export function getApiOrigin(): string {
 }
 
 async function request<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
-	const { accessToken, signal: outerSignal, ...init } = options;
+	const { accessToken, signal: outerSignal, timeoutMs = REQUEST_TIMEOUT_MS, ...init } = options;
 	const headers = new Headers(init.headers);
 	if (init.body) headers.set("Content-Type", "application/json");
 	if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`);
 
 	const url = `${apiOrigin}${apiPrefix}${normalizePath(path)}`;
 	const controller = new AbortController();
-	const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+	const timeout = setTimeout(() => controller.abort(), timeoutMs);
 	const onOuterAbort = () => controller.abort();
 	outerSignal?.addEventListener("abort", onOuterAbort);
 

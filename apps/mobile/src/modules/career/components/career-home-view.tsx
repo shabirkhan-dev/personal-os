@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
+import { type AiJob, useAiJobs } from "@/lib/ai-jobs/ai-jobs-store";
 import { useFinanceSummary } from "@/modules/finance";
 import { AskBar } from "@/modules/home/components/ask-bar";
 import type { HomeModuleViewProps } from "@/modules/home/lib/module-home";
@@ -14,6 +15,7 @@ import {
 } from "../data/career-actions";
 import { useCareerUi } from "../hooks/career-ui-store";
 import { useCareer, useNow } from "../hooks/use-career";
+import { prepJobKey, SKILL_PATH_JOB } from "../hooks/use-career-jobs";
 import {
 	activity,
 	appliedThisWeek,
@@ -48,6 +50,12 @@ import {
 import { NudgeSheet } from "./nudge-sheet";
 import { RunwaySheet } from "./runway-sheet";
 
+/** The subtitle for a card whose AI work is running in the background, or null. */
+function jobLine(job: AiJob | undefined, running: string): string | null {
+	if (!job) return null;
+	return job.status === "running" ? running : "AI couldn't finish · tap to retry";
+}
+
 /** What the ask bar just did, so it can be undone. */
 type Logged = {
 	quote: string;
@@ -71,6 +79,7 @@ export function CareerHomeView({ actionRequest }: HomeModuleViewProps) {
 	const [logged, setLogged] = useState<Logged | null>(null);
 	const [notice, setNotice] = useState<string | null>(null);
 	const [working, setWorking] = useState(false);
+	const jobs = useAiJobs((state) => state.jobs);
 
 	const lastRequest = useRef(actionRequest);
 	useEffect(() => {
@@ -180,6 +189,8 @@ export function CareerHomeView({ actionRequest }: HomeModuleViewProps) {
 	const loggedApp = logged ? (apps.find((app) => app.id === logged.appId) ?? null) : null;
 	const nudgeApp = nudgeId ? (apps.find((app) => app.id === nudgeId) ?? null) : null;
 	const prep = prepProgress(view.prep);
+	const pathJob: AiJob | undefined = jobs[SKILL_PATH_JOB];
+	const prepJob = view.interview ? jobs[prepJobKey(view.interview.id)] : undefined;
 	const empty = !data.loading && apps.length === 0;
 
 	return (
@@ -276,9 +287,10 @@ export function CareerHomeView({ actionRequest }: HomeModuleViewProps) {
 					icon={{ name: "Filled/Calendar", tone: "accentDefault", tile: "accentSubtle" }}
 					title={interviewTitle(view.interview.company, view.interview.interview.at)}
 					subtitle={
-						prep.total > 0
+						jobLine(prepJob, "Prep · building in the background…") ??
+						(prep.total > 0
 							? `Prep · ${prep.done} of ${prep.total} topics done`
-							: "Prep · not built yet"
+							: "Prep · not built yet")
 					}
 					value={prep.total > 0 ? `${Math.round((prep.done / prep.total) * 100)}%` : "0%"}
 					share={prep.total > 0 ? prep.done / prep.total : 0}
@@ -294,7 +306,8 @@ export function CareerHomeView({ actionRequest }: HomeModuleViewProps) {
 						: "Skill block"
 				}
 				subtitle={
-					plan ? `30 min today · ${view.streak}-day streak` : "Pick a skill, 30 minutes a day"
+					jobLine(pathJob, "Planning your path in the background…") ??
+					(plan ? `30 min today · ${view.streak}-day streak` : "Pick a skill, 30 minutes a day")
 				}
 				value={plan ? `${view.weekDone}/${plan.weeks[view.week]?.days.length ?? 5}` : "—"}
 				share={plan ? view.weekDone / Math.max(1, plan.weeks[view.week]?.days.length ?? 5) : 0}

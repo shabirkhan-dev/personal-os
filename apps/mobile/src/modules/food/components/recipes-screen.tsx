@@ -1,364 +1,241 @@
 import { textStyles } from "@personal-os/tokens";
-import { router } from "expo-router";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Icon } from "@/components/icons";
-import { HeaderButton } from "@/components/ui/header-button";
-import { PillButton } from "@/components/ui/pill-button";
+import { FilterChip } from "@/components/module-ui";
 import { PoText } from "@/components/ui/po-text";
-import { toTextStyle, usePoTheme } from "@/theme";
 import { haptics } from "@/lib/haptics";
-import { useFoodDay } from "../hooks/use-food-day";
-import { findRecipes, fitsCalories, RECIPE_FILTERS, type RecipeFilter } from "../lib/match";
-import { formatKcal, slotForTime, slotLabel } from "../lib/meals";
-import { RECIPES, type Recipe } from "../lib/recipes";
-import { openRecipe } from "../navigation";
-import { useFoodStore } from "../store/food-store";
-import { FavouriteButton } from "./favourite-button";
-import { RecipeArt } from "./recipe-art";
+import { toTextStyle, usePoTheme } from "@/theme";
+import { saveRecipeState } from "../data/food-actions";
+import { useFoodToday } from "../hooks/use-food";
+import { nextSlot, pickRecipe } from "../lib/food-math";
+import { SLOT_LABELS, SLOT_TIMES } from "../lib/food-model";
+import { RECIPES, type Recipe, type RecipeTag, TAG_LABELS } from "../lib/recipes";
+import { remaining } from "../lib/targets";
+import { foodRoutes } from "../navigation";
+import { FoodScreen } from "./food-screen";
+import { kcalText } from "./home-cards";
+import { MealImage } from "./meal-image";
 
-const searchStyle = toTextStyle(textStyles.body15);
+const inputStyle = toTextStyle(textStyles.body15);
 
-function Dot() {
-	const { colors } = usePoTheme();
-	return <View style={[styles.dot, { backgroundColor: colors.textTertiary }]} />;
-}
+type Filter = "for-you" | "saved" | RecipeTag;
 
-function FilterChips({
-	value,
-	onChange,
-}: {
-	value: RecipeFilter;
-	onChange: (value: RecipeFilter) => void;
-}) {
-	const { colors } = usePoTheme();
-	return (
-		<ScrollView
-			horizontal
-			showsHorizontalScrollIndicator={false}
-			contentContainerStyle={styles.filters}
-			style={styles.filtersScroll}
-		>
-			{RECIPE_FILTERS.map((filter) => {
-				const selected = filter.value === value;
-				return (
-					<Pressable
-						key={filter.value}
-						accessibilityRole="radio"
-						accessibilityState={{ selected }}
-						onPress={() => {
-							haptics.select();
-							onChange(filter.value);
-						}}
-						style={[
-							styles.filter,
-							selected
-								? { backgroundColor: colors.accentDefault, borderColor: colors.accentDefault }
-								: { backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-						]}
-					>
-						<PoText variant="meta13" tone={selected ? "textOnAccent" : "textSecondary"}>
-							{filter.label}
-						</PoText>
-					</Pressable>
-				);
-			})}
-		</ScrollView>
-	);
-}
+const FILTERS: readonly { id: Filter; label: string }[] = [
+	{ id: "for-you", label: "For you" },
+	{ id: "high-protein", label: TAG_LABELS["high-protein"] },
+	{ id: "bulk", label: TAG_LABELS.bulk },
+	{ id: "desi", label: TAG_LABELS.desi },
+	{ id: "quick", label: TAG_LABELS.quick },
+	{ id: "cheap", label: TAG_LABELS.cheap },
+	{ id: "saved", label: "Saved" },
+];
 
-function FeaturedCard({ recipe, fits, slot }: { recipe: Recipe; fits: boolean; slot: string }) {
+export function HeartButton({ saved, onPress }: { saved: boolean; onPress: () => void }) {
 	const { colors } = usePoTheme();
 	return (
 		<Pressable
 			accessibilityRole="button"
-			accessibilityLabel={`${recipe.name}, ${recipe.minutes} minutes, ${recipe.kcal} kcal`}
-			onPress={() => openRecipe(recipe.id)}
-			style={[
-				styles.featured,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
+			accessibilityLabel={saved ? "Remove from saved" : "Save recipe"}
+			accessibilityState={{ selected: saved }}
+			hitSlop={8}
+			onPress={() => {
+				haptics.select();
+				onPress();
+			}}
+			style={[styles.heart, { backgroundColor: colors.bgSubtle }]}
 		>
-			<RecipeArt recipe={recipe} height={200} radius={22} glyph={56} />
-			<View style={styles.featuredText}>
-				<View style={styles.titleRow}>
-					<PoText variant="title18" style={styles.grow} numberOfLines={2}>
-						{recipe.name}
-					</PoText>
-					<FavouriteButton recipeId={recipe.id} recipeName={recipe.name} />
-				</View>
-				<View style={styles.meta}>
-					<PoText variant="meta13" tone="textSecondary">
-						{recipe.minutes} min
-					</PoText>
-					<Dot />
-					<PoText variant="meta13" tone="textSecondary">
-						{recipe.kcal} kcal
-					</PoText>
-					<Dot />
-					<PoText variant="meta13" tone="textSecondary">
-						{recipe.protein} g protein
-					</PoText>
-				</View>
-				<View style={styles.meta}>
-					<View
-						style={[
-							styles.fitDot,
-							{ backgroundColor: fits ? colors.statusSuccess : colors.statusCaution },
-						]}
-					/>
-					<PoText variant="meta13" tone={fits ? "textSuccess" : "textWarning"}>
-						{fits ? `Fits your ${slot}` : "More than you have left today"}
-					</PoText>
-				</View>
-			</View>
+			<Icon name="Heart" size={18} color={saved ? colors.statusDanger : colors.textSecondary} />
 		</Pressable>
 	);
 }
 
-function GridCard({ recipe }: { recipe: Recipe }) {
-	const { colors } = usePoTheme();
-	return (
-		<Pressable
-			accessibilityRole="button"
-			accessibilityLabel={`${recipe.name}, ${recipe.minutes} minutes, ${recipe.kcal} kcal`}
-			onPress={() => openRecipe(recipe.id)}
-			style={[
-				styles.tile,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
-			<RecipeArt recipe={recipe} height={110} radius={18} glyph={32} />
-			<View style={styles.tileText}>
-				<PoText variant="row15" numberOfLines={2}>
-					{recipe.name}
-				</PoText>
-				<View style={styles.meta}>
-					<PoText variant="meta13" tone="textSecondary">
-						{recipe.minutes} min
-					</PoText>
-					<Dot />
-					<PoText variant="meta13" tone="textSecondary">
-						{recipe.kcal} kcal
-					</PoText>
-				</View>
-			</View>
-		</Pressable>
-	);
-}
-
-function pairs<T>(items: readonly T[]): T[][] {
-	const rows: T[][] = [];
-	for (let index = 0; index < items.length; index += 2) rows.push(items.slice(index, index + 2));
-	return rows;
-}
-
-/** Food · Recipes (Figma 181:1232): bundled recipes, filtered and ranked for what is left today. */
+/** Recipes: a pick for the next meal from what's left today, then the rest to browse. */
 export function RecipesScreen() {
 	const { colors } = usePoTheme();
-	const insets = useSafeAreaInsets();
-	const day = useFoodDay();
-	const saved = useFoodStore((state) => state.data.favourites);
-	const [filter, setFilter] = useState<RecipeFilter>("for-you");
+	const { data, eaten, now } = useFoodToday();
+	const [filter, setFilter] = useState<Filter>("for-you");
 	const [searching, setSearching] = useState(false);
-	const [search, setSearch] = useState("");
+	const [query, setQuery] = useState("");
+	const left = remaining(data.settings.targets, eaten);
+	const slot = nextSlot(now.getHours() * 60 + now.getMinutes(), SLOT_TIMES);
+	const featured = pickRecipe(slot, left);
+	const saved = new Set(data.recipes.filter((state) => state.saved).map((state) => state.id));
+	const words = query.trim().toLowerCase();
+	const shown = RECIPES.filter((recipe) => {
+		if (words) {
+			return (
+				recipe.name.toLowerCase().includes(words) ||
+				recipe.ingredients.some((item) => item.name.toLowerCase().includes(words))
+			);
+		}
+		if (filter === "for-you") return recipe.id !== featured?.id;
+		if (filter === "saved") return saved.has(recipe.id);
+		return recipe.tags.includes(filter);
+	});
 
-	const slot = slotForTime(day.now);
-	const slotName = slotLabel(slot).toLowerCase();
-	const results = useMemo(
-		() => findRecipes(RECIPES, { filter, search, left: day.left, slot, saved }),
-		[filter, search, day.left, slot, saved],
-	);
-	const [featured, ...rest] = results;
+	const toggleSaved = (recipe: Recipe) => {
+		const state = data.recipes.find((item) => item.id === recipe.id);
+		saveRecipeState({
+			id: recipe.id,
+			saved: !saved.has(recipe.id),
+			atHome: state?.atHome ?? [],
+		}).catch((error: unknown) => console.error("[food] could not save the recipe", error));
+	};
+
+	const showFeatured = featured && filter === "for-you" && !query.trim();
 
 	return (
-		<View style={[styles.screen, { backgroundColor: colors.bgApp }]}>
-			<ScrollView
-				keyboardShouldPersistTaps="handled"
-				contentContainerStyle={[
-					styles.content,
-					{ paddingTop: insets.top + 12, paddingBottom: insets.bottom + 32 },
-				]}
-			>
-				<View style={styles.header}>
-					<HeaderButton accessibilityLabel="Back" onPress={() => router.back()} />
-					<View
-						style={[
-							styles.titlePill,
-							{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-						]}
-					>
-						<Icon name="Food" size={16} color={colors.textSecondary} />
-						<PoText variant="text14Medium" accessibilityRole="header">
-							Recipes
-						</PoText>
-					</View>
-					<HeaderButton
-						icon={searching ? "Line/Close" : "Search"}
-						accessibilityLabel={searching ? "Close search" : "Search recipes"}
-						onPress={() => {
-							if (searching) setSearch("");
-							setSearching((value) => !value);
-						}}
+		<FoodScreen
+			label="Recipes"
+			action={{
+				icon: "Search",
+				label: "Search recipes",
+				onPress: () => setSearching((value) => !value),
+			}}
+		>
+			{searching ? (
+				<View style={[styles.search, { backgroundColor: colors.bgSubtle }]}>
+					<Icon name="Search" size={16} color={colors.textSecondary} />
+					<TextInput
+						value={query}
+						onChangeText={setQuery}
+						placeholder="Dish or ingredient"
+						placeholderTextColor={colors.textTertiary}
+						style={[inputStyle, styles.flex, { color: colors.textPrimary }]}
 					/>
 				</View>
+			) : null}
+			<ScrollView
+				horizontal
+				showsHorizontalScrollIndicator={false}
+				contentContainerStyle={styles.filters}
+			>
+				{FILTERS.map((item) => (
+					<FilterChip
+						key={item.id}
+						label={item.label}
+						selected={filter === item.id}
+						onPress={() => setFilter(item.id)}
+					/>
+				))}
+			</ScrollView>
 
-				{searching ? (
-					<View style={[styles.search, { backgroundColor: colors.bgSubtle }]}>
-						<Icon name="Search" size={16} color={colors.textSecondary} />
-						<TextInput
-							value={search}
-							onChangeText={setSearch}
-							placeholder="Search by dish or ingredient"
-							placeholderTextColor={colors.textTertiary}
-							returnKeyType="search"
-							accessibilityLabel="Search recipes"
-							selectionColor={colors.accentDefault}
-							style={[searchStyle, styles.searchInput, { color: colors.textPrimary }]}
-						/>
-					</View>
-				) : null}
-
-				<FilterChips value={filter} onChange={setFilter} />
-
-				{filter === "for-you" && !search ? (
-					<View style={styles.pick}>
-						<Icon name="Filled/Sparkle" size={16} color={colors.statusViolet} />
-						<PoText variant="meta13" tone="textSecondary" style={styles.grow}>
-							{day.left.kcal > 0 ? (
-								<>
-									Picked for {slotName}:{" "}
-									<PoText variant="meta13">{Math.round(day.left.protein)} g protein</PoText> and{" "}
-									<PoText variant="meta13">{formatKcal(day.left.kcal)} kcal</PoText> left today.
-								</>
-							) : (
-								"You've reached today's calories, so the lightest dishes come first."
-							)}
+			{showFeatured ? (
+				<>
+					<View style={styles.tip}>
+						<Icon name="Filled/Sparkle" size={16} color={colors.accentDefault} />
+						<PoText variant="meta13" tone="textSecondary" style={styles.flex}>
+							{`Picked for ${SLOT_LABELS[slot].toLowerCase()}: `}
+							<PoText variant="meta13">{`${Math.round(left.protein)} g protein`}</PoText>
+							{" and "}
+							<PoText variant="meta13">{`${kcalText(left.kcal)} kcal`}</PoText>
+							{" left today."}
 						</PoText>
 					</View>
-				) : null}
-
-				{featured ? (
-					<FeaturedCard recipe={featured} fits={fitsCalories(featured, day.left)} slot={slotName} />
-				) : (
-					<View
+					<Pressable
+						accessibilityRole="button"
+						onPress={() => foodRoutes.recipe(featured.id)}
 						style={[
-							styles.empty,
+							styles.featured,
 							{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
 						]}
 					>
-						<PoText variant="row15">
-							{filter === "saved" && !search ? "No saved recipes yet" : "No recipes match"}
-						</PoText>
-						<PoText variant="meta13" tone="textSecondary" style={styles.centerText}>
-							{filter === "saved" && !search
-								? "Tap the heart on a recipe to keep it here."
-								: "Try another word or filter."}
-						</PoText>
-						<PillButton
-							variant="secondary"
-							label="Show all recipes"
-							onPress={() => {
-								setSearch("");
-								setFilter("for-you");
-							}}
-						/>
-					</View>
-				)}
-
-				{rest.length > 0 ? (
-					<>
-						<View style={styles.sectionHead}>
-							<PoText variant="eyebrow11" tone="textTertiary">
-								{filter === "for-you" ? "More for you" : "More"}
-							</PoText>
+						<MealImage recipeId={featured.id} hero size={200} fill radius={22} />
+						<View style={styles.featuredText}>
+							<View style={styles.featuredHead}>
+								<PoText variant="title18" style={styles.flex}>
+									{featured.name}
+								</PoText>
+								<HeartButton saved={saved.has(featured.id)} onPress={() => toggleSaved(featured)} />
+							</View>
 							<PoText variant="meta13" tone="textSecondary">
-								{results.length} recipes
+								{`${featured.minutes} min  •  ${featured.kcal} kcal  •  ${featured.protein} g protein`}
 							</PoText>
-						</View>
-						<View style={styles.grid}>
-							{pairs(rest).map((row) => (
-								<View key={row.map((recipe) => recipe.id).join("+")} style={styles.gridRow}>
-									{row.map((recipe) => (
-										<GridCard key={recipe.id} recipe={recipe} />
-									))}
-									{row.length === 1 ? <View style={styles.grow} /> : null}
+							{featured.kcal <= left.kcal + 150 ? (
+								<View style={styles.fits}>
+									<View style={[styles.dot, { backgroundColor: colors.statusSuccess }]} />
+									<PoText variant="meta13" tone="textSuccess">
+										{`Fits your ${SLOT_LABELS[slot].toLowerCase()}`}
+									</PoText>
 								</View>
-							))}
+							) : null}
 						</View>
-					</>
-				) : null}
-			</ScrollView>
-		</View>
+					</Pressable>
+				</>
+			) : null}
+
+			<View style={styles.sectionHead}>
+				<PoText variant="eyebrow11" tone="textTertiary">
+					{query.trim()
+						? `${shown.length} found`
+						: showFeatured
+							? "More for you"
+							: `${shown.length} recipes`}
+				</PoText>
+			</View>
+			{shown.length === 0 ? (
+				<PoText variant="body15" tone="textSecondary" style={styles.none}>
+					{filter === "saved"
+						? "Tap the heart on a recipe to keep it here."
+						: "Nothing matches yet."}
+				</PoText>
+			) : (
+				<View style={styles.grid}>
+					{shown.map((recipe) => (
+						<Pressable
+							key={recipe.id}
+							accessibilityRole="button"
+							onPress={() => foodRoutes.recipe(recipe.id)}
+							style={[
+								styles.tile,
+								{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
+							]}
+						>
+							<MealImage recipeId={recipe.id} size={110} fill radius={18} />
+							<View style={styles.tileText}>
+								<PoText variant="row15" numberOfLines={1}>
+									{recipe.name}
+								</PoText>
+								<PoText variant="meta13" tone="textSecondary">
+									{`${recipe.minutes} min  •  ${recipe.kcal} kcal`}
+								</PoText>
+							</View>
+						</Pressable>
+					))}
+				</View>
+			)}
+		</FoodScreen>
 	);
 }
 
 const styles = StyleSheet.create({
-	screen: { flex: 1 },
-	content: { gap: 16, paddingHorizontal: 16 },
-	header: {
+	flex: { flex: 1 },
+	search: {
 		flexDirection: "row",
+		alignItems: "center",
+		gap: 8,
+		height: 48,
+		paddingHorizontal: 14,
+		borderRadius: 24,
+	},
+	filters: { gap: 8 },
+	tip: { flexDirection: "row", gap: 10, paddingHorizontal: 6 },
+	featured: { padding: 8, borderRadius: 28, borderWidth: 1 },
+	featuredText: { gap: 6, padding: 10 },
+	featuredHead: { flexDirection: "row", alignItems: "center", gap: 8 },
+	fits: { flexDirection: "row", alignItems: "center", gap: 6 },
+	dot: { width: 6, height: 6, borderRadius: 3 },
+	heart: {
+		width: 36,
+		height: 36,
+		borderRadius: 18,
 		alignItems: "center",
 		justifyContent: "center",
-		gap: 8,
-		paddingBottom: 12,
 	},
-	titlePill: {
-		height: 40,
-		flexDirection: "row",
-		alignItems: "center",
-		gap: 8,
-		paddingHorizontal: 14,
-		borderRadius: 20,
-		borderWidth: 1,
-	},
-	search: {
-		height: 48,
-		flexDirection: "row",
-		alignItems: "center",
-		gap: 10,
-		paddingHorizontal: 16,
-		borderRadius: 24,
-	},
-	searchInput: { flex: 1, paddingVertical: 0 },
-	filtersScroll: { marginHorizontal: -16 },
-	filters: { gap: 8, paddingHorizontal: 16 },
-	filter: { paddingHorizontal: 14, paddingVertical: 9, borderRadius: 20, borderWidth: 1 },
-	pick: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 4 },
-	grow: { flex: 1 },
-	featured: {
-		gap: 12,
-		paddingTop: 8,
-		paddingHorizontal: 8,
-		paddingBottom: 16,
-		borderRadius: 28,
-		borderWidth: 1,
-	},
-	featuredText: { gap: 6, paddingHorizontal: 10 },
-	titleRow: { flexDirection: "row", alignItems: "center", gap: 12 },
-	meta: { flexDirection: "row", alignItems: "center", gap: 10 },
-	dot: { width: 3, height: 3, borderRadius: 1.5 },
-	fitDot: { width: 6, height: 6, borderRadius: 3, marginRight: -4 },
-	sectionHead: {
-		flexDirection: "row",
-		justifyContent: "space-between",
-		alignItems: "center",
-		paddingTop: 4,
-		paddingHorizontal: 4,
-	},
-	grid: { gap: 10 },
-	gridRow: { flexDirection: "row", gap: 10 },
-	tile: {
-		flex: 1,
-		gap: 10,
-		paddingTop: 6,
-		paddingHorizontal: 6,
-		paddingBottom: 12,
-		borderRadius: 24,
-		borderWidth: 1,
-	},
-	tileText: { gap: 3, paddingHorizontal: 6 },
-	empty: { alignItems: "center", gap: 10, padding: 24, borderRadius: 28, borderWidth: 1 },
-	centerText: { textAlign: "center" },
+	sectionHead: { paddingHorizontal: 6, paddingTop: 4 },
+	none: { paddingHorizontal: 6 },
+	grid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
+	tile: { width: "48.5%", padding: 6, borderRadius: 24, borderWidth: 1 },
+	tileText: { gap: 2, padding: 8 },
 });

@@ -10,24 +10,24 @@
 	"observability": { "enabled": true },
 	"dev": { "port": 4000, "ip": "0.0.0.0" },
 
-	// Plain settings. Secrets (JWT_SECRET, AUTH_TOKEN_SECRET, RESEND_API_KEY, OPENAI_API_KEY,
-	// R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY) are set with `wrangler secret put` and, locally,
-	// in `.dev.vars` (copy `.dev.vars.example`).
+	// Only generic settings live here; the repo is public. Values for your own deployment
+	// (AUTH_EMAIL_FROM, OPENAI_BASE_URL, OPENAI_MODEL, R2_ACCOUNT_ID, R2_PUBLIC_URL) are set in
+	// the dashboard (Worker → Settings → Variables and Secrets); `keep_vars` stops a deploy from
+	// deleting them. Secrets (JWT_SECRET, AUTH_TOKEN_SECRET, RESEND_API_KEY, OPENAI_API_KEY,
+	// R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY) go there too, or `wrangler secret put`. Locally,
+	// everything comes from `.dev.vars` (copy `.dev.vars.example`).
+	"keep_vars": true,
 	"vars": {
 		"ENVIRONMENT": "production",
 		"APP_NAME": "Personal OS",
-		"AUTH_EMAIL_FROM": "Personal OS <auth@rabtx.dev>",
 		"AI_PROVIDER": "openai_compatible",
-		"OPENAI_BASE_URL": "https://api.deepseek.com",
-		"OPENAI_MODEL": "deepseek-flash",
-		"R2_ACCOUNT_ID": "2d8491daffdf5977ab85d2fb0edda3c5",
 		"R2_BUCKET_NAME": "personal-os-assets",
-		"R2_PUBLIC_URL": "https://assets.rabtx.dev",
 	},
 
-	// Postgres (Neon) through Hyperdrive. Create it once:
-	//   bunx wrangler hyperdrive create personal-os-db --connection-string="<Neon URL>"
-	// and paste the id. `localConnectionString` is what `wrangler dev` uses.
+	// Postgres (Neon) through Hyperdrive. Create it once (dashboard → Hyperdrive, or
+	//   bunx wrangler hyperdrive create personal-os-db --connection-string="<Neon URL>")
+	// and paste the id. The id is not a credential: the connection string lives in Cloudflare,
+	// and the id is only usable from inside your own account. Forks put their own id here. `localConnectionString` is what `wrangler dev` uses.
 	"hyperdrive": [
 		{
 			"binding": "HYPERDRIVE",

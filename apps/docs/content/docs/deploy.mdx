@@ -53,19 +53,29 @@ Paste the printed `id` into `hyperdrive[0].id` in `apps/api/wrangler.jsonc`.
    but is rate limited.
 3. **Upload credentials:** R2 → Manage API tokens → Create API token, permission *Object Read &
    Write*, limited to this bucket. Keep the Access Key ID and Secret Access Key.
-4. In `apps/api/wrangler.jsonc` → `vars`, set `R2_ACCOUNT_ID` (your account id, on the R2 overview
-   page) and `R2_PUBLIC_URL` (the public domain, no trailing slash).
+4. Set the variables `R2_ACCOUNT_ID` (your account id, on the R2 overview page) and
+   `R2_PUBLIC_URL` (the public domain, no trailing slash) as described below.
 
 The app uploads straight to R2 with a presigned URL; the API only checks and saves the key. No
 bucket CORS rule is needed for the app (CORS only applies to browsers).
 
 ### Settings and secrets
 
-In `wrangler.jsonc` → `vars`, set `AUTH_EMAIL_FROM` to an address on a domain verified in
-[Resend](https://resend.com), for example `Personal OS <auth@your-domain.com>`. The AI provider is
-DeepSeek: `OPENAI_BASE_URL` is `https://api.deepseek.com` and `OPENAI_MODEL` is `deepseek-flash`
-(DeepSeek V4.1 Flash), with the DeepSeek key in the `OPENAI_API_KEY` secret. Any
-OpenAI-compatible provider works by changing those two values.
+The repo is public, so `wrangler.jsonc` holds only generic settings. Values for your own
+deployment are dashboard **variables** (Worker → Settings → Variables and Secrets → Add, type
+*Text*); `keep_vars` in `wrangler.jsonc` stops a deploy from deleting them:
+
+| Variable | Example |
+|---|---|
+| `AUTH_EMAIL_FROM` | `Personal OS <auth@your-domain.com>`, on a domain verified in [Resend](https://resend.com) |
+| `OPENAI_BASE_URL` | `https://api.deepseek.com` |
+| `OPENAI_MODEL` | `deepseek-flash` (DeepSeek V4.1 Flash) |
+| `R2_ACCOUNT_ID` | your Cloudflare account id |
+| `R2_PUBLIC_URL` | `https://assets.your-domain.com` |
+
+The AI key goes in the `OPENAI_API_KEY` secret whatever the provider; any OpenAI-compatible
+provider works by changing the two `OPENAI_*` variables. In production the Worker refuses to
+start while `AUTH_EMAIL_FROM` is still an `example.com` address.
 
 Then the secrets, each prompted for its value:
 
@@ -117,7 +127,7 @@ launch-day sign-ups (`/api/notify`, Workers KV). It does not call the API.
 1. **Workers & Pages → Create → Workers → Import a repository**, this repo, branch `main`.
 2. Root directory `apps/web`, build command `bun run build`, deploy command `npx wrangler deploy`.
 3. Create a KV namespace and put its id in `apps/web/wrangler.jsonc` (`WAITLIST` binding).
-4. Add a custom domain, for example `personalos.rabtx.dev`.
+4. Add a custom domain, for example `personalos.your-domain.com`.
 
 Full steps: `apps/web/README.md`.
 
@@ -137,7 +147,7 @@ Full steps: `apps/web/README.md`.
 ## Checklist
 
 - [ ] Migrations applied to Neon
-- [ ] Hyperdrive id in `wrangler.jsonc`
+- [ ] Hyperdrive id in `wrangler.jsonc`; deployment variables set in the dashboard
 - [ ] R2 bucket with a public domain; `R2_ACCOUNT_ID`, `R2_PUBLIC_URL` and the two R2 secrets set
 - [ ] `AUTH_EMAIL_FROM` on a verified Resend domain; `RESEND_API_KEY` set
 - [ ] `JWT_SECRET`, `AUTH_TOKEN_SECRET`, `OPENAI_API_KEY` set

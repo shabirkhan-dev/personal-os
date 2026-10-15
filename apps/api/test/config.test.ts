@@ -7,13 +7,14 @@ import { testApp } from "./support";
 describe("config", () => {
 	it("requires real secrets and an email key in production", () => {
 		expect(() => parseConfig({ ENVIRONMENT: "production" })).toThrow(
-			/JWT_SECRET.*AUTH_TOKEN_SECRET.*RESEND_API_KEY/,
+			/JWT_SECRET.*AUTH_TOKEN_SECRET.*RESEND_API_KEY.*AUTH_EMAIL_FROM/,
 		);
 		const config = parseConfig({
 			ENVIRONMENT: "production",
 			JWT_SECRET: "j".repeat(40),
 			AUTH_TOKEN_SECRET: "t".repeat(40),
 			RESEND_API_KEY: "re_123",
+			AUTH_EMAIL_FROM: "Personal OS <auth@personal-os.test>",
 		});
 		expect(config.auth.exposeCodes).toBe(false);
 		expect(config.r2).toBeUndefined();

@@ -38,8 +38,8 @@ pins the v2 runtime 0.2.5. The root `overrides` held `expo` at 58.0.7, so the ap
 
 Changed: `expo` 58.0.7 → 58.0.10 (root override and app), every Expo native package aligned to
 `expo/bundledNativeModules.json` (0 mismatches; `expo install --check` cannot reach Expo's API
-from the sandbox), `expo-modules-core` now 58.0.18. Hyperdrive id
-`037e090d79784cac818deb6acb9177e2` in `apps/api/wrangler.jsonc`.
+from the sandbox), `expo-modules-core` now 58.0.18. Hyperdrive id in
+`apps/api/wrangler.jsonc`.
 
 Validation: mobile typecheck clean, 207 tests pass, `expo export --platform android` bundles
 (2210 modules), lint clean. Not verified here: the Gradle release build itself (needs EAS).

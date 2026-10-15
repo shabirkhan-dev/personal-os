@@ -40,6 +40,9 @@ const envSchema = z
 			require("AUTH_TOKEN_SECRET", "must be set in production");
 		}
 		if (!env.RESEND_API_KEY) require("RESEND_API_KEY", "required in production");
+		if (env.AUTH_EMAIL_FROM.includes("@example.com")) {
+			require("AUTH_EMAIL_FROM", "set it to an address on your Resend-verified domain");
+		}
 	});
 
 /** Everything the code reads about its environment, typed and checked. */

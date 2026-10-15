@@ -33,7 +33,7 @@ bun --cwd=apps/web run build   # static site in apps/web/out
    `wrangler.jsonc`, paste the id and push. Until then `/api/notify` answers 503 and the form asks
    people to try again.
 4. Custom domain: Worker **Settings → Domains & Routes → Add → Custom domain**, for example
-   `personalos.rabtx.dev` (the `rabtx.dev` zone is already on Cloudflare).
+   `personalos.your-domain.com` (a zone already on Cloudflare).
 
 Try the Worker locally after a build: `bunx wrangler dev` (uses a local KV store).
 Read sign-ups with `bunx wrangler kv key list --namespace-id <id>` (keys are `email:<address>`).

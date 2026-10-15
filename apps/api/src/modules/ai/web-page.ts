@@ -11,6 +11,14 @@ const unreadable = (message: string) => new AppError("JOB_LINK_UNREADABLE", { me
  * this keeps it that way if the code ever runs elsewhere).
  */
 export async function fetchPageText(url: string, fetcher: typeof fetch = fetch): Promise<string> {
+	return (await fetchPage(url, fetcher)).text;
+}
+
+/** A public page's text and its share image (`og:image`), for product links. */
+export async function fetchPage(
+	url: string,
+	fetcher: typeof fetch = fetch,
+): Promise<{ text: string; image: string | null }> {
 	let current = url;
 	for (let hop = 0; hop <= maxRedirects; hop += 1) {
 		assertPublicUrl(current);
@@ -33,11 +41,28 @@ export async function fetchPageText(url: string, fetcher: typeof fetch = fetch):
 		}
 		if (response.status >= 400) throw unreadable(`The page answered ${response.status}.`);
 		// oxlint-disable-next-line eslint/no-await-in-loop -- the loop ends here
-		const text = htmlToText(await readLimited(response));
+		const html = await readLimited(response);
+		const text = htmlToText(html);
 		if (text.length < minText) throw unreadable("The page needs a sign-in or blocks reading.");
-		return text.slice(0, maxText);
+		return { text: text.slice(0, maxText), image: shareImage(html, current) };
 	}
 	throw unreadable("The page redirected too many times.");
+}
+
+/** The page's `og:image` (or `twitter:image`) as an absolute https URL, or null. */
+export function shareImage(html: string, base: string): string | null {
+	const tag =
+		/<meta[^>]+(?:property|name)=["'](?:og:image(?::secure_url)?|twitter:image)["'][^>]*>/i.exec(
+			html,
+		)?.[0];
+	const content = tag ? /content=["']([^"']+)["']/i.exec(tag)?.[1] : undefined;
+	if (!content) return null;
+	try {
+		const absolute = new URL(content.replace(/&amp;/g, "&"), base);
+		return absolute.protocol === "https:" ? absolute.toString() : null;
+	} catch {
+		return null;
+	}
 }
 
 export function assertPublicUrl(value: string): void {

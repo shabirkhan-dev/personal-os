@@ -27,6 +27,10 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
   that follows the time of day, prayer logging and consistency, Qibla compass, Tasbih, Quran
   recitation timer, ayah and dua cards read aloud, Zakat, Grow (challenges, paths, flashcards,
   notes) and Insights, plus questions answered by the Faith AI.
+- Fashion module: wardrobe with photos (starter photos, camera, gallery or a product link read by
+  AI), today's look picked on the phone for the weather (Open-Meteo) with layer advice, a watch and
+  a scent, a rotating week plan, piece detail with cost per wear, wishlist with a buying pause,
+  watches and scents, and Insights.
 - Voice in and out on the phone behind one swappable layer (`src/lib/voice`), and Talk to OS
   (`personalos://listen`), which opens listening and hands the line to the right module.
 - Long AI work runs in the background with a working card, so no screen waits on it.
@@ -47,7 +51,8 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
 
 Roughly in order; each item becomes board cards.
 
-1. **Remaining modules**: Daily life and Fashion, on the record store.
+1. **Remaining modules**: Daily life, on the record store.
+1. **Piece photos to R2** so a wardrobe syncs with its photos (they stay on the phone for now).
 1. **"Hey OS" wake phrase**: an on-device wake word in an Android foreground service (iOS does not
    allow always-on listening), opening Talk to OS.
 2. **Move Finance, Workout, Skincare and Food onto the record store** so everything is synced.

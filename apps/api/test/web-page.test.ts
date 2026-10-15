@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { AppError } from "@/core/app-error";
-import { assertPublicUrl, fetchPageText, htmlToText } from "@/modules/ai/web-page";
+import { assertPublicUrl, fetchPageText, htmlToText, shareImage } from "@/modules/ai/web-page";
 
 const page = (body: string, init: ResponseInit = {}) => new Response(body, init);
 const longText = "Senior TypeScript Engineer at Tessera. ".repeat(10);
@@ -58,5 +58,23 @@ describe("fetchPageText", () => {
 		).rejects.toMatchObject({
 			message: "The page needs a sign-in or blocks reading.",
 		});
+	});
+});
+
+describe("shareImage", () => {
+	it("finds og:image and makes it absolute", () => {
+		expect(
+			shareImage(
+				'<meta property="og:image" content="/img/shirt.jpg?a=1&amp;b=2">',
+				"https://shop.example.com/p/1",
+			),
+		).toBe("https://shop.example.com/img/shirt.jpg?a=1&b=2");
+		expect(
+			shareImage(
+				'<meta content="http://x.example.com/a.jpg" name="twitter:image">',
+				"https://a.example.com",
+			),
+		).toBeNull();
+		expect(shareImage("<p>nothing</p>", "https://a.example.com")).toBeNull();
 	});
 });

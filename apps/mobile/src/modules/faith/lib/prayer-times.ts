@@ -1,4 +1,7 @@
 import { CalculationMethod, Coordinates, Madhab, PrayerTimes, Qibla } from "adhan";
+import type { Place } from "@/lib/location/current-place";
+
+export type { Place };
 
 /**
  * Prayer times on the phone, from the person's location (adhan) or the times they typed. Nothing
@@ -32,8 +35,6 @@ export const METHOD_LABELS: Record<MethodId, string> = {
 };
 
 export type AsrSchool = "standard" | "hanafi";
-
-export type Place = { latitude: number; longitude: number; name: string };
 
 /** Everything the times depend on. `manual` wins over the calculation for the prayers it sets. */
 export type TimesSource = {

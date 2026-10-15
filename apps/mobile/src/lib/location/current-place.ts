@@ -1,9 +1,11 @@
 import * as Location from "expo-location";
 import { Platform } from "react-native";
-import type { Place } from "../lib/prayer-times";
+
+/** Where the person is: prayer times, the Qibla and the weather all start from it. */
+export type Place = { latitude: number; longitude: number; name: string };
 
 /**
- * The person's place for prayer times and the Qibla, asked only when they tap Use my location.
+ * The person's place, asked only when they tap Use my location.
  *
  * Every native call has a time limit: on Android, a GPS fix indoors or the system geocoder can
  * wait forever without failing, which left the screen stuck with no error. A coarse network fix

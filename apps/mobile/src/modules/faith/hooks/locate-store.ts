@@ -6,7 +6,7 @@ import {
 	LOCATE_FAILURE_MESSAGE,
 	LOCATE_STAGE_LABEL,
 	type LocateStage,
-} from "../services/location";
+} from "@/lib/location/current-place";
 import { requestReminderPermission } from "../services/prayer-reminders";
 
 type LocateState = {

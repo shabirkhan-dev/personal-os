@@ -15,7 +15,7 @@ import { useHomeView } from "../store/home-view";
 import { AskBar } from "./ask-bar";
 
 /** Modules whose Home takes a line from Talk to OS. */
-const LISTENERS: ReadonlySet<ModuleId> = new Set<ModuleId>(["faith", "career"]);
+const LISTENERS: ReadonlySet<ModuleId> = new Set<ModuleId>(["faith", "career", "fashion"]);
 
 /**
  * Talk to OS (`personalos://listen`): opens straight into listening, works out which module the
@@ -61,7 +61,8 @@ export function TalkScreen() {
 					Talk to OS
 				</PoText>
 				<PoText variant="body15" tone="textSecondary">
-					Say it like you'd type it: “prayed fajr”, “when is maghrib”, “applied to Acme, frontend”.
+					Say it like you'd type it: “prayed fajr”, “what should I wear”, “applied to Acme,
+					frontend”.
 				</PoText>
 				<AskBar
 					suggestions={[]}
@@ -86,7 +87,7 @@ export function TalkScreen() {
 						</View>
 						{choices.length === 0 ? (
 							<PoText variant="meta13" tone="textTertiary">
-								Turn on Faith or Career in Profile to log by voice.
+								Turn on Faith, Career or Fashion in Profile to log by voice.
 							</PoText>
 						) : null}
 					</View>

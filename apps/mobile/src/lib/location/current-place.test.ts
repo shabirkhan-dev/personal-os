@@ -24,7 +24,7 @@ mock.module("expo-location", () => ({
 	reverseGeocodeAsync: () => phone.geocode(),
 }));
 
-const { currentPlace } = await import("./location");
+const { currentPlace } = await import("./current-place");
 
 /** Moves fake time on a second at a time, letting promise callbacks run in between. */
 async function passSeconds(seconds: number): Promise<void> {

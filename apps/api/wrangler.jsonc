@@ -16,7 +16,7 @@
 	"vars": {
 		"ENVIRONMENT": "production",
 		"APP_NAME": "Personal OS",
-		"AUTH_EMAIL_FROM": "Personal OS <auth@example.com>",
+		"AUTH_EMAIL_FROM": "Personal OS <auth@rabtx.dev>",
 		"AI_PROVIDER": "openai_compatible",
 		"OPENAI_BASE_URL": "https://api.deepseek.com",
 		"OPENAI_MODEL": "deepseek-flash",

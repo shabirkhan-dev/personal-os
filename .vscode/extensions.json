@@ -2,8 +2,6 @@
 	"recommendations": [
 		"oxc.oxc-vscode",
 		"bradlc.vscode-tailwindcss",
-		"ms-python.python",
-		"charliermarsh.ruff",
 		"timonwong.shellcheck",
 		"mkhl.shfmt"
 	],

@@ -52,7 +52,7 @@ fi
 # Reject any uppercase letter in the subject line
 if [[ "$FIRST" =~ [A-Z] ]]; then
     msg "commit-msg: error - subject must be all lowercase (no uppercase letters)"
-    msg "example: feat(auth): add nestjs login and shared ui forms"
+    msg "example: feat(auth): add email code sign-in"
     exit 1
 fi
 
@@ -64,7 +64,7 @@ if ! [[ "$FIRST" =~ $CONV_RE ]]; then
     msg "commit-msg: error - subject must use conventional commits"
     msg "format:   <type>(optional-scope): <description>"
     msg "types:    feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert"
-    msg "example:  feat(auth): add nestjs login and shared ui forms"
+    msg "example:  feat(auth): add email code sign-in"
     exit 1
 fi
 

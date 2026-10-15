@@ -10,7 +10,6 @@
   ],
   "scripts": {
     "dev": "turbo run dev --continue --concurrency=12",
-    "dev:ai": "bun --cwd=apps/ai-api run dev",
     "dev:all": "turbo run dev --continue --concurrency=12",
     "build": "turbo run build",
     "start": "turbo run start",
@@ -20,7 +19,7 @@
     "format": "oxfmt && bun run scripts:format",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
-    "test:coverage": "(cd apps/nest-api && bun run test:cov) && (cd apps/mobile && bun run test)",
+    "test:coverage": "bun run test",
     "architecture:check": "bash scripts/architecture/check-boundaries.sh",
     "naming:check": "bash scripts/architecture/check-naming.sh",
     "ci:lint": "bun run lint && bun run architecture:check",

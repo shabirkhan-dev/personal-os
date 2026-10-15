@@ -1,1 +1,0 @@
-ALTER TYPE "public"."auth_challenge_purpose" ADD VALUE 'email_sign_in' BEFORE 'mfa_login';

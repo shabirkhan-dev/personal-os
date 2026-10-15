@@ -5,8 +5,7 @@
 	"editor.insertSpaces": false,
 	"editor.rulers": [100],
 	"editor.codeActionsOnSave": {
-		"quickfix.oxc": "explicit",
-		"source.fixAll.ruff": "explicit"
+		"quickfix.oxc": "explicit"
 	},
 
 	// —— Language-specific formatters (oxfmt via the oxc extension) ——
@@ -28,12 +27,6 @@
 	"[jsonc]": {
 		"editor.defaultFormatter": "oxc.oxc-vscode"
 	},
-
-	// —— Python (apps/ai-api: ruff check, ruff format) ——
-	"[python]": {
-		"editor.defaultFormatter": "charliermarsh.ruff"
-	},
-	"ruff.lint.run": "onSave",
 
 	// —— Bash (scripts/git-hooks, scripts/architecture: ShellCheck, shfmt -i 4) ——
 	"[shellscript]": {

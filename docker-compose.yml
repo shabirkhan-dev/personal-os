@@ -1,12 +1,29 @@
-# Project entrypoint: Postgres + Nest API (web app disabled; Personal OS is mobile-only).
-# Requires Docker Compose v2.20+ (include). From repo root:
-#   cp env.docker.example .env && docker compose up -d --build
-#
-# Compose file format: no top-level `version` key (obsolete since Compose Spec).
+# Local Postgres for the API (`wrangler dev`) and its tests. The API itself runs on Workers,
+# locally through `bun --cwd=apps/api run dev`. From the repo root:
+#   docker compose up -d
+# Databases: personal_os (dev) and personal_os_api_test (tests), user/password personal_os.
 
 name: personal-os
 
-include:
-  - path: docker/compose/postgres.yml
-  - path: docker/compose/nest-api.yml
-  - path: docker/compose/ai-api.yml
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: personal_os
+      POSTGRES_PASSWORD: personal_os
+      POSTGRES_DB: personal_os
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres-init.sql:/docker-entrypoint-initdb.d/10-test-database.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U personal_os -d personal_os"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  postgres_data:

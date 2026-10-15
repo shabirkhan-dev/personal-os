@@ -12,11 +12,8 @@ node_modules
 **/target
 **/.expo
 
-# Python: apps/ai-api ships a 74MB .venv that the docs build never touches
-**/.venv
-**/__pycache__
-**/.ruff_cache
-**/.pytest_cache
+# Local Worker state (apps/api)
+**/.wrangler
 
 # Test and tooling artifacts
 **/coverage

@@ -1,0 +1,154 @@
+import { eq } from "drizzle-orm";
+import { describe, expect, it } from "vitest";
+
+import { signInCodes, users } from "@/db/schema";
+import { db, signIn, testApp } from "./support";
+
+const { call } = testApp();
+const newEmail = () => `Person-${crypto.randomUUID()}@Example.com`;
+
+describe("email-code sign-in", () => {
+	it("creates the account on first use, with the given name, and signs in", async () => {
+		const email = newEmail();
+		const sent = await call<{ data: { accepted: boolean; developmentCode: string } }>(
+			"POST",
+			"/auth/email-code/request",
+			{ body: { email, name: "Shabir" } },
+		);
+		expect(sent.status).toBe(202);
+		expect(sent.json?.data.developmentCode).toMatch(/^\d{6}$/);
+		// No account until the code is used.
+		expect(await db.select().from(users).where(eq(users.email, email.toLowerCase()))).toHaveLength(
+			0,
+		);
+
+		const session = await call<{ data: { user: { email: string; displayName: string } } }>(
+			"POST",
+			"/auth/email-code/verify",
+			{ body: { email, code: sent.json?.data.developmentCode } },
+		);
+		expect(session.status).toBe(200);
+		expect(session.json?.data.user).toMatchObject({
+			email: email.toLowerCase(),
+			displayName: "Shabir",
+		});
+	});
+
+	it("uses each code once and only the newest code", async () => {
+		const email = newEmail();
+		const first = await call<{ data: { developmentCode: string } }>(
+			"POST",
+			"/auth/email-code/request",
+			{
+				body: { email },
+			},
+		);
+		const second = await call<{ data: { developmentCode: string } }>(
+			"POST",
+			"/auth/email-code/request",
+			{
+				body: { email },
+			},
+		);
+		const oldCode = first.json?.data.developmentCode;
+		const newCode = second.json?.data.developmentCode;
+		if (oldCode !== newCode) {
+			const stale = await call("POST", "/auth/email-code/verify", {
+				body: { email, code: oldCode },
+			});
+			expect(stale.status).toBe(401);
+		}
+		const ok = await call("POST", "/auth/email-code/verify", { body: { email, code: newCode } });
+		expect(ok.status).toBe(200);
+		const again = await call("POST", "/auth/email-code/verify", { body: { email, code: newCode } });
+		expect(again.status).toBe(401);
+		expect(again.json).toMatchObject({ success: false, code: "AUTH_CODE_INVALID" });
+	});
+
+	it("locks a code after five wrong tries", async () => {
+		const email = newEmail();
+		const sent = await call<{ data: { developmentCode: string } }>(
+			"POST",
+			"/auth/email-code/request",
+			{
+				body: { email },
+			},
+		);
+		const code = sent.json?.data.developmentCode ?? "";
+		const wrong = code === "123456" ? "654321" : "123456";
+		for (let attempt = 0; attempt < 5; attempt += 1) {
+			// oxlint-disable-next-line eslint/no-await-in-loop -- attempts are sequential
+			await call("POST", "/auth/email-code/verify", { body: { email, code: wrong } });
+		}
+		const [row] = await db
+			.select()
+			.from(signInCodes)
+			.where(eq(signInCodes.email, email.toLowerCase()));
+		expect(row?.attempts).toBe(5);
+		const right = await call("POST", "/auth/email-code/verify", { body: { email, code } });
+		expect(right.status).toBe(401);
+	});
+
+	it("rejects a malformed body with the issues", async () => {
+		const response = await call("POST", "/auth/email-code/verify", {
+			body: { email: "nope", code: "12" },
+		});
+		expect(response.status).toBe(400);
+		expect(response.json).toMatchObject({
+			success: false,
+			code: "VALIDATION_FAILED",
+			errors: expect.arrayContaining([expect.objectContaining({ path: "email" })]),
+		});
+	});
+});
+
+describe("sessions", () => {
+	it("rotates the refresh token and ends the session when an old one is reused", async () => {
+		const session = await signIn(call);
+		const rotated = await call<{ data: { refreshToken: string; accessToken: string } }>(
+			"POST",
+			"/auth/refresh",
+			{ body: { refreshToken: session.refreshToken } },
+		);
+		expect(rotated.status).toBe(200);
+		const next = rotated.json?.data.refreshToken ?? "";
+		expect(next).not.toBe(session.refreshToken);
+
+		// The old token again: treated as stolen, so the whole session ends.
+		const reused = await call("POST", "/auth/refresh", {
+			body: { refreshToken: session.refreshToken },
+		});
+		expect(reused.status).toBe(401);
+		const afterTheft = await call("POST", "/auth/refresh", { body: { refreshToken: next } });
+		expect(afterTheft.status).toBe(401);
+		const me = await call("GET", "/users/me", { token: rotated.json?.data.accessToken });
+		expect(me.status).toBe(401);
+	});
+
+	it("serves /users/me with a live session and stops after logout", async () => {
+		const session = await signIn(call);
+		const me = await call<{ data: { id: string; avatarUrl: null } }>("GET", "/users/me", {
+			token: session.accessToken,
+		});
+		expect(me.status).toBe(200);
+		expect(me.json?.data).toMatchObject({ id: session.user.id, avatarUrl: null });
+
+		const out = await call("POST", "/auth/logout", {
+			body: { refreshToken: session.refreshToken },
+		});
+		expect(out.status).toBe(204);
+		expect((await call("GET", "/users/me", { token: session.accessToken })).status).toBe(401);
+		expect(
+			(await call("POST", "/auth/refresh", { body: { refreshToken: session.refreshToken } }))
+				.status,
+		).toBe(401);
+	});
+
+	it("answers missing or bad tokens with the standard envelope", async () => {
+		const missing = await call("GET", "/users/me");
+		expect(missing.json).toMatchObject({ success: false, statusCode: 401, code: "AUTH_REQUIRED" });
+		const bad = await call("GET", "/users/me", { token: "not-a-jwt" });
+		expect(bad.json).toMatchObject({ code: "AUTH_ACCESS_TOKEN_INVALID", path: "/api/v1/users/me" });
+		expect(bad.json?.requestId).toMatch(/^req_/);
+	});
+});

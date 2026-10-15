@@ -1,0 +1,15 @@
+{
+	"extends": "../../packages/typescript-config/base.json",
+	"compilerOptions": {
+		"target": "ES2022",
+		"lib": ["ES2023"],
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"types": ["@cloudflare/workers-types", "node"],
+		"allowJs": false,
+		"incremental": false,
+		"noUncheckedIndexedAccess": true,
+		"paths": { "@/*": ["./src/*"] }
+	},
+	"include": ["src", "test", "vitest.config.ts", "drizzle.config.ts"]
+}

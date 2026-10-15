@@ -1,0 +1,48 @@
+{
+	// Personal OS API on Cloudflare Workers. Deploy with Workers Builds (root directory
+	// `apps/api`, deploy command `npx wrangler deploy`) or `bun --cwd=apps/api run deploy`.
+	// Setup, secrets and the one-time Hyperdrive and R2 steps: /docs/deploy.
+	"$schema": "../../node_modules/wrangler/config-schema.json",
+	"name": "personal-os-api",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-10-01",
+	"compatibility_flags": ["nodejs_compat"],
+	"observability": { "enabled": true },
+	"dev": { "port": 4000, "ip": "0.0.0.0" },
+
+	// Plain settings. Secrets (JWT_SECRET, AUTH_TOKEN_SECRET, RESEND_API_KEY, OPENAI_API_KEY,
+	// R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY) are set with `wrangler secret put` and, locally,
+	// in `.dev.vars` (copy `.dev.vars.example`).
+	"vars": {
+		"ENVIRONMENT": "production",
+		"APP_NAME": "Personal OS",
+		"AUTH_EMAIL_FROM": "Personal OS <auth@example.com>",
+		"AI_PROVIDER": "openai_compatible",
+		"OPENAI_BASE_URL": "https://api.openai.com/v1",
+		"OPENAI_MODEL": "gpt-4o-mini",
+		"R2_ACCOUNT_ID": "",
+		"R2_BUCKET_NAME": "personal-os-assets",
+		"R2_PUBLIC_URL": "",
+	},
+
+	// Postgres (Neon) through Hyperdrive. Create it once:
+	//   bunx wrangler hyperdrive create personal-os-db --connection-string="<Neon URL>"
+	// and paste the id. `localConnectionString` is what `wrangler dev` uses.
+	"hyperdrive": [
+		{
+			"binding": "HYPERDRIVE",
+			"id": "00000000000000000000000000000000",
+			"localConnectionString": "postgresql://personal_os:personal_os@localhost:5433/personal_os",
+		},
+	],
+
+	// Images and other assets. The app uploads straight to this bucket with a presigned URL.
+	"r2_buckets": [{ "binding": "ASSETS", "bucket_name": "personal-os-assets" }],
+
+	// Per-key limits (IP or user). namespace_id is any number unique within the account.
+	"ratelimits": [
+		{ "name": "AUTH_LIMITER", "namespace_id": "4101", "simple": { "limit": 10, "period": 60 } },
+		{ "name": "AI_LIMITER", "namespace_id": "4102", "simple": { "limit": 20, "period": 60 } },
+		{ "name": "SYNC_LIMITER", "namespace_id": "4103", "simple": { "limit": 60, "period": 60 } },
+	],
+}

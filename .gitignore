@@ -84,14 +84,6 @@ apps/c/build/
 .just-*
 
 # scripts – build/cache
-# python
-__pycache__/
-*.py[cod]
-.venv/
-venv/
-.mypy_cache/
-.ruff_cache/
-.pytest_cache/
 # lua (if any)
 *.luac
 
@@ -103,3 +95,7 @@ venv/
 
 # root workspace generated / temp (remove from .gitignore to track)
 root.ts
+
+# Cloudflare Workers (apps/api)
+.dev.vars
+.wrangler/

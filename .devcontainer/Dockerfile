@@ -1,17 +1,14 @@
-# Dev container: Bun, Python (scripts), Bash tooling.
+# Dev container: Bun and Bash tooling.
 FROM mcr.microsoft.com/devcontainers/base:ubuntu-22.04
 
-ARG BUN_VERSION=1.3.13
+ARG BUN_VERSION=1.4.2
 
-# Shell/Python tooling used by repo scripts (no C/Lua toolchain).
+# Shell tooling used by repo scripts.
 RUN apt-get update && apt-get install -y --no-install-recommends \
 	curl \
 	git \
 	ca-certificates \
 	shellcheck \
-	python3 \
-	python3-pip \
-	python3-venv \
 	&& rm -rf /var/lib/apt/lists/*
 
 USER vscode
@@ -24,9 +21,6 @@ RUN curl -fsSL https://bun.sh/install | bash -s "bun-v${BUN_VERSION}" \
 ENV BUN_INSTALL="/home/vscode/.bun" \
 	PATH="/home/vscode/.bun/bin:${PATH}"
 
-
-# Ruff for apps/ai-api (uv also installs it into the project venv)
-RUN pip install --user ruff 2>/dev/null || true
 
 # shfmt for bash scripts
 RUN set -e; \

@@ -1,6 +1,6 @@
 ---
 title: Deploy
-description: Landing page on Cloudflare Workers, docs on Vercel, Nest API on Render with Neon Postgres.
+description: Nest API and AI service on Render with Neon Postgres, the app on EAS, the landing page on Cloudflare Workers and docs on Vercel.
 ---
 
 Where each piece of Personal OS runs in production:
@@ -11,6 +11,7 @@ Where each piece of Personal OS runs in production:
 | `apps/web` | [Cloudflare Workers](https://workers.cloudflare.com) | Next.js static export served as Worker assets + `/api/notify` |
 | `apps/docs` | [Vercel](https://vercel.com) | Separate Vercel project |
 | `apps/nest-api` | [Render](https://render.com) | Docker Blueprint + Neon `DATABASE_URL` |
+| `apps/ai-api` | [Render](https://render.com) | Same Blueprint; only the Nest API calls it |
 | Database | [Neon](https://neon.tech) | Serverless Postgres (TLS auto-detected) |
 
 Repo files: `apps/web/README.md`, `apps/docs/vercel.json`, root `render.yaml`.
@@ -21,35 +22,51 @@ Repo files: `apps/web/README.md`, `apps/docs/vercel.json`, root `render.yaml`.
 2. Copy the **pooled** connection string (includes `sslmode=require`).
 3. You will paste it into Render as `DATABASE_URL`. Nest enables TLS automatically for `neon.tech` URLs.
 
-## 2) Nest API on Render
+## 2) Nest API and AI service on Render
 
-1. In Render, **New → Blueprint** and connect this GitHub repo (or create a Web Service with Docker).
-2. Use `render.yaml` at the repo root (dockerfile `apps/nest-api/Dockerfile`, context `.`).
-3. Fill **sync: false** env vars in the dashboard:
+The root `render.yaml` creates both services: `personal-os-api` (Nest) and `personal-os-ai`
+(FastAPI). The phone only talks to the API; the API calls the AI service with a shared token that
+Render generates on the AI service and copies to the API.
 
-| Variable | Example |
-|----------|---------|
-| `DATABASE_URL` | Neon pooled URL |
-| `RESEND_API_KEY` | `re_...` from [Resend](https://resend.com) |
-| `AUTH_EMAIL_FROM` | `Personal OS <noreply@your-domain.com>` |
-| `WEB_APP_URL` | Base URL for links in auth emails (magic links); any HTTPS origin you own |
-| `CORS_ORIGIN` | Browser origins allowed to call the API; the mobile app does not need one |
-| `WEBAUTHN_RP_ID` | Passkey relying-party hostname; only needed once passkeys are used |
-| `WEBAUTHN_ORIGIN` | Passkey origin, `https://` + the hostname above |
+1. In Render, **New → Blueprint**, connect this GitHub repo and pick `render.yaml`.
+2. Fill the **sync: false** values when Render asks:
 
-Blueprint already sets `COOKIE_SAME_SITE=none`, `TRUST_PROXY=true`, and generates `JWT_SECRET`, `AUTH_TOKEN_SECRET`, and `AI_SERVICE_TOKEN`.
+| Service | Variable | Value |
+|---------|----------|-------|
+| API | `DATABASE_URL` | Neon pooled URL |
+| API | `RESEND_API_KEY` | `re_...` from [Resend](https://resend.com); sign-in codes go out by email |
+| API | `AUTH_EMAIL_FROM` | `Personal OS <noreply@your-domain.com>` (a verified Resend domain) |
+| API | `AI_API_URL` | The AI service's URL, e.g. `https://personal-os-ai.onrender.com`. Leave it empty on the first run and fill it once the AI service exists |
+| AI | `OPENAI_API_KEY` | Your provider key |
+| API | `WEB_APP_URL`, `CORS_ORIGIN`, `WEBAUTHN_*` | Only for browser clients and passkeys; leave empty for now |
 
-4. Deploy and confirm health:
+The Blueprint generates `JWT_SECRET`, `AUTH_TOKEN_SECRET` and `AI_SERVICE_TOKEN`, and sets the
+AI service to `AI_PROVIDER=openai_compatible` with `gpt-4o-mini`. Any OpenAI-compatible provider
+works: change `OPENAI_BASE_URL` and `OPENAI_MODEL` on the AI service.
+
+3. Confirm both are up:
 
 ```bash
-curl -sS https://<your-service>.onrender.com/api/v1/health
+curl -sS https://<api>.onrender.com/api/v1/health
+curl -sS https://<ai>.onrender.com/api/v1/health   # "provider": "openai_compatible"
 ```
 
-Migrations run on container start when `RUN_MIGRATIONS=true` (default in the Blueprint).
+Migrations run on container start when `RUN_MIGRATIONS=true` (set in the Blueprint). Changing a
+key never needs an app rebuild: update it in Render and the service restarts.
 
-**Note:** Free Render services spin down when idle; the first request can take ~30s. AI assist still needs a hosted `apps/ai-api` (`AI_API_URL`) later — Nest will boot without it.
+**Note:** free Render services sleep when idle; the first request takes about 30 s to wake them,
+and the app gives up after 15 s, so the first try after a quiet spell can fail once.
 
-## 3) Landing page on Cloudflare Workers
+## 3) The app on EAS
+
+1. On expo.dev, open the project → **Settings → GitHub**, connect this repo, base directory
+   `apps/mobile`.
+2. **Environment variables**: add `EXPO_PUBLIC_NEST_API_URL=https://<api>.onrender.com` (no
+   path) to every environment. It is baked in at build time, so add it before building.
+3. Build from the GitHub tab, or `bunx eas-cli build --profile preview --platform android` for a
+   standalone APK that talks to the hosted API.
+
+## 4) Landing page on Cloudflare Workers
 
 `apps/web` is a static export (`out/`) served as Worker static assets, plus a small Worker for
 launch-day sign-ups (`/api/notify`, Workers KV). It does not call Nest.
@@ -61,7 +78,7 @@ launch-day sign-ups (`/api/notify`, Workers KV). It does not call Nest.
 
 Full steps: `apps/web/README.md`.
 
-## 4) Docs on Vercel
+## 5) Docs on Vercel
 
 1. **Add another project** from the same repo.
 2. **Root Directory:** `apps/docs`.
@@ -86,6 +103,7 @@ none today: the landing page and docs never call the API.
 - [ ] Neon `DATABASE_URL` on Render
 - [ ] Resend key + verified from-address
 - [ ] Nest health returns OK
+- [ ] AI health returns `openai_compatible`, and `AI_API_URL` on the API points at it
 - [ ] Mobile production build sets `EXPO_PUBLIC_NEST_API_URL` to the Render API URL
 - [ ] Email-code sign-in works on a device
 - [ ] Landing page live on its custom domain, waitlist KV bound

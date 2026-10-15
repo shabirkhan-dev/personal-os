@@ -4,6 +4,7 @@ import { Alert, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { careerHome, useCareerStatus } from "@/modules/career";
 import { faithHome, useFaithStatus } from "@/modules/faith";
+import { fashionHome, useFashionStatus } from "@/modules/fashion";
 import { foodHome, useFoodStatus } from "@/modules/food";
 import { financeHome, useFinanceStatus, useFinanceSummary } from "@/modules/finance";
 import { AskBar } from "@/modules/home/components/ask-bar";
@@ -40,6 +41,7 @@ const moduleHomes: Partial<Record<ModuleId, HomeModule>> = {
 	skincare: skincareHome,
 	food: foodHome,
 	faith: faithHome,
+	fashion: fashionHome,
 };
 
 /** Re-renders once a minute so "Now" and "Next · in …" stay current. */
@@ -83,6 +85,7 @@ export default function TodayScreen() {
 		skincare: skincareHome.useHero(),
 		food: foodHome.useHero(),
 		faith: faithHome.useHero(),
+		fashion: fashionHome.useHero(),
 	};
 	const liveStatus: Partial<Record<ModuleId, string>> = {
 		career: useCareerStatus(),
@@ -91,6 +94,7 @@ export default function TodayScreen() {
 		skincare: useSkincareStatus(),
 		food: useFoodStatus(),
 		faith: useFaithStatus(),
+		fashion: useFashionStatus(),
 	};
 	const modules = moduleStatuses(plan.input, items);
 	for (const item of modules) item.status = liveStatus[item.id] ?? item.status;
@@ -254,6 +258,9 @@ function OverviewBody({ period, modules, amountsHidden, onOpen, upcomingList }: 
 			: null,
 		modules.includes("skincare") ? { label: "Skincare", onPress: () => onOpen("skincare") } : null,
 		modules.includes("faith") ? { label: "Log a prayer", onPress: () => onOpen("faith") } : null,
+		modules.includes("fashion")
+			? { label: "What to wear", onPress: () => onOpen("fashion") }
+			: null,
 	].filter((item): item is { label: string; onPress: () => void } => item !== null);
 	const talk = { label: "Talk to OS", onPress: () => router.push("/listen") };
 

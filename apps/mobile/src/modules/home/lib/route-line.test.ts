@@ -9,6 +9,7 @@ describe("routeLine", () => {
 		expect(routeLine("applied to tessera, frontend", all)).toBe("career");
 		expect(routeLine("had dal for lunch", all)).toBe("food");
 		expect(routeLine("hello there", all)).toBeNull();
+		expect(routeLine("what should I wear tonight", [...all, "fashion"])).toBe("fashion");
 	});
 
 	it("skips modules the person turned off", () => {

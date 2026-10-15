@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 import { Footer, ListCard, ListRow, SectionLabel } from "@/components/module-ui";
 import { ChoiceChips } from "@/components/ui/choice-chips";
 import { PillButton } from "@/components/ui/pill-button";
@@ -101,6 +101,8 @@ export function RemindersSheet({
 	rows,
 	onClose,
 	onChange,
+	locating,
+	locateError,
 	onChangeLocation,
 	onEditTimes,
 }: {
@@ -109,6 +111,9 @@ export function RemindersSheet({
 	rows: readonly PrayerRow[];
 	onClose: () => void;
 	onChange: (settings: FaithSettings) => void;
+	/** "Finding where you are…" while locating. */
+	locating: string | null;
+	locateError: string | null;
 	onChangeLocation: () => void;
 	onEditTimes: () => void;
 }) {
@@ -124,8 +129,9 @@ export function RemindersSheet({
 			footer={
 				<Footer>
 					<PillButton
-						label={settings.place ? "Change location" : "Use my location"}
+						label={locating ?? (settings.place ? "Change location" : "Use my location")}
 						variant="secondary"
+						disabled={locating !== null}
 						onPress={onChangeLocation}
 						style={styles.flex}
 					/>
@@ -139,6 +145,7 @@ export function RemindersSheet({
 					{source}
 				</PoText>
 			</View>
+			<LocateStatus locating={locating} error={locateError} />
 			<ListCard>
 				{rows.map((row, index) => (
 					<ToggleRow
@@ -220,13 +227,16 @@ export function PrayerSetupSheet({
 	visible,
 	settings,
 	locating,
+	locateError,
 	onClose,
 	onLocate,
 	onSave,
 }: {
 	visible: boolean;
 	settings: FaithSettings;
-	locating: boolean;
+	/** "Finding where you are…" while locating. */
+	locating: string | null;
+	locateError: string | null;
 	onClose: () => void;
 	onLocate: () => void;
 	onSave: (settings: FaithSettings) => void;
@@ -318,13 +328,12 @@ export function PrayerSetupSheet({
 				{settings.place ? `Worked out for ${settings.place.name}` : "From your location"}
 			</SectionLabel>
 			<PillButton
-				label={
-					locating ? "Finding you…" : settings.place ? "Update my location" : "Use my location"
-				}
+				label={locating ?? (settings.place ? "Update my location" : "Use my location")}
 				variant="secondary"
-				disabled={locating}
+				disabled={locating !== null}
 				onPress={onLocate}
 			/>
+			<LocateStatus locating={locating} error={locateError} />
 			<ChoiceChips
 				label="Method"
 				options={METHODS.map((id) => ({ value: id, label: METHOD_LABELS[id] }))}
@@ -375,7 +384,34 @@ export function PrayerSetupSheet({
 	);
 }
 
+/** A spinner with the current step while locating, or the reason it failed. */
+export function LocateStatus({
+	locating,
+	error,
+}: {
+	locating: string | null;
+	error: string | null;
+}) {
+	const { colors } = usePoTheme();
+	if (locating) {
+		return (
+			<View style={styles.status} accessibilityLiveRegion="polite">
+				<ActivityIndicator size="small" color={colors.accentDefault} />
+				<PoText variant="meta13" tone="textSecondary">
+					{locating}
+				</PoText>
+			</View>
+		);
+	}
+	return error ? (
+		<PoText variant="meta13" tone="textDanger" accessibilityLiveRegion="polite">
+			{error}
+		</PoText>
+	) : null;
+}
+
 const styles = StyleSheet.create({
+	status: { flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 6 },
 	flex: { flex: 1 },
 	source: { flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 6 },
 	liveDot: { width: 8, height: 8, borderRadius: 4 },

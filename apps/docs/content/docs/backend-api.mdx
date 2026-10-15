@@ -47,6 +47,7 @@ table, `apps/api/src/config/messages.ts`.
 | `POST` | `/sync` | bearer | Push local record changes, pull changes after a cursor |
 | `POST` | `/ai/career/<task>` | bearer | Career AI: `read-job`, `parse-line`, `nudge`, `interview-prep`, `skill-path` |
 | `POST` | `/ai/faith/ask` | bearer | Faith AI: a question answered in the person's tradition |
+| `POST` | `/ai/fashion/<task>` | bearer | Fashion AI: `read-piece`, `ask` |
 
 Rate limits (per IP, or per user when signed in, per minute): auth routes 10, `/sync` 60, AI 20.
 Over the limit: `429` `RATE_LIMITED`. When the Worker's settings are incomplete, every route
@@ -153,7 +154,8 @@ about a second after they happen.
 Collections in use: `career-applications`, `career-preps`, `career-stories`, `career-flashcards`,
 `career-skill-plans`, `career-skill-sessions`, `career-settings`, and for Faith `faith-settings`,
 `faith-prayer-logs`, `faith-tasbih`, `faith-recitations`, `faith-zakat`, `faith-zakat-payments`,
-`faith-resources`, `faith-challenge`, `faith-paths`, `faith-cards`. Names are part of the contract.
+`faith-resources`, `faith-challenge`, `faith-paths`, `faith-cards`, and for Fashion `fashion-pieces`,
+`fashion-wears`, `fashion-plans`, `fashion-wishes`, `fashion-settings`. Names are part of the contract.
 
 ### Career AI
 
@@ -183,12 +185,26 @@ person's own words ("Shia Ismaili", "Hanafi"); the model follows it, says where 
 and points rulings on the person's own case to a scholar. Prayer times, the Qibla, logging and
 everything else in Faith work on the phone without the API.
 
+### Fashion AI
+
+`POST /ai/fashion/<task>`:
+
+| Task | Body | Returns |
+| --- | --- | --- |
+| `read-piece` | `{ url }` or `{ text }` (≤ 2,000 chars) | `{ name, category, colour, size, fit, fabric, price, care, imageUrl }` |
+| `ask` | `{ question, today, wardrobe?[{ name, category, colour, lastWornDaysAgo }], weather? }` | `{ answer, outfit[], followUps[] }` |
+
+`category` is `top`, `layer`, `bottom`, `shoes`, `watch`, `scent` or `extra`. For a link,
+`imageUrl` is the page's `og:image` (https only). `outfit` names pieces from the wardrobe sent.
+Outfits, the week plan and the weather (Open-Meteo, called from the phone) work without the API.
+
 ## Changelog
 
 Record every public API change, newest first, so consumers can see what moved.
 
 | Date | Change | Breaking |
 | --- | --- | --- |
+| 2026-10-16 | Added `POST /ai/fashion/read-piece` and `POST /ai/fashion/ask` | No |
 | 2026-10-15 | Added `POST /ai/faith/ask`; `faith` is a valid onboarding module and up to 8 modules can be chosen | No |
 | 2026-10-15 | Moved to one Hono API on Cloudflare Workers. Sign-in paths are now `/auth/email-code/*`; `GET /auth/me` is gone (use `/users/me`); the user is `{ id, email, displayName, avatarUrl, createdAt }`; the refresh token is always in the body; avatars upload to R2 through `POST /assets/uploads` (`POST /users/me/avatar` removed); Career AI fields are camelCase; validation errors are `VALIDATION_FAILED`; password, magic-link, TOTP, passkey, Google and `/ai/assist` routes removed | Yes, the app moves in the same change |
 | 2026-10-15 | Added `POST /sync` and `POST /ai/career/:task`; `career` is a valid onboarding module | No |

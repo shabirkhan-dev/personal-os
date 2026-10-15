@@ -192,3 +192,45 @@ describe("Faith AI", () => {
 		expect(sent.messages[0]?.content).toContain("Faith assistant");
 	});
 });
+
+describe("Fashion AI", () => {
+	it("reads a typed piece with the mock provider", async () => {
+		const response = await mockApp.call("POST", "/ai/fashion/read-piece", {
+			token,
+			body: { text: "olive overshirt, cotton twill, size M, 6500" },
+		});
+		expect(response.json?.data).toEqual({
+			name: "Olive overshirt",
+			category: "layer",
+			colour: "olive",
+			size: "M",
+			fit: "",
+			fabric: "cotton twill",
+			price: 6500,
+			care: "",
+			imageUrl: null,
+		});
+	});
+
+	it("asks the model as the Fashion assistant and trims the outfit", async () => {
+		const spy = provider(
+			JSON.stringify({ answer: " Olive layers. ", outfit: ["A", "B", "C", "D", "E", "F", "G"] }),
+		);
+		const response = await realApp.call("POST", "/ai/fashion/ask", {
+			token,
+			body: {
+				question: "What should I wear?",
+				today: "2026-10-16",
+				wardrobe: [{ name: "Olive overshirt", category: "layer", colour: "olive" }],
+				weather: { now: 18, high: 19, low: 10, summary: "clear" },
+			},
+		});
+		expect(response.json?.data).toEqual({
+			answer: "Olive layers.",
+			outfit: ["A", "B", "C", "D", "E", "F"],
+			followUps: [],
+		});
+		const [, init] = spy.mock.calls[0] as unknown as [string, RequestInit];
+		expect(JSON.parse(String(init.body)).messages[0].content).toContain("Fashion assistant");
+	});
+});

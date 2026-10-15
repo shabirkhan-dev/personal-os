@@ -8,17 +8,19 @@ import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
 import { haptics } from "@/lib/haptics";
 import { usePoTheme } from "@/theme";
-import { saveSettings } from "../data/faith-actions";
 import { useFaith } from "../hooks/use-faith";
 import { compassPoint, distanceToMakkah, qiblaBearing, turnBetween } from "../lib/prayer-times";
 import { useFaithUi } from "../hooks/faith-ui-store";
-import { currentPlace } from "../services/location";
+import { locateLabel, useLocate } from "../hooks/locate-store";
+import { LocateStatus } from "./faith-sheets";
 import { faithRoutes } from "../navigation";
 import { FaithScreen } from "./faith-screen";
 
 const SIZE = 320;
 const CENTER = SIZE / 2;
 const ALIGNED_DEGREES = 5;
+/** Without a reading by then, the compass is treated as missing (the bearing is still shown). */
+const COMPASS_WAIT_MS = 6000;
 const TICKS = Array.from({ length: 72 }, (_, step) => step * 5);
 
 type Heading = { degrees: number; accuracy: number };
@@ -32,10 +34,22 @@ function useHeading(enabled: boolean): { heading: Heading | null; unavailable: b
 		if (!enabled || Platform.OS === "web") return;
 		let subscription: Location.LocationSubscription | null = null;
 		let cancelled = false;
-		Location.watchHeadingAsync((reading) => {
-			const degrees = reading.trueHeading >= 0 ? reading.trueHeading : reading.magHeading;
-			setHeading({ degrees, accuracy: reading.accuracy });
-		})
+		let heard = false;
+		const wait = setTimeout(() => {
+			if (!heard) setUnavailable(true);
+		}, COMPASS_WAIT_MS);
+		// The heading needs the location permission on Android; asking again is instant once given.
+		Location.requestForegroundPermissionsAsync()
+			.then((permission) => {
+				if (!permission.granted) throw new Error("location permission denied");
+				return Location.watchHeadingAsync((reading) => {
+					const degrees = reading.trueHeading >= 0 ? reading.trueHeading : reading.magHeading;
+					if (degrees < 0) return;
+					heard = true;
+					setUnavailable(false);
+					setHeading({ degrees, accuracy: reading.accuracy });
+				});
+			})
 			.then((sub) => {
 				if (cancelled) sub.remove();
 				else subscription = sub;
@@ -46,6 +60,7 @@ function useHeading(enabled: boolean): { heading: Heading | null; unavailable: b
 			});
 		return () => {
 			cancelled = true;
+			clearTimeout(wait);
 			subscription?.remove();
 		};
 	}, [enabled]);
@@ -60,8 +75,8 @@ export function QiblaScreen() {
 	const openSheet = useFaithUi((state) => state.openSheet);
 	const place = settings.place;
 	const { heading, unavailable } = useHeading(place !== null);
-	const [locating, setLocating] = useState(false);
-	const [error, setError] = useState<string | null>(null);
+	const locating = locateLabel(useLocate((state) => state.stage));
+	const error = useLocate((state) => state.error);
 
 	const bearing = place ? qiblaBearing(place) : 0;
 	const turn = heading ? turnBetween(heading.degrees, bearing) : null;
@@ -87,23 +102,7 @@ export function QiblaScreen() {
 	const dialStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${rotation.value}deg` }] }));
 
 	const locate = async () => {
-		setLocating(true);
-		setError(null);
-		try {
-			const result = await currentPlace();
-			if (result.ok) await saveSettings({ ...settings, place: result.place });
-			else
-				setError(
-					result.reason === "denied"
-						? "Location is off for Personal OS. Allow it in Settings to find the Qibla."
-						: "Couldn't find you just now. Try again.",
-				);
-		} catch (cause) {
-			console.error("[faith] could not save the location", cause);
-			setError("Couldn't save on this phone. Try again.");
-		} finally {
-			setLocating(false);
-		}
+		if (await useLocate.getState().locate(settings)) haptics.success();
 	};
 
 	if (!place) {
@@ -115,16 +114,12 @@ export function QiblaScreen() {
 					title="Find the Qibla"
 					body="I need to know where you are once. It stays on this phone and also sets your prayer times."
 				>
-					{error ? (
-						<PoText variant="meta13" tone="textDanger">
-							{error}
-						</PoText>
-					) : null}
 					<PillButton
-						label={locating ? "Finding you…" : "Use my location"}
-						disabled={locating}
+						label={locating ?? "Use my location"}
+						disabled={locating !== null}
 						onPress={() => void locate()}
 					/>
+					<LocateStatus locating={locating} error={error} />
 				</EmptyCard>
 			</FaithScreen>
 		);
@@ -306,7 +301,7 @@ export function QiblaScreen() {
 			) : (
 				<PoText variant="text14" tone="textSecondary" style={styles.centerText}>
 					{unavailable
-						? `This phone has no compass. Face ${Math.round(bearing)}° from north (${compassPoint(bearing)}).`
+						? `The compass isn't answering. Face ${Math.round(bearing)}° from north (${compassPoint(bearing)}), or tap Calibrate.`
 						: "Hold your phone flat, away from metal and magnets."}
 				</PoText>
 			)}

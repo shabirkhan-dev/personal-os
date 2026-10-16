@@ -1,13 +1,18 @@
 import { dayKey } from "@/lib/day";
-import type { WorkoutSession, WorkoutType } from "./types";
+import type { Session, Sport } from "./training-model";
 
 /** Compendium-style MET values for a typical effort. */
-const MET: Record<WorkoutType, number> = {
-	strength: 5,
-	run: 9.8,
+const MET: Record<Sport, number> = {
+	calisthenics: 5,
+	running: 9.8,
+	boxing: 7.8,
+	yoga: 2.5,
+	football: 7,
+	volleyball: 4,
+	gym: 5,
+	swimming: 7,
 	walk: 3.5,
 	cycle: 7.5,
-	yoga: 2.5,
 	other: 4.5,
 };
 
@@ -19,24 +24,26 @@ function runMet(distanceKm: number, durationMin: number): number {
 
 /** kcal = MET × weight (kg) × hours, rounded. */
 export function estimateKcal(
-	type: WorkoutType,
+	type: Sport,
 	durationMin: number,
 	weightKg: number,
 	distanceKm?: number,
 ): number {
 	if (durationMin <= 0 || weightKg <= 0) return 0;
 	const met =
-		type === "run" && distanceKm && distanceKm > 0 ? runMet(distanceKm, durationMin) : MET[type];
+		type === "running" && distanceKm && distanceKm > 0
+			? runMet(distanceKm, durationMin)
+			: MET[type];
 	return Math.round(met * weightKg * (durationMin / 60));
 }
 
 /** Sessions that started on the same local day as `day`. */
-export function sessionsOn(sessions: readonly WorkoutSession[], day: Date): WorkoutSession[] {
+export function sessionsOn(sessions: readonly Session[], day: Date): Session[] {
 	const key = dayKey(day);
 	return sessions.filter((session) => dayKey(new Date(session.startedAt)) === key);
 }
 
-export function kcalOn(sessions: readonly WorkoutSession[], day: Date): number {
+export function kcalOn(sessions: readonly Session[], day: Date): number {
 	return sessionsOn(sessions, day).reduce((sum, session) => sum + session.kcal, 0);
 }
 

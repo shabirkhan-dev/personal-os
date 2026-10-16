@@ -1,86 +1,135 @@
-import { useEffect, useState } from "react";
-import { ChoiceChips } from "@/components/ui/choice-chips";
+import { useState } from "react";
+import { StyleSheet, View } from "react-native";
+import { FilterChip } from "@/components/module-ui";
+import { PoText } from "@/components/ui/po-text";
 import { Sheet } from "@/components/ui/sheet";
 import { TextField } from "@/components/ui/text-field";
 import { haptics } from "@/lib/haptics";
-import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
-import { estimateKcal } from "../lib/kcal";
-import { formatKm } from "../lib/parse-log";
-import { typeLabel, type WorkoutType } from "../lib/types";
-import { addSession } from "../store/workout-store";
-import { readNumber, typeOptions } from "./fields";
+import { logSession } from "../data/training-actions";
+import { type Feel, FEELS, type Session, SPORT_LABELS, type Sport } from "../lib/training-model";
 
-export type LogDraft = { type: WorkoutType; distanceKm?: number; durationMin?: number | null };
+const SPORTS: readonly Sport[] = [
+	"calisthenics",
+	"running",
+	"boxing",
+	"yoga",
+	"walk",
+	"football",
+	"volleyball",
+	"gym",
+	"cycle",
+	"swimming",
+];
 
-export type LogSheetProps = { visible: boolean; draft: LogDraft; onClose: () => void };
-
-/** Quick log of a finished workout (a run by default): distance, minutes, calories. */
-export function LogSheet({ visible, draft, onClose }: LogSheetProps) {
-	const weightKg = useOnboardingStore((state) => state.weightKg);
-	const [type, setType] = useState<WorkoutType>(draft.type);
-	const [distanceText, setDistanceText] = useState("");
-	const [minutesText, setMinutesText] = useState("");
-	const [kcalText, setKcalText] = useState("");
-
-	useEffect(() => {
-		if (!visible) return;
-		setType(draft.type);
-		setDistanceText(draft.distanceKm ? formatKm(draft.distanceKm) : "");
-		setMinutesText(draft.durationMin ? String(draft.durationMin) : "");
-		setKcalText("");
-	}, [visible, draft]);
-
-	const distance = readNumber(distanceText) ?? undefined;
-	const minutes = readNumber(minutesText);
-	const estimate = minutes ? estimateKcal(type, minutes, weightKg, distance) : 0;
+/** Log a session by hand: what, how long, how far, how it felt. */
+export function LogSheet({
+	visible,
+	weightKg,
+	onClose,
+	onLogged,
+}: {
+	visible: boolean;
+	weightKg: number;
+	onClose: () => void;
+	onLogged: (session: Session) => void;
+}) {
+	const [sport, setSport] = useState<Sport>("calisthenics");
+	const [minutes, setMinutes] = useState("45");
+	const [km, setKm] = useState("");
+	const [feel, setFeel] = useState<Feel | null>(null);
+	const [notice, setNotice] = useState<string | null>(null);
+	const distance =
+		sport === "running" || sport === "walk" || sport === "cycle" || sport === "swimming";
 
 	const save = () => {
-		if (!minutes) return;
-		const startedAt = new Date(Date.now() - minutes * 60000);
-		addSession({
-			type,
-			title: distance ? `${typeLabel[type]} · ${formatKm(distance)} km` : typeLabel[type],
-			startedAt: startedAt.toISOString(),
-			durationMin: Math.round(minutes),
-			...(distance ? { distanceKm: distance } : {}),
-			kcal: Math.round(readNumber(kcalText) ?? estimate),
-			feel: null,
-		});
-		haptics.success();
-		onClose();
+		const duration = Number(minutes);
+		if (!Number.isFinite(duration) || duration <= 0) {
+			setNotice("How many minutes?");
+			return;
+		}
+		const distanceKm =
+			distance && Number(km.replace(",", ".")) > 0 ? Number(km.replace(",", ".")) : null;
+		logSession(
+			{
+				template: null,
+				sport,
+				title: sport === "running" && distanceKm ? `Run · ${distanceKm} km` : SPORT_LABELS[sport],
+				startedAt: new Date(Date.now() - duration * 60_000).toISOString(),
+				durationMin: Math.round(duration),
+				distanceKm,
+				rounds: null,
+				sets: [],
+				feel,
+			},
+			weightKg,
+		)
+			.then((session) => {
+				haptics.success();
+				onLogged(session);
+				onClose();
+			})
+			.catch((error: unknown) => {
+				console.error("[training] could not log", error);
+				setNotice("Couldn't save on this phone. Try again.");
+			});
 	};
 
 	return (
 		<Sheet
 			visible={visible}
-			title={type === "run" ? "Log a run" : `Log ${typeLabel[type].toLowerCase()}`}
+			title="Log a session"
 			onClose={onClose}
-			action={{ label: "Save", onPress: save, disabled: !minutes }}
+			action={{ label: "Log", onPress: save }}
 		>
-			<ChoiceChips label="Type" options={typeOptions} value={type} onChange={setType} />
-			<TextField
-				label="Distance"
-				value={distanceText}
-				onChangeText={setDistanceText}
-				keyboardType="decimal-pad"
-				placeholder="Optional"
-				suffix="km"
-			/>
-			<TextField
-				label="Minutes"
-				value={minutesText}
-				onChangeText={setMinutesText}
-				keyboardType="number-pad"
-				suffix="min"
-			/>
-			<TextField
-				label="Calories"
-				value={kcalText}
-				onChangeText={setKcalText}
-				keyboardType="number-pad"
-				placeholder={minutes ? `${estimate} (estimate)` : "Estimated from minutes"}
-				suffix="kcal"
-			/>
+			<View style={styles.body}>
+				<View style={styles.chips}>
+					{SPORTS.map((item) => (
+						<FilterChip
+							key={item}
+							label={SPORT_LABELS[item]}
+							selected={sport === item}
+							onPress={() => setSport(item)}
+						/>
+					))}
+				</View>
+				<TextField
+					label="Minutes"
+					value={minutes}
+					onChangeText={setMinutes}
+					keyboardType="number-pad"
+					suffix="min"
+				/>
+				{distance ? (
+					<TextField
+						label="Distance"
+						value={km}
+						onChangeText={setKm}
+						keyboardType="decimal-pad"
+						suffix="km"
+						onSubmitEditing={save}
+					/>
+				) : null}
+				<View style={styles.chips}>
+					{FEELS.map((item) => (
+						<FilterChip
+							key={item}
+							label={item.charAt(0).toUpperCase() + item.slice(1)}
+							selected={feel === item}
+							onPress={() => setFeel(feel === item ? null : item)}
+						/>
+					))}
+				</View>
+				{notice ? (
+					<PoText variant="meta13" tone="textSecondary">
+						{notice}
+					</PoText>
+				) : null}
+			</View>
 		</Sheet>
 	);
 }
+
+const styles = StyleSheet.create({
+	body: { gap: 12 },
+	chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+});

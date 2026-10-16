@@ -50,6 +50,7 @@ table, `apps/api/src/config/messages.ts`.
 | `POST` | `/ai/fashion/<task>` | bearer | Fashion AI: `read-piece`, `ask` |
 | `POST` | `/ai/food/<task>` | bearer | Food AI: `read-meal`, `ask` |
 | `POST` | `/ai/care/ask` | bearer | Care AI (skin, hair, body) |
+| `POST` | `/ai/training/<task>` | bearer | Training AI: `ask`, `skill` |
 
 Rate limits (per IP, or per user when signed in, per minute): auth routes 10, `/sync` 60, AI 20.
 Over the limit: `429` `RATE_LIMITED`. When the Worker's settings are incomplete, every route
@@ -160,7 +161,8 @@ Collections in use: `career-applications`, `career-preps`, `career-stories`, `ca
 `fashion-wears`, `fashion-plans`, `fashion-wishes`, `fashion-settings`, and for Food `food-meals`,
 `food-water`, `food-weights`, `food-settings`, `food-plans`, `food-grocery`, `food-recipes`, and
 for Care `care-settings`, `care-steps`, `care-products`, `care-habits`, `care-days`,
-`care-checkins`, and for Daily life `daily-settings`, `daily-days`, `daily-sleep`, `daily-plans`.
+`care-checkins`, for Daily life `daily-settings`, `daily-days`, `daily-sleep`, `daily-plans`, and
+for Training `training-settings`, `training-sessions`, `training-plans`, `training-skills`.
 Names are part of the contract.
 
 ### Career AI
@@ -228,12 +230,25 @@ follow-ups). `routine` is `morning` or `night`; `ratings` are the latest weekly 
 for anything worrying. Routines, the shelf, check-ins and UV (Open-Meteo, from the phone) work
 without the API; check-ins are words and numbers only, never photos.
 
+### Training AI
+
+`POST /ai/training/<task>`:
+
+| Task | Body | Returns |
+| --- | --- | --- |
+| `ask` | `{ question, today, sports?[], phase?, week?[{ day, title, status }], recent?[{ day, title, line }] }` | `{ answer, followUps[] }` |
+| `skill` | `{ name, sport?, level? }` | `{ steps[] }` (2 to 8, easiest first) |
+
+The week program, live sessions, rounds timer, bests and insights work on the phone without the
+API. Answers point to a doctor or physiotherapist for pain or injury.
+
 ## Changelog
 
 Record every public API change, newest first, so consumers can see what moved.
 
 | Date | Change | Breaking |
 | --- | --- | --- |
+| 2026-10-16 | Added `POST /ai/training/ask` and `POST /ai/training/skill` | No |
 | 2026-10-16 | Added `POST /ai/care/ask` | No |
 | 2026-10-16 | Added `POST /ai/food/read-meal` and `POST /ai/food/ask` | No |
 | 2026-10-16 | Added `POST /ai/fashion/read-piece` and `POST /ai/fashion/ask` | No |

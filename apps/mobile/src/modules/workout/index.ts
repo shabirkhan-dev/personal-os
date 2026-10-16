@@ -1,15 +1,16 @@
 import type { HomeModule } from "@/modules/home/lib/module-home";
-import { WorkoutHomeView } from "./components/workout-home-view";
-import { useWorkoutHero } from "./hooks/use-workout-hero";
+import { TrainingHomeView } from "./components/training-home-view";
+import { useTrainingHero } from "./hooks/use-training-hero";
+import { trainingRoutes } from "./navigation";
 
-export { useWorkoutStatus } from "./hooks/use-workout-status";
+export { useWorkoutStatus } from "./hooks/use-training-hero";
 export { type WorkoutDay, useWorkoutDay } from "./hooks/use-workout-day";
-export { useWorkoutStore } from "./store/workout-store";
 
-/** Workout Home: red glow, Start workout in the header, kcal burned today as the hero. */
+/** Training Home: a red glow, this week's sessions as the hero, Start in the header. */
 export const workoutHome: HomeModule = {
 	glow: "statusDanger",
-	action: { icon: "Filled/Play", label: "Start workout" },
-	useHero: useWorkoutHero,
-	View: WorkoutHomeView,
+	action: { icon: "Filled/Play", label: "Start today's session" },
+	useHero: useTrainingHero,
+	View: TrainingHomeView,
+	onInsights: trainingRoutes.insights,
 };

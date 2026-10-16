@@ -4,6 +4,7 @@ import { useFoodHero } from "./hooks/use-food-hero";
 import { foodRoutes } from "./navigation";
 
 export { useFoodStatus } from "./hooks/use-food-hero";
+export { useFoodWater } from "./hooks/use-food";
 
 /** Food Home: a warm yellow glow, today's calories as the hero, the camera on the right. */
 export const foodHome: HomeModule = {

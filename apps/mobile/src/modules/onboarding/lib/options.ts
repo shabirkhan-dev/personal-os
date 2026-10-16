@@ -156,8 +156,8 @@ export const moduleOptions: readonly ModuleOption[] = [
 	},
 	{
 		id: "skincare",
-		label: "Skincare",
-		summary: "AM/PM · products",
+		label: "Care",
+		summary: "Skin · hair · body",
 		icon: "Drop",
 		iconTone: "statusViolet",
 		tileTone: "statusVioletSubtle",

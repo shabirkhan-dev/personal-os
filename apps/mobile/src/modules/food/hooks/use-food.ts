@@ -81,3 +81,9 @@ export function useFoodToday() {
 
 	return { data, now, today, ...view };
 }
+
+/** Today's water against the target, for other modules (Care's "Drink 3 L" habit). */
+export function useFoodWater(): { ml: number; targetMl: number } {
+	const { waterMl, data } = useFoodToday();
+	return { ml: waterMl, targetMl: data.settings.targets.waterMl };
+}

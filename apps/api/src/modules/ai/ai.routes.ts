@@ -16,6 +16,8 @@ import {
 	skillPathSchema,
 } from "./career.schema";
 import { buildInterviewPrep, draftNudge, parseLine, planSkillPath, readJob } from "./career.tasks";
+import { askCareSchema } from "./care.schema";
+import { askCare } from "./care.tasks";
 import { askFashionSchema, readPieceSchema } from "./fashion.schema";
 import { askFashion, readPiece } from "./fashion.tasks";
 import { askFaithSchema } from "./faith.schema";
@@ -64,4 +66,7 @@ export const aiRoutes = new Hono<AppEnv>()
 	)
 	.post("/food/ask", validate("json", askFoodSchema), async (c) =>
 		ok(c, await askFood({ config: c.get("config") }, c.req.valid("json"))),
+	)
+	.post("/care/ask", validate("json", askCareSchema), async (c) =>
+		ok(c, await askCare({ config: c.get("config") }, c.req.valid("json"))),
 	);

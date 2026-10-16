@@ -287,3 +287,45 @@ describe("Food AI", () => {
 		expect(JSON.parse(String(init.body)).messages[0].content).toContain("Food assistant");
 	});
 });
+
+describe("Care AI", () => {
+	const body = {
+		question: "Is my dandruff getting better?",
+		today: "2026-10-16",
+		concerns: ["dandruff", "dark-spots"],
+		skin: ["sensitive"],
+		routine: [{ routine: "morning", name: "Sunscreen SPF 50" }],
+		ratings: { dandruff: 2 },
+		uv: 8,
+	};
+
+	it("answers with the mock provider", async () => {
+		const response = await mockApp.call("POST", "/ai/care/ask", { token, body });
+		expect(response.json?.data).toEqual({
+			answer:
+				"You asked “Is my dandruff getting better?”. With a provider key set, the answer appears here.",
+			followUps: ["What should I change first?"],
+		});
+	});
+
+	it("rejects a rating outside 1 to 5", async () => {
+		const response = await mockApp.call("POST", "/ai/care/ask", {
+			token,
+			body: { ...body, ratings: { dandruff: 9 } },
+		});
+		expect(response.status).toBe(400);
+	});
+
+	it("speaks as the Care assistant and keeps three follow-ups", async () => {
+		const spy = provider(
+			JSON.stringify({ answer: " Keep washing twice a week. ", followUps: ["a", "b", "c", "d"] }),
+		);
+		const response = await realApp.call("POST", "/ai/care/ask", { token, body });
+		expect(response.json?.data).toEqual({
+			answer: "Keep washing twice a week.",
+			followUps: ["a", "b", "c"],
+		});
+		const [, init] = spy.mock.calls[0] as unknown as [string, RequestInit];
+		expect(JSON.parse(String(init.body)).messages[0].content).toContain("Care assistant");
+	});
+});

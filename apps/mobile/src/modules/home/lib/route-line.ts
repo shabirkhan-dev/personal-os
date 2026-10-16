@@ -20,7 +20,10 @@ const MODULE_WORDS: readonly [ModuleId, RegExp][] = [
 	["food", /\b(ate|eat|eaten|breakfast|lunch|dinner|snack|meal|kcal|calories)\b/],
 	["finance", /\b(spent|spend|paid|bought|expense|budget|salary|rs|rupees|bill)\b/],
 	["workout", /\b(workout|gym|run|ran|walked|steps|pushups|squats|exercise)\b/],
-	["skincare", /\b(skincare|serum|sunscreen|moisturi[sz]er|cleanser)\b/],
+	[
+		"skincare",
+		/\b(skincare|serum|sunscreen|spf|moisturi[sz]er|cleanser|dandruff|shampoo|nails?|floss(ed)?)\b/,
+	],
 ];
 
 export function routeLine(text: string, enabled: readonly ModuleId[]): ModuleId | null {

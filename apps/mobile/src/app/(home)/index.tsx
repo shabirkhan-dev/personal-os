@@ -2,6 +2,7 @@ import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { Alert, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { careHome, useCareStatus } from "@/modules/care";
 import { careerHome, useCareerStatus } from "@/modules/career";
 import { faithHome, useFaithStatus } from "@/modules/faith";
 import { fashionHome, useFashionStatus } from "@/modules/fashion";
@@ -28,7 +29,6 @@ import { moduleOptions } from "@/modules/onboarding/lib/options";
 import { useOnboardingProgress } from "@/modules/onboarding/store/onboarding-progress";
 import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
 import { usePlan } from "@/modules/onboarding/store/use-plan";
-import { skincareHome, useSkincareStatus } from "@/modules/skincare";
 import { useWorkoutStatus, workoutHome } from "@/modules/workout";
 import { KeyboardAwareScrollView } from "@/components/ui/keyboard-aware-scroll-view";
 import { usePoTheme } from "@/theme";
@@ -39,7 +39,7 @@ const moduleHomes: Partial<Record<ModuleId, HomeModule>> = {
 	career: careerHome,
 	finance: financeHome,
 	workout: workoutHome,
-	skincare: skincareHome,
+	skincare: careHome,
 	food: foodHome,
 	faith: faithHome,
 	fashion: fashionHome,
@@ -83,7 +83,7 @@ export default function TodayScreen() {
 		career: careerHome.useHero(),
 		finance: financeHome.useHero(),
 		workout: workoutHome.useHero(),
-		skincare: skincareHome.useHero(),
+		skincare: careHome.useHero(),
 		food: foodHome.useHero(),
 		faith: faithHome.useHero(),
 		fashion: fashionHome.useHero(),
@@ -92,7 +92,7 @@ export default function TodayScreen() {
 		career: useCareerStatus(),
 		finance: useFinanceStatus(),
 		workout: useWorkoutStatus(),
-		skincare: useSkincareStatus(),
+		skincare: useCareStatus(),
 		food: useFoodStatus(),
 		faith: useFaithStatus(),
 		fashion: useFashionStatus(),
@@ -257,7 +257,7 @@ function OverviewBody({ period, modules, amountsHidden, onOpen, upcomingList }: 
 		modules.includes("workout")
 			? { label: "Start workout", onPress: () => onOpen("workout") }
 			: null,
-		modules.includes("skincare") ? { label: "Skincare", onPress: () => onOpen("skincare") } : null,
+		modules.includes("skincare") ? { label: "Care", onPress: () => onOpen("skincare") } : null,
 		modules.includes("faith") ? { label: "Log a prayer", onPress: () => onOpen("faith") } : null,
 		modules.includes("fashion")
 			? { label: "What to wear", onPress: () => onOpen("fashion") }

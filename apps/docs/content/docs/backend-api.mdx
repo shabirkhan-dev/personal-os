@@ -49,6 +49,7 @@ table, `apps/api/src/config/messages.ts`.
 | `POST` | `/ai/faith/ask` | bearer | Faith AI: a question answered in the person's tradition |
 | `POST` | `/ai/fashion/<task>` | bearer | Fashion AI: `read-piece`, `ask` |
 | `POST` | `/ai/food/<task>` | bearer | Food AI: `read-meal`, `ask` |
+| `POST` | `/ai/care/ask` | bearer | Care AI (skin, hair, body) |
 
 Rate limits (per IP, or per user when signed in, per minute): auth routes 10, `/sync` 60, AI 20.
 Over the limit: `429` `RATE_LIMITED`. When the Worker's settings are incomplete, every route
@@ -157,8 +158,9 @@ Collections in use: `career-applications`, `career-preps`, `career-stories`, `ca
 `faith-prayer-logs`, `faith-tasbih`, `faith-recitations`, `faith-zakat`, `faith-zakat-payments`,
 `faith-resources`, `faith-challenge`, `faith-paths`, `faith-cards`, and for Fashion `fashion-pieces`,
 `fashion-wears`, `fashion-plans`, `fashion-wishes`, `fashion-settings`, and for Food `food-meals`,
-`food-water`, `food-weights`, `food-settings`, `food-plans`, `food-grocery`, `food-recipes`. Names
-are part of the contract.
+`food-water`, `food-weights`, `food-settings`, `food-plans`, `food-grocery`, `food-recipes`, and
+for Care `care-settings`, `care-steps`, `care-products`, `care-habits`, `care-days`,
+`care-checkins`. Names are part of the contract.
 
 ### Career AI
 
@@ -216,12 +218,22 @@ phone matches everyday foods itself and only sends the words it didn't know to `
 targets, the meal plan, the grocery list and barcode lookups (Open Food Facts, from the phone) work
 without the API. Meal photos stay on the phone.
 
+### Care AI
+
+`POST /ai/care/ask` with `{ question, today, concerns?[], skin?[], routine?[{ routine, name }],
+ratings?{ metric: 1–5 }, uv? }` returns `{ answer, followUps[] }` (at most 90 words and three
+follow-ups). `routine` is `morning` or `night`; `ratings` are the latest weekly check-in (1 fine,
+5 bad), at most 12. The answer is general care guidance and points to a dermatologist or doctor
+for anything worrying. Routines, the shelf, check-ins and UV (Open-Meteo, from the phone) work
+without the API; check-ins are words and numbers only, never photos.
+
 ## Changelog
 
 Record every public API change, newest first, so consumers can see what moved.
 
 | Date | Change | Breaking |
 | --- | --- | --- |
+| 2026-10-16 | Added `POST /ai/care/ask` | No |
 | 2026-10-16 | Added `POST /ai/food/read-meal` and `POST /ai/food/ask` | No |
 | 2026-10-16 | Added `POST /ai/fashion/read-piece` and `POST /ai/fashion/ask` | No |
 | 2026-10-15 | Added `POST /ai/faith/ask`; `faith` is a valid onboarding module and up to 8 modules can be chosen | No |

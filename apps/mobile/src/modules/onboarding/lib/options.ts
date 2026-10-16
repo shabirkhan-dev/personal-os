@@ -138,8 +138,8 @@ export const moduleOptions: readonly ModuleOption[] = [
 	},
 	{
 		id: "workout",
-		label: "Workout",
-		summary: "Plans · steps · energy",
+		label: "Training",
+		summary: "Sessions · runs · skills",
 		icon: "Dumbbell",
 		iconTone: "statusDanger",
 		tileTone: "bgSubtle",

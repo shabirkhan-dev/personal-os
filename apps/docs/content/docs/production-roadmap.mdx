@@ -17,7 +17,7 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
 ### Mobile app
 
 - Onboarding end to end: voice input, saved progress, reminders, plan reveal and sign-in.
-- Today: Overview plus module Homes for Finance and Workout, and Profile, all on what the person enters. Module data is stored on the phone
+- Today: Overview plus a Finance Home, and Profile, all on what the person enters. Module data is stored on the phone
   ([ADR 0001](/docs/architecture/adr-0001-on-device-module-data)).
 - Ask bar that parses typed lines into module entries.
 - Career module: pipeline, follow-ups with AI-drafted nudges, job links read by AI with a halal
@@ -40,6 +40,11 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
   reapply time, the shelf with how long each product lasts and what to reorder, hair and scalp,
   body and nails with daily habits (water shared with Food), a weekly check-in with no photos,
   and Insights. Synced through the record store.
+- Training (was Workout): a week program built from the sports picked and days a week, with
+  missed sessions moved to an easy day; session plans with photos, a live session with sets,
+  the number to beat and a rest timer, boxing rounds with call-outs read aloud, run summaries
+  with pace and splits, skills as step ladders (the Training AI builds new ones), personal bests,
+  phases and Insights. Synced through the record store.
 - Daily life, the hub that ties the modules together: the minimum day (3 to 5 small things the
   OS protects, with a "never miss twice" streak), what's on right now, every module's line for
   today and the rest of the day; a morning brief, a day plan drafted from the modules, closing
@@ -74,7 +79,7 @@ Roughly in order; each item becomes board cards.
 1. **"Hey OS" with the app closed**: today it listens while the app is open (Profile → Hey OS) and
    Android has a Talk to OS launcher shortcut. Waking from the background needs an on-device
    wake-word engine in an Android foreground service; iOS does not allow always-on listening.
-2. **Move Finance and Workout onto the record store** so everything is synced.
+2. **Move Finance onto the record store** so everything is synced.
 3. **Files**: an avatar picker and photos through the R2 upload flow; videos streamed from Google
    Drive.
 4. **Insights**: AI over a per-module, opt-in daily digest, shown in the Insights tab.

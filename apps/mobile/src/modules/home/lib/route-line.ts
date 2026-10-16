@@ -19,7 +19,10 @@ const MODULE_WORDS: readonly [ModuleId, RegExp][] = [
 	],
 	["food", /\b(ate|eat|eaten|breakfast|lunch|dinner|snack|meal|kcal|calories)\b/],
 	["finance", /\b(spent|spend|paid|bought|expense|budget|salary|rs|rupees|bill)\b/],
-	["workout", /\b(workout|gym|run|ran|walked|steps|pushups|squats|exercise)\b/],
+	[
+		"workout",
+		/\b(workout|trained|training|gym|run|ran|jogged|walked|steps|push-?ups|pull-?ups|dips|squats|handstand|boxing|boxed|shadow ?boxing|yoga|exercise)\b/,
+	],
 	[
 		"daily-life",
 		/\b(slept|sleep|woke|bedtime|read \d+ pages|minimum day|plan (my|the) day|close (my|the) day)\b/,

@@ -1,10 +1,7 @@
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import type { DayEntry } from "@/modules/home/lib/module-day";
-import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
-import { sessionsOn } from "../lib/kcal";
-import { PLANNED_LENGTH_MIN, PLANNED_START_MIN } from "../lib/status";
-import { useWorkoutStore } from "../store/workout-store";
-import { useNow } from "./use-now";
+import { sessionsOnDay } from "../lib/training-math";
+import { useTrainingToday } from "./use-training";
 
 export type WorkoutDay = {
 	minutesToday: number;
@@ -16,35 +13,29 @@ export type WorkoutDay = {
 
 /** Today's training for Daily life. */
 export function useWorkoutDay(): WorkoutDay {
-	const sessions = useWorkoutStore((state) => state.data.sessions);
-	const hydrate = useWorkoutStore((state) => state.hydrate);
-	const workdays = useOnboardingStore((state) => state.workdays);
-	const now = useNow();
-	useEffect(() => {
-		hydrate();
-	}, [hydrate]);
+	const { data, today, template } = useTrainingToday();
 	return useMemo(() => {
-		const today = sessionsOn(sessions, now);
-		const minutesToday = today.reduce((sum, session) => sum + session.durationMin, 0);
-		const plannedToday = workdays[(now.getDay() + 6) % 7] === true;
-		const title = today[0]?.title ?? "Workout";
+		const done = sessionsOnDay(data.sessions, today);
+		const minutesToday = done.reduce((sum, session) => sum + session.durationMin, 0);
+		const plannedToday = template !== undefined && template.id !== "mobility";
+		const entries: DayEntry[] =
+			template || done.length > 0
+				? [
+						{
+							id: "workout-today",
+							minutes: data.settings.trainAt,
+							length: template?.minutes ?? done[0]?.durationMin ?? 45,
+							title: template?.title ?? done[0]?.title ?? "Training",
+							detail: `${template?.minutes ?? done[0]?.durationMin ?? 45} min`,
+							done: minutesToday > 0,
+						},
+					]
+				: [];
 		return {
 			minutesToday,
 			plannedToday,
-			entries:
-				plannedToday || today.length > 0
-					? [
-							{
-								id: "workout-today",
-								minutes: PLANNED_START_MIN,
-								length: PLANNED_LENGTH_MIN,
-								title,
-								detail: `${PLANNED_LENGTH_MIN} min`,
-								done: minutesToday > 0,
-							},
-						]
-					: [],
-			startHours: sessions.map((session) => new Date(session.startedAt).getHours()),
+			entries,
+			startHours: data.sessions.map((session) => new Date(session.startedAt).getHours()),
 		};
-	}, [sessions, workdays, now]);
+	}, [data, today, template]);
 }

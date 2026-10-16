@@ -329,3 +329,48 @@ describe("Care AI", () => {
 		expect(JSON.parse(String(init.body)).messages[0].content).toContain("Care assistant");
 	});
 });
+
+describe("Training AI", () => {
+	const body = {
+		question: "What should I train tomorrow?",
+		today: "2026-10-16",
+		sports: ["calisthenics", "running"],
+		phase: 1,
+		week: [{ day: "2026-10-16", title: "Push + handstand", status: "today" }],
+		recent: [{ day: "2026-10-15", title: "Easy run", line: "5.0 km · 27:40" }],
+	};
+
+	it("answers with the mock provider", async () => {
+		const response = await mockApp.call("POST", "/ai/training/ask", { token, body });
+		expect(response.json?.data).toMatchObject({
+			followUps: ["What should I do tomorrow?"],
+		});
+	});
+
+	it("speaks as the Training assistant and keeps three follow-ups", async () => {
+		const spy = provider(
+			JSON.stringify({ answer: " Long run. ", followUps: ["a", "b", "c", "d"] }),
+		);
+		const response = await realApp.call("POST", "/ai/training/ask", { token, body });
+		expect(response.json?.data).toEqual({ answer: "Long run.", followUps: ["a", "b", "c"] });
+		const [, init] = spy.mock.calls[0] as unknown as [string, RequestInit];
+		expect(JSON.parse(String(init.body)).messages[0].content).toContain("Training assistant");
+	});
+
+	it("builds a skill ladder and caps it at eight steps", async () => {
+		provider(JSON.stringify({ steps: ["1", "2", "3", "4", "5", "6", "7", "8", "9"] }));
+		const response = await realApp.call("POST", "/ai/training/skill", {
+			token,
+			body: { name: "Planche", sport: "calisthenics" },
+		});
+		expect(response.json?.data).toMatchObject({ steps: ["1", "2", "3", "4", "5", "6", "7", "8"] });
+	});
+
+	it("rejects an extra field", async () => {
+		const response = await mockApp.call("POST", "/ai/training/skill", {
+			token,
+			body: { name: "Planche", extra: 1 },
+		});
+		expect(response.status).toBe(400);
+	});
+});

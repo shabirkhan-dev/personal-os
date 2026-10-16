@@ -374,3 +374,75 @@ describe("Training AI", () => {
 		expect(response.status).toBe(400);
 	});
 });
+
+describe("Finance AI", () => {
+	const body = {
+		question: "Can I afford a bike service this month?",
+		today: "2026-10-16",
+		balance: 148_500,
+		runwayDays: 81,
+		monthlyCost: 55_000,
+		monthlyIncome: 0,
+		spent: 31_200,
+		budget: 55_000,
+		lines: [{ name: "Food", spent: 16_860, limit: 24_000 }],
+		bills: [{ name: "Electricity", amount: 2400, due: "Sat 18 Oct" }],
+		recent: [{ day: "2026-10-16", title: "Bike fuel", amount: 1500, kind: "spend" }],
+	};
+
+	it("answers with the mock provider and the runway", async () => {
+		const response = await mockApp.call("POST", "/ai/finance/ask", { token, body });
+		expect(response.json?.data).toMatchObject({ followUps: ["Where can I cut this month?"] });
+		expect(JSON.stringify(response.json?.data)).toContain("81 days of runway");
+	});
+
+	it("speaks as the Finance assistant and keeps three follow-ups", async () => {
+		const spy = provider(
+			JSON.stringify({ answer: " Wait a week. ", followUps: ["a", "b", "c", "d"] }),
+		);
+		const response = await realApp.call("POST", "/ai/finance/ask", { token, body });
+		expect(response.json?.data).toEqual({ answer: "Wait a week.", followUps: ["a", "b", "c"] });
+		const [, init] = spy.mock.calls[0] as unknown as [string, RequestInit];
+		expect(JSON.parse(String(init.body)).messages[0].content).toContain("Finance assistant");
+	});
+
+	it("splits spending and drops items without an amount", async () => {
+		provider(
+			JSON.stringify({
+				items: [
+					{ name: "Chicken · 1 kg", amount: 800, category: "food" },
+					{ name: "Milk", amount: 0, category: "food" },
+					{ name: "Fuel", amount: 1500, category: "rocket" },
+				],
+				method: "cash",
+			}),
+		);
+		const response = await realApp.call("POST", "/ai/finance/read", {
+			token,
+			body: { text: "chicken 1 kg 800, milk, fuel 1500 cash" },
+		});
+		expect(response.json?.data).toEqual({
+			items: [
+				{ name: "Chicken · 1 kg", amount: 800, category: "food" },
+				{ name: "Fuel", amount: 1500, category: "other" },
+			],
+			method: "cash",
+		});
+	});
+
+	it("reads with the mock provider", async () => {
+		const response = await mockApp.call("POST", "/ai/finance/read", {
+			token,
+			body: { text: "groceries 1680 and fuel 1500, cash" },
+		});
+		expect(response.json?.data).toMatchObject({ method: "cash" });
+	});
+
+	it("rejects an extra field", async () => {
+		const response = await mockApp.call("POST", "/ai/finance/ask", {
+			token,
+			body: { ...body, extra: 1 },
+		});
+		expect(response.status).toBe(400);
+	});
+});

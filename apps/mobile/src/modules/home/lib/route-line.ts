@@ -18,7 +18,10 @@ const MODULE_WORDS: readonly [ModuleId, RegExp][] = [
 		/\b(wear|wore|wearing|outfit|wardrobe|closet|overshirt|chinos|jeans|sneakers|tee|polo|blazer|kurta|perfume|cologne|scent)\b/,
 	],
 	["food", /\b(ate|eat|eaten|breakfast|lunch|dinner|snack|meal|kcal|calories)\b/],
-	["finance", /\b(spent|spend|paid|bought|expense|budget|salary|rs|rupees|bill)\b/],
+	[
+		"finance",
+		/\b(spent|spend|paid|bought|expense|budget|salary|rs|rupees|bills?|runway|income|groceries|fuel)\b/,
+	],
 	[
 		"workout",
 		/\b(workout|trained|training|gym|run|ran|jogged|walked|steps|push-?ups|pull-?ups|dips|squats|handstand|boxing|boxed|shadow ?boxing|yoga|exercise)\b/,

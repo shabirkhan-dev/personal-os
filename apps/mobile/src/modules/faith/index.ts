@@ -7,6 +7,7 @@ import { faithRoutes } from "./navigation";
 export { useFaithStatus } from "./hooks/use-faith-hero";
 export { useFaithPlace } from "./hooks/use-faith";
 export { type FaithDay, useFaithDay } from "./hooks/use-faith-day";
+export { type ZakatLine, useZakatLine } from "./hooks/use-zakat-line";
 
 /** Faith Home: the Sky header that follows the time of day, prayers as the hero, Qibla on the right. */
 export const faithHome: HomeModule = {

@@ -26,6 +26,8 @@ import { askFoodSchema, readMealSchema } from "./food.schema";
 import { askTrainingSchema, skillStepsSchema } from "./training.schema";
 import { askTraining, buildSkill } from "./training.tasks";
 import { askFood, readMeal } from "./food.tasks";
+import { askFinanceSchema, readSpendSchema } from "./finance.schema";
+import { askFinance, readSpend } from "./finance.tasks";
 
 /** Module AI, `POST /ai/<module>/<task>`. Signed-in only; the provider key never leaves the API. */
 export const aiRoutes = new Hono<AppEnv>()
@@ -77,4 +79,10 @@ export const aiRoutes = new Hono<AppEnv>()
 	)
 	.post("/training/skill", validate("json", skillStepsSchema), async (c) =>
 		ok(c, await buildSkill({ config: c.get("config") }, c.req.valid("json"))),
+	)
+	.post("/finance/read", validate("json", readSpendSchema), async (c) =>
+		ok(c, await readSpend({ config: c.get("config") }, c.req.valid("json"))),
+	)
+	.post("/finance/ask", validate("json", askFinanceSchema), async (c) =>
+		ok(c, await askFinance({ config: c.get("config") }, c.req.valid("json"))),
 	);

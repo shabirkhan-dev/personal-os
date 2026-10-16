@@ -21,6 +21,9 @@ const LISTENERS: ReadonlySet<ModuleId> = new Set<ModuleId>([
 	"fashion",
 	"food",
 	"skincare",
+	"workout",
+	"daily-life",
+	"finance",
 ]);
 
 /**

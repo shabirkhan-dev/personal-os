@@ -257,7 +257,9 @@ function OverviewBody({ period, modules, amountsHidden, onOpen, upcomingList }: 
 	const suggestions = [
 		modules.includes("career") ? { label: "Log a job", onPress: () => onOpen("career") } : null,
 		modules.includes("food") ? { label: "Log a meal", onPress: () => onOpen("food") } : null,
-		modules.includes("finance") ? { label: "Add expense", onPress: () => onOpen("finance") } : null,
+		modules.includes("finance")
+			? { label: "Log spending", onPress: () => onOpen("finance") }
+			: null,
 		modules.includes("workout")
 			? { label: "Start workout", onPress: () => onOpen("workout") }
 			: null,

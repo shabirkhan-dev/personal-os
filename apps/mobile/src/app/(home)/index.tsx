@@ -4,6 +4,7 @@ import { Alert, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { careHome, useCareStatus } from "@/modules/care";
 import { careerHome, useCareerStatus } from "@/modules/career";
+import { dailyHome, useDailyStatus } from "@/modules/daily";
 import { faithHome, useFaithStatus } from "@/modules/faith";
 import { fashionHome, useFashionStatus } from "@/modules/fashion";
 import { foodHome, useFoodStatus } from "@/modules/food";
@@ -36,6 +37,7 @@ import { usePoTheme } from "@/theme";
 const HEADER_HEIGHT = 66;
 
 const moduleHomes: Partial<Record<ModuleId, HomeModule>> = {
+	"daily-life": dailyHome,
 	career: careerHome,
 	finance: financeHome,
 	workout: workoutHome,
@@ -80,6 +82,7 @@ export default function TodayScreen() {
 
 	// Every module's hero is read on each render so the hooks stay in a fixed order.
 	const heroes: Partial<Record<ModuleId, HomeHero>> = {
+		"daily-life": dailyHome.useHero(),
 		career: careerHome.useHero(),
 		finance: financeHome.useHero(),
 		workout: workoutHome.useHero(),
@@ -89,6 +92,7 @@ export default function TodayScreen() {
 		fashion: fashionHome.useHero(),
 	};
 	const liveStatus: Partial<Record<ModuleId, string>> = {
+		"daily-life": useDailyStatus(),
 		career: useCareerStatus(),
 		finance: useFinanceStatus(),
 		workout: useWorkoutStatus(),

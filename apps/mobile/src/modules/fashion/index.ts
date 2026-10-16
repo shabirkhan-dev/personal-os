@@ -4,6 +4,8 @@ import { useFashionHero } from "./hooks/use-fashion-hero";
 import { fashionRoutes } from "./navigation";
 
 export { useFashionStatus } from "./hooks/use-fashion-hero";
+export { type FashionDay, useFashionDay } from "./hooks/use-fashion-day";
+export { PieceImage } from "./components/piece-image";
 
 /** Fashion Home: a soft white glow, the weather as the hero, Add piece on the right. */
 export const fashionHome: HomeModule = {

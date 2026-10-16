@@ -21,6 +21,10 @@ const MODULE_WORDS: readonly [ModuleId, RegExp][] = [
 	["finance", /\b(spent|spend|paid|bought|expense|budget|salary|rs|rupees|bill)\b/],
 	["workout", /\b(workout|gym|run|ran|walked|steps|pushups|squats|exercise)\b/],
 	[
+		"daily-life",
+		/\b(slept|sleep|woke|bedtime|read \d+ pages|minimum day|plan (my|the) day|close (my|the) day)\b/,
+	],
+	[
 		"skincare",
 		/\b(skincare|serum|sunscreen|spf|moisturi[sz]er|cleanser|dandruff|shampoo|nails?|floss(ed)?)\b/,
 	],

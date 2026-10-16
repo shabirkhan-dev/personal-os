@@ -40,7 +40,12 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
   reapply time, the shelf with how long each product lasts and what to reorder, hair and scalp,
   body and nails with daily habits (water shared with Food), a weekly check-in with no photos,
   and Insights. Synced through the record store.
-- Voice in and out on the phone behind one swappable layer (`src/lib/voice`), and Talk to OS
+- Daily life, the hub that ties the modules together: the minimum day (3 to 5 small things the
+  OS protects, with a "never miss twice" streak), what's on right now, every module's line for
+  today and the rest of the day; a morning brief, a day plan drafted from the modules, closing
+  the day with energy and one good thing, sleep with a wind-down and alarms, and Insights.
+  Modules feed it through one small hook each.
+- - Voice in and out on the phone behind one swappable layer (`src/lib/voice`), and Talk to OS
   (`personalos://listen`), which opens listening and hands the line to the right module.
 - "Hey OS" while the app is open (on-device speech, off until turned on in Profile), and a Talk to
   OS launcher shortcut on Android.
@@ -64,7 +69,7 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
 
 Roughly in order; each item becomes board cards.
 
-1. **Remaining modules**: Daily life, on the record store.
+1. **Remaining modules**: Wishlist, on the record store.
 1. **Piece and meal photos to R2** so a wardrobe and food log sync with their photos (they stay on the phone for now).
 1. **"Hey OS" with the app closed**: today it listens while the app is open (Profile → Hey OS) and
    Android has a Talk to OS launcher shortcut. Waking from the background needs an on-device

@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react";
 import { formatMoney, moneyParts } from "@/lib/money";
 import type { HomeHero } from "@/modules/home/lib/module-home";
-import { leftToSpend, spentThisMonth } from "../lib/finance-math";
+import { expensesOnDay, leftToSpend, spentThisMonth, sumAmounts } from "../lib/finance-math";
 import { useFinanceStore } from "../store/finance-store";
 import { useNow } from "./use-now";
 
@@ -9,6 +9,7 @@ export type FinanceSummary = {
 	hydrated: boolean;
 	budget: number | null;
 	spentThisMonth: number;
+	spentToday: number;
 	/** Budget minus spent this month (negative when over); null with no budget. */
 	leftToSpend: number | null;
 };
@@ -27,7 +28,13 @@ export function useFinanceSummary(): FinanceSummary {
 
 	return useMemo(() => {
 		const spent = spentThisMonth(expenses, now);
-		return { hydrated, budget, spentThisMonth: spent, leftToSpend: leftToSpend(budget, spent) };
+		return {
+			hydrated,
+			budget,
+			spentThisMonth: spent,
+			spentToday: sumAmounts(expensesOnDay(expenses, now)),
+			leftToSpend: leftToSpend(budget, spent),
+		};
 	}, [hydrated, budget, expenses, now]);
 }
 

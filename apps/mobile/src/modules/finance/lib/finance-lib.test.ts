@@ -229,6 +229,16 @@ describe("history and halal", () => {
 	});
 });
 
+const groceryItem = (id: string, name: string, bought = false) => ({
+	id,
+	name,
+	amount: "",
+	section: "protein" as const,
+	price: 0,
+	bought,
+	atHome: false,
+});
+
 describe("ask bar", () => {
 	it("splits items, quantities and how it was paid", () => {
 		expect(parseFinanceLine("chicken 1 kg 800 and milk 4 litre 880, cash")).toEqual({
@@ -267,16 +277,11 @@ describe("ask bar", () => {
 	});
 
 	it("matches spending against the grocery list", () => {
-		const item = (id: string, name: string, bought = false) => ({
-			id,
-			name,
-			amount: "",
-			section: "protein" as const,
-			price: 0,
-			bought,
-			atHome: false,
-		});
-		const list = [item("a", "Chicken breast"), item("b", "Eggs"), item("c", "Milk", true)];
+		const list = [
+			groceryItem("a", "Chicken breast"),
+			groceryItem("b", "Eggs"),
+			groceryItem("c", "Milk", true),
+		];
 		expect(groceryMatches(list, ["Chicken · 1 kg", "Milk · 4 L", "egg"])).toEqual(["a", "b"]);
 	});
 });

@@ -1,22 +1,79 @@
 # Personal OS
 
-Personal life operating system: daily life, training, finance, skincare, food and fashion in one
-**mobile** app. Bun workspaces + Turborepo.
+Personal OS is a mobile-first life operating system for planning and managing the everyday parts of life: routines, finance, skincare, food, fashion, and daily habits.
 
-**Mobile-first.** The Expo app (`apps/mobile`) is the product. It is backed by one API on Cloudflare
-Workers (`apps/api`, Hono, AI included), and styled with the Figma Kit v2 tokens in `packages/tokens`
-(`@personal-os/tokens`). The Next.js app in `apps/web` is the public landing page, a static export
-served by Cloudflare Workers (see `apps/web/README.md`). To install the app on a phone, see
-[apps/mobile/README.md](apps/mobile/README.md).
+It is built as a Bun + Turborepo monorepo with a product-focused Expo app, a Cloudflare Workers API, a documentation app, and a web landing page.
 
-Dual-licensed **MIT OR Apache-2.0**.
+## Why this project exists
 
-## Quick start
+Most people track life in disconnected tools: notes, finance apps, shopping lists, routines, and personal health data live in separate places. Personal OS brings those systems together into a single daily operating layer.
 
-**Prerequisites**
+The project is designed to help people:
 
-- [Bun](https://bun.sh) `1.4.2` (pinned via `packageManager`)
-- Optional: Docker (local Postgres for the API)
+- build sustainable routines and habits
+- track personal spending and recurring costs
+- monitor skincare and wellness goals
+- plan meals and nutrition routines
+- manage style and wardrobe decisions
+- keep daily life organized in one place
+
+## Product architecture
+
+This monorepo is organized around a few core parts:
+
+- Mobile app: `apps/mobile` — Expo / React Native app, the primary product experience
+- API: `apps/api` — Hono app running on Cloudflare Workers with AI-powered capabilities
+- Docs: `apps/docs` — Fumadocs site for product and engineering documentation
+- Web: `apps/web` — landing page / public shell, built as a static export
+- Shared design system: `packages/tokens` — design tokens and visual primitives
+- Shared tooling: `scripts/`, `.devcontainer/`, CI and project hooks
+
+## Tech stack
+
+- Bun + Turborepo
+- Expo / React Native
+- Next.js
+- Hono on Cloudflare Workers
+- TypeScript
+- Postgres / Drizzle
+- Cloudflare R2 and Hyperdrive
+- Design tokens and mobile-first UI system
+
+## Repository layout
+
+```text
+personal-os/
+├── apps/
+│   ├── mobile/          # Expo app — product surface
+│   ├── api/             # Hono API on Cloudflare Workers
+│   ├── docs/            # Documentation site
+│   └── web/             # Landing page
+├── packages/
+│   ├── tokens/          # Shared design tokens
+│   ├── typescript-config/
+│   └── logger/
+├── scripts/             # Architecture, checks, hooks
+├── docker/              # Postgres setup
+├── .agents/             # Agent coordination + policies
+├── .devcontainer/       # Dev container setup
+├── .github/workflows/   # CI/CD
+├── DESIGN.md            # Visual/design source of truth
+├── PROJECT.md           # Product/engineering context
+├── AGENTS.md            # AI-agent instructions
+├── README.md            # This file
+├── LICENSE-MIT
+├── LICENSE-Apache-2.0
+└── package.json
+```
+
+## Getting started
+
+### Prerequisites
+
+- [Bun](https://bun.sh) 1.4.2+
+- Optional: Docker for local Postgres
+
+### Install and run
 
 ```bash
 git clone https://github.com/shabirkhan-dev/personal-os.git
@@ -26,104 +83,59 @@ bun run prepare
 bun run dev
 ```
 
-`bun run dev` starts every app's dev server (Turbo). The API needs Postgres first; see
-[Local API](#local-api).
+### Local development URLs
 
-| App | Dev URL |
-| --- | --- |
-| Expo / Metro | http://localhost:8081 (open in a development build) |
-| API (`wrangler dev`) | http://localhost:4000/api/v1/health |
-| Docs | http://localhost:3002/docs |
-| Landing page | http://localhost:3000 |
+- Expo / Metro: http://localhost:8081
+- API: http://localhost:4000/api/v1/health
+- Docs: http://localhost:3002/docs
+- Landing page: http://localhost:3000
 
-To work on one app in isolation: `bun --cwd=apps/mobile run start` (same pattern for `api`,
-`docs`).
-
-## Layout
-
-| Path | What it is |
-| --- | --- |
-| `apps/mobile` | Expo SDK 58 app: onboarding v5, then home |
-| `apps/api` | Hono API on Cloudflare Workers: Drizzle over Neon (Hyperdrive), R2, Career AI |
-| `apps/docs` | Fumadocs site — project docs at `/docs` |
-| `apps/web` | Landing page: Next.js static export on Cloudflare Workers |
-| `packages/tokens` | `@personal-os/tokens`: Kit v2 colours, spacing, radii, text styles |
-| `packages/typescript-config` | `@personal-os/typescript-config`: base tsconfigs |
-| `.agents/` | Agent coordination hub, rules and vendored skills |
-| `docker/` | Postgres init script for `docker-compose.yml` |
-| `scripts/` | Git hooks plus architecture and naming checks (Bash) |
-| `.github/workflows/` | `ci.yml`, `cd.yml`, `security.yml` |
-
-The design rules live in [DESIGN.md](DESIGN.md).
-
-## Commands
-
-| Command | Does |
-| --- | --- |
-| `bun run dev` | All dev servers (Turbo) |
-| `bun run build` | Build every app |
-| `bun run lint` / `lint:fix` | oxlint, plus ShellCheck over `scripts/` |
-| `bun run format` | Format TS/JS and shell |
-| `bun run typecheck` | TypeScript across workspaces |
-| `bun run test` / `test:coverage` | Unit tests / coverage gates |
-| `bun run architecture:check` | Import-boundary rules |
-| `bun run naming:check` | File and folder naming rules |
-| `bun run preflight` | `lint` + `typecheck` + `test` — run before pushing |
-
-## Tooling
-
-- **Bun** workspaces and **Turborepo** for the task graph
-- **oxlint** for linting and **oxfmt** for formatting TS/JS — tabs, line width 100
-- **Lefthook** pre-commit and commit-msg, enforcing Conventional Commits
-- Bash: ShellCheck + shfmt
-- **EAS** for development builds and over-the-air updates of the mobile app
-
-## Local API
+## Local API setup
 
 ```bash
-docker compose up -d                      # Postgres on host :5433
+docker compose up -d
 cp apps/api/.dev.vars.example apps/api/.dev.vars
 bun --cwd=apps/api run db:migrate
-bun --cwd=apps/api run dev                # http://localhost:4000/api/v1/health
+bun --cwd=apps/api run dev
 ```
 
-More in [apps/api/README.md](apps/api/README.md) and `/docs/docker`.
-
-## Deploy
-
-| Piece | Host | Config |
-| --- | --- | --- |
-| Mobile | [EAS](https://expo.dev/eas) | `apps/mobile/eas.json` |
-| API | [Cloudflare Workers](https://workers.cloudflare.com) | `apps/api/wrangler.jsonc` |
-| Database | [Neon](https://neon.tech) through Hyperdrive | `hyperdrive` in `wrangler.jsonc` |
-| Images | [Cloudflare R2](https://developers.cloudflare.com/r2/) | `r2_buckets` in `wrangler.jsonc` |
-| Docs | [Vercel](https://vercel.com) | `apps/docs/vercel.json` |
-| Landing page | [Cloudflare Workers](https://workers.cloudflare.com) | `apps/web/wrangler.jsonc` |
-
-Walkthrough: `/docs/deploy` — [apps/docs/content/docs/deploy.mdx](apps/docs/content/docs/deploy.mdx).
-
-## Dev Container
-
-`.devcontainer/` installs **Bun** and the Bash lint tools.
-See [.devcontainer/README.md](.devcontainer/README.md).
-
-## Docs
+## Common commands
 
 ```bash
-bun --cwd=apps/docs run dev
+bun run dev
+bun run build
+bun run lint
+bun run lint:fix
+bun run format
+bun run typecheck
+bun run test
+bun run test:coverage
+bun run architecture:check
+bun run naming:check
 ```
 
-- [/docs/quick-start](http://localhost:3002/docs/quick-start)
-- [/docs/architecture](http://localhost:3002/docs/architecture)
-- [/docs/deploy](http://localhost:3002/docs/deploy)
-- [/docs/docker](http://localhost:3002/docs/docker)
-- [/docs/product-system-design](http://localhost:3002/docs/product-system-design)
-- [/docs/production-roadmap](http://localhost:3002/docs/production-roadmap)
+## Docs and design
 
-Also in the repo: [PROJECT.md](PROJECT.md), [DESIGN.md](DESIGN.md), [AGENTS.md](AGENTS.md),
-[CHANGELOG.md](CHANGELOG.md).
+The project documentation lives in the docs app and is served locally at:
+
+- http://localhost:3002/docs
+
+Main docs and references:
+
+- `/docs/quick-start`
+- `/docs/architecture`
+- `/docs/docker`
+- `/docs/deploy`
+- `/docs/product-system-design`
+- `/docs/production-roadmap`
+
+Design rules live in `DESIGN.md` and are the source of truth for the app UI and system tokens.
 
 ## License
 
-Dual-licensed under **MIT** or **Apache-2.0**, at your option —
-[LICENSE-MIT](LICENSE-MIT), [LICENSE-Apache-2.0](LICENSE-Apache-2.0).
+This project is dual-licensed under:
+
+- MIT
+- Apache-2.0
+
+Choose either at your option.

@@ -106,7 +106,8 @@ export type ModuleId =
 	| "skincare"
 	| "food"
 	| "fashion"
-	| "faith";
+	| "faith"
+	| "wishlist";
 
 export type ModuleOption = {
 	id: ModuleId;
@@ -187,6 +188,14 @@ export const moduleOptions: readonly ModuleOption[] = [
 		icon: "Moon",
 		iconTone: "statusSuccess",
 		tileTone: "statusSuccessSubtle",
+	},
+	{
+		id: "wishlist",
+		label: "Wishlist",
+		summary: "Dreams · roadmap · garage",
+		icon: "Star",
+		iconTone: "statusCaution",
+		tileTone: "statusCautionSubtle",
 	},
 ];
 

@@ -30,6 +30,7 @@ import { moduleOptions } from "@/modules/onboarding/lib/options";
 import { useOnboardingProgress } from "@/modules/onboarding/store/onboarding-progress";
 import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
 import { usePlan } from "@/modules/onboarding/store/use-plan";
+import { useWishlistStatus, wishlistHome } from "@/modules/wishlist";
 import { useWorkoutStatus, workoutHome } from "@/modules/workout";
 import { KeyboardAwareScrollView } from "@/components/ui/keyboard-aware-scroll-view";
 import { usePoTheme } from "@/theme";
@@ -45,6 +46,7 @@ const moduleHomes: Partial<Record<ModuleId, HomeModule>> = {
 	food: foodHome,
 	faith: faithHome,
 	fashion: fashionHome,
+	wishlist: wishlistHome,
 };
 
 /** Re-renders once a minute so "Now" and "Next · in …" stay current. */
@@ -90,6 +92,7 @@ export default function TodayScreen() {
 		food: foodHome.useHero(),
 		faith: faithHome.useHero(),
 		fashion: fashionHome.useHero(),
+		wishlist: wishlistHome.useHero(),
 	};
 	const liveStatus: Partial<Record<ModuleId, string>> = {
 		"daily-life": useDailyStatus(),
@@ -100,6 +103,7 @@ export default function TodayScreen() {
 		food: useFoodStatus(),
 		faith: useFaithStatus(),
 		fashion: useFashionStatus(),
+		wishlist: useWishlistStatus(),
 	};
 	const modules = moduleStatuses(plan.input, items);
 	for (const item of modules) item.status = liveStatus[item.id] ?? item.status;

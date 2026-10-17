@@ -40,5 +40,15 @@ export function useDreamSavings() {
 		[unfund],
 	);
 
-	return { ...funding, add, undo };
+	/** Puts back everything saved for a dream, one transfer after another (each sees the last). */
+	const undoAll = useCallback(
+		(dream: Dream): Promise<void> =>
+			dream.contributions.reduce<Promise<void>>(
+				(previous, item) => previous.then(() => undo(dream, item)),
+				Promise.resolve(),
+			),
+		[undo],
+	);
+
+	return { ...funding, add, undo, undoAll };
 }

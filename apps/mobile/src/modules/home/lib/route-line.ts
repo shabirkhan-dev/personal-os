@@ -18,6 +18,7 @@ const MODULE_WORDS: readonly [ModuleId, RegExp][] = [
 		/\b(wear|wore|wearing|outfit|wardrobe|closet|overshirt|chinos|jeans|sneakers|tee|polo|blazer|kurta|perfume|cologne|scent)\b/,
 	],
 	["food", /\b(ate|eat|eaten|breakfast|lunch|dinner|snack|meal|kcal|calories)\b/],
+	["wishlist", /\b(wishlist|dream|dreams|someday|save for|saving for|want to buy|i want an?)\b/],
 	[
 		"finance",
 		/\b(spent|spend|paid|bought|expense|budget|salary|rs|rupees|bills?|runway|income|groceries|fuel)\b/,

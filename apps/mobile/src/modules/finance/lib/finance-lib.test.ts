@@ -10,6 +10,7 @@ import {
 	entryLine,
 	financeNotes,
 	interestOwed,
+	lineRoom,
 	monthlyBurn,
 	pace,
 	project,
@@ -146,6 +147,22 @@ describe("budget and bills", () => {
 		expect(
 			upcomingBills([bill({ dueDay: 31 })], new Date("2026-11-10T10:00:00"))[0]?.due.getDate(),
 		).toBe(30);
+	});
+
+	it("knows what each line has free for Wishlist's Add savings", () => {
+		const room = lineRoom(
+			settings,
+			[
+				entry("2026-10-10T10:00:00", { category: "other", amount: 3000 }),
+				entry("2026-09-30T10:00:00", { category: "other", amount: 9000 }),
+				entry("2026-10-12T10:00:00", { category: "transport", amount: 9000 }),
+			],
+			now,
+		);
+		expect(room.other).toBe(settings.limits.other - 3000);
+		expect(room.transport).toBe(0);
+		expect(room.dreams).toBe(0);
+		expect(defaultLimits(55_000).dreams).toBe(0);
 	});
 });
 

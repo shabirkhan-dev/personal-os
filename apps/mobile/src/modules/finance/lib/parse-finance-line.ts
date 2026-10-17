@@ -19,7 +19,8 @@ export type FinanceIntent =
 	/** Money words but no amounts the phone can split; the AI reads it. */
 	| { kind: "unclear"; text: string };
 
-const WORDS: Record<Exclude<Category, "other">, readonly string[]> = {
+/** Dreams is left out: money only reaches it through Wishlist's Add savings. */
+const WORDS: Record<Exclude<Category, "other" | "dreams">, readonly string[]> = {
 	food: [
 		"food",
 		"lunch",

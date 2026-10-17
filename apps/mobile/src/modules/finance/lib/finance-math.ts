@@ -463,3 +463,17 @@ export function recap(
 export function savedShare(settings: FinanceSettings): number {
 	return settings.savingsTarget > 0 ? Math.min(1, settings.saved / settings.savingsTarget) : 0;
 }
+
+/** What is still free on each budget line this month: its limit minus what was spent on it. */
+export function lineRoom(
+	settings: FinanceSettings,
+	entries: readonly Entry[],
+	now: Date,
+): Record<Category, number> {
+	const spent = byCategory(inMonth(entries, now));
+	const room = {} as Record<Category, number>;
+	for (const category of CATEGORIES) {
+		room[category] = roundCents(Math.max(0, settings.limits[category] - spent[category]));
+	}
+	return room;
+}

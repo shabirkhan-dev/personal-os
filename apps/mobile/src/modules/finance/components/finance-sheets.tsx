@@ -10,6 +10,7 @@ import { budgetTotal, rupees } from "../lib/finance-math";
 import {
 	type Bill,
 	CATEGORIES,
+	SPEND_CATEGORIES,
 	type Category,
 	CATEGORY_LABELS,
 	CATEGORY_SHORT,
@@ -463,7 +464,7 @@ export function BillSheet({
 					placeholder="18"
 				/>
 				<Chips
-					options={CATEGORIES}
+					options={SPEND_CATEGORIES}
 					labels={CATEGORY_SHORT}
 					value={category}
 					onChange={setCategory}

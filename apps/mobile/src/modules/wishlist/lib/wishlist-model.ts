@@ -82,6 +82,8 @@ export type Contribution = {
 	at: string;
 	/** The Finance entry that took it out of the budget, so Undo can remove both. */
 	entryId: string | null;
+	/** The Finance budget line it came from ("other" is Buffer). */
+	from: string | null;
 };
 
 export type CheckItem = { id: string; label: string; done: boolean };
@@ -196,7 +198,7 @@ function parseContribution(raw: unknown): Contribution | null {
 	const at = asIso(raw.at);
 	const amount = money(raw.amount, 0);
 	if (!id || !at || amount <= 0) return null;
-	return { id, amount, at, entryId: idOf(raw.entryId) };
+	return { id, amount, at, entryId: idOf(raw.entryId), from: idOf(raw.from) };
 }
 
 export function parseDream(raw: unknown): Dream | null {

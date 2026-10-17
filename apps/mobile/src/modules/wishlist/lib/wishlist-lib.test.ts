@@ -169,7 +169,13 @@ describe("insights", () => {
 			price: 10_000,
 			addedAt: new Date(2026, 9, 2, 1).toISOString(),
 			contributions: [
-				{ id: "k", amount: 5000, at: new Date(2026, 9, 3).toISOString(), entryId: null },
+				{
+					id: "k",
+					amount: 5000,
+					at: new Date(2026, 9, 3).toISOString(),
+					entryId: null,
+					from: null,
+				},
 			],
 			savedAmount: 5000,
 		});

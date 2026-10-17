@@ -59,6 +59,10 @@ export function useDreamFunding() {
 		lines,
 		/** Put aside for dreams this month so far. */
 		dreamsLimit: settings.limits.dreams,
+		/** Monthly pay now, or the expected salary while job hunting (0 when neither is set). */
+		income: settings.monthlyIncome > 0 ? settings.monthlyIncome : settings.salary,
+		/** True while the pay is only expected (no monthly income yet). */
+		incomeExpected: settings.monthlyIncome <= 0 && settings.salary > 0,
 		fund,
 		unfund,
 	};

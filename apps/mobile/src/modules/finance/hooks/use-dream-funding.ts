@@ -43,13 +43,12 @@ export function useDreamFunding() {
 
 	const fund = useCallback(
 		(amount: number, from: Category, dream: string): Promise<Entry> =>
-			fundDream(settings, { amount, from, dream }),
-		[settings],
+			fundDream({ amount, from, dream }),
+		[],
 	);
 	const unfund = useCallback(
-		(entryId: string, amount: number, from: Category) =>
-			unfundDream(settings, { entryId, amount, from }),
-		[settings],
+		(entryId: string, amount: number, from: Category) => unfundDream({ entryId, amount, from }),
+		[],
 	);
 
 	return {

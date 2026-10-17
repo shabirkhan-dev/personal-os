@@ -254,11 +254,11 @@ export function moveMoney(
  * entry so the transfer can be undone.
  */
 export async function fundDream(
-	settings: FinanceSettings,
 	input: { amount: number; from: Category; dream: string },
 	now = new Date(),
 ): Promise<Entry> {
 	if (input.from === "dreams") throw new Error("Pick a budget line other than Dreams.");
+	const settings = await currentSettings();
 	const amount = roundCents(Math.min(input.amount, settings.limits[input.from]));
 	if (amount <= 0) throw new Error("That budget line has nothing left to move.");
 	await moveMoney(settings, input.from, "dreams", amount);
@@ -276,13 +276,19 @@ export async function fundDream(
 }
 
 /** Undo a `fundDream`: the entry goes and the amount returns to the line it came from. */
-export async function unfundDream(
-	settings: FinanceSettings,
-	input: { entryId: string; amount: number; from: Category },
-): Promise<void> {
+export async function unfundDream(input: {
+	entryId: string;
+	amount: number;
+	from: Category;
+}): Promise<void> {
 	const item = (await listItems(financeEntries)).find((each) => each.id === input.entryId);
 	if (item) await removeItem(financeEntries, item.id);
-	await moveMoney(settings, "dreams", input.from, input.amount);
+	await moveMoney(await currentSettings(), "dreams", input.from, input.amount);
+}
+
+/** The saved settings, read fresh so back-to-back transfers each see the last one's limits. */
+async function currentSettings(): Promise<FinanceSettings> {
+	return (await listItems(financeSettings))[0] ?? defaultSettings();
 }
 
 // --- the old Finance file -----------------------------------------------------------------------

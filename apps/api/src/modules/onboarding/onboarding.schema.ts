@@ -20,6 +20,7 @@ const moduleId = z.enum([
 	"food",
 	"fashion",
 	"faith",
+	"wishlist",
 ]);
 
 /** Mirrors `OnboardingAnswers` in `apps/mobile/src/modules/onboarding/store/onboarding-store.ts`. */
@@ -46,7 +47,7 @@ export const onboardingAnswersSchema = z
 		workdays: z.array(z.boolean()).length(7),
 		workStyle: z.enum(["office", "remote", "hybrid"]),
 		goals: z.array(goalId).max(3),
-		modules: z.array(moduleId).max(8),
+		modules: z.array(moduleId).max(moduleId.options.length),
 		connections: z
 			.object({
 				calendar: z.boolean(),

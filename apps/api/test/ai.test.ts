@@ -446,3 +446,60 @@ describe("Finance AI", () => {
 		expect(response.status).toBe(400);
 	});
 });
+
+describe("Wishlist AI", () => {
+	it("reads a typed dream with the mock provider", async () => {
+		const response = await mockApp.call("POST", "/ai/wishlist/find", {
+			token,
+			body: { text: "a GPS sports watch for running and boxing", today: "2026-10-17" },
+		});
+		expect(response.status).toBe(200);
+		expect(response.json).toMatchObject({
+			data: { name: "GPS sports watch", category: "other", options: [] },
+		});
+	});
+
+	it("clamps what the model returns", async () => {
+		provider(
+			JSON.stringify({
+				name: "GPS sports watch",
+				category: "watches",
+				options: [
+					{ label: "Sport", price: 120000.4 },
+					{ label: "Lite", price: 65000 },
+					{ label: "Pro", price: 210000 },
+					{ label: "Ultra", price: 400000 },
+					{ label: "", price: 1 },
+				],
+				priceLow: 110000,
+				priceHigh: -5,
+				fits: "Training · running",
+			}),
+		);
+		const response = await realApp.call("POST", "/ai/wishlist/find", {
+			token,
+			body: { text: "a GPS sports watch", today: "2026-10-17" },
+		});
+		expect(response.json).toMatchObject({
+			data: {
+				category: "other",
+				options: [
+					{ label: "Sport", price: 120000 },
+					{ label: "Lite", price: 65000 },
+					{ label: "Pro", price: 210000 },
+				],
+				priceLow: 110000,
+				priceHigh: 0,
+			},
+		});
+	});
+
+	it("rejects an empty line and a signed-out caller", async () => {
+		const bad = await mockApp.call("POST", "/ai/wishlist/find", {
+			token,
+			body: { text: "", today: "2026-10-17" },
+		});
+		expect(bad.status).toBe(400);
+		expect((await mockApp.call("POST", "/ai/wishlist/find", { body: {} })).status).toBe(401);
+	});
+});

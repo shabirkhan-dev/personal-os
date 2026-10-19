@@ -4,11 +4,11 @@ import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
-import { usePoTheme } from "@/theme";
+import { PoThemeProvider, usePoTheme } from "@/theme";
 
 /**
  * Expo Router error screen: a render error shows what failed and a retry instead of a blank
- * screen or a crash. The message stays visible so it can be reported.
+ * screen or a crash. The technical message shows in development builds only; release builds log it.
  */
 export function RouteError({ error, retry }: ErrorBoundaryProps) {
 	const { colors } = usePoTheme();
@@ -34,9 +34,11 @@ export function RouteError({ error, retry }: ErrorBoundaryProps) {
 				<PoText variant="body15" tone="textSecondary">
 					This screen hit an error. Your plan is still saved on this phone.
 				</PoText>
-				<PoText variant="mono13" tone="textTertiary" selectable>
-					{error.message}
-				</PoText>
+				{__DEV__ ? (
+					<PoText variant="mono13" tone="textTertiary" selectable>
+						{error.message}
+					</PoText>
+				) : null}
 			</View>
 			<PillButton
 				label="Try again"
@@ -45,6 +47,18 @@ export function RouteError({ error, retry }: ErrorBoundaryProps) {
 				}}
 			/>
 		</View>
+	);
+}
+
+/**
+ * The root layout's boundary. It renders in place of the root layout, outside its theme
+ * provider, so it brings its own; a crash in the providers then shows this, not a closed app.
+ */
+export function RootError(props: ErrorBoundaryProps) {
+	return (
+		<PoThemeProvider>
+			<RouteError {...props} />
+		</PoThemeProvider>
 	);
 }
 

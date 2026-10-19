@@ -5,11 +5,15 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useMemo } from "react";
 import { AppProviders } from "@/components/providers";
+import { RootError } from "@/components/route-error";
 import { PoThemeProvider, poFontAssets, usePoTheme } from "@/theme";
 
 SplashScreen.preventAutoHideAsync().catch((error: unknown) =>
 	console.warn("[splash] could not keep the splash screen up", error),
 );
+
+/** Catches render errors in the providers and in screens without their own boundary. */
+export const ErrorBoundary = RootError;
 
 export default function RootLayout() {
 	return (

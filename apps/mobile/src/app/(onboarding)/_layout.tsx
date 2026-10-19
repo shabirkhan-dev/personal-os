@@ -1,7 +1,11 @@
 import { Stack } from "expo-router";
 import { Platform } from "react-native";
+import { RouteError } from "@/components/route-error";
 import { useDraftAutosave } from "@/modules/onboarding/store/use-draft-autosave";
 import { usePoTheme } from "@/theme";
+
+/** A setup screen that fails to render shows a retry instead of closing the app. */
+export const ErrorBoundary = RouteError;
 
 export default function OnboardingLayout() {
 	const { colors } = usePoTheme();

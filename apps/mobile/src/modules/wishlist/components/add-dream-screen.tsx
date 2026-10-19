@@ -15,7 +15,7 @@ import { addDream, saveChecklist, saveDream } from "../data/wishlist-actions";
 import { useWishlist } from "../hooks/use-wishlist";
 import { useWishlistUi } from "../hooks/wishlist-ui-store";
 import { parseWishLine } from "../lib/parse-wish-line";
-import { compactMoney, fullMoney } from "../lib/wishlist-math";
+import { compactMoney, fullMoney, replacedPhotoUri } from "../lib/wishlist-math";
 import {
 	CATEGORY_LABELS,
 	DREAM_CATEGORIES,
@@ -24,7 +24,7 @@ import {
 	type Spec,
 } from "../lib/wishlist-model";
 import { wishlistRoutes } from "../navigation";
-import { pickDreamPhoto } from "../services/dream-photo";
+import { deleteDreamPhoto, pickDreamPhoto } from "../services/dream-photo";
 import { type DreamFound, useWishlistAi, wishlistAiMessage } from "../services/wishlist-ai";
 import { DreamImage } from "./dream-image";
 import { WishlistScreen } from "./wishlist-screen";
@@ -75,7 +75,7 @@ function specsFrom(text: string): Spec[] {
 /** "What do you want?": type a line, pick the closest version, say why, add it to the list. */
 export function AddDreamScreen({ editId }: { editId?: string }) {
 	const { colors } = usePoTheme();
-	const { dreams, loading } = useWishlist();
+	const { dreams, owned, loading } = useWishlist();
 	const ai = useWishlistAi();
 	const editing = editId ? dreams.find((dream) => dream.id === editId) : undefined;
 	const draft = useWishlistUi((state) => state.draft);
@@ -202,6 +202,8 @@ export function AddDreamScreen({ editId }: { editId?: string }) {
 				};
 				await saveDream(next);
 				await saveChecklist(next, form.checklist.split("\n"));
+				const replaced = replacedPhotoUri(editing.photo, next.photo, owned);
+				if (replaced) deleteDreamPhoto(replaced);
 				haptics.success();
 				router.back();
 				return;

@@ -64,6 +64,16 @@ export class RecordStore {
 		return rows.map((row) => JSON.parse(row.data) as unknown);
 	}
 
+	/** Every live document, grouped by collection (for the data export). */
+	async all(): Promise<Record<string, unknown[]>> {
+		const rows = await this.db.all<Pick<Row, "collection" | "data">>(
+			"SELECT collection, data FROM records WHERE deleted_at IS NULL ORDER BY collection, updated_at DESC",
+		);
+		const out: Record<string, unknown[]> = {};
+		for (const row of rows) (out[row.collection] ??= []).push(JSON.parse(row.data) as unknown);
+		return out;
+	}
+
 	async get(collection: string, id: string): Promise<unknown | null> {
 		const row = await this.row(collection, id);
 		return row && row.deleted_at === null ? (JSON.parse(row.data) as unknown) : null;

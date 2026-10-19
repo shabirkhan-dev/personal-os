@@ -12,6 +12,7 @@ describe("data export", () => {
 			appVersion: "1.0",
 			answers: { name: "Sara", modules: ["finance"] },
 			documents: { workout: null, finance: { expenses: [{ amount: 500 }] } },
+			records: { "wishlist-dreams": [{ id: "d1" }], "faith-prayer-logs": [{ id: "p1" }] },
 			themePreference: "dark",
 		});
 		expect(file.app).toBe("Personal OS");
@@ -20,6 +21,7 @@ describe("data export", () => {
 		expect(file.preferences).toEqual({ theme: "dark" });
 		expect(Object.keys(file.modules)).toEqual(["finance", "workout"]);
 		expect(file.modules.workout).toBeNull();
+		expect(Object.keys(file.records)).toEqual(["faith-prayer-logs", "wishlist-dreams"]);
 		expect(JSON.parse(exportJson(file))).toEqual(file);
 	});
 
@@ -29,6 +31,7 @@ describe("data export", () => {
 
 	test("counts documents with data", () => {
 		expect(savedDocumentCount({ a: null, b: {}, c: [] })).toBe(2);
+		expect(savedDocumentCount({ a: null }, { notes: [{}, {}], other: [{}] })).toBe(3);
 	});
 });
 

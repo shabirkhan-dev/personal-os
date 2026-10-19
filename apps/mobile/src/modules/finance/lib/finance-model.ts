@@ -231,6 +231,9 @@ const asIso = (value: unknown) =>
 	typeof value === "string" && !Number.isNaN(Date.parse(value)) ? value : null;
 const money = (value: unknown, fallback: number) =>
 	Math.min(1_000_000_000, Math.max(0, Math.round(asNumber(value, fallback) * 100) / 100));
+/** Money on hand can be overdrawn, so it keeps its sign. */
+const signedMoney = (value: unknown) =>
+	Math.min(1_000_000_000, Math.max(-1_000_000_000, Math.round(asNumber(value, 0) * 100) / 100));
 const text = (value: unknown, max: number) => asString(value, "").trim().slice(0, max);
 const isMonth = (value: unknown): value is string =>
 	typeof value === "string" && /^\d{4}-\d{2}$/.test(value);
@@ -257,7 +260,7 @@ export function parseSettings(raw: unknown): FinanceSettings | null {
 	return {
 		id: "settings",
 		setUp: asBoolean(raw.setUp, false),
-		balance: money(raw.balance, 0),
+		balance: signedMoney(raw.balance),
 		balanceAt: asIso(raw.balanceAt) ?? base.balanceAt,
 		monthlyCost,
 		monthlyIncome: money(raw.monthlyIncome, 0),

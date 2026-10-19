@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test";
 import { groceryMatches } from "@/modules/food/lib/grocery-match";
 import {
 	balanceNow,
+	balanceText,
 	balanceTone,
 	billMonthOf,
 	budgetTotal,
@@ -15,6 +16,7 @@ import {
 	monthlyBurn,
 	monthLimits,
 	pace,
+	parseBalance,
 	project,
 	recap,
 	runwayDays,
@@ -365,6 +367,21 @@ describe("ask bar", () => {
 			groceryItem("c", "Milk", true),
 		];
 		expect(groceryMatches(list, ["Chicken · 1 kg", "Milk · 4 L", "egg"])).toEqual(["a", "b"]);
+	});
+});
+
+describe("edit numbers", () => {
+	it("shows and reads the balance exactly, overdrawn or zero", () => {
+		expect(balanceText(-5000)).toBe("-5000");
+		expect(balanceText(0)).toBe("0");
+		expect(balanceText(148_500.5)).toBe("148500.5");
+		expect(parseBalance(balanceText(-5000))).toBe(-5000);
+		expect(parseBalance(balanceText(148_500.5))).toBe(148_500.5);
+		expect(parseBalance("−5,000.25")).toBe(-5000.25);
+		expect(parseBalance("Rs 148,500")).toBe(148_500);
+		expect(parseBalance("")).toBe(0);
+		expect(parseBalance("abc")).toBeNull();
+		expect(parseSettings({ balance: -5000 })?.balance).toBe(-5000);
 	});
 });
 

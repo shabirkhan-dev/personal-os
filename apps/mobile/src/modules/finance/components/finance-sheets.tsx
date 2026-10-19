@@ -6,7 +6,7 @@ import { PoText } from "@/components/ui/po-text";
 import { Sheet } from "@/components/ui/sheet";
 import { TextField } from "@/components/ui/text-field";
 import { parseAmount } from "@/lib/money";
-import { budgetTotal, rupees } from "../lib/finance-math";
+import { balanceText, budgetTotal, parseBalance, rupees } from "../lib/finance-math";
 import {
 	type Bill,
 	CATEGORIES,
@@ -66,7 +66,11 @@ export type NumbersValue = {
 	salary: number;
 };
 
-/** "Edit numbers": money now, a month's cost, fixed income and the pay a job would bring. */
+/**
+ * "Edit numbers": money now, a month's cost, fixed income and the pay a job would bring. Money now
+ * shows exactly (paisa, overdrawn, zero) and is only sent back changed when it was edited, so
+ * saving another number never re-bases the balance.
+ */
 export function NumbersSheet({
 	visible,
 	initial,
@@ -79,13 +83,15 @@ export function NumbersSheet({
 	onSave: (value: NumbersValue) => void;
 }) {
 	const [balance, setBalance] = useState("");
+	const [balanceEdited, setBalanceEdited] = useState(false);
 	const [cost, setCost] = useState("");
 	const [income, setIncome] = useState("");
 	const [salary, setSalary] = useState("");
 	const [notice, setNotice] = useState<string | null>(null);
 	useEffect(() => {
 		if (!visible) return;
-		setBalance(show(initial.balance));
+		setBalance(balanceText(initial.balance));
+		setBalanceEdited(false);
 		setCost(show(initial.monthlyCost));
 		setIncome(show(initial.monthlyIncome));
 		setSalary(show(initial.salary));
@@ -98,8 +104,13 @@ export function NumbersSheet({
 			setNotice("What does a month cost you?");
 			return;
 		}
+		const typed = balanceEdited ? parseBalance(balance) : initial.balance;
+		if (typed === null) {
+			setNotice("Money now should be a number, like 148500 or -5000.");
+			return;
+		}
 		onSave({
-			balance: read(balance),
+			balance: typed,
 			monthlyCost: read(cost),
 			monthlyIncome: read(income),
 			salary: read(salary),
@@ -117,8 +128,11 @@ export function NumbersSheet({
 				<TextField
 					label="Money you have now"
 					value={balance}
-					onChangeText={setBalance}
-					keyboardType="number-pad"
+					onChangeText={(value) => {
+						setBalance(value);
+						setBalanceEdited(true);
+					}}
+					keyboardType="numbers-and-punctuation"
 					suffix="Rs"
 				/>
 				<TextField

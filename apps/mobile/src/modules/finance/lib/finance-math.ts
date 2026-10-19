@@ -44,6 +44,19 @@ export function total(items: readonly { amount: number }[]): number {
 	return roundCents(sum);
 }
 
+/** A balance as typed into Edit numbers: exact, with paisa, minus when overdrawn, "0" at zero. */
+export function balanceText(balance: number): string {
+	return String(roundCents(balance));
+}
+
+/** A typed balance: "148,500", "-5000", "−5,000.50" or "0"; null when it isn't a number. */
+export function parseBalance(text: string): number | null {
+	const cleaned = text.replace(/rs\.?|pkr|,|\s/gi, "").replace("−", "-");
+	if (cleaned === "") return 0;
+	if (!/^-?\d+(\.\d{1,2})?$/.test(cleaned)) return null;
+	return roundCents(Number(cleaned));
+}
+
 /** "Rs 148,500" without the paisa. */
 export function rupees(amount: number): string {
 	return formatMoney(Math.round(amount));

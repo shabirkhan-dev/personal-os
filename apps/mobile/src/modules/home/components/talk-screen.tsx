@@ -11,6 +11,7 @@ import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store"
 import { usePoTheme } from "@/theme";
 import { routeLine } from "../lib/route-line";
 import { useAskInbox } from "../store/ask-inbox";
+import { useHeyOsStatus } from "../store/hey-os";
 import { useHomeView } from "../store/home-view";
 import { AskBar } from "./ask-bar";
 
@@ -57,14 +58,21 @@ export function TalkScreen({ say }: { say?: string }) {
 		else setUnsure({ text, spoken });
 	};
 
-	// "Hey OS, prayed fajr": the words after the wake phrase are handled at once.
+	// "Hey OS, prayed fajr": words heard in the app are handled at once. Words from a link
+	// (`?say=`, which any app or site can open) are only offered: the person picks where they go.
 	const handled = useRef(false);
+	const [heard] = useState(() => {
+		const words = useHeyOsStatus.getState().heard;
+		useHeyOsStatus.setState({ heard: null });
+		return words;
+	});
 	useEffect(() => {
-		if (!say || handled.current) return;
+		if (handled.current) return;
 		handled.current = true;
-		onLine(say, true);
-		// oxlint-disable-next-line react/exhaustive-deps -- once, for the words that woke it
-	}, [say]);
+		if (heard) onLine(heard, true);
+		else if (say) setUnsure({ text: say.slice(0, 500), spoken: false });
+		// oxlint-disable-next-line react/exhaustive-deps -- once, for the words that opened it
+	}, [heard, say]);
 
 	return (
 		<View style={[styles.root, { backgroundColor: colors.bgApp, paddingTop: insets.top + 6 }]}>
@@ -86,7 +94,7 @@ export function TalkScreen({ say }: { say?: string }) {
 				<AskBar
 					suggestions={[]}
 					placeholder="Listening… or type here"
-					autoListen={!say}
+					autoListen={!say && !heard}
 					onSubmit={onLine}
 				/>
 				{unsure ? (

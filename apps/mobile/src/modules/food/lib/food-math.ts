@@ -280,7 +280,7 @@ export function weightTrend(weighIns: readonly WeighIn[], settings: FoodSettings
 	if (last) {
 		const cutoff = dayKey(addDays(new Date(`${last.id}T12:00:00`), -6));
 		const older = sorted.filter((item) => item.id < last.id);
-		const before = older.findLast((item) => item.id <= cutoff);
+		const before = [...older].reverse().find((item) => item.id <= cutoff);
 		const earlier = before ?? older[0];
 		if (earlier) week = round1(latest - earlier.kg);
 	}

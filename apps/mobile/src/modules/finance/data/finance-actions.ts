@@ -2,7 +2,7 @@ import { listItems, removeItem, saveItem } from "@/lib/db/collection";
 import { monthKey, newId } from "@/lib/day";
 import { deleteJson, readJson } from "@/lib/storage/json-file";
 import { asArray, asNumber, asString, isRecord } from "@/lib/storage/parse";
-import { billMonthOf, budgetTotal, monthLimits, roundCents } from "../lib/finance-math";
+import { billMonthOf, budgetTotal, monthLimits, roundCents, rupees } from "../lib/finance-math";
 import {
 	type Bill,
 	type Category,
@@ -298,7 +298,9 @@ export async function fundDream(
 
 /**
  * Undo a `fundDream`: the entry goes, and with it the month's transfer. Transfers saved before
- * they were kept per month moved the standing limits, so those are moved back here.
+ * they were kept per month moved the standing limits, so those are moved back here; when the
+ * Dreams limit no longer holds the whole amount, nothing changes and the undo fails rather than
+ * refund only part of it.
  */
 export async function unfundDream(input: {
 	entryId: string;
@@ -307,8 +309,18 @@ export async function unfundDream(input: {
 }): Promise<void> {
 	const item = (await listItems(financeEntries)).find((each) => each.id === input.entryId);
 	if (!item) return;
+	if (item.movedFrom) {
+		await removeItem(financeEntries, item.id);
+		return;
+	}
+	const settings = await currentSettings();
+	if (settings.limits.dreams < roundCents(input.amount)) {
+		throw new Error(
+			`Dreams only has ${rupees(settings.limits.dreams)} of its limit left to put back. Change limits in Finance first.`,
+		);
+	}
 	await removeItem(financeEntries, item.id);
-	if (!item.movedFrom) await moveMoney(await currentSettings(), "dreams", input.from, input.amount);
+	await moveMoney(settings, "dreams", input.from, input.amount);
 }
 
 /** The saved settings, read fresh so back-to-back transfers each see the last one's limits. */

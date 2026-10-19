@@ -1,4 +1,4 @@
-import { removeItem, saveItem } from "@/lib/db/collection";
+import { listItems, removeItem, saveItem } from "@/lib/db/collection";
 import { newId } from "@/lib/day";
 import { inLine, moveInLine, renumber } from "../lib/wishlist-math";
 import type {
@@ -112,20 +112,27 @@ export async function startSaving(dream: Dream, dreams: readonly Dream[]): Promi
 	);
 }
 
-export function addContribution(dream: Dream, contribution: Contribution): Promise<void> {
-	const contributions = [...dream.contributions, contribution];
-	return saveDream({
-		...dream,
-		status: dream.status === "want" ? "saving" : dream.status,
+/** The dream as saved now, read fresh so back-to-back savings changes each see the last one. */
+async function currentDream(dream: Dream): Promise<Dream> {
+	return (await listItems(wishlistDreams)).find((item) => item.id === dream.id) ?? dream;
+}
+
+export async function addContribution(dream: Dream, contribution: Contribution): Promise<void> {
+	const fresh = await currentDream(dream);
+	const contributions = [...fresh.contributions, contribution];
+	await saveDream({
+		...fresh,
+		status: fresh.status === "want" ? "saving" : fresh.status,
 		contributions,
 		savedAmount: contributions.reduce((sum, item) => sum + item.amount, 0),
 	});
 }
 
-export function removeContribution(dream: Dream, id: string): Promise<void> {
-	const contributions = dream.contributions.filter((item) => item.id !== id);
-	return saveDream({
-		...dream,
+export async function removeContribution(dream: Dream, id: string): Promise<void> {
+	const fresh = await currentDream(dream);
+	const contributions = fresh.contributions.filter((item) => item.id !== id);
+	await saveDream({
+		...fresh,
 		contributions,
 		savedAmount: contributions.reduce((sum, item) => sum + item.amount, 0),
 	});

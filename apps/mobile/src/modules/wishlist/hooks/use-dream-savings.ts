@@ -40,7 +40,11 @@ export function useDreamSavings() {
 		[unfund],
 	);
 
-	/** Puts back everything saved for a dream, one transfer after another (each sees the last). */
+	/**
+	 * Puts back everything saved for a dream, one transfer after another. Each step reads the dream
+	 * fresh (see `removeContribution`), so the last save holds none of them, and the first failure
+	 * stops the rest and is reported.
+	 */
 	const undoAll = useCallback(
 		(dream: Dream): Promise<void> =>
 			dream.contributions.reduce<Promise<void>>(

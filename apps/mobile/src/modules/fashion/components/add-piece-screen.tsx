@@ -95,6 +95,9 @@ export function AddPieceScreen({ editId, category }: { editId?: string; category
 	const [filled, setFilled] = useState(0);
 	const [reading, setReading] = useState(false);
 	const [message, setMessage] = useState<string | null>(null);
+	const [saving, setSaving] = useState(false);
+	/** Blocks a second tap that lands before the disabled button re-renders. */
+	const savingRef = useRef(false);
 	const loaded = useRef(Boolean(editing));
 
 	// The piece being edited arrives with the record store; fill the form once.
@@ -187,7 +190,9 @@ export function AddPieceScreen({ editId, category }: { editId?: string; category
 	const canSave = form.name.trim().length > 0 && form.category !== null && priceOk && dateOk;
 
 	const save = async () => {
-		if (!form.category) return;
+		if (!form.category || savingRef.current) return;
+		savingRef.current = true;
+		setSaving(true);
 		try {
 			const saved = await savePiece({
 				...(editing ? { id: editing.id, createdAt: editing.createdAt } : {}),
@@ -211,6 +216,8 @@ export function AddPieceScreen({ editId, category }: { editId?: string; category
 		} catch (error) {
 			console.error("[fashion] could not save the piece", error);
 			setMessage("Couldn't save on this phone. Try again.");
+			savingRef.current = false;
+			setSaving(false);
 		}
 	};
 
@@ -517,8 +524,8 @@ export function AddPieceScreen({ editId, category }: { editId?: string; category
 					style={styles.flex}
 				/>
 				<PillButton
-					label={editing ? "Save" : "Save piece"}
-					disabled={!canSave}
+					label={saving ? "Saving…" : editing ? "Save" : "Save piece"}
+					disabled={!canSave || saving}
 					onPress={() => void save()}
 					style={styles.flex}
 				/>

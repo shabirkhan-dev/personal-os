@@ -16,3 +16,8 @@ AUTH_TOKEN_SECRET=development-only-auth-token-secret-change-me
 # AUTH_EMAIL_FROM="Personal OS <auth@your-domain.com>"
 # OPENAI_BASE_URL=https://api.deepseek.com
 # OPENAI_MODEL=deepseek-flash
+# Optional, with their defaults:
+# APP_NAME="Personal OS"
+# R2_BUCKET_NAME=personal-os-assets
+# Scripts and tests only; on Workers the database comes from the HYPERDRIVE binding.
+# DATABASE_URL=postgresql://personal_os:personal_os@localhost:5433/personal_os

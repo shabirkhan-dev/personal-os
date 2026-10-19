@@ -56,8 +56,9 @@ bun run update:preview      # → preview channel (internal testers, `eas build 
 bun run update:production   # → production channel, with the production EAS environment
 ```
 
-Updates read `EXPO_PUBLIC_API_URL` from the EAS environment named in the script, never from a
-local `.env`, so a laptop's LAN address can't ship over the air.
+The scripts pass `--environment`, so updates take `EXPO_PUBLIC_API_URL` from that EAS environment.
+Check that no local `.env` overrides it before publishing to production: a laptop's LAN address
+must never ship over the air.
 
 ## Structure
 

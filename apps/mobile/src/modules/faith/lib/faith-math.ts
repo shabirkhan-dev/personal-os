@@ -490,6 +490,21 @@ export function zakatView(
 	};
 }
 
+/** A typed "YYYY-MM-DD" that is a real day: "2026-02-30" is refused, not rolled into March. */
+export function isCalendarDay(text: string): boolean {
+	if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) return false;
+	const date = new Date(`${text}T00:00:00`);
+	return !Number.isNaN(date.getTime()) && dayKey(date) === text;
+}
+
+/** A typed zakat rate in percent ("2.5") as a share (0.025); empty, zero or over 100 is null. */
+export function parseRate(text: string): number | null {
+	const trimmed = text.trim();
+	if (!trimmed) return null;
+	const value = Number(trimmed);
+	return Number.isFinite(value) && value > 0 && value <= 100 ? value / 100 : null;
+}
+
 /** "1.5L", "70k", "3,20,000": Pakistani short amounts as the Zakat frame shows them. */
 export function shortRupees(amount: number): string {
 	if (amount >= 100_000) return `${trim(amount / 100_000)}L`;

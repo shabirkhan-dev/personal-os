@@ -4,6 +4,8 @@ import { ayahs } from "./ayahs";
 import {
 	consistencyGrid,
 	currentHawl,
+	isCalendarDay,
+	parseRate,
 	currentPrayer,
 	insights,
 	lakhs,
@@ -288,6 +290,20 @@ describe("tasbih, zakat, hijri, ayahs", () => {
 		expect(view.monthsHeld).toBe(7);
 		expect(currentHawl("2027-01-01", now)?.start.getFullYear()).toBe(2027);
 		expect(currentHawl(null, now)).toBeNull();
+	});
+
+	it("checks the typed hawl date and rate", () => {
+		expect(isCalendarDay("2026-03-20")).toBe(true);
+		expect(isCalendarDay("2028-02-29")).toBe(true);
+		expect(isCalendarDay("2026-02-30")).toBe(false);
+		expect(isCalendarDay("2026-13-01")).toBe(false);
+		expect(isCalendarDay("20-03-2026")).toBe(false);
+		expect(parseRate("2.5")).toBe(0.025);
+		expect(parseRate("")).toBeNull();
+		expect(parseRate("  ")).toBeNull();
+		expect(parseRate("0")).toBeNull();
+		expect(parseRate("101")).toBeNull();
+		expect(parseRate("abc")).toBeNull();
 	});
 
 	it("converts to the Hijri calendar", () => {

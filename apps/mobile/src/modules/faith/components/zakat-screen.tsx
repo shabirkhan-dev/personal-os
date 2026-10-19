@@ -12,7 +12,15 @@ import { useNow } from "@/lib/use-now";
 import { usePoTheme } from "@/theme";
 import { addPayment, removePayment, saveZakat } from "../data/faith-actions";
 import { useFaith } from "../hooks/use-faith";
-import { hijriMonthName, lakhs, shortRupees, toHijri, zakatView } from "../lib/faith-math";
+import {
+	hijriMonthName,
+	isCalendarDay,
+	lakhs,
+	parseRate,
+	shortRupees,
+	toHijri,
+	zakatView,
+} from "../lib/faith-math";
 import type { ZakatProfile } from "../lib/faith-model";
 import { FaithScreen } from "./faith-screen";
 
@@ -280,16 +288,10 @@ function OwnedSheet({ profile, onClose }: { profile: ZakatProfile; onClose: () =
 		debts: read(debts),
 		nisab: read(nisab),
 	};
-	const rateValue = Number(rate);
-	const startOk =
-		!start.trim() ||
-		(/^\d{4}-\d{2}-\d{2}$/.test(start.trim()) && !Number.isNaN(Date.parse(start.trim())));
+	const rateValue = parseRate(rate);
+	const startOk = !start.trim() || isCalendarDay(start.trim());
 	const valid =
-		Object.values(values).every((value) => value !== null) &&
-		Number.isFinite(rateValue) &&
-		rateValue >= 0 &&
-		rateValue <= 100 &&
-		startOk;
+		Object.values(values).every((value) => value !== null) && rateValue !== null && startOk;
 
 	return (
 		<Sheet
@@ -307,7 +309,7 @@ function OwnedSheet({ profile, onClose }: { profile: ZakatProfile; onClose: () =
 						savings: values.savings ?? 0,
 						debts: values.debts ?? 0,
 						nisab: values.nisab ?? profile.nisab,
-						rate: rateValue / 100,
+						rate: rateValue ?? profile.rate,
 						hawlStart: start.trim() || null,
 					}).catch((error: unknown) => console.error("[faith] could not save zakat", error));
 					onClose();
@@ -364,7 +366,7 @@ function OwnedSheet({ profile, onClose }: { profile: ZakatProfile; onClose: () =
 			/>
 			{!valid ? (
 				<PoText variant="meta13" tone="textDanger">
-					Check the amounts, the rate (0–100) and the date (like 2026-03-20).
+					Check the amounts, the rate (above 0, up to 100) and the date (like 2026-03-20).
 				</PoText>
 			) : null}
 		</Sheet>

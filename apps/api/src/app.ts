@@ -23,7 +23,7 @@ export type AppOptions = {
 };
 
 /** On Workers the URL is Hyperdrive's; elsewhere (scripts) it is DATABASE_URL. */
-function defaultOpenDatabase(config: Config, env: CloudflareBindings): DatabaseHandle {
+export function defaultOpenDatabase(config: Config, env: CloudflareBindings): DatabaseHandle {
 	const url = env.HYPERDRIVE?.connectionString ?? config.databaseUrl;
 	if (!url) throw new Error("No database: bind HYPERDRIVE or set DATABASE_URL");
 	return openDatabase(url);

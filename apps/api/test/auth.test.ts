@@ -89,6 +89,30 @@ describe("email-code sign-in", () => {
 		expect(right.status).toBe(401);
 	});
 
+	it("counts parallel guesses, so a burst can't get past five tries", async () => {
+		const email = newEmail();
+		const sent = await call<{ data: { developmentCode: string } }>(
+			"POST",
+			"/auth/email-code/request",
+			{ body: { email } },
+		);
+		const code = sent.json?.data.developmentCode ?? "";
+		const wrong = code === "123456" ? "654321" : "123456";
+		const burst = await Promise.all(
+			Array.from({ length: 20 }, () =>
+				call("POST", "/auth/email-code/verify", { body: { email, code: wrong } }),
+			),
+		);
+		expect(burst.every((response) => response.status === 401)).toBe(true);
+		const [row] = await db
+			.select()
+			.from(signInCodes)
+			.where(eq(signInCodes.email, email.toLowerCase()));
+		expect(row?.attempts).toBe(5);
+		const right = await call("POST", "/auth/email-code/verify", { body: { email, code } });
+		expect(right.status).toBe(401);
+	});
+
 	it("rejects a malformed body with the issues", async () => {
 		const response = await call("POST", "/auth/email-code/verify", {
 			body: { email: "nope", code: "12" },

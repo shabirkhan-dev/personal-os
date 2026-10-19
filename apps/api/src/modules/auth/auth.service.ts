@@ -64,8 +64,10 @@ export async function verifyCode(
 	) {
 		throw new AppError("AUTH_CODE_INVALID");
 	}
+	if (!(await repo.claimAttempt(db, saved.id, settings.auth.codeMaxAttempts))) {
+		throw new AppError("AUTH_CODE_INVALID");
+	}
 	if (!safeEqual(await codeHash(config, input.email, input.code), saved.codeHash)) {
-		await repo.recordWrongCode(db, saved.id);
 		throw new AppError("AUTH_CODE_INVALID");
 	}
 	if (!(await repo.consumeCode(db, saved.id))) throw new AppError("AUTH_CODE_INVALID");

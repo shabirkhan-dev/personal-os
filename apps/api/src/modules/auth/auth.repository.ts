@@ -1,4 +1,4 @@
-import { and, desc, eq, gt, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, gt, isNull, lt, sql } from "drizzle-orm";
 
 import type { Database } from "@/db/client";
 import { type SessionRow, type SignInCodeRow, sessions, signInCodes, users } from "@/db/schema";
@@ -21,11 +21,27 @@ export async function latestCode(db: Database, email: string): Promise<SignInCod
 	return row ?? null;
 }
 
-export async function recordWrongCode(db: Database, id: string): Promise<void> {
-	await db
+/**
+ * Spends one try before the code is compared, so parallel guesses can't all read the same count.
+ * False once the code has used up its tries or was already used.
+ */
+export async function claimAttempt(
+	db: Database,
+	id: string,
+	maxAttempts: number,
+): Promise<boolean> {
+	const rows = await db
 		.update(signInCodes)
 		.set({ attempts: sql`${signInCodes.attempts} + 1` })
-		.where(eq(signInCodes.id, id));
+		.where(
+			and(
+				eq(signInCodes.id, id),
+				isNull(signInCodes.consumedAt),
+				lt(signInCodes.attempts, maxAttempts),
+			),
+		)
+		.returning({ id: signInCodes.id });
+	return rows.length === 1;
 }
 
 /** Single use: of two requests racing with the same code, only one gets `true`. */

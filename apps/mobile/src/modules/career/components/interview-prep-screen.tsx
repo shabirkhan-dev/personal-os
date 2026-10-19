@@ -179,8 +179,8 @@ export function InterviewPrepScreen({ id }: { id?: string }) {
 							valueTone="accentDefault"
 							leading={<Checkbox checked={topic.done} />}
 							onPress={() =>
-								void toggleTopic(prep, topic.id).catch((error: unknown) =>
-									console.error("[career] could not tick the topic", error),
+								void toggleTopic(prep, topic.id).catch((caught: unknown) =>
+									console.error("[career] could not tick the topic", caught),
 								)
 							}
 							last={index === prep.topics.length - 1}

@@ -165,7 +165,7 @@ export function DailyHomeView({ actionRequest }: HomeModuleViewProps) {
 			return;
 		}
 		if (intent.kind === "tick") {
-			void toggleTick(log, today, intent.id)
+			void toggleTick(today, intent.id)
 				.then(() => say(`${MINIMUM[intent.id].label} ticked for today.`, spoken))
 				.catch(failed);
 			return;
@@ -271,7 +271,7 @@ export function DailyHomeView({ actionRequest }: HomeModuleViewProps) {
 					now={rightNow}
 					detail={detail}
 					onStart={() => open(rightNow.item.module)}
-					onLater={() => void pushLater(log, today, rightNow.item.id).catch(failed)}
+					onLater={() => void pushLater(today, rightNow.item.id).catch(failed)}
 				/>
 			) : null}
 			{settings.setUp ? (
@@ -280,7 +280,7 @@ export function DailyHomeView({ actionRequest }: HomeModuleViewProps) {
 					streak={streak}
 					onPress={dailyRoutes.minimum}
 					onRing={(ring) => {
-						if (ring.module === "daily-life") void toggleTick(log, today, ring.id).catch(failed);
+						if (ring.module === "daily-life") void toggleTick(today, ring.id).catch(failed);
 						else open(ring.module);
 					}}
 				/>

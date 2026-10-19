@@ -213,7 +213,7 @@ export function SleepScreen() {
 						tone="textTertiary"
 						{...(row.auto
 							? {}
-							: { onPress: () => void toggleWindDown(log, today, row.id).catch(failed) })}
+							: { onPress: () => void toggleWindDown(today, row.id).catch(failed) })}
 					/>
 				))}
 			</Card>
@@ -267,7 +267,7 @@ export function SleepScreen() {
 					onPress={() => {
 						if (next && !next.auto) {
 							haptics.tap();
-							void toggleWindDown(log, today, next.id).catch(failed);
+							void toggleWindDown(today, next.id).catch(failed);
 						}
 					}}
 				/>

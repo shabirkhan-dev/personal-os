@@ -11,6 +11,10 @@ export const errors = {
 	BODY_TOO_LARGE: { status: 413, message: "The request is too large." },
 	NOT_FOUND: { status: 404, message: "Nothing lives at this address." },
 	RATE_LIMITED: { status: 429, message: "Too many requests. Wait a minute and try again." },
+	AI_QUOTA_REACHED: {
+		status: 429,
+		message: "You've used today's AI help. It resets tomorrow; everything else still works.",
+	},
 	INTERNAL_ERROR: { status: 500, message: "Something went wrong on our side. Try again." },
 	/** The message lists the missing or invalid settings by name (never their values). */
 	CONFIG_INVALID: { status: 503, message: "The API's settings are incomplete." },

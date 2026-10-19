@@ -16,6 +16,7 @@ import {
 	skillPathSchema,
 } from "./career.schema";
 import { buildInterviewPrep, draftNudge, parseLine, planSkillPath, readJob } from "./career.tasks";
+import { aiQuota } from "./ai.quota";
 import { askCareSchema } from "./care.schema";
 import { findDreamSchema } from "./wishlist.schema";
 import { findDream } from "./wishlist.tasks";
@@ -36,6 +37,7 @@ export const aiRoutes = new Hono<AppEnv>()
 	.use(
 		requireAuth,
 		rateLimit("AI_LIMITER"),
+		aiQuota,
 		bodyLimit({
 			maxSize: settings.ai.maxBodyBytes,
 			onError: () => {

@@ -18,6 +18,7 @@ export async function completeJson(
 				model: config.model,
 				messages,
 				temperature: 0.4,
+				max_tokens: settings.ai.maxOutputTokens,
 				response_format: { type: "json_object" },
 			}),
 			signal: AbortSignal.timeout(settings.ai.timeoutMs),

@@ -28,6 +28,10 @@ export const settings = {
 	ai: {
 		maxBodyBytes: 32 * 1024,
 		timeoutMs: 60_000,
+		/** Caps each answer's length, and so its cost. */
+		maxOutputTokens: 4000,
+		/** AI calls per user per UTC day. */
+		callsPerDay: 150,
 		page: {
 			maxBytes: 2_000_000,
 			maxRedirects: 3,

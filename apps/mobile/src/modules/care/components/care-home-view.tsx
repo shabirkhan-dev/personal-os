@@ -17,7 +17,7 @@ import { voiceOut } from "@/lib/voice";
 import { AskBar } from "@/modules/home/components/ask-bar";
 import type { HomeModuleViewProps } from "@/modules/home/lib/module-home";
 import { useAskInbox } from "@/modules/home/store/ask-inbox";
-import { finish, restock, saveDay, saveSettings, setUp, tick } from "../data/care-actions";
+import { finish, logCare, restock, saveDay, saveSettings, setUp, tick } from "../data/care-actions";
 import { CARE_ASK_JOB, useCareUi } from "../hooks/care-ui-store";
 import { useCareToday } from "../hooks/use-care";
 import { useUv } from "../hooks/use-uv";
@@ -126,9 +126,9 @@ export function CareHomeView({ actionRequest }: HomeModuleViewProps) {
 	};
 
 	const onTick = (step: Step) => {
-		tick(record, today, step, routineSteps)
-			.then((next) => {
-				if (next.finished.includes(routine) && !record?.finished.includes(routine)) {
+		tick(today, step, routineSteps)
+			.then(({ before, after }) => {
+				if (after.finished.includes(routine) && !before.finished.includes(routine)) {
 					haptics.success();
 					setNotice(`${routine === "morning" ? "Morning" : "Night"} routine done. Nice.`);
 				}
@@ -190,22 +190,14 @@ export function CareHomeView({ actionRequest }: HomeModuleViewProps) {
 			return;
 		}
 		const previous = record;
-		const base = record ?? emptyDay(today);
 		let title = "";
 		if (intent.kind === "routine") {
 			const list = stepsOn(steps, intent.routine, today);
 			title = `${intent.routine === "morning" ? "Morning" : "Night"} routine · ${list.length} steps`;
-			void finish(base, today, list)
+			void finish(today, list)
 				.then(() => haptics.success())
 				.catch(failed("log the routine"));
 		} else {
-			const ticked = { ...base.steps };
-			for (const id of intent.stepIds) ticked[id] ??= new Date().toISOString();
-			const next: CareDay = {
-				...base,
-				steps: ticked,
-				habits: [...new Set([...base.habits, ...intent.habitIds])],
-			};
 			const names = [
 				...steps.filter((step) => intent.stepIds.includes(step.id)).map((step) => step.name),
 				...data.habits
@@ -213,9 +205,11 @@ export function CareHomeView({ actionRequest }: HomeModuleViewProps) {
 					.map((habit) => habit.name),
 			];
 			title = names.join(" · ");
-			const routineDone = routineSteps.length > 0 && routineSteps.every((step) => ticked[step.id]);
-			if (routineDone) next.finished = [...new Set([...next.finished, routine])];
-			void saveDay(next)
+			void logCare(today, {
+				stepIds: intent.stepIds,
+				habitIds: intent.habitIds,
+				routine: { id: routine, steps: routineSteps },
+			})
 				.then(() => haptics.success())
 				.catch(failed("log care"));
 		}

@@ -64,38 +64,86 @@ export function saveDay(day: CareDay): Promise<void> {
 	return saveItem(careDays, day);
 }
 
+/**
+ * Day writes run one after another and each starts from the stored day, not the screen's copy,
+ * so two fast taps before the screen refreshes both land.
+ */
+let dayWrites: Promise<unknown> = Promise.resolve();
+
+function updateDay<T>(day: string, change: (current: CareDay) => Promise<T>): Promise<T> {
+	const run = dayWrites.then(async () => {
+		const current = (await listItems(careDays)).find((item) => item.id === day) ?? emptyDay(day);
+		return change(current);
+	});
+	dayWrites = run.catch(() => undefined);
+	return run;
+}
+
+/** Ticks (or unticks) one step; `before` and `after` tell whether this tick finished the routine. */
 export function tick(
-	record: CareDay | null,
 	day: string,
 	step: Step,
 	routineSteps: readonly Step[],
 	now = new Date(),
-): Promise<CareDay> {
-	const next = toggleStep(record ?? emptyDay(day), step, routineSteps, now);
-	return saveItem(careDays, next).then(() => next);
+): Promise<{ before: CareDay; after: CareDay }> {
+	return updateDay(day, async (before) => {
+		const after = toggleStep(before, step, routineSteps, now);
+		await saveItem(careDays, after);
+		return { before, after };
+	});
 }
 
 export function finish(
-	record: CareDay | null,
 	day: string,
 	routineSteps: readonly Step[],
 	now = new Date(),
-): Promise<CareDay> {
-	const next = finishRoutine(record ?? emptyDay(day), routineSteps, now);
-	return saveItem(careDays, next).then(() => next);
+): Promise<void> {
+	return updateDay(day, (current) => saveItem(careDays, finishRoutine(current, routineSteps, now)));
 }
 
-export function skip(record: CareDay | null, day: string, routine: Routine): Promise<void> {
-	const base = record ?? emptyDay(day);
-	return saveItem(careDays, { ...base, skipped: [...new Set([...base.skipped, routine])] });
+export function skip(day: string, routine: Routine): Promise<void> {
+	return updateDay(day, (current) =>
+		saveItem(careDays, { ...current, skipped: [...new Set([...current.skipped, routine])] }),
+	);
 }
 
-export function toggleHabit(record: CareDay | null, day: string, habitId: string): Promise<void> {
-	const base = record ?? emptyDay(day);
-	const habits = base.habits.includes(habitId)
-		? base.habits.filter((id) => id !== habitId)
-		: [...base.habits, habitId];
-	return saveItem(careDays, { ...base, habits });
+export function toggleHabit(day: string, habitId: string): Promise<void> {
+	return updateDay(day, (current) => {
+		const habits = current.habits.includes(habitId)
+			? current.habits.filter((id) => id !== habitId)
+			: [...current.habits, habitId];
+		return saveItem(careDays, { ...current, habits });
+	});
+}
+
+/**
+ * Ticks several steps and habits at once ("did my sunscreen and water", "Log today"), finishing
+ * `routine` when that leaves all of its steps done.
+ */
+export function logCare(
+	day: string,
+	input: {
+		stepIds?: readonly string[];
+		habitIds?: readonly string[];
+		routine?: { id: Routine; steps: readonly Step[] };
+	},
+	now = new Date(),
+): Promise<void> {
+	return updateDay(day, (current) => {
+		const steps = { ...current.steps };
+		for (const id of input.stepIds ?? []) steps[id] ??= now.toISOString();
+		const routine = input.routine;
+		const done =
+			routine !== undefined &&
+			routine.steps.length > 0 &&
+			routine.steps.every((step) => steps[step.id]);
+		return saveItem(careDays, {
+			...current,
+			steps,
+			habits: [...new Set([...current.habits, ...(input.habitIds ?? [])])],
+			finished: done ? [...new Set([...current.finished, routine.id])] : current.finished,
+		});
+	});
 }
 
 export function saveStep(step: Omit<Step, "id"> & { id?: string }): Promise<void> {

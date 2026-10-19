@@ -30,6 +30,10 @@ const DEFAULT_PHOTO = {
 } as const;
 
 /** One logged session: run numbers and splits, or the sets done, how it felt and a note. */
+function failed(error: unknown) {
+	console.error("[training] could not save", error);
+}
+
 export function SessionScreen({ id }: { id: string }) {
 	const { colors } = usePoTheme();
 	const { sessions } = useTraining();
@@ -74,7 +78,9 @@ export function SessionScreen({ id }: { id: string }) {
 				text: "Delete",
 				style: "destructive",
 				onPress: () => {
-					void deleteSession(session).then(() => router.back());
+					void deleteSession(session)
+						.then(() => router.back())
+						.catch(failed);
 				},
 			},
 		]);
@@ -154,7 +160,7 @@ export function SessionScreen({ id }: { id: string }) {
 							key={feel}
 							label={feel.charAt(0).toUpperCase() + feel.slice(1)}
 							selected={session.feel === feel}
-							onPress={() => void updateSession({ ...session, feel })}
+							onPress={() => void updateSession({ ...session, feel }).catch(failed)}
 						/>
 					))}
 				</View>
@@ -181,7 +187,9 @@ export function SessionScreen({ id }: { id: string }) {
 					label: "Save",
 					onPress: () => {
 						haptics.success();
-						void updateSession({ ...session, note: (noting ?? "").trim().slice(0, 500) });
+						void updateSession({ ...session, note: (noting ?? "").trim().slice(0, 500) }).catch(
+							failed,
+						);
 						setNoting(null);
 					},
 				}}

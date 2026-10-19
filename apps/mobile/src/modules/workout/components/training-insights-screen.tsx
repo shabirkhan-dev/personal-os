@@ -72,7 +72,9 @@ export function TrainingInsightsScreen() {
 			updateView((doc) => ({ ...doc, view: "food" }));
 			trainingRoutes.today();
 		} else if (note.kind === "missed" && plan) {
-			void rebalanceWeek(plan, sessions, today).then(() => haptics.success());
+			void rebalanceWeek(plan, sessions, today)
+				.then(() => haptics.success())
+				.catch((error: unknown) => console.error("[training] could not save", error));
 		} else trainingRoutes.week();
 		setHidden((list) => [...list, note.kind]);
 	};

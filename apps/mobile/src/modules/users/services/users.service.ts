@@ -5,6 +5,8 @@ export const usersService = {
 	getCurrent: (accessToken: string) => apiClient.get<User>("/users/me", { accessToken }),
 	updateProfile: (accessToken: string, input: UpdateUserProfileInput) =>
 		apiClient.patch<User>("/users/me/profile", input, { accessToken }),
+	/** Deletes the account and everything the server keeps for it. */
+	deleteAccount: (accessToken: string) => apiClient.delete<null>("/users/me", { accessToken }),
 
 	/**
 	 * Uploads a picked image straight to R2 with a presigned URL, then saves its key. The image

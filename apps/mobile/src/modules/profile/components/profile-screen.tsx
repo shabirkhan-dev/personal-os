@@ -6,6 +6,7 @@ import { Alert, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PoText } from "@/components/ui/po-text";
 import { haptics } from "@/lib/haptics";
+import { useSync } from "@/lib/sync/sync-provider";
 import { CURRENCY } from "@/lib/money";
 import { useAuth } from "@/modules/auth/context/auth-context";
 import { FloatingTabBar } from "@/modules/home/components/floating-tab-bar";
@@ -27,6 +28,7 @@ import {
 	weekStartLabel,
 } from "../lib/labels";
 import type { WeekStart } from "../lib/profile-document";
+import { eraseThisPhone } from "../services/erase-device";
 import { exportData } from "../services/export-data";
 import { useProfileStore } from "../store/profile-store";
 import { DevicesSection } from "./devices-section";
@@ -69,6 +71,16 @@ function saveUnits(system: UnitSystem) {
 		.catch((error: unknown) => console.error("Could not save units", error));
 }
 
+/** An Alert as a promise: true when the person picks `action`. */
+function confirm(title: string, message: string, action: string): Promise<boolean> {
+	return new Promise((resolve) => {
+		Alert.alert(title, message, [
+			{ text: "Cancel", style: "cancel", onPress: () => resolve(false) },
+			{ text: action, style: "destructive", onPress: () => resolve(true) },
+		]);
+	});
+}
+
 /** Clears the answers and restarts setup, after a confirm. */
 function replayOnboarding() {
 	Alert.alert(
@@ -106,6 +118,8 @@ export function ProfileScreen() {
 	const hydrateProfile = useProfileStore((state) => state.hydrate);
 	const [sheet, setSheet] = useState<OpenSheet>(null);
 	const [exporting, setExporting] = useState(false);
+	const [deleting, setDeleting] = useState(false);
+	const backup = useSync();
 
 	useEffect(() => {
 		useMemberStore
@@ -133,17 +147,75 @@ export function ProfileScreen() {
 			.finally(() => setExporting(false));
 	};
 
+	/** Backs up first; if that fails, asks before leaving changes that only live on this phone. */
+	const leave = async (erase: boolean) => {
+		try {
+			await backup.syncNow();
+		} catch (error) {
+			console.warn("[profile] could not back up before signing out", error);
+			const go = await confirm(
+				"Not everything is backed up",
+				erase
+					? "Some changes haven't reached your account and will be lost. Sign out and erase anyway?"
+					: "Some changes haven't reached your account yet. They stay on this phone. Sign out anyway?",
+				"Sign out",
+			);
+			if (!go) return;
+		}
+		await auth.logout();
+		if (erase) await eraseThisPhone();
+	};
+
 	const signOut = () => {
-		Alert.alert("Sign out?", "Your plan and logs stay on this phone.", [
-			{ text: "Cancel", style: "cancel" },
-			{
-				text: "Sign out",
-				style: "destructive",
-				onPress: () => {
-					auth.logout().catch((error: unknown) => console.error("Sign out failed", error));
+		Alert.alert(
+			"Sign out?",
+			"Your changes are backed up first. Keep your plan and logs on this phone, or erase them.",
+			[
+				{ text: "Cancel", style: "cancel" },
+				{
+					text: "Sign out",
+					onPress: () =>
+						void leave(false).catch((error: unknown) => console.error("Sign out failed", error)),
 				},
-			},
-		]);
+				{
+					text: "Sign out and erase",
+					style: "destructive",
+					onPress: () =>
+						void leave(true).catch((error: unknown) => console.error("Sign out failed", error)),
+				},
+			],
+		);
+	};
+
+	const removeAccount = () => {
+		Alert.alert(
+			"Delete your account?",
+			"This deletes your account and everything backed up to it, and erases this phone. It can't be undone.",
+			[
+				{ text: "Cancel", style: "cancel" },
+				{
+					text: "Delete account",
+					style: "destructive",
+					onPress: () => {
+						setDeleting(true);
+						auth
+							.deleteAccount()
+							.then(async () => {
+								await eraseThisPhone();
+								haptics.success();
+							})
+							.catch((error: unknown) => {
+								console.error("Account deletion failed", error);
+								Alert.alert(
+									"Couldn't delete your account",
+									"Check your connection and try again. Nothing was deleted.",
+								);
+							})
+							.finally(() => setDeleting(false));
+					},
+				},
+			],
+		);
 	};
 
 	return (
@@ -283,6 +355,16 @@ export function ProfileScreen() {
 							meta="Set up Personal OS again"
 							onPress={replayOnboarding}
 						/>
+						{signedIn ? (
+							<SettingsRow
+								icon="Line/Close"
+								iconTone="textDanger"
+								title={deleting ? "Deleting…" : "Delete account"}
+								titleTone="textDanger"
+								meta="Removes your account and all of its data"
+								onPress={deleting ? undefined : removeAccount}
+							/>
+						) : null}
 					</SettingsCard>
 
 					<View style={styles.version}>

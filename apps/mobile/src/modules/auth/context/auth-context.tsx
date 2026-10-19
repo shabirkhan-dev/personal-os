@@ -7,6 +7,7 @@ import {
 	useMemo,
 	useState,
 } from "react";
+import { usersService } from "@/modules/users/services/users.service";
 import type { User } from "@/modules/users/types/user.types";
 import { authService } from "../services/auth.service";
 import { restoreSession } from "../services/restore-session";
@@ -30,6 +31,8 @@ interface AuthContextValue {
 	/** Retries restoring the saved session after `offline`. */
 	retry: () => Promise<void>;
 	logout: () => Promise<void>;
+	/** Deletes the account on the server, then ends the session. Throws if the server refused. */
+	deleteAccount: () => Promise<void>;
 	/** Shows a changed account (new name or avatar) without signing in again. */
 	updateUser: (user: User) => void;
 }
@@ -124,6 +127,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		}
 	}, [clearSession]);
 
+	const deleteAccount = useCallback(async () => {
+		if (!session) throw new Error("Sign in to delete your account");
+		await usersService.deleteAccount(session.accessToken);
+		await clearSession();
+	}, [session, clearSession]);
+
 	const updateUser = useCallback((user: User) => {
 		setSession((current) => (current ? { ...current, user } : current));
 	}, []);
@@ -138,9 +147,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			verifyEmailCode,
 			retry: () => restore(),
 			logout,
+			deleteAccount,
 			updateUser,
 		}),
-		[status, session, error, requestEmailCode, verifyEmailCode, restore, logout, updateUser],
+		[
+			status,
+			session,
+			error,
+			requestEmailCode,
+			verifyEmailCode,
+			restore,
+			logout,
+			deleteAccount,
+			updateUser,
+		],
 	);
 
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

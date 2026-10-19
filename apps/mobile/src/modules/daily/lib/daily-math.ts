@@ -165,9 +165,8 @@ export function streak(logs: readonly DayLog[], now: Date): number {
 	let count = kept(dayKey(now)) ? 1 : 0;
 	let misses = 0;
 	for (let back = 1; back < 400; back += 1) {
-		const day = dayKey(addDays(now, -back));
-		if (!byDay.has(day)) break;
-		if (kept(day)) {
+		// A day with no log is a miss like any other: it still gets its one pass.
+		if (kept(dayKey(addDays(now, -back)))) {
 			count += 1;
 			misses = 0;
 		} else {

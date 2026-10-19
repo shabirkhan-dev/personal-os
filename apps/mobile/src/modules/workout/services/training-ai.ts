@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { ApiError, apiClient } from "@/lib/api/client";
+import { aiLimitMessage } from "@/lib/api/ai-limits";
 import { dayKey } from "@/lib/day";
 import { useAuth } from "@/modules/auth";
 
@@ -10,6 +11,8 @@ const AI_TIMEOUT_MS = 45_000;
 export type TrainingAnswer = { answer: string; followUps: string[] };
 
 export function trainingAiMessage(error: unknown): string {
+	const limit = aiLimitMessage(error);
+	if (limit) return limit;
 	if (error instanceof ApiError) {
 		if (error.statusCode === 0) return "You're offline. This needs a connection.";
 		if (error.statusCode === 401) return "Sign in again to use AI.";

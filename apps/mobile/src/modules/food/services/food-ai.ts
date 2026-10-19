@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { ApiError, apiClient } from "@/lib/api/client";
+import { aiLimitMessage } from "@/lib/api/ai-limits";
 import { dayKey } from "@/lib/day";
 import { useAuth } from "@/modules/auth";
 import type { Macros, Slot } from "../lib/food-model";
@@ -16,6 +17,8 @@ export type MealReadingAi = {
 export type FoodAnswer = { answer: string; recipeId: string | null; followUps: string[] };
 
 export function foodAiMessage(error: unknown): string {
+	const limit = aiLimitMessage(error);
+	if (limit) return limit;
 	if (error instanceof ApiError) {
 		if (error.statusCode === 0) return "You're offline. This needs a connection.";
 		if (error.statusCode === 401) return "Sign in again to use AI.";

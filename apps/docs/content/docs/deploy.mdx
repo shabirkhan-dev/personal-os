@@ -108,14 +108,29 @@ Check it:
 ```bash
 curl -sS https://personal-os-api.<your-subdomain>.workers.dev/api/v1/health
 # "environment": "production", "ai": "openai_compatible", "assets": "ready"
+curl -sS --fail https://personal-os-api.<your-subdomain>.workers.dev/api/v1/ready
+# 200 once the database answers; point an uptime monitor here
 ```
+
+`ai: "off"` means the provider key is missing: AI screens say AI is unavailable and everything
+else keeps working. The Worker also runs a daily cron (`triggers.crons` in `wrangler.jsonc`) that
+drops old sign-in codes, ended sessions and old AI usage.
+
+**Order matters when a pull request adds a migration:** apply it to Neon first, then let the
+Worker deploy. CI fails a pull request whose schema changed without a migration.
+
+**Backups:** Neon keeps point-in-time history; check the retention window in the Neon project
+settings and restore to a branch to recover (Neon → Branches → restore). Migrations have no
+down step, so a bad one is undone by restoring, not by rolling back.
 
 ## 3) The app on EAS
 
 1. On expo.dev, the project → **Settings → GitHub**: connect this repo, base directory
    `apps/mobile`.
-2. **Environment variables:** add `EXPO_PUBLIC_API_URL` = the Worker URL (no path) to every
-   environment. It is baked in at build time, so add it before building.
+2. **Environment variables:** add `EXPO_PUBLIC_API_URL` = the Worker URL (https, no path) to the
+   `preview` and `production` environments (`eas env:create`). It is baked in at build time; a
+   production build without an https URL stops before installing, and a release app without one
+   says it can't reach its server instead of calling localhost.
 3. Build from the GitHub tab, or `bunx eas-cli build --profile preview --platform android` for a
    standalone APK.
 
@@ -152,7 +167,10 @@ Full steps: `apps/web/README.md`.
 - [ ] `AUTH_EMAIL_FROM` on a verified Resend domain; `RESEND_API_KEY` set
 - [ ] `JWT_SECRET`, `AUTH_TOKEN_SECRET`, `OPENAI_API_KEY` set
 - [ ] `/api/v1/health` shows production, `openai_compatible` and `assets: ready`
-- [ ] EAS builds have `EXPO_PUBLIC_API_URL`
+- [ ] `/api/v1/ready` answers 200, with an uptime monitor on it
+- [ ] EAS `preview` and `production` environments have an https `EXPO_PUBLIC_API_URL`
+- [ ] Neon point-in-time restore retention checked
+- [ ] Branch protection on `main` requires lint, typecheck, build and test
 - [ ] Email-code sign-in works on a device
 - [ ] Landing page live on its custom domain, waitlist KV bound
 - [ ] Docs project live (optional OpenRouter)

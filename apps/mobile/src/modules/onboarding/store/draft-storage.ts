@@ -1,4 +1,4 @@
-import * as SecureStore from "expo-secure-store";
+import * as SecureStore from "@/lib/secure-store";
 import { isResumable, type OnboardingRoute, onboardingRoutes } from "../lib/flow";
 import { mergeStoredAnswers, pickAnswers } from "./answers-storage";
 import type { OnboardingAnswers } from "./onboarding-store";

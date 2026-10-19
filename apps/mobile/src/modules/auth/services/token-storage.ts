@@ -1,4 +1,4 @@
-import * as SecureStore from "expo-secure-store";
+import * as SecureStore from "@/lib/secure-store";
 
 const REFRESH_TOKEN_KEY = "personal-os.auth.refreshToken";
 

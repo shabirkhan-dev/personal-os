@@ -1,4 +1,4 @@
-import * as SecureStore from "expo-secure-store";
+import * as SecureStore from "@/lib/secure-store";
 import { initialAnswers, type OnboardingAnswers } from "./onboarding-store";
 
 const ANSWERS_KEY = "personal-os.onboarding.answers";

@@ -4,7 +4,7 @@ import { router } from "expo-router";
 export const wishlistRoutes = {
 	/** `save` opens Add savings straight away (the Home header's button). */
 	dream: (id: string, save = false) =>
-		router.push({ pathname: "/wishlist/dream/[id]", params: { id, save: save ? "1" : "" } }),
+		router.push({ pathname: "/wishlist/dream/[id]", params: save ? { id, save: "1" } : { id } }),
 	/** With `editId`, the same screen edits that dream. */
 	add: (editId?: string) =>
 		router.push({ pathname: "/wishlist/add", params: editId ? { edit: editId } : {} }),

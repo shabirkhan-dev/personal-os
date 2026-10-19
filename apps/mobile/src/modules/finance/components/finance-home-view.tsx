@@ -78,6 +78,8 @@ export function FinanceHomeView({ actionRequest }: HomeModuleViewProps) {
 	const dismissJob = useAiJobs((state) => state.dismiss);
 	const [notice, setNotice] = useState<string | null>(null);
 	const [logged, setLogged] = useState<{ quote: string; entries: Entry[] } | null>(null);
+	/** A bill payment in flight; a second tap before it lands would pay twice. */
+	const paying = useRef(false);
 	const [billSheet, setBillSheet] = useState<{ bill: Bill | null } | null>(null);
 	const [saving, setSaving] = useState(false);
 	const [setup, setSetup] = useState({ balance: "", cost: "", income: "" });
@@ -433,10 +435,14 @@ export function FinanceHomeView({ actionRequest }: HomeModuleViewProps) {
 				count={thisMonth.length}
 				onPay={(id) => {
 					const item = due.find((each) => each.bill.id === id);
-					if (!item) return;
+					if (!item || paying.current) return;
+					paying.current = true;
 					payBill(item.bill, item.due)
 						.then((saved) => done(`Paid ${item.bill.name}`, [saved], false))
-						.catch(failed("pay the bill"));
+						.catch(failed("pay the bill"))
+						.finally(() => {
+							paying.current = false;
+						});
 				}}
 				onOpen={(id) => setBillSheet({ bill: bills.find((bill) => bill.id === id) ?? null })}
 				onAdd={() => setBillSheet({ bill: null })}

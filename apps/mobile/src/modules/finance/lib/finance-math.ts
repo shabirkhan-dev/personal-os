@@ -287,6 +287,11 @@ export function upcomingBills(bills: readonly Bill[], now: Date): DueBill[] {
 		.sort((a, b) => a.due.getTime() - b.due.getTime());
 }
 
+/** The "YYYY-MM" a bill payment covered: stored on the entry, else (older entries) its month. */
+export function billMonthOf(entry: Pick<Entry, "billMonth" | "at">): string {
+	return entry.billMonth ?? monthKey(new Date(entry.at));
+}
+
 /** "Sat 18 Oct". */
 export function dayLabel(date: Date): string {
 	return `${WEEKDAYS[date.getDay()]} ${shortDate(date)}`;

@@ -3,6 +3,7 @@ import { groceryMatches } from "@/modules/food/lib/grocery-match";
 import {
 	balanceNow,
 	balanceTone,
+	billMonthOf,
 	budgetTotal,
 	bufferLine,
 	dayGroups,
@@ -53,6 +54,7 @@ const entry = (at: string, fields: Partial<Entry> = {}): Entry => ({
 	clean: true,
 	purify: false,
 	billId: null,
+	billMonth: null,
 	at: new Date(at).toISOString(),
 	receiptUri: null,
 	...fields,
@@ -169,6 +171,18 @@ describe("budget and bills", () => {
 		expect(upcomingBills([bill({ dueDay: 28, paid: ["2026-09"] })], nov)[0]?.due.getMonth()).toBe(
 			9,
 		);
+	});
+
+	it("undoes a bill payment for the month it covered", () => {
+		// Paid on 20 Oct for November's bill: undo must clear November, not October.
+		const paid = entry("2026-10-20T10:00:00", { billId: "bill", billMonth: "2026-11" });
+		expect(billMonthOf(paid)).toBe("2026-11");
+		expect(billMonthOf({ ...paid, billMonth: null })).toBe("2026-10");
+		expect(
+			parseEntry({ id: "a", amount: 10, at: "2026-10-20T10:00:00", billMonth: "2026-11" })
+				?.billMonth,
+		).toBe("2026-11");
+		expect(parseEntry({ id: "a", amount: 10, at: "2026-10-20T10:00:00" })?.billMonth).toBeNull();
 	});
 
 	it("knows what each line has free for Wishlist's Add savings", () => {

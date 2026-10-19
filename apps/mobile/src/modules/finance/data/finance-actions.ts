@@ -2,7 +2,7 @@ import { listItems, removeItem, saveItem } from "@/lib/db/collection";
 import { monthKey, newId } from "@/lib/day";
 import { deleteJson, readJson } from "@/lib/storage/json-file";
 import { asArray, asNumber, asString, isRecord } from "@/lib/storage/parse";
-import { budgetTotal, roundCents } from "../lib/finance-math";
+import { billMonthOf, budgetTotal, roundCents } from "../lib/finance-math";
 import {
 	type Bill,
 	type Category,
@@ -86,6 +86,7 @@ function entry(fields: Partial<Entry> & Pick<Entry, "kind" | "amount" | "title">
 		clean: true,
 		purify: false,
 		billId: null,
+		billMonth: null,
 		at: new Date().toISOString(),
 		receiptUri: null,
 		...fields,
@@ -164,13 +165,13 @@ export function updateEntry(item: Entry): Promise<void> {
 	return saveItem(financeEntries, item);
 }
 
-/** Delete an entry; a paid bill goes back to unpaid for that month. */
+/** Delete an entry; a paid bill goes back to unpaid for the month the payment covered. */
 export async function deleteEntry(item: Entry): Promise<void> {
 	await removeItem(financeEntries, item.id);
 	if (item.receiptUri) deleteReceiptPhoto(item.receiptUri);
 	if (item.billId) {
 		const bill = (await listItems(financeBills)).find((each) => each.id === item.billId);
-		const month = monthKey(new Date(item.at));
+		const month = billMonthOf(item);
 		if (bill)
 			await saveItem(financeBills, { ...bill, paid: bill.paid.filter((key) => key !== month) });
 	}
@@ -202,6 +203,7 @@ export async function payBill(bill: Bill, due: Date, now = new Date()): Promise<
 		category: bill.category,
 		method: "bank",
 		billId: bill.id,
+		billMonth: monthKey(due),
 		at: now.toISOString(),
 	});
 	await saveItem(financeEntries, item);
@@ -329,6 +331,7 @@ export async function migrateOldFinance(): Promise<number> {
 			clean: true,
 			purify: false,
 			billId: null,
+			billMonth: null,
 			at,
 			receiptUri: receipt || null,
 		};

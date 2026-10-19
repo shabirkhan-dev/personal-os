@@ -111,6 +111,8 @@ export type Entry = {
 	purify: boolean;
 	/** The bill this paid, if any. */
 	billId: string | null;
+	/** "YYYY-MM" month the bill payment covered; null for older entries (then its own month). */
+	billMonth: string | null;
 	/** ISO time it happened. */
 	at: string;
 	receiptUri: string | null;
@@ -281,6 +283,7 @@ export function parseEntry(raw: unknown): Entry | null {
 		clean: kind === "income" ? asBoolean(raw.clean, true) : true,
 		purify: kind === "spend" ? asBoolean(raw.purify, false) : false,
 		billId: id(raw.billId),
+		billMonth: isMonth(raw.billMonth) ? raw.billMonth : null,
 		at,
 		receiptUri: id(raw.receiptUri),
 	};

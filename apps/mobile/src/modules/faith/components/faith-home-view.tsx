@@ -497,7 +497,9 @@ export function FaithHomeView({ actionRequest }: HomeModuleViewProps) {
 					onSave={(saved) => {
 						update(saved);
 						ui.closeSheet();
-						void requestReminderPermission();
+						requestReminderPermission().catch((error: unknown) =>
+							console.warn("[faith] could not ask for notifications", error),
+						);
 					}}
 				/>
 			) : null}

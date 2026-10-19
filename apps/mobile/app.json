@@ -13,7 +13,11 @@
       "icon": "./assets/images/icon.png",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "NSMicrophoneUsageDescription": "Personal OS uses the microphone when you talk to set up or ask “Hey OS”."
+        "NSMicrophoneUsageDescription": "Personal OS uses the microphone when you talk to set up or ask “Hey OS”.",
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": false,
+          "NSAllowsLocalNetworking": true
+        }
       }
     },
     "android": {
@@ -24,7 +28,10 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.shabirkhandev.personalos"
+      "package": "com.shabirkhandev.personalos",
+      "blockedPermissions": [
+        "android.permission.SYSTEM_ALERT_WINDOW"
+      ]
     },
     "plugins": [
       "expo-router",
@@ -42,7 +49,12 @@
         }
       ],
       "expo-font",
-      "expo-secure-store",
+      [
+        "expo-secure-store",
+        {
+          "faceIDPermission": false
+        }
+      ],
       "expo-updates",
       [
         "expo-speech-recognition",
@@ -64,15 +76,16 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Personal OS uses your photos when you attach one to a meal or skin check-in.",
-          "cameraPermission": "Personal OS uses the camera for meal and skin check-in photos."
+          "photosPermission": "Personal OS uses your photos when you add one to a meal, a check-in, your wardrobe, a dream, a receipt or your profile.",
+          "cameraPermission": "Personal OS uses the camera for photos of meals, check-ins, clothes, dreams, receipts and your profile.",
+          "microphonePermission": "Personal OS uses the microphone when you talk to set up or ask “Hey OS”."
         }
       ],
       [
         "expo-camera",
         {
           "cameraPermission": "Personal OS uses the camera to scan food barcodes and take meal photos.",
-          "microphonePermission": false,
+          "microphonePermission": "Personal OS uses the microphone when you talk to set up or ask “Hey OS”.",
           "recordAudioAndroid": false,
           "barcodeScannerEnabled": true
         }
@@ -86,7 +99,10 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Personal OS uses your location to work out prayer times and the Qibla direction where you are."
+          "locationWhenInUsePermission": "Personal OS uses your location to work out prayer times and the Qibla direction where you are.",
+          "locationAlwaysAndWhenInUsePermission": false,
+          "locationAlwaysPermission": false,
+          "locationFullAccuracyPermission": false
         }
       ],
       "./plugins/with-talk-shortcut"

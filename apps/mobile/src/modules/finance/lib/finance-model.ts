@@ -127,6 +127,8 @@ export type Bill = {
 	category: Category;
 	/** "YYYY-MM" months already paid. */
 	paid: string[];
+	/** "YYYY-MM" month it was added; null for bills saved before this was kept. */
+	since: string | null;
 };
 
 export type Source = {
@@ -223,6 +225,8 @@ const asIso = (value: unknown) =>
 const money = (value: unknown, fallback: number) =>
 	Math.min(1_000_000_000, Math.max(0, Math.round(asNumber(value, fallback) * 100) / 100));
 const text = (value: unknown, max: number) => asString(value, "").trim().slice(0, max);
+const isMonth = (value: unknown): value is string =>
+	typeof value === "string" && /^\d{4}-\d{2}$/.test(value);
 const id = (value: unknown) => (typeof value === "string" && value ? value : null);
 
 export function parseSettings(raw: unknown): FinanceSettings | null {
@@ -295,9 +299,8 @@ export function parseBill(raw: unknown): Bill | null {
 		amount,
 		dueDay: Math.min(31, Math.max(1, Math.round(asNumber(raw.dueDay, 1)))),
 		category: oneOf(raw.category, CATEGORIES, "bills"),
-		paid: asArray(raw.paid, (item) =>
-			typeof item === "string" && /^\d{4}-\d{2}$/.test(item) ? item : null,
-		).slice(-24),
+		paid: asArray(raw.paid, (item) => (isMonth(item) ? item : null)).slice(-24),
+		since: isMonth(raw.since) ? raw.since : null,
 	};
 }
 

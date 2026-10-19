@@ -184,8 +184,8 @@ export function saveBill(bill: Bill): Promise<void> {
 	return saveItem(financeBills, bill);
 }
 
-export function newBill(fields: Omit<Bill, "id" | "paid">): Bill {
-	return { ...fields, id: newId(), paid: [] };
+export function newBill(fields: Omit<Bill, "id" | "paid" | "since">, now = new Date()): Bill {
+	return { ...fields, id: newId(), paid: [], since: monthKey(now) };
 }
 
 export async function deleteBill(bill: Bill): Promise<void> {

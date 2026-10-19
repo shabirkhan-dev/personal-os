@@ -259,15 +259,30 @@ export function dueIn(bill: Bill, year: number, month: number): Date {
 
 export type DueBill = { bill: Bill; due: Date; overdue: boolean };
 
-/** Bills not paid yet: this month's if unpaid, otherwise next month's. Soonest first. */
+/** The month a bill's history starts: when it was added, else its first paid month. */
+function billStart(bill: Bill): string | null {
+	return bill.since ?? ([...bill.paid].sort()[0] || null);
+}
+
+/**
+ * Bills not paid yet, soonest first. Last month's occurrence stays, overdue, until it is paid (a
+ * bill due 28 Oct still shows on 1 Nov); otherwise this month's if unpaid, else next month's.
+ */
 export function upcomingBills(bills: readonly Bill[], now: Date): DueBill[] {
 	const today = startOfDay(now);
+	const year = now.getFullYear();
+	const month = now.getMonth();
 	const thisMonth = monthKey(now);
+	const lastMonth = monthKey(new Date(year, month - 1, 1));
 	return bills
 		.map((bill) => {
-			const due = dueIn(bill, now.getFullYear(), now.getMonth());
+			const start = billStart(bill);
+			if (start !== null && start <= lastMonth && !bill.paid.includes(lastMonth)) {
+				return { bill, due: dueIn(bill, year, month - 1), overdue: true };
+			}
+			const due = dueIn(bill, year, month);
 			if (!bill.paid.includes(thisMonth)) return { bill, due, overdue: due < today };
-			return { bill, due: dueIn(bill, now.getFullYear(), now.getMonth() + 1), overdue: false };
+			return { bill, due: dueIn(bill, year, month + 1), overdue: false };
 		})
 		.sort((a, b) => a.due.getTime() - b.due.getTime());
 }

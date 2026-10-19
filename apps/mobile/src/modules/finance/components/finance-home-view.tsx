@@ -386,7 +386,7 @@ export function FinanceHomeView({ actionRequest }: HomeModuleViewProps) {
 		tone: balanceTone(index === 0 ? balance : point.balance, cost),
 	}));
 	const due = upcomingBills(bills, now);
-	const thisMonth = due.filter((item) => item.due.getMonth() === now.getMonth());
+	const thisMonth = due.filter((item) => item.overdue || item.due.getMonth() === now.getMonth());
 	const billRows = due.slice(0, 3).map((item) => ({
 		id: item.bill.id,
 		name: item.bill.name,

@@ -380,7 +380,7 @@ export function IncomeSheet({
 
 // --- bills --------------------------------------------------------------------------------------
 
-export type BillValue = Omit<Bill, "id" | "paid">;
+export type BillValue = Omit<Bill, "id" | "paid" | "since">;
 
 /** Add or change a bill: name, provider, amount, the day it's due and its budget line. */
 export function BillSheet({

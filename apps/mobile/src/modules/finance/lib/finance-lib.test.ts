@@ -66,6 +66,7 @@ const bill = (fields: Partial<Bill>): Bill => ({
 	dueDay: 18,
 	category: "bills",
 	paid: [],
+	since: null,
 	...fields,
 });
 
@@ -147,6 +148,27 @@ describe("budget and bills", () => {
 		expect(
 			upcomingBills([bill({ dueDay: 31 })], new Date("2026-11-10T10:00:00"))[0]?.due.getDate(),
 		).toBe(30);
+	});
+
+	it("keeps last month's unpaid bill overdue into the new month", () => {
+		const nov = new Date("2026-11-01T09:00:00");
+		const added = bill({ dueDay: 28, since: "2026-10" });
+		expect(upcomingBills([added], new Date("2026-10-30T09:00:00"))[0]?.overdue).toBe(true);
+		const late = upcomingBills([added], nov)[0];
+		expect(late?.overdue).toBe(true);
+		expect(late?.due.getMonth()).toBe(9);
+		expect(late?.due.getDate()).toBe(28);
+		const paid = upcomingBills([{ ...added, paid: ["2026-10"] }], nov)[0];
+		expect(paid?.overdue).toBe(false);
+		expect(paid?.due.getMonth()).toBe(10);
+		// Added this month: last month's date came before the bill existed.
+		expect(upcomingBills([bill({ dueDay: 28, since: "2026-11" })], nov)[0]?.due.getMonth()).toBe(
+			10,
+		);
+		// Older bills without `since` count from their first paid month.
+		expect(upcomingBills([bill({ dueDay: 28, paid: ["2026-09"] })], nov)[0]?.due.getMonth()).toBe(
+			9,
+		);
 	});
 
 	it("knows what each line has free for Wishlist's Add savings", () => {

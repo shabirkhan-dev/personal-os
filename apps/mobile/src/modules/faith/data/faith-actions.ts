@@ -1,4 +1,4 @@
-import { removeItem, saveItem } from "@/lib/db/collection";
+import { listItems, removeItem, saveItem } from "@/lib/db/collection";
 import { dayKey, newId } from "@/lib/day";
 import { type Rating, review } from "@/lib/flashcards/schedule";
 import { type ChallengeTemplate, STARTER_CARDS } from "../lib/faith-content";
@@ -7,7 +7,6 @@ import type {
 	Challenge,
 	FaithCard,
 	FaithSettings,
-	PathProgress,
 	PrayerLog,
 	PrayerStatus,
 	Resource,
@@ -131,23 +130,34 @@ export async function startChallenge(template: ChallengeTemplate, now = new Date
 	await saveItem(challenges, challenge);
 }
 
-export async function toggleChallengeDay(challenge: Challenge, now = new Date()): Promise<void> {
-	const day = dayKey(now);
-	const done = challenge.done.includes(day)
-		? challenge.done.filter((item) => item !== day)
-		: [...challenge.done, day];
-	await saveItem(challenges, { ...challenge, done });
+/**
+ * Toggles run one after another and each starts from what is stored, not the screen's copy, so
+ * two fast taps before the screen refreshes both land.
+ */
+let toggles: Promise<unknown> = Promise.resolve();
+
+function inTurn(work: () => Promise<void>): Promise<void> {
+	const run = toggles.then(work);
+	toggles = run.catch(() => undefined);
+	return run;
 }
 
-export async function toggleLesson(
-	pathId: string,
-	lessonId: string,
-	progress: PathProgress | undefined,
-): Promise<void> {
-	const done = progress?.done ?? [];
-	await saveItem(pathProgress, {
-		id: pathId,
-		done: done.includes(lessonId) ? done.filter((id) => id !== lessonId) : [...done, lessonId],
+const toggled = (list: readonly string[], id: string) =>
+	list.includes(id) ? list.filter((item) => item !== id) : [...list, id];
+
+/** Marks today done on the running challenge, or unmarks it. */
+export function toggleChallengeDay(now = new Date()): Promise<void> {
+	return inTurn(async () => {
+		const challenge = (await listItems(challenges))[0];
+		if (!challenge) return;
+		await saveItem(challenges, { ...challenge, done: toggled(challenge.done, dayKey(now)) });
+	});
+}
+
+export function toggleLesson(pathId: string, lessonId: string): Promise<void> {
+	return inTurn(async () => {
+		const progress = (await listItems(pathProgress)).find((item) => item.id === pathId);
+		await saveItem(pathProgress, { id: pathId, done: toggled(progress?.done ?? [], lessonId) });
 	});
 }
 

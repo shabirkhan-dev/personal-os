@@ -131,7 +131,7 @@ export function GrowScreen() {
 								label={doneToday ? "Done today ✓" : "Mark today done"}
 								onPress={() => {
 									haptics.success();
-									void toggleChallengeDay(challenge).catch((error: unknown) =>
+									void toggleChallengeDay().catch((error: unknown) =>
 										console.error("[faith] could not save", error),
 									);
 								}}
@@ -339,8 +339,8 @@ function PathSheet({
 								</View>
 							}
 							onPress={() =>
-								void toggleLesson(path.id, lesson.id, { id: path.id, done: [...done] }).catch(
-									(error: unknown) => console.error("[faith] could not save the lesson", error),
+								void toggleLesson(path.id, lesson.id).catch((error: unknown) =>
+									console.error("[faith] could not save the lesson", error),
 								)
 							}
 						/>

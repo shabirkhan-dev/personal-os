@@ -125,9 +125,13 @@ export function FaithHomeView({ actionRequest }: HomeModuleViewProps) {
 		spoken: boolean,
 	) => {
 		const row = rows.find((item) => item.prayer === prayer);
-		const previous = logs.find((log) => log.id === `${dayKey(now)}:${prayer}`) ?? null;
+		if (row && row.at > new Date()) {
+			say(`${row.label} isn't due until ${hhmm(row.at)}. Log it once you've prayed.`, spoken);
+			return;
+		}
+		const previous = row?.log ?? null;
 		try {
-			const log = await logPrayer(prayer, { status, prayerAt: row?.at ?? null });
+			const log = await logPrayer(prayer, { status, prayerAt: row?.at ?? null, day: row?.day });
 			haptics.success();
 			setLogged({ quote, log, previous });
 			setNotice(null);

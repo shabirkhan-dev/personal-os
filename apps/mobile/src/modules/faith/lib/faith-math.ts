@@ -47,6 +47,8 @@ export type RowState = PrayerStatus | "due" | "next" | "later";
 
 export type PrayerRow = {
 	prayer: PrayerId;
+	/** The prayer day the row belongs to: yesterday's until today's Fajr. */
+	day: string;
 	label: string;
 	at: Date;
 	state: RowState;
@@ -64,13 +66,38 @@ export function statusFor(at: Date, loggedAt: Date): PrayerStatus {
 	return loggedAt.getTime() - at.getTime() <= ON_TIME_MINUTES * MINUTE ? "prayed" : "late";
 }
 
+/**
+ * The date whose prayers are the current ones. The night belongs to the day before until Fajr, so
+ * at 00:30 the Isha to log is last night's, not tonight's.
+ */
+export function prayerDate(settings: FaithSettings, now: Date): Date {
+	const fajr = dayTimes(timesSource(settings), now).prayers.fajr;
+	const beforeDawn = fajr ? now < fajr : now.getHours() < 4;
+	return beforeDawn ? addDays(now, -1) : now;
+}
+
+/**
+ * The log for one prayer, or null when its time hasn't come: a prayer can't be prayed (or
+ * missed) before it is due. Without a status it is "prayed" or "late" by when it is logged.
+ */
+export function prayerLogFor(
+	prayer: PrayerId,
+	input: { day: string; prayerAt: Date | null; status?: PrayerStatus; now: Date },
+): PrayerLog | null {
+	const { day, prayerAt, now } = input;
+	if (prayerAt && prayerAt > now) return null;
+	const status = input.status ?? (prayerAt ? statusFor(prayerAt, now) : "prayed");
+	return { id: logId(day, prayer), day, prayer, status, at: now.toISOString() };
+}
+
 export function todayRows(
 	settings: FaithSettings,
 	logs: readonly PrayerLog[],
 	now: Date,
 ): PrayerRow[] {
-	const day = dayKey(now);
-	const list = slots(dayTimes(timesSource(settings), now), settings.prayers);
+	const date = prayerDate(settings, now);
+	const day = dayKey(date);
+	const list = slots(dayTimes(timesSource(settings), date), settings.prayers);
 	const nextIndex = list.findIndex((slot) => slot.at > now);
 	return list.map((slot, index) => {
 		const log = logs.find((item) => item.id === logId(day, slot.prayer)) ?? null;
@@ -100,6 +127,7 @@ export function todayRows(
 		}[state];
 		return {
 			prayer: slot.prayer,
+			day,
 			label: PRAYER_LABELS[slot.prayer],
 			at: slot.at,
 			state,

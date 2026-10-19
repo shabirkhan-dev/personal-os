@@ -2,7 +2,7 @@ import { removeItem, saveItem } from "@/lib/db/collection";
 import { dayKey, newId } from "@/lib/day";
 import { type Rating, review } from "@/lib/flashcards/schedule";
 import { type ChallengeTemplate, STARTER_CARDS } from "../lib/faith-content";
-import { logId, statusFor } from "../lib/faith-math";
+import { prayerLogFor } from "../lib/faith-math";
 import type {
 	Challenge,
 	FaithCard,
@@ -16,7 +16,7 @@ import type {
 	ZakatPayment,
 	ZakatProfile,
 } from "../lib/faith-model";
-import type { PrayerId } from "../lib/prayer-times";
+import { PRAYER_LABELS, type PrayerId } from "../lib/prayer-times";
 import {
 	challenges,
 	faithCards,
@@ -37,17 +37,23 @@ export function saveSettings(settings: FaithSettings): Promise<void> {
 }
 
 /**
- * Logs one prayer. Without a status it is "prayed" or "late" depending on how long after the
- * prayer's time it is logged.
+ * Logs one prayer under its prayer day (a row's `day`: last night's Isha stays last night's after
+ * midnight). Without a status it is "prayed" or "late" depending on how long after the prayer's
+ * time it is logged. A prayer whose time hasn't come is refused.
  */
 export async function logPrayer(
 	prayer: PrayerId,
-	options: { status?: PrayerStatus; prayerAt?: Date | null; now?: Date } = {},
+	options: { status?: PrayerStatus; prayerAt?: Date | null; day?: string; now?: Date } = {},
 ): Promise<PrayerLog> {
 	const now = options.now ?? new Date();
-	const day = dayKey(options.prayerAt ?? now);
-	const status = options.status ?? (options.prayerAt ? statusFor(options.prayerAt, now) : "prayed");
-	const log: PrayerLog = { id: logId(day, prayer), day, prayer, status, at: now.toISOString() };
+	const prayerAt = options.prayerAt ?? null;
+	const log = prayerLogFor(prayer, {
+		day: options.day ?? dayKey(prayerAt ?? now),
+		prayerAt,
+		status: options.status,
+		now,
+	});
+	if (!log) throw new Error(`${PRAYER_LABELS[prayer]} isn't due yet.`);
 	await saveItem(prayerLogs, log);
 	return log;
 }

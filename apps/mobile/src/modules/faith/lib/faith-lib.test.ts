@@ -9,6 +9,8 @@ import {
 	recitationStreak,
 	shortRupees,
 	tasbihProgress,
+	prayerDate,
+	prayerLogFor,
 	todayRows,
 	toHijri,
 	weekRecap,
@@ -135,6 +137,40 @@ describe("today's prayers", () => {
 		expect(rows[1]?.pill).toBe("in 2h 10m");
 		expect(rows[1]?.note).toBe("Reminder 10 min before");
 		expect(prayedCount(rows)).toBe(1);
+	});
+
+	it("keeps the night with the day before until Fajr", () => {
+		const night = new Date(2026, 9, 16, 0, 30);
+		expect(prayerDate(settingsAt(), night).getDate()).toBe(15);
+		expect(prayerDate(settingsAt(), new Date(2026, 9, 16, 5, 30)).getDate()).toBe(16);
+		const rows = todayRows(settingsAt(), [log("2026-10-15", "maghrib", "prayed")], night);
+		expect(rows.map((row) => row.day)).toEqual(["2026-10-15", "2026-10-15", "2026-10-15"]);
+		expect(rows.map((row) => row.state)).toEqual(["due", "prayed", "due"]);
+		expect(currentPrayer(rows)?.prayer).toBe("isha");
+		expect(rows[2]?.at.getDate()).toBe(15);
+		const isha = prayerLogFor("isha", {
+			day: rows[2]?.day ?? "",
+			prayerAt: rows[2]?.at ?? null,
+			now: night,
+		});
+		expect(isha?.id).toBe("2026-10-15:isha");
+		expect(isha?.status).toBe("late");
+	});
+
+	it("won't log a prayer before its time", () => {
+		const now = new Date(2026, 9, 15, 15, 28);
+		const maghrib = new Date(2026, 9, 15, 17, 38);
+		expect(prayerLogFor("maghrib", { day: "2026-10-15", prayerAt: maghrib, now })).toBeNull();
+		expect(
+			prayerLogFor("maghrib", { day: "2026-10-15", prayerAt: maghrib, status: "missed", now }),
+		).toBeNull();
+		expect(
+			prayerLogFor("maghrib", {
+				day: "2026-10-15",
+				prayerAt: maghrib,
+				now: new Date(2026, 9, 15, 17, 50),
+			})?.status,
+		).toBe("prayed");
 	});
 
 	it("knows which prayer a bare 'prayed' means", () => {

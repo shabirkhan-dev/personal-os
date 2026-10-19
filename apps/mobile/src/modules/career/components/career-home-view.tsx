@@ -252,7 +252,13 @@ export function CareerHomeView({ actionRequest }: HomeModuleViewProps) {
 							title: "Halal check",
 							subtitle: loggedApp.halal.note || "Check what the company earns from.",
 							value: loggedApp.halal.confirmed ? "Confirmed" : "Confirm",
-							onPress: loggedApp.halal.confirmed ? undefined : () => void confirmHalal(loggedApp),
+							onPress: loggedApp.halal.confirmed
+								? undefined
+								: () =>
+										void confirmHalal(loggedApp).catch((error: unknown) => {
+											console.error("[career] could not confirm the halal check", error);
+											setNotice("Couldn't save on this phone. Try again.");
+										}),
 						},
 					]}
 				/>

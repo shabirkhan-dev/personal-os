@@ -236,7 +236,13 @@ export function ApplicationDetailScreen({ id }: { id: string }) {
 										app.halal.note || "Check what the company earns from before you go further.",
 										[
 											{ text: "Later", style: "cancel" },
-											{ text: "I've checked — clean", onPress: () => void confirmHalal(app) },
+											{
+												text: "I've checked — clean",
+												onPress: () =>
+													void confirmHalal(app).catch((error: unknown) =>
+														console.error("[career] could not confirm the halal check", error),
+													),
+											},
 										],
 									)
 					}

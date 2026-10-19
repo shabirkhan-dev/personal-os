@@ -35,6 +35,8 @@ const apiPrefix = "/api/v1";
 
 export type ApiRequestOptions = RequestInit & {
 	accessToken?: string;
+	/** Set on the one retry after a refresh, so an expired token never loops. */
+	retried?: boolean;
 	/** How long to wait before giving up; AI calls need longer than the default 15 s. */
 	timeoutMs?: number;
 };
@@ -61,11 +63,40 @@ export const apiClient = {
 	},
 };
 
+type TokenRefresher = () => Promise<string | null>;
+let refreshAccessToken: TokenRefresher | null = null;
+
+/**
+ * Registers how to get a fresh access token. A request rejected with an expired token asks for
+ * one and is retried once with it. Returns the unregister function.
+ */
+export function onExpiredAccessToken(refresher: TokenRefresher): () => void {
+	refreshAccessToken = refresher;
+	return () => {
+		if (refreshAccessToken === refresher) refreshAccessToken = null;
+	};
+}
+
 export function getApiOrigin(): string | null {
 	return apiOrigin;
 }
 
 async function request<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
+	try {
+		return await send<T>(path, options);
+	} catch (error) {
+		const expired =
+			error instanceof ApiError &&
+			error.code === "AUTH_ACCESS_TOKEN_INVALID" &&
+			options.accessToken;
+		if (!expired || options.retried || !refreshAccessToken) throw error;
+		const accessToken = await refreshAccessToken();
+		if (!accessToken || accessToken === options.accessToken) throw error;
+		return send<T>(path, { ...options, accessToken, retried: true });
+	}
+}
+
+async function send<T>(path: string, options: ApiRequestOptions): Promise<T> {
 	if (!apiOrigin) {
 		throw new ApiError(
 			"This version of Personal OS can't reach its server. Update the app.",
@@ -73,7 +104,13 @@ async function request<T>(path: string, options: ApiRequestOptions = {}): Promis
 			"API_NOT_CONFIGURED",
 		);
 	}
-	const { accessToken, signal: outerSignal, timeoutMs = REQUEST_TIMEOUT_MS, ...init } = options;
+	const {
+		accessToken,
+		retried: _retried,
+		signal: outerSignal,
+		timeoutMs = REQUEST_TIMEOUT_MS,
+		...init
+	} = options;
 	const headers = new Headers(init.headers);
 	if (init.body) headers.set("Content-Type", "application/json");
 	if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`);

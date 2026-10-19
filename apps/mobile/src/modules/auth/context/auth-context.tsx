@@ -5,8 +5,11 @@ import {
 	useContext,
 	useEffect,
 	useMemo,
+	useRef,
 	useState,
 } from "react";
+import { AppState } from "react-native";
+import { onExpiredAccessToken } from "@/lib/api/client";
 import { usersService } from "@/modules/users/services/users.service";
 import type { User } from "@/modules/users/types/user.types";
 import { authService } from "../services/auth.service";
@@ -43,8 +46,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	const [status, setStatus] = useState<AuthStatus>("loading");
 	const [session, setSession] = useState<AuthSession | null>(null);
 	const [error, setError] = useState<string | null>(null);
+	/** The newest access token, readable right after a refresh (state updates later). */
+	const accessToken = useRef<string | null>(null);
 
 	const clearSession = useCallback(async () => {
+		accessToken.current = null;
 		setSession(null);
 		setStatus("signed-out");
 		try {
@@ -61,30 +67,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			// Still signed in for this run; the session just won't survive a restart.
 			console.warn("[auth] could not save the session", caught);
 		}
+		accessToken.current = next.accessToken;
 		setSession(next);
 		setError(null);
 		setStatus("signed-in");
 	}, []);
 
-	/** `quiet` keeps the current status while refreshing in the background. */
+	/**
+	 * `quiet` keeps the current status while refreshing in the background. Calls made while one
+	 * is running share it: two refreshes with the same token would look like token theft.
+	 */
+	const restoring = useRef<Promise<void> | null>(null);
 	const restore = useCallback(
-		async (quiet = false) => {
-			if (!quiet) setStatus("loading");
-			const result = await restoreSession({
-				readToken: tokenStorage.getRefreshToken,
-				refresh: authService.refresh,
-				clearToken: () => tokenStorage.setRefreshToken(null),
+		(quiet = false) => {
+			restoring.current ??= (async () => {
+				if (!quiet) setStatus("loading");
+				const result = await restoreSession({
+					readToken: tokenStorage.getRefreshToken,
+					refresh: authService.refresh,
+					clearToken: () => tokenStorage.setRefreshToken(null),
+				});
+				if (result.status === "signed-in") {
+					await establishSession(result.session);
+				} else if (result.status === "offline") {
+					setError(result.error);
+					setStatus("offline");
+				} else {
+					accessToken.current = null;
+					setStatus("signed-out");
+				}
+			})().finally(() => {
+				restoring.current = null;
 			});
-			if (result.status === "signed-in") {
-				await establishSession(result.session);
-			} else if (result.status === "offline") {
-				setError(result.error);
-				setStatus("offline");
-			} else {
-				setStatus("signed-out");
-			}
+			return restoring.current;
 		},
 		[establishSession],
+	);
+
+	// Requests rejected with an expired token wait for one refresh and retry with the new token.
+	useEffect(
+		() =>
+			onExpiredAccessToken(async () => {
+				await restore(true);
+				return accessToken.current;
+			}),
+		[restore],
 	);
 
 	useEffect(() => {
@@ -101,7 +128,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		const timer = setTimeout(() => {
 			restore(true).catch((caught: unknown) => console.warn("[auth] token refresh failed", caught));
 		}, delay);
-		return () => clearTimeout(timer);
+		// iOS pauses timers in the background: coming back with a token about to lapse refreshes it.
+		const subscription = AppState.addEventListener("change", (state) => {
+			if (state !== "active") return;
+			if (new Date(tokenExpiresAt).getTime() - Date.now() > 120_000) return;
+			restore(true).catch((caught: unknown) => console.warn("[auth] token refresh failed", caught));
+		});
+		return () => {
+			clearTimeout(timer);
+			subscription.remove();
+		};
 	}, [restore, tokenExpiresAt]);
 
 	const requestEmailCode = useCallback(

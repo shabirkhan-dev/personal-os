@@ -10,7 +10,7 @@ import { haptics } from "@/lib/haptics";
 import { useNow } from "@/lib/use-now";
 import { usePoTheme } from "@/theme";
 import { saveSettings, saveTasbih } from "../data/faith-actions";
-import { tasbihToday, useFaith } from "../hooks/use-faith";
+import { useFaith } from "../hooks/use-faith";
 import { tasbihProgress } from "../lib/faith-math";
 import { TASBIH_PHRASES, TASBIH_TARGETS, type TasbihPhrase } from "../lib/faith-model";
 import { FaithScreen } from "./faith-screen";
@@ -20,20 +20,27 @@ const STROKE = 14;
 const DOTS = 33;
 const FLUSH_MS = 700;
 
+/** Counts kept in memory while tapping, tagged with the day they were made on. */
+type DayCounts = { day: string; counts: Record<string, number> };
+
 /**
  * Tasbih: tap the ring to count. Counts are kept in memory while tapping and saved a moment after
- * the last tap, so a fast hand doesn't write to the phone's database on every touch.
+ * the last tap, so a fast hand doesn't write to the phone's database on every touch. They belong to
+ * the day they were made: past midnight the count starts from the new day's, not yesterday's.
  */
 export function TasbihScreen() {
 	const { colors } = usePoTheme();
 	const data = useFaith();
 	const now = useNow();
 	const sequence = data.settings.tasbih;
-	const stored = tasbihToday(data, now);
-	const [counts, setCounts] = useState<Record<string, number> | null>(null);
+	const [counts, setCounts] = useState<DayCounts | null>(null);
 	const [selected, setSelected] = useState<string | undefined>(undefined);
 	const [editing, setEditing] = useState(false);
-	const live = counts ?? stored?.counts ?? {};
+	const countsOn = (day: string): Record<string, number> =>
+		counts?.day === day
+			? counts.counts
+			: (data.tasbihDays.find((item) => item.id === day)?.counts ?? {});
+	const live = countsOn(dayKey(now));
 
 	// Phrases outside the sequence can be counted on their own, at 33.
 	const all = useMemo<TasbihPhrase[]>(
@@ -50,14 +57,14 @@ export function TasbihScreen() {
 	const target = phrase?.target ?? 33;
 
 	const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-	const pending = useRef<Record<string, number> | null>(null);
+	const pending = useRef<DayCounts | null>(null);
 	const flush = () => {
 		if (timer.current) clearTimeout(timer.current);
 		timer.current = null;
 		const value = pending.current;
 		pending.current = null;
 		if (value) {
-			saveTasbih({ id: dayKey(new Date()), counts: value }).catch((error: unknown) =>
+			saveTasbih({ id: value.day, counts: value.counts }).catch((error: unknown) =>
 				console.error("[faith] could not save tasbih", error),
 			);
 		}
@@ -65,7 +72,9 @@ export function TasbihScreen() {
 	// oxlint-disable-next-line react/exhaustive-deps -- flush on leaving the screen only
 	useEffect(() => () => flush(), []);
 
-	const write = (next: Record<string, number>) => {
+	const write = (next: DayCounts) => {
+		// Taps from before midnight are saved under their own day before the new day starts.
+		if (pending.current && pending.current.day !== next.day) flush();
 		setCounts(next);
 		pending.current = next;
 		if (timer.current) clearTimeout(timer.current);
@@ -74,13 +83,15 @@ export function TasbihScreen() {
 
 	const tap = () => {
 		if (!phrase) return;
-		const value = count + 1;
-		write({ ...live, [phrase.id]: value });
+		const day = dayKey(new Date());
+		const base = countsOn(day);
+		const value = (base[phrase.id] ?? 0) + 1;
+		write({ day, counts: { ...base, [phrase.id]: value } });
 		if (value === target) {
 			haptics.success();
 			const index = sequence.findIndex((item) => item.id === phrase.id);
 			const following = index >= 0 ? sequence[index + 1] : undefined;
-			if (following && (live[following.id] ?? 0) < following.target) setSelected(following.id);
+			if (following && (base[following.id] ?? 0) < following.target) setSelected(following.id);
 		} else haptics.tap();
 	};
 
@@ -99,7 +110,14 @@ export function TasbihScreen() {
 		if (!phrase) return;
 		Alert.alert(`Reset ${phrase.label}?`, "Today's count for this phrase goes back to 0.", [
 			{ text: "Cancel", style: "cancel" },
-			{ text: "Reset", style: "destructive", onPress: () => write({ ...live, [phrase.id]: 0 }) },
+			{
+				text: "Reset",
+				style: "destructive",
+				onPress: () => {
+					const day = dayKey(new Date());
+					write({ day, counts: { ...countsOn(day), [phrase.id]: 0 } });
+				},
+			},
 		]);
 	};
 

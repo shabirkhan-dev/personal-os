@@ -37,11 +37,6 @@ export const errors = {
 	ASSET_INVALID: { status: 400, message: "Use a JPEG, PNG or WebP image under 5 MB." },
 
 	// Sync
-	SYNC_CLOCK_AHEAD: {
-		status: 400,
-		message: "A change is dated more than a day in the future. Check the phone's clock.",
-	},
-	SYNC_DUPLICATE_RECORD: { status: 400, message: "The same record was sent twice." },
 
 	// AI
 	AI_UNAVAILABLE: { status: 503, message: "AI is not reachable right now. Try again shortly." },

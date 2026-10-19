@@ -10,6 +10,8 @@ export type SyncResponse = {
 	changes: SyncRecord[];
 	/** Pushed records the server already had a newer version of; the server copy wins. */
 	conflicts: SyncRecord[];
+	/** Pushed records the server skipped as invalid; they are not sent again. */
+	rejected?: { collection: string | null; id: string | null; reason: string }[];
 	/** More changes are waiting after `cursor`. */
 	hasMore: boolean;
 };
@@ -63,6 +65,7 @@ export function createSyncEngine(options: {
 		const cursor = await store.getMeta(CURSOR_KEY);
 		const response = await transport({ cursor, changes });
 		await store.markSynced(changes);
+		if (response.rejected?.length) console.warn("[sync] the server skipped", response.rejected);
 		await store.applyRemote([...response.conflicts, ...response.changes]);
 		await store.setMeta(CURSOR_KEY, response.cursor);
 		const caughtUp =

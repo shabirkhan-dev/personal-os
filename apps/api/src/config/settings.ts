@@ -19,8 +19,10 @@ export const settings = {
 		/** Matches the app's `PUSH_BATCH`. */
 		maxPush: 200,
 		pullPage: 500,
+		/** A pull page also stops at this many bytes of record data, to stay far below Worker memory. */
+		pullBytes: 4 * 1024 * 1024,
 		maxRecordBytes: 64 * 1024,
-		/** Client clocks may run ahead a little; far-future versions would win every conflict. */
+		/** Client clocks may run ahead a little; later times are clamped so they can't win forever. */
 		maxClockSkewMs: 24 * 60 * 60_000,
 	},
 	assets: {

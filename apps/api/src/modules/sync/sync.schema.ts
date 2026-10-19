@@ -26,7 +26,8 @@ export const syncRequestSchema = z
 			.string()
 			.regex(/^\d{1,18}$/)
 			.nullable(),
-		changes: z.array(syncRecordSchema).max(maxPush),
+		/** Checked one by one in the service, so a bad record is skipped, not the whole batch. */
+		changes: z.array(z.unknown()).max(maxPush),
 	})
 	.strict();
 
@@ -41,9 +42,17 @@ export type SyncRecordView = {
 	deletedAt: number | null;
 };
 
+/** A pushed record the server skipped; the phone stops resending it. */
+export type SyncRejection = {
+	collection: string | null;
+	id: string | null;
+	reason: "invalid" | "duplicate";
+};
+
 export type SyncResponse = {
 	cursor: string;
 	changes: SyncRecordView[];
 	conflicts: SyncRecordView[];
+	rejected: SyncRejection[];
 	hasMore: boolean;
 };

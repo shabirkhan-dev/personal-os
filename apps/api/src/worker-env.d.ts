@@ -28,4 +28,5 @@ interface CloudflareBindings {
 	AUTH_LIMITER?: RateLimit;
 	AI_LIMITER?: RateLimit;
 	SYNC_LIMITER?: RateLimit;
+	UPLOAD_LIMITER?: RateLimit;
 }

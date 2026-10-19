@@ -1,6 +1,7 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
-import { signIn, testApp, testEnv } from "./support";
+import { aiUsage } from "@/db/schema";
+import { db, signIn, testApp, testEnv } from "./support";
 
 const mockApp = testApp();
 const realApp = testApp(
@@ -501,5 +502,30 @@ describe("Wishlist AI", () => {
 		});
 		expect(bad.status).toBe(400);
 		expect((await mockApp.call("POST", "/ai/wishlist/find", { body: {} })).status).toBe(401);
+	});
+});
+
+describe("AI allowance", () => {
+	it("stops a user at the daily cap, with the cap's own code", async () => {
+		const session = await signIn(mockApp.call);
+		const day = new Date().toISOString().slice(0, 10);
+		await db.insert(aiUsage).values({ userId: session.user.id, day, calls: 150 });
+		const response = await mockApp.call("POST", "/ai/career/parse-line", {
+			token: session.accessToken,
+			body: { text: "applied to tessera", today: "2026-10-15" },
+		});
+		expect(response.status).toBe(429);
+		expect(response.json).toMatchObject({ success: false, code: "AI_QUOTA_REACHED" });
+	});
+
+	it("asks the provider for a bounded answer", async () => {
+		const spy = provider(JSON.stringify({ name: "x" }));
+		await realApp.call("POST", "/ai/wishlist/find", {
+			token,
+			body: { text: "a laptop", today: "2026-10-17" },
+		});
+		const [, init] = spy.mock.calls[0] as unknown as [string, RequestInit];
+		const body = JSON.parse(String(init.body)) as { max_tokens: number };
+		expect(body.max_tokens).toBe(4000);
 	});
 });

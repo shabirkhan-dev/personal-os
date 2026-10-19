@@ -11,8 +11,13 @@ export const errors = {
 	BODY_TOO_LARGE: { status: 413, message: "The request is too large." },
 	NOT_FOUND: { status: 404, message: "Nothing lives at this address." },
 	RATE_LIMITED: { status: 429, message: "Too many requests. Wait a minute and try again." },
+	AI_QUOTA_REACHED: {
+		status: 429,
+		message: "You've used today's AI help. It resets tomorrow; everything else still works.",
+	},
 	INTERNAL_ERROR: { status: 500, message: "Something went wrong on our side. Try again." },
-	/** The message lists the missing or invalid settings by name (never their values). */
+	NOT_READY: { status: 503, message: "The service is starting up or degraded. Try again shortly." },
+	/** The missing settings are logged by name; callers only learn that something is missing. */
 	CONFIG_INVALID: { status: 503, message: "The API's settings are incomplete." },
 
 	// Auth
@@ -32,11 +37,6 @@ export const errors = {
 	ASSET_INVALID: { status: 400, message: "Use a JPEG, PNG or WebP image under 5 MB." },
 
 	// Sync
-	SYNC_CLOCK_AHEAD: {
-		status: 400,
-		message: "A change is dated more than a day in the future. Check the phone's clock.",
-	},
-	SYNC_DUPLICATE_RECORD: { status: 400, message: "The same record was sent twice." },
 
 	// AI
 	AI_UNAVAILABLE: { status: 503, message: "AI is not reachable right now. Try again shortly." },

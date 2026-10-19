@@ -55,6 +55,16 @@ describe("parseIntro", () => {
 		expect(facts.workStyle).toBe("remote");
 	});
 
+	test("does not read a weight after feet as inches", () => {
+		const facts = parseIntro("I'm Sara, 5 feet 160 pounds");
+		expect(facts.heightUnit).toBe("ft");
+		expect(facts.heightCm).toBe(152);
+		expect(facts.weightUnit).toBe("lb");
+		expect(facts.weightLb).toBe(160);
+		expect(parseIntro("5 ft 11 and 70 kg").heightCm).toBe(180);
+		expect(parseIntro("5'10\"").heightCm).toBe(178);
+	});
+
 	test("keeps goals in the order they were said, at most three", () => {
 		const facts = parseIntro("I want to sleep better, save money, build muscle and stress less");
 		expect(facts.goals).toEqual(["sleep-better", "save-money", "build-muscle"]);

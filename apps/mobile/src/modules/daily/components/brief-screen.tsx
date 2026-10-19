@@ -92,7 +92,7 @@ export function BriefScreen() {
 		});
 
 	const start = () => {
-		markBrief(log, today)
+		markBrief(today)
 			.then(() => haptics.success())
 			.catch((error: unknown) => console.error("[daily] could not mark the brief", error));
 		router.back();

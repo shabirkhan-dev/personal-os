@@ -2,7 +2,9 @@ import { describe, expect, it } from "bun:test";
 import { groceryMatches } from "@/modules/food/lib/grocery-match";
 import {
 	balanceNow,
+	balanceText,
 	balanceTone,
+	billMonthOf,
 	budgetTotal,
 	bufferLine,
 	dayGroups,
@@ -12,7 +14,9 @@ import {
 	interestOwed,
 	lineRoom,
 	monthlyBurn,
+	monthLimits,
 	pace,
+	parseBalance,
 	project,
 	recap,
 	runwayDays,
@@ -53,6 +57,8 @@ const entry = (at: string, fields: Partial<Entry> = {}): Entry => ({
 	clean: true,
 	purify: false,
 	billId: null,
+	billMonth: null,
+	movedFrom: null,
 	at: new Date(at).toISOString(),
 	receiptUri: null,
 	...fields,
@@ -66,6 +72,7 @@ const bill = (fields: Partial<Bill>): Bill => ({
 	dueDay: 18,
 	category: "bills",
 	paid: [],
+	since: null,
 	...fields,
 });
 
@@ -149,6 +156,39 @@ describe("budget and bills", () => {
 		).toBe(30);
 	});
 
+	it("keeps last month's unpaid bill overdue into the new month", () => {
+		const nov = new Date("2026-11-01T09:00:00");
+		const added = bill({ dueDay: 28, since: "2026-10" });
+		expect(upcomingBills([added], new Date("2026-10-30T09:00:00"))[0]?.overdue).toBe(true);
+		const late = upcomingBills([added], nov)[0];
+		expect(late?.overdue).toBe(true);
+		expect(late?.due.getMonth()).toBe(9);
+		expect(late?.due.getDate()).toBe(28);
+		const paid = upcomingBills([{ ...added, paid: ["2026-10"] }], nov)[0];
+		expect(paid?.overdue).toBe(false);
+		expect(paid?.due.getMonth()).toBe(10);
+		// Added this month: last month's date came before the bill existed.
+		expect(upcomingBills([bill({ dueDay: 28, since: "2026-11" })], nov)[0]?.due.getMonth()).toBe(
+			10,
+		);
+		// Older bills without `since` count from their first paid month.
+		expect(upcomingBills([bill({ dueDay: 28, paid: ["2026-09"] })], nov)[0]?.due.getMonth()).toBe(
+			9,
+		);
+	});
+
+	it("undoes a bill payment for the month it covered", () => {
+		// Paid on 20 Oct for November's bill: undo must clear November, not October.
+		const paid = entry("2026-10-20T10:00:00", { billId: "bill", billMonth: "2026-11" });
+		expect(billMonthOf(paid)).toBe("2026-11");
+		expect(billMonthOf({ ...paid, billMonth: null })).toBe("2026-10");
+		expect(
+			parseEntry({ id: "a", amount: 10, at: "2026-10-20T10:00:00", billMonth: "2026-11" })
+				?.billMonth,
+		).toBe("2026-11");
+		expect(parseEntry({ id: "a", amount: 10, at: "2026-10-20T10:00:00" })?.billMonth).toBeNull();
+	});
+
 	it("knows what each line has free for Wishlist's Add savings", () => {
 		const room = lineRoom(
 			settings,
@@ -163,6 +203,33 @@ describe("budget and bills", () => {
 		expect(room.transport).toBe(0);
 		expect(room.dreams).toBe(0);
 		expect(defaultLimits(55_000).dreams).toBe(0);
+	});
+
+	it("moves Wishlist savings between lines for their own month only", () => {
+		const saved = (at: string, amount: number) =>
+			entry(at, { title: at, category: "dreams", amount, movedFrom: "other" });
+		const entries = [
+			saved("2026-10-05T10:00:00", 2000),
+			saved("2026-09-20T10:00:00", 5000),
+			entry("2026-10-10T10:00:00", { category: "other", amount: 1000 }),
+		];
+		const limits = monthLimits(settings, entries, now);
+		expect(limits.other).toBe(settings.limits.other - 2000);
+		expect(limits.dreams).toBe(2000);
+		expect(budgetTotal(limits)).toBe(budgetTotal(settings.limits));
+		const room = lineRoom(settings, entries, now);
+		expect(room.other).toBe(settings.limits.other - 2000 - 1000);
+		expect(room.dreams).toBe(0);
+		// Next month starts from the standing limits again.
+		const nov = lineRoom(settings, entries, new Date("2026-11-02T10:00:00"));
+		expect(nov.other).toBe(settings.limits.other);
+		expect(monthLimits(settings, entries, new Date("2026-11-02T10:00:00")).dreams).toBe(0);
+		// Undo deletes the entry, which puts the money back on its line.
+		expect(lineRoom(settings, entries.slice(1), now).other).toBe(settings.limits.other - 1000);
+		// Older transfers without `movedFrom` already moved the standing limits.
+		expect(
+			monthLimits(settings, [{ ...saved("2026-10-05T10:00:00", 2000), movedFrom: null }], now),
+		).toEqual(settings.limits);
 	});
 });
 
@@ -300,6 +367,21 @@ describe("ask bar", () => {
 			groceryItem("c", "Milk", true),
 		];
 		expect(groceryMatches(list, ["Chicken · 1 kg", "Milk · 4 L", "egg"])).toEqual(["a", "b"]);
+	});
+});
+
+describe("edit numbers", () => {
+	it("shows and reads the balance exactly, overdrawn or zero", () => {
+		expect(balanceText(-5000)).toBe("-5000");
+		expect(balanceText(0)).toBe("0");
+		expect(balanceText(148_500.5)).toBe("148500.5");
+		expect(parseBalance(balanceText(-5000))).toBe(-5000);
+		expect(parseBalance(balanceText(148_500.5))).toBe(148_500.5);
+		expect(parseBalance("−5,000.25")).toBe(-5000.25);
+		expect(parseBalance("Rs 148,500")).toBe(148_500);
+		expect(parseBalance("")).toBe(0);
+		expect(parseBalance("abc")).toBeNull();
+		expect(parseSettings({ balance: -5000 })?.balance).toBe(-5000);
 	});
 });
 

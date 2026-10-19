@@ -1,4 +1,4 @@
-import { removeItem, saveItem } from "@/lib/db/collection";
+import { listItems, removeItem, saveItem } from "@/lib/db/collection";
 import { dayKey } from "@/lib/day";
 import {
 	type Block,
@@ -21,57 +21,74 @@ export function saveLog(log: DayLog): Promise<void> {
 	return saveItem(dayLogs, log);
 }
 
-const base = (log: DayLog | null, day: string) => log ?? emptyLog(day);
+/**
+ * Day-log writes run one after another and each starts from the stored log, not the screen's
+ * copy, so two fast taps before the screen refreshes both land.
+ */
+let logWrites: Promise<unknown> = Promise.resolve();
 
-export function toggleTick(log: DayLog | null, day: string, id: MinimumId): Promise<void> {
-	const current = base(log, day);
-	const ticked = current.ticked.includes(id)
-		? current.ticked.filter((item) => item !== id)
-		: [...current.ticked, id];
-	return saveLog({ ...current, ticked });
+function updateLog(
+	day: string,
+	change: (current: DayLog, stored: boolean) => DayLog | null,
+): Promise<void> {
+	const run = logWrites.then(async () => {
+		const stored = (await listItems(dayLogs)).find((item) => item.id === day);
+		const next = change(stored ?? emptyLog(day), stored !== undefined);
+		if (next) await saveLog(next);
+	});
+	logWrites = run.catch(() => undefined);
+	return run;
 }
 
-export function toggleWindDown(log: DayLog | null, day: string, id: WindDownId): Promise<void> {
-	const current = base(log, day);
-	const windDown = current.windDown.includes(id)
-		? current.windDown.filter((item) => item !== id)
-		: [...current.windDown, id];
-	return saveLog({ ...current, windDown });
+const toggled = <T>(list: readonly T[], id: T): T[] =>
+	list.includes(id) ? list.filter((item) => item !== id) : [...list, id];
+
+export function toggleTick(day: string, id: MinimumId): Promise<void> {
+	return updateLog(day, (current) => ({ ...current, ticked: toggled(current.ticked, id) }));
 }
 
-export function pushLater(log: DayLog | null, day: string, blockId: string): Promise<void> {
-	const current = base(log, day);
-	return saveLog({ ...current, later: [...new Set([...current.later, blockId])] });
+export function toggleWindDown(day: string, id: WindDownId): Promise<void> {
+	return updateLog(day, (current) => ({ ...current, windDown: toggled(current.windDown, id) }));
 }
 
-/** Keeps today's minimum-day result, so the streak still knows it tomorrow. */
+export function pushLater(day: string, blockId: string): Promise<void> {
+	return updateLog(day, (current) => ({
+		...current,
+		later: [...new Set([...current.later, blockId])],
+	}));
+}
+
+/**
+ * Keeps today's minimum-day result, so the streak still knows it tomorrow. `known` is the log the
+ * screen has: when it already holds this result nothing is written.
+ */
 export function recordResult(
-	log: DayLog | null,
+	known: DayLog | null,
 	day: string,
 	kept: number,
 	total: number,
 ): Promise<void> | null {
-	const current = base(log, day);
-	if (log && current.kept === kept && current.total === total) return null;
-	return saveLog({ ...current, kept, total });
+	if (known && known.kept === kept && known.total === total) return null;
+	return updateLog(day, (current, stored) =>
+		stored && current.kept === kept && current.total === total ? null : { ...current, kept, total },
+	);
 }
 
 export function closeDay(
-	log: DayLog | null,
 	day: string,
 	input: { energy: number | null; good: string; kept: number; total: number },
 	now = new Date(),
 ): Promise<void> {
-	return saveLog({
-		...base(log, day),
+	return updateLog(day, (current) => ({
+		...current,
 		...input,
 		good: input.good.trim(),
 		closedAt: now.toISOString(),
-	});
+	}));
 }
 
-export function markBrief(log: DayLog | null, day: string, now = new Date()): Promise<void> {
-	return saveLog({ ...base(log, day), briefAt: now.toISOString() });
+export function markBrief(day: string, now = new Date()): Promise<void> {
+	return updateLog(day, (current) => ({ ...current, briefAt: now.toISOString() }));
 }
 
 export function saveSleep(bed: Date, wake: Date): Promise<void> {

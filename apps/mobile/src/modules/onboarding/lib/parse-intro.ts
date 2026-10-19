@@ -267,9 +267,10 @@ export function parseIntro(raw: string): IntroFacts {
 		}
 	}
 
-	// Height: "5 foot 9", "5'9", "5 feet 9 inches", or "175 cm" / "I'm 175".
+	// Height: "5 foot 9", "5'9", "5 feet 9 inches", or "175 cm" / "I'm 175". Inches are a whole
+	// number 0-11, so the "160" in "5 feet 160 pounds" is left for the weight.
 	const feet = text.match(
-		/\b([4-7])\s*(?:foot|feet|ft|')\s*(?:and\s*)?(\d{1,2})?\s*(?:inches|inch|in|")?/i,
+		/\b([4-7])\s*(?:foot|feet|ft|')\s*(?:and\s*)?(?:(1[01]|\d)(?!\d))?\s*(?:inches|inch|in|")?/i,
 	);
 	if (feet) {
 		const inches = Number(feet[1]) * 12 + Number(feet[2] ?? 0);

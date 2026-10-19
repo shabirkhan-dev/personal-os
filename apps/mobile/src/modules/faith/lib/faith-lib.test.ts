@@ -1,7 +1,11 @@
 import { describe, expect, it } from "bun:test";
+import { dayKey } from "@/lib/day";
 import { ayahs } from "./ayahs";
 import {
 	consistencyGrid,
+	currentHawl,
+	isCalendarDay,
+	parseRate,
 	currentPrayer,
 	insights,
 	lakhs,
@@ -9,6 +13,8 @@ import {
 	recitationStreak,
 	shortRupees,
 	tasbihProgress,
+	prayerDate,
+	prayerLogFor,
 	todayRows,
 	toHijri,
 	weekRecap,
@@ -137,6 +143,40 @@ describe("today's prayers", () => {
 		expect(prayedCount(rows)).toBe(1);
 	});
 
+	it("keeps the night with the day before until Fajr", () => {
+		const night = new Date(2026, 9, 16, 0, 30);
+		expect(prayerDate(settingsAt(), night).getDate()).toBe(15);
+		expect(prayerDate(settingsAt(), new Date(2026, 9, 16, 5, 30)).getDate()).toBe(16);
+		const rows = todayRows(settingsAt(), [log("2026-10-15", "maghrib", "prayed")], night);
+		expect(rows.map((row) => row.day)).toEqual(["2026-10-15", "2026-10-15", "2026-10-15"]);
+		expect(rows.map((row) => row.state)).toEqual(["due", "prayed", "due"]);
+		expect(currentPrayer(rows)?.prayer).toBe("isha");
+		expect(rows[2]?.at.getDate()).toBe(15);
+		const isha = prayerLogFor("isha", {
+			day: rows[2]?.day ?? "",
+			prayerAt: rows[2]?.at ?? null,
+			now: night,
+		});
+		expect(isha?.id).toBe("2026-10-15:isha");
+		expect(isha?.status).toBe("late");
+	});
+
+	it("won't log a prayer before its time", () => {
+		const now = new Date(2026, 9, 15, 15, 28);
+		const maghrib = new Date(2026, 9, 15, 17, 38);
+		expect(prayerLogFor("maghrib", { day: "2026-10-15", prayerAt: maghrib, now })).toBeNull();
+		expect(
+			prayerLogFor("maghrib", { day: "2026-10-15", prayerAt: maghrib, status: "missed", now }),
+		).toBeNull();
+		expect(
+			prayerLogFor("maghrib", {
+				day: "2026-10-15",
+				prayerAt: maghrib,
+				now: new Date(2026, 9, 15, 17, 50),
+			})?.status,
+		).toBe("prayed");
+	});
+
 	it("knows which prayer a bare 'prayed' means", () => {
 		const rows = todayRows(settingsAt(), [], new Date(2026, 9, 15, 18));
 		expect(currentPrayer(rows)?.prayer).toBe("maghrib");
@@ -225,6 +265,45 @@ describe("tasbih, zakat, hijri, ayahs", () => {
 		expect(shortRupees(70_000)).toBe("70k");
 		expect(lakhs(320_000)).toBe("3,20,000");
 		expect(lakhs(155_000)).toBe("1,55,000");
+	});
+
+	it("rolls the hawl over each lunar year and counts only this hawl's payments", () => {
+		const profile = {
+			...defaultZakat(),
+			gold: 150_000,
+			cash: 120_000,
+			savings: 70_000,
+			debts: 20_000,
+			hawlStart: "2025-03-20",
+		};
+		const payments = [
+			{ id: "old", to: "A family", note: "", amount: 8000, at: "2025-12-01T12:00:00Z" },
+			{ id: "new", to: "A family", note: "", amount: 3000, at: "2026-09-01T12:00:00Z" },
+		];
+		const now = new Date(2026, 9, 15);
+		const hawl = currentHawl(profile.hawlStart, now);
+		expect(dayKey(hawl?.start ?? now)).toBe("2026-03-09");
+		expect(dayKey(hawl?.end ?? now)).toBe("2027-02-26");
+		const view = zakatView(profile, payments, now);
+		expect(view.paid).toBe(3000);
+		expect(view.left).toBe(5000);
+		expect(view.monthsHeld).toBe(7);
+		expect(currentHawl("2027-01-01", now)?.start.getFullYear()).toBe(2027);
+		expect(currentHawl(null, now)).toBeNull();
+	});
+
+	it("checks the typed hawl date and rate", () => {
+		expect(isCalendarDay("2026-03-20")).toBe(true);
+		expect(isCalendarDay("2028-02-29")).toBe(true);
+		expect(isCalendarDay("2026-02-30")).toBe(false);
+		expect(isCalendarDay("2026-13-01")).toBe(false);
+		expect(isCalendarDay("20-03-2026")).toBe(false);
+		expect(parseRate("2.5")).toBe(0.025);
+		expect(parseRate("")).toBeNull();
+		expect(parseRate("  ")).toBeNull();
+		expect(parseRate("0")).toBeNull();
+		expect(parseRate("101")).toBeNull();
+		expect(parseRate("abc")).toBeNull();
 	});
 
 	it("converts to the Hijri calendar", () => {

@@ -16,10 +16,17 @@ export function formatMoney(amount: number, symbol: string = CURRENCY.symbol): s
 	return decimal === ".00" ? whole : `${whole}${decimal}`;
 }
 
-/** Reads "1,240", "1240.50" or "Rs 300" typed by a person; null when it is not an amount. */
-export function parseAmount(text: string): number | null {
+/** Above this a typed amount is a slip of the thumb, not money (a trillion rupees). */
+export const MAX_AMOUNT = 1e12;
+
+/**
+ * Reads "1,240", "1240.50" or "Rs 300" typed by a person; null when it is not an amount or is
+ * absurdly large. Zero is rejected unless `allowZero` is set (e.g. a balance that really is Rs 0).
+ */
+export function parseAmount(text: string, options: { allowZero?: boolean } = {}): number | null {
 	const cleaned = text.replace(/rs\.?|pkr|,|\s/gi, "");
 	if (!/^\d+(\.\d{1,2})?$/.test(cleaned)) return null;
 	const value = Number(cleaned);
-	return value > 0 ? value : null;
+	if (value > MAX_AMOUNT) return null;
+	return value > 0 || (options.allowZero === true && value === 0) ? value : null;
 }

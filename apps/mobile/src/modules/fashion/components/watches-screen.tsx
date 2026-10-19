@@ -1,3 +1,4 @@
+import { useRef, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { EmptyCard, ProgressBar, ScreenTitle } from "@/components/module-ui";
 import { PillButton } from "@/components/ui/pill-button";
@@ -17,6 +18,9 @@ import { PieceImage } from "./piece-image";
 export function WatchesScreen() {
 	const { colors } = usePoTheme();
 	const { data, weather, now, context, looks, worn } = useFashionToday();
+	const [addingRefill, setAddingRefill] = useState(false);
+	/** Blocks a second tap that lands before the disabled card re-renders. */
+	const addingRefillRef = useRef(false);
 	const watches = data.pieces.filter((piece) => piece.category === "watch");
 	const scents = data.pieces.filter((piece) => piece.category === "scent");
 	const wishedWatches = data.wishes.filter((wish) => wish.category === "watch");
@@ -233,7 +237,9 @@ export function WatchesScreen() {
 				<Pressable
 					accessibilityRole="button"
 					onPress={() => {
-						if (data.settings.buyingPaused) return;
+						if (data.settings.buyingPaused || addingRefillRef.current) return;
+						addingRefillRef.current = true;
+						setAddingRefill(true);
 						haptics.tap();
 						void saveWish({
 							name: `${low.name} refill`,
@@ -247,10 +253,13 @@ export function WatchesScreen() {
 							url: "",
 						})
 							.then(fashionRoutes.wishlist)
-							.catch((error: unknown) =>
-								console.error("[fashion] could not add the refill", error),
-							);
+							.catch((error: unknown) => console.error("[fashion] could not add the refill", error))
+							.finally(() => {
+								addingRefillRef.current = false;
+								setAddingRefill(false);
+							});
 					}}
+					disabled={addingRefill}
 					style={[
 						styles.low,
 						{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },

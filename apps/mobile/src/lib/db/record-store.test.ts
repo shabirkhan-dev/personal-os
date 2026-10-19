@@ -25,6 +25,16 @@ describe("RecordStore", () => {
 		expect(await store.get("notes", "missing")).toBeNull();
 	});
 
+	test("lists every live document by collection for the export", async () => {
+		const { store } = await openStore();
+		await store.put("notes", "a", { text: "one" });
+		await store.put("other", "b", { text: "two" });
+		await store.put("notes", "gone", { text: "x" });
+		await store.remove("notes", "gone");
+
+		expect(await store.all()).toEqual({ notes: [{ text: "one" }], other: [{ text: "two" }] });
+	});
+
 	test("deletes leave a tombstone that syncs", async () => {
 		const { store } = await openStore();
 		await store.put("notes", "a", { text: "one" });

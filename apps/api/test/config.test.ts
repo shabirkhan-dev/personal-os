@@ -40,14 +40,34 @@ describe("config", () => {
 		}
 	});
 
-	it("answers 503 naming the missing settings, not their values", async () => {
+	it("answers 503 without naming the missing settings to callers", async () => {
 		const { call } = testApp({ ENVIRONMENT: "production", JWT_SECRET: "j".repeat(40) });
 		const response = await call("GET", "/health");
 		expect(response.status).toBe(503);
 		expect(response.json).toMatchObject({ code: "CONFIG_INVALID" });
 		const message = String(response.json?.message);
-		expect(message).toContain("AUTH_TOKEN_SECRET");
-		expect(message).toContain("RESEND_API_KEY");
+		expect(message).not.toContain("AUTH_TOKEN_SECRET");
 		expect(message).not.toContain("jjjj");
+	});
+
+	it("turns AI off in production instead of failing every route or faking answers", () => {
+		const production = {
+			ENVIRONMENT: "production",
+			JWT_SECRET: "j".repeat(40),
+			AUTH_TOKEN_SECRET: "t".repeat(40),
+			RESEND_API_KEY: "re_123",
+			AUTH_EMAIL_FROM: "Personal OS <auth@personal-os.test>",
+		};
+		expect(parseConfig({ ...production, AI_PROVIDER: "openai_compatible" }).ai).toEqual({
+			provider: "off",
+		});
+		expect(parseConfig({ ...production, AI_PROVIDER: "mock" }).ai).toEqual({ provider: "off" });
+	});
+
+	it("is ready when the database answers", async () => {
+		const { call } = testApp();
+		const response = await call("GET", "/ready");
+		expect(response.status).toBe(200);
+		expect(response.json).toMatchObject({ data: { status: "ready" } });
 	});
 });

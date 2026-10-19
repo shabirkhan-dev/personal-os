@@ -28,11 +28,15 @@ export class ApiError extends Error {
 }
 
 const REQUEST_TIMEOUT_MS = 15_000;
-const apiOrigin = resolveApiOrigin(process.env.EXPO_PUBLIC_API_URL ?? defaultApiOrigin());
+/** Release builds; `__DEV__` is undefined under the unit tests. */
+const IS_DEV = typeof __DEV__ === "undefined" || __DEV__;
+const apiOrigin = pickApiOrigin(process.env.EXPO_PUBLIC_API_URL);
 const apiPrefix = "/api/v1";
 
 export type ApiRequestOptions = RequestInit & {
 	accessToken?: string;
+	/** Set on the one retry after a refresh, so an expired token never loops. */
+	retried?: boolean;
 	/** How long to wait before giving up; AI calls need longer than the default 15 s. */
 	timeoutMs?: number;
 };
@@ -59,12 +63,54 @@ export const apiClient = {
 	},
 };
 
-export function getApiOrigin(): string {
+type TokenRefresher = () => Promise<string | null>;
+let refreshAccessToken: TokenRefresher | null = null;
+
+/**
+ * Registers how to get a fresh access token. A request rejected with an expired token asks for
+ * one and is retried once with it. Returns the unregister function.
+ */
+export function onExpiredAccessToken(refresher: TokenRefresher): () => void {
+	refreshAccessToken = refresher;
+	return () => {
+		if (refreshAccessToken === refresher) refreshAccessToken = null;
+	};
+}
+
+export function getApiOrigin(): string | null {
 	return apiOrigin;
 }
 
 async function request<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
-	const { accessToken, signal: outerSignal, timeoutMs = REQUEST_TIMEOUT_MS, ...init } = options;
+	try {
+		return await send<T>(path, options);
+	} catch (error) {
+		const expired =
+			error instanceof ApiError &&
+			error.code === "AUTH_ACCESS_TOKEN_INVALID" &&
+			options.accessToken;
+		if (!expired || options.retried || !refreshAccessToken) throw error;
+		const accessToken = await refreshAccessToken();
+		if (!accessToken || accessToken === options.accessToken) throw error;
+		return send<T>(path, { ...options, accessToken, retried: true });
+	}
+}
+
+async function send<T>(path: string, options: ApiRequestOptions): Promise<T> {
+	if (!apiOrigin) {
+		throw new ApiError(
+			"This version of Personal OS can't reach its server. Update the app.",
+			0,
+			"API_NOT_CONFIGURED",
+		);
+	}
+	const {
+		accessToken,
+		retried: _retried,
+		signal: outerSignal,
+		timeoutMs = REQUEST_TIMEOUT_MS,
+		...init
+	} = options;
 	const headers = new Headers(init.headers);
 	if (init.body) headers.set("Content-Type", "application/json");
 	if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`);
@@ -100,13 +146,17 @@ async function request<T>(path: string, options: ApiRequestOptions = {}): Promis
 		if (caught instanceof ApiError) throw caught;
 		if (isAbortError(caught)) {
 			throw new ApiError(
-				`Request timed out reaching ${apiOrigin}. Is the API running and EXPO_PUBLIC_API_URL correct for this device?`,
+				IS_DEV
+					? `Request timed out reaching ${apiOrigin}. Is the API running and EXPO_PUBLIC_API_URL correct for this device?`
+					: "The server took too long to answer. Try again.",
 				408,
 				"API_TIMEOUT",
 			);
 		}
 		throw new ApiError(
-			`Cannot reach API at ${apiOrigin}. Use your computer LAN IP on a physical phone (not localhost).`,
+			IS_DEV
+				? `Cannot reach API at ${apiOrigin}. Use your computer LAN IP on a physical phone (not localhost).`
+				: "Can't reach Personal OS. Check your connection and try again.",
 			0,
 			"API_UNREACHABLE",
 		);
@@ -140,12 +190,25 @@ function getExpoMetroHost(): string | null {
 	return host || null;
 }
 
-function resolveApiOrigin(value: string): string {
-	try {
-		return new URL(value).origin;
-	} catch {
-		throw new Error(`Invalid EXPO_PUBLIC_API_URL: ${value}`);
+/**
+ * Development falls back to the Metro host or the emulator alias. A release build only uses its
+ * configured https URL; without one, requests fail with API_NOT_CONFIGURED instead of quietly
+ * calling localhost, and a bad value never crashes the app at startup.
+ */
+function pickApiOrigin(configured: string | undefined): string | null {
+	if (configured) {
+		try {
+			const url = new URL(configured);
+			if (IS_DEV || url.protocol === "https:") return url.origin;
+			console.error(`[api] release builds need an https EXPO_PUBLIC_API_URL, not ${configured}`);
+		} catch (error) {
+			console.error(`[api] EXPO_PUBLIC_API_URL is not a URL: ${configured}`, error);
+		}
+		return IS_DEV ? defaultApiOrigin() : null;
 	}
+	if (IS_DEV) return defaultApiOrigin();
+	console.error("[api] EXPO_PUBLIC_API_URL was not set for this build");
+	return null;
 }
 
 function normalizePath(path: string): string {

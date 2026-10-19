@@ -9,7 +9,7 @@ const PREFIX: Record<AssetKind, string> = { avatar: "avatars" };
 
 /**
  * A presigned R2 URL the app uploads to directly; the file never passes through the API. The
- * signature covers the content type, so the upload must send the same `Content-Type`.
+ * signature covers the content type and length, so R2 refuses any other type or a bigger file.
  */
 export async function createUpload(
 	config: Config,
@@ -30,7 +30,7 @@ export async function createUpload(
 		service: "s3",
 		region: "auto",
 	});
-	const headers = { "Content-Type": input.contentType };
+	const headers = { "Content-Type": input.contentType, "Content-Length": String(input.size) };
 	const signed = await client.sign(new Request(url, { method: "PUT", headers }), {
 		aws: { signQuery: true, allHeaders: true, datetime: toAmzDate(now) },
 	});
@@ -72,6 +72,25 @@ export async function deleteAsset(bucket: R2Bucket | undefined, key: string): Pr
 		await bucket?.delete(key);
 	} catch (error) {
 		console.warn(`[assets] could not delete ${key}`, error);
+	}
+}
+
+/** Deletes every object under a user's prefix: their avatar and any upload never confirmed. */
+export async function deleteUserAssets(
+	bucket: R2Bucket | undefined,
+	userId: string,
+): Promise<void> {
+	if (!bucket) return;
+	for (const kind of Object.values(PREFIX)) {
+		let cursor: string | undefined;
+		do {
+			// oxlint-disable-next-line eslint/no-await-in-loop -- R2 lists one page at a time
+			const page = await bucket.list({ prefix: `${kind}/${userId}/`, cursor });
+			const keys = page.objects.map((object) => object.key);
+			// oxlint-disable-next-line eslint/no-await-in-loop
+			if (keys.length > 0) await bucket.delete(keys);
+			cursor = page.truncated ? page.cursor : undefined;
+		} while (cursor);
 	}
 }
 

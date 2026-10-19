@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { ApiError, apiClient } from "@/lib/api/client";
+import { aiLimitMessage } from "@/lib/api/ai-limits";
 import { dayKey } from "@/lib/day";
 import { useAuth } from "@/modules/auth";
 import type { DreamCategory } from "../lib/wishlist-model";
@@ -19,6 +20,8 @@ export type DreamFound = {
 };
 
 export function wishlistAiMessage(error: unknown): string {
+	const limit = aiLimitMessage(error);
+	if (limit) return limit;
 	if (error instanceof ApiError) {
 		if (error.statusCode === 0) return "You're offline. Add the price yourself for now.";
 		if (error.statusCode === 401) return "Sign in again to look up prices.";

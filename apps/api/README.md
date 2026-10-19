@@ -1,7 +1,7 @@
 # @personal-os/api
 
 The Personal OS API: one Hono app on Cloudflare Workers. It owns email-code sign-in, the profile
-and onboarding answers, sync for the app's offline store, avatar uploads to R2, and the Career AI
+and onboarding answers, sync for the app's offline store, avatar uploads to R2, and the module AI
 tasks. Postgres is Neon, reached through Hyperdrive. The contract is in the docs app at
 `/docs/backend-api`.
 
@@ -9,7 +9,7 @@ tasks. Postgres is Neon, reached through Hyperdrive. The contract is in the docs
 
 ```text
 src/
-├── index.ts            # Worker entry
+├── index.ts            # Worker entry: fetch, plus the daily cleanup cron
 ├── app.ts              # middleware, error handling, route mounting under /api/v1
 ├── config/
 │   ├── env.ts          # vars + secrets → typed Config (zod, checked once per isolate)
@@ -20,12 +20,13 @@ src/
 ├── lib/crypto.ts       # Web Crypto helpers
 └── modules/<name>/     # one feature: <name>.routes.ts, .service.ts, .repository.ts, .schema.ts
     ├── auth            # email code, sessions, refresh rotation
-    ├── users           # GET /users/me, PATCH /users/me/profile
+    ├── users           # GET and DELETE /users/me, PATCH /users/me/profile
     ├── assets          # presigned R2 uploads
     ├── onboarding
     ├── sync
-    ├── ai              # Career AI: provider, tasks, mock answers, safe page reader
+    ├── ai              # Module AI: provider, tasks, daily allowance, mock answers, safe page reader
     ├── email           # Resend
+    ├── maintenance     # daily cleanup of old codes, sessions and AI usage
     └── health
 ```
 

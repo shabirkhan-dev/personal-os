@@ -28,7 +28,8 @@ export function useHeyOs(): void {
 
 	const status = useWakeListener(enabled && foreground && pathname !== "/listen", (rest) => {
 		haptics.success();
-		router.push(rest ? { pathname: "/listen", params: { say: rest } } : "/listen");
+		useHeyOsStatus.setState({ heard: rest || null });
+		router.push("/listen");
 	});
 
 	useEffect(() => {

@@ -8,6 +8,8 @@ type MemberState = {
 	member: Member | null;
 	/** Loads the card number, making and saving one the first time. */
 	ensure: () => Promise<Member>;
+	/** Forgets the card (this phone was erased); the next `ensure` makes a new one. */
+	clear: () => Promise<void>;
 };
 
 export const useMemberStore = create<MemberState>()((set, get) => ({
@@ -20,5 +22,9 @@ export const useMemberStore = create<MemberState>()((set, get) => ({
 		if (!stored) await SecureStore.setItemAsync(MEMBER_KEY, JSON.stringify(member));
 		set({ member });
 		return member;
+	},
+	clear: async () => {
+		set({ member: null });
+		await SecureStore.deleteItemAsync(MEMBER_KEY);
 	},
 }));

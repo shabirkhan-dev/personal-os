@@ -1,5 +1,6 @@
 import { beforeAll, describe, expect, it } from "vitest";
 
+import { pageLength } from "@/modules/sync/sync.repository";
 import { signIn, testApp } from "./support";
 
 const { call } = testApp();
@@ -82,16 +83,51 @@ describe("POST /sync", () => {
 		expect(new Set(ids).size).toBe(ids.length);
 	});
 
-	it("rejects clocks far ahead, duplicates and oversized records", async () => {
-		const ahead = await sync(null, [record("f1", Date.now() + 3 * 86_400_000)]);
-		expect(ahead.json).toMatchObject({ code: "SYNC_CLOCK_AHEAD" });
-		const duplicate = await sync(null, [record("x", 1), record("x", 2)]);
-		expect(duplicate.json).toMatchObject({ code: "SYNC_DUPLICATE_RECORD" });
-		const huge = await sync(null, [record("big", 1, { text: "x".repeat(70_000) })]);
-		expect(huge.json).toMatchObject({ code: "VALIDATION_FAILED" });
+	it("skips bad records instead of failing the batch, so a phone never gets stuck", async () => {
+		const fresh = (await signIn(call)).accessToken;
+		const response = await sync(
+			null,
+			[
+				record("big", 1, { text: "x".repeat(70_000) }),
+				{ collection: "Bad Name", id: "x", data: {}, updatedAt: 1, deletedAt: null },
+				record("dup", 1, { v: "old" }),
+				record("dup", 2, { v: "new" }),
+				record("fine", 3),
+			],
+			fresh,
+		);
+		expect(response.status).toBe(200);
+		const view = response.json?.data as SyncView & {
+			rejected: { id: string | null; reason: string }[];
+		};
+		expect(view.rejected).toEqual([
+			{ collection: "career-applications", id: "big", reason: "invalid" },
+			{ collection: "Bad Name", id: "x", reason: "invalid" },
+			{ collection: "career-applications", id: "dup", reason: "duplicate" },
+		]);
+		const stored = view.changes.map((change) => change.id);
+		expect(stored).toEqual(expect.arrayContaining(["dup", "fine"]));
+		expect(view.changes.find((change) => change.id === "dup")?.data).toEqual({ v: "new" });
+		expect(stored).not.toContain("big");
+	});
+
+	it("clamps a change dated far ahead instead of refusing it", async () => {
+		const fresh = (await signIn(call)).accessToken;
+		const response = await sync(null, [record("future", Date.now() + 3 * 86_400_000)], fresh);
+		expect(response.status).toBe(200);
+		const kept = response.data.changes.find((change) => change.id === "future");
+		expect(kept?.updatedAt).toBeLessThanOrEqual(Date.now() + 86_400_000 + 1000);
 	});
 
 	it("needs a session", async () => {
 		expect((await sync(null, [], "")).status).toBe(401);
+	});
+});
+
+describe("pull pages", () => {
+	it("stop at the byte budget but always move at least one record", () => {
+		expect(pageLength([10, 10, 10], 25)).toBe(2);
+		expect(pageLength([50, 10], 25)).toBe(1);
+		expect(pageLength([], 25)).toBe(0);
 	});
 });

@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from "react";
 import { useNow } from "@/lib/use-now";
 import { fundDream, unfundDream } from "../data/finance-actions";
-import { lineRoom } from "../lib/finance-math";
+import { lineRoom, monthLimits } from "../lib/finance-math";
 import {
 	CATEGORIES,
 	CATEGORY_SHORT,
@@ -57,7 +57,7 @@ export function useDreamFunding() {
 		ready: settings.setUp,
 		lines,
 		/** Put aside for dreams this month so far. */
-		dreamsLimit: settings.limits.dreams,
+		dreamsLimit: monthLimits(settings, entries, now).dreams,
 		/** Monthly pay now, or the expected salary while job hunting (0 when neither is set). */
 		income: settings.monthlyIncome > 0 ? settings.monthlyIncome : settings.salary,
 		/** True while the pay is only expected (no monthly income yet). */

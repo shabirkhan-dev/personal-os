@@ -1,4 +1,4 @@
-import { and, desc, eq, gt, isNull, sql } from "drizzle-orm";
+import { and, count, desc, eq, gt, gte, isNull, lt, max, sql } from "drizzle-orm";
 
 import type { Database } from "@/db/client";
 import { type SessionRow, type SignInCodeRow, sessions, signInCodes, users } from "@/db/schema";
@@ -8,6 +8,19 @@ export async function saveCode(
 	input: { email: string; displayName: string | null; codeHash: string; expiresAt: Date },
 ): Promise<void> {
 	await db.insert(signInCodes).values(input);
+}
+
+/** How many codes this email was sent since `since`, and when the newest one went out. */
+export async function codesSince(
+	db: Database,
+	email: string,
+	since: Date,
+): Promise<{ count: number; newest: Date | null }> {
+	const [row] = await db
+		.select({ count: count(), newest: max(signInCodes.createdAt) })
+		.from(signInCodes)
+		.where(and(eq(signInCodes.email, email), gte(signInCodes.createdAt, since)));
+	return { count: row?.count ?? 0, newest: row?.newest ?? null };
 }
 
 /** The newest unused code for this email; older ones stop working once a new one is sent. */
@@ -21,11 +34,27 @@ export async function latestCode(db: Database, email: string): Promise<SignInCod
 	return row ?? null;
 }
 
-export async function recordWrongCode(db: Database, id: string): Promise<void> {
-	await db
+/**
+ * Spends one try before the code is compared, so parallel guesses can't all read the same count.
+ * False once the code has used up its tries or was already used.
+ */
+export async function claimAttempt(
+	db: Database,
+	id: string,
+	maxAttempts: number,
+): Promise<boolean> {
+	const rows = await db
 		.update(signInCodes)
 		.set({ attempts: sql`${signInCodes.attempts} + 1` })
-		.where(eq(signInCodes.id, id));
+		.where(
+			and(
+				eq(signInCodes.id, id),
+				isNull(signInCodes.consumedAt),
+				lt(signInCodes.attempts, maxAttempts),
+			),
+		)
+		.returning({ id: signInCodes.id });
+	return rows.length === 1;
 }
 
 /** Single use: of two requests racing with the same code, only one gets `true`. */
@@ -66,11 +95,44 @@ export async function rotateSession(
 ): Promise<boolean> {
 	const rows = await db
 		.update(sessions)
-		.set({ refreshTokenHash: nextHash, expiresAt, lastUsedAt: new Date() })
+		.set({
+			refreshTokenHash: nextHash,
+			previousRefreshTokenHash: previousHash,
+			rotatedAt: new Date(),
+			expiresAt,
+			lastUsedAt: new Date(),
+		})
 		.where(
 			and(
 				eq(sessions.id, id),
 				eq(sessions.refreshTokenHash, previousHash),
+				isNull(sessions.revokedAt),
+			),
+		)
+		.returning({ id: sessions.id });
+	return rows.length === 1;
+}
+
+/**
+ * A retry with the token that was just rotated away, inside the grace window: issues a fresh token
+ * again. The one whose answer was lost is never seen by the phone, so it simply stops working.
+ */
+export async function rotateFromPrevious(
+	db: Database,
+	id: string,
+	presentedHash: string,
+	nextHash: string,
+	expiresAt: Date,
+	rotatedAfter: Date,
+): Promise<boolean> {
+	const rows = await db
+		.update(sessions)
+		.set({ refreshTokenHash: nextHash, expiresAt, lastUsedAt: new Date() })
+		.where(
+			and(
+				eq(sessions.id, id),
+				eq(sessions.previousRefreshTokenHash, presentedHash),
+				gt(sessions.rotatedAt, rotatedAfter),
 				isNull(sessions.revokedAt),
 			),
 		)

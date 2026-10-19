@@ -1,13 +1,12 @@
-import { removeItem, saveItem } from "@/lib/db/collection";
+import { listItems, removeItem, saveItem } from "@/lib/db/collection";
 import { dayKey, newId } from "@/lib/day";
 import { type Rating, review } from "@/lib/flashcards/schedule";
 import { type ChallengeTemplate, STARTER_CARDS } from "../lib/faith-content";
-import { logId, statusFor } from "../lib/faith-math";
+import { prayerLogFor } from "../lib/faith-math";
 import type {
 	Challenge,
 	FaithCard,
 	FaithSettings,
-	PathProgress,
 	PrayerLog,
 	PrayerStatus,
 	Resource,
@@ -16,7 +15,7 @@ import type {
 	ZakatPayment,
 	ZakatProfile,
 } from "../lib/faith-model";
-import type { PrayerId } from "../lib/prayer-times";
+import { PRAYER_LABELS, type PrayerId } from "../lib/prayer-times";
 import {
 	challenges,
 	faithCards,
@@ -37,17 +36,23 @@ export function saveSettings(settings: FaithSettings): Promise<void> {
 }
 
 /**
- * Logs one prayer. Without a status it is "prayed" or "late" depending on how long after the
- * prayer's time it is logged.
+ * Logs one prayer under its prayer day (a row's `day`: last night's Isha stays last night's after
+ * midnight). Without a status it is "prayed" or "late" depending on how long after the prayer's
+ * time it is logged. A prayer whose time hasn't come is refused.
  */
 export async function logPrayer(
 	prayer: PrayerId,
-	options: { status?: PrayerStatus; prayerAt?: Date | null; now?: Date } = {},
+	options: { status?: PrayerStatus; prayerAt?: Date | null; day?: string; now?: Date } = {},
 ): Promise<PrayerLog> {
 	const now = options.now ?? new Date();
-	const day = dayKey(options.prayerAt ?? now);
-	const status = options.status ?? (options.prayerAt ? statusFor(options.prayerAt, now) : "prayed");
-	const log: PrayerLog = { id: logId(day, prayer), day, prayer, status, at: now.toISOString() };
+	const prayerAt = options.prayerAt ?? null;
+	const log = prayerLogFor(prayer, {
+		day: options.day ?? dayKey(prayerAt ?? now),
+		prayerAt,
+		status: options.status,
+		now,
+	});
+	if (!log) throw new Error(`${PRAYER_LABELS[prayer]} isn't due yet.`);
 	await saveItem(prayerLogs, log);
 	return log;
 }
@@ -125,23 +130,34 @@ export async function startChallenge(template: ChallengeTemplate, now = new Date
 	await saveItem(challenges, challenge);
 }
 
-export async function toggleChallengeDay(challenge: Challenge, now = new Date()): Promise<void> {
-	const day = dayKey(now);
-	const done = challenge.done.includes(day)
-		? challenge.done.filter((item) => item !== day)
-		: [...challenge.done, day];
-	await saveItem(challenges, { ...challenge, done });
+/**
+ * Toggles run one after another and each starts from what is stored, not the screen's copy, so
+ * two fast taps before the screen refreshes both land.
+ */
+let toggles: Promise<unknown> = Promise.resolve();
+
+function inTurn(work: () => Promise<void>): Promise<void> {
+	const run = toggles.then(work);
+	toggles = run.catch(() => undefined);
+	return run;
 }
 
-export async function toggleLesson(
-	pathId: string,
-	lessonId: string,
-	progress: PathProgress | undefined,
-): Promise<void> {
-	const done = progress?.done ?? [];
-	await saveItem(pathProgress, {
-		id: pathId,
-		done: done.includes(lessonId) ? done.filter((id) => id !== lessonId) : [...done, lessonId],
+const toggled = (list: readonly string[], id: string) =>
+	list.includes(id) ? list.filter((item) => item !== id) : [...list, id];
+
+/** Marks today done on the running challenge, or unmarks it. */
+export function toggleChallengeDay(now = new Date()): Promise<void> {
+	return inTurn(async () => {
+		const challenge = (await listItems(challenges))[0];
+		if (!challenge) return;
+		await saveItem(challenges, { ...challenge, done: toggled(challenge.done, dayKey(now)) });
+	});
+}
+
+export function toggleLesson(pathId: string, lessonId: string): Promise<void> {
+	return inTurn(async () => {
+		const progress = (await listItems(pathProgress)).find((item) => item.id === pathId);
+		await saveItem(pathProgress, { id: pathId, done: toggled(progress?.done ?? [], lessonId) });
 	});
 }
 

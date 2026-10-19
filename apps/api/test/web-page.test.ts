@@ -78,3 +78,18 @@ describe("shareImage", () => {
 		expect(shareImage("<p>nothing</p>", "https://a.example.com")).toBeNull();
 	});
 });
+
+describe("htmlToText on hostile pages", () => {
+	it("stays linear with thousands of unclosed tags", () => {
+		const hostile = "<script".repeat(200_000) + "<".repeat(200_000);
+		const started = performance.now();
+		htmlToText(hostile);
+		expect(performance.now() - started).toBeLessThan(1000);
+	});
+
+	it("still drops comments, scripts and an unclosed trailing block", () => {
+		expect(
+			htmlToText("<p>Hi</p><!-- note --><script>x()</script><style>a{}</style>there<script>tail"),
+		).toBe("Hi\nthere");
+	});
+});

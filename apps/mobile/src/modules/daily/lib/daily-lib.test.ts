@@ -119,6 +119,16 @@ describe("minimum day", () => {
 		expect(streak([...logs, day("2026-10-16", 3)], now)).toBe(5);
 		expect(streak([day("2026-10-13", 0), day("2026-10-14", 1), day("2026-10-15", 3)], now)).toBe(1);
 	});
+
+	it("counts a day with no log as one miss, not the end of the streak", () => {
+		const kept = [day("2026-10-15", 3), day("2026-10-16", 3), day("2026-10-17", 3)];
+		const monday = new Date("2026-10-19T09:00:00");
+		const sunday = new Date("2026-10-18T21:00:00");
+		expect(streak(kept, monday)).toBe(3);
+		expect(streak([...kept, day("2026-10-18", 1)], monday)).toBe(3);
+		expect(streak(kept, sunday)).toBe(3);
+		expect(streak([day("2026-10-14", 3), day("2026-10-15", 3)], monday)).toBe(0);
+	});
 });
 
 describe("plan", () => {

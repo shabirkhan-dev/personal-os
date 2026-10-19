@@ -44,6 +44,19 @@ export function total(items: readonly { amount: number }[]): number {
 	return roundCents(sum);
 }
 
+/** A balance as typed into Edit numbers: exact, with paisa, minus when overdrawn, "0" at zero. */
+export function balanceText(balance: number): string {
+	return String(roundCents(balance));
+}
+
+/** A typed balance: "148,500", "-5000", "−5,000.50" or "0"; null when it isn't a number. */
+export function parseBalance(text: string): number | null {
+	const cleaned = text.replace(/rs\.?|pkr|,|\s/gi, "").replace("−", "-");
+	if (cleaned === "") return 0;
+	if (!/^-?\d+(\.\d{1,2})?$/.test(cleaned)) return null;
+	return roundCents(Number(cleaned));
+}
+
 /** "Rs 148,500" without the paisa. */
 export function rupees(amount: number): string {
 	return formatMoney(Math.round(amount));
@@ -259,17 +272,37 @@ export function dueIn(bill: Bill, year: number, month: number): Date {
 
 export type DueBill = { bill: Bill; due: Date; overdue: boolean };
 
-/** Bills not paid yet: this month's if unpaid, otherwise next month's. Soonest first. */
+/** The month a bill's history starts: when it was added, else its first paid month. */
+function billStart(bill: Bill): string | null {
+	return bill.since ?? ([...bill.paid].sort()[0] || null);
+}
+
+/**
+ * Bills not paid yet, soonest first. Last month's occurrence stays, overdue, until it is paid (a
+ * bill due 28 Oct still shows on 1 Nov); otherwise this month's if unpaid, else next month's.
+ */
 export function upcomingBills(bills: readonly Bill[], now: Date): DueBill[] {
 	const today = startOfDay(now);
+	const year = now.getFullYear();
+	const month = now.getMonth();
 	const thisMonth = monthKey(now);
+	const lastMonth = monthKey(new Date(year, month - 1, 1));
 	return bills
 		.map((bill) => {
-			const due = dueIn(bill, now.getFullYear(), now.getMonth());
+			const start = billStart(bill);
+			if (start !== null && start <= lastMonth && !bill.paid.includes(lastMonth)) {
+				return { bill, due: dueIn(bill, year, month - 1), overdue: true };
+			}
+			const due = dueIn(bill, year, month);
 			if (!bill.paid.includes(thisMonth)) return { bill, due, overdue: due < today };
-			return { bill, due: dueIn(bill, now.getFullYear(), now.getMonth() + 1), overdue: false };
+			return { bill, due: dueIn(bill, year, month + 1), overdue: false };
 		})
 		.sort((a, b) => a.due.getTime() - b.due.getTime());
+}
+
+/** The "YYYY-MM" a bill payment covered: stored on the entry, else (older entries) its month. */
+export function billMonthOf(entry: Pick<Entry, "billMonth" | "at">): string {
+	return entry.billMonth ?? monthKey(new Date(entry.at));
 }
 
 /** "Sat 18 Oct". */
@@ -389,12 +422,13 @@ export function financeNotes(input: {
 	const month = inMonth(entries, now);
 	const sums = byCategory(month);
 	const spent = total(spends(month));
-	const monthPace = pace(spent, budgetTotal(settings.limits), now);
+	const limits = monthLimits(settings, month, now);
+	const monthPace = pace(spent, budgetTotal(limits), now);
 
 	const ahead = CATEGORIES.map((category) => ({
 		category,
 		spent: sums[category],
-		limit: settings.limits[category],
+		limit: limits[category],
 	}))
 		.filter((item) => item.limit > 0 && item.spent / item.limit > monthPace.monthShare + 0.25)
 		.sort((a, b) => b.spent / b.limit - a.spent / a.limit)[0];
@@ -464,16 +498,39 @@ export function savedShare(settings: FinanceSettings): number {
 	return settings.savingsTarget > 0 ? Math.min(1, settings.saved / settings.savingsTarget) : 0;
 }
 
+/**
+ * Each budget line's limit for the month of `now`: the standing limits, with that month's Wishlist
+ * transfers (Dreams entries with `movedFrom`) taken from their line and given to Dreams. A transfer
+ * never carries into the next month, and deleting its entry puts the money back.
+ */
+export function monthLimits(
+	settings: FinanceSettings,
+	entries: readonly Entry[],
+	now: Date,
+): Record<Category, number> {
+	const limits = { ...settings.limits };
+	for (const entry of spends(inMonth(entries, now))) {
+		const from = entry.category === "dreams" ? entry.movedFrom : null;
+		if (!from || from === "dreams") continue;
+		const moved = Math.min(entry.amount, limits[from]);
+		limits[from] = roundCents(limits[from] - moved);
+		limits.dreams = roundCents(limits.dreams + moved);
+	}
+	return limits;
+}
+
 /** What is still free on each budget line this month: its limit minus what was spent on it. */
 export function lineRoom(
 	settings: FinanceSettings,
 	entries: readonly Entry[],
 	now: Date,
 ): Record<Category, number> {
-	const spent = byCategory(inMonth(entries, now));
+	const month = inMonth(entries, now);
+	const limits = monthLimits(settings, month, now);
+	const spent = byCategory(month);
 	const room = {} as Record<Category, number>;
 	for (const category of CATEGORIES) {
-		room[category] = roundCents(Math.max(0, settings.limits[category] - spent[category]));
+		room[category] = roundCents(Math.max(0, limits[category] - spent[category]));
 	}
 	return room;
 }

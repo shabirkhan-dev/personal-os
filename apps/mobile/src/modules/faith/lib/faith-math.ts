@@ -47,6 +47,8 @@ export type RowState = PrayerStatus | "due" | "next" | "later";
 
 export type PrayerRow = {
 	prayer: PrayerId;
+	/** The prayer day the row belongs to: yesterday's until today's Fajr. */
+	day: string;
 	label: string;
 	at: Date;
 	state: RowState;
@@ -64,13 +66,38 @@ export function statusFor(at: Date, loggedAt: Date): PrayerStatus {
 	return loggedAt.getTime() - at.getTime() <= ON_TIME_MINUTES * MINUTE ? "prayed" : "late";
 }
 
+/**
+ * The date whose prayers are the current ones. The night belongs to the day before until Fajr, so
+ * at 00:30 the Isha to log is last night's, not tonight's.
+ */
+export function prayerDate(settings: FaithSettings, now: Date): Date {
+	const fajr = dayTimes(timesSource(settings), now).prayers.fajr;
+	const beforeDawn = fajr ? now < fajr : now.getHours() < 4;
+	return beforeDawn ? addDays(now, -1) : now;
+}
+
+/**
+ * The log for one prayer, or null when its time hasn't come: a prayer can't be prayed (or
+ * missed) before it is due. Without a status it is "prayed" or "late" by when it is logged.
+ */
+export function prayerLogFor(
+	prayer: PrayerId,
+	input: { day: string; prayerAt: Date | null; status?: PrayerStatus; now: Date },
+): PrayerLog | null {
+	const { day, prayerAt, now } = input;
+	if (prayerAt && prayerAt > now) return null;
+	const status = input.status ?? (prayerAt ? statusFor(prayerAt, now) : "prayed");
+	return { id: logId(day, prayer), day, prayer, status, at: now.toISOString() };
+}
+
 export function todayRows(
 	settings: FaithSettings,
 	logs: readonly PrayerLog[],
 	now: Date,
 ): PrayerRow[] {
-	const day = dayKey(now);
-	const list = slots(dayTimes(timesSource(settings), now), settings.prayers);
+	const date = prayerDate(settings, now);
+	const day = dayKey(date);
+	const list = slots(dayTimes(timesSource(settings), date), settings.prayers);
 	const nextIndex = list.findIndex((slot) => slot.at > now);
 	return list.map((slot, index) => {
 		const log = logs.find((item) => item.id === logId(day, slot.prayer)) ?? null;
@@ -100,6 +127,7 @@ export function todayRows(
 		}[state];
 		return {
 			prayer: slot.prayer,
+			day,
 			label: PRAYER_LABELS[slot.prayer],
 			at: slot.at,
 			state,
@@ -397,14 +425,34 @@ export type ZakatView = {
 	net: number;
 	aboveNisab: boolean;
 	due: number;
+	/** Paid within the current hawl only. */
 	paid: number;
 	left: number;
-	/** Lunar months held since the hawl started, 0–12. */
+	/** The current lunar year of holding, rolled forward each year; null without a start date. */
+	hawl: Hawl | null;
+	/** Lunar months held since the current hawl started, 0–12. */
 	monthsHeld: number;
 	monthsLeft: number;
 };
 
+export type Hawl = { start: Date; end: Date };
+
 const LUNAR_MONTH_DAYS = 29.530588;
+const LUNAR_YEAR_DAYS = 354;
+
+/**
+ * The hawl running now: the first one starts on `hawlStart`, and each lunar year (354 days) a new
+ * one begins, so last year's payments don't count towards this year's zakat.
+ */
+export function currentHawl(hawlStart: string | null, now: Date): Hawl | null {
+	if (!hawlStart) return null;
+	const first = new Date(`${hawlStart}T00:00:00`);
+	const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+	const days = Math.round((today.getTime() - first.getTime()) / DAY_MS);
+	const years = days > 0 ? Math.floor(days / LUNAR_YEAR_DAYS) : 0;
+	const start = addDays(first, years * LUNAR_YEAR_DAYS);
+	return { start, end: addDays(start, LUNAR_YEAR_DAYS) };
+}
 
 export function zakatView(
 	profile: ZakatProfile,
@@ -415,14 +463,17 @@ export function zakatView(
 	const net = Math.max(0, owned - profile.debts);
 	const aboveNisab = net >= profile.nisab && net > 0;
 	const due = aboveNisab ? Math.round(net * profile.rate) : 0;
-	const start = profile.hawlStart ? new Date(`${profile.hawlStart}T00:00:00`) : null;
-	const monthsHeld = start
+	const hawl = currentHawl(profile.hawlStart, now);
+	const monthsHeld = hawl
 		? Math.min(
 				12,
-				Math.max(0, Math.floor((now.getTime() - start.getTime()) / (LUNAR_MONTH_DAYS * DAY_MS))),
+				Math.max(
+					0,
+					Math.floor((now.getTime() - hawl.start.getTime()) / (LUNAR_MONTH_DAYS * DAY_MS)),
+				),
 			)
 		: 0;
-	const since = start ?? addDays(now, -355);
+	const since = hawl?.start ?? addDays(now, -LUNAR_YEAR_DAYS);
 	const paid = payments
 		.filter((payment) => new Date(payment.at) >= since)
 		.reduce((sum, payment) => sum + payment.amount, 0);
@@ -433,9 +484,25 @@ export function zakatView(
 		due,
 		paid,
 		left: Math.max(0, due - paid),
+		hawl,
 		monthsHeld,
 		monthsLeft: 12 - monthsHeld,
 	};
+}
+
+/** A typed "YYYY-MM-DD" that is a real day: "2026-02-30" is refused, not rolled into March. */
+export function isCalendarDay(text: string): boolean {
+	if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) return false;
+	const date = new Date(`${text}T00:00:00`);
+	return !Number.isNaN(date.getTime()) && dayKey(date) === text;
+}
+
+/** A typed zakat rate in percent ("2.5") as a share (0.025); empty, zero or over 100 is null. */
+export function parseRate(text: string): number | null {
+	const trimmed = text.trim();
+	if (!trimmed) return null;
+	const value = Number(trimmed);
+	return Number.isFinite(value) && value > 0 && value <= 100 ? value / 100 : null;
 }
 
 /** "1.5L", "70k", "3,20,000": Pakistani short amounts as the Zakat frame shows them. */

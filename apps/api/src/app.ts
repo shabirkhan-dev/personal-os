@@ -23,7 +23,7 @@ export type AppOptions = {
 };
 
 /** On Workers the URL is Hyperdrive's; elsewhere (scripts) it is DATABASE_URL. */
-function defaultOpenDatabase(config: Config, env: CloudflareBindings): DatabaseHandle {
+export function defaultOpenDatabase(config: Config, env: CloudflareBindings): DatabaseHandle {
 	const url = env.HYPERDRIVE?.connectionString ?? config.databaseUrl;
 	if (!url) throw new Error("No database: bind HYPERDRIVE or set DATABASE_URL");
 	return openDatabase(url);
@@ -50,10 +50,7 @@ export function createApp(options: AppOptions = {}) {
 			} catch (error) {
 				if (!(error instanceof ConfigError)) throw error;
 				console.error("[config]", error.message);
-				throw new AppError("CONFIG_INVALID", {
-					message: `The API's settings are incomplete: ${error.issues.join("; ")}`,
-					cause: error,
-				});
+				throw new AppError("CONFIG_INVALID", { cause: error });
 			}
 			c.set("openDatabase", open);
 			try {

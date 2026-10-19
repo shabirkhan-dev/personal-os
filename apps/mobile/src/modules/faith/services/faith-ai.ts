@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { ApiError, apiClient } from "@/lib/api/client";
+import { aiLimitMessage } from "@/lib/api/ai-limits";
 import { dayKey } from "@/lib/day";
 import { useAuth } from "@/modules/auth";
 import type { PrayerId } from "../lib/prayer-times";
@@ -19,6 +20,8 @@ export type AskInput = {
 
 /** A sentence the screen can show for any failure. */
 export function faithAiMessage(error: unknown): string {
+	const limit = aiLimitMessage(error);
+	if (limit) return limit;
 	if (error instanceof ApiError) {
 		if (error.statusCode === 0)
 			return "You're offline. Questions need a connection; logging works offline.";

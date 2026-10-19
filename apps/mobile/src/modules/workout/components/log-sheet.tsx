@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { FilterChip } from "@/components/module-ui";
 import { PoText } from "@/components/ui/po-text";
@@ -38,10 +38,14 @@ export function LogSheet({
 	const [km, setKm] = useState("");
 	const [feel, setFeel] = useState<Feel | null>(null);
 	const [notice, setNotice] = useState<string | null>(null);
+	const [saving, setSaving] = useState(false);
+	/** Blocks a second tap that lands before the disabled button re-renders. */
+	const savingRef = useRef(false);
 	const distance =
 		sport === "running" || sport === "walk" || sport === "cycle" || sport === "swimming";
 
 	const save = () => {
+		if (savingRef.current) return;
 		const duration = Number(minutes);
 		if (!Number.isFinite(duration) || duration <= 0) {
 			setNotice("How many minutes?");
@@ -49,6 +53,8 @@ export function LogSheet({
 		}
 		const distanceKm =
 			distance && Number(km.replace(",", ".")) > 0 ? Number(km.replace(",", ".")) : null;
+		savingRef.current = true;
+		setSaving(true);
 		logSession(
 			{
 				template: null,
@@ -71,6 +77,10 @@ export function LogSheet({
 			.catch((error: unknown) => {
 				console.error("[training] could not log", error);
 				setNotice("Couldn't save on this phone. Try again.");
+			})
+			.finally(() => {
+				savingRef.current = false;
+				setSaving(false);
 			});
 	};
 
@@ -79,7 +89,7 @@ export function LogSheet({
 			visible={visible}
 			title="Log a session"
 			onClose={onClose}
-			action={{ label: "Log", onPress: save }}
+			action={{ label: saving ? "Saving…" : "Log", onPress: save, disabled: saving }}
 		>
 			<View style={styles.body}>
 				<View style={styles.chips}>

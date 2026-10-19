@@ -1,10 +1,23 @@
 version: 2
 updates:
-  - package-ecosystem: "npm"
+  # The repo uses Bun (bun.lock); Expo SDK and React Native move together in an SDK upgrade,
+  # never one package at a time, so they are left out here.
+  - package-ecosystem: "bun"
     directory: "/"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
+    groups:
+      minor-and-patch:
+        update-types: ["minor", "patch"]
+    ignore:
+      - dependency-name: "expo"
+      - dependency-name: "expo-*"
+      - dependency-name: "@expo/*"
+      - dependency-name: "react-native"
+      - dependency-name: "react-native-*"
+      - dependency-name: "react"
+      - dependency-name: "react-dom"
 
   - package-ecosystem: "github-actions"
     directory: "/"

@@ -8,6 +8,8 @@
 	"compatibility_date": "2026-10-01",
 	"compatibility_flags": ["nodejs_compat"],
 	"observability": { "enabled": true },
+	// Daily housekeeping: old sign-in codes, ended sessions and AI usage rows (src/index.ts).
+	"triggers": { "crons": ["17 3 * * *"] },
 	"dev": { "port": 4000, "ip": "0.0.0.0" },
 
 	// Only generic settings live here; the repo is public. Values for your own deployment
@@ -44,5 +46,6 @@
 		{ "name": "AUTH_LIMITER", "namespace_id": "4101", "simple": { "limit": 10, "period": 60 } },
 		{ "name": "AI_LIMITER", "namespace_id": "4102", "simple": { "limit": 20, "period": 60 } },
 		{ "name": "SYNC_LIMITER", "namespace_id": "4103", "simple": { "limit": 60, "period": 60 } },
+		{ "name": "UPLOAD_LIMITER", "namespace_id": "4104", "simple": { "limit": 5, "period": 60 } },
 	],
 }

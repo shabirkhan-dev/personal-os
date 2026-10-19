@@ -13,6 +13,7 @@ import {
 	monthsFor,
 	moveInLine,
 	progressPercent,
+	replacedPhotoUri,
 	recap,
 	roadmap,
 	serviceState,
@@ -89,6 +90,19 @@ describe("one dream", () => {
 		});
 		expect(coolOff(fresh, settings, now)).toEqual({ passed: false, daysLeft: 23, days: 7 });
 		expect(coolOff(laptop, settings, now).passed).toBe(true);
+	});
+});
+
+describe("editing a photo", () => {
+	test("names the old file to delete once the photo changed", () => {
+		const old = { kind: "file", uri: "file:///wishlist/dream-a.jpg" } as const;
+		const fresh = { kind: "file", uri: "file:///wishlist/dream-b.jpg" } as const;
+		expect(replacedPhotoUri(old, fresh, [])).toBe(old.uri);
+		expect(replacedPhotoUri(old, null, [])).toBe(old.uri);
+		expect(replacedPhotoUri(old, { kind: "bundled", key: "pro-laptop" }, [])).toBe(old.uri);
+		expect(replacedPhotoUri(old, { ...old }, [])).toBeNull();
+		expect(replacedPhotoUri(null, fresh, [])).toBeNull();
+		expect(replacedPhotoUri(old, fresh, [{ photo: old }])).toBeNull();
 	});
 });
 

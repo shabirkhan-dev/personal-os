@@ -39,7 +39,7 @@ const READ_STEPS = ["Reading what you spent", "Splitting it into items"] as cons
 /** Finance · Log spending: type or say it, the phone splits it into items, then save. */
 export function LogScreen() {
 	const { colors } = usePoTheme();
-	const { data, now, sums } = useFinanceToday();
+	const { data, now, sums, limits } = useFinanceToday();
 	const draft = useFinanceUi((state) => state.draft);
 	const ai = useFinanceAi();
 	const readJob = useAiJobs((state) => state.jobs[FINANCE_READ_JOB]);
@@ -95,9 +95,7 @@ export function LogScreen() {
 	const sum = total(items);
 	const main = [...items].sort((a, b) => b.amount - a.amount)[0]?.category ?? null;
 	const mainLeft = main
-		? data.settings.limits[main] -
-			sums[main] -
-			total(items.filter((item) => item.category === main))
+		? limits[main] - sums[main] - total(items.filter((item) => item.category === main))
 		: 0;
 	const matched = groceries.ids.length;
 

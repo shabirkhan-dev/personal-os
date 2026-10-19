@@ -78,6 +78,8 @@ export function FinanceHomeView({ actionRequest }: HomeModuleViewProps) {
 	const dismissJob = useAiJobs((state) => state.dismiss);
 	const [notice, setNotice] = useState<string | null>(null);
 	const [logged, setLogged] = useState<{ quote: string; entries: Entry[] } | null>(null);
+	/** A bill payment in flight; a second tap before it lands would pay twice. */
+	const paying = useRef(false);
 	const [billSheet, setBillSheet] = useState<{ bill: Bill | null } | null>(null);
 	const [saving, setSaving] = useState(false);
 	const [setup, setSetup] = useState({ balance: "", cost: "", income: "" });
@@ -316,8 +318,10 @@ export function FinanceHomeView({ actionRequest }: HomeModuleViewProps) {
 	if (data.error) return <ReadError name="Finance" />;
 
 	if (!data.loading && !settings.setUp) {
+		// Rs 0 on hand is a real starting point (runway mode is for exactly that case).
+		const onHand = parseAmount(setup.balance, { allowZero: true });
 		const typed = {
-			balance: parseAmount(setup.balance) ?? 0,
+			balance: onHand ?? 0,
 			cost: parseAmount(setup.cost) ?? 0,
 			income: parseAmount(setup.income) ?? 0,
 		};
@@ -347,7 +351,7 @@ export function FinanceHomeView({ actionRequest }: HomeModuleViewProps) {
 						placeholder="Nothing fixed yet"
 						onChangeText={(value) => setSetup((current) => ({ ...current, income: value }))}
 					/>
-					{typed.balance > 0 && typed.cost > 0 ? (
+					{onHand !== null && typed.cost > 0 ? (
 						<View style={styles.previewRow}>
 							<View style={[styles.dot, { backgroundColor: colors.statusCaution }]} />
 							<PoText variant="row15" tone="textWarning">
@@ -359,7 +363,7 @@ export function FinanceHomeView({ actionRequest }: HomeModuleViewProps) {
 					) : null}
 					<PillButton
 						label={starting ? "Starting…" : "Start runway mode"}
-						disabled={starting || !(typed.balance > 0 && typed.cost > 0)}
+						disabled={starting || !(onHand !== null && typed.cost > 0)}
 						onPress={() => {
 							setStarting(true);
 							setUp(settings, {
@@ -386,7 +390,7 @@ export function FinanceHomeView({ actionRequest }: HomeModuleViewProps) {
 		tone: balanceTone(index === 0 ? balance : point.balance, cost),
 	}));
 	const due = upcomingBills(bills, now);
-	const thisMonth = due.filter((item) => item.due.getMonth() === now.getMonth());
+	const thisMonth = due.filter((item) => item.overdue || item.due.getMonth() === now.getMonth());
 	const billRows = due.slice(0, 3).map((item) => ({
 		id: item.bill.id,
 		name: item.bill.name,
@@ -433,10 +437,14 @@ export function FinanceHomeView({ actionRequest }: HomeModuleViewProps) {
 				count={thisMonth.length}
 				onPay={(id) => {
 					const item = due.find((each) => each.bill.id === id);
-					if (!item) return;
+					if (!item || paying.current) return;
+					paying.current = true;
 					payBill(item.bill, item.due)
 						.then((saved) => done(`Paid ${item.bill.name}`, [saved], false))
-						.catch(failed("pay the bill"));
+						.catch(failed("pay the bill"))
+						.finally(() => {
+							paying.current = false;
+						});
 				}}
 				onOpen={(id) => setBillSheet({ bill: bills.find((bill) => bill.id === id) ?? null })}
 				onAdd={() => setBillSheet({ bill: null })}

@@ -14,5 +14,11 @@ export const useHeyOsSettings = createDocumentStore<HeyOsDoc>(
 	}),
 );
 
-/** What the listener is doing right now, for the Profile row. */
-export const useHeyOsStatus = create<{ status: WakeStatus }>(() => ({ status: "off" }));
+/**
+ * What the listener is doing right now (for the Profile row), and the words said right after
+ * "Hey OS", handed to Talk to OS in memory: a link from outside the app can't put words here.
+ */
+export const useHeyOsStatus = create<{ status: WakeStatus; heard: string | null }>(() => ({
+	status: "off",
+	heard: null,
+}));

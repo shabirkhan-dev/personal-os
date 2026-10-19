@@ -55,7 +55,7 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
   today and the rest of the day; a morning brief, a day plan drafted from the modules, closing
   the day with energy and one good thing, sleep with a wind-down and alarms, and Insights.
   Modules feed it through one small hook each.
-- - Voice in and out on the phone behind one swappable layer (`src/lib/voice`), and Talk to OS
+- Voice in and out on the phone behind one swappable layer (`src/lib/voice`), and Talk to OS
   (`personalos://listen`), which opens listening and hands the line to the right module.
 - "Hey OS" while the app is open (on-device speech, off until turned on in Profile), and a Talk to
   OS launcher shortcut on Android.
@@ -72,23 +72,26 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
   Neon through Hyperdrive, Cloudflare rate limiting, typed config and one table of error codes.
 - Email-code sign-in with rotating refresh sessions.
 - Profile with avatars uploaded straight to R2; onboarding answers stored and synced.
-- Career AI inside the API, with a mock provider for development and tests.
+- Module AI inside the API (Career, Faith, Food, Fashion, Finance, Training, Care, Wishlist),
+  with a mock provider for development and tests, capped answers and a daily allowance per user.
+- Account deletion (`DELETE /users/me` and Profile → Delete account), a full data export, and a
+  daily cleanup cron for old codes, sessions and AI usage.
 - Landing page on Cloudflare Workers with a launch waitlist.
 
 ## Next
 
 Roughly in order; each item becomes board cards.
 
-1. **Remaining modules**: Wishlist, on the record store.
-1. **Piece and meal photos to R2** so a wardrobe and food log sync with their photos (they stay on the phone for now).
-1. **"Hey OS" with the app closed**: today it listens while the app is open (Profile → Hey OS) and
+1. **Production hardening**: error tracking (Sentry on the app and the Worker), migrations and
+   deploys in `cd.yml` behind CI (it is still a template; Workers Builds deploys today), a
+   staging Worker, branch protection on `main`, and a privacy policy and terms linked in the app.
+2. **Piece, meal and dream photos to R2** so a wardrobe, food log and wishlist sync with their
+   photos (they stay on the phone for now).
+3. **"Hey OS" with the app closed**: today it listens while the app is open (Profile → Hey OS) and
    Android has a Talk to OS launcher shortcut. Waking from the background needs an on-device
    wake-word engine in an Android foreground service; iOS does not allow always-on listening.
-3. **Files**: an avatar picker and photos through the R2 upload flow; videos streamed from Google
-   Drive.
-4. **Insights**: AI over a per-module, opt-in daily digest, shown in the Insights tab.
-5. **Production hardening**: error tracking, migrations in the deploy pipeline, and real deploy
-   steps in `cd.yml` (it is still a template).
+4. **Files**: videos streamed from Google Drive.
+5. **Insights**: AI over a per-module, opt-in daily digest, shown in the Insights tab.
 6. **Desktop app** on the same record store and sync.
 
 ## Engineering rules

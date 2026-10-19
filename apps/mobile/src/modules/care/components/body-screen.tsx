@@ -9,9 +9,9 @@ import { TextField } from "@/components/ui/text-field";
 import { haptics } from "@/lib/haptics";
 import { useFoodWater } from "@/modules/food";
 import { usePoTheme } from "@/theme";
-import { deleteHabit, saveDay, saveHabit, tick } from "../data/care-actions";
+import { deleteHabit, logCare, saveHabit, tick, toggleHabit } from "../data/care-actions";
 import { useCareToday } from "../hooks/use-care";
-import { emptyDay, lastDone, ratingWord, stepsOn, weekdayName } from "../lib/care-math";
+import { lastDone, ratingWord, stepsOn, weekdayName } from "../lib/care-math";
 import type { CheckIn, Habit, Metric } from "../lib/care-model";
 import { CareScreen } from "./care-screen";
 import { Card, CardHead } from "./home-cards";
@@ -92,11 +92,7 @@ export function BodyScreen() {
 	const toggle = (habit: Habit) => {
 		if (habit.link === "water") return;
 		haptics.select();
-		const base = record ?? emptyDay(today);
-		const next = base.habits.includes(habit.id)
-			? base.habits.filter((id) => id !== habit.id)
-			: [...base.habits, habit.id];
-		saveDay({ ...base, habits: next }).catch(failed("tick the habit"));
+		toggleHabit(today, habit.id).catch(failed("tick the habit"));
 	};
 
 	return (
@@ -134,9 +130,7 @@ export function BodyScreen() {
 					accessibilityLabel="Log nail day"
 					onPress={() => {
 						haptics.tap();
-						void tick(record, today, nail, stepsOn(steps, nail.routine, today)).catch(
-							failed("log nails"),
-						);
+						void tick(today, nail, stepsOn(steps, nail.routine, today)).catch(failed("log nails"));
 					}}
 					style={[
 						styles.nail,
@@ -213,9 +207,8 @@ export function BodyScreen() {
 					label="Log today"
 					style={styles.flex}
 					onPress={() => {
-						const base = record ?? emptyDay(today);
 						const all = habits.filter((habit) => habit.link !== "water").map((habit) => habit.id);
-						saveDay({ ...base, habits: [...new Set([...base.habits, ...all])] })
+						logCare(today, { habitIds: all })
 							.then(() => haptics.success())
 							.catch(failed("log today"));
 					}}

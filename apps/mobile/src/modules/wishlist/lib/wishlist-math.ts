@@ -4,6 +4,7 @@ import {
 	type Dream,
 	type DreamCategory,
 	type Owned,
+	type Photo,
 	type ServiceItem,
 	type WishlistSettings,
 } from "./wishlist-model";
@@ -16,6 +17,21 @@ const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Frida
 const roundCents = (value: number) => Math.round(value * 100) / 100;
 
 // --- one dream ----------------------------------------------------------------------------------
+
+/**
+ * The photo file an edit leaves behind: the old one when it was a file and the dream now shows
+ * something else, unless a garage item still uses it (Got it shares the dream's photo).
+ */
+export function replacedPhotoUri(
+	before: Photo,
+	after: Photo,
+	owned: readonly Pick<Owned, "photo">[],
+): string | null {
+	if (before?.kind !== "file") return null;
+	if (after?.kind === "file" && after.uri === before.uri) return null;
+	const kept = owned.some((item) => item.photo?.kind === "file" && item.photo.uri === before.uri);
+	return kept ? null : before.uri;
+}
 
 /** Share of the price put aside, 0–1. */
 export function progress(dream: Pick<Dream, "price" | "savedAmount">): number {

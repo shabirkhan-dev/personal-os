@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { ApiError, apiClient } from "@/lib/api/client";
+import { aiLimitMessage } from "@/lib/api/ai-limits";
 import { dayKey } from "@/lib/day";
 import { useAuth } from "@/modules/auth";
 import type { HalalStatus, Stage, Story } from "../lib/career-model";
@@ -67,6 +68,8 @@ export type SkillPathResult = {
 
 function toCareerAiError(error: unknown): CareerAiError {
 	if (error instanceof CareerAiError) return error;
+	const limit = aiLimitMessage(error);
+	if (limit) return new CareerAiError("failed", limit);
 	if (error instanceof ApiError) {
 		if (error.statusCode === 0) {
 			return new CareerAiError("offline", "You're offline. This needs a connection.");

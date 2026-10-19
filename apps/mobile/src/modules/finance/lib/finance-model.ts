@@ -111,6 +111,13 @@ export type Entry = {
 	purify: boolean;
 	/** The bill this paid, if any. */
 	billId: string | null;
+	/** "YYYY-MM" month the bill payment covered; null for older entries (then its own month). */
+	billMonth: string | null;
+	/**
+	 * Wishlist's Add savings: the budget line this Dreams money was moved from. The move holds for
+	 * the entry's month only (see `monthLimits`); null for anything else and for older transfers.
+	 */
+	movedFrom: Category | null;
 	/** ISO time it happened. */
 	at: string;
 	receiptUri: string | null;
@@ -127,6 +134,8 @@ export type Bill = {
 	category: Category;
 	/** "YYYY-MM" months already paid. */
 	paid: string[];
+	/** "YYYY-MM" month it was added; null for bills saved before this was kept. */
+	since: string | null;
 };
 
 export type Source = {
@@ -222,7 +231,14 @@ const asIso = (value: unknown) =>
 	typeof value === "string" && !Number.isNaN(Date.parse(value)) ? value : null;
 const money = (value: unknown, fallback: number) =>
 	Math.min(1_000_000_000, Math.max(0, Math.round(asNumber(value, fallback) * 100) / 100));
+/** Money on hand can be overdrawn, so it keeps its sign. */
+const signedMoney = (value: unknown) =>
+	Math.min(1_000_000_000, Math.max(-1_000_000_000, Math.round(asNumber(value, 0) * 100) / 100));
 const text = (value: unknown, max: number) => asString(value, "").trim().slice(0, max);
+const isMonth = (value: unknown): value is string =>
+	typeof value === "string" && /^\d{4}-\d{2}$/.test(value);
+const isLine = (value: unknown): value is Category =>
+	typeof value === "string" && (CATEGORIES as readonly string[]).includes(value);
 const id = (value: unknown) => (typeof value === "string" && value ? value : null);
 
 export function parseSettings(raw: unknown): FinanceSettings | null {
@@ -244,7 +260,7 @@ export function parseSettings(raw: unknown): FinanceSettings | null {
 	return {
 		id: "settings",
 		setUp: asBoolean(raw.setUp, false),
-		balance: money(raw.balance, 0),
+		balance: signedMoney(raw.balance),
 		balanceAt: asIso(raw.balanceAt) ?? base.balanceAt,
 		monthlyCost,
 		monthlyIncome: money(raw.monthlyIncome, 0),
@@ -277,6 +293,11 @@ export function parseEntry(raw: unknown): Entry | null {
 		clean: kind === "income" ? asBoolean(raw.clean, true) : true,
 		purify: kind === "spend" ? asBoolean(raw.purify, false) : false,
 		billId: id(raw.billId),
+		billMonth: isMonth(raw.billMonth) ? raw.billMonth : null,
+		movedFrom:
+			category === "dreams" && isLine(raw.movedFrom) && raw.movedFrom !== "dreams"
+				? raw.movedFrom
+				: null,
 		at,
 		receiptUri: id(raw.receiptUri),
 	};
@@ -295,9 +316,8 @@ export function parseBill(raw: unknown): Bill | null {
 		amount,
 		dueDay: Math.min(31, Math.max(1, Math.round(asNumber(raw.dueDay, 1)))),
 		category: oneOf(raw.category, CATEGORIES, "bills"),
-		paid: asArray(raw.paid, (item) =>
-			typeof item === "string" && /^\d{4}-\d{2}$/.test(item) ? item : null,
-		).slice(-24),
+		paid: asArray(raw.paid, (item) => (isMonth(item) ? item : null)).slice(-24),
+		since: isMonth(raw.since) ? raw.since : null,
 	};
 }
 

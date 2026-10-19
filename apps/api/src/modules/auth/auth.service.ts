@@ -30,6 +30,11 @@ export async function requestCode(
 	input: { email: string; name?: string | undefined },
 	now = Date.now(),
 ): Promise<CodeSent> {
+	const recent = await repo.codesSince(db, input.email, new Date(now - 86_400_000));
+	const cooling =
+		recent.newest !== null &&
+		now - recent.newest.getTime() < settings.auth.codeCooldownSeconds * 1000;
+	if (cooling || recent.count >= settings.auth.codesPerDay) throw new AppError("RATE_LIMITED");
 	const code = randomCode();
 	await repo.saveCode(db, {
 		email: input.email,
@@ -64,8 +69,10 @@ export async function verifyCode(
 	) {
 		throw new AppError("AUTH_CODE_INVALID");
 	}
+	if (!(await repo.claimAttempt(db, saved.id, settings.auth.codeMaxAttempts))) {
+		throw new AppError("AUTH_CODE_INVALID");
+	}
 	if (!safeEqual(await codeHash(config, input.email, input.code), saved.codeHash)) {
-		await repo.recordWrongCode(db, saved.id);
 		throw new AppError("AUTH_CODE_INVALID");
 	}
 	if (!(await repo.consumeCode(db, saved.id))) throw new AppError("AUTH_CODE_INVALID");
@@ -75,7 +82,10 @@ export async function verifyCode(
 	return startSession(deps, user, userAgent, now);
 }
 
-/** Rotates the refresh token. A token that was already rotated away ends the session. */
+/**
+ * Rotates the refresh token. The token rotated away a moment ago still works once (a retry after
+ * a lost answer); an older one is treated as stolen and ends the session.
+ */
 export async function refresh(deps: Deps, refreshToken: string, now = Date.now()) {
 	const { db } = deps;
 	const sessionId = sessionIdOf(refreshToken);
@@ -84,7 +94,14 @@ export async function refresh(deps: Deps, refreshToken: string, now = Date.now()
 		throw new AppError("AUTH_REFRESH_TOKEN_INVALID");
 	}
 	const presented = await sha256(refreshToken);
-	if (!safeEqual(presented, session.refreshTokenHash)) {
+	const current = safeEqual(presented, session.refreshTokenHash);
+	const retry =
+		!current &&
+		session.previousRefreshTokenHash !== null &&
+		safeEqual(presented, session.previousRefreshTokenHash) &&
+		session.rotatedAt !== null &&
+		now - session.rotatedAt.getTime() < settings.auth.refreshGraceMs;
+	if (!current && !retry) {
 		await repo.revokeSession(db, session.id, "refresh_token_reuse");
 		throw new AppError("AUTH_REFRESH_TOKEN_INVALID");
 	}
@@ -94,13 +111,17 @@ export async function refresh(deps: Deps, refreshToken: string, now = Date.now()
 		throw new AppError("AUTH_REFRESH_TOKEN_INVALID");
 	}
 	const next = createRefreshToken(session.id);
-	const rotated = await repo.rotateSession(
-		db,
-		session.id,
-		session.refreshTokenHash,
-		await sha256(next),
-		sessionExpiry(now),
-	);
+	const nextHash = await sha256(next);
+	const rotated = current
+		? await repo.rotateSession(db, session.id, presented, nextHash, sessionExpiry(now))
+		: await repo.rotateFromPrevious(
+				db,
+				session.id,
+				presented,
+				nextHash,
+				sessionExpiry(now),
+				new Date(now - settings.auth.refreshGraceMs),
+			);
 	if (!rotated) throw new AppError("AUTH_REFRESH_TOKEN_INVALID");
 	return buildSession(deps, user, session.id, next, now);
 }

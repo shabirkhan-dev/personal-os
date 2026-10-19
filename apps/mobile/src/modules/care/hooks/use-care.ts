@@ -11,7 +11,7 @@ import {
 	careSteps,
 } from "../data/collections";
 import { migrateOldSkincare } from "../data/care-actions";
-import { currentRoutine, latestCheckIn, streak } from "../lib/care-math";
+import { careDate, currentRoutine, latestCheckIn, streak } from "../lib/care-math";
 import { defaultSettings } from "../lib/care-model";
 
 let migration: Promise<unknown> | null = null;
@@ -52,15 +52,16 @@ export type CareData = ReturnType<typeof useCare>;
 export function useCareToday() {
 	const data = useCare();
 	const now = useNow();
-	const today = dayKey(now);
+	// Before 04:00 "today" is still last night's day.
+	const today = dayKey(careDate(now));
 	const view = useMemo(
 		() => ({
 			record: data.days.find((day) => day.id === today) ?? null,
 			routine: currentRoutine(now),
-			streak: streak(data.days, now),
+			streak: streak(data.days, careDate(now)),
 			latest: latestCheckIn(data.checkIns),
 		}),
-		// `today` changes when `now` crosses midnight.
+		// `today` changes when `now` crosses 04:00.
 		[data, today, now],
 	);
 	return { data, now, today, ...view };

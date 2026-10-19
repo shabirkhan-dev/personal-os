@@ -83,10 +83,24 @@ export function logRecipe(
 	return logMeal({ slot, items: [recipeItem(recipe, portions)], recipeId }, now);
 }
 
-export async function addWater(current: number, ml: number, now = new Date()): Promise<number> {
-	const next = Math.min(10_000, Math.max(0, current + ml));
-	await saveItem(water, { id: dayKey(now), ml: next });
-	return next;
+/** Water writes run one after another so each adds to the total the previous one saved. */
+let waterQueue: Promise<unknown> = Promise.resolve();
+
+/**
+ * Adds `ml` (negative to take some back) to today's stored total, read fresh from the record store
+ * so quick taps each count and an undo only takes back its own drink. Resolves to the new total.
+ */
+export function addWater(ml: number, now = new Date()): Promise<number> {
+	const write = waterQueue.then(async () => {
+		const id = dayKey(now);
+		const stored = (await listItems(water)).find((item) => item.id === id)?.ml ?? 0;
+		const next = Math.min(10_000, Math.max(0, stored + ml));
+		await saveItem(water, { id, ml: next });
+		return next;
+	});
+	// The caller sees the failure through `write`; the queue only needs to keep going.
+	waterQueue = write.catch(() => undefined);
+	return write;
 }
 
 export function weighIn(kg: number, now = new Date()): Promise<void> {

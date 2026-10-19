@@ -1,4 +1,7 @@
-/** Stored documents included in the export, by file name. */
+/**
+ * JSON documents still kept as files (the rest of the modules live in the record store). Old
+ * module files are read too, for phones that never opened a module since its move.
+ */
 export const EXPORT_DOCUMENTS = [
 	"finance",
 	"workout",
@@ -15,17 +18,20 @@ export type ExportInput = {
 	answers: Record<string, unknown>;
 	/** Each module document as stored; `null` when the module has nothing saved yet. */
 	documents: Record<string, unknown>;
+	/** Every record in the on-device database, by collection (`finance-entries`, …). */
+	records: Record<string, unknown[]>;
 	themePreference: string;
 };
 
 export type ExportFile = {
 	app: "Personal OS";
-	format: 1;
+	format: 2;
 	exportedAt: string;
 	appVersion: string | null;
 	answers: Record<string, unknown>;
 	preferences: { theme: string };
 	modules: Record<string, unknown>;
+	records: Record<string, unknown[]>;
 };
 
 /** One JSON document with everything the person saved on this phone. */
@@ -36,12 +42,17 @@ export function buildExport(input: ExportInput): ExportFile {
 	}
 	return {
 		app: "Personal OS",
-		format: 1,
+		format: 2,
 		exportedAt: input.exportedAt.toISOString(),
 		appVersion: input.appVersion,
 		answers: input.answers,
 		preferences: { theme: input.themePreference },
 		modules,
+		records: Object.fromEntries(
+			Object.keys(input.records)
+				.sort()
+				.map((name) => [name, input.records[name] ?? []]),
+		),
 	};
 }
 
@@ -58,7 +69,11 @@ export function exportFileName(date: Date): string {
 	return `personal-os-${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}.json`;
 }
 
-/** How many module documents have anything saved. */
-export function savedDocumentCount(documents: Record<string, unknown>): number {
-	return Object.values(documents).filter((value) => value !== null && value !== undefined).length;
+/** How many documents and records the export carries. */
+export function savedDocumentCount(
+	documents: Record<string, unknown>,
+	records: Record<string, unknown[]> = {},
+): number {
+	const files = Object.values(documents).filter((value) => value !== null && value !== undefined);
+	return files.length + Object.values(records).reduce((sum, list) => sum + list.length, 0);
 }

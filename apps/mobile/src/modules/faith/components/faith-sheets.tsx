@@ -53,6 +53,7 @@ export function LogPrayerSheet({
 		row && row.at <= now && now.getTime() - row.at.getTime() > 60 * 60_000 ? "late" : "prayed";
 	const [status, setStatus] = useState<PrayerStatus | null>(null);
 	const chosen = status ?? suggested;
+	const notDue = row !== undefined && row.at > now;
 
 	return (
 		<Sheet
@@ -61,7 +62,7 @@ export function LogPrayerSheet({
 			onClose={onClose}
 			action={{
 				label: chosen === "missed" ? "Save as missed" : "Save",
-				disabled: !prayer,
+				disabled: !prayer || notDue,
 				onPress: () => prayer && onSave(prayer, chosen),
 			}}
 		>
@@ -83,7 +84,11 @@ export function LogPrayerSheet({
 				value={chosen}
 				onChange={setStatus}
 			/>
-			{chosen === "missed" ? (
+			{notDue && row ? (
+				<PoText variant="meta13" tone="textSecondary">
+					{`${row.label} isn't due until ${hhmm(row.at)}. Log it once you've prayed.`}
+				</PoText>
+			) : chosen === "missed" ? (
 				<PoText variant="meta13" tone="textSecondary">
 					That's okay. Logging it honestly is how the next one gets easier.
 				</PoText>

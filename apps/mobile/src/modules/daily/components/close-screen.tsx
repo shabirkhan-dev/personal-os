@@ -33,7 +33,7 @@ export function CloseScreen() {
 
 	const close = () => {
 		setSaving(true);
-		closeDay(log, today, { energy, good, kept, total })
+		closeDay(today, { energy, good, kept, total })
 			.then(() => {
 				haptics.success();
 				router.back();
@@ -84,7 +84,7 @@ export function CloseScreen() {
 							{...(own
 								? {
 										onPress: () =>
-											void toggleTick(log, today, id).catch((error: unknown) =>
+											void toggleTick(today, id).catch((error: unknown) =>
 												console.error("[daily] could not save", error),
 											),
 									}

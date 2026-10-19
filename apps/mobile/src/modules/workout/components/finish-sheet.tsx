@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { FilterChip } from "@/components/module-ui";
 import { PoText } from "@/components/ui/po-text";
@@ -31,9 +31,13 @@ export function FinishSheet({
 	const [feel, setFeel] = useState<Feel | null>("good");
 	const [km, setKm] = useState(template.distanceKm ? String(template.distanceKm) : "");
 	const [notice, setNotice] = useState<string | null>(null);
+	const [saving, setSaving] = useState(false);
+	/** Blocks a second tap that lands before the disabled button re-renders. */
+	const savingRef = useRef(false);
 	const running = template.sport === "running";
 
 	const save = () => {
+		if (savingRef.current) return;
 		const ended = live.pausedAtMs ?? Date.now();
 		const durationMin = Math.max(
 			1,
@@ -44,6 +48,8 @@ export function FinishSheet({
 			setNotice("How far did you run?");
 			return;
 		}
+		savingRef.current = true;
+		setSaving(true);
 		logSession(
 			{
 				template: template.id,
@@ -67,6 +73,8 @@ export function FinishSheet({
 			.catch((error: unknown) => {
 				console.error("[training] could not save the session", error);
 				setNotice("Couldn't save on this phone. Try again.");
+				savingRef.current = false;
+				setSaving(false);
 			});
 	};
 
@@ -75,7 +83,7 @@ export function FinishSheet({
 			visible={visible}
 			title="Finish session"
 			onClose={onClose}
-			action={{ label: "Save", onPress: save }}
+			action={{ label: saving ? "Saving…" : "Save", onPress: save, disabled: saving }}
 		>
 			<View style={styles.body}>
 				{running ? (

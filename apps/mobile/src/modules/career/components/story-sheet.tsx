@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
 import { Sheet } from "@/components/ui/sheet";
@@ -15,11 +15,17 @@ export function StorySheet({ visible, story, onClose }: StorySheetProps) {
 	const [summary, setSummary] = useState(story?.summary ?? "");
 	const [minutes, setMinutes] = useState(String(story?.minutes ?? 2));
 	const [error, setError] = useState<string | null>(null);
+	const [saving, setSaving] = useState(false);
+	/** Blocks a second tap that lands before the disabled button re-renders. */
+	const savingRef = useRef(false);
 
 	const save = async () => {
+		if (savingRef.current) return;
 		const length = Number.parseInt(minutes, 10);
 		if (!title.trim()) return setError("Give the story a title, like the project name.");
 		if (!(length > 0 && length <= 15)) return setError("Keep it between 1 and 15 minutes.");
+		savingRef.current = true;
+		setSaving(true);
 		try {
 			await saveStory({
 				id: story?.id,
@@ -31,6 +37,9 @@ export function StorySheet({ visible, story, onClose }: StorySheetProps) {
 		} catch (caught) {
 			console.error("[career] could not save the story", caught);
 			setError("Couldn't save on this phone. Try again.");
+		} finally {
+			savingRef.current = false;
+			setSaving(false);
 		}
 	};
 
@@ -39,7 +48,7 @@ export function StorySheet({ visible, story, onClose }: StorySheetProps) {
 			visible={visible}
 			title={story ? "Your story" : "Add a story"}
 			onClose={onClose}
-			action={{ label: "Save", onPress: () => void save() }}
+			action={{ label: saving ? "Saving…" : "Save", onPress: () => void save(), disabled: saving }}
 		>
 			<TextField label="Title" value={title} onChangeText={setTitle} placeholder="Auspira" />
 			<TextField

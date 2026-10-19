@@ -45,16 +45,20 @@ compress their native libraries. All release builds use R8 code shrinking and re
 
 ### EAS Update (over the air)
 
-Builds are bound to a channel (`development`, `preview`, `production`, see `eas.json`) and to the
-app version (`runtimeVersion.policy: appVersion`). Publish JavaScript changes without a rebuild:
+Builds are bound to a channel (`development`, `preview`, `production`, see `eas.json`) and to a
+fingerprint of their native code (`runtimeVersion.policy: fingerprint`). An update only reaches
+builds whose native code matches, so a JavaScript update can never crash an older binary; a
+change to native modules or config needs a new build. Publish JavaScript changes without a rebuild:
 
 ```bash
-bun run update:dev       # → development channel
-bun run update:preview   # → preview channel (internal testers, `eas build --profile preview`)
+bun run update:dev          # → development channel
+bun run update:preview      # → preview channel (internal testers, `eas build --profile preview`)
+bun run update:production   # → production channel, with the production EAS environment
 ```
 
-Bump `expo.version` in `app.json` whenever native code or config changes, so old binaries don't
-receive incompatible updates.
+The scripts pass `--environment`, so updates take `EXPO_PUBLIC_API_URL` from that EAS environment.
+Check that no local `.env` overrides it before publishing to production: a laptop's LAN address
+must never ship over the air.
 
 ## Structure
 

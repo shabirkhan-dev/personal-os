@@ -16,4 +16,17 @@ describe("money", () => {
 		expect(parseAmount("abc")).toBeNull();
 		expect(parseAmount("0")).toBeNull();
 	});
+
+	test("reads zero only when allowed", () => {
+		expect(parseAmount("0", { allowZero: true })).toBe(0);
+		expect(parseAmount("Rs 0.00", { allowZero: true })).toBe(0);
+		expect(parseAmount("", { allowZero: true })).toBeNull();
+		expect(parseAmount("-5", { allowZero: true })).toBeNull();
+	});
+
+	test("rejects absurd amounts", () => {
+		expect(parseAmount("1,000,000,000,000")).toBe(1e12);
+		expect(parseAmount("1000000000001")).toBeNull();
+		expect(parseAmount("9".repeat(400))).toBeNull();
+	});
 });

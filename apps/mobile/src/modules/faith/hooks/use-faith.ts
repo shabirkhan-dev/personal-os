@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import { useCollection } from "@/lib/db/collection";
-import { dayKey } from "@/lib/day";
 import {
 	challenges,
 	faithCards,
@@ -72,10 +71,6 @@ export function useFaith() {
 }
 
 export type FaithData = ReturnType<typeof useFaith>;
-
-export function tasbihToday(data: FaithData, now: Date) {
-	return data.tasbihDays.find((day) => day.id === dayKey(now)) ?? null;
-}
 
 /** Where Faith found the person, for other modules that need a place (Fashion's weather). */
 export function useFaithPlace() {

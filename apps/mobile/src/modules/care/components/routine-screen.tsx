@@ -60,7 +60,7 @@ export function RoutineScreen({ routine }: { routine: Routine }) {
 		setNotice("Couldn't save on this phone. Try again.");
 	};
 
-	const onTick = (step: Step) => tick(record, today, step, list).catch(failed("tick the step"));
+	const onTick = (step: Step) => tick(today, step, list).catch(failed("tick the step"));
 
 	const say = (step: Step | null) => {
 		if (step) speaker.speak(step.id, [{ text: `${step.name}. ${step.detail}` }]);
@@ -191,7 +191,7 @@ export function RoutineScreen({ routine }: { routine: Routine }) {
 					variant="secondary"
 					style={styles.flex}
 					onPress={() => {
-						void skip(record, today, routine)
+						void skip(today, routine)
 							.then(() => router.back())
 							.catch(failed("skip"));
 					}}

@@ -139,13 +139,35 @@ const ENTITIES: Record<string, string> = {
 	nbsp: " ",
 };
 
+const HIDDEN = /<(!--|script|style|noscript|svg|head|template)\b/gi;
+
+/**
+ * Drops comments and hidden blocks (scripts, styles, the head) in one pass. A lazy regex would
+ * rescan to the end for every unclosed tag, which a hostile page can make quadratic.
+ */
+function dropHidden(html: string): string {
+	const lower = html.toLowerCase();
+	let out = "";
+	let from = 0;
+	HIDDEN.lastIndex = 0;
+	for (let match = HIDDEN.exec(html); match; match = HIDDEN.exec(html)) {
+		const tag = (match[1] ?? "").toLowerCase();
+		const closer = tag === "!--" ? "-->" : `</${tag}`;
+		const close = lower.indexOf(closer, match.index + match[0].length);
+		out += `${html.slice(from, match.index)} `;
+		if (close === -1) return out;
+		const end = tag === "!--" ? close + 3 : lower.indexOf(">", close) + 1 || lower.length;
+		from = end;
+		HIDDEN.lastIndex = end;
+	}
+	return out + html.slice(from);
+}
+
 /** Visible text of an HTML page: scripts, styles and the head dropped, blocks on new lines. */
 export function htmlToText(html: string): string {
-	return html
-		.replace(/<!--[\s\S]*?-->/g, " ")
-		.replace(/<(script|style|noscript|svg|head|template)\b[\s\S]*?<\/\1\s*>/gi, " ")
-		.replace(/<\/?(p|div|li|br|h[1-6]|section|article|tr|ul|ol)\b[^>]*>/gi, "\n")
-		.replace(/<[^>]+>/g, " ")
+	return dropHidden(html)
+		.replace(/<\/?(p|div|li|br|h[1-6]|section|article|tr|ul|ol)\b[^<>]*>/gi, "\n")
+		.replace(/<[^<>]*>/g, " ")
 		.replace(/&(#x?[0-9a-f]+|[a-z]+);/gi, (match, entity: string) => {
 			if (entity.startsWith("#")) {
 				const code =

@@ -1,6 +1,7 @@
 import Constants from "expo-constants";
 import { File, Paths } from "expo-file-system";
 import { Platform, Share } from "react-native";
+import { getRecordStore } from "@/lib/db/database";
 import { readJson } from "@/lib/storage/json-file";
 import { pickAnswers } from "@/modules/onboarding/store/answers-storage";
 import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
@@ -49,11 +50,13 @@ export type ExportResult = { shared: boolean; documents: number };
 export async function exportData(themePreference: string): Promise<ExportResult> {
 	const now = new Date();
 	const documents = await readDocuments();
+	const records = await (await getRecordStore()).all();
 	const file = buildExport({
 		exportedAt: now,
 		appVersion: Constants.expoConfig?.version ?? null,
 		answers: pickAnswers(useOnboardingStore.getState()),
 		documents,
+		records,
 		themePreference,
 	});
 	const json = exportJson(file);
@@ -65,6 +68,6 @@ export async function exportData(themePreference: string): Promise<ExportResult>
 	);
 	return {
 		shared: result.action === Share.sharedAction,
-		documents: savedDocumentCount(documents),
+		documents: savedDocumentCount(documents, records),
 	};
 }

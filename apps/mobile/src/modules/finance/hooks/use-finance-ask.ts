@@ -9,7 +9,7 @@ import { useFinanceToday } from "./use-finance";
 
 /** Asks the Finance AI about the person's money; without AI it answers with the runway. */
 export function useFinanceAsk(onOffline: (text: string) => void) {
-	const { data, now, balance, days, spent, budget, sums } = useFinanceToday();
+	const { data, now, balance, days, spent, budget, sums, limits } = useFinanceToday();
 	const ai = useFinanceAi();
 	const startJob = useAiJobs((state) => state.start);
 
@@ -33,13 +33,11 @@ export function useFinanceAsk(onOffline: (text: string) => void) {
 					monthlyIncome: data.settings.monthlyIncome,
 					spent,
 					budget,
-					lines: CATEGORIES.filter((category) => data.settings.limits[category] > 0).map(
-						(category) => ({
-							name: CATEGORY_LABELS[category],
-							spent: sums[category],
-							limit: data.settings.limits[category],
-						}),
-					),
+					lines: CATEGORIES.filter((category) => limits[category] > 0).map((category) => ({
+						name: CATEGORY_LABELS[category],
+						spent: sums[category],
+						limit: limits[category],
+					})),
 					bills: upcomingBills(data.bills, now).map((item) => ({
 						name: item.bill.name,
 						amount: item.bill.amount,

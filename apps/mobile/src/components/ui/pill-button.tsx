@@ -79,7 +79,11 @@ export function PillButton({
 				style,
 			]}
 		>
-			<Animated.Text allowFontScaling={false} style={[labelStyle, { color: textColor }]}>
+			<Animated.Text
+				allowFontScaling={false}
+				numberOfLines={1}
+				style={[labelStyle, { color: textColor }]}
+			>
 				{label}
 			</Animated.Text>
 			{showPlus ? (

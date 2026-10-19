@@ -100,8 +100,7 @@ export function FoodHomeView({ actionRequest }: HomeModuleViewProps) {
 	};
 
 	const drink = (ml: number, quote: string, spoken = false) => {
-		const before = waterMl;
-		addWater(before, ml)
+		addWater(ml)
 			.then((next) => {
 				haptics.success();
 				setNotice(null);
@@ -110,7 +109,7 @@ export function FoodHomeView({ actionRequest }: HomeModuleViewProps) {
 					title: ml >= 0 ? `Water +${ml} ml` : `Water ${ml} ml`,
 					subtitle: `${(next / 1000).toFixed(2).replace(/0$/, "")} L today`,
 					value: "Logged",
-					undo: () => void addWater(next, before - next).catch(failed("undo water")),
+					undo: () => void addWater(-ml).catch(failed("undo water")),
 				});
 				if (spoken) voiceOut.speak(`Logged ${ml} millilitres of water.`);
 			})

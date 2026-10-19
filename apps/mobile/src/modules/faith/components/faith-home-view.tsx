@@ -1,7 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { AiWorkingCard } from "@/components/ai-working-card";
-import { ActionPills, ProgressCard, ResultCard, SectionLabel } from "@/components/module-ui";
+import {
+	ActionPills,
+	ProgressCard,
+	ReadError,
+	ResultCard,
+	SectionLabel,
+} from "@/components/module-ui";
 import { PoText } from "@/components/ui/po-text";
 import { useAiJobs } from "@/lib/ai-jobs/ai-jobs-store";
 import { dayKey } from "@/lib/day";
@@ -249,6 +255,8 @@ export function FaithHomeView({ actionRequest }: HomeModuleViewProps) {
 	bedtime.setHours(22, 30, 0, 0);
 	const challengeDayNumber = challenge ? challengeDay(challenge, now) : 0;
 	const openLog = (row?: PrayerRow) => setLogFor({ key: Date.now(), prayer: row?.prayer ?? null });
+
+	if (data.error) return <ReadError name="Faith" />;
 
 	return (
 		<>

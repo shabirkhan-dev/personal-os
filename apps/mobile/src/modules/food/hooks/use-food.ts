@@ -45,6 +45,7 @@ export function useFood() {
 		];
 		return {
 			loading: queries.some((query) => query.isPending),
+			error: queries.find((query) => query.error)?.error ?? null,
 			meals: [...(mealList.data ?? [])].sort((a, b) => a.at.localeCompare(b.at)),
 			water: waterList.data ?? [],
 			weighIns: [...(weightList.data ?? [])].sort((a, b) => a.id.localeCompare(b.id)),

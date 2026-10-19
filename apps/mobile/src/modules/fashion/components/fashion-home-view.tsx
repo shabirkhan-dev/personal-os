@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { AiWorkingCard } from "@/components/ai-working-card";
-import { ActionPills, ResultCard } from "@/components/module-ui";
+import { ActionPills, ReadError, ResultCard } from "@/components/module-ui";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
 import { useAiJobs } from "@/lib/ai-jobs/ai-jobs-store";
@@ -213,6 +213,8 @@ export function FashionHomeView({ actionRequest }: HomeModuleViewProps) {
 			? layerAdvice(context.weather, shown.layer ? (shown.clothes[0]?.name ?? null) : null)
 			: null;
 	const firstWish = wishes[0];
+
+	if (data.error) return <ReadError name="Fashion" />;
 
 	return (
 		<>

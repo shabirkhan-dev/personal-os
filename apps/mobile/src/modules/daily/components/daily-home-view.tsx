@@ -1,7 +1,7 @@
 import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { ActionPills } from "@/components/module-ui";
+import { ActionPills, ReadError } from "@/components/module-ui";
 import { PoText } from "@/components/ui/po-text";
 import { formatMoney } from "@/lib/money";
 import { voiceOut } from "@/lib/voice";
@@ -241,6 +241,8 @@ export function DailyHomeView({ actionRequest }: HomeModuleViewProps) {
 		}
 		return item.length > 0 ? `${item.detail} · until ${until}` : item.detail;
 	})();
+
+	if (data.error) return <ReadError name="Daily" />;
 
 	return (
 		<>

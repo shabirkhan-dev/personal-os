@@ -38,7 +38,7 @@ import { looksLikeLink, parseCareerLine } from "../lib/parse-career-line";
 import { careerRoutes } from "../navigation";
 import { type ParsedLineAi, useCareerAi } from "../services/career-ai";
 import { AddApplicationSheet } from "./add-application-sheet";
-import { AiTip, EmptyCard, ProgressCard, ResultCard } from "@/components/module-ui";
+import { AiTip, EmptyCard, ProgressCard, ReadError, ResultCard } from "@/components/module-ui";
 import {
 	ActivityCard,
 	FollowUpsCard,
@@ -200,6 +200,8 @@ export function CareerHomeView({ actionRequest }: HomeModuleViewProps) {
 	const pathJob: AiJob | undefined = jobs[SKILL_PATH_JOB];
 	const prepJob = view.interview ? jobs[prepJobKey(view.interview.id)] : undefined;
 	const empty = !data.loading && apps.length === 0;
+
+	if (data.error) return <ReadError name="Career" />;
 
 	return (
 		<>

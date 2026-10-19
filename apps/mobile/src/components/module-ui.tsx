@@ -348,6 +348,17 @@ export function ProgressBar({ share, tone }: { share: number; tone: Tone }) {
 }
 
 /** Centered icon, title and body for empty states. */
+/** A module's records couldn't be read: say so, rather than offer setup over real data. */
+export function ReadError({ name }: { name: string }) {
+	return (
+		<EmptyCard
+			icon="Help"
+			title={`Couldn't open ${name}`}
+			body={`Something went wrong reading ${name} on this phone. Close the app and open it again; nothing was deleted.`}
+		/>
+	);
+}
+
 export function EmptyCard({
 	icon,
 	title,

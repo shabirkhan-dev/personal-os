@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Platform, StyleSheet, View } from "react-native";
 import { AiWorkingCard } from "@/components/ai-working-card";
-import { ActionPills, ResultCard } from "@/components/module-ui";
+import { ActionPills, ReadError, ResultCard } from "@/components/module-ui";
 import { PoText } from "@/components/ui/po-text";
 import { useAiJobs } from "@/lib/ai-jobs/ai-jobs-store";
 import { dayKey } from "@/lib/day";
@@ -241,6 +241,8 @@ export function TrainingHomeView({ actionRequest }: HomeModuleViewProps) {
 			/>
 		</>
 	);
+
+	if (data.error) return <ReadError name="Training" />;
 
 	if (!data.loading && !settings.setUp) {
 		return (

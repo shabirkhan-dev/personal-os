@@ -43,6 +43,7 @@ export function useFaith() {
 		];
 		return {
 			loading: queries.some((query) => query.isPending),
+			error: queries.find((query) => query.error)?.error ?? null,
 			settings: settingsList.data?.[0] ?? defaultSettings(),
 			logs: logs.data ?? [],
 			tasbihDays: tasbih.data ?? [],

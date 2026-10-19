@@ -425,14 +425,34 @@ export type ZakatView = {
 	net: number;
 	aboveNisab: boolean;
 	due: number;
+	/** Paid within the current hawl only. */
 	paid: number;
 	left: number;
-	/** Lunar months held since the hawl started, 0–12. */
+	/** The current lunar year of holding, rolled forward each year; null without a start date. */
+	hawl: Hawl | null;
+	/** Lunar months held since the current hawl started, 0–12. */
 	monthsHeld: number;
 	monthsLeft: number;
 };
 
+export type Hawl = { start: Date; end: Date };
+
 const LUNAR_MONTH_DAYS = 29.530588;
+const LUNAR_YEAR_DAYS = 354;
+
+/**
+ * The hawl running now: the first one starts on `hawlStart`, and each lunar year (354 days) a new
+ * one begins, so last year's payments don't count towards this year's zakat.
+ */
+export function currentHawl(hawlStart: string | null, now: Date): Hawl | null {
+	if (!hawlStart) return null;
+	const first = new Date(`${hawlStart}T00:00:00`);
+	const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+	const days = Math.round((today.getTime() - first.getTime()) / DAY_MS);
+	const years = days > 0 ? Math.floor(days / LUNAR_YEAR_DAYS) : 0;
+	const start = addDays(first, years * LUNAR_YEAR_DAYS);
+	return { start, end: addDays(start, LUNAR_YEAR_DAYS) };
+}
 
 export function zakatView(
 	profile: ZakatProfile,
@@ -443,14 +463,17 @@ export function zakatView(
 	const net = Math.max(0, owned - profile.debts);
 	const aboveNisab = net >= profile.nisab && net > 0;
 	const due = aboveNisab ? Math.round(net * profile.rate) : 0;
-	const start = profile.hawlStart ? new Date(`${profile.hawlStart}T00:00:00`) : null;
-	const monthsHeld = start
+	const hawl = currentHawl(profile.hawlStart, now);
+	const monthsHeld = hawl
 		? Math.min(
 				12,
-				Math.max(0, Math.floor((now.getTime() - start.getTime()) / (LUNAR_MONTH_DAYS * DAY_MS))),
+				Math.max(
+					0,
+					Math.floor((now.getTime() - hawl.start.getTime()) / (LUNAR_MONTH_DAYS * DAY_MS)),
+				),
 			)
 		: 0;
-	const since = start ?? addDays(now, -355);
+	const since = hawl?.start ?? addDays(now, -LUNAR_YEAR_DAYS);
 	const paid = payments
 		.filter((payment) => new Date(payment.at) >= since)
 		.reduce((sum, payment) => sum + payment.amount, 0);
@@ -461,6 +484,7 @@ export function zakatView(
 		due,
 		paid,
 		left: Math.max(0, due - paid),
+		hawl,
 		monthsHeld,
 		monthsLeft: 12 - monthsHeld,
 	};

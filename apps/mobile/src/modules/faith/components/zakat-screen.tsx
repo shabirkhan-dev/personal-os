@@ -6,7 +6,7 @@ import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
 import { Sheet } from "@/components/ui/sheet";
 import { TextField } from "@/components/ui/text-field";
-import { addDays, dayKey } from "@/lib/day";
+import { dayKey } from "@/lib/day";
 import { formatMoney, parseAmount } from "@/lib/money";
 import { useNow } from "@/lib/use-now";
 import { usePoTheme } from "@/theme";
@@ -15,8 +15,6 @@ import { useFaith } from "../hooks/use-faith";
 import { hijriMonthName, lakhs, shortRupees, toHijri, zakatView } from "../lib/faith-math";
 import type { ZakatProfile } from "../lib/faith-model";
 import { FaithScreen } from "./faith-screen";
-
-const LUNAR_YEAR_DAYS = 354;
 
 /** Zakat: what is due this lunar year, how long it has been held and what has been paid. */
 export function ZakatScreen() {
@@ -27,8 +25,8 @@ export function ZakatScreen() {
 	const [editing, setEditing] = useState(false);
 	const [paying, setPaying] = useState<number | null>(null);
 	const empty = view.owned === 0;
-	const since = zakat.hawlStart ? new Date(`${zakat.hawlStart}T00:00:00`) : null;
-	const dueOn = since ? addDays(since, LUNAR_YEAR_DAYS) : null;
+	const since = view.hawl?.start ?? null;
+	const dueOn = view.hawl?.end ?? null;
 	const parts = [
 		{ key: "gold", label: "Gold", amount: zakat.gold, tone: colors.statusCaution },
 		{ key: "cash", label: "Cash", amount: zakat.cash, tone: colors.accentDefault },

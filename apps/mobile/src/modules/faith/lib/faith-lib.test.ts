@@ -1,7 +1,9 @@
 import { describe, expect, it } from "bun:test";
+import { dayKey } from "@/lib/day";
 import { ayahs } from "./ayahs";
 import {
 	consistencyGrid,
+	currentHawl,
 	currentPrayer,
 	insights,
 	lakhs,
@@ -261,6 +263,31 @@ describe("tasbih, zakat, hijri, ayahs", () => {
 		expect(shortRupees(70_000)).toBe("70k");
 		expect(lakhs(320_000)).toBe("3,20,000");
 		expect(lakhs(155_000)).toBe("1,55,000");
+	});
+
+	it("rolls the hawl over each lunar year and counts only this hawl's payments", () => {
+		const profile = {
+			...defaultZakat(),
+			gold: 150_000,
+			cash: 120_000,
+			savings: 70_000,
+			debts: 20_000,
+			hawlStart: "2025-03-20",
+		};
+		const payments = [
+			{ id: "old", to: "A family", note: "", amount: 8000, at: "2025-12-01T12:00:00Z" },
+			{ id: "new", to: "A family", note: "", amount: 3000, at: "2026-09-01T12:00:00Z" },
+		];
+		const now = new Date(2026, 9, 15);
+		const hawl = currentHawl(profile.hawlStart, now);
+		expect(dayKey(hawl?.start ?? now)).toBe("2026-03-09");
+		expect(dayKey(hawl?.end ?? now)).toBe("2027-02-26");
+		const view = zakatView(profile, payments, now);
+		expect(view.paid).toBe(3000);
+		expect(view.left).toBe(5000);
+		expect(view.monthsHeld).toBe(7);
+		expect(currentHawl("2027-01-01", now)?.start.getFullYear()).toBe(2027);
+		expect(currentHawl(null, now)).toBeNull();
 	});
 
 	it("converts to the Hijri calendar", () => {

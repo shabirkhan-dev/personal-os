@@ -7,7 +7,9 @@ import { useEffect, useMemo } from "react";
 import { AppProviders } from "@/components/providers";
 import { PoThemeProvider, poFontAssets, usePoTheme } from "@/theme";
 
-SplashScreen.preventAutoHideAsync().catch(() => undefined);
+SplashScreen.preventAutoHideAsync().catch((error: unknown) =>
+	console.warn("[splash] could not keep the splash screen up", error),
+);
 
 export default function RootLayout() {
 	return (
@@ -26,7 +28,10 @@ function RootNavigator() {
 
 	useEffect(() => {
 		if (fontError) console.warn("[fonts] a bundled font failed to load", fontError);
-		if (ready) SplashScreen.hideAsync().catch(() => undefined);
+		if (ready)
+			SplashScreen.hideAsync().catch((error: unknown) =>
+				console.warn("[splash] could not hide the splash screen", error),
+			);
 	}, [ready, fontError]);
 
 	const navigationTheme = useMemo(() => {

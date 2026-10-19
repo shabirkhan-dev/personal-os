@@ -73,9 +73,21 @@ export function streak(days: readonly CareDay[], now: Date): number {
 	return count;
 }
 
-/** Morning until 15:00, then night. */
+/** Until this hour the night still belongs to the day before. */
+const NIGHT_ENDS_HOUR = 4;
+
+/**
+ * The date whose care record is open now: before 04:00 it is still last night, so a night step
+ * ticked at 00:30 finishes yesterday's night routine rather than starting today's morning.
+ */
+export function careDate(now: Date): Date {
+	return now.getHours() < NIGHT_ENDS_HOUR ? addDays(now, -1) : now;
+}
+
+/** Night until 04:00, morning until 15:00, then night again. */
 export function currentRoutine(now: Date): Routine {
-	return now.getHours() < 15 ? "morning" : "night";
+	const hour = now.getHours();
+	return hour >= NIGHT_ENDS_HOUR && hour < 15 ? "morning" : "night";
 }
 
 // --- shelf --------------------------------------------------------------------------------------

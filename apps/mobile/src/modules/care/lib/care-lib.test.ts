@@ -1,10 +1,13 @@
 import { describe, expect, it } from "bun:test";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
+import { dayKey } from "@/lib/day";
 import { buildRoutine, CATALOG, photoFor } from "./catalog";
 import {
 	bodyTiles,
+	careDate,
 	careNotes,
+	currentRoutine,
 	emptyDay,
 	finishRoutine,
 	leftLabel,
@@ -108,6 +111,18 @@ describe("ticking and the streak", () => {
 		expect(streak([...days, day(today)], now)).toBe(4);
 		expect(streak([day("2026-10-13"), day("2026-10-15")], now)).toBe(1);
 		expect(streak([], now)).toBe(0);
+	});
+
+	it("keeps the night with the day before until 04:00", () => {
+		const late = new Date(2026, 9, 16, 0, 30);
+		expect(currentRoutine(late)).toBe("night");
+		expect(dayKey(careDate(late))).toBe("2026-10-15");
+		const dawn = new Date(2026, 9, 16, 4, 0);
+		expect(currentRoutine(dawn)).toBe("morning");
+		expect(dayKey(careDate(dawn))).toBe("2026-10-16");
+		expect(currentRoutine(new Date(2026, 9, 16, 14, 59))).toBe("morning");
+		expect(currentRoutine(new Date(2026, 9, 16, 15))).toBe("night");
+		expect(currentRoutine(new Date(2026, 9, 16, 23, 30))).toBe("night");
 	});
 });
 

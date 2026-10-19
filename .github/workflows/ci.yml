@@ -126,6 +126,16 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Migrations match the schema
+        # A schema change without its generated migration would deploy code the database can't serve.
+        run: |
+          bun --cwd=apps/api run db:generate
+          if [ -n "$(git status --porcelain apps/api/src/db/migrations)" ]; then
+            echo "::error::The database schema changed without a migration. Run: bun --cwd=apps/api run db:generate"
+            git status --porcelain apps/api/src/db/migrations
+            exit 1
+          fi
+
       - name: Test
         run: bun run ci:test
         env:

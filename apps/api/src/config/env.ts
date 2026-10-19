@@ -31,10 +31,12 @@ const envSchema = z
 	.superRefine((env, context) => {
 		const require = (path: string, message: string) =>
 			context.addIssue({ code: "custom", path: [path], message });
-		if (env.AI_PROVIDER === "openai_compatible" && !env.OPENAI_API_KEY) {
-			require("OPENAI_API_KEY", "required when AI_PROVIDER=openai_compatible");
+		if (env.ENVIRONMENT !== "production") {
+			if (env.AI_PROVIDER === "openai_compatible" && !env.OPENAI_API_KEY) {
+				require("OPENAI_API_KEY", "required when AI_PROVIDER=openai_compatible");
+			}
+			return;
 		}
-		if (env.ENVIRONMENT !== "production") return;
 		if (env.JWT_SECRET === DEV_JWT_SECRET) require("JWT_SECRET", "must be set in production");
 		if (env.AUTH_TOKEN_SECRET === DEV_TOKEN_SECRET) {
 			require("AUTH_TOKEN_SECRET", "must be set in production");
@@ -57,8 +59,13 @@ export type Config = {
 		exposeCodes: boolean;
 	};
 	email: { resendApiKey?: string; from: string };
+	/**
+	 * `off` in production when the provider key is missing or the mock is configured: AI routes
+	 * answer AI_UNAVAILABLE and everything else keeps working. Canned answers never reach users.
+	 */
 	ai:
 		| { provider: "mock" }
+		| { provider: "off" }
 		| { provider: "openai_compatible"; apiKey: string; baseUrl: string; model: string };
 	/** Avatar uploads need all of these; without them `POST /assets/uploads` answers 503. */
 	r2?: {
@@ -101,15 +108,7 @@ export function parseConfig(source: Record<string, unknown>): Config {
 			...(env.RESEND_API_KEY ? { resendApiKey: env.RESEND_API_KEY } : {}),
 			from: env.AUTH_EMAIL_FROM,
 		},
-		ai:
-			env.AI_PROVIDER === "openai_compatible" && env.OPENAI_API_KEY
-				? {
-						provider: "openai_compatible",
-						apiKey: env.OPENAI_API_KEY,
-						baseUrl: env.OPENAI_BASE_URL.replace(/\/$/, ""),
-						model: env.OPENAI_MODEL,
-					}
-				: { provider: "mock" },
+		ai: aiConfig(env, isProduction),
 		...(env.R2_ACCOUNT_ID && env.R2_ACCESS_KEY_ID && env.R2_SECRET_ACCESS_KEY && env.R2_PUBLIC_URL
 			? {
 					r2: {
@@ -123,6 +122,20 @@ export function parseConfig(source: Record<string, unknown>): Config {
 			: {}),
 		...(env.DATABASE_URL ? { databaseUrl: env.DATABASE_URL } : {}),
 	};
+}
+
+function aiConfig(env: z.infer<typeof envSchema>, isProduction: boolean): Config["ai"] {
+	if (env.AI_PROVIDER === "openai_compatible" && env.OPENAI_API_KEY) {
+		return {
+			provider: "openai_compatible",
+			apiKey: env.OPENAI_API_KEY,
+			baseUrl: env.OPENAI_BASE_URL.replace(/\/$/, ""),
+			model: env.OPENAI_MODEL,
+		};
+	}
+	if (!isProduction) return { provider: "mock" };
+	console.error("[config] AI is off: set AI_PROVIDER=openai_compatible and OPENAI_API_KEY");
+	return { provider: "off" };
 }
 
 const cache = new WeakMap<object, Config>();

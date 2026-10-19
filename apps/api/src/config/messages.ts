@@ -16,7 +16,8 @@ export const errors = {
 		message: "You've used today's AI help. It resets tomorrow; everything else still works.",
 	},
 	INTERNAL_ERROR: { status: 500, message: "Something went wrong on our side. Try again." },
-	/** The message lists the missing or invalid settings by name (never their values). */
+	NOT_READY: { status: 503, message: "The service is starting up or degraded. Try again shortly." },
+	/** The missing settings are logged by name; callers only learn that something is missing. */
 	CONFIG_INVALID: { status: 503, message: "The API's settings are incomplete." },
 
 	// Auth

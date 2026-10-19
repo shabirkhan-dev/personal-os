@@ -50,10 +50,7 @@ export function createApp(options: AppOptions = {}) {
 			} catch (error) {
 				if (!(error instanceof ConfigError)) throw error;
 				console.error("[config]", error.message);
-				throw new AppError("CONFIG_INVALID", {
-					message: `The API's settings are incomplete: ${error.issues.join("; ")}`,
-					cause: error,
-				});
+				throw new AppError("CONFIG_INVALID", { cause: error });
 			}
 			c.set("openDatabase", open);
 			try {

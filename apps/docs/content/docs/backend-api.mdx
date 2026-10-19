@@ -35,6 +35,7 @@ table, `apps/api/src/config/messages.ts`.
 | Method | Path | Auth | Purpose |
 | --- | --- | --- | --- |
 | `GET` | `/health` | none | Liveness, environment, AI provider, whether uploads are set up |
+| `GET` | `/ready` | none | Readiness: 200 when the database answers, 503 otherwise |
 | `POST` | `/auth/email-code/request` | none | Send a 6-digit sign-in code |
 | `POST` | `/auth/email-code/verify` | none | Exchange the code for a session; creates the account on first use |
 | `POST` | `/auth/refresh` | refresh token | Rotate the session |

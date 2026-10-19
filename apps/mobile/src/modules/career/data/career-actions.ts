@@ -1,5 +1,5 @@
 import { addDays, dayKey, newId } from "@/lib/day";
-import { removeItem, saveItem } from "@/lib/db/collection";
+import { listItems, removeItem, saveItem } from "@/lib/db/collection";
 import type {
 	Application,
 	CareerEventKind,
@@ -211,8 +211,15 @@ export function deleteStory(id: string): Promise<void> {
 
 // --- Skill block -----------------------------------------------------------------------------
 
-/** Starts a path this week (week 1 begins on this Monday). */
-export function startSkillPlan(title: string, weeks: SkillWeek[], now = new Date()): Promise<void> {
+/**
+ * Starts a path this week (week 1 begins on this Monday). Sessions are keyed by week and day, so
+ * the previous plan's ones are cleared first; otherwise the new plan would inherit its progress.
+ */
+export async function startSkillPlan(
+	title: string,
+	weeks: SkillWeek[],
+	now = new Date(),
+): Promise<void> {
 	const sinceMonday = (now.getDay() + 6) % 7;
 	const plan: SkillPlan = {
 		id: "plan",
@@ -220,7 +227,9 @@ export function startSkillPlan(title: string, weeks: SkillWeek[], now = new Date
 		startedOn: dayKey(addDays(now, -sinceMonday)),
 		weeks,
 	};
-	return saveItem(skillPlans, plan);
+	const old = await listItems(skillSessions);
+	await Promise.all(old.map((session) => removeItem(skillSessions, session.id)));
+	await saveItem(skillPlans, plan);
 }
 
 /** Marks a plan day done (or partial), dated the day it was practised. */

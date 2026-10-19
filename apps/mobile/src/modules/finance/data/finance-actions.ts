@@ -171,15 +171,27 @@ export async function deleteEntry(item: Entry): Promise<void> {
 	await removeItem(financeEntries, item.id);
 	if (item.receiptUri) deleteReceiptPhoto(item.receiptUri);
 	if (item.billId) {
-		const bill = (await listItems(financeBills)).find((each) => each.id === item.billId);
+		const bill = await currentBill(item.billId);
 		const month = billMonthOf(item);
 		if (bill)
 			await saveItem(financeBills, { ...bill, paid: bill.paid.filter((key) => key !== month) });
 	}
 }
 
+/**
+ * One after another: two entries for the same bill each read the bill fresh, so the second
+ * doesn't save over the first with a stale paid list.
+ */
 export async function deleteEntries(items: readonly Entry[]): Promise<void> {
-	await Promise.all(items.map((item) => deleteEntry(item)));
+	await items.reduce<Promise<void>>(
+		(previous, item) => previous.then(() => deleteEntry(item)),
+		Promise.resolve(),
+	);
+}
+
+/** A bill as saved now, read fresh so back-to-back writes each see the last one's paid months. */
+async function currentBill(id: string): Promise<Bill | undefined> {
+	return (await listItems(financeBills)).find((each) => each.id === id);
 }
 
 export function saveBill(bill: Bill): Promise<void> {

@@ -42,6 +42,7 @@ table, `apps/api/src/config/messages.ts`.
 | `POST` | `/auth/logout` | refresh token | End the session (`204`) |
 | `GET` | `/users/me` | bearer | Current user |
 | `PATCH` | `/users/me/profile` | bearer | Update the display name or avatar |
+| `DELETE` | `/users/me` | bearer | Delete the account: sessions, synced records, onboarding, AI usage, pending codes and R2 files. `204` |
 | `POST` | `/assets/uploads` | bearer | A presigned URL to upload a file straight to R2 |
 | `GET` | `/users/me/onboarding` | bearer | Saved onboarding answers, or `null` before the first save |
 | `PUT` | `/users/me/onboarding` | bearer | Save the onboarding answers |

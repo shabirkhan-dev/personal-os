@@ -19,8 +19,12 @@ export function memoryBucket() {
 				? { key, size: object.size, httpMetadata: { contentType: object.contentType } }
 				: null;
 		},
-		async delete(key: string) {
-			objects.delete(key);
+		async delete(keys: string | string[]) {
+			for (const key of Array.isArray(keys) ? keys : [keys]) objects.delete(key);
+		},
+		async list({ prefix }: { prefix: string; cursor?: string }) {
+			const keys = [...objects.keys()].filter((key) => key.startsWith(prefix));
+			return { objects: keys.map((key) => ({ key })), truncated: false, cursor: undefined };
 		},
 	};
 	return bucket;

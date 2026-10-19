@@ -1,6 +1,8 @@
+import { eq } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
 
-import { memoryBucket, signIn, testApp, testEnv } from "./support";
+import { syncRecords, users } from "@/db/schema";
+import { db, memoryBucket, signIn, testApp, testEnv } from "./support";
 
 const bucket = memoryBucket();
 const { call } = testApp(testEnv({ ASSETS: bucket }));
@@ -117,5 +119,44 @@ describe("avatar straight to R2", () => {
 		});
 		expect(response.status).toBe(503);
 		expect(response.json).toMatchObject({ code: "ASSETS_UNAVAILABLE" });
+	});
+});
+
+describe("DELETE /users/me", () => {
+	it("deletes the account, its data and its files, and ends every session", async () => {
+		const session = await signIn(call);
+		const { key } = (await ticket(session.accessToken)).json?.data ?? { key: "" };
+		bucket.put(key, 2048, "image/jpeg");
+		await call("PATCH", "/users/me/profile", {
+			token: session.accessToken,
+			body: { avatarKey: key },
+		});
+		bucket.put(
+			`avatars/${session.user.id}/00000000-0000-0000-0000-000000000000.jpg`,
+			10,
+			"image/jpeg",
+		);
+		await call("POST", "/sync", {
+			token: session.accessToken,
+			body: {
+				cursor: null,
+				changes: [
+					{ collection: "finance-entries", id: "e1", data: {}, updatedAt: 1, deletedAt: null },
+				],
+			},
+		});
+
+		const gone = await call("DELETE", "/users/me", { token: session.accessToken });
+		expect(gone.status).toBe(204);
+		expect([...bucket.objects.keys()].some((k) => k.includes(session.user.id))).toBe(false);
+		expect((await call("GET", "/users/me", { token: session.accessToken })).status).toBe(401);
+		expect(
+			(await call("POST", "/auth/refresh", { body: { refreshToken: session.refreshToken } }))
+				.status,
+		).toBe(401);
+		expect(
+			await db.select().from(syncRecords).where(eq(syncRecords.userId, session.user.id)),
+		).toEqual([]);
+		expect(await db.select().from(users).where(eq(users.id, session.user.id))).toEqual([]);
 	});
 });

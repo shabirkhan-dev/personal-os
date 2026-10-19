@@ -75,6 +75,25 @@ export async function deleteAsset(bucket: R2Bucket | undefined, key: string): Pr
 	}
 }
 
+/** Deletes every object under a user's prefix: their avatar and any upload never confirmed. */
+export async function deleteUserAssets(
+	bucket: R2Bucket | undefined,
+	userId: string,
+): Promise<void> {
+	if (!bucket) return;
+	for (const kind of Object.values(PREFIX)) {
+		let cursor: string | undefined;
+		do {
+			// oxlint-disable-next-line eslint/no-await-in-loop -- R2 lists one page at a time
+			const page = await bucket.list({ prefix: `${kind}/${userId}/`, cursor });
+			const keys = page.objects.map((object) => object.key);
+			// oxlint-disable-next-line eslint/no-await-in-loop
+			if (keys.length > 0) await bucket.delete(keys);
+			cursor = page.truncated ? page.cursor : undefined;
+		} while (cursor);
+	}
+}
+
 export function assetUrl(config: Config, key: string): string | null {
 	return config.r2 ? `${config.r2.publicUrl}/${key}` : null;
 }

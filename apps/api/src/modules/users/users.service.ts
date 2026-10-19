@@ -2,8 +2,13 @@ import type { Config } from "@/config/env";
 import { AppError } from "@/core/app-error";
 import type { Database } from "@/db/client";
 import type { UserRow } from "@/db/schema";
-import { assetUrl, confirmUpload, deleteAsset } from "@/modules/assets/assets.service";
-import { findUserById, updateUser } from "./users.repository";
+import {
+	assetUrl,
+	confirmUpload,
+	deleteAsset,
+	deleteUserAssets,
+} from "@/modules/assets/assets.service";
+import { deleteUser, findUserById, updateUser } from "./users.repository";
 import type { PublicUser, UpdateProfileInput } from "./users.schema";
 
 export function toPublicUser(config: Config, user: UserRow): PublicUser {
@@ -43,4 +48,23 @@ export async function updateProfile(
 		await deleteAsset(bucket, current.avatarKey);
 	}
 	return toPublicUser(config, user);
+}
+
+/**
+ * Deletes the account and everything stored for it: the database rows, then the files in R2.
+ * The data on the phone is the app's to clear. Signing in again with the email starts afresh.
+ */
+export async function deleteAccount(
+	db: Database,
+	bucket: R2Bucket | undefined,
+	userId: string,
+): Promise<void> {
+	const user = await findUserById(db, userId);
+	if (!user) throw new AppError("AUTH_SESSION_INVALID");
+	await deleteUser(db, user);
+	try {
+		await deleteUserAssets(bucket, userId);
+	} catch (error) {
+		console.error(`[users] deleted ${userId} but not all of their files`, error);
+	}
 }

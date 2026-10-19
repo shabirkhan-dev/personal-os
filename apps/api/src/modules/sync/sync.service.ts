@@ -75,8 +75,11 @@ export function sortChanges(
 
 function identify(raw: unknown): Pick<SyncRejection, "collection" | "id"> {
 	const record = typeof raw === "object" && raw !== null ? (raw as Record<string, unknown>) : {};
-	const text = (value: unknown) => (typeof value === "string" ? value.slice(0, 64) : null);
-	return { collection: text(record.collection), id: text(record.id) };
+	return { collection: shortText(record.collection), id: shortText(record.id) };
+}
+
+function shortText(value: unknown): string | null {
+	return typeof value === "string" ? value.slice(0, 64) : null;
 }
 
 function toView(row: SyncRecordRow): SyncRecordView {

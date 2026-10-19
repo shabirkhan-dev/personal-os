@@ -13,6 +13,7 @@ import {
 	interestOwed,
 	lineRoom,
 	monthlyBurn,
+	monthLimits,
 	pace,
 	project,
 	recap,
@@ -55,6 +56,7 @@ const entry = (at: string, fields: Partial<Entry> = {}): Entry => ({
 	purify: false,
 	billId: null,
 	billMonth: null,
+	movedFrom: null,
 	at: new Date(at).toISOString(),
 	receiptUri: null,
 	...fields,
@@ -199,6 +201,33 @@ describe("budget and bills", () => {
 		expect(room.transport).toBe(0);
 		expect(room.dreams).toBe(0);
 		expect(defaultLimits(55_000).dreams).toBe(0);
+	});
+
+	it("moves Wishlist savings between lines for their own month only", () => {
+		const saved = (at: string, amount: number) =>
+			entry(at, { title: at, category: "dreams", amount, movedFrom: "other" });
+		const entries = [
+			saved("2026-10-05T10:00:00", 2000),
+			saved("2026-09-20T10:00:00", 5000),
+			entry("2026-10-10T10:00:00", { category: "other", amount: 1000 }),
+		];
+		const limits = monthLimits(settings, entries, now);
+		expect(limits.other).toBe(settings.limits.other - 2000);
+		expect(limits.dreams).toBe(2000);
+		expect(budgetTotal(limits)).toBe(budgetTotal(settings.limits));
+		const room = lineRoom(settings, entries, now);
+		expect(room.other).toBe(settings.limits.other - 2000 - 1000);
+		expect(room.dreams).toBe(0);
+		// Next month starts from the standing limits again.
+		const nov = lineRoom(settings, entries, new Date("2026-11-02T10:00:00"));
+		expect(nov.other).toBe(settings.limits.other);
+		expect(monthLimits(settings, entries, new Date("2026-11-02T10:00:00")).dreams).toBe(0);
+		// Undo deletes the entry, which puts the money back on its line.
+		expect(lineRoom(settings, entries.slice(1), now).other).toBe(settings.limits.other - 1000);
+		// Older transfers without `movedFrom` already moved the standing limits.
+		expect(
+			monthLimits(settings, [{ ...saved("2026-10-05T10:00:00", 2000), movedFrom: null }], now),
+		).toEqual(settings.limits);
 	});
 });
 

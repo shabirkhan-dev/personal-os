@@ -2,7 +2,7 @@ import { listItems, removeItem, saveItem } from "@/lib/db/collection";
 import { monthKey, newId } from "@/lib/day";
 import { deleteJson, readJson } from "@/lib/storage/json-file";
 import { asArray, asNumber, asString, isRecord } from "@/lib/storage/parse";
-import { billMonthOf, budgetTotal, roundCents } from "../lib/finance-math";
+import { billMonthOf, budgetTotal, monthLimits, roundCents } from "../lib/finance-math";
 import {
 	type Bill,
 	type Category,
@@ -87,6 +87,7 @@ function entry(fields: Partial<Entry> & Pick<Entry, "kind" | "amount" | "title">
 		purify: false,
 		billId: null,
 		billMonth: null,
+		movedFrom: null,
 		at: new Date().toISOString(),
 		receiptUri: null,
 		...fields,
@@ -234,7 +235,12 @@ export function saveLimits(settings: FinanceSettings, limits: Record<Category, n
 	return saveSettings({ ...settings, limits });
 }
 
-/** "Move money": take from one budget line and give to another. */
+/**
+ * Budget's "Move money": take from one budget line and give to another. This one rewrites the
+ * standing limits on purpose: it sits next to "Change limits" on the Budget screen, where the
+ * person reshapes their monthly budget, so it holds every month until changed again. Wishlist's
+ * Add savings is a one-month transfer instead and never comes through here (see `fundDream`).
+ */
 export function moveMoney(
 	settings: FinanceSettings,
 	from: Category,
@@ -250,20 +256,20 @@ export function moveMoney(
 }
 
 /**
- * Wishlist's "Add savings". The money comes from the budget, as a category transfer: `amount`
- * moves from line `from` into Dreams (so `from` has less left to spend this month), and a Dreams
- * entry takes it out of money now, the way cash put in an envelope leaves the wallet. Returns the
- * entry so the transfer can be undone.
+ * Wishlist's "Add savings". The money comes from the budget, as a category transfer for this
+ * month only: a Dreams entry records `amount` moved from line `from` (so `from` has less left to
+ * spend this month, see `monthLimits`) and takes it out of money now, the way cash put in an
+ * envelope leaves the wallet. The standing limits are not touched. Returns the entry so the
+ * transfer can be undone.
  */
 export async function fundDream(
 	input: { amount: number; from: Category; dream: string },
 	now = new Date(),
 ): Promise<Entry> {
 	if (input.from === "dreams") throw new Error("Pick a budget line other than Dreams.");
-	const settings = await currentSettings();
-	const amount = roundCents(Math.min(input.amount, settings.limits[input.from]));
+	const limits = monthLimits(await currentSettings(), await listItems(financeEntries), now);
+	const amount = roundCents(Math.min(input.amount, limits[input.from]));
 	if (amount <= 0) throw new Error("That budget line has nothing left to move.");
-	await moveMoney(settings, input.from, "dreams", amount);
 	const item = entry({
 		kind: "spend",
 		amount,
@@ -271,21 +277,26 @@ export async function fundDream(
 		note: `Wishlist · from ${CATEGORY_SHORT[input.from]}`,
 		category: "dreams",
 		method: "bank",
+		movedFrom: input.from,
 		at: now.toISOString(),
 	});
 	await saveItem(financeEntries, item);
 	return item;
 }
 
-/** Undo a `fundDream`: the entry goes and the amount returns to the line it came from. */
+/**
+ * Undo a `fundDream`: the entry goes, and with it the month's transfer. Transfers saved before
+ * they were kept per month moved the standing limits, so those are moved back here.
+ */
 export async function unfundDream(input: {
 	entryId: string;
 	amount: number;
 	from: Category;
 }): Promise<void> {
 	const item = (await listItems(financeEntries)).find((each) => each.id === input.entryId);
-	if (item) await removeItem(financeEntries, item.id);
-	await moveMoney(await currentSettings(), "dreams", input.from, input.amount);
+	if (!item) return;
+	await removeItem(financeEntries, item.id);
+	if (!item.movedFrom) await moveMoney(await currentSettings(), "dreams", input.from, input.amount);
 }
 
 /** The saved settings, read fresh so back-to-back transfers each see the last one's limits. */
@@ -332,6 +343,7 @@ export async function migrateOldFinance(): Promise<number> {
 			purify: false,
 			billId: null,
 			billMonth: null,
+			movedFrom: null,
 			at,
 			receiptUri: receipt || null,
 		};

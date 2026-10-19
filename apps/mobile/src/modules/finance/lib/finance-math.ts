@@ -409,12 +409,13 @@ export function financeNotes(input: {
 	const month = inMonth(entries, now);
 	const sums = byCategory(month);
 	const spent = total(spends(month));
-	const monthPace = pace(spent, budgetTotal(settings.limits), now);
+	const limits = monthLimits(settings, month, now);
+	const monthPace = pace(spent, budgetTotal(limits), now);
 
 	const ahead = CATEGORIES.map((category) => ({
 		category,
 		spent: sums[category],
-		limit: settings.limits[category],
+		limit: limits[category],
 	}))
 		.filter((item) => item.limit > 0 && item.spent / item.limit > monthPace.monthShare + 0.25)
 		.sort((a, b) => b.spent / b.limit - a.spent / a.limit)[0];
@@ -484,16 +485,39 @@ export function savedShare(settings: FinanceSettings): number {
 	return settings.savingsTarget > 0 ? Math.min(1, settings.saved / settings.savingsTarget) : 0;
 }
 
+/**
+ * Each budget line's limit for the month of `now`: the standing limits, with that month's Wishlist
+ * transfers (Dreams entries with `movedFrom`) taken from their line and given to Dreams. A transfer
+ * never carries into the next month, and deleting its entry puts the money back.
+ */
+export function monthLimits(
+	settings: FinanceSettings,
+	entries: readonly Entry[],
+	now: Date,
+): Record<Category, number> {
+	const limits = { ...settings.limits };
+	for (const entry of spends(inMonth(entries, now))) {
+		const from = entry.category === "dreams" ? entry.movedFrom : null;
+		if (!from || from === "dreams") continue;
+		const moved = Math.min(entry.amount, limits[from]);
+		limits[from] = roundCents(limits[from] - moved);
+		limits.dreams = roundCents(limits.dreams + moved);
+	}
+	return limits;
+}
+
 /** What is still free on each budget line this month: its limit minus what was spent on it. */
 export function lineRoom(
 	settings: FinanceSettings,
 	entries: readonly Entry[],
 	now: Date,
 ): Record<Category, number> {
-	const spent = byCategory(inMonth(entries, now));
+	const month = inMonth(entries, now);
+	const limits = monthLimits(settings, month, now);
+	const spent = byCategory(month);
 	const room = {} as Record<Category, number>;
 	for (const category of CATEGORIES) {
-		room[category] = roundCents(Math.max(0, settings.limits[category] - spent[category]));
+		room[category] = roundCents(Math.max(0, limits[category] - spent[category]));
 	}
 	return room;
 }

@@ -45,16 +45,14 @@ function noteFor(
 /** Finance · Budget: the month against its limits, line by line, and zakat from Faith. */
 export function BudgetScreen() {
 	const { colors } = usePoTheme();
-	const { data, now, month, spent, budget, sums, pace } = useFinanceToday();
+	const { data, now, month, limits: lineLimits, spent, budget, sums, pace } = useFinanceToday();
 	const { settings, bills } = data;
 	const faith = useOnboardingStore((state) => state.modules.includes("faith"));
 	const zakat = useZakatLine();
 	const [limits, setLimits] = useState(false);
 	const [moving, setMoving] = useState(false);
 	const [notice, setNotice] = useState<string | null>(null);
-	const lines = CATEGORIES.filter(
-		(category) => settings.limits[category] > 0 || sums[category] > 0,
-	);
+	const lines = CATEGORIES.filter((category) => lineLimits[category] > 0 || sums[category] > 0);
 	const status =
 		pace.state === "over"
 			? { text: `${rupees(spent - budget)} over the month's budget`, tone: "textDanger" as const }
@@ -92,7 +90,7 @@ export function BudgetScreen() {
 			<Card>
 				<CardHead title="Where it goes" />
 				{lines.map((category) => {
-					const limit = settings.limits[category];
+					const limit = lineLimits[category];
 					const full = limit > 0 ? sums[category] >= limit : sums[category] > 0;
 					return (
 						<View key={category} style={styles.line}>

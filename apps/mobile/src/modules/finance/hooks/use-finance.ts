@@ -10,6 +10,7 @@ import {
 	inMonth,
 	monthlyBurn,
 	monthlyCost,
+	monthLimits,
 	onDay,
 	pace,
 	runwayDays,
@@ -56,7 +57,8 @@ export function useFinanceToday() {
 		const { settings, entries } = data;
 		const month = inMonth(entries, now);
 		const spent = total(spends(month));
-		const budget = budgetTotal(settings.limits);
+		const limits = monthLimits(settings, month, now);
+		const budget = budgetTotal(limits);
 		const balance = balanceNow(settings, entries);
 		const burn = monthlyBurn(settings);
 		return {
@@ -65,6 +67,8 @@ export function useFinanceToday() {
 			cost: monthlyCost(settings),
 			days: runwayDays(balance, burn),
 			month,
+			/** This month's limit per line, with its Wishlist transfers applied. */
+			limits,
 			spent,
 			spentToday: total(spends(onDay(entries, now))),
 			budget,

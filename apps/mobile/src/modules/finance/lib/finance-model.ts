@@ -113,6 +113,11 @@ export type Entry = {
 	billId: string | null;
 	/** "YYYY-MM" month the bill payment covered; null for older entries (then its own month). */
 	billMonth: string | null;
+	/**
+	 * Wishlist's Add savings: the budget line this Dreams money was moved from. The move holds for
+	 * the entry's month only (see `monthLimits`); null for anything else and for older transfers.
+	 */
+	movedFrom: Category | null;
 	/** ISO time it happened. */
 	at: string;
 	receiptUri: string | null;
@@ -229,6 +234,8 @@ const money = (value: unknown, fallback: number) =>
 const text = (value: unknown, max: number) => asString(value, "").trim().slice(0, max);
 const isMonth = (value: unknown): value is string =>
 	typeof value === "string" && /^\d{4}-\d{2}$/.test(value);
+const isLine = (value: unknown): value is Category =>
+	typeof value === "string" && (CATEGORIES as readonly string[]).includes(value);
 const id = (value: unknown) => (typeof value === "string" && value ? value : null);
 
 export function parseSettings(raw: unknown): FinanceSettings | null {
@@ -284,6 +291,10 @@ export function parseEntry(raw: unknown): Entry | null {
 		purify: kind === "spend" ? asBoolean(raw.purify, false) : false,
 		billId: id(raw.billId),
 		billMonth: isMonth(raw.billMonth) ? raw.billMonth : null,
+		movedFrom:
+			category === "dreams" && isLine(raw.movedFrom) && raw.movedFrom !== "dreams"
+				? raw.movedFrom
+				: null,
 		at,
 		receiptUri: id(raw.receiptUri),
 	};

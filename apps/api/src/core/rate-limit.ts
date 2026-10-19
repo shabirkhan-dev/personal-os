@@ -3,7 +3,7 @@ import { createMiddleware } from "hono/factory";
 import { AppError } from "./app-error";
 import type { AppContext, AppEnv } from "./context";
 
-type LimiterName = "AUTH_LIMITER" | "AI_LIMITER" | "SYNC_LIMITER";
+type LimiterName = "AUTH_LIMITER" | "AI_LIMITER" | "SYNC_LIMITER" | "UPLOAD_LIMITER";
 
 /**
  * Cloudflare's rate limiter, keyed by the signed-in user or else the client IP. Without the

@@ -98,9 +98,10 @@ Signed-in routes answer `401` with `AUTH_REQUIRED` (no token), `AUTH_ACCESS_TOKE
 `PATCH /users/me/profile` takes `displayName` (≤ 100, or `null`) and/or `avatarKey`, and returns
 the user. Avatars never pass through the API:
 
-1. `POST /assets/uploads` with `{ "kind": "avatar", "contentType": "image/jpeg" }` (`image/png`
-   and `image/webp` also allowed) returns `201`
-   `{ key, uploadUrl, method: "PUT", headers, expiresAt }`. The URL is valid for 10 minutes.
+1. `POST /assets/uploads` with `{ "kind": "avatar", "contentType": "image/jpeg", "size": 183204 }`
+   (`image/png` and `image/webp` also allowed; `size` in bytes, at most 5 MB) returns `201`
+   `{ key, uploadUrl, method: "PUT", headers, expiresAt }`. The URL is valid for 10 minutes and
+   signs the type and length, so R2 refuses a different or larger file. Five tickets a minute.
 2. The app `PUT`s the file to `uploadUrl` with exactly those `headers`.
 3. `PATCH /users/me/profile` with `{ "avatarKey": key }`. The API checks the object is in R2,
    under the caller's prefix, an allowed type and at most 5 MB, then saves it and deletes the

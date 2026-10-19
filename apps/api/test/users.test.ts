@@ -10,7 +10,7 @@ type Ticket = { key: string; uploadUrl: string; headers: Record<string, string> 
 async function ticket(token: string, contentType = "image/jpeg") {
 	return call<{ data: Ticket }>("POST", "/assets/uploads", {
 		token,
-		body: { kind: "avatar", contentType },
+		body: { kind: "avatar", contentType, size: 120_000 },
 	});
 }
 
@@ -26,7 +26,18 @@ describe("avatar straight to R2", () => {
 		expect(url.pathname).toBe(`/personal-os-assets/${data?.key}`);
 		expect(url.searchParams.get("X-Amz-Signature")).toMatch(/^[0-9a-f]{64}$/);
 		expect(url.searchParams.get("X-Amz-SignedHeaders")).toContain("content-type");
-		expect(data?.headers).toEqual({ "Content-Type": "image/png" });
+		expect(url.searchParams.get("X-Amz-SignedHeaders")).toContain("content-length");
+		expect(data?.headers).toEqual({ "Content-Type": "image/png", "Content-Length": "120000" });
+	});
+
+	it("refuses a ticket for a file over the size limit", async () => {
+		const session = await signIn(call);
+		const response = await call("POST", "/assets/uploads", {
+			token: session.accessToken,
+			body: { kind: "avatar", contentType: "image/jpeg", size: 6 * 1024 * 1024 },
+		});
+		expect(response.status).toBe(400);
+		expect(response.json).toMatchObject({ code: "VALIDATION_FAILED" });
 	});
 
 	it("saves the key only once the file is in the bucket", async () => {
@@ -102,7 +113,7 @@ describe("avatar straight to R2", () => {
 		const session = await signIn(bare.call);
 		const response = await bare.call("POST", "/assets/uploads", {
 			token: session.accessToken,
-			body: { kind: "avatar", contentType: "image/jpeg" },
+			body: { kind: "avatar", contentType: "image/jpeg", size: 120_000 },
 		});
 		expect(response.status).toBe(503);
 		expect(response.json).toMatchObject({ code: "ASSETS_UNAVAILABLE" });

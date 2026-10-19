@@ -11,12 +11,12 @@ export const usersService = {
 	 * never goes through the API; only the key does.
 	 */
 	async uploadAvatar(accessToken: string, file: { uri: string; type: AvatarType }): Promise<User> {
+		const image = await (await fetch(file.uri)).blob();
 		const ticket = await apiClient.post<UploadTicket>(
 			"/assets/uploads",
-			{ kind: "avatar", contentType: file.type },
+			{ kind: "avatar", contentType: file.type, size: image.size },
 			{ accessToken },
 		);
-		const image = await (await fetch(file.uri)).blob();
 		const upload = await fetch(ticket.uploadUrl, {
 			method: ticket.method,
 			headers: ticket.headers,

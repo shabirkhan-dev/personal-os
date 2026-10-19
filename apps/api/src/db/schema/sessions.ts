@@ -11,6 +11,9 @@ export const sessions = pgTable(
 			.notNull()
 			.references(() => users.id, { onDelete: "cascade" }),
 		refreshTokenHash: varchar("refresh_token_hash", { length: 64 }).notNull(),
+		/** The token this one replaced, accepted once more for a short while (see `refresh`). */
+		previousRefreshTokenHash: varchar("previous_refresh_token_hash", { length: 64 }),
+		rotatedAt: timestamp("rotated_at", { withTimezone: true }),
 		userAgent: text("user_agent"),
 		expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
 		lastUsedAt: timestamp("last_used_at", { withTimezone: true }).notNull().defaultNow(),

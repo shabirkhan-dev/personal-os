@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
 
-import { signInCodes, users } from "@/db/schema";
+import { sessions, signInCodes, users } from "@/db/schema";
 import { db, signIn, testApp } from "./support";
 
 const { call } = testApp();
@@ -169,7 +169,11 @@ describe("sessions", () => {
 		const next = rotated.json?.data.refreshToken ?? "";
 		expect(next).not.toBe(session.refreshToken);
 
-		// The old token again: treated as stolen, so the whole session ends.
+		// The old token again after the grace window: treated as stolen, so the whole session ends.
+		await db
+			.update(sessions)
+			.set({ rotatedAt: new Date(Date.now() - 120_000) })
+			.where(eq(sessions.userId, session.user.id));
 		const reused = await call("POST", "/auth/refresh", {
 			body: { refreshToken: session.refreshToken },
 		});
@@ -178,6 +182,26 @@ describe("sessions", () => {
 		expect(afterTheft.status).toBe(401);
 		const me = await call("GET", "/users/me", { token: rotated.json?.data.accessToken });
 		expect(me.status).toBe(401);
+	});
+
+	it("accepts a retry with the just-rotated token, as when the first answer was lost", async () => {
+		const session = await signIn(call);
+		const lost = await call("POST", "/auth/refresh", {
+			body: { refreshToken: session.refreshToken },
+		});
+		expect(lost.status).toBe(200);
+		const retried = await call<{ data: { refreshToken: string; accessToken: string } }>(
+			"POST",
+			"/auth/refresh",
+			{ body: { refreshToken: session.refreshToken } },
+		);
+		expect(retried.status).toBe(200);
+		const me = await call("GET", "/users/me", { token: retried.json?.data.accessToken });
+		expect(me.status).toBe(200);
+		const onward = await call("POST", "/auth/refresh", {
+			body: { refreshToken: retried.json?.data.refreshToken },
+		});
+		expect(onward.status).toBe(200);
 	});
 
 	it("serves /users/me with a live session and stops after logout", async () => {

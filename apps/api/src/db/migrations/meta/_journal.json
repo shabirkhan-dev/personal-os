@@ -15,6 +15,13 @@
       "when": 1792402245795,
       "tag": "0001_ai_usage",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792402416570,
+      "tag": "0002_refresh_grace",
+      "breakpoints": true
     }
   ]
 }

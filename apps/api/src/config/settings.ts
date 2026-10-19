@@ -6,6 +6,11 @@ export const settings = {
 		sessionTtlDays: 30,
 		codeTtlMinutes: 10,
 		codeMaxAttempts: 5,
+		/**
+		 * A refresh whose answer was lost (a phone dropping signal) retries with the old token; it is
+		 * accepted for this long instead of being treated as theft.
+		 */
+		refreshGraceMs: 60_000,
 		/** Per email, whatever IP asks: one code a minute and a handful a day. */
 		codeCooldownSeconds: 60,
 		codesPerDay: 10,

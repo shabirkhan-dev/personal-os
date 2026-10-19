@@ -95,11 +95,44 @@ export async function rotateSession(
 ): Promise<boolean> {
 	const rows = await db
 		.update(sessions)
-		.set({ refreshTokenHash: nextHash, expiresAt, lastUsedAt: new Date() })
+		.set({
+			refreshTokenHash: nextHash,
+			previousRefreshTokenHash: previousHash,
+			rotatedAt: new Date(),
+			expiresAt,
+			lastUsedAt: new Date(),
+		})
 		.where(
 			and(
 				eq(sessions.id, id),
 				eq(sessions.refreshTokenHash, previousHash),
+				isNull(sessions.revokedAt),
+			),
+		)
+		.returning({ id: sessions.id });
+	return rows.length === 1;
+}
+
+/**
+ * A retry with the token that was just rotated away, inside the grace window: issues a fresh token
+ * again. The one whose answer was lost is never seen by the phone, so it simply stops working.
+ */
+export async function rotateFromPrevious(
+	db: Database,
+	id: string,
+	presentedHash: string,
+	nextHash: string,
+	expiresAt: Date,
+	rotatedAfter: Date,
+): Promise<boolean> {
+	const rows = await db
+		.update(sessions)
+		.set({ refreshTokenHash: nextHash, expiresAt, lastUsedAt: new Date() })
+		.where(
+			and(
+				eq(sessions.id, id),
+				eq(sessions.previousRefreshTokenHash, presentedHash),
+				gt(sessions.rotatedAt, rotatedAfter),
 				isNull(sessions.revokedAt),
 			),
 		)

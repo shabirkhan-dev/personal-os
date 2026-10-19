@@ -15,6 +15,7 @@ export function useFashion() {
 		const queries = [pieceList, wearList, planList, wishList, settingsList];
 		return {
 			loading: queries.some((query) => query.isPending),
+			error: queries.find((query) => query.error)?.error ?? null,
 			pieces: [...(pieceList.data ?? [])].sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
 			wears: [...(wearList.data ?? [])].sort((a, b) => a.id.localeCompare(b.id)),
 			plans: planList.data ?? [],

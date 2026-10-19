@@ -1,7 +1,7 @@
 import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { ActionPills } from "@/components/module-ui";
+import { ActionPills, ReadError } from "@/components/module-ui";
 import { PoText } from "@/components/ui/po-text";
 import { formatMoney } from "@/lib/money";
 import { voiceOut } from "@/lib/voice";
@@ -113,6 +113,10 @@ export function DailyHomeView({ actionRequest }: HomeModuleViewProps) {
 		fashion: useFashionStatus(),
 	};
 	const [notice, setNotice] = useState<string | null>(null);
+	const failed = (error: unknown) => {
+		console.error("[daily] could not save", error);
+		setNotice("Couldn't save on this phone. Try again.");
+	};
 
 	const lastRequest = useRef(actionRequest);
 	useEffect(() => {
@@ -161,9 +165,9 @@ export function DailyHomeView({ actionRequest }: HomeModuleViewProps) {
 			return;
 		}
 		if (intent.kind === "tick") {
-			void toggleTick(log, today, intent.id).then(() =>
-				say(`${MINIMUM[intent.id].label} ticked for today.`, spoken),
-			);
+			void toggleTick(log, today, intent.id)
+				.then(() => say(`${MINIMUM[intent.id].label} ticked for today.`, spoken))
+				.catch(failed);
 			return;
 		}
 		if (intent.kind === "next") {
@@ -238,6 +242,8 @@ export function DailyHomeView({ actionRequest }: HomeModuleViewProps) {
 		return item.length > 0 ? `${item.detail} · until ${until}` : item.detail;
 	})();
 
+	if (data.error) return <ReadError name="Daily" />;
+
 	return (
 		<>
 			<View style={styles.ask}>
@@ -265,7 +271,7 @@ export function DailyHomeView({ actionRequest }: HomeModuleViewProps) {
 					now={rightNow}
 					detail={detail}
 					onStart={() => open(rightNow.item.module)}
-					onLater={() => void pushLater(log, today, rightNow.item.id)}
+					onLater={() => void pushLater(log, today, rightNow.item.id).catch(failed)}
 				/>
 			) : null}
 			{settings.setUp ? (
@@ -274,7 +280,7 @@ export function DailyHomeView({ actionRequest }: HomeModuleViewProps) {
 					streak={streak}
 					onPress={dailyRoutes.minimum}
 					onRing={(ring) => {
-						if (ring.module === "daily-life") void toggleTick(log, today, ring.id);
+						if (ring.module === "daily-life") void toggleTick(log, today, ring.id).catch(failed);
 						else open(ring.module);
 					}}
 				/>

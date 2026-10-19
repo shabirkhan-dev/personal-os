@@ -32,6 +32,7 @@ export function useTraining() {
 		const queries = [settingsList, sessionList, planList, skillList];
 		return {
 			loading: queries.some((query) => query.isPending),
+			error: queries.find((query) => query.error)?.error ?? null,
 			settings: settingsList.data?.[0] ?? defaultSettings(),
 			sessions: [...(sessionList.data ?? [])].sort((a, b) =>
 				b.startedAt.localeCompare(a.startedAt),

@@ -32,6 +32,7 @@ export function useDailyData() {
 		};
 		return {
 			loading: queries.some((query) => query.isPending),
+			error: queries.find((query) => query.error)?.error ?? null,
 			settings: settingsList.data?.[0] ?? fallback,
 			logs: [...(logList.data ?? [])].sort((a, b) => a.id.localeCompare(b.id)),
 			sleep: [...(sleepList.data ?? [])].sort((a, b) => a.id.localeCompare(b.id)),

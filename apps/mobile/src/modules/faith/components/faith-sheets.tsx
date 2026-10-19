@@ -46,7 +46,7 @@ export function LogPrayerSheet({
 	onClose: () => void;
 	onSave: (prayer: PrayerId, status: PrayerStatus) => void;
 }) {
-	const firstOpen = rows.findLast((row) => row.state === "due") ?? rows[0];
+	const firstOpen = [...rows].reverse().find((row) => row.state === "due") ?? rows[0];
 	const [prayer, setPrayer] = useState<PrayerId | null>(initial ?? firstOpen?.prayer ?? null);
 	const row = rows.find((item) => item.prayer === prayer);
 	const suggested: PrayerStatus =

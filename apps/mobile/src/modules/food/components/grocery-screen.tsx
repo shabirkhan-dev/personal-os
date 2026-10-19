@@ -70,7 +70,9 @@ export function GroceryScreen() {
 					]
 				: [];
 		});
-		void Share.share({ message: ["Grocery list", "", ...lines].join("\n").trim() });
+		void Share.share({ message: ["Grocery list", "", ...lines].join("\n").trim() }).catch(
+			(error: unknown) => console.error("[food] could not share the list", error),
+		);
 	};
 
 	return (

@@ -19,7 +19,7 @@ import { FINANCE_READ_JOB, useFinanceUi } from "../hooks/finance-ui-store";
 import { useFinanceToday } from "../hooks/use-finance";
 import { rupees, total } from "../lib/finance-math";
 import {
-	CATEGORIES,
+	SPEND_CATEGORIES,
 	type Category,
 	CATEGORY_LABELS,
 	CATEGORY_SHORT,
@@ -304,7 +304,7 @@ function ItemSheet({
 					suffix="Rs"
 				/>
 				<View style={styles.chips}>
-					{CATEGORIES.map((option) => (
+					{SPEND_CATEGORIES.map((option) => (
 						<FilterChip
 							key={option}
 							label={CATEGORY_LABELS[option]}

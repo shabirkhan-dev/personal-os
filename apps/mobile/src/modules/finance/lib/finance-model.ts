@@ -15,9 +15,13 @@ export const CATEGORIES = [
 	"care",
 	"giving",
 	"shopping",
+	"dreams",
 	"other",
 ] as const;
 export type Category = (typeof CATEGORIES)[number];
+
+/** Lines spending can be logged on; Dreams only fills through Wishlist's Add savings. */
+export const SPEND_CATEGORIES = CATEGORIES.filter((category) => category !== "dreams");
 
 export const CATEGORY_LABELS: Record<Category, string> = {
 	food: "Food",
@@ -26,6 +30,7 @@ export const CATEGORY_LABELS: Record<Category, string> = {
 	care: "Care",
 	giving: "Giving and family",
 	shopping: "Shopping",
+	dreams: "Dreams",
 	other: "Buffer",
 };
 
@@ -43,6 +48,7 @@ export const CATEGORY_TONES: Record<Category, keyof ColorTokens> = {
 	care: "statusViolet",
 	giving: "textSuccess",
 	shopping: "statusDanger",
+	dreams: "textWarning",
 	other: "textTertiary",
 };
 
@@ -53,6 +59,7 @@ export const CATEGORY_TILES: Record<Category, keyof ColorTokens> = {
 	care: "statusVioletSubtle",
 	giving: "statusSuccessSubtle",
 	shopping: "statusDangerSubtle",
+	dreams: "statusWarningSubtle",
 	other: "bgSubtle",
 };
 
@@ -63,6 +70,7 @@ export const CATEGORY_ICONS: Record<Category, IconName> = {
 	care: "Drop",
 	giving: "Heart",
 	shopping: "Tag",
+	dreams: "Star",
 	other: "Wallet",
 };
 
@@ -74,6 +82,7 @@ export const CATEGORY_HINTS: Record<Category, string> = {
 	care: "Skin, hair, body",
 	giving: "Sadqa and home",
 	shopping: "Clothes and things",
+	dreams: "Put aside for your wishlist",
 	other: "Unplanned",
 };
 
@@ -163,6 +172,7 @@ const SHARES: Record<Category, number> = {
 	care: 2.6 / 55,
 	giving: 8 / 55,
 	shopping: 0,
+	dreams: 0,
 	other: 8.2 / 55,
 };
 

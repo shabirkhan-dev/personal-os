@@ -14,6 +14,7 @@ const views: readonly HomeView[] = [
 	"food",
 	"fashion",
 	"faith",
+	"wishlist",
 ];
 
 export type HomeViewDoc = { view: HomeView; amountsHidden: boolean };

@@ -37,6 +37,7 @@ export function useFinance() {
 		const queries = [settingsList, entryList, billList, sourceList];
 		return {
 			loading: queries.some((query) => query.isPending),
+			error: queries.find((query) => query.error)?.error ?? null,
 			settings: settingsList.data?.[0] ?? defaultSettings(),
 			entries: [...(entryList.data ?? [])].sort((a, b) => b.at.localeCompare(a.at)),
 			bills: [...(billList.data ?? [])].sort((a, b) => a.dueDay - b.dueDay),

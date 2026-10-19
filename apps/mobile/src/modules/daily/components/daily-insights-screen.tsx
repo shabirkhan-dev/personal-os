@@ -61,10 +61,15 @@ export function DailyInsightsScreen() {
 			void saveSettings({
 				...data.settings,
 				alarms: { ...data.settings.alarms, windDown: true },
-			}).then(() => {
-				haptics.success();
-				setNotice("Wind-down reminder is on.");
-			});
+			})
+				.then(() => {
+					haptics.success();
+					setNotice("Wind-down reminder is on.");
+				})
+				.catch((error: unknown) => {
+					console.error("[daily] could not save", error);
+					setNotice("Couldn't save on this phone. Try again.");
+				});
 		} else if (note.kind === "train-time") {
 			setNotice("Move training in the Training module; Daily's plan follows it.");
 		} else {

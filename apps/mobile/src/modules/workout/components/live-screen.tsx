@@ -81,7 +81,9 @@ export function LiveScreen() {
 	useEffect(() => {
 		if (!exercise || key === lastKey.current) return;
 		lastKey.current = key;
-		const done = live?.sets.findLast((set) => set.exercise === exercise.name)?.value;
+		const done = [...(live?.sets ?? [])]
+			.reverse()
+			.find((set) => set.exercise === exercise.name)?.value;
 		const before = lastValue(sessions, exercise.name);
 		setValue(done ?? exercise.target ?? (before !== null ? before + 1 : 10));
 	}, [key, exercise, live?.sets, sessions]);

@@ -1,4 +1,4 @@
-import * as SecureStore from "expo-secure-store";
+import * as SecureStore from "@/lib/secure-store";
 import { create } from "zustand";
 import { type Member, newMemberNumber, parseMember } from "../lib/member-card";
 

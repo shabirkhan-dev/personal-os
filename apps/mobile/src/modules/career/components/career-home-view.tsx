@@ -38,7 +38,7 @@ import { looksLikeLink, parseCareerLine } from "../lib/parse-career-line";
 import { careerRoutes } from "../navigation";
 import { type ParsedLineAi, useCareerAi } from "../services/career-ai";
 import { AddApplicationSheet } from "./add-application-sheet";
-import { AiTip, EmptyCard, ProgressCard, ResultCard } from "@/components/module-ui";
+import { AiTip, EmptyCard, ProgressCard, ReadError, ResultCard } from "@/components/module-ui";
 import {
 	ActivityCard,
 	FollowUpsCard,
@@ -201,6 +201,8 @@ export function CareerHomeView({ actionRequest }: HomeModuleViewProps) {
 	const prepJob = view.interview ? jobs[prepJobKey(view.interview.id)] : undefined;
 	const empty = !data.loading && apps.length === 0;
 
+	if (data.error) return <ReadError name="Career" />;
+
 	return (
 		<>
 			<View>
@@ -252,7 +254,13 @@ export function CareerHomeView({ actionRequest }: HomeModuleViewProps) {
 							title: "Halal check",
 							subtitle: loggedApp.halal.note || "Check what the company earns from.",
 							value: loggedApp.halal.confirmed ? "Confirmed" : "Confirm",
-							onPress: loggedApp.halal.confirmed ? undefined : () => void confirmHalal(loggedApp),
+							onPress: loggedApp.halal.confirmed
+								? undefined
+								: () =>
+										void confirmHalal(loggedApp).catch((error: unknown) => {
+											console.error("[career] could not confirm the halal check", error);
+											setNotice("Couldn't save on this phone. Try again.");
+										}),
 						},
 					]}
 				/>

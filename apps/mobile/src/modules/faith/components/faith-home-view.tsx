@@ -1,7 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { AiWorkingCard } from "@/components/ai-working-card";
-import { ActionPills, ProgressCard, ResultCard, SectionLabel } from "@/components/module-ui";
+import {
+	ActionPills,
+	ProgressCard,
+	ReadError,
+	ResultCard,
+	SectionLabel,
+} from "@/components/module-ui";
 import { PoText } from "@/components/ui/po-text";
 import { useAiJobs } from "@/lib/ai-jobs/ai-jobs-store";
 import { dayKey } from "@/lib/day";
@@ -250,6 +256,8 @@ export function FaithHomeView({ actionRequest }: HomeModuleViewProps) {
 	const challengeDayNumber = challenge ? challengeDay(challenge, now) : 0;
 	const openLog = (row?: PrayerRow) => setLogFor({ key: Date.now(), prayer: row?.prayer ?? null });
 
+	if (data.error) return <ReadError name="Faith" />;
+
 	return (
 		<>
 			<View style={styles.ask}>
@@ -497,7 +505,9 @@ export function FaithHomeView({ actionRequest }: HomeModuleViewProps) {
 					onSave={(saved) => {
 						update(saved);
 						ui.closeSheet();
-						void requestReminderPermission();
+						requestReminderPermission().catch((error: unknown) =>
+							console.warn("[faith] could not ask for notifications", error),
+						);
 					}}
 				/>
 			) : null}

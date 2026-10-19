@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { AiWorkingCard } from "@/components/ai-working-card";
-import { ActionPills, FilterChip, ResultCard } from "@/components/module-ui";
+import { ActionPills, FilterChip, ReadError, ResultCard } from "@/components/module-ui";
 import { PoText } from "@/components/ui/po-text";
 import { Sheet } from "@/components/ui/sheet";
 import { TextField } from "@/components/ui/text-field";
@@ -229,6 +229,8 @@ export function FoodHomeView({ actionRequest }: HomeModuleViewProps) {
 	};
 
 	const setUp = settings.setUp;
+
+	if (data.error) return <ReadError name="Food" />;
 
 	return (
 		<>

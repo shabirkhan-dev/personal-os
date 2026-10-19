@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { AiWorkingCard } from "@/components/ai-working-card";
-import { ActionPills, ResultCard } from "@/components/module-ui";
+import { ActionPills, ReadError, ResultCard } from "@/components/module-ui";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
 import { useAiJobs } from "@/lib/ai-jobs/ai-jobs-store";
@@ -312,6 +312,8 @@ export function FinanceHomeView({ actionRequest }: HomeModuleViewProps) {
 			/>
 		</>
 	);
+
+	if (data.error) return <ReadError name="Finance" />;
 
 	if (!data.loading && !settings.setUp) {
 		const typed = {

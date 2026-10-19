@@ -35,6 +35,7 @@ export function useCare() {
 		const queries = [settingsList, stepList, productList, habitList, dayList, checkInList];
 		return {
 			loading: queries.some((query) => query.isPending),
+			error: queries.find((query) => query.error)?.error ?? null,
 			settings: settingsList.data?.[0] ?? defaultSettings(),
 			steps: [...(stepList.data ?? [])].sort((a, b) => a.order - b.order),
 			products: [...(productList.data ?? [])].sort((a, b) => a.name.localeCompare(b.name)),

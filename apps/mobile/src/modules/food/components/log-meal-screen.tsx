@@ -177,9 +177,14 @@ export function LogMealScreen() {
 	};
 
 	const remove = async () => {
-		await Promise.all((current.replace ?? []).map((meal) => deleteMeal(meal)));
-		setDraft(null);
-		router.back();
+		try {
+			await Promise.all((current.replace ?? []).map((meal) => deleteMeal(meal)));
+			setDraft(null);
+			router.back();
+		} catch (error) {
+			console.error("[food] could not delete the meal", error);
+			setNotice("Couldn't save on this phone. Try again.");
+		}
 	};
 
 	const editingOld = (current.replace?.length ?? 0) > 0;

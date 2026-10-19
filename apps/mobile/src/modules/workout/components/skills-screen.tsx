@@ -42,6 +42,10 @@ export function SkillsScreen() {
 	const [adding, setAdding] = useState(false);
 	const [name, setName] = useState("");
 	const [notice, setNotice] = useState<string | null>(null);
+	const failed = (error: unknown) => {
+		console.error("[training] could not save", error);
+		setNotice("Couldn't save on this phone. Try again.");
+	};
 	const current = open ? (skills.find((skill) => skill.id === open.id) ?? null) : null;
 	const sportNames = [...new Set(skills.map((skill) => SPORT_LABELS[skill.sport]))];
 	const suggestions = SKILLS.filter((skill) => !skills.some((item) => item.name === skill.name));
@@ -171,7 +175,7 @@ export function SkillsScreen() {
 								label="I can do this step"
 								onPress={() => {
 									haptics.success();
-									void saveSkill({ ...current, done: current.done + 1 });
+									void saveSkill({ ...current, done: current.done + 1 }).catch(failed);
 								}}
 							/>
 						) : null}
@@ -179,14 +183,14 @@ export function SkillsScreen() {
 							<PillButton
 								label="Back a step"
 								variant="secondary"
-								onPress={() => void saveSkill({ ...current, done: current.done - 1 })}
+								onPress={() => void saveSkill({ ...current, done: current.done - 1 }).catch(failed)}
 							/>
 						) : null}
 						<PillButton
 							label="Remove skill"
 							variant="ghost"
 							onPress={() => {
-								void deleteSkill(current);
+								void deleteSkill(current).catch(failed);
 								setOpen(null);
 							}}
 						/>
@@ -225,7 +229,7 @@ export function SkillsScreen() {
 											photo: skill.photo,
 											steps: skill.steps,
 											done: 0,
-										});
+										}).catch(failed);
 										setAdding(false);
 									}}
 									style={styles.step}

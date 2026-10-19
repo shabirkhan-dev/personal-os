@@ -109,9 +109,14 @@ export function NudgeSheet({
 	};
 
 	const copy = async () => {
-		await Clipboard.setStringAsync(body);
-		setNotice("Copied. Paste it wherever you talk to them.");
-		await record();
+		try {
+			await Clipboard.setStringAsync(body);
+			setNotice("Copied. Paste it wherever you talk to them.");
+			await record();
+		} catch (caught) {
+			console.error("[career] could not copy the nudge", caught);
+			setNotice("Couldn't copy that. Try again.");
+		}
 	};
 
 	const openEmail = async () => {

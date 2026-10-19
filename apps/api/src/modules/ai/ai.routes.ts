@@ -17,6 +17,8 @@ import {
 } from "./career.schema";
 import { buildInterviewPrep, draftNudge, parseLine, planSkillPath, readJob } from "./career.tasks";
 import { askCareSchema } from "./care.schema";
+import { findDreamSchema } from "./wishlist.schema";
+import { findDream } from "./wishlist.tasks";
 import { askCare } from "./care.tasks";
 import { askFashionSchema, readPieceSchema } from "./fashion.schema";
 import { askFashion, readPiece } from "./fashion.tasks";
@@ -85,4 +87,7 @@ export const aiRoutes = new Hono<AppEnv>()
 	)
 	.post("/finance/ask", validate("json", askFinanceSchema), async (c) =>
 		ok(c, await askFinance({ config: c.get("config") }, c.req.valid("json"))),
+	)
+	.post("/wishlist/find", validate("json", findDreamSchema), async (c) =>
+		ok(c, await findDream({ config: c.get("config") }, c.req.valid("json"))),
 	);

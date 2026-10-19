@@ -247,6 +247,50 @@ export function moveMoney(
 	});
 }
 
+/**
+ * Wishlist's "Add savings". The money comes from the budget, as a category transfer: `amount`
+ * moves from line `from` into Dreams (so `from` has less left to spend this month), and a Dreams
+ * entry takes it out of money now, the way cash put in an envelope leaves the wallet. Returns the
+ * entry so the transfer can be undone.
+ */
+export async function fundDream(
+	input: { amount: number; from: Category; dream: string },
+	now = new Date(),
+): Promise<Entry> {
+	if (input.from === "dreams") throw new Error("Pick a budget line other than Dreams.");
+	const settings = await currentSettings();
+	const amount = roundCents(Math.min(input.amount, settings.limits[input.from]));
+	if (amount <= 0) throw new Error("That budget line has nothing left to move.");
+	await moveMoney(settings, input.from, "dreams", amount);
+	const item = entry({
+		kind: "spend",
+		amount,
+		title: `Saved for ${input.dream.trim().slice(0, 60) || "a dream"}`,
+		note: `Wishlist · from ${CATEGORY_SHORT[input.from]}`,
+		category: "dreams",
+		method: "bank",
+		at: now.toISOString(),
+	});
+	await saveItem(financeEntries, item);
+	return item;
+}
+
+/** Undo a `fundDream`: the entry goes and the amount returns to the line it came from. */
+export async function unfundDream(input: {
+	entryId: string;
+	amount: number;
+	from: Category;
+}): Promise<void> {
+	const item = (await listItems(financeEntries)).find((each) => each.id === input.entryId);
+	if (item) await removeItem(financeEntries, item.id);
+	await moveMoney(await currentSettings(), "dreams", input.from, input.amount);
+}
+
+/** The saved settings, read fresh so back-to-back transfers each see the last one's limits. */
+async function currentSettings(): Promise<FinanceSettings> {
+	return (await listItems(financeSettings))[0] ?? defaultSettings();
+}
+
 // --- the old Finance file -----------------------------------------------------------------------
 
 const OLD_CATEGORIES: Record<string, Category> = {

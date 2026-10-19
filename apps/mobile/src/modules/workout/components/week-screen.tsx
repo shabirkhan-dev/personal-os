@@ -26,6 +26,10 @@ export function WeekScreen() {
 	const { settings, sessions } = data;
 	const [editing, setEditing] = useState<string | null>(null);
 	const [notice, setNotice] = useState<string | null>(null);
+	const failed = (error: unknown) => {
+		console.error("[training] could not save", error);
+		setNotice("Couldn't save on this phone. Try again.");
+	};
 	const slots = plan?.slots ?? buildWeek(settings, week);
 	const sessionsCount = slots.filter(
 		(slot) => slot.template && slot.template !== "mobility",
@@ -54,7 +58,7 @@ export function WeekScreen() {
 		setEditing(null);
 		if (!plan) return;
 		haptics.tap();
-		void savePlan(plan.id, withSlot(plan.slots, day, template));
+		void savePlan(plan.id, withSlot(plan.slots, day, template)).catch(failed);
 	};
 
 	return (
@@ -158,15 +162,17 @@ export function WeekScreen() {
 					style={styles.flex}
 					onPress={() => {
 						if (!plan) return;
-						void rebalanceWeek(plan, sessions, today).then((next) => {
-							haptics.success();
-							const moved = next.slots.filter((slot) => slot.movedFrom).length;
-							setNotice(
-								moved
-									? `Moved ${moved} missed session${moved === 1 ? "" : "s"} to an easy day.`
-									: "Nothing to move: the week is on track.",
-							);
-						});
+						void rebalanceWeek(plan, sessions, today)
+							.then((next) => {
+								haptics.success();
+								const moved = next.slots.filter((slot) => slot.movedFrom).length;
+								setNotice(
+									moved
+										? `Moved ${moved} missed session${moved === 1 ? "" : "s"} to an easy day.`
+										: "Nothing to move: the week is on track.",
+								);
+							})
+							.catch(failed);
 					}}
 				/>
 			</Footer>

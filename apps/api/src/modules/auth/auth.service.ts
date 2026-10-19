@@ -30,6 +30,11 @@ export async function requestCode(
 	input: { email: string; name?: string | undefined },
 	now = Date.now(),
 ): Promise<CodeSent> {
+	const recent = await repo.codesSince(db, input.email, new Date(now - 86_400_000));
+	const cooling =
+		recent.newest !== null &&
+		now - recent.newest.getTime() < settings.auth.codeCooldownSeconds * 1000;
+	if (cooling || recent.count >= settings.auth.codesPerDay) throw new AppError("RATE_LIMITED");
 	const code = randomCode();
 	await repo.saveCode(db, {
 		email: input.email,

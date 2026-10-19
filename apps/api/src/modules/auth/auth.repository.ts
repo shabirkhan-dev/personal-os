@@ -1,4 +1,4 @@
-import { and, desc, eq, gt, isNull, lt, sql } from "drizzle-orm";
+import { and, count, desc, eq, gt, gte, isNull, lt, max, sql } from "drizzle-orm";
 
 import type { Database } from "@/db/client";
 import { type SessionRow, type SignInCodeRow, sessions, signInCodes, users } from "@/db/schema";
@@ -8,6 +8,19 @@ export async function saveCode(
 	input: { email: string; displayName: string | null; codeHash: string; expiresAt: Date },
 ): Promise<void> {
 	await db.insert(signInCodes).values(input);
+}
+
+/** How many codes this email was sent since `since`, and when the newest one went out. */
+export async function codesSince(
+	db: Database,
+	email: string,
+	since: Date,
+): Promise<{ count: number; newest: Date | null }> {
+	const [row] = await db
+		.select({ count: count(), newest: max(signInCodes.createdAt) })
+		.from(signInCodes)
+		.where(and(eq(signInCodes.email, email), gte(signInCodes.createdAt, since)));
+	return { count: row?.count ?? 0, newest: row?.newest ?? null };
 }
 
 /** The newest unused code for this email; older ones stop working once a new one is sent. */

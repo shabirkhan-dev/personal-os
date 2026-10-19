@@ -6,6 +6,9 @@ export const settings = {
 		sessionTtlDays: 30,
 		codeTtlMinutes: 10,
 		codeMaxAttempts: 5,
+		/** Per email, whatever IP asks: one code a minute and a handful a day. */
+		codeCooldownSeconds: 60,
+		codesPerDay: 10,
 	},
 	sync: {
 		/** Matches the app's `PUSH_BATCH`. */

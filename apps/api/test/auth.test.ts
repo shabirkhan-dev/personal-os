@@ -43,6 +43,11 @@ describe("email-code sign-in", () => {
 				body: { email },
 			},
 		);
+		// Past the one-a-minute cooldown.
+		await db
+			.update(signInCodes)
+			.set({ createdAt: new Date(Date.now() - 120_000) })
+			.where(eq(signInCodes.email, email.toLowerCase()));
 		const second = await call<{ data: { developmentCode: string } }>(
 			"POST",
 			"/auth/email-code/request",
@@ -111,6 +116,32 @@ describe("email-code sign-in", () => {
 		expect(row?.attempts).toBe(5);
 		const right = await call("POST", "/auth/email-code/verify", { body: { email, code } });
 		expect(right.status).toBe(401);
+	});
+
+	it("sends one code a minute and ten a day per email, whatever the IP", async () => {
+		const email = newEmail();
+		const first = await call("POST", "/auth/email-code/request", { body: { email } });
+		expect(first.status).toBe(202);
+		const again = await call("POST", "/auth/email-code/request", { body: { email } });
+		expect(again.status).toBe(429);
+		expect(again.json).toMatchObject({ success: false, code: "RATE_LIMITED" });
+
+		// Past the cooldown, but with nine more codes earlier today: ten in a day is the cap.
+		const lower = email.toLowerCase();
+		await db
+			.update(signInCodes)
+			.set({ createdAt: new Date(Date.now() - 120_000) })
+			.where(eq(signInCodes.email, lower));
+		await db.insert(signInCodes).values(
+			Array.from({ length: 9 }, (_, index) => ({
+				email: lower,
+				codeHash: "0".repeat(64),
+				expiresAt: new Date(),
+				createdAt: new Date(Date.now() - (index + 2) * 3_600_000),
+			})),
+		);
+		const capped = await call("POST", "/auth/email-code/request", { body: { email } });
+		expect(capped.status).toBe(429);
 	});
 
 	it("rejects a malformed body with the issues", async () => {

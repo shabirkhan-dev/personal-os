@@ -26,4 +26,7 @@ config.resolver.blockList = existingBlockList
 	? [existingBlockList, ...ignoreSiblingApps].flat()
 	: ignoreSiblingApps;
 
+// expo-sqlite on web loads wa-sqlite as a .wasm asset.
+if (!config.resolver.assetExts.includes("wasm")) config.resolver.assetExts.push("wasm");
+
 module.exports = config;

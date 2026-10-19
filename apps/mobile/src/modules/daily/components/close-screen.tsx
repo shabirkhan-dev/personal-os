@@ -81,7 +81,14 @@ export function CloseScreen() {
 									? "textSecondary"
 									: MODULE_TONES[MINIMUM[id].module]
 							}
-							{...(own ? { onPress: () => void toggleTick(log, today, id) } : {})}
+							{...(own
+								? {
+										onPress: () =>
+											void toggleTick(log, today, id).catch((error: unknown) =>
+												console.error("[daily] could not save", error),
+											),
+									}
+								: {})}
 						/>
 					);
 				})}

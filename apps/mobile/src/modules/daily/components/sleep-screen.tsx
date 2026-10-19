@@ -26,6 +26,10 @@ export function SleepScreen() {
 	const { settings, sleep } = data;
 	const [logging, setLogging] = useState<{ bed: string; wake: string } | null>(null);
 	const [notice, setNotice] = useState<string | null>(null);
+	const failed = (error: unknown) => {
+		console.error("[daily] could not save", error);
+		setNotice("Couldn't save on this phone. Try again.");
+	};
 	const week = lastDays(now, 7);
 	const nights = sleepWeek(sleep, week);
 	const avg = averageSleep(sleep, week);
@@ -207,7 +211,9 @@ export function SleepScreen() {
 						valueTone="accentDefault"
 						done={row.done}
 						tone="textTertiary"
-						{...(row.auto ? {} : { onPress: () => void toggleWindDown(log, today, row.id) })}
+						{...(row.auto
+							? {}
+							: { onPress: () => void toggleWindDown(log, today, row.id).catch(failed) })}
 					/>
 				))}
 			</Card>
@@ -221,7 +227,7 @@ export function SleepScreen() {
 						subtitle="10 minutes before Fajr, soft sound"
 						value={settings.alarms.fajr ? "On" : "Off"}
 						chevron
-						onPress={() => void toggleAlarm("fajr")}
+						onPress={() => void toggleAlarm("fajr").catch(failed)}
 					/>
 				) : null}
 				<ListRow
@@ -229,7 +235,7 @@ export function SleepScreen() {
 					subtitle="Starts your night routine"
 					value={settings.alarms.windDown ? "On" : "Off"}
 					chevron
-					onPress={() => void toggleAlarm("windDown")}
+					onPress={() => void toggleAlarm("windDown").catch(failed)}
 				/>
 				<ListRow
 					title={`Weekend · ${clockOf(settings.weekendWakeAt)}`}
@@ -237,7 +243,7 @@ export function SleepScreen() {
 					value={settings.alarms.weekend ? "On" : "Off"}
 					chevron
 					last
-					onPress={() => void toggleAlarm("weekend")}
+					onPress={() => void toggleAlarm("weekend").catch(failed)}
 				/>
 			</ListCard>
 			{notice ? (
@@ -261,7 +267,7 @@ export function SleepScreen() {
 					onPress={() => {
 						if (next && !next.auto) {
 							haptics.tap();
-							void toggleWindDown(log, today, next.id);
+							void toggleWindDown(log, today, next.id).catch(failed);
 						}
 					}}
 				/>

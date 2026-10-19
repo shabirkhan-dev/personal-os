@@ -132,7 +132,7 @@ export function WishlistHomeView({ actionRequest }: HomeModuleViewProps) {
 		saved > 0
 			? `${compactMoney(saved)} saved · ${progressPercent(next.dream)}%`
 			: monthly <= 0
-				? "Set your income in Finance to see when"
+				? "Plan your income in Roadmap"
 				: funding.incomeExpected
 					? "Saving starts with the first salary"
 					: "";

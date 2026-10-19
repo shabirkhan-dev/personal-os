@@ -8,7 +8,7 @@ export function useWishlistHero(): HomeHero {
 	const { data, line, toSave } = useWishlistToday();
 	if (data.loading) return { label: "Wishlist", value: "…" };
 	if (line.length === 0) {
-		return { label: "Wishlist · nothing yet", value: "Dream big,", faint: " buy clean" };
+		return { label: "Wishlist · nothing yet", value: "0", faint: " dreams" };
 	}
 	return {
 		label: `Wishlist · ${line.length} ${line.length === 1 ? "dream" : "dreams"}, cash only`,

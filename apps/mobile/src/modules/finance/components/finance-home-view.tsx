@@ -318,8 +318,10 @@ export function FinanceHomeView({ actionRequest }: HomeModuleViewProps) {
 	if (data.error) return <ReadError name="Finance" />;
 
 	if (!data.loading && !settings.setUp) {
+		// Rs 0 on hand is a real starting point (runway mode is for exactly that case).
+		const balance = parseAmount(setup.balance, { allowZero: true });
 		const typed = {
-			balance: parseAmount(setup.balance) ?? 0,
+			balance: balance ?? 0,
 			cost: parseAmount(setup.cost) ?? 0,
 			income: parseAmount(setup.income) ?? 0,
 		};
@@ -349,7 +351,7 @@ export function FinanceHomeView({ actionRequest }: HomeModuleViewProps) {
 						placeholder="Nothing fixed yet"
 						onChangeText={(value) => setSetup((current) => ({ ...current, income: value }))}
 					/>
-					{typed.balance > 0 && typed.cost > 0 ? (
+					{balance !== null && typed.cost > 0 ? (
 						<View style={styles.previewRow}>
 							<View style={[styles.dot, { backgroundColor: colors.statusCaution }]} />
 							<PoText variant="row15" tone="textWarning">
@@ -361,7 +363,7 @@ export function FinanceHomeView({ actionRequest }: HomeModuleViewProps) {
 					) : null}
 					<PillButton
 						label={starting ? "Starting…" : "Start runway mode"}
-						disabled={starting || !(typed.balance > 0 && typed.cost > 0)}
+						disabled={starting || !(balance !== null && typed.cost > 0)}
 						onPress={() => {
 							setStarting(true);
 							setUp(settings, {

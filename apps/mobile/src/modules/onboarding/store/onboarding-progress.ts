@@ -3,7 +3,7 @@ import { create } from "zustand";
 import type { OnboardingRoute } from "../lib/flow";
 import { clearAnswers, loadAnswers, saveAnswers } from "./answers-storage";
 import { clearDraft, loadDraft } from "./draft-storage";
-import { initialAnswers, useOnboardingStore } from "./onboarding-store";
+import { initialAnswers, type OnboardingAnswers, useOnboardingStore } from "./onboarding-store";
 
 const COMPLETED_KEY = "personal-os.onboarding.completed";
 
@@ -16,6 +16,11 @@ type OnboardingProgress = {
 	hydrate: () => Promise<void>;
 	/** Marks onboarding finished and saves the current answers. */
 	markCompleted: () => Promise<void>;
+	/**
+	 * Finishes onboarding with the plan saved on the account (a reinstall or a new phone). Keeps
+	 * the server's `updatedAt`, so the next sync sees both sides as equal and uploads nothing.
+	 */
+	restoreSaved: (answers: OnboardingAnswers, updatedAt: string) => Promise<void>;
 	/** Saves the current answers after they change outside onboarding (e.g. modules on Home). */
 	persistAnswers: () => Promise<void>;
 	/** Clears the flag and the answers so the next launch replays onboarding. */
@@ -64,6 +69,18 @@ export const useOnboardingProgress = create<OnboardingProgress>()((set) => ({
 		} catch (error) {
 			console.warn("[onboarding] could not save progress", error);
 		}
+	},
+	restoreSaved: async (answers, updatedAt) => {
+		useOnboardingStore.setState(answers);
+		try {
+			// Saved before `completed` flips: the sync that starts then reads this timestamp.
+			await saveAnswers(answers, updatedAt);
+			await SecureStore.setItemAsync(COMPLETED_KEY, "1");
+			await clearDraft();
+		} catch (error) {
+			console.warn("[onboarding] could not save the restored plan on this device", error);
+		}
+		set({ completed: true, resumeRoute: null });
 	},
 	persistAnswers: async () => {
 		try {

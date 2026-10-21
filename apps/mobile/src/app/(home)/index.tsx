@@ -1,10 +1,10 @@
 import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { Alert, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { careHome, useCareStatus } from "@/modules/care";
 import { careerHome, useCareerStatus } from "@/modules/career";
-import { dailyHome, useDailyStatus } from "@/modules/daily";
+import { DailyOverview, dailyHome, dailyRoutes, useDailyStatus } from "@/modules/daily";
 import { faithHome, useFaithStatus } from "@/modules/faith";
 import { fashionHome, useFashionStatus } from "@/modules/fashion";
 import { foodHome, useFoodStatus } from "@/modules/food";
@@ -15,15 +15,10 @@ import { HomeHeader } from "@/modules/home/components/home-header";
 import { ModulePicker } from "@/modules/home/components/module-picker";
 import { MoneyCard } from "@/modules/home/components/money-card";
 import { SoonView } from "@/modules/home/components/soon-view";
-import { UpcomingList } from "@/modules/home/components/upcoming-list";
 import type { HomeHero, HomeModule } from "@/modules/home/lib/module-home";
-import {
-	moduleStatuses,
-	nowLabel,
-	periodLabel,
-	todayItems,
-	upcoming,
-} from "@/modules/home/lib/today";
+import { routeLine } from "@/modules/home/lib/route-line";
+import { moduleStatuses, periodLabel, todayItems } from "@/modules/home/lib/today";
+import { useAskInbox } from "@/modules/home/store/ask-inbox";
 import { type HomeView, useHomeView } from "@/modules/home/store/home-view";
 import type { ModuleId } from "@/modules/onboarding/lib/options";
 import { moduleOptions } from "@/modules/onboarding/lib/options";
@@ -33,6 +28,8 @@ import { usePlan } from "@/modules/onboarding/store/use-plan";
 import { useWishlistStatus, wishlistHome } from "@/modules/wishlist";
 import { useWorkoutStatus, workoutHome } from "@/modules/workout";
 import { KeyboardAwareScrollView } from "@/components/ui/keyboard-aware-scroll-view";
+import { PoText } from "@/components/ui/po-text";
+import { useNow } from "@/lib/use-now";
 import { usePoTheme } from "@/theme";
 
 const HEADER_HEIGHT = 66;
@@ -48,16 +45,6 @@ const moduleHomes: Partial<Record<ModuleId, HomeModule>> = {
 	fashion: fashionHome,
 	wishlist: wishlistHome,
 };
-
-/** Re-renders once a minute so "Now" and "Next · in …" stay current. */
-function useNow(): Date {
-	const [now, setNow] = useState(() => new Date());
-	useEffect(() => {
-		const timer = setInterval(() => setNow(new Date()), 60_000);
-		return () => clearInterval(timer);
-	}, []);
-	return now;
-}
 
 /** Today: Overview or one module's Home, switched from the module picker. */
 export default function TodayScreen() {
@@ -79,8 +66,6 @@ export default function TodayScreen() {
 		() => todayItems(plan.input, answers.reminders),
 		[plan.input, answers.reminders],
 	);
-	const nowMinutes = now.getHours() * 60 + now.getMinutes();
-	const next = useMemo(() => upcoming(items, nowMinutes), [items, nowMinutes]);
 
 	// Every module's hero is read on each render so the hooks stay in a fixed order.
 	const heroes: Partial<Record<ModuleId, HomeHero>> = {
@@ -156,11 +141,11 @@ export default function TodayScreen() {
 							glow="accentDefault"
 							pickerOpen={pickerOpen}
 							onAppsPress={togglePicker}
-							action={{
-								icon: "Filled/Bell",
-								label: "Notifications",
-								onPress: () => Alert.alert("Notifications", "You're all caught up."),
-							}}
+							action={
+								answers.modules.includes("daily-life")
+									? { icon: "Sun", label: "Morning brief", onPress: dailyRoutes.brief }
+									: { icon: "Mic", label: "Talk to OS", onPress: () => router.push("/listen") }
+							}
 						/>
 						<View style={styles.content}>
 							{view === "overview" ? (
@@ -169,7 +154,6 @@ export default function TodayScreen() {
 									modules={answers.modules}
 									amountsHidden={viewDoc.amountsHidden}
 									onOpen={select}
-									upcomingList={<UpcomingList upcoming={next} now={nowLabel(now)} />}
 								/>
 							) : (
 								<SoonView
@@ -252,12 +236,28 @@ type OverviewBodyProps = {
 	modules: readonly ModuleId[];
 	amountsHidden: boolean;
 	onOpen: (view: HomeView) => void;
-	upcomingList: React.ReactNode;
 };
 
-/** Overview: money at a glance, the ask bar and what is coming up today. */
-function OverviewBody({ period, modules, amountsHidden, onOpen, upcomingList }: OverviewBodyProps) {
+/** Overview: money at a glance, the ask bar, the minimum day and what is coming up today. */
+function OverviewBody({ period, modules, amountsHidden, onOpen }: OverviewBodyProps) {
 	const finance = useFinanceSummary();
+	const send = useAskInbox((state) => state.send);
+	const [notice, setNotice] = useState<string | null>(null);
+
+	// A line typed or said here goes to the module it belongs to, which logs or answers it.
+	// Daily life takes anything else ("what's next", sleep) when it is on.
+	const ask = (text: string, spoken: boolean) => {
+		const target =
+			routeLine(text, modules) ?? (modules.includes("daily-life") ? "daily-life" : null);
+		if (!target) {
+			setNotice("Say which part of your day it's for, like a meal, a prayer or money spent.");
+			return;
+		}
+		setNotice(null);
+		send({ module: target, text, spoken });
+		onOpen(target);
+	};
+
 	const suggestions = [
 		modules.includes("career") ? { label: "Log a job", onPress: () => onOpen("career") } : null,
 		modules.includes("food") ? { label: "Log a meal", onPress: () => onOpen("food") } : null,
@@ -285,16 +285,13 @@ function OverviewBody({ period, modules, amountsHidden, onOpen, upcomingList }: 
 					onPress={() => onOpen("finance")}
 				/>
 			) : null}
-			<AskBar
-				suggestions={[...suggestions.slice(0, 3), talk]}
-				onSubmit={(text) =>
-					Alert.alert(
-						"Pick a module",
-						`To log “${text}”, open the module it belongs to from the chips or the Apps button.`,
-					)
-				}
-			/>
-			{upcomingList}
+			<AskBar suggestions={[...suggestions.slice(0, 3), talk]} onSubmit={ask} />
+			{notice ? (
+				<PoText variant="meta13" tone="textSecondary" style={styles.notice}>
+					{notice}
+				</PoText>
+			) : null}
+			<DailyOverview onOpen={onOpen} />
 		</>
 	);
 }
@@ -303,4 +300,5 @@ const styles = StyleSheet.create({
 	root: { flex: 1 },
 	scroll: { flexGrow: 1 },
 	content: { gap: 16, paddingHorizontal: 16 },
+	notice: { paddingHorizontal: 6 },
 });

@@ -39,15 +39,6 @@ import {
 } from "./daily-cards";
 import { MinimumPicker } from "./minimum-picker";
 
-/** Modules whose Home takes a line handed over from another screen. */
-const LISTENERS: ReadonlySet<ModuleId> = new Set<ModuleId>([
-	"faith",
-	"career",
-	"fashion",
-	"food",
-	"skincare",
-]);
-
 const TILE_ORDER: readonly ModuleId[] = [
 	"career",
 	"faith",
@@ -183,14 +174,11 @@ export function DailyHomeView({ actionRequest }: HomeModuleViewProps) {
 			dailyRoutes[intent.screen]();
 			return;
 		}
+		// Every module's Home takes a line handed over through the ask inbox and logs it.
 		const target = routeLine(text, sources.modules);
-		if (target && LISTENERS.has(target)) {
+		if (target && target !== "daily-life") {
 			send({ module: target, text, spoken });
 			updateView((doc) => ({ ...doc, view: target }));
-			return;
-		}
-		if (target) {
-			open(target as PlanModule);
 			return;
 		}
 		say(

@@ -1,7 +1,9 @@
-import type { ColorTokens } from "@personal-os/tokens";
+import { router } from "expo-router";
 import type { ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
+import type { ColorTokens } from "@personal-os/tokens";
 import { PillButton } from "@/components/ui/pill-button";
+import { onboardingRoutes } from "../lib/flow";
 import { OnboardingScreen } from "./onboarding-screen";
 import type { RichPart } from "./rich-text";
 import { TextBlock } from "./text-block";
@@ -20,7 +22,10 @@ export type WelcomeFrameProps = {
 	onSkip: () => void;
 };
 
-/** Frames 02–05: dots + Skip, a 420px preview, the text block and one primary pill. */
+/**
+ * Frames 02–05: dots + Skip, a 420px preview, the text block, the primary pill and a way back in
+ * for an existing account.
+ */
 export function WelcomeFrame({
 	step,
 	tone,
@@ -36,7 +41,16 @@ export function WelcomeFrame({
 	return (
 		<OnboardingScreen
 			glow={tone}
-			footer={<PillButton label={cta} showPlus={showPlus} onPress={onNext} />}
+			footer={
+				<>
+					<PillButton label={cta} showPlus={showPlus} onPress={onNext} />
+					<PillButton
+						variant="ghost"
+						label="I already have an account"
+						onPress={() => router.push(onboardingRoutes.welcomeBack)}
+					/>
+				</>
+			}
 		>
 			<WelcomeTop step={step} onSkip={onSkip} />
 			<View style={styles.preview}>{preview}</View>

@@ -5,6 +5,8 @@ export const onboardingRoutes = {
 	welcomeUpcoming: "/(onboarding)/welcome-upcoming",
 	welcomeVoice: "/(onboarding)/welcome-voice",
 	welcomeHomes: "/(onboarding)/welcome-homes",
+	/** Sign in to an existing account and restore its plan (not a Figma frame). */
+	welcomeBack: "/(onboarding)/welcome-back",
 	chooseHow: "/(onboarding)/choose-how",
 	voice: "/(onboarding)/voice",
 	aboutYou: "/(onboarding)/about-you",
@@ -27,6 +29,7 @@ const previous: Partial<Record<OnboardingRoute, OnboardingRoute>> = {
 	[onboardingRoutes.welcomeUpcoming]: onboardingRoutes.welcomeModules,
 	[onboardingRoutes.welcomeVoice]: onboardingRoutes.welcomeUpcoming,
 	[onboardingRoutes.welcomeHomes]: onboardingRoutes.welcomeVoice,
+	[onboardingRoutes.welcomeBack]: onboardingRoutes.welcomeModules,
 	[onboardingRoutes.chooseHow]: onboardingRoutes.welcomeHomes,
 	[onboardingRoutes.voice]: onboardingRoutes.chooseHow,
 	[onboardingRoutes.aboutYou]: onboardingRoutes.chooseHow,

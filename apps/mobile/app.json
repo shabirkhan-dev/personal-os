@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Personal OS",
-    "slug": "personal-os",
+    "slug": "personal-os-",
     "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -118,13 +118,14 @@
       "enabled": true,
       "checkAutomatically": "ON_LOAD",
       "fallbackToCacheTimeout": 0,
-      "url": "https://u.expo.dev/ebd7c656-cf18-46ce-80f3-0fc034481946"
+      "url": "https://u.expo.dev/3dcc4d58-7111-45c9-a443-f4359d06aaac"
     },
     "backgroundColor": "#141414",
     "extra": {
       "eas": {
-        "projectId": "ebd7c656-cf18-46ce-80f3-0fc034481946"
+        "projectId": "3dcc4d58-7111-45c9-a443-f4359d06aaac"
       }
-    }
+    },
+    "owner": "shabirkhan23"
   }
 }

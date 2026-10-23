@@ -12,13 +12,16 @@ import { voiceOut } from "@/lib/voice";
 import { usePoTheme } from "@/theme";
 import { useLiveSession } from "../hooks/live-store";
 import { useTraining } from "../hooks/use-training";
+import { guideFor } from "../lib/exercise-guide";
 import { setsLabel, templateById } from "../lib/library";
-import { heroOf } from "../lib/photos";
+import { logsSets, secondsLeft, timedSeconds, togglePause } from "../lib/live-math";
 import { clockTime, lastValue } from "../lib/training-math";
 import { trainingRoutes } from "../navigation";
+import { useRestAlert } from "../hooks/use-rest-alert";
+import { ExerciseDemo, ExerciseThumb } from "./exercise-demo";
 import { Card } from "./home-cards";
 import { FinishSheet } from "./finish-sheet";
-import { TrainingImage } from "./training-image";
+import { HowToSheet } from "./how-to-sheet";
 import { TrainingScreen } from "./training-screen";
 
 function RestRing({ left, total }: { left: number; total: number }) {
@@ -56,7 +59,35 @@ function RestRing({ left, total }: { left: number; total: number }) {
 	);
 }
 
-/** Live session: one exercise at a time, the set to beat, a rest timer and what's next. */
+/** A chip laid over the demo: How to, Pause, Resume. */
+function DemoChip({
+	icon,
+	label,
+	onPress,
+}: {
+	icon: "Help" | "Pause" | "Filled/Play";
+	label: string;
+	onPress: () => void;
+}) {
+	const { colors } = usePoTheme();
+	return (
+		<Pressable
+			accessibilityRole="button"
+			accessibilityLabel={label}
+			onPress={onPress}
+			hitSlop={8}
+			style={[styles.chip, { backgroundColor: colors.bgCanvas }]}
+		>
+			<Icon name={icon} size={14} color={colors.textPrimary} />
+			<PoText variant="meta13">{label}</PoText>
+		</Pressable>
+	);
+}
+
+/**
+ * Live session: one exercise at a time with its demo, the set to beat, a countdown for holds and
+ * timed blocks, a rest timer (with an alert when the phone is locked), pause, and what's next.
+ */
 export function LiveScreen() {
 	useKeepAwake();
 	const { colors } = usePoTheme();
@@ -70,6 +101,9 @@ export function LiveScreen() {
 	const template = templateById(live?.template);
 	const exercise = template?.exercises[live?.exercise ?? 0];
 	const [value, setValue] = useState(10);
+	const [howTo, setHowTo] = useState(false);
+	/** When the countdown for a hold or timed block started; null when it isn't running. */
+	const [timerStart, setTimerStart] = useState<number | null>(null);
 
 	useEffect(() => {
 		void hydrate();
@@ -86,20 +120,41 @@ export function LiveScreen() {
 			.find((set) => set.exercise === exercise.name)?.value;
 		const before = lastValue(sessions, exercise.name);
 		setValue(done ?? exercise.target ?? (before !== null ? before + 1 : 10));
+		setTimerStart(null);
 	}, [key, exercise, live?.sets, sessions]);
 
-	const restLeft = live?.restUntilMs
-		? Math.max(0, Math.round((live.restUntilMs - now.getTime()) / 1000))
-		: 0;
+	const paused = live?.pausedAtMs != null;
+	const restLeft =
+		live?.restUntilMs && !paused
+			? Math.max(0, Math.round((live.restUntilMs - now.getTime()) / 1000))
+			: 0;
 	const resting = restLeft > 0;
+	useRestAlert(
+		paused ? null : (live?.restUntilMs ?? null),
+		exercise && live ? `${exercise.name}, set ${live.set + 1}. Let's go.` : "Next set. Let's go.",
+	);
+
+	const timedTotal = exercise ? timedSeconds(exercise, value) : null;
+	const timerLeft =
+		timerStart !== null && timedTotal !== null
+			? secondsLeft(timerStart, timedTotal, now.getTime())
+			: timedTotal;
+	const timerRunning = timerStart !== null && timerLeft !== null && timerLeft > 0;
+	const timerDone = timerStart !== null && timerLeft === 0;
+	useEffect(() => {
+		if (!timerDone) return;
+		haptics.success();
+		voiceOut.speak("Time.");
+	}, [timerDone]);
 	const wasResting = useRef(false);
 	useEffect(() => {
-		if (wasResting.current && !resting && exercise && live) {
+		// A pause zeroes the countdown too; only a rest that ran out gets the cue.
+		if (wasResting.current && !resting && !paused && exercise && live) {
 			haptics.success();
 			voiceOut.speak(`Rest over. ${exercise.name}, set ${live.set + 1}.`);
 		}
 		wasResting.current = resting;
-	}, [resting, exercise, live]);
+	}, [resting, paused, exercise, live]);
 
 	if (!hydrated) return <TrainingScreen>{null}</TrainingScreen>;
 	if (!live || !template || !exercise) {
@@ -125,8 +180,10 @@ export function LiveScreen() {
 	const before = lastValue(sessions, exercise.name);
 	const unit = exercise.unit === "min" ? "min" : exercise.unit === "s" ? "seconds" : "reps";
 
-	const advance = (logged: boolean) => {
+	const advance = (done: boolean) => {
 		haptics.tap();
+		setTimerStart(null);
+		const logged = done && logsSets(exercise);
 		update((current) => {
 			if (!current) return current;
 			const sets = logged
@@ -139,14 +196,14 @@ export function LiveScreen() {
 						},
 					]
 				: current.sets;
-			if (!logged || lastSet) {
+			if (!done || lastSet) {
 				if (lastExercise) return { ...current, sets, restUntilMs: null };
 				return {
 					...current,
 					sets,
 					exercise: current.exercise + 1,
 					set: 0,
-					restUntilMs: logged && exercise.restS ? Date.now() + exercise.restS * 1000 : null,
+					restUntilMs: done && exercise.restS ? Date.now() + exercise.restS * 1000 : null,
 				};
 			}
 			return {
@@ -156,8 +213,15 @@ export function LiveScreen() {
 				restUntilMs: exercise.restS ? Date.now() + exercise.restS * 1000 : null,
 			};
 		});
-		if (lastExercise && (lastSet || !logged)) setFinishing(true);
+		if (lastExercise && (lastSet || !done)) setFinishing(true);
 	};
+
+	const pauseOrResume = () => {
+		haptics.tap();
+		setTimerStart(null);
+		update((current) => (current ? togglePause(current, Date.now()) : current));
+	};
+	const guided = guideFor(exercise.name) !== null;
 
 	return (
 		<TrainingScreen
@@ -168,12 +232,25 @@ export function LiveScreen() {
 				title={exercise.name}
 			/>
 			<View>
-				<TrainingImage photo={heroOf(exercise.photo)} size={220} fill radius={28} />
-				<View style={[styles.video, { backgroundColor: colors.bgCanvas }]}>
-					<Icon name="Filled/Play" size={12} color={colors.textPrimary} />
-					<PoText variant="meta13">{exercise.note}</PoText>
+				<ExerciseDemo name={exercise.name} photo={exercise.photo} height={220} />
+				<View style={styles.overlay}>
+					{guided ? <DemoChip icon="Help" label="How to" onPress={() => setHowTo(true)} /> : null}
+					<View style={styles.flex} />
+					<DemoChip
+						icon={paused ? "Filled/Play" : "Pause"}
+						label={paused ? "Resume" : "Pause"}
+						onPress={pauseOrResume}
+					/>
 				</View>
 			</View>
+			{paused ? (
+				<Card>
+					<PoText variant="row15">Paused</PoText>
+					<PoText variant="meta13" tone="textSecondary">
+						The clock and rest are on hold. Resume when you're ready.
+					</PoText>
+				</Card>
+			) : null}
 			<Card>
 				<PoText variant="eyebrow11" tone="textTertiary">
 					{`Set ${live.set + 1} of ${exercise.sets}`}
@@ -207,6 +284,23 @@ export function LiveScreen() {
 						</Pressable>
 					</View>
 				</View>
+				{timedTotal !== null && timerLeft !== null ? (
+					<PillButton
+						variant="secondary"
+						disabled={paused || resting}
+						label={
+							timerRunning
+								? `Stop · ${clockTime(timerLeft)} left`
+								: timerDone
+									? "Time's up · tap Done"
+									: `Start ${clockTime(timedTotal)} timer`
+						}
+						onPress={() => {
+							haptics.tap();
+							setTimerStart(timerStart === null ? Date.now() : null);
+						}}
+					/>
+				) : null}
 				{before !== null && exercise.unit !== "min" ? (
 					<PoText variant="meta13" tone="textSuccess">
 						{`Last time ${before} · beat it by one`}
@@ -232,7 +326,7 @@ export function LiveScreen() {
 				</View>
 				{next ? (
 					<View style={styles.next}>
-						<TrainingImage photo={next.photo} size={44} radius={10} />
+						<ExerciseThumb name={next.name} photo={next.photo} size={44} radius={10} />
 						<View>
 							<PoText variant="eyebrow11" tone="textTertiary">
 								Next
@@ -248,14 +342,24 @@ export function LiveScreen() {
 			</Card>
 			<Footer>
 				<PillButton
-					label="Skip"
+					label="Skip exercise"
 					variant="secondary"
 					style={styles.flex}
+					disabled={paused}
 					onPress={() => advance(false)}
 				/>
 				<PillButton
-					label={lastExercise && lastSet ? "Done · finish" : resting ? "Skip rest" : "Done set"}
+					label={
+						lastExercise && lastSet
+							? "Done · finish"
+							: resting
+								? "Skip rest"
+								: exercise.unit === "min"
+									? "Done"
+									: "Done set"
+					}
 					style={styles.flex}
+					disabled={paused}
 					onPress={() =>
 						resting
 							? update((current) => (current ? { ...current, restUntilMs: null } : current))
@@ -269,23 +373,29 @@ export function LiveScreen() {
 				template={template}
 				onClose={() => setFinishing(false)}
 			/>
+			<HowToSheet exercise={howTo ? exercise : null} onClose={() => setHowTo(false)} />
 		</TrainingScreen>
 	);
 }
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	video: {
+	overlay: {
 		position: "absolute",
 		left: 16,
+		right: 16,
 		bottom: 16,
 		flexDirection: "row",
 		alignItems: "center",
+	},
+	chip: {
+		flexDirection: "row",
+		alignItems: "center",
 		gap: 6,
-		paddingHorizontal: 10,
-		paddingVertical: 6,
-		borderRadius: 14,
-		opacity: 0.85,
+		paddingHorizontal: 12,
+		paddingVertical: 8,
+		borderRadius: 16,
+		opacity: 0.9,
 	},
 	setRow: { flexDirection: "row", alignItems: "center" },
 	stepper: { flexDirection: "row", gap: 10, marginLeft: "auto" },

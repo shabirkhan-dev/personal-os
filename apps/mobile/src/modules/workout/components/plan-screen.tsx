@@ -10,11 +10,14 @@ import { usePoTheme } from "@/theme";
 import { savePlan } from "../data/training-actions";
 import { startSession } from "../hooks/live-actions";
 import { useTrainingToday } from "../hooks/use-training";
-import { setsLabel, TEMPLATES, templateById } from "../lib/library";
+import { type Exercise, setsLabel, TEMPLATES, templateById } from "../lib/library";
+import { guideFor } from "../lib/exercise-guide";
 import { heroOf } from "../lib/photos";
 import { withSlot } from "../lib/training-math";
 import { SPORT_LABELS } from "../lib/training-model";
+import { ExerciseThumb } from "./exercise-demo";
 import { Card, CardHead } from "./home-cards";
+import { HowToSheet } from "./how-to-sheet";
 import { TrainingImage } from "./training-image";
 import { TrainingScreen } from "./training-screen";
 import { trainingRoutes } from "../navigation";
@@ -24,6 +27,7 @@ export function PlanScreen({ templateId }: { templateId?: string }) {
 	const { colors } = usePoTheme();
 	const { data, plan, today, template: todays } = useTrainingToday();
 	const [swapping, setSwapping] = useState(false);
+	const [howTo, setHowTo] = useState<Exercise | null>(null);
 	const template = templateById(templateId) ?? todays ?? templateById("pull-core");
 	if (!template) {
 		return (
@@ -77,22 +81,32 @@ export function PlanScreen({ templateId }: { templateId?: string }) {
 					title="The plan"
 					right={`${template.exercises.length} ${template.exercises.length === 1 ? "block" : "blocks"}`}
 				/>
-				{template.exercises.map((exercise, index) => (
-					<View key={`${exercise.name}-${index}`} style={styles.row}>
-						<TrainingImage photo={exercise.photo} size={48} radius={12} />
-						<View style={styles.flex}>
-							<PoText variant="row15">{exercise.name}</PoText>
-							<PoText variant="meta13" tone="textSecondary">
-								{exercise.note}
+				{template.exercises.map((exercise, index) => {
+					const guided = guideFor(exercise.name) !== null;
+					return (
+						<Pressable
+							key={`${exercise.name}-${index}`}
+							accessibilityRole={guided ? "button" : undefined}
+							accessibilityHint={guided ? "Shows how to do it" : undefined}
+							disabled={!guided}
+							onPress={() => setHowTo(exercise)}
+							style={styles.row}
+						>
+							<ExerciseThumb name={exercise.name} photo={exercise.photo} size={48} />
+							<View style={styles.flex}>
+								<PoText variant="row15">{exercise.name}</PoText>
+								<PoText variant="meta13" tone="textSecondary">
+									{guided ? `${exercise.note} · How to` : exercise.note}
+								</PoText>
+							</View>
+							<PoText variant="mono13" tone="textSecondary">
+								{template.sport === "boxing"
+									? `${template.rounds} × ${template.roundMin} min`
+									: setsLabel(exercise)}
 							</PoText>
-						</View>
-						<PoText variant="mono13" tone="textSecondary">
-							{template.sport === "boxing"
-								? `${template.rounds} × ${template.roundMin} min`
-								: setsLabel(exercise)}
-						</PoText>
-					</View>
-				))}
+						</Pressable>
+					);
+				})}
 			</Card>
 			<Footer>
 				<PillButton
@@ -107,6 +121,7 @@ export function PlanScreen({ templateId }: { templateId?: string }) {
 					onPress={() => startSession(template.id)}
 				/>
 			</Footer>
+			<HowToSheet exercise={howTo} onClose={() => setHowTo(null)} />
 			<Sheet visible={swapping} title="Swap today's session" onClose={() => setSwapping(false)}>
 				<View>
 					{options.map((option) => (

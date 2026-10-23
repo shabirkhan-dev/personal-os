@@ -65,9 +65,12 @@ export function SessionScreen({ id }: { id: string }) {
 		...(session.rounds ? [{ label: "Rounds", value: String(session.rounds) }] : []),
 		...(session.sets.length ? [{ label: "Sets", value: String(session.sets.length) }] : []),
 	];
-	const grouped = new Map<string, number[]>();
-	for (const set of session.sets)
-		grouped.set(set.exercise, [...(grouped.get(set.exercise) ?? []), set.value]);
+	// Holds read "30 s"; reps stay bare numbers.
+	const grouped = new Map<string, string[]>();
+	for (const set of session.sets) {
+		const value = set.unit === "s" ? `${set.value} s` : String(set.value);
+		grouped.set(set.exercise, [...(grouped.get(set.exercise) ?? []), value]);
+	}
 	const fastest = Math.min(...session.splits);
 	const slowest = Math.max(...session.splits);
 

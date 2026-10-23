@@ -21,7 +21,7 @@ import { useRestAlert } from "../hooks/use-rest-alert";
 import { ExerciseDemo, ExerciseThumb } from "./exercise-demo";
 import { Card } from "./home-cards";
 import { FinishSheet } from "./finish-sheet";
-import { HowToSheet } from "./how-to-sheet";
+import { HowToSheet, plannedLine } from "./how-to-sheet";
 import { TrainingScreen } from "./training-screen";
 
 function RestRing({ left, total }: { left: number; total: number }) {
@@ -418,7 +418,10 @@ export function LiveScreen() {
 				progress={progress}
 				onClose={() => setFinishing(false)}
 			/>
-			<HowToSheet exercise={howTo ? exercise : null} onClose={() => setHowTo(false)} />
+			<HowToSheet
+				target={howTo ? { ...exercise, line: plannedLine(exercise) } : null}
+				onClose={() => setHowTo(false)}
+			/>
 		</TrainingScreen>
 	);
 }

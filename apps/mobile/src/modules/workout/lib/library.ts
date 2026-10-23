@@ -158,7 +158,7 @@ export const TEMPLATES: readonly Template[] = [
 		roundMin: 3,
 		restMin: 1,
 		short: "6 rounds",
-		exercises: [ex("Rounds", "shadow-boxing", 6, 3, "min", 60, "1 min rest between rounds")],
+		exercises: [ex("Shadow boxing", "shadow-boxing", 6, 3, "min", 60, "1 min rest between rounds")],
 	},
 	{
 		id: "mobility",

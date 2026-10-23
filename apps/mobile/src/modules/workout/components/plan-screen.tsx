@@ -17,7 +17,7 @@ import { withSlot } from "../lib/training-math";
 import { SPORT_LABELS } from "../lib/training-model";
 import { ExerciseThumb } from "./exercise-demo";
 import { Card, CardHead } from "./home-cards";
-import { HowToSheet } from "./how-to-sheet";
+import { HowToSheet, plannedLine } from "./how-to-sheet";
 import { TrainingImage } from "./training-image";
 import { TrainingScreen } from "./training-screen";
 import { trainingRoutes } from "../navigation";
@@ -55,7 +55,11 @@ export function PlanScreen({ templateId }: { templateId?: string }) {
 			action={{ icon: "Filled/Calendar", label: "This week", onPress: trainingRoutes.week }}
 		>
 			<ScreenTitle
-				eyebrow={`${isToday ? `Today · ${clockOf(data.settings.trainAt)}` : "Session"} · ${SPORT_LABELS[template.sport]}`}
+				eyebrow={
+					template.program
+						? `${isToday ? `Today · ${clockOf(data.settings.trainAt)}` : "Session"} · ${template.program.title} · week ${template.program.week}${template.program.kind === "deload" ? " · light" : template.program.kind === "test" ? " · test" : ""}`
+						: `${isToday ? `Today · ${clockOf(data.settings.trainAt)}` : "Session"} · ${SPORT_LABELS[template.sport]}`
+				}
 				title={template.title}
 			>
 				<MetaChip icon="Clock" label={`${template.minutes} min`} />
@@ -121,7 +125,10 @@ export function PlanScreen({ templateId }: { templateId?: string }) {
 					onPress={() => startSession(template.id)}
 				/>
 			</Footer>
-			<HowToSheet exercise={howTo} onClose={() => setHowTo(null)} />
+			<HowToSheet
+				target={howTo ? { ...howTo, line: plannedLine(howTo) } : null}
+				onClose={() => setHowTo(null)}
+			/>
 			<Sheet visible={swapping} title="Swap today's session" onClose={() => setSwapping(false)}>
 				<View>
 					{options.map((option) => (

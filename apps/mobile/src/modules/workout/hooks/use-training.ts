@@ -75,7 +75,14 @@ export function useActiveProgram(data: TrainingData, now: Date) {
 		const program = programById(data.programs, active?.id);
 		if (!active || !program) return null;
 		const week = weekNumber(active.startedOn, dayKey(now));
-		return { program, week, finished: week > program.weeks, startedOn: active.startedOn };
+		return {
+			program,
+			week,
+			finished: week > program.weeks,
+			/** Started late in a week: week 1 begins next Monday. */
+			upcoming: week < 1,
+			startedOn: active.startedOn,
+		};
 	}, [data.settings.program, data.programs, now]);
 }
 

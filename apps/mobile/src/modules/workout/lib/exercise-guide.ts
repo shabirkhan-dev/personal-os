@@ -1244,7 +1244,7 @@ export const CATALOG: readonly CatalogExercise[] = [
 	// --- boxing and team sport --------------------------------------------------------------------
 	ex({
 		id: "shadow-boxing",
-		name: "Rounds",
+		name: "Shadow boxing",
 		pattern: "boxing",
 		level: 2,
 		unit: "min",

@@ -42,6 +42,7 @@ import {
 	WeekDotsCard,
 } from "./home-cards";
 import { LogSheet } from "./log-sheet";
+import { ActiveProgramCard, ProgramPromptCard } from "./program-cards";
 
 const ASK_STEPS = ["Reading your week", "Checking recent sessions", "Writing an answer"] as const;
 const LETTERS = ["S", "M", "T", "W", "T", "F", "S"];
@@ -56,7 +57,7 @@ const toggle = <T,>(list: readonly T[], value: T): T[] =>
 
 /** Training Home: today's session, the week, activity, recent sessions, bests and the phase. */
 export function TrainingHomeView({ actionRequest }: HomeModuleViewProps) {
-	const { data, now, today, week, plan, template, count } = useTrainingToday();
+	const { data, now, today, week, plan, template, count, active } = useTrainingToday();
 	const { settings, sessions } = data;
 	const weightKg = useOnboardingStore((state) => state.weightKg);
 	const { history } = useStepHistory();
@@ -184,6 +185,7 @@ export function TrainingHomeView({ actionRequest }: HomeModuleViewProps) {
 			<ActionPills
 				actions={[
 					{ label: "Start", icon: "Filled/Play", onPress: start },
+					{ label: "Programs", icon: "List", onPress: trainingRoutes.programs },
 					{ label: "Log it", icon: "Line/Plus", onPress: () => setLogging(true) },
 					{ label: "Timer", icon: "Clock", onPress: trainingRoutes.boxing },
 				]}
@@ -345,6 +347,16 @@ export function TrainingHomeView({ actionRequest }: HomeModuleViewProps) {
 				<PoText variant="meta13" tone="textSecondary" style={styles.notice}>
 					Rest day today. A walk or a few minutes of mobility still counts.
 				</PoText>
+			)}
+			{active ? (
+				<ActiveProgramCard
+					program={active.program}
+					week={active.week}
+					finished={active.finished}
+					onPress={() => trainingRoutes.program(active.program.id)}
+				/>
+			) : (
+				<ProgramPromptCard onPress={trainingRoutes.programs} />
 			)}
 			<WeekDotsCard cells={cells} goal={count.goal} onPress={trainingRoutes.week} />
 			<ActivityCard

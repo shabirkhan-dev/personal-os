@@ -6,7 +6,7 @@ import { estimateKcal } from "../lib/kcal";
 import { SKILLS, type Template } from "../lib/library";
 import {
 	buildProgramWeek,
-	mondayOf,
+	programStart,
 	progressAfter,
 	startingProgress,
 	weekNumber,
@@ -122,18 +122,23 @@ export type ProgramSetup = {
 	steps: Partial<Record<ChainId, number>>;
 };
 
-/** Starts a program this week: settings, starting levels and this week's sessions. */
+/**
+ * Starts a program: settings, starting levels and this week's plan. Days already gone this week keep
+ * what was planned, so they don't turn into missed sessions.
+ */
 export async function startProgram(
 	settings: TrainingSettings,
 	program: ProgramDef,
 	setup: ProgramSetup,
+	previous: WeekPlan | null,
 	now = new Date(),
 ): Promise<void> {
 	const days = weekDays(now);
+	const today = days[(now.getDay() + 6) % 7] ?? "";
 	const next: TrainingSettings = {
 		...settings,
 		setUp: true,
-		program: { id: program.id, startedOn: mondayOf(days[0] ?? "") },
+		program: { id: program.id, startedOn: programStart(today) },
 		daysPerWeek: setup.daysPerWeek,
 		minutes: setup.minutes,
 		equipment: setup.equipment,
@@ -145,7 +150,17 @@ export async function startProgram(
 		startingProgress(setup.steps, program, stamp).map((item) => saveItem(trainingProgress, item)),
 	);
 	await saveItem(trainingSettings, next);
-	await savePlan(days[0] ?? "", weekSlots(next, program, days), now);
+	const planned = weekSlots(next, program, days);
+	const slots = planned.map((slot): PlanSlot =>
+		slot.day < today
+			? (previous?.slots.find((item) => item.day === slot.day) ?? {
+					day: slot.day,
+					template: null,
+					movedFrom: null,
+				})
+			: slot,
+	);
+	await savePlan(days[0] ?? "", slots, now);
 }
 
 /** Stops following the program; this week goes back to the free week by sport. */

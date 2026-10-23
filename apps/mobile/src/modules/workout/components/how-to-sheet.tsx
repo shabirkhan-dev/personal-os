@@ -1,29 +1,52 @@
-import { StyleSheet, View } from "react-native";
+import { Linking, StyleSheet, View } from "react-native";
+import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
 import { Sheet } from "@/components/ui/sheet";
 import { usePoTheme } from "@/theme";
-import { DEMO_CREDIT, guideFor } from "../lib/exercise-guide";
+import { DEMO_CREDIT, guideFor, videoSearchUrl } from "../lib/exercise-guide";
 import { type Exercise, setsLabel } from "../lib/library";
 import { ExerciseDemo } from "./exercise-demo";
 
-/** How to do one exercise: the demo, three numbered cues and the sets it is planned for. */
+export type HowToTarget = {
+	name: string;
+	photo: string;
+	/** Under the demo: "4 × 8 · Rest 90 s", or "Push · level 2" from the library. */
+	line: string;
+};
+
+/** The line for an exercise in a session. */
+export function plannedLine(exercise: Exercise): string {
+	return `${setsLabel(exercise)} · ${exercise.note}`;
+}
+
+/**
+ * How to do one exercise: the demo, three numbered cues, and a video search for when photos aren't
+ * enough (it opens YouTube, outside the app).
+ */
 export function HowToSheet({
-	exercise,
+	target,
 	onClose,
 }: {
-	exercise: Exercise | null;
+	target: HowToTarget | null;
 	onClose: () => void;
 }) {
 	const { colors } = usePoTheme();
-	const guide = exercise ? guideFor(exercise.name) : null;
+	const guide = target ? guideFor(target.name) : null;
+
+	const watch = () => {
+		if (!target) return;
+		Linking.openURL(videoSearchUrl(target.name)).catch((error: unknown) =>
+			console.warn("[training] could not open the video search", error),
+		);
+	};
 
 	return (
-		<Sheet visible={exercise !== null} title={exercise?.name ?? ""} onClose={onClose}>
-			{exercise ? (
+		<Sheet visible={target !== null} title={target?.name ?? ""} onClose={onClose}>
+			{target ? (
 				<View style={styles.body}>
-					<ExerciseDemo name={exercise.name} photo={exercise.photo} height={200} radius={20} />
+					<ExerciseDemo name={target.name} photo={target.photo} height={200} radius={20} />
 					<PoText variant="meta13" tone="textSecondary">
-						{`${setsLabel(exercise)} · ${exercise.note}`}
+						{target.line}
 					</PoText>
 					{guide ? (
 						<View style={styles.cues}>
@@ -39,11 +62,10 @@ export function HowToSheet({
 							))}
 						</View>
 					) : null}
-					{guide?.demo ? (
-						<PoText variant="meta13" tone="textTertiary">
-							{DEMO_CREDIT}
-						</PoText>
-					) : null}
+					<PillButton label="Watch a video" variant="secondary" onPress={watch} />
+					<PoText variant="meta13" tone="textTertiary">
+						{guide?.demo ? `${DEMO_CREDIT}. Videos open on YouTube.` : "Videos open on YouTube."}
+					</PoText>
 				</View>
 			) : null}
 		</Sheet>

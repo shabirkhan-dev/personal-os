@@ -56,6 +56,16 @@ export function mondayOf(day: string): string {
 	return dayKey(addDays(date, -((date.getDay() + 6) % 7)));
 }
 
+/**
+ * The Monday a program starts: this week when started Monday to Wednesday, else next week, so the
+ * first week isn't mostly gone already.
+ */
+export function programStart(today: string): string {
+	const monday = mondayOf(today);
+	const index = Math.round((at(today) - at(monday)) / DAY_MS);
+	return index <= 2 ? monday : dayKey(addDays(new Date(`${monday}T12:00:00`), 7));
+}
+
 /** Which week of the program `day` is in, starting at 1. */
 export function weekNumber(startedOn: string, day: string): number {
 	return Math.floor((at(mondayOf(day)) - at(mondayOf(startedOn))) / DAY_MS / 7) + 1;
@@ -326,7 +336,7 @@ export function materialize(
 			effort: kind === "deload" ? Math.max(1, session.effort - 2) : session.effort,
 			exercises: [
 				{
-					name: "Rounds",
+					name: "Shadow boxing",
 					photo: "shadow-boxing",
 					sets: rounds,
 					target: roundMin,

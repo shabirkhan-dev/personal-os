@@ -10,5 +10,16 @@ export const trainingRoutes = {
 	skills: () => router.push("/training/skills"),
 	week: () => router.push("/training/week"),
 	insights: () => router.push("/training/insights"),
+	programs: () => router.push("/training/programs"),
+	program: (id: string) => router.push({ pathname: "/training/program/[id]", params: { id } }),
+	builder: (options: { id?: string; ai?: boolean } = {}) =>
+		router.push({
+			pathname: "/training/program-builder",
+			params: {
+				...(options.id ? { id: options.id } : {}),
+				...(options.ai ? { ai: "1" } : {}),
+			},
+		}),
+	exercises: () => router.push("/training/exercises"),
 	today: () => router.dismissTo("/"),
 } as const;

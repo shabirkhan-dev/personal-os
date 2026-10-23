@@ -13,6 +13,7 @@ import {
 	parseTemplateId,
 	pickRung,
 	type ProgramContext,
+	programStart,
 	progressAfter,
 	resolveTemplate,
 	sessionOrder,
@@ -105,6 +106,12 @@ describe("weeks", () => {
 		expect(weekNumber("2026-10-21", "2026-10-19")).toBe(1);
 		expect(weekNumber("2026-10-21", "2026-10-26")).toBe(2);
 		expect(weekNumber("2026-10-19", "2026-11-15")).toBe(4);
+	});
+
+	it("starts this Monday early in the week, next Monday from Thursday", () => {
+		expect(programStart("2026-10-21")).toBe("2026-10-19");
+		expect(programStart("2026-10-22")).toBe("2026-10-26");
+		expect(programStart("2026-10-25")).toBe("2026-10-26");
 	});
 
 	it("tests in the first and last week and goes light every fourth", () => {

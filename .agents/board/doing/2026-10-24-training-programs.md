@@ -50,3 +50,22 @@ programs, progression, demos and a way to design their own (`/docs/production-ro
 - Preview build and device check
 
 ## Resolution
+
+In progress on `agent/mobile/training-programs`; waiting on the owner's device check.
+
+- Catalog of 85 exercises (45 with photo demos), 10 progression chains, 12 built-in programs.
+- `lib/programs/engine.ts`: program weeks around team days (legs never the day before a match),
+  sessions trimmed to the minutes set, deload and test weeks, equipment fallbacks, double
+  progression (reps → next variation, or +2.5 kg for gym lifts), programs started from Thursday
+  begin next Monday and keep the days already gone.
+- Screens: Programs, program detail (levels, sessions, start sheet with days, length, equipment,
+  team days and starting levels), builder (AI draft via pos-35, or by hand), exercise library;
+  Training Home shows the program; the live screen logs kg for gym lifts and moves levels on save.
+- How-to sheets link to a YouTube search for a video of the exercise.
+
+Validation run: root `bun run lint` (0 warnings, 5 packages), `bun run typecheck` (5/5),
+`bun --cwd=apps/mobile run test` (282 pass), `bun run architecture:check` (passed). Web preview
+(`expo start --web`, 375×812): programs list, Hybrid Athlete detail, start sheet with Saturday
+football, Training Home program card, the planned week, a program session plan, the live screen
+with demo, how-to sheet and progression hint, the builder by hand and the exercise library all
+render and work. Not yet run on a phone.

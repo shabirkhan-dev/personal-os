@@ -3,10 +3,13 @@ import { ApiError, apiClient } from "@/lib/api/client";
 import { aiLimitMessage } from "@/lib/api/ai-limits";
 import { dayKey } from "@/lib/day";
 import { useAuth } from "@/modules/auth";
+import { type DraftRequest, draftCatalog, type ProgramDraft } from "../lib/programs/draft";
 
 /** The Training AI, `POST /ai/training/<task>`. Needs a connection and a signed-in account. */
 
 const AI_TIMEOUT_MS = 45_000;
+/** A whole program takes the model longer than an answer. */
+const PROGRAM_TIMEOUT_MS = 90_000;
 
 export type TrainingAnswer = { answer: string; followUps: string[] };
 
@@ -27,12 +30,13 @@ export function useTrainingAi() {
 	const available = status === "signed-in" && token !== null;
 
 	const call = useCallback(
-		async <T>(task: string, body: Record<string, unknown>): Promise<T> => {
+		async <T>(
+			task: string,
+			body: Record<string, unknown>,
+			timeoutMs = AI_TIMEOUT_MS,
+		): Promise<T> => {
 			if (!available || !token) throw new Error("signed-out");
-			return apiClient.post<T>(`/ai/training/${task}`, body, {
-				accessToken: token,
-				timeoutMs: AI_TIMEOUT_MS,
-			});
+			return apiClient.post<T>(`/ai/training/${task}`, body, { accessToken: token, timeoutMs });
 		},
 		[available, token],
 	);
@@ -57,6 +61,21 @@ export function useTrainingAi() {
 				}),
 			skill: (name: string, sport: string) =>
 				call<{ steps: string[] }>("skill", { name: name.slice(0, 60), sport }),
+			program: (request: DraftRequest) =>
+				call<ProgramDraft>(
+					"program",
+					{
+						goal: request.goal.slice(0, 300),
+						level: request.level,
+						weeks: request.weeks,
+						daysPerWeek: request.daysPerWeek,
+						minutes: request.minutes,
+						sports: request.sports.slice(0, 12),
+						equipment: request.equipment.slice(0, 10),
+						exercises: draftCatalog(request.equipment).slice(0, 150),
+					},
+					PROGRAM_TIMEOUT_MS,
+				),
 		}),
 		[available, call],
 	);

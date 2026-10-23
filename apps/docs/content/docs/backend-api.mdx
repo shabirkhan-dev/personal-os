@@ -52,7 +52,7 @@ table, `apps/api/src/config/messages.ts`.
 | `POST` | `/ai/fashion/<task>` | bearer | Fashion AI: `read-piece`, `ask` |
 | `POST` | `/ai/food/<task>` | bearer | Food AI: `read-meal`, `ask` |
 | `POST` | `/ai/care/ask` | bearer | Care AI (skin, hair, body) |
-| `POST` | `/ai/training/<task>` | bearer | Training AI: `ask`, `skill` |
+| `POST` | `/ai/training/<task>` | bearer | Training AI: `ask`, `skill`, `program` |
 | `POST` | `/ai/finance/<task>` | bearer | Finance AI: `read`, `ask` |
 
 Rate limits (per IP, or per user when signed in, per minute): auth routes 10, `/sync` 60, AI 20.
@@ -170,7 +170,8 @@ Collections in use: `career-applications`, `career-preps`, `career-stories`, `ca
 `food-water`, `food-weights`, `food-settings`, `food-plans`, `food-grocery`, `food-recipes`, and
 for Care `care-settings`, `care-steps`, `care-products`, `care-habits`, `care-days`,
 `care-checkins`, for Daily life `daily-settings`, `daily-days`, `daily-sleep`, `daily-plans`, and
-for Training `training-settings`, `training-sessions`, `training-plans`, `training-skills`, and
+for Training `training-settings`, `training-sessions`, `training-plans`, `training-skills`,
+`training-programs`, `training-progress`, and
 for Finance `finance-settings`, `finance-entries`, `finance-bills`, `finance-sources`.
 Names are part of the contract.
 
@@ -247,9 +248,16 @@ without the API; check-ins are words and numbers only, never photos.
 | --- | --- | --- |
 | `ask` | `{ question, today, sports?[], phase?, week?[{ day, title, status }], recent?[{ day, title, line }] }` | `{ answer, followUps[] }` |
 | `skill` | `{ name, sport?, level? }` | `{ steps[] }` (2 to 8, easiest first) |
+| `program` | `{ goal, level?, weeks?, daysPerWeek, minutes, sports?[], equipment?[], exercises[{ id, name, pattern, level, unit }] }` (5 to 150 exercises) | `{ title, summary, weeks, sessions[{ title, sport, focus, minutes, items[{ exercise, sets, range: [low, high], restS }] }], order[] }` |
 
-The week program, live sessions, rounds timer, bests and insights work on the phone without the
-API. Answers point to a doctor or physiotherapist for pain or injury.
+`program` drafts a program from the exercises the app sends and nothing else: items naming any
+other id are dropped, numbers are clamped (weeks 2–16, sets 1–10, rest up to 600 s), at most six
+sessions are kept, and `order` holds session indexes for one week (one per training day). A draft
+with no usable session is `502` `AI_INVALID_OUTPUT`. The app shows the draft for review before
+saving it as a program.
+
+The week program, programs and their progression, live sessions, rounds timer, bests and insights
+work on the phone without the API. Answers point to a doctor or physiotherapist for pain or injury.
 
 ### Finance AI
 
@@ -272,6 +280,7 @@ Record every public API change, newest first, so consumers can see what moved.
 
 | Date | Change | Breaking |
 | --- | --- | --- |
+| 2026-10-24 | Added `POST /ai/training/program`; Training syncs `training-programs` and `training-progress` | No |
 | 2026-10-16 | Added `POST /ai/finance/read` and `POST /ai/finance/ask` | No |
 | 2026-10-16 | Added `POST /ai/training/ask` and `POST /ai/training/skill` | No |
 | 2026-10-16 | Added `POST /ai/care/ask` | No |

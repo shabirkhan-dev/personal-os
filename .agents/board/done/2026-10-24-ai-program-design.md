@@ -5,7 +5,7 @@ type: feature
 from: mobile
 to: backend
 priority: normal
-status: doing
+status: done
 assignee: backend (claude code)
 reviewer: human
 parent: 2026-10-24-training-programs.md
@@ -44,3 +44,12 @@ new Training collections).
 - `bun --cwd=apps/api run lint`, `typecheck`, `test`
 
 ## Resolution
+
+`POST /ai/training/program` in `apps/api/src/modules/ai/training.{schema,tasks}.ts` and
+`ai.routes.ts`: strict request, zod-checked draft, `cleanProgram` drops unknown ids and clamps
+numbers, mock answer for the mock provider. Contract, the two new collections and a changelog
+entry are in `backend-api.mdx`.
+
+Validation run: `bun --cwd=apps/api run lint` (0 warnings), `typecheck` (clean), `test` against
+the repo's Postgres (88 pass, 4 new). Not deployed: the Worker at the owner's API URL needs a
+deploy before the app's "Design with AI" works there.

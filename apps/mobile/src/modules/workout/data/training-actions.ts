@@ -3,18 +3,36 @@ import { newId } from "@/lib/day";
 import { deleteJson, readJson } from "@/lib/storage/json-file";
 import { asArray, asNumber, asString, isRecord } from "@/lib/storage/parse";
 import { estimateKcal } from "../lib/kcal";
-import { SKILLS } from "../lib/library";
+import { SKILLS, type Template } from "../lib/library";
+import {
+	buildProgramWeek,
+	mondayOf,
+	progressAfter,
+	startingProgress,
+	weekNumber,
+} from "../lib/programs/engine";
+import type { ChainId, FixedDay, ProgramDef, Progress } from "../lib/programs/program-model";
+import type { Equipment } from "../lib/exercise-guide";
 import { buildWeek, rebalance, weekDays } from "../lib/training-math";
 import {
 	defaultSettings,
+	type Feel,
 	type PlanSlot,
 	type Session,
+	type SetLog,
 	type Skill,
 	type Sport,
 	type TrainingSettings,
 	type WeekPlan,
 } from "../lib/training-model";
-import { trainingPlans, trainingSessions, trainingSettings, trainingSkills } from "./collections";
+import {
+	trainingPlans,
+	trainingPrograms,
+	trainingProgress,
+	trainingSessions,
+	trainingSettings,
+	trainingSkills,
+} from "./collections";
 
 /** Every Training write. Each saves to the record store, which refreshes the screens and syncs. */
 
@@ -60,15 +78,109 @@ export async function setUp(
 	);
 }
 
-/** The week's program, made if it doesn't exist yet. */
+/** The week's slots: the active program's week while it runs, else the free week by sport. */
+export function weekSlots(
+	settings: TrainingSettings,
+	program: ProgramDef | undefined,
+	days: readonly string[],
+): PlanSlot[] {
+	const monday = days[0] ?? "";
+	if (program && settings.program) {
+		const week = weekNumber(settings.program.startedOn, monday);
+		if (week >= 1 && week <= program.weeks) return buildProgramWeek(program, settings, week, days);
+	}
+	return buildWeek(settings, days);
+}
+
+/**
+ * The week's program, made if it doesn't exist yet, or remade when a program is running and this
+ * week was planned without it (it was just started).
+ */
 export function ensureWeek(
 	plan: WeekPlan | null,
 	settings: TrainingSettings,
+	program: ProgramDef | undefined,
 	now = new Date(),
 ): Promise<WeekPlan> | null {
-	if (plan || !settings.setUp) return null;
+	if (!settings.setUp) return null;
 	const days = weekDays(now);
-	return savePlan(days[0] ?? "", buildWeek(settings, days), now);
+	if (plan) {
+		const running = program && settings.program;
+		const week = running ? weekNumber(settings.program?.startedOn ?? "", days[0] ?? "") : 0;
+		const planned = plan.slots.some((slot) => slot.template?.startsWith(`p:${program?.id}:`));
+		if (!running || planned || week < 1 || week > program.weeks) return null;
+	}
+	return savePlan(days[0] ?? "", weekSlots(settings, program, days), now);
+}
+
+export type ProgramSetup = {
+	daysPerWeek: number;
+	minutes: number;
+	equipment: Equipment[];
+	fixedDays: FixedDay[];
+	/** The rung someone can already do, per chain. */
+	steps: Partial<Record<ChainId, number>>;
+};
+
+/** Starts a program this week: settings, starting levels and this week's sessions. */
+export async function startProgram(
+	settings: TrainingSettings,
+	program: ProgramDef,
+	setup: ProgramSetup,
+	now = new Date(),
+): Promise<void> {
+	const days = weekDays(now);
+	const next: TrainingSettings = {
+		...settings,
+		setUp: true,
+		program: { id: program.id, startedOn: mondayOf(days[0] ?? "") },
+		daysPerWeek: setup.daysPerWeek,
+		minutes: setup.minutes,
+		equipment: setup.equipment,
+		fixedDays: setup.fixedDays,
+		sports: [...new Set([...settings.sports, ...program.sports])],
+	};
+	const stamp = now.toISOString();
+	await Promise.all(
+		startingProgress(setup.steps, program, stamp).map((item) => saveItem(trainingProgress, item)),
+	);
+	await saveItem(trainingSettings, next);
+	await savePlan(days[0] ?? "", weekSlots(next, program, days), now);
+}
+
+/** Stops following the program; this week goes back to the free week by sport. */
+export async function endProgram(settings: TrainingSettings, now = new Date()): Promise<void> {
+	const next: TrainingSettings = { ...settings, program: null };
+	const days = weekDays(now);
+	await saveItem(trainingSettings, next);
+	await savePlan(days[0] ?? "", buildWeek(next, days), now);
+}
+
+export function saveProgram(program: ProgramDef): Promise<void> {
+	return saveItem(trainingPrograms, program);
+}
+
+export function deleteProgram(program: ProgramDef): Promise<void> {
+	return removeItem(trainingPrograms, program.id);
+}
+
+/** Saves the level changes from a finished program session. */
+export async function applyProgress(
+	template: Template,
+	sets: readonly SetLog[],
+	feel: Feel | null,
+	saved: ReadonlyMap<string, Progress>,
+	now = new Date(),
+): Promise<Progress[]> {
+	if (!template.program) return [];
+	const updates = progressAfter(template, sets, feel, saved, now.toISOString());
+	await Promise.all(updates.map((item) => saveItem(trainingProgress, item)));
+	return updates;
+}
+
+/** Sets one chain's or exercise's level by hand ("I can already do pull-ups"). */
+export function saveProgress(progress: Progress): Promise<void> {
+	return saveItem(trainingProgress, progress);
 }
 
 export function rebalanceWeek(

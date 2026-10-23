@@ -1,4 +1,6 @@
 import { asArray, asBoolean, asNumber, asString, isRecord, oneOf } from "@/lib/storage/parse";
+import { EQUIPMENT, type Equipment } from "./exercise-guide";
+import type { ActiveProgram, FixedDay } from "./programs/program-model";
 
 /**
  * Training's documents: settings (sports, days a week, phase), the week's program, logged
@@ -43,6 +45,8 @@ export type SetLog = {
 	/** Reps, or seconds for a hold. */
 	value: number;
 	unit: "reps" | "s";
+	/** The load for weighted lifts, in kilograms. */
+	kg?: number;
 };
 
 export type Session = {
@@ -90,7 +94,17 @@ export type TrainingSettings = {
 	stepsGoal: number;
 	activeGoal: number;
 	moveGoal: number;
+	/** The program being followed, and the Monday it started; null for the free week. */
+	program: ActiveProgram | null;
+	/** What someone can train with; exercises that need anything else are swapped. */
+	equipment: Equipment[];
+	/** Team sport days the week is built around. */
+	fixedDays: FixedDay[];
+	/** Usual session length; longer strength sessions are trimmed to fit. */
+	minutes: number;
 };
+
+export const SESSION_LENGTHS = [20, 30, 45, 60] as const;
 
 // --- parsing ------------------------------------------------------------------------------------
 
@@ -112,6 +126,10 @@ export function defaultSettings(): TrainingSettings {
 		stepsGoal: 8000,
 		activeGoal: 450,
 		moveGoal: 45,
+		program: null,
+		equipment: ["pull-up-bar"],
+		fixedDays: [],
+		minutes: 45,
 	};
 }
 
@@ -134,7 +152,40 @@ export function parseSettings(raw: unknown): TrainingSettings | null {
 		stepsGoal: Math.max(1000, Math.round(asNumber(raw.stepsGoal, base.stepsGoal))),
 		activeGoal: Math.max(50, Math.round(asNumber(raw.activeGoal, base.activeGoal))),
 		moveGoal: Math.max(10, Math.round(asNumber(raw.moveGoal, base.moveGoal))),
+		program: parseActive(raw.program),
+		equipment: Array.isArray(raw.equipment)
+			? [
+					...new Set(
+						asArray(raw.equipment, (item) =>
+							typeof item === "string" && (EQUIPMENT as readonly string[]).includes(item)
+								? (item as Equipment)
+								: null,
+						),
+					),
+				]
+			: base.equipment,
+		fixedDays: parseFixedDays(raw.fixedDays),
+		minutes: Math.min(120, Math.max(15, Math.round(asNumber(raw.minutes, base.minutes)))),
 	};
+}
+
+function parseActive(raw: unknown): ActiveProgram | null {
+	if (!isRecord(raw)) return null;
+	const id = asString(raw.id, "");
+	const startedOn = asDay(raw.startedOn);
+	return id && startedOn ? { id, startedOn } : null;
+}
+
+function parseFixedDays(raw: unknown): FixedDay[] {
+	const days = asArray(raw, (item): FixedDay | null => {
+		if (!isRecord(item)) return null;
+		const weekday = Math.round(asNumber(item.weekday, -1));
+		const sport = asString(item.sport, "");
+		if (weekday < 0 || weekday > 6 || !(SPORTS as readonly string[]).includes(sport)) return null;
+		return { weekday, sport: sport as Sport };
+	});
+	const seen = new Set<number>();
+	return days.filter((day) => !seen.has(day.weekday) && seen.add(day.weekday));
 }
 
 function parseSet(raw: unknown): SetLog | null {
@@ -142,10 +193,12 @@ function parseSet(raw: unknown): SetLog | null {
 	const exercise = asString(raw.exercise, "").trim();
 	const value = asNumber(raw.value, -1);
 	if (!exercise || value < 0) return null;
+	const kg = asNumber(raw.kg, 0);
 	return {
 		exercise: exercise.slice(0, 60),
 		value: Math.min(10_000, Math.round(value)),
 		unit: raw.unit === "s" ? "s" : "reps",
+		...(kg > 0 ? { kg: Math.min(1000, Math.round(kg * 2) / 2) } : {}),
 	};
 }
 

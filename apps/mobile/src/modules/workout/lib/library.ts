@@ -1,4 +1,5 @@
-import type { Sport } from "./training-model";
+import { asArray, asNumber, asString, isRecord } from "@/lib/storage/parse";
+import { SPORTS, type Sport } from "./training-model";
 
 /**
  * The sessions Training plans from: bodyweight, running, shadow boxing and mobility for phase 1
@@ -17,6 +18,19 @@ export type Exercise = {
 	each?: boolean;
 	restS: number;
 	note: string;
+	/** Program sessions: which level this counts towards and the range that moves it on. */
+	progress?: ExerciseProgress;
+	/** Gym lifts log kilograms; the load to start from, when known. */
+	weighted?: boolean;
+	kg?: number | null;
+};
+
+export type ExerciseProgress = {
+	/** A chain id or an exercise id. */
+	key: string;
+	step: number;
+	range: readonly [number, number];
+	chainLength: number;
 };
 
 export type Template = {
@@ -36,6 +50,8 @@ export type Template = {
 	restMin?: number;
 	/** Shown under the title on the week program: "48 min", "5 km", "6 rounds". */
 	short: string;
+	/** Set when the session comes from a program. */
+	program?: { id: string; title: string; week: number; kind: "build" | "deload" | "test" };
 };
 
 const ex = (
@@ -185,8 +201,17 @@ export const TEMPLATES: readonly Template[] = [
 	},
 ];
 
+/** Program sessions are made on the fly from the program and the person's levels. */
+let resolveGenerated: ((id: string) => Template | undefined) | null = null;
+
+/** Lets the data layer resolve generated ids ("p:hybrid-athlete:3:push") once it has loaded. */
+export function setTemplateResolver(resolver: ((id: string) => Template | undefined) | null): void {
+	resolveGenerated = resolver;
+}
+
 export function templateById(id: string | null | undefined): Template | undefined {
-	return id ? TEMPLATES.find((template) => template.id === id) : undefined;
+	if (!id) return undefined;
+	return TEMPLATES.find((template) => template.id === id) ?? resolveGenerated?.(id);
 }
 
 /** "4 × 30 s", "3 × max", "3 × 5 each", "5 min". */
@@ -308,3 +333,33 @@ export const SKILLS: readonly SkillTemplate[] = [
 		],
 	},
 ];
+
+/**
+ * A session saved with a live workout (program sessions change as levels move, so the one being
+ * trained is kept as it was). Only kept on the phone; anything malformed reads as no snapshot.
+ */
+export function parseTemplate(raw: unknown): Template | null {
+	if (!isRecord(raw)) return null;
+	const id = asString(raw.id, "");
+	const title = asString(raw.title, "");
+	const sport = asString(raw.sport, "");
+	if (!id || !title || !(SPORTS as readonly string[]).includes(sport)) return null;
+	const exercises = asArray(raw.exercises, (item): Exercise | null => {
+		if (!isRecord(item)) return null;
+		const name = asString(item.name, "");
+		const unit = item.unit === "s" || item.unit === "min" ? item.unit : "reps";
+		if (!name) return null;
+		return {
+			...(item as Partial<Exercise>),
+			name,
+			photo: asString(item.photo, ""),
+			sets: Math.max(1, Math.round(asNumber(item.sets, 1))),
+			target: typeof item.target === "number" ? item.target : null,
+			unit,
+			restS: Math.max(0, Math.round(asNumber(item.restS, 0))),
+			note: asString(item.note, ""),
+		};
+	});
+	if (exercises.length === 0) return null;
+	return { ...(raw as Partial<Template>), id, title, sport: sport as Sport, exercises } as Template;
+}

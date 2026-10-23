@@ -95,13 +95,15 @@ export function LiveScreen() {
 	const hydrated = useLiveSession((state) => state.hydrated);
 	const hydrate = useLiveSession((state) => state.hydrate);
 	const update = useLiveSession((state) => state.update);
-	const { sessions } = useTraining();
+	const { sessions, progress } = useTraining();
 	const now = useNow(1000);
 	const [finishing, setFinishing] = useState(false);
-	const template = templateById(live?.template);
+	const template = live?.snapshot ?? templateById(live?.template);
 	const exercise = template?.exercises[live?.exercise ?? 0];
 	const [value, setValue] = useState(10);
 	const [howTo, setHowTo] = useState(false);
+	/** The load for weighted lifts, in kilograms. */
+	const [kg, setKg] = useState(20);
 	/** When the countdown for a hold or timed block started; null when it isn't running. */
 	const [timerStart, setTimerStart] = useState<number | null>(null);
 
@@ -121,6 +123,12 @@ export function LiveScreen() {
 		const before = lastValue(sessions, exercise.name);
 		setValue(done ?? exercise.target ?? (before !== null ? before + 1 : 10));
 		setTimerStart(null);
+		if (exercise.weighted) {
+			const lastKg = [...(live?.sets ?? []), ...sessions.flatMap((session) => session.sets)].find(
+				(set) => set.exercise === exercise.name && set.kg !== undefined,
+			)?.kg;
+			setKg(exercise.kg ?? lastKg ?? 20);
+		}
 	}, [key, exercise, live?.sets, sessions]);
 
 	const paused = live?.pausedAtMs != null;
@@ -193,6 +201,7 @@ export function LiveScreen() {
 							exercise: exercise.name,
 							value,
 							unit: exercise.unit === "s" ? ("s" as const) : ("reps" as const),
+							...(exercise.weighted ? { kg } : {}),
 						},
 					]
 				: current.sets;
@@ -301,6 +310,41 @@ export function LiveScreen() {
 						}}
 					/>
 				) : null}
+				{exercise.weighted ? (
+					<View style={styles.setRow}>
+						<PoText variant="title18">
+							{`${kg} kg`}
+							<PoText variant="meta13" tone="textSecondary">
+								{"  load"}
+							</PoText>
+						</PoText>
+						<View style={styles.stepper}>
+							<Pressable
+								accessibilityRole="button"
+								accessibilityLabel="Less weight"
+								onPress={() => setKg((current) => Math.max(0, current - 2.5))}
+								style={[styles.round, { backgroundColor: colors.bgSubtle }]}
+							>
+								<Icon name="Minus" size={18} color={colors.textPrimary} />
+							</Pressable>
+							<Pressable
+								accessibilityRole="button"
+								accessibilityLabel="More weight"
+								onPress={() => setKg((current) => current + 2.5)}
+								style={[styles.round, { backgroundColor: colors.bgSubtle }]}
+							>
+								<Icon name="Line/Plus" size={18} color={colors.textPrimary} />
+							</Pressable>
+						</View>
+					</View>
+				) : null}
+				{exercise.progress ? (
+					<PoText variant="meta13" tone="textSecondary">
+						{template.program?.kind === "test"
+							? "Test set: as many clean as you can. It sets your targets."
+							: `Hit ${exercise.target ?? "the target"} on every set to move up · ${exercise.note}`}
+					</PoText>
+				) : null}
 				{before !== null && exercise.unit !== "min" ? (
 					<PoText variant="meta13" tone="textSuccess">
 						{`Last time ${before} · beat it by one`}
@@ -371,6 +415,7 @@ export function LiveScreen() {
 				visible={finishing}
 				live={live}
 				template={template}
+				progress={progress}
 				onClose={() => setFinishing(false)}
 			/>
 			<HowToSheet exercise={howTo ? exercise : null} onClose={() => setHowTo(false)} />

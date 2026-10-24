@@ -7,10 +7,13 @@ import { Sheet } from "@/components/ui/sheet";
 import { TextField } from "@/components/ui/text-field";
 import { haptics } from "@/lib/haptics";
 import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
-import { logSession } from "../data/training-actions";
+import { voiceOut } from "@/lib/voice";
+import { applyProgress, logSession } from "../data/training-actions";
 import { endLive } from "../hooks/live-actions";
 import type { LiveSession } from "../hooks/live-store";
+import { exerciseById } from "../lib/exercise-guide";
 import type { Template } from "../lib/library";
+import { CHAINS, type ChainId, type Progress } from "../lib/programs/program-model";
 import { type Feel, FEELS } from "../lib/training-model";
 
 /** Ends a live session: how it felt (and how far, for a run), then the summary. */
@@ -19,12 +22,15 @@ export function FinishSheet({
 	live,
 	template,
 	rounds,
+	progress,
 	onClose,
 }: {
 	visible: boolean;
 	live: LiveSession;
 	template: Template;
 	rounds?: number;
+	/** Levels before this session, for program sessions. */
+	progress?: ReadonlyMap<string, Progress>;
 	onClose: () => void;
 }) {
 	const weightKg = useOnboardingStore((state) => state.weightKg);
@@ -64,8 +70,9 @@ export function FinishSheet({
 			},
 			weightKg,
 		)
-			.then((session) => {
+			.then(async (session) => {
 				haptics.success();
+				await levelUp(template, live, feel, progress);
 				endLive();
 				onClose();
 				router.replace({ pathname: "/training/session/[id]", params: { id: session.id } });
@@ -122,3 +129,34 @@ const styles = StyleSheet.create({
 	body: { gap: 12 },
 	chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 });
+
+/** Moves program levels on and says when a new variation starts next time. */
+async function levelUp(
+	template: Template,
+	live: LiveSession,
+	feel: Feel | null,
+	saved: ReadonlyMap<string, Progress> | undefined,
+): Promise<void> {
+	if (!template.program || !saved) return;
+	try {
+		const updates = await applyProgress(template, live.sets, feel, saved);
+		const trained = new Map(
+			template.exercises.flatMap((exercise) =>
+				exercise.progress ? [[exercise.progress.key, exercise.progress.step] as const] : [],
+			),
+		);
+		const promoted = updates.filter((item) => item.step > (trained.get(item.id) ?? item.step));
+		const names = promoted
+			.map((item) => {
+				const rungs = CHAINS[item.id as ChainId];
+				return rungs ? exerciseById(String(rungs[item.step]))?.name : undefined;
+			})
+			.filter((name): name is string => Boolean(name));
+		if (names.length > 0) {
+			voiceOut.speak(`Level up. Next time: ${names.join(" and ")}.`);
+		}
+	} catch (error) {
+		// The session is saved either way; the levels catch up next time.
+		console.error("[training] could not move program levels", error);
+	}
+}

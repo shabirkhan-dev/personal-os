@@ -10,11 +10,15 @@ import { usePoTheme } from "@/theme";
 import { savePlan } from "../data/training-actions";
 import { startSession } from "../hooks/live-actions";
 import { useTrainingToday } from "../hooks/use-training";
-import { setsLabel, TEMPLATES, templateById } from "../lib/library";
+import { type Exercise, setsLabel, TEMPLATES, templateById } from "../lib/library";
+import { guideFor } from "../lib/exercise-guide";
+import { resolveTemplate } from "../lib/programs/engine";
 import { heroOf } from "../lib/photos";
 import { withSlot } from "../lib/training-math";
 import { SPORT_LABELS } from "../lib/training-model";
+import { ExerciseThumb } from "./exercise-demo";
 import { Card, CardHead } from "./home-cards";
+import { HowToSheet, plannedLine } from "./how-to-sheet";
 import { TrainingImage } from "./training-image";
 import { TrainingScreen } from "./training-screen";
 import { trainingRoutes } from "../navigation";
@@ -24,7 +28,19 @@ export function PlanScreen({ templateId }: { templateId?: string }) {
 	const { colors } = usePoTheme();
 	const { data, plan, today, template: todays } = useTrainingToday();
 	const [swapping, setSwapping] = useState(false);
-	const template = templateById(templateId) ?? todays ?? templateById("pull-core");
+	const [howTo, setHowTo] = useState<Exercise | null>(null);
+	// Program sessions and activity days are built from this person's data, so it's passed in.
+	const template =
+		(templateId?.startsWith("p:") || templateId?.startsWith("a:")
+			? resolveTemplate(templateId, {
+					programs: data.programs,
+					progress: data.progress,
+					settings: data.settings,
+					activities: data.activities,
+				})
+			: templateById(templateId)) ??
+		todays ??
+		templateById("pull-core");
 	if (!template) {
 		return (
 			<TrainingScreen>
@@ -51,7 +67,11 @@ export function PlanScreen({ templateId }: { templateId?: string }) {
 			action={{ icon: "Filled/Calendar", label: "This week", onPress: trainingRoutes.week }}
 		>
 			<ScreenTitle
-				eyebrow={`${isToday ? `Today · ${clockOf(data.settings.trainAt)}` : "Session"} · ${SPORT_LABELS[template.sport]}`}
+				eyebrow={
+					template.program
+						? `${isToday ? `Today · ${clockOf(data.settings.trainAt)}` : "Session"} · ${template.program.title} · week ${template.program.week}${template.program.kind === "deload" ? " · light" : template.program.kind === "test" ? " · test" : ""}`
+						: `${isToday ? `Today · ${clockOf(data.settings.trainAt)}` : "Session"} · ${SPORT_LABELS[template.sport]}`
+				}
 				title={template.title}
 			>
 				<MetaChip icon="Clock" label={`${template.minutes} min`} />
@@ -77,22 +97,32 @@ export function PlanScreen({ templateId }: { templateId?: string }) {
 					title="The plan"
 					right={`${template.exercises.length} ${template.exercises.length === 1 ? "block" : "blocks"}`}
 				/>
-				{template.exercises.map((exercise, index) => (
-					<View key={`${exercise.name}-${index}`} style={styles.row}>
-						<TrainingImage photo={exercise.photo} size={48} radius={12} />
-						<View style={styles.flex}>
-							<PoText variant="row15">{exercise.name}</PoText>
-							<PoText variant="meta13" tone="textSecondary">
-								{exercise.note}
+				{template.exercises.map((exercise, index) => {
+					const guided = guideFor(exercise.name) !== null;
+					return (
+						<Pressable
+							key={`${exercise.name}-${index}`}
+							accessibilityRole={guided ? "button" : undefined}
+							accessibilityHint={guided ? "Shows how to do it" : undefined}
+							disabled={!guided}
+							onPress={() => setHowTo(exercise)}
+							style={styles.row}
+						>
+							<ExerciseThumb name={exercise.name} photo={exercise.photo} size={48} />
+							<View style={styles.flex}>
+								<PoText variant="row15">{exercise.name}</PoText>
+								<PoText variant="meta13" tone="textSecondary">
+									{guided ? `${exercise.note} · How to` : exercise.note}
+								</PoText>
+							</View>
+							<PoText variant="mono13" tone="textSecondary">
+								{template.sport === "boxing"
+									? `${template.rounds} × ${template.roundMin} min`
+									: setsLabel(exercise)}
 							</PoText>
-						</View>
-						<PoText variant="mono13" tone="textSecondary">
-							{template.sport === "boxing"
-								? `${template.rounds} × ${template.roundMin} min`
-								: setsLabel(exercise)}
-						</PoText>
-					</View>
-				))}
+						</Pressable>
+					);
+				})}
 			</Card>
 			<Footer>
 				<PillButton
@@ -107,6 +137,10 @@ export function PlanScreen({ templateId }: { templateId?: string }) {
 					onPress={() => startSession(template.id)}
 				/>
 			</Footer>
+			<HowToSheet
+				target={howTo ? { ...howTo, line: plannedLine(howTo) } : null}
+				onClose={() => setHowTo(null)}
+			/>
 			<Sheet visible={swapping} title="Swap today's session" onClose={() => setSwapping(false)}>
 				<View>
 					{options.map((option) => (

@@ -29,7 +29,7 @@ export function BoxingScreen() {
 	const update = useLiveSession((state) => state.update);
 	const now = useNow(500);
 	const [finishing, setFinishing] = useState(false);
-	const template = templateById(live?.template);
+	const template = live?.snapshot ?? templateById(live?.template);
 
 	useEffect(() => {
 		void hydrate();

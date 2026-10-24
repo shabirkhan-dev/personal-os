@@ -18,6 +18,7 @@ export function startSession(templateId: string, now = Date.now()): void {
 			restUntilMs: null,
 			pausedAtMs: null,
 			pausedMs: 0,
+			snapshot: template.program ? template : null,
 		}));
 	}
 	router.push(template.sport === "boxing" ? "/training/boxing" : "/training/live");

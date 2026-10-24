@@ -26,8 +26,8 @@ import { askFashion, readPiece } from "./fashion.tasks";
 import { askFaithSchema } from "./faith.schema";
 import { askFaith } from "./faith.tasks";
 import { askFoodSchema, readMealSchema } from "./food.schema";
-import { askTrainingSchema, skillStepsSchema } from "./training.schema";
-import { askTraining, buildSkill } from "./training.tasks";
+import { askTrainingSchema, designProgramSchema, skillStepsSchema } from "./training.schema";
+import { askTraining, buildSkill, designProgram } from "./training.tasks";
 import { askFood, readMeal } from "./food.tasks";
 import { askFinanceSchema, readSpendSchema } from "./finance.schema";
 import { askFinance, readSpend } from "./finance.tasks";
@@ -83,6 +83,9 @@ export const aiRoutes = new Hono<AppEnv>()
 	)
 	.post("/training/skill", validate("json", skillStepsSchema), async (c) =>
 		ok(c, await buildSkill({ config: c.get("config") }, c.req.valid("json"))),
+	)
+	.post("/training/program", validate("json", designProgramSchema), async (c) =>
+		ok(c, await designProgram({ config: c.get("config") }, c.req.valid("json"))),
 	)
 	.post("/finance/read", validate("json", readSpendSchema), async (c) =>
 		ok(c, await readSpend({ config: c.get("config") }, c.req.valid("json"))),

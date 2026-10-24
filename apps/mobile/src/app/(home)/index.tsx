@@ -2,6 +2,7 @@ import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { CalendarWeekCard } from "@/modules/calendar/components/calendar-week-card";
 import { careHome, useCareStatus } from "@/modules/care";
 import { careerHome, useCareerStatus } from "@/modules/career";
 import { DailyOverview, dailyHome, dailyRoutes, useDailyStatus } from "@/modules/daily";
@@ -292,6 +293,7 @@ function OverviewBody({ period, modules, amountsHidden, onOpen }: OverviewBodyPr
 				</PoText>
 			) : null}
 			<DailyOverview onOpen={onOpen} />
+			<CalendarWeekCard />
 		</>
 	);
 }

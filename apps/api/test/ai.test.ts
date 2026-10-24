@@ -374,6 +374,105 @@ describe("Training AI", () => {
 		});
 		expect(response.status).toBe(400);
 	});
+
+	const catalog = [
+		{
+			id: "shoulder-warm-up",
+			name: "Wrist and shoulder warm-up",
+			pattern: "mobility",
+			level: 1,
+			unit: "min",
+		},
+		{ id: "push-up", name: "Push-ups", pattern: "push", level: 2, unit: "reps" },
+		{ id: "pull-up", name: "Pull-ups", pattern: "pull", level: 4, unit: "reps" },
+		{ id: "plank", name: "Plank", pattern: "core", level: 1, unit: "s" },
+		{ id: "bodyweight-squat", name: "Bodyweight squats", pattern: "squat", level: 1, unit: "reps" },
+	];
+	const programBody = {
+		goal: "First muscle-up and a 5 km run",
+		level: "intermediate",
+		weeks: 8,
+		daysPerWeek: 3,
+		minutes: 45,
+		sports: ["calisthenics", "running"],
+		equipment: ["pull-up-bar"],
+		exercises: catalog,
+	};
+
+	it("drafts a program with the mock provider from the given exercises", async () => {
+		const response = await mockApp.call("POST", "/ai/training/program", {
+			token,
+			body: programBody,
+		});
+		expect(response.status).toBe(200);
+		expect(response.json?.data).toMatchObject({
+			title: "Mock program",
+			weeks: 8,
+			sessions: [{ items: [{ exercise: "shoulder-warm-up" }, { exercise: "push-up" }, {}] }],
+		});
+	});
+
+	it("drops unknown exercises and clamps the numbers in a model's draft", async () => {
+		provider(
+			JSON.stringify({
+				title: "Pull + run",
+				summary: "Pull strength and running.",
+				weeks: 40,
+				sessions: [
+					{
+						title: "Pull day",
+						sport: "calisthenics",
+						focus: "upper",
+						minutes: 45,
+						items: [
+							{ exercise: "pull-up", sets: 30, low: 12, high: 5, restS: 2000 },
+							{ exercise: "flying-kick", sets: 3, low: 8, high: 12, restS: 60 },
+						],
+					},
+					{ title: "Empty", sport: "darts", focus: "fun", minutes: 20, items: [] },
+				],
+				order: [0, 5, 0],
+			}),
+		);
+		const response = await realApp.call("POST", "/ai/training/program", {
+			token,
+			body: programBody,
+		});
+		expect(response.json?.data).toEqual({
+			title: "Pull + run",
+			summary: "Pull strength and running.",
+			weeks: 16,
+			sessions: [
+				{
+					title: "Pull day",
+					sport: "calisthenics",
+					focus: "upper",
+					minutes: 45,
+					items: [{ exercise: "pull-up", sets: 10, range: [12, 12], restS: 600 }],
+				},
+			],
+			order: [0, 0],
+		});
+	});
+
+	it("fails when the draft has no usable session", async () => {
+		provider(
+			JSON.stringify({ title: "x", sessions: [{ title: "a", items: [{ exercise: "nope" }] }] }),
+		);
+		const response = await realApp.call("POST", "/ai/training/program", {
+			token,
+			body: programBody,
+		});
+		expect(response.status).toBe(502);
+	});
+
+	it("needs a list of exercises to choose from", async () => {
+		const response = await mockApp.call("POST", "/ai/training/program", {
+			token,
+			body: { ...programBody, exercises: catalog.slice(0, 2) },
+		});
+		expect(response.status).toBe(400);
+	});
 });
 
 describe("Finance AI", () => {

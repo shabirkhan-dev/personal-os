@@ -50,7 +50,68 @@ export const skillSteps = z.object({
 		.transform((items) => items.filter(Boolean).slice(0, 8)),
 });
 
+// --- program -----------------------------------------------------------------------------------
+
+const catalogEntry = z
+	.object({
+		id: z.string().regex(/^[a-z0-9-]{1,40}$/),
+		name: line(60),
+		pattern: line(20),
+		level: z.number().int().min(1).max(10),
+		unit: z.enum(["reps", "s", "min"]),
+	})
+	.strict();
+
+export const designProgramSchema = z
+	.object({
+		goal: z.string().trim().min(3).max(300),
+		level: z.enum(["beginner", "intermediate", "advanced"]).default("beginner"),
+		weeks: z.number().int().min(2).max(16).default(8),
+		daysPerWeek: z.number().int().min(1).max(7),
+		minutes: z.number().int().min(15).max(120),
+		sports: z.array(line(20)).max(12).default([]),
+		equipment: z.array(line(20)).max(10).default([]),
+		exercises: z.array(catalogEntry).min(5).max(150),
+	})
+	.strict();
+
+/** Model numbers: coerced and rounded; out-of-range values are clamped by the task. */
+const whole = z.coerce
+	.number()
+	.catch(0)
+	.transform((value) => Math.round(value));
+
+export const programDraft = z.object({
+	title: text(60),
+	summary: text(400),
+	weeks: whole,
+	sessions: z
+		.array(
+			z.object({
+				title: text(40),
+				sport: text(20),
+				focus: text(20),
+				minutes: whole,
+				items: z
+					.array(
+						z.object({
+							exercise: z.string().default(""),
+							sets: whole,
+							low: whole,
+							high: whole,
+							restS: whole,
+						}),
+					)
+					.default([]),
+			}),
+		)
+		.default([]),
+	order: z.array(whole).default([]),
+});
+
 export type AskTrainingInput = z.infer<typeof askTrainingSchema>;
+export type DesignProgramInput = z.infer<typeof designProgramSchema>;
+export type ProgramDraft = z.infer<typeof programDraft>;
 export type TrainingAnswer = z.infer<typeof trainingAnswer>;
 export type SkillStepsInput = z.infer<typeof skillStepsSchema>;
 export type SkillSteps = z.infer<typeof skillSteps>;

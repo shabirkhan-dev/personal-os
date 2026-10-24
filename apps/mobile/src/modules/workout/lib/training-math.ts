@@ -25,7 +25,7 @@ const BY_SPORT: Partial<Record<Sport, readonly string[]>> = {
 };
 
 /** Which weekdays (0 = Monday) get a session, spread so hard days don't stack. */
-const SPREAD: Record<number, number[]> = {
+export const SPREAD: Record<number, number[]> = {
 	1: [2],
 	2: [1, 4],
 	3: [0, 2, 4],

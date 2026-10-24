@@ -31,6 +31,16 @@ export const settings = {
 			maxBytes: 5 * 1024 * 1024,
 			types: { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" },
 		},
+		/** Exercise photos and animations (GIF or animated WebP). Videos live elsewhere. */
+		media: {
+			maxBytes: 15 * 1024 * 1024,
+			types: {
+				"image/jpeg": "jpg",
+				"image/png": "png",
+				"image/webp": "webp",
+				"image/gif": "gif",
+			},
+		},
 	},
 	ai: {
 		maxBodyBytes: 32 * 1024,

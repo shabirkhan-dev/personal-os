@@ -14,7 +14,7 @@ import {
 	trainingSkills,
 } from "../data/collections";
 import { ensureWeek, migrateOldWorkout } from "../data/training-actions";
-import { setCustomExercises } from "../lib/exercise-guide";
+import { type CatalogExercise, setCustomExercises } from "../lib/exercise-guide";
 import { setTemplateResolver, templateById } from "../lib/library";
 import { BUILT_IN_PROGRAMS } from "../lib/programs/built-in";
 import { programById, resolveTemplate, weekNumber } from "../lib/programs/engine";
@@ -23,6 +23,9 @@ import { weekCount, weekDays } from "../lib/training-math";
 import { defaultSettings } from "../lib/training-model";
 
 let migration: Promise<unknown> | null = null;
+
+/** One empty list, so "nothing saved yet" is the same value on every render. */
+const NO_EXERCISES: readonly CatalogExercise[] = [];
 
 /** Everything Training keeps on the phone, read through React Query from the record store. */
 export function useTraining() {
@@ -53,7 +56,7 @@ export function useTraining() {
 			exerciseList,
 		];
 		const activities = [...(activityList.data ?? [])].sort((a, b) => a.name.localeCompare(b.name));
-		const exercises = exerciseList.data ?? [];
+		const exercises = exerciseList.data ?? NO_EXERCISES;
 		setCustomExercises(exercises);
 		const custom = [...(programList.data ?? [])].sort((a, b) =>
 			(b.createdAt ?? "").localeCompare(a.createdAt ?? ""),

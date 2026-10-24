@@ -1401,7 +1401,12 @@ let byName = new Map(CATALOG.map((exercise) => [exercise.name, exercise]));
  * Adds the person's own exercises and their changes to built-in ones (a doc with a built-in id keeps
  * the built-in name and adds media and cues). Called by the data layer whenever they change.
  */
+let lastSaved: readonly CatalogExercise[] | null = null;
+
 export function setCustomExercises(saved: readonly CatalogExercise[]): void {
+	// The same list (same reference) changes nothing; skipping keeps `allExercises()` stable.
+	if (saved === lastSaved) return;
+	lastSaved = saved;
 	const overrides = new Map(saved.filter((item) => !item.custom).map((item) => [item.id, item]));
 	const builtIn = CATALOG.map((exercise) => {
 		const change = overrides.get(exercise.id);

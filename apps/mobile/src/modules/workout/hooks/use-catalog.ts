@@ -15,11 +15,17 @@ const byName = (list: readonly CatalogExercise[]) =>
  * the React Compiler would treat them as never changing inside a component.
  */
 export const useCatalog = create<{
+	source: readonly CatalogExercise[];
 	byName: ReadonlyMap<string, CatalogExercise>;
 	sync: () => void;
-}>((set) => ({
+}>((set, get) => ({
+	source: CATALOG,
 	byName: byName(CATALOG),
-	sync: () => set({ byName: byName(allExercises()) }),
+	// Only a changed merged list updates state, so syncing can never loop.
+	sync: () => {
+		const source = allExercises();
+		if (source !== get().source) set({ source, byName: byName(source) });
+	},
 }));
 
 /** An exercise's guide (demo, cues, media), updating when the person changes the exercise. */

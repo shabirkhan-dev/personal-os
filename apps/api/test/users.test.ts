@@ -160,3 +160,62 @@ describe("DELETE /users/me", () => {
 		expect(await db.select().from(users).where(eq(users.id, session.user.id))).toEqual([]);
 	});
 });
+
+async function mediaTicket(token: string, contentType = "image/gif", size = 2_000_000) {
+	return call<{ data: Ticket }>("POST", "/assets/uploads", {
+		token,
+		body: { kind: "media", contentType, size },
+	});
+}
+
+describe("exercise media straight to R2", () => {
+	it("hands out a GIF ticket under the media prefix, up to 15 MB", async () => {
+		const session = await signIn(call);
+		const response = await mediaTicket(session.accessToken);
+		expect(response.status).toBe(201);
+		expect(response.json?.data.key).toMatch(
+			new RegExp(`^media/${session.user.id}/[0-9a-f-]{36}\\.gif$`),
+		);
+		const tooBig = await mediaTicket(session.accessToken, "image/gif", 16 * 1024 * 1024);
+		expect(tooBig.status).toBe(400);
+	});
+
+	it("confirms an uploaded file and returns its public URL", async () => {
+		const session = await signIn(call);
+		const { key } = (await mediaTicket(session.accessToken)).json?.data ?? { key: "" };
+		const early = await call("POST", "/assets/confirm", {
+			token: session.accessToken,
+			body: { kind: "media", key },
+		});
+		expect(early.json).toMatchObject({ code: "ASSET_NOT_UPLOADED" });
+
+		bucket.put(key, 2_000_000, "image/gif");
+		const confirmed = await call<{ data: { key: string; url: string } }>(
+			"POST",
+			"/assets/confirm",
+			{
+				token: session.accessToken,
+				body: { kind: "media", key },
+			},
+		);
+		expect(confirmed.status).toBe(200);
+		expect(confirmed.json?.data).toEqual({ key, url: `https://assets.example.com/${key}` });
+	});
+
+	it("refuses another user's media and avatars on the media route", async () => {
+		const owner = await signIn(call);
+		const other = await signIn(call);
+		const { key } = (await mediaTicket(owner.accessToken)).json?.data ?? { key: "" };
+		bucket.put(key, 1000, "image/gif");
+		const stolen = await call("POST", "/assets/confirm", {
+			token: other.accessToken,
+			body: { kind: "media", key },
+		});
+		expect(stolen.json).toMatchObject({ code: "ASSET_INVALID" });
+		const avatar = await call("POST", "/assets/confirm", {
+			token: owner.accessToken,
+			body: { kind: "avatar", key },
+		});
+		expect(avatar.status).toBe(400);
+	});
+});

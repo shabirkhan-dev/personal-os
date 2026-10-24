@@ -44,6 +44,7 @@ table, `apps/api/src/config/messages.ts`.
 | `PATCH` | `/users/me/profile` | bearer | Update the display name or avatar |
 | `DELETE` | `/users/me` | bearer | Delete the account: sessions, synced records, onboarding, AI usage, pending codes and R2 files. `204` |
 | `POST` | `/assets/uploads` | bearer | A presigned URL to upload a file straight to R2 |
+| `POST` | `/assets/confirm` | bearer | Check an uploaded media file and get its public URL |
 | `GET` | `/users/me/onboarding` | bearer | Saved onboarding answers, or `null` before the first save |
 | `PUT` | `/users/me/onboarding` | bearer | Save the onboarding answers |
 | `POST` | `/sync` | bearer | Push local record changes, pull changes after a cursor |
@@ -112,6 +113,15 @@ Errors: `400` `ASSET_NOT_UPLOADED` (nothing at that key), `400` `ASSET_INVALID` 
 type or size; a bad file is deleted), `503` `ASSETS_UNAVAILABLE` (R2 not configured).
 `"avatarKey": null` removes the avatar.
 
+### Exercise media
+
+Photos and animations for exercises use the same presigned upload with `"kind": "media"`:
+`image/jpeg`, `image/png`, `image/webp` or `image/gif`, at most 15 MB. After the `PUT`,
+`POST /assets/confirm` with `{ "kind": "media", "key": key }` checks the object (in R2, under the
+caller's prefix, an allowed type and size; a bad file is deleted) and returns `{ key, url }`, where
+`url` is the public address the app stores on the exercise. Same errors as avatars. Videos are not
+uploaded: the app stores a Google Drive link and plays it in Drive's player.
+
 ### Onboarding answers
 
 `PUT /users/me/onboarding` takes `{ "answers": OnboardingAnswers }`, the same shape as the mobile
@@ -171,7 +181,8 @@ Collections in use: `career-applications`, `career-preps`, `career-stories`, `ca
 for Care `care-settings`, `care-steps`, `care-products`, `care-habits`, `care-days`,
 `care-checkins`, for Daily life `daily-settings`, `daily-days`, `daily-sleep`, `daily-plans`, and
 for Training `training-settings`, `training-sessions`, `training-plans`, `training-skills`,
-`training-programs`, `training-progress`, and
+`training-programs`, `training-progress`, `training-activities`, `training-exercises`, for the
+calendar `calendar-events`, and
 for Finance `finance-settings`, `finance-entries`, `finance-bills`, `finance-sources`.
 Names are part of the contract.
 
@@ -280,6 +291,7 @@ Record every public API change, newest first, so consumers can see what moved.
 
 | Date | Change | Breaking |
 | --- | --- | --- |
+| 2026-10-24 | Added the `media` upload kind and `POST /assets/confirm`; Training syncs `training-activities` and `training-exercises`, and `calendar-events` holds personal calendar events | No |
 | 2026-10-24 | Added `POST /ai/training/program`; Training syncs `training-programs` and `training-progress` | No |
 | 2026-10-16 | Added `POST /ai/finance/read` and `POST /ai/finance/ask` | No |
 | 2026-10-16 | Added `POST /ai/training/ask` and `POST /ai/training/skill` | No |

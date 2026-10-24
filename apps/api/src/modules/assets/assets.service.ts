@@ -5,7 +5,13 @@ import { settings } from "@/config/settings";
 import { AppError } from "@/core/app-error";
 import type { AssetKind, CreateUploadInput, UploadTicket } from "./assets.schema";
 
-const PREFIX: Record<AssetKind, string> = { avatar: "avatars" };
+const PREFIX: Record<AssetKind, string> = { avatar: "avatars", media: "media" };
+
+/** Allowed content types (with their file extension) and the size limit per kind. */
+const LIMITS: Record<AssetKind, { maxBytes: number; types: Record<string, string> }> = {
+	avatar: settings.assets.avatar,
+	media: settings.assets.media,
+};
 
 /**
  * A presigned R2 URL the app uploads to directly; the file never passes through the API. The
@@ -19,7 +25,7 @@ export async function createUpload(
 ): Promise<UploadTicket> {
 	const r2 = config.r2;
 	if (!r2) throw new AppError("ASSETS_UNAVAILABLE");
-	const extension = settings.assets.avatar.types[input.contentType];
+	const extension = LIMITS[input.kind].types[input.contentType] ?? "bin";
 	const key = `${PREFIX[input.kind]}/${userId}/${crypto.randomUUID()}.${extension}`;
 	const url = new URL(`https://${r2.accountId}.r2.cloudflarestorage.com/${r2.bucket}/${key}`);
 	url.searchParams.set("X-Amz-Expires", String(settings.assets.uploadTtlSeconds));
@@ -54,13 +60,15 @@ export async function confirmUpload(
 	key: string,
 ): Promise<void> {
 	if (!bucket) throw new AppError("ASSETS_UNAVAILABLE");
-	const pattern = new RegExp(`^${PREFIX[kind]}/${userId}/[0-9a-f-]{36}\\.(jpg|png|webp)$`);
+	const limits = LIMITS[kind];
+	const extensions = Object.values(limits.types).join("|");
+	const pattern = new RegExp(`^${PREFIX[kind]}/${userId}/[0-9a-f-]{36}\\.(${extensions})$`);
 	if (!pattern.test(key)) throw new AppError("ASSET_INVALID");
 
 	const object = await bucket.head(key);
 	if (!object) throw new AppError("ASSET_NOT_UPLOADED");
 	const type = object.httpMetadata?.contentType ?? "";
-	if (object.size > settings.assets.avatar.maxBytes || !(type in settings.assets.avatar.types)) {
+	if (object.size > limits.maxBytes || !(type in limits.types)) {
 		await bucket.delete(key);
 		throw new AppError("ASSET_INVALID");
 	}

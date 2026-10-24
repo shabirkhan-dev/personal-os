@@ -5,7 +5,7 @@ type: feature
 from: human
 to: mobile
 priority: high
-status: doing
+status: done
 assignee: mobile (claude code)
 reviewer: human
 parent: none
@@ -51,7 +51,7 @@ programs, progression, demos and a way to design their own (`/docs/production-ro
 
 ## Resolution
 
-In progress on `agent/mobile/training-programs`; waiting on the owner's device check.
+Landed on `agent/mobile/training-programs`. Superseded and extended by pos-36 (2026-10-24-training-v2-calendar.md), which carries the final validation.
 
 - Catalog of 85 exercises (45 with photo demos), 10 progression chains, 12 built-in programs.
 - `lib/programs/engine.ts`: program weeks around team days (legs never the day before a match),

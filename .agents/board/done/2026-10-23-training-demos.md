@@ -5,7 +5,7 @@ type: feature
 from: human
 to: mobile
 priority: normal
-status: doing
+status: done
 assignee: mobile (claude code)
 reviewer: human
 parent: none
@@ -55,7 +55,7 @@ when the phone is locked, and the session summary shows hold values without unit
 
 ## Resolution
 
-In progress on `agent/mobile/training-demos` (commit c99f855); waiting on the owner's device check.
+Landed on `agent/mobile/training-demos` (commit c99f855). Superseded and extended by pos-36 (2026-10-24-training-v2-calendar.md), which carries the final validation.
 
 - Demos: `lib/exercise-guide.ts` (guides and cues), `lib/demo-frames.ts`,
   `assets/training/demos/` (21 frames, 856 KB, from free-exercise-db, The Unlicense),

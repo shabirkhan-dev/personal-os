@@ -20,7 +20,8 @@ export function TrainingImage({
 	const { colors } = usePoTheme();
 	const source = photo ? TRAINING_PHOTOS[photo] : undefined;
 	const box = [
-		fill ? { alignSelf: "stretch" as const, height: size } : { width: size, height: size },
+		// A fixed width is needed: an image without one keeps its own size inside a scroll view.
+		fill ? { width: "100%" as const, height: size } : { width: size, height: size },
 		{ borderRadius: radius, backgroundColor: colors.bgSubtle },
 		style,
 	];

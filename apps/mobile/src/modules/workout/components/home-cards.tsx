@@ -294,65 +294,18 @@ export function BestsRow({ bests }: { bests: readonly Best[] }) {
 	);
 }
 
-const PHASE_TEXT: Record<1 | 2 | 3, { title: string; body: string }> = {
-	1: {
-		title: "Phase 1 · until the new job",
-		body: "Bodyweight, running and shadow boxing. The gym and a boxing club unlock in phase 2.",
-	},
-	2: {
-		title: "Phase 2 · gym and clubs",
-		body: "Gym, a boxing club and a team sport, on top of the basics.",
-	},
-	3: { title: "Phase 3 · new skills", body: "Swimming lessons, then skiing." },
-};
-
-const LATER: Record<1 | 2 | 3, string[]> = {
-	1: ["Gym", "Football", "Swimming"],
-	2: ["Swimming", "Skiing"],
-	3: [],
-};
-
-/** What this phase trains, and what comes later. */
-export function PhaseCard({ phase, sports }: { phase: 1 | 2 | 3; sports: readonly Sport[] }) {
-	const { colors } = usePoTheme();
-	return (
-		<View style={[styles.card, { backgroundColor: colors.bgSubtle, borderColor: colors.bgSubtle }]}>
-			<PoText variant="eyebrow11" tone="textTertiary">
-				{PHASE_TEXT[phase].title}
-			</PoText>
-			<PoText variant="meta13" tone="textSecondary">
-				{PHASE_TEXT[phase].body}
-			</PoText>
-			<View style={styles.tags}>
-				{sports.map((sport) => (
-					<View key={sport} style={styles.tag}>
-						<View style={[styles.dot, { backgroundColor: colors[SPORT_TONES[sport]] }]} />
-						<PoText variant="meta13">{SPORT_LABELS[sport]}</PoText>
-					</View>
-				))}
-				{LATER[phase]
-					.filter((name) => !sports.some((sport) => SPORT_LABELS[sport] === name))
-					.map((name) => (
-						<View key={name} style={styles.tag}>
-							<View style={[styles.dot, { backgroundColor: colors.textTertiary }]} />
-							<PoText variant="meta13" tone="textTertiary">{`${name} · later`}</PoText>
-						</View>
-					))}
-			</View>
-		</View>
-	);
-}
-
+/** The kinds of training a simple week rotates through; everything else is an activity. */
 const PICKABLE: readonly { sport: Sport; photo: string }[] = [
 	{ sport: "calisthenics", photo: "handstand" },
 	{ sport: "running", photo: "mountain-run" },
 	{ sport: "boxing", photo: "shadow-boxing" },
-	{ sport: "football", photo: "football" },
-	{ sport: "volleyball", photo: "volleyball" },
 	{ sport: "yoga", photo: "yoga" },
 ];
 
-/** The empty Home: what you train (photos), days a week, Build my first week. */
+/**
+ * The empty Home: follow a program, or build a simple week from what you train and how many days,
+ * and add your own activities (football, swimming…).
+ */
 export function SetupCard({
 	sports,
 	days,
@@ -360,6 +313,8 @@ export function SetupCard({
 	onSport,
 	onDays,
 	onBuild,
+	onPrograms,
+	onActivity,
 }: {
 	sports: readonly Sport[];
 	days: number;
@@ -367,14 +322,20 @@ export function SetupCard({
 	onSport: (sport: Sport) => void;
 	onDays: (days: number) => void;
 	onBuild: () => void;
+	onPrograms: () => void;
+	onActivity: () => void;
 }) {
 	const { colors } = usePoTheme();
 	return (
 		<Card>
 			<PoText variant="eyebrow11" tone="textTertiary">
-				What do you train?
+				Get started
 			</PoText>
-			<PoText variant="title18">Pick everything you do now</PoText>
+			<PoText variant="title18">Follow a program, or build a simple week</PoText>
+			<PillButton label="See programs" onPress={onPrograms} />
+			<PoText variant="meta13" tone="textSecondary">
+				Or pick what you train and how many days:
+			</PoText>
 			<View style={styles.grid}>
 				{PICKABLE.map((item) => {
 					const on = sports.includes(item.sport);
@@ -429,13 +390,17 @@ export function SetupCard({
 					<Icon name="Line/Plus" size={18} color={colors.textPrimary} />
 				</Pressable>
 			</View>
-			<PoText variant="meta13" tone="textSecondary">
-				No gym yet, so phase 1 starts with bodyweight, runs and shadow boxing.
-			</PoText>
 			<PillButton
 				label={busy ? "Building…" : "Build my first week"}
+				variant="secondary"
 				disabled={busy || sports.length === 0}
 				onPress={onBuild}
+			/>
+			<PillButton
+				label="Add football, swimming or another activity"
+				variant="ghost"
+				showPlus
+				onPress={onActivity}
 			/>
 		</Card>
 	);

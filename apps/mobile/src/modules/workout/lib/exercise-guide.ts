@@ -119,6 +119,15 @@ export const EQUIPMENT_LABELS: Record<Equipment, string> = {
 
 export type ExerciseUnit = "reps" | "s" | "min";
 
+/** Media someone added: photos and animations on R2, a video as a Google Drive link. */
+export type ExerciseMedia = {
+	image?: string;
+	/** An animated GIF or WebP. */
+	animation?: string;
+	/** A Google Drive share link, played in Drive's own player. */
+	video?: string;
+};
+
 export type CatalogExercise = {
 	id: string;
 	/** Shown and stored on logged sets; never renamed. */
@@ -137,9 +146,12 @@ export type CatalogExercise = {
 	/** Training photo used when there is no demo. */
 	photo: string;
 	cues: readonly [string, string, string];
+	media?: ExerciseMedia;
+	/** Made by the person rather than built in. */
+	custom?: boolean;
 };
 
-export type ExerciseGuide = { demo: DemoId | null; cues: readonly string[] };
+export type ExerciseGuide = { demo: DemoId | null; cues: readonly string[]; media?: ExerciseMedia };
 
 export const DEMO_CREDIT = "Demo photos: free-exercise-db, public domain";
 
@@ -1381,22 +1393,156 @@ export const CATALOG: readonly CatalogExercise[] = [
 	}),
 ];
 
-const BY_ID = new Map(CATALOG.map((exercise) => [exercise.id, exercise]));
-const BY_NAME = new Map(CATALOG.map((exercise) => [exercise.name, exercise]));
+let merged: readonly CatalogExercise[] = CATALOG;
+let byId = new Map(CATALOG.map((exercise) => [exercise.id, exercise]));
+let byName = new Map(CATALOG.map((exercise) => [exercise.name, exercise]));
+
+/**
+ * Adds the person's own exercises and their changes to built-in ones (a doc with a built-in id keeps
+ * the built-in name and adds media and cues). Called by the data layer whenever they change.
+ */
+export function setCustomExercises(saved: readonly CatalogExercise[]): void {
+	const overrides = new Map(saved.filter((item) => !item.custom).map((item) => [item.id, item]));
+	const builtIn = CATALOG.map((exercise) => {
+		const change = overrides.get(exercise.id);
+		if (!change) return exercise;
+		return {
+			...exercise,
+			cues: change.cues,
+			...(change.media ? { media: change.media } : {}),
+		};
+	});
+	const builtInNames = new Set(CATALOG.map((exercise) => exercise.name));
+	const own = saved.filter((item) => item.custom && !builtInNames.has(item.name));
+	merged = [...builtIn, ...own];
+	byId = new Map(merged.map((exercise) => [exercise.id, exercise]));
+	byName = new Map(merged.map((exercise) => [exercise.name, exercise]));
+}
+
+/** Built-in exercises (with the person's changes) and their own. */
+export function allExercises(): readonly CatalogExercise[] {
+	return merged;
+}
 
 export function exerciseById(id: string): CatalogExercise | null {
-	return BY_ID.get(id) ?? null;
+	return byId.get(id) ?? null;
 }
 
 export function exerciseByName(name: string): CatalogExercise | null {
-	return BY_NAME.get(name) ?? null;
+	return byName.get(name) ?? null;
 }
 
 /** The guide for an exercise by its name, or null when there is none. */
 export function guideFor(name: string): ExerciseGuide | null {
-	const exercise = BY_NAME.get(name);
+	const exercise = byName.get(name);
 	if (!exercise || exercise.pattern === "sport") return null;
-	return { demo: exercise.demo, cues: exercise.cues };
+	return {
+		demo: exercise.demo,
+		cues: exercise.cues,
+		...(exercise.media ? { media: exercise.media } : {}),
+	};
+}
+
+/**
+ * The Google Drive file id in a share link ("…/file/d/<id>/view", "open?id=<id>", "uc?id=<id>"),
+ * or null when the link isn't a Drive file.
+ */
+export function driveFileId(link: string): string | null {
+	let url: URL;
+	try {
+		url = new URL(link.trim());
+	} catch {
+		return null;
+	}
+	if (!/(^|\.)drive\.google\.com$|(^|\.)docs\.google\.com$/.test(url.hostname)) return null;
+	const path = /\/file\/d\/([\w-]{10,})/.exec(url.pathname);
+	const id = path?.[1] ?? url.searchParams.get("id");
+	return id && /^[\w-]{10,}$/.test(id) ? id : null;
+}
+
+/** Drive's embedded player for a file, which streams the video at the right quality. */
+export function drivePreviewUrl(link: string): string | null {
+	const id = driveFileId(link);
+	return id ? `https://drive.google.com/file/d/${id}/preview` : null;
+}
+
+// --- saved exercises ----------------------------------------------------------------------------
+
+const httpsUrl = (value: unknown): string | undefined => {
+	if (typeof value !== "string" || value.length > 600) return undefined;
+	try {
+		return new URL(value).protocol === "https:" ? value : undefined;
+	} catch {
+		return undefined;
+	}
+};
+
+function parseMedia(raw: unknown): ExerciseMedia | undefined {
+	if (typeof raw !== "object" || raw === null) return undefined;
+	const record = raw as Record<string, unknown>;
+	const image = httpsUrl(record.image);
+	const animation = httpsUrl(record.animation);
+	const video =
+		typeof record.video === "string" && driveFileId(record.video) ? record.video : undefined;
+	if (!image && !animation && !video) return undefined;
+	return {
+		...(image ? { image } : {}),
+		...(animation ? { animation } : {}),
+		...(video ? { video } : {}),
+	};
+}
+
+const text = (value: unknown, max: number) =>
+	typeof value === "string" ? value.trim().slice(0, max) : "";
+
+/**
+ * A saved exercise (`training-exercises`): one of the person's own, or changes to a built-in one
+ * (same id). Anything malformed falls back or is dropped.
+ */
+export function parseSavedExercise(raw: unknown): CatalogExercise | null {
+	if (typeof raw !== "object" || raw === null) return null;
+	const record = raw as Record<string, unknown>;
+	const id = text(record.id, 60);
+	if (!id) return null;
+	const cuesRaw = Array.isArray(record.cues) ? record.cues : [];
+	const cues = [0, 1, 2].map((index) => text(cuesRaw[index], 100)) as [string, string, string];
+	const builtIn = CATALOG.find((exercise) => exercise.id === id);
+	const media = parseMedia(record.media);
+	if (builtIn) {
+		return {
+			...builtIn,
+			cues: cues.some(Boolean) ? cues : builtIn.cues,
+			...(media ? { media } : {}),
+		};
+	}
+	const name = text(record.name, 60);
+	if (!name) return null;
+	const pattern = (PATTERNS as readonly string[]).includes(String(record.pattern))
+		? (record.pattern as Pattern)
+		: "conditioning";
+	const unit = record.unit === "s" || record.unit === "min" ? record.unit : "reps";
+	const level =
+		typeof record.level === "number" ? Math.min(10, Math.max(1, Math.round(record.level))) : 3;
+	const equipment = Array.isArray(record.equipment)
+		? record.equipment.filter((item): item is Equipment =>
+				(EQUIPMENT as readonly string[]).includes(String(item)),
+			)
+		: [];
+	return {
+		id,
+		name,
+		pattern,
+		level,
+		equipment,
+		unit,
+		...(record.each === true ? { each: true } : {}),
+		...(record.weighted === true ? { weighted: true } : {}),
+		demo: null,
+		photo: text(record.photo, 40) || "handstand",
+		cues,
+		...(media ? { media } : {}),
+		custom: true,
+	};
 }
 
 /** Whether the equipment someone has covers what an exercise needs. */

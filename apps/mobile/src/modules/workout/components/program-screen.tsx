@@ -129,7 +129,7 @@ export function ProgramScreen({ id }: { id: string }) {
 			</ScreenTitle>
 			<TrainingImage photo={heroOf(program.photo)} size={180} fill radius={28} />
 			{isActive && active ? (
-				<Card accent>
+				<Card>
 					<PoText variant="eyebrow11" tone="accentDefault">
 						{active.finished
 							? "Program done"
@@ -280,6 +280,7 @@ export function ProgramScreen({ id }: { id: string }) {
 				settings={data.settings}
 				progress={data.progress}
 				plan={data.plans.find((item) => item.id === weekDays(now)[0]) ?? null}
+				activities={data.activities}
 				switchingFrom={active && !isActive && !active.finished ? active.program.title : null}
 				visible={starting}
 				onClose={() => setStarting(false)}

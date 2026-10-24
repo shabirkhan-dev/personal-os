@@ -1,3 +1,4 @@
+import { Image as RemoteImage } from "expo-image";
 import { useEffect } from "react";
 import { Image, StyleSheet, View } from "react-native";
 import Animated, {
@@ -22,9 +23,9 @@ const HOLD_MS = 900;
 const FADE_MS = 280;
 
 /**
- * An exercise shown moving: its start and end positions fading back and forth, like a short loop.
- * A still when there is one frame or the system asks for reduced motion; the Training photo when the
- * exercise has no demo.
+ * An exercise shown moving. Media the person added comes first (an animation plays on its own,
+ * cached for the gym; a photo is shown still); otherwise the bundled start and end positions fade
+ * back and forth like a short loop, or the Training photo. Reduced motion shows stills.
  */
 export function ExerciseDemo({
 	name,
@@ -39,10 +40,11 @@ export function ExerciseDemo({
 }) {
 	const { colors } = usePoTheme();
 	const reduceMotion = useReducedMotion();
-	const demo = guideFor(name)?.demo;
-	const frames = demo ? DEMO_FRAMES[demo] : [];
+	const guide = guideFor(name);
+	const remote = guide?.media?.animation ?? guide?.media?.image;
+	const frames = guide?.demo ? DEMO_FRAMES[guide.demo] : [];
 	const [first, second] = frames;
-	const moving = second !== undefined && !reduceMotion;
+	const moving = !remote && second !== undefined && !reduceMotion;
 	const end = useSharedValue(0);
 
 	useEffect(() => {
@@ -64,17 +66,26 @@ export function ExerciseDemo({
 	}, [moving, end]);
 
 	const endStyle = useAnimatedStyle(() => ({ opacity: end.value }));
-
-	if (!first) return <TrainingImage photo={photo} size={height} fill radius={radius} />;
-
 	const box = [styles.box, { height, borderRadius: radius, backgroundColor: colors.bgSubtle }];
+	const label = `${name} demonstration`;
+
+	if (remote) {
+		return (
+			<View style={box} accessible accessibilityRole="image" accessibilityLabel={label}>
+				<RemoteImage
+					source={{ uri: remote }}
+					contentFit="cover"
+					autoplay={!reduceMotion}
+					cachePolicy="disk"
+					transition={150}
+					style={StyleSheet.absoluteFill}
+				/>
+			</View>
+		);
+	}
+	if (!first) return <TrainingImage photo={photo} size={height} fill radius={radius} />;
 	return (
-		<View
-			style={box}
-			accessible
-			accessibilityRole="image"
-			accessibilityLabel={`${name} demonstration`}
-		>
+		<View style={box} accessible accessibilityRole="image" accessibilityLabel={label}>
 			<Image source={first} resizeMode="cover" style={StyleSheet.absoluteFill} />
 			{moving ? (
 				<Animated.Image
@@ -87,7 +98,7 @@ export function ExerciseDemo({
 	);
 }
 
-/** A small still of the exercise for lists: its demo's start position, else the Training photo. */
+/** A small still of the exercise for lists: its photo, demo start position, or Training photo. */
 export function ExerciseThumb({
 	name,
 	photo,
@@ -100,19 +111,31 @@ export function ExerciseThumb({
 	radius?: number;
 }) {
 	const { colors } = usePoTheme();
-	const demo = guideFor(name)?.demo;
-	const first = demo ? DEMO_FRAMES[demo][0] : undefined;
+	const guide = guideFor(name);
+	const style = {
+		width: size,
+		height: size,
+		borderRadius: radius,
+		backgroundColor: colors.bgSubtle,
+	};
+	const remote = guide?.media?.image ?? guide?.media?.animation;
+	if (remote) {
+		return (
+			<RemoteImage
+				source={{ uri: remote }}
+				contentFit="cover"
+				autoplay={false}
+				cachePolicy="disk"
+				style={style}
+				accessibilityIgnoresInvertColors
+			/>
+		);
+	}
+	const first = guide?.demo ? DEMO_FRAMES[guide.demo][0] : undefined;
 	if (!first) return <TrainingImage photo={photo} size={size} radius={radius} />;
-	return (
-		<Image
-			source={first}
-			resizeMode="cover"
-			style={{ width: size, height: size, borderRadius: radius, backgroundColor: colors.bgSubtle }}
-			accessibilityIgnoresInvertColors
-		/>
-	);
+	return <Image source={first} resizeMode="cover" style={style} accessibilityIgnoresInvertColors />;
 }
 
 const styles = StyleSheet.create({
-	box: { alignSelf: "stretch", overflow: "hidden" },
+	box: { width: "100%", overflow: "hidden" },
 });

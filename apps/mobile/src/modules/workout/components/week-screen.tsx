@@ -66,7 +66,7 @@ export function WeekScreen() {
 			action={{ icon: "Filled/Edit", label: "Edit week", onPress: () => setEditing(today) }}
 		>
 			<ScreenTitle
-				eyebrow={`Phase ${settings.phase} · ${sessionsCount} sessions + ${easyCount} easy days`}
+				eyebrow={`${sessionsCount} sessions + ${easyCount} easy days`}
 				title="This week"
 			/>
 			{slots.map((slot) => {
@@ -122,26 +122,6 @@ export function WeekScreen() {
 					</Pressable>
 				);
 			})}
-			{settings.phase === 1 ? (
-				<View style={[styles.next, { borderColor: colors.borderStrong }]}>
-					<PoText variant="eyebrow11" tone="textTertiary">
-						Phase 2 adds
-					</PoText>
-					<View style={styles.phase}>
-						{[
-							{ photo: "football", name: "Football team" },
-							{ photo: "volleyball", name: "Volleyball team" },
-						].map((item) => (
-							<View key={item.name} style={styles.phaseItem}>
-								<TrainingImage photo={item.photo} size={40} radius={10} />
-								<PoText variant="meta13" tone="textSecondary">
-									{item.name}
-								</PoText>
-							</View>
-						))}
-					</View>
-				</View>
-			) : null}
 			{notice ? (
 				<PoText variant="meta13" tone="textSecondary">
 					{notice}
@@ -245,9 +225,6 @@ const styles = StyleSheet.create({
 	},
 	name: { width: 36 },
 	bar: { width: 3, height: 32, borderRadius: 2 },
-	next: { gap: 10, padding: 16, borderRadius: 24, borderWidth: 1, borderStyle: "dashed" },
-	phase: { flexDirection: "row", gap: 16 },
-	phaseItem: { flexDirection: "row", alignItems: "center", gap: 8 },
 	hint: { paddingHorizontal: 6 },
 	sheet: { gap: 8 },
 	chips: { flexDirection: "row", flexWrap: "wrap", gap: 6 },

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Platform, StyleSheet, View } from "react-native";
 import { AiWorkingCard } from "@/components/ai-working-card";
-import { ActionPills, ReadError, ResultCard } from "@/components/module-ui";
+import { ActionPills, ListCard, ListRow, ReadError, ResultCard } from "@/components/module-ui";
 import { PoText } from "@/components/ui/po-text";
 import { useAiJobs } from "@/lib/ai-jobs/ai-jobs-store";
 import { dayKey } from "@/lib/day";
@@ -26,6 +26,7 @@ import {
 	slotState,
 	weekdayShort,
 } from "../lib/training-math";
+import type { Activity } from "../lib/activities";
 import type { Session, Sport } from "../lib/training-model";
 import { trainingRoutes } from "../navigation";
 import { trainingAiMessage, useTrainingAi } from "../services/training-ai";
@@ -33,7 +34,6 @@ import {
 	type ActivityRow,
 	ActivityCard,
 	BestsRow,
-	PhaseCard,
 	RecentCard,
 	SetupCard,
 	SPORT_TONES,
@@ -41,6 +41,8 @@ import {
 	TrainingAnswerCard,
 	WeekDotsCard,
 } from "./home-cards";
+import { ActivitiesCard } from "./activities-card";
+import { ActivityEditorSheet } from "./activity-editor-sheet";
 import { LogSheet } from "./log-sheet";
 import { ActiveProgramCard, ProgramPromptCard } from "./program-cards";
 
@@ -55,7 +57,10 @@ const dayLabel = (iso: string) => {
 const toggle = <T,>(list: readonly T[], value: T): T[] =>
 	list.includes(value) ? list.filter((item) => item !== value) : [...list, value];
 
-/** Training Home: today's session, the week, activity, recent sessions, bests and the phase. */
+/**
+ * Training Home: today's session, the program, your activities, the week, movement, recent sessions,
+ * bests and the tools.
+ */
 export function TrainingHomeView({ actionRequest }: HomeModuleViewProps) {
 	const { data, now, today, week, plan, template, count, active } = useTrainingToday();
 	const { settings, sessions } = data;
@@ -70,12 +75,21 @@ export function TrainingHomeView({ actionRequest }: HomeModuleViewProps) {
 	const [notice, setNotice] = useState<string | null>(null);
 	const [logged, setLogged] = useState<{ quote: string; session: Session } | null>(null);
 	const [logging, setLogging] = useState(false);
+	/** The activity the log sheet opens on. */
+	const [logActivity, setLogActivity] = useState<string | null>(null);
+	const [editingActivity, setEditingActivity] = useState<Activity | "new" | null>(null);
 	const [sports, setSports] = useState<Sport[]>(["calisthenics", "running", "boxing"]);
 	const [days, setDays] = useState(5);
 	const [building, setBuilding] = useState(false);
 
+	/** Activities (a match, a class) are logged; workouts run live. */
+	const openLog = (activityId: string | null) => {
+		setLogActivity(activityId);
+		setLogging(true);
+	};
 	const start = () => {
-		if (template) startSession(template.id);
+		if (template?.id.startsWith("a:")) openLog(template.id.slice(2));
+		else if (template) startSession(template.id);
 		else trainingRoutes.plan();
 	};
 
@@ -186,8 +200,8 @@ export function TrainingHomeView({ actionRequest }: HomeModuleViewProps) {
 				actions={[
 					{ label: "Start", icon: "Filled/Play", onPress: start },
 					{ label: "Programs", icon: "List", onPress: trainingRoutes.programs },
-					{ label: "Log it", icon: "Line/Plus", onPress: () => setLogging(true) },
-					{ label: "Timer", icon: "Clock", onPress: trainingRoutes.boxing },
+					{ label: "Log it", icon: "Line/Plus", onPress: () => openLog(null) },
+					{ label: "Calendar", icon: "Filled/Calendar", onPress: trainingRoutes.calendar },
 				]}
 			/>
 		</View>
@@ -238,8 +252,16 @@ export function TrainingHomeView({ actionRequest }: HomeModuleViewProps) {
 			<LogSheet
 				visible={logging}
 				weightKg={weightKg}
+				activities={data.activities}
+				initialActivity={logActivity}
 				onClose={() => setLogging(false)}
 				onLogged={(session) => setLogged({ quote: "Logged by hand", session })}
+			/>
+			<ActivityEditorSheet
+				visible={editingActivity !== null}
+				activity={editingActivity === "new" ? null : editingActivity}
+				existing={data.activities}
+				onClose={() => setEditingActivity(null)}
 			/>
 		</>
 	);
@@ -253,6 +275,8 @@ export function TrainingHomeView({ actionRequest }: HomeModuleViewProps) {
 					sports={sports}
 					days={days}
 					busy={building}
+					onPrograms={trainingRoutes.programs}
+					onActivity={() => setEditingActivity("new")}
 					onSport={(sport) => setSports((list) => toggle(list, sport))}
 					onDays={setDays}
 					onBuild={() => {
@@ -337,11 +361,7 @@ export function TrainingHomeView({ actionRequest }: HomeModuleViewProps) {
 					at={settings.trainAt}
 					done={doneToday}
 					onOpen={() => trainingRoutes.plan(template.id)}
-					onStart={() =>
-						doneToday
-							? trainingRoutes.session(todaySessions[0]?.id ?? "")
-							: startSession(template.id)
-					}
+					onStart={() => (doneToday ? trainingRoutes.session(todaySessions[0]?.id ?? "") : start())}
 				/>
 			) : (
 				<PoText variant="meta13" tone="textSecondary" style={styles.notice}>
@@ -358,6 +378,12 @@ export function TrainingHomeView({ actionRequest }: HomeModuleViewProps) {
 			) : (
 				<ProgramPromptCard onPress={trainingRoutes.programs} />
 			)}
+			<ActivitiesCard
+				activities={data.activities}
+				onLog={(item) => openLog(item.id)}
+				onEdit={(item) => setEditingActivity(item)}
+				onAdd={() => setEditingActivity("new")}
+			/>
 			<WeekDotsCard cells={cells} goal={count.goal} onPress={trainingRoutes.week} />
 			<ActivityCard
 				rows={activity}
@@ -373,7 +399,30 @@ export function TrainingHomeView({ actionRequest }: HomeModuleViewProps) {
 				<RecentCard rows={recent} count={thisWeek.length} onRow={trainingRoutes.session} />
 			) : null}
 			{bests.length > 0 ? <BestsRow bests={bests} /> : null}
-			<PhaseCard phase={settings.phase} sports={settings.sports} />
+			<ListCard>
+				<ListRow
+					title="Exercise library"
+					subtitle="Demos, cues and videos; add your own"
+					icon={{ name: "Dumbbell", tone: "accentDefault", tile: "accentSubtle" }}
+					chevron
+					onPress={trainingRoutes.exercises}
+				/>
+				<ListRow
+					title="Rounds timer"
+					subtitle="Boxing and interval rounds"
+					icon={{ name: "Clock", tone: "statusDanger", tile: "statusDangerSubtle" }}
+					chevron
+					onPress={trainingRoutes.boxing}
+				/>
+				<ListRow
+					title="Progress and insights"
+					subtitle="Bests, volume, consistency"
+					icon={{ name: "Filled/Chart", tone: "statusSuccess", tile: "statusSuccessSubtle" }}
+					chevron
+					last
+					onPress={trainingRoutes.insights}
+				/>
+			</ListCard>
 		</>
 	);
 }

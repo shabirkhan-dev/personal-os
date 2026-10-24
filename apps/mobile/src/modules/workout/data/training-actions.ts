@@ -25,7 +25,11 @@ import {
 	type TrainingSettings,
 	type WeekPlan,
 } from "../lib/training-model";
+import type { Activity } from "../lib/activities";
+import type { CatalogExercise } from "../lib/exercise-guide";
 import {
+	trainingActivities,
+	trainingExercises,
 	trainingPlans,
 	trainingPrograms,
 	trainingProgress,
@@ -191,6 +195,23 @@ export async function applyProgress(
 	const updates = progressAfter(template, sets, feel, saved, now.toISOString());
 	await Promise.all(updates.map((item) => saveItem(trainingProgress, item)));
 	return updates;
+}
+
+export function saveActivity(activity: Activity): Promise<void> {
+	return saveItem(trainingActivities, activity);
+}
+
+export function deleteActivity(activity: Activity): Promise<void> {
+	return removeItem(trainingActivities, activity.id);
+}
+
+/** Saves one of their exercises, or their changes to a built-in one (same id). */
+export function saveExercise(exercise: CatalogExercise): Promise<void> {
+	return saveItem(trainingExercises, exercise);
+}
+
+export function deleteExercise(id: string): Promise<void> {
+	return removeItem(trainingExercises, id);
 }
 
 /** Sets one chain's or exercise's level by hand ("I can already do pull-ups"). */

@@ -1,15 +1,16 @@
 import { addDays, dayKey } from "@/lib/day";
 import {
-	CATALOG,
+	allExercises,
 	type CatalogExercise,
 	canDo,
 	type Equipment,
 	exerciseById,
 	exerciseByName,
 } from "../exercise-guide";
+import { type Activity, activityFor, activityTemplate, activityTemplateId } from "../activities";
 import type { Exercise, Template } from "../library";
 import { SPREAD } from "../training-math";
-import type { Feel, PlanSlot, SetLog, Sport, TrainingSettings } from "../training-model";
+import type { Feel, PlanSlot, SetLog, TrainingSettings } from "../training-model";
 import {
 	CHAINS,
 	type ChainId,
@@ -32,12 +33,7 @@ export type ProgramContext = {
 		TrainingSettings,
 		"equipment" | "minutes" | "daysPerWeek" | "fixedDays" | "sports"
 	>;
-};
-
-/** Team sports someone can pin to a weekday, with the session that day shows. */
-export const TEAM_TEMPLATES: Partial<Record<Sport, string>> = {
-	football: "football",
-	volleyball: "volleyball",
+	activities?: readonly Activity[];
 };
 
 const DAY_MS = 86_400_000;
@@ -144,7 +140,7 @@ export function substitute(
 	equipment: readonly Equipment[],
 ): CatalogExercise | null {
 	if (canDo(exercise, equipment)) return exercise;
-	const options = CATALOG.filter(
+	const options = allExercises().filter(
 		(candidate) =>
 			candidate.pattern === exercise.pattern &&
 			candidate.id !== exercise.id &&
@@ -383,8 +379,12 @@ export function materialize(
 	};
 }
 
-/** Resolves a generated session id against the programs and levels in `ctx`. */
+/** Resolves a generated id (a program session, or an activity day) against `ctx`. */
 export function resolveTemplate(id: string, ctx: ProgramContext): Template | undefined {
+	if (id.startsWith("a:")) {
+		const activity = activityFor(id, ctx.activities ?? []);
+		return activity ? activityTemplate(id, activity) : undefined;
+	}
 	const parsed = parseTemplateId(id);
 	if (!parsed) return undefined;
 	const program = programById(ctx.programs, parsed.programId);
@@ -403,7 +403,7 @@ export function buildProgramWeek(
 	week: number,
 	days: readonly string[],
 ): PlanSlot[] {
-	const fixed = new Map(settings.fixedDays.map((day) => [day.weekday, day.sport]));
+	const fixed = new Map(settings.fixedDays.map((day) => [day.weekday, day.activity]));
 	const free = Array.from({ length: 7 }, (_, index) => index).filter((index) => !fixed.has(index));
 	const order = sessionOrder(program, Math.min(settings.daysPerWeek, free.length)).slice(
 		0,
@@ -436,7 +436,7 @@ export function buildProgramWeek(
 
 	return days.map((day, index) => {
 		const team = fixed.get(index);
-		if (team) return { day, template: TEAM_TEMPLATES[team] ?? null, movedFrom: null };
+		if (team) return { day, template: activityTemplateId(team), movedFrom: null };
 		const key = assigned.get(index);
 		if (key) return { day, template: templateId(program.id, week, key), movedFrom: null };
 		return {

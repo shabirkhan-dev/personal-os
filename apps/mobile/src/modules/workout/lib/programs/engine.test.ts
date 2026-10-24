@@ -133,11 +133,12 @@ describe("weeks", () => {
 	it("keeps team days and never puts legs the day before a match", () => {
 		const slots = buildProgramWeek(
 			hybrid,
-			{ ...settings, fixedDays: [{ weekday: 5, sport: "football" }] },
+			{ ...settings, fixedDays: [{ weekday: 5, activity: "sport:football" }] },
 			2,
 			week,
 		);
-		expect(slots[5]?.template).toBe("football");
+		expect(slots[5]?.template).toBe("a:sport:football");
+		expect(resolveTemplate("a:sport:football", ctx())?.title).toBe("Football");
 		expect(slots[4]?.template).not.toBe(templateId(hybrid.id, 2, "legs"));
 		expect(slots.filter((slot) => slot.template?.startsWith("p:")).length).toBe(5);
 	});

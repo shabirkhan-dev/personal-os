@@ -36,7 +36,7 @@ function failed(error: unknown) {
 
 export function SessionScreen({ id }: { id: string }) {
 	const { colors } = usePoTheme();
-	const { sessions } = useTraining();
+	const { sessions, activities } = useTraining();
 	const session = sessions.find((item) => item.id === id);
 	const [noting, setNoting] = useState<string | null>(null);
 
@@ -64,6 +64,17 @@ export function SessionScreen({ id }: { id: string }) {
 		...(!pace ? [{ label: "Active", value: `${session.kcal} kcal` }] : []),
 		...(session.rounds ? [{ label: "Rounds", value: String(session.rounds) }] : []),
 		...(session.sets.length ? [{ label: "Sets", value: String(session.sets.length) }] : []),
+		...(session.distanceKm && !pace
+			? [{ label: "Distance", value: `${session.distanceKm} km` }]
+			: []),
+		// The activity's own numbers ("Goals 2"), labelled from its definition.
+		...Object.entries(session.metrics ?? {}).map(([key, value]) => {
+			const metric = activities
+				.find((activity) => activity.id === session.activity)
+				?.metrics.find((item) => item.key === key);
+			const label = metric?.label ?? key.replace(/-/g, " ");
+			return { label, value: metric?.unit ? `${value} ${metric.unit}` : String(value) };
+		}),
 	];
 	// Holds read "30 s"; reps stay bare numbers.
 	const grouped = new Map<string, string[]>();

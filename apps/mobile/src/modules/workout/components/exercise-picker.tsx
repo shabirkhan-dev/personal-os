@@ -7,7 +7,7 @@ import { TextField } from "@/components/ui/text-field";
 import { usePoTheme } from "@/theme";
 import { useTraining } from "../hooks/use-training";
 import {
-	CATALOG,
+	allExercises,
 	type CatalogExercise,
 	canDo,
 	type Equipment,
@@ -18,6 +18,7 @@ import {
 } from "../lib/exercise-guide";
 import { ExerciseThumb } from "./exercise-demo";
 import { HowToSheet, type HowToTarget } from "./how-to-sheet";
+import { trainingRoutes } from "../navigation";
 import { TrainingScreen } from "./training-screen";
 
 /** "Pull-ups · level 4 · Pull-up bar" */
@@ -33,16 +34,19 @@ function useFiltered(
 	pattern: Pattern | null,
 	equipment: readonly Equipment[] | null,
 ) {
+	// Saved exercises change the merged list; reading them here re-runs the filter when they do.
+	const { savedExercises } = useTraining();
 	return useMemo(() => {
 		const words = query.trim().toLowerCase();
-		return CATALOG.filter(
+		return allExercises().filter(
 			(exercise) =>
 				exercise.pattern !== "sport" &&
 				(pattern === null || exercise.pattern === pattern) &&
 				(equipment === null || canDo(exercise, equipment)) &&
 				(!words || exercise.name.toLowerCase().includes(words)),
 		);
-	}, [query, pattern, equipment]);
+		// oxlint-disable-next-line react/exhaustive-deps -- savedExercises is what changes allExercises()
+	}, [query, pattern, equipment, savedExercises]);
 }
 
 /** Search, pattern chips and an "only what I can do" switch. */
@@ -177,11 +181,17 @@ export function ExerciseLibraryScreen() {
 	const [query, setQuery] = useState("");
 	const [pattern, setPattern] = useState<Pattern | null>(null);
 	const [mine, setMine] = useState(false);
-	const [open, setOpen] = useState<HowToTarget | null>(null);
+	const [open, setOpen] = useState<(HowToTarget & { id: string }) | null>(null);
 	const list = useFiltered(query, pattern, mine ? settings.equipment : null);
 
 	return (
-		<TrainingScreen>
+		<TrainingScreen
+			action={{
+				icon: "Line/Plus",
+				label: "New exercise",
+				onPress: () => trainingRoutes.exerciseEditor(),
+			}}
+		>
 			<ScreenTitle eyebrow={`${list.length} exercises`} title="Exercise library" />
 			<Filters
 				query={query}
@@ -203,7 +213,12 @@ export function ExerciseLibraryScreen() {
 						exercise={exercise}
 						last={index === list.length - 1}
 						onPress={() =>
-							setOpen({ name: exercise.name, photo: exercise.photo, line: catalogLine(exercise) })
+							setOpen({
+								id: exercise.id,
+								name: exercise.name,
+								photo: exercise.photo,
+								line: catalogLine(exercise),
+							})
 						}
 					/>
 				))}
@@ -213,7 +228,15 @@ export function ExerciseLibraryScreen() {
 					</PoText>
 				) : null}
 			</View>
-			<HowToSheet target={open} onClose={() => setOpen(null)} />
+			<HowToSheet
+				target={open}
+				onClose={() => setOpen(null)}
+				onEdit={() => {
+					const id = open?.id;
+					setOpen(null);
+					if (id) trainingRoutes.exerciseEditor(id);
+				}}
+			/>
 		</TrainingScreen>
 	);
 }

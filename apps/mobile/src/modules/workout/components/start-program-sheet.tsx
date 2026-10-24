@@ -5,6 +5,7 @@ import { PoText } from "@/components/ui/po-text";
 import { Sheet } from "@/components/ui/sheet";
 import { haptics } from "@/lib/haptics";
 import { startProgram } from "../data/training-actions";
+import { type Activity, presetForKind } from "../lib/activities";
 import { EQUIPMENT, EQUIPMENT_LABELS, type Equipment, exerciseById } from "../lib/exercise-guide";
 import { chainsIn, defaultStep } from "../lib/programs/engine";
 import {
@@ -23,18 +24,6 @@ import {
 } from "../lib/training-model";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-/** Tapping a weekday cycles through these: nothing, then each team sport. */
-const TEAM_CYCLE: readonly (Sport | null)[] = [null, "football", "volleyball"];
-const TEAM_LABELS: Partial<Record<Sport, string>> = {
-	football: "Football",
-	volleyball: "Volleyball",
-};
-
-function nextTeam(current: Sport | null): Sport | null {
-	const index = TEAM_CYCLE.indexOf(current);
-	return TEAM_CYCLE[(index + 1) % TEAM_CYCLE.length] ?? null;
-}
-
 function Label({ title, hint }: { title: string; hint?: string }) {
 	return (
 		<View style={styles.label}>
@@ -57,6 +46,7 @@ export function StartProgramSheet({
 	settings,
 	progress,
 	plan,
+	activities,
 	switchingFrom,
 	visible,
 	onClose,
@@ -67,6 +57,8 @@ export function StartProgramSheet({
 	progress: ReadonlyMap<string, Progress>;
 	/** This week's plan, so days already gone keep what they had. */
 	plan: WeekPlan | null;
+	/** The person's activities, for fixed days. */
+	activities: readonly Activity[];
 	switchingFrom: string | null;
 	visible: boolean;
 	onClose: () => void;
@@ -85,6 +77,8 @@ export function StartProgramSheet({
 	const [fixed, setFixed] = useState<FixedDay[]>(settings.fixedDays);
 	const [steps, setSteps] = useState<Partial<Record<ChainId, number>>>({});
 	const [saving, setSaving] = useState(false);
+	/** The weekday whose activity is being picked. */
+	const [editingDay, setEditingDay] = useState<number | null>(null);
 	const [notice, setNotice] = useState<string | null>(null);
 
 	// Fresh choices each time the sheet opens.
@@ -109,13 +103,17 @@ export function StartProgramSheet({
 	const missing = program.equipment.filter((item) => !equipment.includes(item));
 	// Thursday onwards, week 1 starts next Monday.
 	const startsNow = (new Date().getDay() + 6) % 7 <= 2;
-	const teamOn = (weekday: number) => fixed.find((day) => day.weekday === weekday)?.sport ?? null;
-	const toggleTeam = (weekday: number) => {
-		const next = nextTeam(teamOn(weekday));
+	const activityOn = (weekday: number) =>
+		fixed.find((day) => day.weekday === weekday)?.activity ?? null;
+	const nameOf = (id: string) =>
+		activities.find((activity) => activity.id === id)?.name ??
+		(id.startsWith("sport:") ? presetForKind(id.slice(6) as Sport).name : "Activity");
+	const assign = (weekday: number, activity: string | null) => {
 		setFixed((current) => [
 			...current.filter((day) => day.weekday !== weekday),
-			...(next ? [{ weekday, sport: next }] : []),
+			...(activity ? [{ weekday, activity }] : []),
 		]);
+		setEditingDay(null);
 	};
 
 	const start = async () => {
@@ -220,22 +218,44 @@ export function StartProgramSheet({
 					</PoText>
 				) : null}
 				<Label
-					title="Team days"
-					hint="Tap a day for football or volleyball. Training works around them."
+					title="Fixed days"
+					hint="Matches, classes or club nights you already do. Tap a day, then pick the activity; training works around them."
 				/>
 				<View style={styles.wrap}>
 					{WEEKDAYS.map((name, weekday) => {
-						const team = teamOn(weekday);
+						const activity = activityOn(weekday);
 						return (
 							<FilterChip
 								key={name}
-								label={team ? `${name} · ${TEAM_LABELS[team]}` : name}
-								selected={team !== null}
-								onPress={() => toggleTeam(weekday)}
+								label={activity ? `${name} · ${nameOf(activity)}` : name}
+								selected={activity !== null || editingDay === weekday}
+								onPress={() => setEditingDay(editingDay === weekday ? null : weekday)}
 							/>
 						);
 					})}
 				</View>
+				{editingDay !== null ? (
+					<View style={styles.wrap}>
+						<FilterChip
+							label="Nothing fixed"
+							selected={activityOn(editingDay) === null}
+							onPress={() => assign(editingDay, null)}
+						/>
+						{activities.map((activity) => (
+							<FilterChip
+								key={activity.id}
+								label={activity.name}
+								selected={activityOn(editingDay) === activity.id}
+								onPress={() => assign(editingDay, activity.id)}
+							/>
+						))}
+						{activities.length === 0 ? (
+							<PoText variant="meta13" tone="textSecondary">
+								Add your activities (football, swimming, a class) on Training Home to pin them here.
+							</PoText>
+						) : null}
+					</View>
+				) : null}
 				{chains.length > 0 ? (
 					<>
 						<Label

@@ -184,7 +184,8 @@ export type Progress = {
 export type FixedDay = {
 	/** 0 = Monday. */
 	weekday: number;
-	sport: Sport;
+	/** The activity id that day ("sport:football" for days saved before activities). */
+	activity: string;
 };
 
 export type ActiveProgram = { id: string; startedOn: string };

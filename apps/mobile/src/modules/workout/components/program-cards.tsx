@@ -58,7 +58,7 @@ export function ProgramRow({
 				styles.row,
 				{
 					backgroundColor: colors.bgSurface,
-					borderColor: active ? colors.accentDefault : colors.borderDefault,
+					borderColor: colors.borderDefault,
 				},
 			]}
 		>
@@ -97,7 +97,7 @@ export function ActiveProgramCard({
 			onPress={onPress}
 			style={[
 				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.accentDefault },
+				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
 			]}
 		>
 			<View style={styles.head}>

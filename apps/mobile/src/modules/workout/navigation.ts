@@ -21,5 +21,8 @@ export const trainingRoutes = {
 			},
 		}),
 	exercises: () => router.push("/training/exercises"),
+	calendar: () => router.push("/calendar"),
+	exerciseEditor: (id?: string) =>
+		router.push({ pathname: "/training/exercise-editor", params: id ? { id } : {} }),
 	today: () => router.dismissTo("/"),
 } as const;

@@ -67,6 +67,10 @@ export type Session = {
 	climbM: number | null;
 	avgHr: number | null;
 	note: string;
+	/** The person's activity it was, for sessions logged against one. */
+	activity?: string;
+	/** That activity's own numbers ("goals": 2). */
+	metrics?: Record<string, number>;
 };
 
 /** One day of the week's program; the id of the plan is that week's Monday. */
@@ -180,9 +184,14 @@ function parseFixedDays(raw: unknown): FixedDay[] {
 	const days = asArray(raw, (item): FixedDay | null => {
 		if (!isRecord(item)) return null;
 		const weekday = Math.round(asNumber(item.weekday, -1));
+		if (weekday < 0 || weekday > 6) return null;
+		const activity = asString(item.activity, "");
+		if (activity) return { weekday, activity: activity.slice(0, 60) };
+		// Team days saved before activities existed pointed at a sport.
 		const sport = asString(item.sport, "");
-		if (weekday < 0 || weekday > 6 || !(SPORTS as readonly string[]).includes(sport)) return null;
-		return { weekday, sport: sport as Sport };
+		return (SPORTS as readonly string[]).includes(sport)
+			? { weekday, activity: `sport:${sport}` }
+			: null;
 	});
 	const seen = new Set<number>();
 	return days.filter((day) => !seen.has(day.weekday) && seen.add(day.weekday));
@@ -228,7 +237,22 @@ export function parseSession(raw: unknown): Session | null {
 			typeof raw.climbM === "number" && Number.isFinite(raw.climbM) ? Math.round(raw.climbM) : null,
 		avgHr: positiveOrNull(raw.avgHr),
 		note: asString(raw.note, "").slice(0, 500),
+		...(typeof raw.activity === "string" && raw.activity
+			? { activity: raw.activity.slice(0, 60) }
+			: {}),
+		...parseMetrics(raw.metrics),
 	};
+}
+
+function parseMetrics(raw: unknown): { metrics?: Record<string, number> } {
+	if (!isRecord(raw)) return {};
+	const metrics: Record<string, number> = {};
+	for (const [key, value] of Object.entries(raw).slice(0, 8)) {
+		if (typeof value === "number" && Number.isFinite(value) && key.length <= 30) {
+			metrics[key] = Math.round(value * 100) / 100;
+		}
+	}
+	return Object.keys(metrics).length > 0 ? { metrics } : {};
 }
 
 export function parsePlan(raw: unknown): WeekPlan | null {

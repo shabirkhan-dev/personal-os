@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Linking, StyleSheet, View } from "react-native";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
@@ -5,6 +6,7 @@ import { Sheet } from "@/components/ui/sheet";
 import { usePoTheme } from "@/theme";
 import { DEMO_CREDIT, guideFor, videoSearchUrl } from "../lib/exercise-guide";
 import { type Exercise, setsLabel } from "../lib/library";
+import { DrivePlayer } from "./drive-player";
 import { ExerciseDemo } from "./exercise-demo";
 
 export type HowToTarget = {
@@ -26,12 +28,19 @@ export function plannedLine(exercise: Exercise): string {
 export function HowToSheet({
 	target,
 	onClose,
+	onEdit,
 }: {
 	target: HowToTarget | null;
 	onClose: () => void;
+	/** Opens the exercise editor (from the library). */
+	onEdit?: () => void;
 }) {
 	const { colors } = usePoTheme();
 	const guide = target ? guideFor(target.name) : null;
+	const video = guide?.media?.video;
+	// Keyed by exercise, so opening another one starts on its demo again.
+	const [playingFor, setPlayingFor] = useState<string | null>(null);
+	const playing = target !== null && playingFor === target.name;
 
 	const watch = () => {
 		if (!target) return;
@@ -44,7 +53,11 @@ export function HowToSheet({
 		<Sheet visible={target !== null} title={target?.name ?? ""} onClose={onClose}>
 			{target ? (
 				<View style={styles.body}>
-					<ExerciseDemo name={target.name} photo={target.photo} height={200} radius={20} />
+					{playing && video ? (
+						<DrivePlayer link={video} />
+					) : (
+						<ExerciseDemo name={target.name} photo={target.photo} height={200} radius={20} />
+					)}
 					<PoText variant="meta13" tone="textSecondary">
 						{target.line}
 					</PoText>
@@ -62,9 +75,24 @@ export function HowToSheet({
 							))}
 						</View>
 					) : null}
-					<PillButton label="Watch a video" variant="secondary" onPress={watch} />
+					{video ? (
+						<PillButton
+							label={playing ? "Show the demo" : "Play video"}
+							variant="secondary"
+							onPress={() => setPlayingFor(playing ? null : (target?.name ?? null))}
+						/>
+					) : (
+						<PillButton label="Find a video" variant="secondary" onPress={watch} />
+					)}
+					{onEdit ? (
+						<PillButton label="Edit cues, photo or video" variant="ghost" onPress={onEdit} />
+					) : null}
 					<PoText variant="meta13" tone="textTertiary">
-						{guide?.demo ? `${DEMO_CREDIT}. Videos open on YouTube.` : "Videos open on YouTube."}
+						{video
+							? "Video from your Google Drive."
+							: guide?.demo
+								? `${DEMO_CREDIT}. Add your own photo, animation or video from the exercise library.`
+								: "Add your own photo, animation or video from the exercise library."}
 					</PoText>
 				</View>
 			) : null}

@@ -1,5 +1,5 @@
 import { newId } from "@/lib/day";
-import { CATALOG, canDo, type Equipment, exerciseById } from "../exercise-guide";
+import { allExercises, canDo, type Equipment, exerciseById } from "../exercise-guide";
 import { SPORTS, type Sport } from "../training-model";
 import {
 	CHAINS,
@@ -39,15 +39,15 @@ export type DraftRequest = {
 
 /** The exercises sent to the AI: what someone can do, with sport blocks left out. */
 export function draftCatalog(equipment: readonly Equipment[]) {
-	return CATALOG.filter(
-		(exercise) => exercise.pattern !== "sport" && canDo(exercise, equipment),
-	).map((exercise) => ({
-		id: exercise.id,
-		name: exercise.name,
-		pattern: exercise.pattern,
-		level: exercise.level,
-		unit: exercise.unit,
-	}));
+	return allExercises()
+		.filter((exercise) => exercise.pattern !== "sport" && canDo(exercise, equipment))
+		.map((exercise) => ({
+			id: exercise.id,
+			name: exercise.name,
+			pattern: exercise.pattern,
+			level: exercise.level,
+			unit: exercise.unit,
+		}));
 }
 
 function chainOf(exerciseId: string): ChainId | null {

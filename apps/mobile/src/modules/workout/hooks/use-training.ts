@@ -3,6 +3,8 @@ import { useCollection } from "@/lib/db/collection";
 import { dayKey } from "@/lib/day";
 import { useNow } from "@/lib/use-now";
 import {
+	trainingActivities,
+	trainingExercises,
 	trainingPlans,
 	trainingPrograms,
 	trainingProgress,
@@ -11,6 +13,7 @@ import {
 	trainingSkills,
 } from "../data/collections";
 import { ensureWeek, migrateOldWorkout } from "../data/training-actions";
+import { setCustomExercises } from "../lib/exercise-guide";
 import { setTemplateResolver, templateById } from "../lib/library";
 import { BUILT_IN_PROGRAMS } from "../lib/programs/built-in";
 import { programById, resolveTemplate, weekNumber } from "../lib/programs/engine";
@@ -28,6 +31,8 @@ export function useTraining() {
 	const skillList = useCollection(trainingSkills);
 	const programList = useCollection(trainingPrograms);
 	const progressList = useCollection(trainingProgress);
+	const activityList = useCollection(trainingActivities);
+	const exerciseList = useCollection(trainingExercises);
 
 	useEffect(() => {
 		migration ??= migrateOldWorkout().catch((error: unknown) =>
@@ -36,7 +41,19 @@ export function useTraining() {
 	}, []);
 
 	const data = useMemo(() => {
-		const queries = [settingsList, sessionList, planList, skillList, programList, progressList];
+		const queries = [
+			settingsList,
+			sessionList,
+			planList,
+			skillList,
+			programList,
+			progressList,
+			activityList,
+			exerciseList,
+		];
+		const activities = [...(activityList.data ?? [])].sort((a, b) => a.name.localeCompare(b.name));
+		const exercises = exerciseList.data ?? [];
+		setCustomExercises(exercises);
 		const custom = [...(programList.data ?? [])].sort((a, b) =>
 			(b.createdAt ?? "").localeCompare(a.createdAt ?? ""),
 		);
@@ -47,7 +64,7 @@ export function useTraining() {
 		const settings = settingsList.data?.[0] ?? defaultSettings();
 		// Program sessions ("p:hybrid-athlete:3:push") are built from the programs and levels. Set
 		// here, during render, so the screen reading this data resolves them right away.
-		setTemplateResolver((id) => resolveTemplate(id, { programs, progress, settings }));
+		setTemplateResolver((id) => resolveTemplate(id, { programs, progress, settings, activities }));
 		return {
 			loading: queries.some((query) => query.isPending),
 			error: queries.find((query) => query.error)?.error ?? null,
@@ -60,8 +77,19 @@ export function useTraining() {
 			programs,
 			customPrograms: custom,
 			progress,
+			activities,
+			savedExercises: exercises,
 		};
-	}, [settingsList, sessionList, planList, skillList, programList, progressList]);
+	}, [
+		settingsList,
+		sessionList,
+		planList,
+		skillList,
+		programList,
+		progressList,
+		activityList,
+		exerciseList,
+	]);
 
 	return data;
 }
@@ -96,10 +124,16 @@ export function useTrainingToday() {
 		const week = weekDays(now);
 		const plan = data.plans.find((item) => item.id === week[0]) ?? null;
 		const slot = plan?.slots.find((item) => item.day === today) ?? null;
-		const context = { programs: data.programs, progress: data.progress, settings: data.settings };
-		const template = slot?.template?.startsWith("p:")
-			? resolveTemplate(slot.template, context)
-			: templateById(slot?.template);
+		const context = {
+			programs: data.programs,
+			progress: data.progress,
+			settings: data.settings,
+			activities: data.activities,
+		};
+		const template =
+			slot?.template?.startsWith("p:") || slot?.template?.startsWith("a:")
+				? resolveTemplate(slot.template, context)
+				: templateById(slot?.template);
 		return {
 			week,
 			plan,

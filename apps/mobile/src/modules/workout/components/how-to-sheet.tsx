@@ -4,7 +4,8 @@ import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
 import { Sheet } from "@/components/ui/sheet";
 import { usePoTheme } from "@/theme";
-import { DEMO_CREDIT, guideFor, videoSearchUrl } from "../lib/exercise-guide";
+import { useGuide } from "../hooks/use-catalog";
+import { DEMO_CREDIT, videoSearchUrl } from "../lib/exercise-guide";
 import { type Exercise, setsLabel } from "../lib/library";
 import { DrivePlayer } from "./drive-player";
 import { ExerciseDemo } from "./exercise-demo";
@@ -36,7 +37,7 @@ export function HowToSheet({
 	onEdit?: () => void;
 }) {
 	const { colors } = usePoTheme();
-	const guide = target ? guideFor(target.name) : null;
+	const guide = useGuide(target?.name ?? "");
 	const video = guide?.media?.video;
 	// Keyed by exercise, so opening another one starts on its demo again.
 	const [playingFor, setPlayingFor] = useState<string | null>(null);

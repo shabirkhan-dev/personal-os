@@ -12,6 +12,7 @@ import { startSession } from "../hooks/live-actions";
 import { useTrainingToday } from "../hooks/use-training";
 import { type Exercise, setsLabel, TEMPLATES, templateById } from "../lib/library";
 import { guideFor } from "../lib/exercise-guide";
+import { resolveTemplate } from "../lib/programs/engine";
 import { heroOf } from "../lib/photos";
 import { withSlot } from "../lib/training-math";
 import { SPORT_LABELS } from "../lib/training-model";
@@ -28,7 +29,18 @@ export function PlanScreen({ templateId }: { templateId?: string }) {
 	const { data, plan, today, template: todays } = useTrainingToday();
 	const [swapping, setSwapping] = useState(false);
 	const [howTo, setHowTo] = useState<Exercise | null>(null);
-	const template = templateById(templateId) ?? todays ?? templateById("pull-core");
+	// Program sessions and activity days are built from this person's data, so it's passed in.
+	const template =
+		(templateId?.startsWith("p:") || templateId?.startsWith("a:")
+			? resolveTemplate(templateId, {
+					programs: data.programs,
+					progress: data.progress,
+					settings: data.settings,
+					activities: data.activities,
+				})
+			: templateById(templateId)) ??
+		todays ??
+		templateById("pull-core");
 	if (!template) {
 		return (
 			<TrainingScreen>

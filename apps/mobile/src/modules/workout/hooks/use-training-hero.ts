@@ -3,9 +3,9 @@ import { sessionsOnDay } from "../lib/training-math";
 import { trainingRoutes } from "../navigation";
 import { useTrainingToday } from "./use-training";
 
-/** "Training · phase 1, this week / 3 of 5 sessions". */
+/** "Training · Hybrid Athlete week 3 / 3 of 5 sessions", or "Training · this week". */
 export function useTrainingHero(): HomeHero {
-	const { data, count } = useTrainingToday();
+	const { data, count, active } = useTrainingToday();
 	if (!data.settings.setUp) {
 		const total = data.sessions.length;
 		return {
@@ -15,7 +15,10 @@ export function useTrainingHero(): HomeHero {
 		};
 	}
 	return {
-		label: `Training · phase ${data.settings.phase}, this week`,
+		label:
+			active && !active.finished && !active.upcoming
+				? `Training · ${active.program.title} week ${active.week}`
+				: "Training · this week",
 		value: String(count.done),
 		faint: ` of ${count.goal} sessions`,
 		onLabelPress: trainingRoutes.week,

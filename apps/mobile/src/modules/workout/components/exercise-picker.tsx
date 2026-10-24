@@ -5,9 +5,9 @@ import { PoText } from "@/components/ui/po-text";
 import { Sheet } from "@/components/ui/sheet";
 import { TextField } from "@/components/ui/text-field";
 import { usePoTheme } from "@/theme";
+import { useCatalog } from "../hooks/use-catalog";
 import { useTraining } from "../hooks/use-training";
 import {
-	allExercises,
 	type CatalogExercise,
 	canDo,
 	type Equipment,
@@ -34,19 +34,18 @@ function useFiltered(
 	pattern: Pattern | null,
 	equipment: readonly Equipment[] | null,
 ) {
-	// Saved exercises change the merged list; reading them here re-runs the filter when they do.
-	const { savedExercises } = useTraining();
+	// The merged exercises as state, so a new or changed exercise shows straight away.
+	const byName = useCatalog((state) => state.byName);
 	return useMemo(() => {
 		const words = query.trim().toLowerCase();
-		return allExercises().filter(
+		return [...byName.values()].filter(
 			(exercise) =>
 				exercise.pattern !== "sport" &&
 				(pattern === null || exercise.pattern === pattern) &&
 				(equipment === null || canDo(exercise, equipment)) &&
 				(!words || exercise.name.toLowerCase().includes(words)),
 		);
-		// oxlint-disable-next-line react/exhaustive-deps -- savedExercises is what changes allExercises()
-	}, [query, pattern, equipment, savedExercises]);
+	}, [query, pattern, equipment, byName]);
 }
 
 /** Search, pattern chips and an "only what I can do" switch. */

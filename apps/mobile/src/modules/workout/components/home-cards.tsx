@@ -81,7 +81,9 @@ export function TodayCard({
 			? `${template.distanceKm ?? 5} km · about ${template.minutes} min`
 			: template.sport === "boxing"
 				? `${template.rounds} × ${template.roundMin} min rounds`
-				: `${template.exercises.length} exercises · ${template.minutes} min`;
+				: template.id.startsWith("a:")
+					? `${template.minutes} min · tap play to log it`
+					: `${template.exercises.length} ${template.exercises.length === 1 ? "exercise" : "exercises"} · ${template.minutes} min`;
 	return (
 		<Pressable
 			accessibilityRole="button"

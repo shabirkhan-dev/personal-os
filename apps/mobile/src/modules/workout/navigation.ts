@@ -25,4 +25,9 @@ export const trainingRoutes = {
 	exerciseEditor: (id?: string) =>
 		router.push({ pathname: "/training/exercise-editor", params: id ? { id } : {} }),
 	today: () => router.dismissTo("/"),
+	/** Back, or to `fallback` when the screen was opened directly (a link, a reload). */
+	back: (fallback: "/training/exercises" | "/training/programs") => {
+		if (router.canGoBack()) router.back();
+		else router.replace(fallback);
+	},
 } as const;

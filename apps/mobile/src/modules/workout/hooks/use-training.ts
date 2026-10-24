@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from "react";
+import { useCatalog } from "./use-catalog";
 import { useCollection } from "@/lib/db/collection";
 import { dayKey } from "@/lib/day";
 import { useNow } from "@/lib/use-now";
@@ -90,6 +91,12 @@ export function useTraining() {
 		activityList,
 		exerciseList,
 	]);
+
+	// Components reading the catalog recompute once the merged exercises change.
+	const saved = data.savedExercises;
+	useEffect(() => {
+		if (saved) useCatalog.getState().sync();
+	}, [saved]);
 
 	return data;
 }

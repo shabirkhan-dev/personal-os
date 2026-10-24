@@ -47,7 +47,11 @@ export function CalendarWeekCard() {
 				{days.map((day) => {
 					const date = new Date(`${day}T12:00:00`);
 					const sources = [
-						...new Set(itemsOn(calendar.items, day).map((item) => item.source)),
+						...new Set(
+							itemsOn(calendar.items, day)
+								.filter((item) => !item.endDate)
+								.map((item) => item.source),
+						),
 					].slice(0, 3);
 					const on = day === selected;
 					return (

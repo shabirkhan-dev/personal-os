@@ -30,6 +30,7 @@ import { trainingAiMessage, useTrainingAi } from "../services/training-ai";
 import { ExerciseThumb } from "./exercise-demo";
 import { ExercisePickerSheet } from "./exercise-picker";
 import { Card } from "./home-cards";
+import { trainingRoutes } from "../navigation";
 import { TrainingScreen } from "./training-screen";
 
 const WEEK_OPTIONS = [4, 6, 8, 12] as const;
@@ -370,7 +371,7 @@ export function ProgramBuilderScreen({ id, ai }: { id?: string; ai: boolean }) {
 					label="Cancel"
 					variant="secondary"
 					style={styles.flex}
-					onPress={() => router.back()}
+					onPress={() => trainingRoutes.back("/training/programs")}
 				/>
 				<PillButton
 					label={saving ? "Saving…" : "Save program"}

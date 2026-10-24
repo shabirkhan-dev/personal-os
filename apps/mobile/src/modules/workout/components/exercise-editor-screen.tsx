@@ -1,5 +1,4 @@
 import * as ImagePicker from "expo-image-picker";
-import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Alert, Pressable, StyleSheet, View } from "react-native";
 import { FilterChip, Footer, ScreenTitle } from "@/components/module-ui";
@@ -31,6 +30,7 @@ import { mediaTypeOf, uploadMedia } from "../services/media-upload";
 import { DrivePlayer } from "./drive-player";
 import { ExerciseDemo } from "./exercise-demo";
 import { Card } from "./home-cards";
+import { trainingRoutes } from "../navigation";
 import { TrainingScreen } from "./training-screen";
 
 const UNITS: readonly { id: ExerciseUnit; label: string }[] = [
@@ -92,7 +92,8 @@ export function ExerciseEditorScreen({ id }: { id?: string }) {
 	const current = id ? exerciseById(id) : null;
 	const isOwn = !builtIn;
 	const [draft, setDraft] = useState<Draft>(() => draftOf(current));
-	const loaded = useRef(current !== null || !id);
+	// Filled once saved exercises have loaded, so changes to a built-in one show when editing it.
+	const loaded = useRef(!id);
 	const [uploading, setUploading] = useState<"image" | "animation" | null>(null);
 	const [saving, setSaving] = useState(false);
 	const [notice, setNotice] = useState<string | null>(null);
@@ -100,10 +101,10 @@ export function ExerciseEditorScreen({ id }: { id?: string }) {
 
 	// An exercise that loads after the first render (synced data).
 	useEffect(() => {
-		if (loaded.current || !current) return;
+		if (loaded.current || data.loading || !current) return;
 		loaded.current = true;
 		setDraft(draftOf(current));
-	}, [current]);
+	}, [current, data.loading]);
 
 	const set = <K extends keyof Draft>(key: K, value: Draft[K]) =>
 		setDraft((previous) => ({ ...previous, [key]: value }));
@@ -191,7 +192,7 @@ export function ExerciseEditorScreen({ id }: { id?: string }) {
 		try {
 			await saveExercise(exercise);
 			haptics.success();
-			router.back();
+			trainingRoutes.back("/training/exercises");
 		} catch (error) {
 			console.error("[training] could not save the exercise", error);
 			setNotice("Couldn't save on this phone. Try again.");
@@ -213,7 +214,7 @@ export function ExerciseEditorScreen({ id }: { id?: string }) {
 					style: "destructive",
 					onPress: () => {
 						deleteExercise(id)
-							.then(() => router.back())
+							.then(() => trainingRoutes.back("/training/exercises"))
 							.catch((error: unknown) => {
 								console.error("[training] could not delete the exercise", error);
 								setNotice("Couldn't save on this phone. Try again.");

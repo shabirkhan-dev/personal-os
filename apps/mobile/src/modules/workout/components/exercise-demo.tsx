@@ -14,8 +14,8 @@ import Animated, {
 	withTiming,
 } from "react-native-reanimated";
 import { usePoTheme } from "@/theme";
+import { useGuide } from "../hooks/use-catalog";
 import { DEMO_FRAMES } from "../lib/demo-frames";
-import { guideFor } from "../lib/exercise-guide";
 import { TrainingImage } from "./training-image";
 
 /** How long each position shows, and the fade between them. */
@@ -40,7 +40,7 @@ export function ExerciseDemo({
 }) {
 	const { colors } = usePoTheme();
 	const reduceMotion = useReducedMotion();
-	const guide = guideFor(name);
+	const guide = useGuide(name);
 	const remote = guide?.media?.animation ?? guide?.media?.image;
 	const frames = guide?.demo ? DEMO_FRAMES[guide.demo] : [];
 	const [first, second] = frames;
@@ -111,7 +111,7 @@ export function ExerciseThumb({
 	radius?: number;
 }) {
 	const { colors } = usePoTheme();
-	const guide = guideFor(name);
+	const guide = useGuide(name);
 	const style = {
 		width: size,
 		height: size,

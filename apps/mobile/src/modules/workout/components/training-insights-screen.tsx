@@ -9,6 +9,7 @@ import { haptics } from "@/lib/haptics";
 import { useHomeView } from "@/modules/home/store/home-view";
 import { usePoTheme } from "@/theme";
 import { rebalanceWeek } from "../data/training-actions";
+import { useReadiness } from "../hooks/use-readiness";
 import { useTrainingToday } from "../hooks/use-training";
 import {
 	personalBests,
@@ -20,6 +21,16 @@ import {
 } from "../lib/training-math";
 import { trainingRoutes } from "../navigation";
 import { Card } from "./home-cards";
+import {
+	ActivityTotalsCard,
+	ConsistencyCard,
+	ExerciseProgressCard,
+	ReadinessCard,
+	RecordsCard,
+	TestsCard,
+	VolumeCard,
+	WeeklyReviewCard,
+} from "./progress-cards";
 import { TrainingScreen } from "./training-screen";
 
 type Range = "week" | "last" | "month";
@@ -43,7 +54,10 @@ const short = (day: string) => {
 	return `${date.getDate()} ${MONTHS[date.getMonth()]}`;
 };
 
-/** Training Insights: the week in a sentence, three numbers and what's worth acting on. */
+/**
+ * Training Insights: the week in a sentence, three numbers, what's worth acting on, readiness, an AI
+ * review, each exercise's progress, bests, volume by movement, consistency, activities and tests.
+ */
 export function TrainingInsightsScreen() {
 	const { colors } = usePoTheme();
 	const { data, now, today, plan, count } = useTrainingToday();
@@ -51,6 +65,7 @@ export function TrainingInsightsScreen() {
 	const [range, setRange] = useState<Range>("week");
 	const [hidden, setHidden] = useState<string[]>([]);
 	const { sessions } = data;
+	const ready = useReadiness(sessions, now);
 	const days = rangeDays(range, now);
 	const inRange = sessionsOnDays(sessions, days);
 	const km = runKm(sessions, days);
@@ -176,6 +191,18 @@ export function TrainingInsightsScreen() {
 					</Card>
 				);
 			})}
+			<ReadinessCard value={ready} />
+			<WeeklyReviewCard settings={data.settings} plan={plan} sessions={sessions} today={today} />
+			<ExerciseProgressCard sessions={sessions} />
+			<RecordsCard sessions={sessions} />
+			<VolumeCard sessions={sessions} now={now} />
+			<ConsistencyCard plans={data.plans} sessions={sessions} now={now} />
+			<ActivityTotalsCard
+				sessions={sessions}
+				activities={data.activities}
+				days={rangeDays("month", now)}
+			/>
+			<TestsCard sessions={sessions} programs={data.programs} />
 		</TrainingScreen>
 	);
 }

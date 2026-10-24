@@ -1,4 +1,3 @@
-import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import { Alert, Pressable, StyleSheet, View } from "react-native";
 import { EmptyCard, Footer, MetaChip, ScreenTitle } from "@/components/module-ui";
@@ -87,7 +86,7 @@ export function ProgramScreen({ id }: { id: string }) {
 					const ending = isActive ? endProgram(data.settings) : Promise.resolve();
 					ending
 						.then(() => deleteProgram(program))
-						.then(() => router.back())
+						.then(() => trainingRoutes.back("/training/programs"))
 						.catch(failed);
 				},
 			},

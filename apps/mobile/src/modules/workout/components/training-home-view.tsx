@@ -14,6 +14,7 @@ import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store"
 import { deleteSession, logSession, setUp } from "../data/training-actions";
 import { startSession } from "../hooks/live-actions";
 import { TRAINING_ASK_JOB, useTrainingUi } from "../hooks/training-ui-store";
+import { useReadiness } from "../hooks/use-readiness";
 import { useStepHistory } from "../hooks/use-step-history";
 import { useTrainingToday } from "../hooks/use-training";
 import { templateById } from "../lib/library";
@@ -42,6 +43,7 @@ import {
 	WeekDotsCard,
 } from "./home-cards";
 import { ActivitiesCard } from "./activities-card";
+import { ReadinessCard } from "./progress-cards";
 import { ActivityEditorSheet } from "./activity-editor-sheet";
 import { LogSheet } from "./log-sheet";
 import { ActiveProgramCard, ProgramPromptCard } from "./program-cards";
@@ -66,6 +68,7 @@ export function TrainingHomeView({ actionRequest }: HomeModuleViewProps) {
 	const { settings, sessions } = data;
 	const weightKg = useOnboardingStore((state) => state.weightKg);
 	const { history } = useStepHistory();
+	const ready = useReadiness(sessions, now);
 	const ui = useTrainingUi();
 	const ai = useTrainingAi();
 	const askJob = useAiJobs((state) => state.jobs[TRAINING_ASK_JOB]);
@@ -355,6 +358,7 @@ export function TrainingHomeView({ actionRequest }: HomeModuleViewProps) {
 		<>
 			{askBar}
 			{extras}
+			{sessions.length > 0 ? <ReadinessCard value={ready} /> : null}
 			{template ? (
 				<TodayCard
 					template={template}

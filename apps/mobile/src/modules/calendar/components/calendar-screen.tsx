@@ -202,7 +202,10 @@ export function CalendarScreen() {
 						{week.map((day) => {
 							const inMonth = Number(day.slice(5, 7)) - 1 === month.month;
 							const dayItems = itemsOn(visible, day);
-							const tones = [...new Set(dayItems.map((item) => item.source))].slice(0, 4);
+							// Week-long ranges (program weeks) would dot every day; only dated things get a dot.
+							const tones = [
+								...new Set(dayItems.filter((item) => !item.endDate).map((item) => item.source)),
+							].slice(0, 4);
 							const isSelected = day === selected;
 							return (
 								<Pressable

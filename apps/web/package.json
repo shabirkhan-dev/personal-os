@@ -12,13 +12,13 @@
   },
   "dependencies": {
     "@personal-os/tokens": "workspace:*",
-    "next": "^16.3.8",
+    "next": "^16.4.3",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
   },
   "devDependencies": {
     "@personal-os/typescript-config": "workspace:*",
-    "@types/node": "^26.6.3",
+    "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "typescript": "^7.0.2"

@@ -26,6 +26,14 @@ function starters(place: AssistantPlace): string[] {
 			"Move this to closed",
 		];
 	}
+	if (place.module === "finance") {
+		return [
+			"How am I doing for money?",
+			"Where did my money go this month?",
+			"I spent 1200 on lunch",
+			"Which bills are due?",
+		];
+	}
 	if (place.module === "career") {
 		return [
 			"How's my job hunt going?",
@@ -35,15 +43,15 @@ function starters(place: AssistantPlace): string[] {
 		];
 	}
 	return [
+		"How am I doing for money?",
 		"How's my job hunt going?",
-		"Which follow-ups are due?",
-		"Add a job I applied to",
+		"I spent 1200 on lunch",
 		"What can you do?",
 	];
 }
 
-/** Text with **bold** spans, the only formatting answers use. */
-function RichText({ text }: { text: string }) {
+/** A line with **bold** spans. */
+function Inline({ text }: { text: string }) {
 	const parts = text.split(/(\*\*[^*]+\*\*)/g).filter(Boolean);
 	return (
 		<PoText variant="body15">
@@ -57,6 +65,29 @@ function RichText({ text }: { text: string }) {
 				),
 			)}
 		</PoText>
+	);
+}
+
+/** Answer text: paragraphs, "- " bullets and **bold**, the formatting answers use. */
+function RichText({ text }: { text: string }) {
+	const { colors } = usePoTheme();
+	const blocks = text.split(/\n+/).filter((line) => line.trim());
+	return (
+		<View style={styles.paragraphs}>
+			{blocks.map((line, index) => {
+				const bullet = /^\s*(?:[-•*]|\d+[.)])\s+(.*)$/.exec(line);
+				return bullet ? (
+					<View key={index} style={styles.bullet}>
+						<View style={[styles.bulletDot, { backgroundColor: colors.textTertiary }]} />
+						<View style={styles.flex}>
+							<Inline text={bullet[1] ?? ""} />
+						</View>
+					</View>
+				) : (
+					<Inline key={index} text={line.trim()} />
+				);
+			})}
+		</View>
 	);
 }
 
@@ -165,8 +196,8 @@ export function AssistantChat() {
 						</View>
 						<PoText variant="title18">What can I do for you?</PoText>
 						<PoText variant="meta13" tone="textSecondary" style={styles.center}>
-							I can see your job hunt, add and update applications, book interviews and keep track
-							of what matters to you. I ask before changing anything.
+							I can see your money and your job hunt: log spending, pay bills, track applications
+							and book interviews. I ask before changing anything.
 						</PoText>
 						<View style={styles.starters}>
 							{starters(place).map((text) => (
@@ -283,6 +314,10 @@ const styles = StyleSheet.create({
 	answer: { gap: 10 },
 	// The medium weight of the type scale, at the body size.
 	bold: { fontFamily: medium.fontFamily, fontWeight: medium.fontWeight },
+	paragraphs: { gap: 8 },
+	bullet: { flexDirection: "row", gap: 10, paddingLeft: 2 },
+	bulletDot: { width: 5, height: 5, borderRadius: 3, marginTop: 9 },
+	flex: { flex: 1 },
 	steps: { gap: 4 },
 	step: { flexDirection: "row", alignItems: "center", gap: 6 },
 	error: { padding: 12, borderRadius: 14 },

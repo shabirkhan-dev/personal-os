@@ -1,4 +1,4 @@
-import { addDays, newId } from "../ids";
+import { addDays, newId } from "../dates";
 import type { Application, CareerEventKind, Contact, Halal, Interview, Stage } from "./model";
 
 /**

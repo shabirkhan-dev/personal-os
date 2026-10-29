@@ -19,6 +19,16 @@
 			"types": "./src/assistant/index.ts",
 			"import": "./src/assistant/index.ts",
 			"default": "./src/assistant/index.ts"
+		},
+		"./finance": {
+			"types": "./src/finance/index.ts",
+			"import": "./src/finance/index.ts",
+			"default": "./src/finance/index.ts"
+		},
+		"./dates": {
+			"types": "./src/dates.ts",
+			"import": "./src/dates.ts",
+			"default": "./src/dates.ts"
 		}
 	},
 	"scripts": {

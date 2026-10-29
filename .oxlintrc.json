@@ -42,6 +42,12 @@
 			}
 		},
 		{
+			"files": ["packages/domain/**/*.ts"],
+			"rules": {
+				"unicorn/no-array-sort": "off"
+			}
+		},
+		{
 			"files": ["apps/mobile/**/*.ts", "apps/mobile/**/*.tsx"],
 			"rules": {
 				"react/no-array-index-key": "off",

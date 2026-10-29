@@ -191,6 +191,9 @@ export default function TodayScreen() {
 			{view === "career" ? (
 				<AskAssistant place={{ module: "career", screen: "career home" }} />
 			) : null}
+			{view === "finance" ? (
+				<AskAssistant place={{ module: "finance", screen: "finance home" }} />
+			) : null}
 		</View>
 	);
 }

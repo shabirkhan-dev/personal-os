@@ -58,7 +58,24 @@ export type AppLink =
 	| { screen: "career-applications" }
 	| { screen: "career-application"; id: string }
 	| { screen: "career-prep"; id: string }
-	| { screen: "career-skill" };
+	| { screen: "career-skill" }
+	| { screen: "finance" }
+	| { screen: "finance-runway" }
+	| { screen: "finance-budget" }
+	| { screen: "finance-history" }
+	| { screen: "finance-income" }
+	| { screen: "finance-insights" };
+
+/** One row of a list card: a record, a bill, an entry. */
+export type ListItem = {
+	id: string;
+	title: string;
+	subtitle?: string;
+	/** Short value on the right: "Rs 2,400", "Due Mon". */
+	value?: string;
+	tone?: Tone;
+	link?: AppLink;
+};
 
 export type ApplicationSummary = {
 	id: string;
@@ -95,7 +112,30 @@ export type Card =
 	  }
 	| { kind: "change"; callId: string; title: string; detail: string; undone: boolean }
 	| { kind: "link"; label: string; link: AppLink }
-	| { kind: "choices"; prompt: string; options: string[] };
+	| { kind: "choices"; prompt: string; options: string[] }
+	/** One number that answers the question: "Runway · 142 days". */
+	| { kind: "metric"; label: string; value: string; detail?: string; tone?: Tone; link?: AppLink }
+	/** Rows of anything, with an optional value on the right. */
+	| { kind: "list"; title: string; items: ListItem[]; empty: string; more?: AppLink }
+	/** Bars to compare: spending per line, per week. Values are plain numbers; `unit` labels them. */
+	| {
+			kind: "chart";
+			title: string;
+			style: "bars" | "columns";
+			unit: string;
+			points: { label: string; value: number; display?: string; tone?: Tone }[];
+			note?: string;
+	  }
+	/** Use against a limit: budget lines, targets. */
+	| {
+			kind: "progress";
+			title: string;
+			items: { label: string; used: number; limit: number; text: string; tone?: Tone }[];
+	  }
+	/** What happened, in order: an application's history. */
+	| { kind: "timeline"; title: string; items: { when: string; text: string; tone?: Tone }[] }
+	/** Something to notice: a warning, a tip. */
+	| { kind: "callout"; tone: Tone; title: string; text: string };
 
 // --- Streaming -----------------------------------------------------------------------------------
 

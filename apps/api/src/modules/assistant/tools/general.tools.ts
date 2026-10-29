@@ -58,7 +58,17 @@ const forget = defineTool({
 	},
 });
 
-const SCREENS = ["career", "career-applications", "career-skill"] as const;
+const SCREENS = [
+	"career",
+	"career-applications",
+	"career-skill",
+	"finance",
+	"finance-runway",
+	"finance-budget",
+	"finance-history",
+	"finance-income",
+	"finance-insights",
+] as const;
 
 const openScreen = defineTool({
 	name: "show_screen_link",

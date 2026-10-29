@@ -1,3 +1,4 @@
+import { newEntry, payBillOps, unpaidBill } from "@personal-os/domain/finance";
 import { listItems, removeItem, saveItem } from "@/lib/db/collection";
 import { monthKey, newId } from "@/lib/day";
 import { deleteJson, readJson } from "@/lib/storage/json-file";
@@ -76,24 +77,8 @@ export function updateNumbers(
 	});
 }
 
-function entry(fields: Partial<Entry> & Pick<Entry, "kind" | "amount" | "title">): Entry {
-	return {
-		id: newId(),
-		category: "other",
-		note: "",
-		method: "cash",
-		sourceId: null,
-		clean: true,
-		purify: false,
-		billId: null,
-		billMonth: null,
-		movedFrom: null,
-		at: new Date().toISOString(),
-		receiptUri: null,
-		...fields,
-		amount: roundCents(fields.amount),
-	};
-}
+const entry = (fields: Partial<Entry> & Pick<Entry, "kind" | "amount" | "title">) =>
+	newEntry(fields);
 
 /** Log spending, one entry per item. */
 export async function logSpend(
@@ -173,8 +158,7 @@ export async function deleteEntry(item: Entry): Promise<void> {
 	if (item.billId) {
 		const bill = await currentBill(item.billId);
 		const month = billMonthOf(item);
-		if (bill)
-			await saveItem(financeBills, { ...bill, paid: bill.paid.filter((key) => key !== month) });
+		if (bill) await saveItem(financeBills, unpaidBill(bill, month));
 	}
 }
 
@@ -208,20 +192,10 @@ export async function deleteBill(bill: Bill): Promise<void> {
 
 /** "Pay Rs 2,400": a spending entry for the bill and the month marked paid. */
 export async function payBill(bill: Bill, due: Date, now = new Date()): Promise<Entry> {
-	const item = entry({
-		kind: "spend",
-		amount: bill.amount,
-		title: bill.name,
-		note: bill.provider,
-		category: bill.category,
-		method: "bank",
-		billId: bill.id,
-		billMonth: monthKey(due),
-		at: now.toISOString(),
-	});
-	await saveItem(financeEntries, item);
-	await saveItem(financeBills, { ...bill, paid: [...new Set([...bill.paid, monthKey(due)])] });
-	return item;
+	const paid = payBillOps(bill, due, now);
+	await saveItem(financeEntries, paid.entry);
+	await saveItem(financeBills, paid.bill);
+	return paid.entry;
 }
 
 /** Interest given away: out of the balance, but not counted as charity. */

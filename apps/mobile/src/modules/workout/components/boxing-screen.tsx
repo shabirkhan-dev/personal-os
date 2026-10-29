@@ -72,10 +72,10 @@ export function BoxingScreen() {
 		}
 	}, [live, state.done, state.work, state.round, state.withinWork, combo]);
 
-	if (!hydrated) return <TrainingScreen>{null}</TrainingScreen>;
+	if (!hydrated) return <TrainingScreen ask={false}>{null}</TrainingScreen>;
 	if (!live || !template || template.sport !== "boxing") {
 		return (
-			<TrainingScreen>
+			<TrainingScreen ask={false}>
 				<EmptyCard
 					icon="Clock"
 					title="Rounds timer"
@@ -97,6 +97,7 @@ export function BoxingScreen() {
 
 	return (
 		<TrainingScreen
+			ask={false}
 			action={{ icon: "Filled/Edit", label: "End session", onPress: () => setFinishing(true) }}
 		>
 			<ScreenTitle

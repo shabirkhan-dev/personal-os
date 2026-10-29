@@ -29,6 +29,16 @@
 			"types": "./src/dates.ts",
 			"import": "./src/dates.ts",
 			"default": "./src/dates.ts"
+		},
+		"./training": {
+			"types": "./src/training/index.ts",
+			"import": "./src/training/index.ts",
+			"default": "./src/training/index.ts"
+		},
+		"./food": {
+			"types": "./src/food/index.ts",
+			"import": "./src/food/index.ts",
+			"default": "./src/food/index.ts"
 		}
 	},
 	"scripts": {

@@ -194,6 +194,7 @@ export default function TodayScreen() {
 			{view === "finance" ? (
 				<AskAssistant place={{ module: "finance", screen: "finance home" }} />
 			) : null}
+			{view === "food" ? <AskAssistant place={{ module: "food", screen: "food home" }} /> : null}
 			{view === "workout" ? (
 				<AskAssistant place={{ module: "workout", screen: "training home" }} />
 			) : null}

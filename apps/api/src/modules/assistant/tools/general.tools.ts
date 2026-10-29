@@ -72,6 +72,11 @@ const SCREENS = [
 	"training-insights",
 	"training-programs",
 	"training-exercises",
+	"food",
+	"food-plan",
+	"food-grocery",
+	"food-recipes",
+	"food-insights",
 ] as const;
 
 const openScreen = defineTool({

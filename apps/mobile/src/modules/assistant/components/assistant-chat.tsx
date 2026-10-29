@@ -26,6 +26,30 @@ function starters(place: AssistantPlace): string[] {
 			"Move this to closed",
 		];
 	}
+	if (place.module === "skincare") {
+		return [
+			"What's left in my routine?",
+			"Did my morning routine",
+			"Is my skin getting better?",
+			"What do I need to reorder?",
+		];
+	}
+	if (place.module === "food") {
+		return [
+			"What have I eaten today?",
+			"How much protein is left?",
+			"Had 2 eggs and a paratha",
+			"How's my week of eating?",
+		];
+	}
+	if (place.module === "workout") {
+		return [
+			"How's my training this week?",
+			"How are my pull-ups going?",
+			"I ran 5 km in 28 minutes",
+			"When did I last box?",
+		];
+	}
 	if (place.module === "finance") {
 		return [
 			"How am I doing for money?",
@@ -196,8 +220,8 @@ export function AssistantChat() {
 						</View>
 						<PoText variant="title18">What can I do for you?</PoText>
 						<PoText variant="meta13" tone="textSecondary" style={styles.center}>
-							I can see your money and your job hunt: log spending, pay bills, track applications
-							and book interviews. I ask before changing anything.
+							I can see your money, food, training and job hunt: log meals, spending and workouts,
+							pay bills and track your progress. I ask before changing anything.
 						</PoText>
 						<View style={styles.starters}>
 							{starters(place).map((text) => (

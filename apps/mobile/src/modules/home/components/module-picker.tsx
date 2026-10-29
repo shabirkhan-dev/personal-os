@@ -103,14 +103,15 @@ export function ModulePicker({
 	onEdit,
 }: ModulePickerProps) {
 	const { colors } = usePoTheme();
-	const enabled = modules.filter((item) => item.enabled);
+	// Your routine (the minimum day) lives on Overview, so it has no row of its own once on.
+	const enabled = modules.filter((item) => item.enabled && item.id !== "daily-life");
 	const available = modules.filter((item) => !item.enabled);
 	const check = (
 		<View style={[styles.check, { backgroundColor: colors.bgInverse }]}>
 			<Icon name="Line/Check" size={16} color={colors.textInverse} />
 		</View>
 	);
-	const isShowing = (id: HomeView) => view === id || (id === "overview" && view === "daily-life");
+	const isShowing = (id: HomeView) => view === id;
 
 	return (
 		<View style={StyleSheet.absoluteFill}>
@@ -171,8 +172,8 @@ export function ModulePicker({
 							{...item}
 							name={item.label}
 							selected={isShowing(item.id)}
-							onPress={() => onSelect(item.id === "daily-life" ? "overview" : item.id)}
-							trailing={isShowing(item.id) && item.id !== "daily-life" ? check : null}
+							onPress={() => onSelect(item.id)}
+							trailing={isShowing(item.id) ? check : null}
 						/>
 					))}
 					{available.length > 0 ? <SectionLabel>Add a module</SectionLabel> : null}

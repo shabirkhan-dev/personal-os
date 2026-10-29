@@ -6,7 +6,6 @@ export type HomeView = "overview" | ModuleId;
 
 const views: readonly HomeView[] = [
 	"overview",
-	"daily-life",
 	"career",
 	"workout",
 	"finance",

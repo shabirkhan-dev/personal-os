@@ -3,7 +3,7 @@ import type { IconName } from "@/components/icons";
 import { dayRhythm } from "@/modules/onboarding/lib/insights";
 import { type ModuleId, moduleOptions, type ReminderId } from "@/modules/onboarding/lib/options";
 import { buildDayPlan, type PlanInput, type PlanRow } from "@/modules/onboarding/lib/plan";
-import { formatClock, formatDuration, wrapMinutes } from "@/modules/onboarding/lib/time";
+import { wrapMinutes } from "@/modules/onboarding/lib/time";
 
 type Tone = keyof ColorTokens;
 
@@ -15,13 +15,6 @@ export type TodayItem = {
 	meta: string;
 	icon: IconName;
 	tone: Tone;
-};
-
-export type Upcoming = {
-	/** The next item, with how long until it starts. */
-	next: (TodayItem & { startsIn: string; tomorrow: boolean }) | null;
-	/** Up to three items after `next`. */
-	later: TodayItem[];
 };
 
 const subtleTone: Partial<Record<Tone, Tone>> = {
@@ -84,24 +77,6 @@ export function todayItems(
 	return [...items].sort((a, b) => a.minutes - b.minutes);
 }
 
-/** Splits the timeline around the current minute; after the last item it rolls to tomorrow. */
-export function upcoming(items: readonly TodayItem[], nowMinutes: number): Upcoming {
-	if (items.length === 0) return { next: null, later: [] };
-	const startIndex = items.findIndex((item) => item.minutes > nowMinutes);
-	const tomorrow = startIndex === -1;
-	const ordered = tomorrow
-		? [...items]
-		: [...items.slice(startIndex), ...items.slice(0, startIndex)];
-	const [first, ...rest] = ordered;
-	if (!first) return { next: null, later: [] };
-	const wait = tomorrow ? first.minutes + 24 * 60 - nowMinutes : first.minutes - nowMinutes;
-	const laterToday = tomorrow ? rest : rest.filter((item) => item.minutes > nowMinutes);
-	return {
-		next: { ...first, startsIn: formatDuration(wait), tomorrow },
-		later: laterToday.slice(0, 3),
-	};
-}
-
 export type ModuleStatus = {
 	id: ModuleId;
 	label: string;
@@ -148,9 +123,4 @@ export function moduleStatuses(input: PlanInput, items: readonly TodayItem[]): M
 export function periodLabel(date: Date, currency = "PKR"): string {
 	const month = date.toLocaleString("en-US", { month: "short" }).toUpperCase();
 	return `${currency} · ${month}`;
-}
-
-/** "Now 16:20" chip value. */
-export function nowLabel(date: Date): string {
-	return `Now ${formatClock(date.getHours() * 60 + date.getMinutes())}`;
 }

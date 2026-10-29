@@ -68,6 +68,10 @@ const SCREENS = [
 	"finance-history",
 	"finance-income",
 	"finance-insights",
+	"training",
+	"training-insights",
+	"training-programs",
+	"training-exercises",
 ] as const;
 
 const openScreen = defineTool({

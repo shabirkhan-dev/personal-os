@@ -37,8 +37,9 @@ import { type Tool, type ToolContext, ToolError } from "./assistant.tool";
 import { careerTools } from "./tools/career.tools";
 import { financeTools } from "./tools/finance.tools";
 import { generalTools } from "./tools/general.tools";
+import { trainingTools } from "./tools/training.tools";
 
-const TOOLS: readonly Tool[] = [...careerTools, ...financeTools, ...generalTools];
+const TOOLS: readonly Tool[] = [...careerTools, ...financeTools, ...trainingTools, ...generalTools];
 const byName = new Map(TOOLS.map((tool) => [tool.name, tool]));
 
 /** The tools as the model sees them: name, description and a JSON schema of the input. */

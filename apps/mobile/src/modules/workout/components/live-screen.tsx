@@ -164,10 +164,10 @@ export function LiveScreen() {
 		wasResting.current = resting;
 	}, [resting, paused, exercise, live]);
 
-	if (!hydrated) return <TrainingScreen>{null}</TrainingScreen>;
+	if (!hydrated) return <TrainingScreen ask={false}>{null}</TrainingScreen>;
 	if (!live || !template || !exercise) {
 		return (
-			<TrainingScreen>
+			<TrainingScreen ask={false}>
 				<EmptyCard
 					icon="Filled/Play"
 					title="No session running"
@@ -234,6 +234,7 @@ export function LiveScreen() {
 
 	return (
 		<TrainingScreen
+			ask={false}
 			action={{ icon: "Filled/Edit", label: "Finish session", onPress: () => setFinishing(true) }}
 		>
 			<ScreenTitle

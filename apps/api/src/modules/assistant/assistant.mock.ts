@@ -10,6 +10,7 @@ export async function* mockCompletion(
 	const last = messages.at(-1);
 	if (last?.role === "user") {
 		const money = /money|spen[dt]|bill|budget|rs\b|afford/i.test(last.content);
+		const training = /train|workout|run|gym|session|exercise/i.test(last.content);
 		yield { type: "text", delta: "Let me look." };
 		yield {
 			type: "tool_calls",
@@ -17,7 +18,10 @@ export async function* mockCompletion(
 				{
 					id: `mock_${messages.length}`,
 					type: "function",
-					function: { name: money ? "finance_overview" : "career_overview", arguments: "{}" },
+					function: {
+						name: money ? "finance_overview" : training ? "training_overview" : "career_overview",
+						arguments: "{}",
+					},
 				},
 			],
 		};
@@ -31,7 +35,9 @@ export async function* mockCompletion(
 					? "your job hunt"
 					: "balance" in result
 						? "your money"
-						: null
+						: "thisWeek" in result
+							? "your training"
+							: null
 				: null;
 		yield {
 			type: "text",

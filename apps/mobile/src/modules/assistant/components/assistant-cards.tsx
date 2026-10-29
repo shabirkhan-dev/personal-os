@@ -13,6 +13,7 @@ import { PoText } from "@/components/ui/po-text";
 import { haptics } from "@/lib/haptics";
 import { careerRoutes } from "@/modules/career/navigation";
 import { financeRoutes } from "@/modules/finance/navigation";
+import { trainingRoutes } from "@/modules/workout/navigation";
 import { STAGE_LABELS, type Stage } from "@/modules/career/lib/career-model";
 import { usePoTheme } from "@/theme";
 
@@ -51,6 +52,21 @@ export function openLink(link: AppLink) {
 			return;
 		case "finance-insights":
 			financeRoutes.insights();
+			return;
+		case "training":
+			trainingRoutes.today();
+			return;
+		case "training-insights":
+			trainingRoutes.insights();
+			return;
+		case "training-programs":
+			trainingRoutes.programs();
+			return;
+		case "training-exercises":
+			trainingRoutes.exercises();
+			return;
+		case "training-session":
+			trainingRoutes.session(link.id);
 			return;
 	}
 }

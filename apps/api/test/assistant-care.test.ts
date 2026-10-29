@@ -59,21 +59,23 @@ function provider(...answers: unknown[][]) {
 const cards = (got: AssistantEvent[]) =>
 	got.flatMap((event) => (event.type === "card" ? [event.card] : [])) as Card[];
 
+/** A one-minute morning face step. */
+const step = (id: string, name: string, order: number) => ({
+	id,
+	routine: "morning",
+	area: "face",
+	name,
+	detail: "",
+	productId: null,
+	minutes: 1,
+	days: [],
+	short: name,
+	order,
+});
+
 /** A two-step morning routine, a habit and a cleanser opened 25 of its 30 days ago. */
 async function seed(token: string) {
 	const opened = new Date(Date.now() - 25 * 86_400_000).toISOString().slice(0, 10);
-	const step = (id: string, name: string, order: number) => ({
-		id,
-		routine: "morning",
-		area: "face",
-		name,
-		detail: "",
-		productId: null,
-		minutes: 1,
-		days: [],
-		short: name,
-		order,
-	});
 	const changes = [
 		{
 			collection: "assistant-settings",
@@ -105,11 +107,9 @@ async function seed(token: string) {
 		token,
 		body: {
 			cursor: null,
-			changes: changes.map((change) => ({
-				...change,
-				updatedAt: Date.now() - 1000,
-				deletedAt: null,
-			})),
+			changes: changes.map((change) =>
+				Object.assign({}, change, { updatedAt: Date.now() - 1000, deletedAt: null }),
+			),
 		},
 	});
 }

@@ -170,6 +170,15 @@ const careerOverview = defineTool({
 				],
 			},
 		];
+		if (apps.length > 0) {
+			cards.push({
+				kind: "chart",
+				title: "Applications by stage",
+				style: "columns",
+				unit: "",
+				points: STAGES.map((stage) => ({ label: STAGE_LABELS[stage], value: byStage[stage] })),
+			});
+		}
 		if (due.length > 0) {
 			cards.push({
 				kind: "records",
@@ -263,7 +272,19 @@ const getApplication = defineTool({
 						`${localDate(new Date(event.at), zone)} ${event.kind}${event.note ? `: ${event.note}` : ""}`,
 				),
 			},
-			cards: [recordCard(app)],
+			cards: [
+				recordCard(app),
+				{
+					kind: "timeline",
+					title: "History",
+					items: app.events.map((event) => ({
+						when: localDate(new Date(event.at), zone),
+						text: `${STAGE_LABELS[event.kind as Stage] ?? (event.kind === "nudged" ? "Followed up" : event.kind)}${event.note ? ` · ${event.note}` : ""}`,
+						tone:
+							event.kind === "offer" ? "success" : event.kind === "closed" ? "neutral" : "accent",
+					})),
+				},
+			],
 		};
 	},
 });

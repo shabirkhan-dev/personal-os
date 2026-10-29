@@ -12,6 +12,7 @@ import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
 import { haptics } from "@/lib/haptics";
 import { careerRoutes } from "@/modules/career/navigation";
+import { financeRoutes } from "@/modules/finance/navigation";
 import { STAGE_LABELS, type Stage } from "@/modules/career/lib/career-model";
 import { usePoTheme } from "@/theme";
 
@@ -33,8 +34,38 @@ export function openLink(link: AppLink) {
 		case "career-skill":
 			careerRoutes.skill();
 			return;
+		case "finance":
+			financeRoutes.today();
+			return;
+		case "finance-runway":
+			financeRoutes.runway();
+			return;
+		case "finance-budget":
+			financeRoutes.budget();
+			return;
+		case "finance-history":
+			financeRoutes.history();
+			return;
+		case "finance-income":
+			financeRoutes.income();
+			return;
+		case "finance-insights":
+			financeRoutes.insights();
+			return;
 	}
 }
+
+/** The fill colour of a tone, for bars and dots. */
+const FILL: Record<
+	Tone,
+	"accentDefault" | "statusSuccess" | "statusCaution" | "statusDanger" | "textTertiary"
+> = {
+	accent: "accentDefault",
+	success: "statusSuccess",
+	caution: "statusCaution",
+	danger: "statusDanger",
+	neutral: "textTertiary",
+};
 
 const TONE_COLOR: Record<
 	Tone,
@@ -244,6 +275,223 @@ export function AnswerCardView({ card, actions }: { card: AnswerCard; actions: C
 					<Icon name="Line/Chevron right" size={16} color={colors.textSecondary} />
 				</Pressable>
 			);
+		case "metric": {
+			const body = (
+				<>
+					<PoText variant="eyebrow11" tone="textTertiary">
+						{card.label.toUpperCase()}
+					</PoText>
+					<PoText variant="title30" tone={TONE_COLOR[card.tone ?? "neutral"]}>
+						{card.value}
+					</PoText>
+					{card.detail ? (
+						<PoText variant="meta13" tone="textSecondary">
+							{card.detail}
+						</PoText>
+					) : null}
+				</>
+			);
+			return card.link ? (
+				<Pressable accessibilityRole="button" onPress={() => openLink(card.link as AppLink)}>
+					<Card style={[styles.tight, styles.metric]}>{body}</Card>
+				</Pressable>
+			) : (
+				<Card style={[styles.tight, styles.metric]}>{body}</Card>
+			);
+		}
+		case "list":
+			return (
+				<Card style={styles.tight}>
+					<PoText variant="eyebrow11" tone="textTertiary">
+						{card.title.toUpperCase()}
+					</PoText>
+					{card.items.length === 0 ? (
+						<PoText variant="meta13" tone="textSecondary">
+							{card.empty}
+						</PoText>
+					) : (
+						<View>
+							{card.items.map((item, index) => (
+								<ListRow
+									key={item.id}
+									title={item.title}
+									subtitle={item.subtitle}
+									value={item.value}
+									valueTone={TONE_COLOR[item.tone ?? "neutral"]}
+									last={index === card.items.length - 1 && !card.more}
+									onPress={item.link ? () => openLink(item.link as AppLink) : undefined}
+								/>
+							))}
+							{card.more ? (
+								<ListRow
+									title="See all"
+									chevron
+									last
+									onPress={() => openLink(card.more as AppLink)}
+								/>
+							) : null}
+						</View>
+					)}
+				</Card>
+			);
+		case "chart": {
+			const max = Math.max(1, ...card.points.map((point) => point.value));
+			return (
+				<Card style={styles.tight}>
+					<PoText variant="eyebrow11" tone="textTertiary">
+						{card.title.toUpperCase()}
+					</PoText>
+					{card.style === "bars" ? (
+						<View style={styles.bars}>
+							{card.points.map((point) => (
+								<View
+									key={point.label}
+									style={styles.barRow}
+									accessible
+									accessibilityLabel={`${point.label}: ${point.display ?? point.value}`}
+								>
+									<PoText variant="meta13" numberOfLines={1} style={styles.barLabel}>
+										{point.label}
+									</PoText>
+									<View style={[styles.track, { backgroundColor: colors.bgSubtle }]}>
+										<View
+											style={[
+												styles.fill,
+												{
+													width: `${Math.max(3, (point.value / max) * 100)}%`,
+													backgroundColor: colors[FILL[point.tone ?? "accent"]],
+												},
+											]}
+										/>
+									</View>
+									<PoText variant="mono13" tone="textSecondary" style={styles.barValue}>
+										{point.display ?? String(point.value)}
+									</PoText>
+								</View>
+							))}
+						</View>
+					) : (
+						<View style={styles.columns}>
+							{card.points.map((point) => (
+								<View
+									key={point.label}
+									style={styles.column}
+									accessible
+									accessibilityLabel={`${point.label}: ${point.display ?? point.value}`}
+								>
+									<View style={styles.columnTrack}>
+										<View
+											style={[
+												styles.columnFill,
+												{
+													height: `${Math.max(2, (point.value / max) * 100)}%`,
+													backgroundColor: colors[FILL[point.tone ?? "accent"]],
+												},
+											]}
+										/>
+									</View>
+									<PoText variant="tab11" tone="textTertiary" numberOfLines={1}>
+										{point.label}
+									</PoText>
+								</View>
+							))}
+						</View>
+					)}
+					{card.note ? (
+						<PoText variant="meta13" tone="textSecondary">
+							{card.note}
+						</PoText>
+					) : null}
+				</Card>
+			);
+		}
+		case "progress":
+			return (
+				<Card style={styles.tight}>
+					<PoText variant="eyebrow11" tone="textTertiary">
+						{card.title.toUpperCase()}
+					</PoText>
+					<View style={styles.bars}>
+						{card.items.map((item) => (
+							<View
+								key={item.label}
+								style={styles.progress}
+								accessible
+								accessibilityLabel={`${item.label}: ${item.text}`}
+							>
+								<View style={styles.progressHead}>
+									<PoText variant="text14Medium">{item.label}</PoText>
+									<PoText
+										variant="meta13"
+										tone={TONE_COLOR[item.tone === "accent" ? "neutral" : (item.tone ?? "neutral")]}
+									>
+										{item.text}
+									</PoText>
+								</View>
+								<View style={[styles.track, { backgroundColor: colors.bgSubtle }]}>
+									<View
+										style={[
+											styles.fill,
+											{
+												width: `${item.limit > 0 ? Math.min(100, Math.max(2, (item.used / item.limit) * 100)) : 100}%`,
+												backgroundColor: colors[FILL[item.tone ?? "accent"]],
+											},
+										]}
+									/>
+								</View>
+							</View>
+						))}
+					</View>
+				</Card>
+			);
+		case "timeline":
+			return (
+				<Card style={styles.tight}>
+					<PoText variant="eyebrow11" tone="textTertiary">
+						{card.title.toUpperCase()}
+					</PoText>
+					<View>
+						{card.items.map((item, index) => (
+							<View key={`${item.when}-${index}`} style={styles.step}>
+								<View style={styles.rail}>
+									<View
+										style={[styles.dot, { backgroundColor: colors[FILL[item.tone ?? "accent"]] }]}
+									/>
+									{index < card.items.length - 1 ? (
+										<View style={[styles.line, { backgroundColor: colors.borderDefault }]} />
+									) : null}
+								</View>
+								<View style={styles.stepText}>
+									<PoText variant="text14Medium">{item.text}</PoText>
+									<PoText variant="meta13" tone="textTertiary">
+										{item.when}
+									</PoText>
+								</View>
+							</View>
+						))}
+					</View>
+				</Card>
+			);
+		case "callout": {
+			const subtle =
+				card.tone === "danger"
+					? colors.statusDangerSubtle
+					: card.tone === "caution"
+						? colors.statusCautionSubtle
+						: card.tone === "success"
+							? colors.statusSuccessSubtle
+							: colors.accentSubtle;
+			return (
+				<View style={[styles.callout, { backgroundColor: subtle }]}>
+					<PoText variant="text14Medium" tone={TONE_COLOR[card.tone]}>
+						{card.title}
+					</PoText>
+					<PoText variant="meta13" tone="textSecondary">
+						{card.text}
+					</PoText>
+				</View>
+			);
+		}
 		case "choices":
 			return actions.live ? (
 				<View style={styles.choices}>
@@ -296,5 +544,24 @@ const styles = StyleSheet.create({
 		gap: 8,
 	},
 	choices: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+	metric: { gap: 4 },
+	bars: { gap: 10 },
+	barRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+	barLabel: { width: 84 },
+	barValue: { minWidth: 72, textAlign: "right" },
+	track: { flex: 1, height: 8, borderRadius: 4, overflow: "hidden" },
+	fill: { height: 8, borderRadius: 4 },
+	columns: { flexDirection: "row", alignItems: "flex-end", gap: 4, height: 120 },
+	column: { flex: 1, alignItems: "center", gap: 4, height: "100%" },
+	columnTrack: { flex: 1, width: "100%", justifyContent: "flex-end" },
+	columnFill: { width: "100%", borderRadius: 4 },
+	progress: { gap: 6 },
+	progressHead: { flexDirection: "row", justifyContent: "space-between", gap: 8 },
+	step: { flexDirection: "row", gap: 12 },
+	rail: { width: 10, alignItems: "center" },
+	dot: { width: 10, height: 10, borderRadius: 5, marginTop: 5 },
+	line: { width: 2, flex: 1, marginVertical: 2 },
+	stepText: { flex: 1, gap: 2, paddingBottom: 12 },
+	callout: { gap: 4, padding: 14, borderRadius: 16 },
 	choice: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999, borderWidth: 1 },
 });

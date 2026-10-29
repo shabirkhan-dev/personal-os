@@ -1,14 +1,15 @@
 import type { ModelChunk, ModelMessage } from "./assistant.provider";
 
 /**
- * A stand-in model for development and tests: for a new question it reads the job hunt with
- * `career_overview`, then answers from the tool's result. Deterministic, no network.
+ * A stand-in model for development and tests: for a new question it reads the money (questions
+ * about spending, bills, budget) or the job hunt, then answers. Deterministic, no network.
  */
 export async function* mockCompletion(
 	messages: readonly ModelMessage[],
 ): AsyncGenerator<ModelChunk> {
 	const last = messages.at(-1);
 	if (last?.role === "user") {
+		const money = /money|spen[dt]|bill|budget|rs\b|afford/i.test(last.content);
 		yield { type: "text", delta: "Let me look." };
 		yield {
 			type: "tool_calls",
@@ -16,7 +17,7 @@ export async function* mockCompletion(
 				{
 					id: `mock_${messages.length}`,
 					type: "function",
-					function: { name: "career_overview", arguments: "{}" },
+					function: { name: money ? "finance_overview" : "career_overview", arguments: "{}" },
 				},
 			],
 		};
@@ -24,11 +25,18 @@ export async function* mockCompletion(
 	}
 	if (last?.role === "tool") {
 		const result = safeJson(last.content);
-		const active = typeof result === "object" && result && "byStage" in result ? result : null;
+		const about =
+			typeof result === "object" && result
+				? "byStage" in result
+					? "your job hunt"
+					: "balance" in result
+						? "your money"
+						: null
+				: null;
 		yield {
 			type: "text",
-			delta: active
-				? " Here's where your job hunt stands. (Mock AI: set AI_PROVIDER to use a real model.)"
+			delta: about
+				? ` Here's where ${about} stands. (Mock AI: set AI_PROVIDER to use a real model.)`
 				: " Done.",
 		};
 		return;

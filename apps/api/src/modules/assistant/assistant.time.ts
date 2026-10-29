@@ -66,3 +66,24 @@ export function zonedToDate(local: string, timeZone: string): Date | null {
 	const result = new Date(guess);
 	return Number.isNaN(result.getTime()) ? null : result;
 }
+
+/** How far the person's zone is ahead of UTC at `date`, in ms (Asia/Karachi: +5 h). */
+export function zoneOffsetMs(date: Date, timeZone: string): number {
+	const p = partsIn(date, timeZone);
+	const wall = Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute);
+	return wall - Math.floor(date.getTime() / 60_000) * 60_000;
+}
+
+/**
+ * A clock for the shared date math, which reads calendar days and months from a Date's own
+ * fields. The API runs in UTC, so moving every time by the person's offset makes those fields
+ * their local day and month. `back` undoes it for times that are stored.
+ */
+export function localClock(now: Date, timeZone: string) {
+	const offset = zoneOffsetMs(now, timeZone);
+	return {
+		now: new Date(now.getTime() + offset),
+		shift: (iso: string) => new Date(Date.parse(iso) + offset).toISOString(),
+		back: (date: Date) => new Date(date.getTime() - offset),
+	};
+}

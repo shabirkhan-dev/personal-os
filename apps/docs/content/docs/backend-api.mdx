@@ -209,12 +209,16 @@ then `done` (`{ changed[], waiting }`) or `error` (`{ code, message }`). `change
 collections the answer wrote; the app syncs at once. `waiting: true` means a change waits on an
 approval card.
 
-Cards: `stats`, `records` (applications), `record`, `approval` (`waiting`, `approved` or
-`declined`), `change` (with Undo), `link` (an app screen) and `choices` (taps sent as the next
-message). A new message in a thread with undecided approvals declines them.
+Cards: `metric` (one number), `stats`, `list` (rows with values), `records` and `record`
+(applications), `chart` (`bars` or `columns`), `progress` (use against a limit), `timeline`,
+`callout`, `approval` (`waiting`, `approved` or `declined`), `change` (with Undo), `link` (an app
+screen) and `choices` (taps sent as the next message). A new message in a thread with undecided approvals declines them.
 
 **Tools.** Career: `career_overview`, `find_applications`, `get_application`, `add_application`,
-`update_application`, `book_interview`, `record_follow_up_sent`, `delete_application`. General:
+`update_application`, `book_interview`, `record_follow_up_sent`, `delete_application`. Finance:
+`finance_overview`, `find_entries`, `spending_breakdown`, `list_bills`, `log_spending`,
+`log_income`, `pay_bill`, `add_bill`, `set_budget_line`, `set_balance` (risky), `delete_entry`
+(risky); days and months are counted in the person's time zone. General:
 `remember`, `forget`, `show_screen_link`, `offer_choices`. Records are referred to by id or by
 words from the company or role; an ambiguous reference returns the candidates for the model to
 ask about. Writes go to `sync_records` as a newer version, exactly like a push from the phone,
@@ -336,6 +340,7 @@ Record every public API change, newest first, so consumers can see what moved.
 
 | Date | Change | Breaking |
 | --- | --- | --- |
+| 2026-10-30 | Assistant: Finance tools and the `metric`, `list`, `chart`, `progress`, `timeline` and `callout` cards | No |
 | 2026-10-30 | Added the assistant (`/assistant/*`: streamed messages, approvals, undo, threads, memories) and the `assistant-settings` collection | No |
 | 2026-10-24 | Added the `media` upload kind and `POST /assets/confirm`; Training syncs `training-activities` and `training-exercises`, and `calendar-events` holds personal calendar events | No |
 | 2026-10-24 | Added `POST /ai/training/program`; Training syncs `training-programs` and `training-progress` | No |

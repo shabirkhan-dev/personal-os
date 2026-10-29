@@ -125,6 +125,7 @@ export function RoutineScreen({ routine }: { routine: Routine }) {
 
 	return (
 		<CareScreen
+			ask={false}
 			action={{
 				icon: "Filled/Edit",
 				label: "Add a step",

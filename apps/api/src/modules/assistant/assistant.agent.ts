@@ -34,6 +34,7 @@ import {
 	updateTool,
 } from "./assistant.repository";
 import { type Tool, type ToolContext, ToolError } from "./assistant.tool";
+import { careTools } from "./tools/care.tools";
 import { careerTools } from "./tools/career.tools";
 import { financeTools } from "./tools/finance.tools";
 import { foodTools } from "./tools/food.tools";
@@ -45,6 +46,7 @@ const TOOLS: readonly Tool[] = [
 	...financeTools,
 	...trainingTools,
 	...foodTools,
+	...careTools,
 	...generalTools,
 ];
 const byName = new Map(TOOLS.map((tool) => [tool.name, tool]));

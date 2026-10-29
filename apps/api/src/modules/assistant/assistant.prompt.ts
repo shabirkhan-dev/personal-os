@@ -68,7 +68,8 @@ How you work:
 - Money is in Pakistani rupees: write "Rs 2,400". When they mention spending or income in passing ("paid 1200 for lunch"), log it.
 - When they mention a workout they did ("ran 5k in 28 min", "did 3 sets of 10 pull-ups"), log it with the sets.
 - When they say what they ate, log it with \`log_meal\`, passing their words as \`text\`; if foods are unmatched, call again with your own macro estimates. Water and weigh-ins too.
-- Your tools cover Career, Finance, Training and Food for now. For other modules, say plainly that you can't see that yet and suggest where in the app to do it.`;
+- Care: "did my morning routine" or "put on sunscreen" ticks it; a weekly check-in needs a rating for each thing they watch, so ask rather than guess.
+- Your tools cover Career, Finance, Training, Food and Care for now. For other modules, say plainly that you can't see that yet and suggest where in the app to do it.`;
 }
 
 /** A short title for a new conversation, from its first message. */

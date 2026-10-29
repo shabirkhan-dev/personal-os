@@ -5,7 +5,7 @@ description: The command surface and toolchain used across the monorepo.
 
 ## Package manager
 
-Use Bun for everything:
+Use Bun (`1.4.2`, pinned in `packageManager`) for everything:
 
 ```bash
 bun install
@@ -13,30 +13,43 @@ bun install
 
 Do not use npm, yarn, or pnpm in this repository.
 
-## Common root commands
+## Root commands
+
+| Command | What it does |
+| --- | --- |
+| `bun run dev` | Every dev server through Turbo: Metro, the API (`wrangler dev`), docs, landing page |
+| `bun run build` | Build every app |
+| `bun run lint` / `lint:fix` | oxlint across the workspace, plus ShellCheck on the scripts |
+| `bun run format` | oxfmt, plus shfmt on the scripts |
+| `bun run typecheck` | TypeScript in every workspace |
+| `bun run test` | Vitest for the API (against Postgres), `bun test` for the app |
+| `bun run preflight` | Lint, typecheck and tests: run before every push |
+| `bun run architecture:check` | Import boundaries between apps, packages and modules |
+| `bun run naming:check` | Kebab-case file and folder names |
+
+## Per app
 
 ```bash
-bun run dev
-bun run build
-bun run lint
-bun run format
-bun run typecheck
-bun run test
+docker compose up -d                       # Postgres on :5433 for the API
+bun --cwd=apps/api run db:migrate          # apply migrations
+bun --cwd=apps/api run db:generate         # write a migration after a schema change
+bun --cwd=apps/api run dev                 # API on http://localhost:4000/api/v1/health
+bun --cwd=apps/mobile run start            # Metro for the development build
+bun --cwd=apps/docs run dev                # this site on http://localhost:3002/docs
 ```
 
 ## Toolchain
 
-- **Turborepo**: Task orchestration and caching
-- **oxlint / oxfmt**: Linting and formatting for TS/JS
-- **Lefthook**: Git hooks (pre-commit and commit-msg)
-- **TypeScript**: Shared base config via `packages/typescript-config`
+- **Turborepo**: task orchestration and caching (`turbo.json`)
+- **oxlint / oxfmt**: linting and formatting for TS/JS (tabs, width 100)
+- **Lefthook**: pre-commit (format, lint, typecheck, architecture, secrets, 2 MB file guard) and
+  commit-msg (Conventional Commits, lowercase)
+- **TypeScript**: shared bases in `packages/typescript-config`
+- **Wrangler**: runs and deploys the API on Cloudflare Workers
+- **EAS**: builds and updates for the mobile app
 
-## CI expectations
+## CI
 
-Before opening a PR:
-
-1. Run lint and format locally.
-2. Run typecheck for TS changes.
-3. Run tests for affected apps or packages.
-
-These checks align with CI and reduce review friction.
+GitHub Actions run lint (with the architecture check), typecheck, build and tests on every PR,
+fail when the database schema changes without a migration, and run CodeQL. Dependabot opens
+weekly dependency updates; Expo SDK packages move only with SDK upgrades.

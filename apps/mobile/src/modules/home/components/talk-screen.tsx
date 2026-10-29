@@ -45,7 +45,8 @@ export function TalkScreen({ say }: { say?: string }) {
 
 	const handTo = (module: ModuleId, text: string, spoken: boolean) => {
 		send({ module, text, spoken });
-		updateView((doc) => ({ ...doc, view: module }));
+		// The day itself has no Home of its own: Overview takes its lines.
+		updateView((doc) => ({ ...doc, view: module === "daily-life" ? "overview" : module }));
 		router.dismissTo("/");
 	};
 

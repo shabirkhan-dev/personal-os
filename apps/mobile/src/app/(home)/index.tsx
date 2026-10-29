@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CalendarWeekCard } from "@/modules/calendar/components/calendar-week-card";
 import { careHome, useCareStatus } from "@/modules/care";
 import { careerHome, useCareerStatus } from "@/modules/career";
-import { DailyOverview, dailyHome, dailyRoutes, useDailyStatus } from "@/modules/daily";
+import { DailyOverview, dailyRoutes, useDailyLine, useDailyStatus } from "@/modules/daily";
 import { faithHome, useFaithStatus } from "@/modules/faith";
 import { fashionHome, useFashionStatus } from "@/modules/fashion";
 import { foodHome, useFoodStatus } from "@/modules/food";
@@ -31,12 +31,12 @@ import { useWorkoutStatus, workoutHome } from "@/modules/workout";
 import { KeyboardAwareScrollView } from "@/components/ui/keyboard-aware-scroll-view";
 import { PoText } from "@/components/ui/po-text";
 import { useNow } from "@/lib/use-now";
+import { voiceOut } from "@/lib/voice";
 import { usePoTheme } from "@/theme";
 
 const HEADER_HEIGHT = 66;
 
 const moduleHomes: Partial<Record<ModuleId, HomeModule>> = {
-	"daily-life": dailyHome,
 	career: careerHome,
 	finance: financeHome,
 	workout: workoutHome,
@@ -70,7 +70,6 @@ export default function TodayScreen() {
 
 	// Every module's hero is read on each render so the hooks stay in a fixed order.
 	const heroes: Partial<Record<ModuleId, HomeHero>> = {
-		"daily-life": dailyHome.useHero(),
 		career: careerHome.useHero(),
 		finance: financeHome.useHero(),
 		workout: workoutHome.useHero(),
@@ -94,9 +93,10 @@ export default function TodayScreen() {
 	const modules = moduleStatuses(plan.input, items);
 	for (const item of modules) item.status = liveStatus[item.id] ?? item.status;
 
-	// A module turned off elsewhere falls back to Overview.
+	// A module turned off elsewhere, or one without its own Home, falls back to Overview.
 	const view: HomeView =
-		viewDoc.view !== "overview" && !answers.modules.includes(viewDoc.view)
+		viewDoc.view !== "overview" &&
+		(!answers.modules.includes(viewDoc.view) || !moduleHomes[viewDoc.view])
 			? "overview"
 			: viewDoc.view;
 	const moduleHome = view === "overview" ? undefined : moduleHomes[view];
@@ -142,11 +142,7 @@ export default function TodayScreen() {
 							glow="accentDefault"
 							pickerOpen={pickerOpen}
 							onAppsPress={togglePicker}
-							action={
-								answers.modules.includes("daily-life")
-									? { icon: "Sun", label: "Morning brief", onPress: dailyRoutes.brief }
-									: { icon: "Mic", label: "Talk to OS", onPress: () => router.push("/listen") }
-							}
+							action={{ icon: "Sun", label: "Morning brief", onPress: dailyRoutes.brief }}
 						/>
 						<View style={styles.content}>
 							{view === "overview" ? (
@@ -187,7 +183,7 @@ export default function TodayScreen() {
 				bottomInset={insets.bottom}
 				onTodayPress={() => select("overview")}
 				onAreasPress={() => setPickerOpen(true)}
-				onInsightsPress={moduleHome?.onInsights}
+				onInsightsPress={moduleHome ? moduleHome.onInsights : dailyRoutes.insights}
 				onProfilePress={() => router.replace("/profile")}
 			/>
 		</View>
@@ -239,19 +235,24 @@ type OverviewBodyProps = {
 	onOpen: (view: HomeView) => void;
 };
 
-/** Overview: money at a glance, the ask bar, the minimum day and what is coming up today. */
+/** Overview, the day's hub: money at a glance, the ask bar, the day and the week's calendar. */
 function OverviewBody({ period, modules, amountsHidden, onOpen }: OverviewBodyProps) {
 	const finance = useFinanceSummary();
 	const send = useAskInbox((state) => state.send);
 	const [notice, setNotice] = useState<string | null>(null);
+	const say = (text: string, spoken: boolean) => {
+		setNotice(text);
+		if (spoken) voiceOut.speak(text);
+	};
+	const dayLine = useDailyLine(say);
 
-	// A line typed or said here goes to the module it belongs to, which logs or answers it.
-	// Daily life takes anything else ("what's next", sleep) when it is on.
+	// The day's own lines (sleep, "what's next", ticking the minimum day) are handled here; any
+	// other line goes to the module it belongs to, which logs or answers it.
 	const ask = (text: string, spoken: boolean) => {
-		const target =
-			routeLine(text, modules) ?? (modules.includes("daily-life") ? "daily-life" : null);
-		if (!target) {
-			setNotice("Say which part of your day it's for, like a meal, a prayer or money spent.");
+		if (dayLine(text, spoken)) return;
+		const target = routeLine(text, modules);
+		if (!target || target === "daily-life") {
+			say("Say which part of your day it's for, like a meal, a prayer or money spent.", spoken);
 			return;
 		}
 		setNotice(null);
@@ -292,7 +293,7 @@ function OverviewBody({ period, modules, amountsHidden, onOpen }: OverviewBodyPr
 					{notice}
 				</PoText>
 			) : null}
-			<DailyOverview onOpen={onOpen} />
+			<DailyOverview onOpen={onOpen} onNotice={setNotice} />
 			<CalendarWeekCard />
 		</>
 	);

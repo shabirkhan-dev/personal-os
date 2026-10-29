@@ -5,7 +5,7 @@ Personal OS is a mobile-first life operating system for planning and managing th
 It is built as a Bun + Turborepo monorepo with a product-focused Expo app, a Cloudflare Workers API, a documentation app, and a web landing page.
 
 <p align="center">
-  <img src=".github/assets/showcase.gif" alt="Personal OS: Training Home, programs and a program page" width="260" />
+  <img src=".github/assets/showcase.gif" alt="Personal OS: Training Home, programs and a program page" width="300" />
 </p>
 
 <p align="center">

@@ -28,6 +28,7 @@
     "@expo-google-fonts/amiri-quran": "^0.4.1",
     "@expo-google-fonts/jetbrains-mono": "^0.4.1",
     "@expo/metro-runtime": "~58.0.14",
+    "@personal-os/domain": "workspace:*",
     "@personal-os/tokens": "workspace:*",
     "@react-navigation/native": "^7.5.0",
     "@tanstack/react-query": "^5.104.0",

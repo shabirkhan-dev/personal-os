@@ -1,0 +1,35 @@
+{
+	"name": "@personal-os/domain",
+	"version": "0.0.0",
+	"private": true,
+	"sideEffects": false,
+	"type": "module",
+	"exports": {
+		"./parse": {
+			"types": "./src/parse.ts",
+			"import": "./src/parse.ts",
+			"default": "./src/parse.ts"
+		},
+		"./career": {
+			"types": "./src/career/index.ts",
+			"import": "./src/career/index.ts",
+			"default": "./src/career/index.ts"
+		},
+		"./assistant": {
+			"types": "./src/assistant/index.ts",
+			"import": "./src/assistant/index.ts",
+			"default": "./src/assistant/index.ts"
+		}
+	},
+	"scripts": {
+		"lint": "oxlint",
+		"lint:fix": "oxlint --fix",
+		"typecheck": "tsc --noEmit",
+		"test": "bun test"
+	},
+	"devDependencies": {
+		"@personal-os/typescript-config": "workspace:*",
+		"@types/bun": "^1.4.3",
+		"typescript": "^7.0.2"
+	}
+}

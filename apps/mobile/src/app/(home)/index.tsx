@@ -2,6 +2,7 @@ import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { AskAssistant, startConversation, useAssistant } from "@/modules/assistant";
 import { CalendarWeekCard } from "@/modules/calendar/components/calendar-week-card";
 import { careHome, useCareStatus } from "@/modules/care";
 import { careerHome, useCareerStatus } from "@/modules/career";
@@ -117,7 +118,7 @@ export default function TodayScreen() {
 	return (
 		<View style={[styles.root, { backgroundColor: colors.bgApp }]}>
 			<KeyboardAwareScrollView
-				contentContainerStyle={[styles.scroll, { paddingBottom: 110 + insets.bottom }]}
+				contentContainerStyle={[styles.scroll, { paddingBottom: 160 + insets.bottom }]}
 				keyboardShouldPersistTaps="handled"
 			>
 				{moduleHome && view !== "overview" ? (
@@ -186,6 +187,10 @@ export default function TodayScreen() {
 				onInsightsPress={moduleHome ? moduleHome.onInsights : dailyRoutes.insights}
 				onProfilePress={() => router.replace("/profile")}
 			/>
+			{view === "overview" ? <AskAssistant place={{ screen: "overview" }} /> : null}
+			{view === "career" ? (
+				<AskAssistant place={{ module: "career", screen: "career home" }} />
+			) : null}
 		</View>
 	);
 }
@@ -245,6 +250,7 @@ function OverviewBody({ period, modules, amountsHidden, onOpen }: OverviewBodyPr
 		if (spoken) voiceOut.speak(text);
 	};
 	const dayLine = useDailyLine(say);
+	const assistant = useAssistant();
 
 	// The day's own lines (sleep, "what's next", ticking the minimum day) are handled here; any
 	// other line goes to the module it belongs to, which logs or answers it.
@@ -252,7 +258,15 @@ function OverviewBody({ period, modules, amountsHidden, onOpen }: OverviewBodyPr
 		if (dayLine(text, spoken)) return;
 		const target = routeLine(text, modules);
 		if (!target || target === "daily-life") {
-			say("Say which part of your day it's for, like a meal, a prayer or money spent.", spoken);
+			// Questions and anything else go to the assistant, which answers from the person's data.
+			if (!assistant.available) {
+				say("Say which part of your day it's for, like a meal, a prayer or money spent.", spoken);
+				return;
+			}
+			setNotice(null);
+			startConversation({ screen: "overview" });
+			assistant.send(text);
+			router.push("/assistant");
 			return;
 		}
 		setNotice(null);
@@ -276,6 +290,13 @@ function OverviewBody({ period, modules, amountsHidden, onOpen }: OverviewBodyPr
 			: null,
 	].filter((item): item is { label: string; onPress: () => void } => item !== null);
 	const talk = { label: "Talk to OS", onPress: () => router.push("/listen") };
+	const askAi = {
+		label: "Ask AI",
+		onPress: () => {
+			startConversation({ screen: "overview" });
+			router.push("/assistant");
+		},
+	};
 
 	return (
 		<>
@@ -287,7 +308,7 @@ function OverviewBody({ period, modules, amountsHidden, onOpen }: OverviewBodyPr
 					onPress={() => onOpen("finance")}
 				/>
 			) : null}
-			<AskBar suggestions={[...suggestions.slice(0, 3), talk]} onSubmit={ask} />
+			<AskBar suggestions={[askAi, ...suggestions.slice(0, 3), talk]} onSubmit={ask} />
 			{notice ? (
 				<PoText variant="meta13" tone="textSecondary" style={styles.notice}>
 					{notice}

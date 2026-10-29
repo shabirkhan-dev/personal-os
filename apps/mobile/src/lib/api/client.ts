@@ -81,6 +81,16 @@ export function getApiOrigin(): string | null {
 	return apiOrigin;
 }
 
+/** The full URL of an API path, for requests the client can't make itself (streams). */
+export function apiUrl(path: string): string | null {
+	return apiOrigin ? `${apiOrigin}${apiPrefix}${normalizePath(path)}` : null;
+}
+
+/** A fresh access token after one expired, through the registered refresher. */
+export async function refreshToken(): Promise<string | null> {
+	return refreshAccessToken ? refreshAccessToken() : null;
+}
+
 async function request<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
 	try {
 		return await send<T>(path, options);

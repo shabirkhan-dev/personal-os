@@ -45,6 +45,15 @@ export const errors = {
 		status: 422,
 		message: "The page needs a sign-in or blocks reading. Paste the job text instead.",
 	},
+
+	// Assistant
+	ASSISTANT_THREAD_NOT_FOUND: { status: 404, message: "That conversation doesn't exist." },
+	ASSISTANT_NOTHING_TO_APPROVE: {
+		status: 409,
+		message: "That change was already decided. Ask again if you still want it.",
+	},
+	ASSISTANT_NOTHING_TO_UNDO: { status: 409, message: "That change was already undone." },
+	ASSISTANT_MEMORY_NOT_FOUND: { status: 404, message: "That memory is already gone." },
 } as const satisfies Record<string, { status: ContentfulStatusCode; message: string }>;
 
 export type ErrorCode = keyof typeof errors;

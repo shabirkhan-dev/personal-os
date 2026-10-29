@@ -1,8 +1,16 @@
 import { addDays, dayKey, newId } from "@/lib/day";
 import { listItems, removeItem, saveItem } from "@/lib/db/collection";
+import {
+	createApplication,
+	type NewApplication as DomainNewApplication,
+	withContact,
+	withFollowUp,
+	withInterview,
+	withNudge,
+	withStage,
+} from "@personal-os/domain/career";
 import type {
 	Application,
-	CareerEventKind,
 	CareerSettings,
 	Contact,
 	Flashcard,
@@ -31,52 +39,19 @@ import {
  * sync engine backs it up later. Screens never write documents directly.
  */
 
-const STAGE_EVENT: Partial<Record<Stage, CareerEventKind>> = {
-	saved: "saved",
-	applied: "applied",
-	interview: "interview",
-	offer: "offer",
-	closed: "closed",
-};
-
-export type NewApplication = {
-	company: string;
-	role: string;
+export type NewApplication = DomainNewApplication & {
 	pay: string;
 	where: string;
 	cv: string;
 	link: string;
-	stage: Extract<Stage, "saved" | "applied">;
 	halal: Halal;
-	followUpInDays?: number | null;
 };
 
 export async function addApplication(
 	input: NewApplication,
 	now = new Date(),
 ): Promise<Application> {
-	const at = now.toISOString();
-	const followUpInDays = input.followUpInDays ?? (input.stage === "applied" ? 7 : null);
-	const app: Application = {
-		id: newId(),
-		company: input.company.trim(),
-		role: input.role.trim(),
-		pay: input.pay.trim(),
-		where: input.where.trim(),
-		cv: input.cv.trim(),
-		link: input.link.trim(),
-		notes: "",
-		stage: input.stage,
-		halal: input.halal,
-		contact: null,
-		interview: null,
-		followUpAt:
-			input.stage === "applied" && followUpInDays
-				? addDays(now, followUpInDays).toISOString()
-				: null,
-		events: [{ at, kind: input.stage, note: "" }],
-		createdAt: at,
-	};
+	const app = createApplication(input, now);
 	await saveItem(applications, app);
 	return app;
 }
@@ -87,14 +62,7 @@ export function updateApplication(app: Application): Promise<void> {
 
 /** Moves an application along; logs the step and sets or clears the follow-up. */
 export function setStage(app: Application, stage: Stage, now = new Date()): Promise<void> {
-	const kind = STAGE_EVENT[stage];
-	const events = kind ? [...app.events, { at: now.toISOString(), kind, note: "" }] : app.events;
-	return saveItem(applications, {
-		...app,
-		stage,
-		events,
-		followUpAt: stage === "applied" ? addDays(now, 7).toISOString() : null,
-	});
+	return saveItem(applications, withStage(app, stage, now));
 }
 
 /**
@@ -106,16 +74,11 @@ export function recordNudge(
 	contact?: Contact | null,
 	now = new Date(),
 ): Promise<void> {
-	return saveItem(applications, {
-		...app,
-		contact: contact === undefined ? app.contact : contact,
-		events: [...app.events, { at: now.toISOString(), kind: "nudged", note: "" }],
-		followUpAt: addDays(now, 7).toISOString(),
-	});
+	return saveItem(applications, withNudge(app, contact, now));
 }
 
 export function setFollowUp(app: Application, at: Date | null): Promise<void> {
-	return saveItem(applications, { ...app, followUpAt: at ? at.toISOString() : null });
+	return saveItem(applications, withFollowUp(app, at));
 }
 
 export function bookInterview(
@@ -123,17 +86,11 @@ export function bookInterview(
 	interview: Interview,
 	now = new Date(),
 ): Promise<void> {
-	return saveItem(applications, {
-		...app,
-		stage: "interview",
-		interview,
-		followUpAt: null,
-		events: [...app.events, { at: now.toISOString(), kind: "interview", note: interview.round }],
-	});
+	return saveItem(applications, withInterview(app, interview, now));
 }
 
 export function setContact(app: Application, contact: Contact | null): Promise<void> {
-	return saveItem(applications, { ...app, contact });
+	return saveItem(applications, withContact(app, contact));
 }
 
 export function confirmHalal(app: Application): Promise<void> {

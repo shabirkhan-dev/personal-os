@@ -21,6 +21,7 @@
 	},
 	"dependencies": {
 		"@hono/zod-validator": "^0.9.1",
+		"@personal-os/domain": "workspace:*",
 		"aws4fetch": "^1.0.20",
 		"drizzle-orm": "^0.45.4",
 		"hono": "^4.13.13",

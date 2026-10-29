@@ -110,6 +110,8 @@ email code only (Google, passwords, TOTP and passkeys were removed; pos-12 close
 | `sign_in_codes` | Email codes, hashed, keyed by email, with attempt counts |
 | `onboarding_profiles` | The onboarding answers as JSON with a `schema_version`; the plan is derived on the device |
 | `ai_usage` | AI calls per user per UTC day, for the daily allowance |
+| `assistant_threads`, `assistant_messages` | Conversations with the assistant: the model's messages, tool calls and results, and the cards shown |
+| `assistant_memories` | Short facts the assistant keeps about the person, which they can delete |
 | `sync_records` | Every synced document: user, collection, id, JSON data, `updated_at`, `deleted_at`, and a `seq` that sync cursors page through |
 
 Schema changes are made in `apps/api/src/db/schema` and committed with the generated migration
@@ -143,6 +145,22 @@ asks the model for JSON matching a zod schema and validates the answer before it
 Answers are capped at 4,000 tokens and each user has 150 AI calls a day; the app says plainly when
 the allowance is used up or AI is off. Reading a link refuses local and private addresses on every
 redirect, with size and time limits, and strips HTML in linear time.
+
+### The assistant
+
+One assistant answers from the person's own records instead of a fixed form per task. The app
+streams a message to `POST /assistant/messages` with where the person is (module, screen,
+record) and their time zone. The API runs a loop: the model reads the conversation and calls
+tools; each tool reads or writes the person's synced records through the shared rules in
+`@personal-os/domain`, then the model answers. Text, tool steps and cards (stats, records,
+approvals, changes with Undo, choices) stream back as they happen.
+
+Writes wait for the person's approval per their setting (every change, only risky ones, or none)
+and can be undone. A write is a newer version in `sync_records`, so the phone pulls it like any
+other change; the app syncs as soon as an answer that changed something finishes. Conversations
+(`assistant_threads`, `assistant_messages`) and a short memory of facts about the person
+(`assistant_memories`) are kept on the account. Career has tools today; the other modules get
+theirs next.
 
 ## 6. Security and known gaps
 

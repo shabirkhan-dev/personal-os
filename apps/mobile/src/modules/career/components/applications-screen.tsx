@@ -95,6 +95,7 @@ export function ApplicationsScreen() {
 
 	return (
 		<CareerScreen
+			about={{ screen: "applications list" }}
 			action={{
 				icon: "Filled/Filter",
 				label: showClosed ? "Hide closed applications" : "Show closed applications",

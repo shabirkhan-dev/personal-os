@@ -203,6 +203,7 @@ export function ApplicationDetailScreen({ id }: { id: string }) {
 
 	return (
 		<CareerScreen
+			about={{ screen: "application detail", recordId: app.id }}
 			action={{ icon: "Filled/Edit", label: "Edit application", onPress: () => setSheet("edit") }}
 		>
 			<ScreenTitle

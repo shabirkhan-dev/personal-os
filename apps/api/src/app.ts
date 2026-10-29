@@ -10,6 +10,7 @@ import type { AppEnv } from "@/core/context";
 import { onError, onNotFound } from "@/core/error-handler";
 import { type DatabaseHandle, openDatabase } from "@/db/client";
 import { aiRoutes } from "@/modules/ai/ai.routes";
+import { assistantRoutes } from "@/modules/assistant/assistant.routes";
 import { assetsRoutes } from "@/modules/assets/assets.routes";
 import { authRoutes } from "@/modules/auth/auth.routes";
 import { healthRoutes } from "@/modules/health/health.routes";
@@ -39,7 +40,8 @@ export function createApp(options: AppOptions = {}) {
 		.route("/users", usersRoutes)
 		.route("/assets", assetsRoutes)
 		.route("/sync", syncRoutes)
-		.route("/ai", aiRoutes);
+		.route("/ai", aiRoutes)
+		.route("/assistant", assistantRoutes);
 
 	const app = new Hono<AppEnv>()
 		.use(requestId({ generator: () => `req_${crypto.randomUUID()}` }))

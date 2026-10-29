@@ -7,6 +7,9 @@ import { ALIASES, type Food } from "./foods";
  * Food AI can read the line when there is a connection.
  */
 
+/** Longest line read; a meal or a question is far shorter, and it bounds the work on odd input. */
+const MAX_LINE = 500;
+
 const SLOT_WORDS: readonly [RegExp, Slot][] = [
 	[/\b(breakfast|nashta|nashtay)\b/, "breakfast"],
 	[/\b(lunch|dopahar)\b/, "lunch"],
@@ -87,7 +90,8 @@ function quantityBefore(text: string, at: number): number {
 	return 1;
 }
 
-export function parseMealText(input: string): MealParse {
+export function parseMealText(line: string): MealParse {
+	const input = line.slice(0, MAX_LINE);
 	let text = ` ${input.toLowerCase().replace(/[’']/g, "")} `;
 	let slot: Slot | null = null;
 	for (const [pattern, value] of SLOT_WORDS) {
@@ -178,11 +182,12 @@ const SCREENS: readonly [RegExp, FoodScreen][] = [
 ];
 
 function waterMl(text: string): number {
-	const litres = /(\d+(?:\.\d+)?)\s*(l|litres?|liters?)\b/.exec(text);
+	// Each number starts at a word boundary, so the match runs in linear time on long digit runs.
+	const litres = /\b(\d+(?:\.\d+)?)\s*(l|litres?|liters?)\b/.exec(text);
 	if (litres?.[1]) return Math.round(Number(litres[1]) * 1000);
-	const ml = /(\d+)\s*ml\b/.exec(text);
+	const ml = /\b(\d+)\s*ml\b/.exec(text);
 	if (ml?.[1]) return Number(ml[1]);
-	const glasses = /(\d+|a|one|two|three)\s*(glass|glasses|cups?|bottles?)\b/.exec(text);
+	const glasses = /\b(\d+|a|one|two|three)\s*(glass|glasses|cups?|bottles?)\b/.exec(text);
 	if (glasses?.[1]) {
 		const count = NUMBER_WORDS[glasses[1]] ?? Number(glasses[1]);
 		return count * (/bottle/.test(glasses[2] ?? "") ? 500 : 250);
@@ -190,7 +195,8 @@ function waterMl(text: string): number {
 	return 250;
 }
 
-export function parseFoodLine(input: string): FoodIntent | null {
+export function parseFoodLine(line: string): FoodIntent | null {
+	const input = line.slice(0, MAX_LINE);
 	const text = input.trim().toLowerCase();
 	if (!text) return null;
 	const question = /\?$|^(what|which|how|should|can|is|does|do|tell me|suggest)\b/.test(text);

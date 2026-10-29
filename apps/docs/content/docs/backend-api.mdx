@@ -183,8 +183,53 @@ for Care `care-settings`, `care-steps`, `care-products`, `care-habits`, `care-da
 for Training `training-settings`, `training-sessions`, `training-plans`, `training-skills`,
 `training-programs`, `training-progress`, `training-activities`, `training-exercises`, for the
 calendar `calendar-events`, and
-for Finance `finance-settings`, `finance-entries`, `finance-bills`, `finance-sources`.
-Names are part of the contract.
+for Finance `finance-settings`, `finance-entries`, `finance-bills`, `finance-sources`, and for
+the assistant `assistant-settings`. Names are part of the contract.
+
+### Assistant
+
+One assistant that answers from the person's own records and changes them through tools, under
+`/assistant`. Signed-in only; each model call counts against the daily AI allowance. Shared types
+(`AssistantEvent`, `Card`, `ThreadMessage`) live in `@personal-os/domain/assistant`.
+
+| Route | Body | Returns |
+| --- | --- | --- |
+| `POST /assistant/messages` | `{ threadId?, text, context: { timeZone, module?, screen?, recordId? } }` | Server-sent events |
+| `POST /assistant/approvals` | `{ callId, approve, timeZone }` | Server-sent events (the turn carries on) |
+| `POST /assistant/undo` | `{ callId }` | `{ changed[], card }` |
+| `GET /assistant/threads` | | `[{ id, title, updatedAt }]`, newest first |
+| `GET /assistant/threads/:id` | | `{ id, title, messages[{ id, role, text, cards[], steps[], createdAt }] }` |
+| `DELETE /assistant/threads/:id` | | `204` |
+| `GET /assistant/memories` | | `[{ id, text, createdAt }]` |
+| `DELETE /assistant/memories/:id` | | `204` |
+
+Each event is one `data:` line of JSON: `thread` (`{ threadId, title }`, first), `text`
+(`{ delta }`), `step` (`{ callId, label, status: running | done | failed }`), `card` (`{ card }`),
+then `done` (`{ changed[], waiting }`) or `error` (`{ code, message }`). `changed` lists the
+collections the answer wrote; the app syncs at once. `waiting: true` means a change waits on an
+approval card.
+
+Cards: `stats`, `records` (applications), `record`, `approval` (`waiting`, `approved` or
+`declined`), `change` (with Undo), `link` (an app screen) and `choices` (taps sent as the next
+message). A new message in a thread with undecided approvals declines them.
+
+**Tools.** Career: `career_overview`, `find_applications`, `get_application`, `add_application`,
+`update_application`, `book_interview`, `record_follow_up_sent`, `delete_application`. General:
+`remember`, `forget`, `show_screen_link`, `offer_choices`. Records are referred to by id or by
+words from the company or role; an ambiguous reference returns the candidates for the model to
+ask about. Writes go to `sync_records` as a newer version, exactly like a push from the phone,
+using the shared rules in `@personal-os/domain`.
+
+**Approval.** The `assistant-settings` record (`approval: always | important | never`, default
+`always`) decides which writes wait for the person: every write, only `risky` ones (deleting), or
+none. Reads never ask. Each write can be undone (`POST /assistant/undo`) until it is undone once.
+
+**Memory.** Up to 60 short facts per person in `assistant_memories`, added and removed by the
+model with `remember` and `forget`, listed and deleted by the person in the app.
+
+Errors (as an `error` event or JSON): `404` `ASSISTANT_THREAD_NOT_FOUND`, `409`
+`ASSISTANT_NOTHING_TO_APPROVE`, `409` `ASSISTANT_NOTHING_TO_UNDO`, `404`
+`ASSISTANT_MEMORY_NOT_FOUND`, `429` `AI_QUOTA_REACHED`, `503` `AI_UNAVAILABLE`.
 
 ### Career AI
 
@@ -291,6 +336,7 @@ Record every public API change, newest first, so consumers can see what moved.
 
 | Date | Change | Breaking |
 | --- | --- | --- |
+| 2026-10-30 | Added the assistant (`/assistant/*`: streamed messages, approvals, undo, threads, memories) and the `assistant-settings` collection | No |
 | 2026-10-24 | Added the `media` upload kind and `POST /assets/confirm`; Training syncs `training-activities` and `training-exercises`, and `calendar-events` holds personal calendar events | No |
 | 2026-10-24 | Added `POST /ai/training/program`; Training syncs `training-programs` and `training-progress` | No |
 | 2026-10-16 | Added `POST /ai/finance/read` and `POST /ai/finance/ask` | No |

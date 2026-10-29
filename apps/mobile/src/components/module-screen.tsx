@@ -5,6 +5,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Icon, type IconName } from "@/components/icons";
 import { HeaderButton } from "@/components/ui/header-button";
 import { PoText } from "@/components/ui/po-text";
+import { AskAssistant } from "@/modules/assistant";
+import type { AssistantPlace } from "@/modules/assistant/hooks/use-assistant";
 import { FloatingTabBar } from "@/modules/home/components/floating-tab-bar";
 import { Avatar } from "@/modules/onboarding/components/avatar";
 import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
@@ -23,6 +25,8 @@ export type ModuleScreenProps = {
 	scroll?: boolean;
 	/** The module's Insights screen: enables the tab, or marks it active when this is it. */
 	insights?: { onPress: () => void; active?: boolean };
+	/** Shows the Ask button, opening the assistant about this screen. */
+	assistant?: AssistantPlace;
 };
 
 /**
@@ -36,6 +40,7 @@ export function ModuleScreen({
 	action,
 	scroll = true,
 	insights,
+	assistant,
 }: ModuleScreenProps) {
 	const { colors } = usePoTheme();
 	const insets = useSafeAreaInsets();
@@ -68,7 +73,11 @@ export function ModuleScreen({
 			)}
 		</View>
 	);
-	const padding = { paddingTop: insets.top + 6, paddingBottom: 110 + insets.bottom };
+	// Room for the tab bar, and the Ask button above it when there is one.
+	const padding = {
+		paddingTop: insets.top + 6,
+		paddingBottom: (assistant ? 160 : 110) + insets.bottom,
+	};
 
 	return (
 		<View style={[styles.root, { backgroundColor: colors.bgApp }]}>
@@ -94,6 +103,7 @@ export function ModuleScreen({
 				onInsightsPress={insights?.onPress}
 				onProfilePress={() => router.push("/profile")}
 			/>
+			{assistant ? <AskAssistant place={assistant} /> : null}
 		</View>
 	);
 }

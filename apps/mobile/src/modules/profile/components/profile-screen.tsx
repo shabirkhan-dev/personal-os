@@ -36,6 +36,8 @@ import { EditProfileSheet } from "./edit-profile-sheet";
 import { ManageModulesSheet } from "./manage-modules-sheet";
 import { OptionSheet } from "./option-sheet";
 import { SectionLabel, SettingsCard, SettingsRow, SoonTag } from "./settings-list";
+import { useAssistantSettings } from "@/modules/assistant/data/assistant-settings";
+import { APPROVAL_LABELS } from "@personal-os/domain/assistant";
 
 type OpenSheet = "modules" | "edit" | "theme" | "currency" | "units" | "week" | null;
 
@@ -109,6 +111,7 @@ export function ProfileScreen() {
 	const insets = useSafeAreaInsets();
 	const auth = useAuth();
 	const name = useOnboardingStore((state) => state.name);
+	const { settings: assistantSettings } = useAssistantSettings();
 	const modules = useOnboardingStore((state) => state.modules);
 	const heightUnit = useOnboardingStore((state) => state.heightUnit);
 	const weightUnit = useOnboardingStore((state) => state.weightUnit);
@@ -251,6 +254,23 @@ export function ProfileScreen() {
 							title="Pinned order"
 							meta="Choose which modules come first"
 							accessory={<SoonTag />}
+						/>
+					</SettingsCard>
+
+					<SectionLabel>Assistant</SectionLabel>
+					<SettingsCard>
+						<SettingsRow
+							icon="Filled/Sparkle"
+							iconTone="accentDefault"
+							title="Assistant"
+							meta={APPROVAL_LABELS[assistantSettings.approval].title}
+							onPress={() => router.push("/assistant/settings")}
+						/>
+						<SettingsRow
+							icon="Filled/Calendar"
+							title="Past chats"
+							meta="Open or delete a conversation"
+							onPress={() => router.push("/assistant/history")}
 						/>
 					</SettingsCard>
 

@@ -5,8 +5,8 @@ Keep it updated before generating new screens with Claude Code, Cursor, Figma MC
 
 ## Product intent
 
-Personal OS is a personal life operating system: routines, finance, skincare, food and fashion in
-one mobile app. Screens should feel calm, personal and precise — a quiet dark canvas, clear type,
+Personal OS is a personal life operating system: Daily life, Training, Career, Finance, Food, Care,
+Faith, Fashion and Wishlist, with one calendar, in one mobile app. Screens should feel calm, personal and precise — a quiet dark canvas, clear type,
 and colour used to carry meaning (a module, a status, a highlight), not decoration.
 
 ## Figma source

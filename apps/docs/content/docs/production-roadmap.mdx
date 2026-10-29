@@ -40,11 +40,17 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
   reapply time, the shelf with how long each product lasts and what to reorder, hair and scalp,
   body and nails with daily habits (water shared with Food), a weekly check-in with no photos,
   and Insights. Synced through the record store.
-- Training (was Workout): a week program built from the sports picked and days a week, with
-  missed sessions moved to an easy day; session plans with photos, a live session with sets,
-  the number to beat and a rest timer, boxing rounds with call-outs read aloud, run summaries
-  with pace and splits, skills as step ladders (the Training AI builds new ones), personal bests,
-  phases and Insights. Synced through the record store.
+- Training (was Workout): twelve ready-made programs or one designed by hand or with the Training
+  AI, built around the days a week, session length, equipment and the person's fixed activity
+  days; double progression up a chain of variations (or +2.5 kg for gym lifts), light and test
+  weeks; activities the person defines (football, swimming, anything) with their own numbers; an
+  exercise library of 85 exercises with cues and 45 photo demos, plus the person's own exercises
+  with photos, GIFs (R2) and Google Drive videos; a live session with demos, hold countdowns and a
+  rest timer that alerts on a locked phone; readiness, an AI weekly review, bests with estimated
+  one-rep max and Insights. Synced through the record store.
+- Calendar: one calendar for the whole app (training sessions and program weeks, interviews and
+  follow-ups, bill due days and the person's own events), with a week strip on Overview.
+- Wishlist: dreams with savings moved from Finance, photos, and the Wishlist AI turning a typed wish into a dream.
 - Finance in runway mode: money now and how many days it lasts, what-ifs (a job in two or four
   months, cutting Rs 10k), the minimum that's always paid, spending typed or said and split into
   items on the phone (the Finance AI reads what it can't), receipt photos, a budget per line with
@@ -71,7 +77,8 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
 - One Hono API on Cloudflare Workers ([ADR 0003](/docs/architecture/adr-0003-one-api-on-workers)):
   Neon through Hyperdrive, Cloudflare rate limiting, typed config and one table of error codes.
 - Email-code sign-in with rotating refresh sessions.
-- Profile with avatars uploaded straight to R2; onboarding answers stored and synced.
+- Profile with avatars, and exercise media, uploaded straight to R2; onboarding answers stored
+  and synced.
 - Module AI inside the API (Career, Faith, Food, Fashion, Finance, Training, Care, Wishlist),
   with a mock provider for development and tests, capped answers and a daily allowance per user.
 - Account deletion (`DELETE /users/me` and Profile → Delete account), a full data export, and a
@@ -90,9 +97,8 @@ Roughly in order; each item becomes board cards.
 3. **"Hey OS" with the app closed**: today it listens while the app is open (Profile → Hey OS) and
    Android has a Talk to OS launcher shortcut. Waking from the background needs an on-device
    wake-word engine in an Android foreground service; iOS does not allow always-on listening.
-4. **Files**: videos streamed from Google Drive.
-5. **Insights**: AI over a per-module, opt-in daily digest, shown in the Insights tab.
-6. **Desktop app** on the same record store and sync.
+4. **Insights**: AI over a per-module, opt-in daily digest, shown in the Insights tab.
+5. **Desktop app** on the same record store and sync.
 
 ## Engineering rules
 

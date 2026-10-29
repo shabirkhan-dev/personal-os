@@ -1,6 +1,6 @@
 # Personal OS
 
-Personal OS is a mobile-first life operating system for planning and managing the everyday parts of life: routines, finance, skincare, food, fashion, and daily habits.
+Personal OS is a mobile-first life operating system for planning and managing the everyday parts of life: your day, training, career, money, food, care, faith, fashion and the things you're saving for, on one calendar.
 
 It is built as a Bun + Turborepo monorepo with a product-focused Expo app, a Cloudflare Workers API, a documentation app, and a web landing page.
 
@@ -61,7 +61,8 @@ syncs to your account.
 This monorepo is organized around a few core parts:
 
 - Mobile app: `apps/mobile` — Expo / React Native app, the primary product experience
-- API: `apps/api` — Hono app running on Cloudflare Workers with AI-powered capabilities
+- API: `apps/api` — one Hono app on Cloudflare Workers: email-code sign-in, sync, R2 uploads and
+  the AI for every module (the provider key stays in the Worker)
 - Docs: `apps/docs` — Fumadocs site for product and engineering documentation
 - Web: `apps/web` — landing page / public shell, built as a static export
 - Shared design system: `packages/tokens` — design tokens and visual primitives
@@ -175,6 +176,7 @@ The project documentation lives in the docs app and is served locally at:
 Main docs and references:
 
 - `/docs/quick-start`
+- `/docs/backend-api`
 - `/docs/architecture`
 - `/docs/docker`
 - `/docs/deploy`

@@ -3,7 +3,7 @@ title: Product System Design
 description: How Personal OS is put together today, where data lives, and the direction it is heading.
 ---
 
-Status: describes the code on `main` as of 2026-10-15. Section 7 lists the direction under
+Status: describes the code on `main` as of 2026-10-30. Section 7 lists the direction under
 discussion; nothing there is built yet.
 
 ## 1. What the system is
@@ -35,9 +35,9 @@ Principles:
         │ HTTPS, bearer token          │ presigned PUT (images)
  ┌──────▼──────────────────────────┐  ┌▼──────────────────┐
  │ apps/api (Hono, Cloudflare      │  │ R2 bucket         │
- │ Workers)                        │─►│ avatars, photos   │
+ │ Workers)                        │─►│ avatars, media    │
  │ auth · profile · onboarding     │  └───────────────────┘
- │ sync · uploads · Career AI ─────┼──► OpenAI-compatible provider
+ │ sync · uploads · module AI ─────┼──► OpenAI-compatible provider
  └──────┬──────────────────────────┘
         │ Drizzle over Hyperdrive
  ┌──────▼─────────┐
@@ -53,26 +53,28 @@ Principles:
 | Path | Responsibility |
 | --- | --- |
 | `src/app/(onboarding)` | Onboarding flow: about you, body, goals, your day, modules, reminders, plan reveal, sign-in |
-| `src/app/(home)` | Today (Overview or one module Home), Profile, Recipes |
+| `src/app/(home)` | Today (Overview or one module Home), Calendar, Profile and each module's inner screens |
 | `src/modules/<name>` | One folder per feature: `components`, `hooks`, `lib` (pure logic, tested), `services` (I/O), `store` |
-| `src/lib/storage` | `createDocumentStore`: a Zustand store backed by one JSON file |
+| `src/lib/storage` | `createDocumentStore`: a Zustand store backed by one JSON file, for small device-only state |
 | `src/lib/api` | Typed fetch client, token refresh |
 | `src/components`, `src/theme` | Kit v2 components and the theme provider over `@personal-os/tokens` |
 
-Modules on the Home: Daily life, Workout, Finance, Skincare, Food, Fashion. Each module Home reads
-its own document store; the ask bar parses typed lines ("500 food", "45 min gym") into entries
-for the right module.
+Modules on the Home: Daily life, Training, Career, Finance, Food, Care, Faith, Fashion and Wishlist.
+Each module Home reads its own collections; the ask bar parses typed lines ("500 food", "45 min
+gym") into entries for the right module. The Calendar reads every module's dated items (training
+sessions and program weeks, interviews and follow-ups, bill due days) next to the person's own
+events.
 
 ### On-device data
 
-Two stores live on the phone while modules move over:
-
-- **Record store** (Career, and every module from now on): one SQLite database with typed
-  collections, read through React Query and backed up by sync. Works offline; writes are instant.
-  See [ADR 0002](/docs/architecture/adr-0002-offline-first-sync).
-- **JSON documents** (Finance, Workout, Skincare, Food for now): one file per module, hydrated on
-  first use with debounced writes. No backup yet. See
+- **Record store** (every module): one SQLite database with typed collections, read through React
+  Query and backed up by sync. Works offline; writes are instant. See
+  [ADR 0002](/docs/architecture/adr-0002-offline-first-sync).
+- **JSON documents** (device-only state such as the chosen Home view, the profile cache and a live
+  training session): one small file each, hydrated on first use with debounced writes. See
   [ADR 0001](/docs/architecture/adr-0001-on-device-module-data).
+
+Profile → Export writes every record in the on-device database to one file.
 
 Both parse what they read, so old or damaged data never crashes a screen. Secrets (refresh token)
 go in SecureStore, never in either store.
@@ -95,7 +97,8 @@ environment; every error is an `AppError` whose code, status and message come fr
 [Backend API](/docs/backend-api).
 
 The app uses all of it: email-code sign-in, refresh and logout, `GET /users/me` and the profile,
-presigned avatar uploads, onboarding answers, `POST /sync` and the Career AI tasks. Sign-in is
+account deletion (`DELETE /users/me`), presigned uploads, onboarding answers, `POST /sync` and the
+module AI tasks. A daily cron drops old sign-in codes, ended sessions and old AI usage. Sign-in is
 email code only (Google, passwords, TOTP and passkeys were removed; pos-12 closed).
 
 ### Data model
@@ -106,6 +109,7 @@ email code only (Google, passwords, TOTP and passkeys were removed; pos-12 close
 | `sessions` | Refresh sessions: hashed token, expiry, user agent, revocation |
 | `sign_in_codes` | Email codes, hashed, keyed by email, with attempt counts |
 | `onboarding_profiles` | The onboarding answers as JSON with a `schema_version`; the plan is derived on the device |
+| `ai_usage` | AI calls per user per UTC day, for the daily allowance |
 | `sync_records` | Every synced document: user, collection, id, JSON data, `updated_at`, `deleted_at`, and a `seq` that sync cursors page through |
 
 Schema changes are made in `apps/api/src/db/schema` and committed with the generated migration
@@ -119,9 +123,12 @@ schema version reads as `null`, and the app uploads its copy.
 
 ### Files
 
-Images go to R2. The app asks `POST /assets/uploads` for a presigned URL, uploads the file
-straight to R2, and sends back only the key; the API checks the object (prefix, type, size) before
-saving it. Long videos (training, cooking) will stream from Google Drive rather than be copied.
+Images go to R2. The app asks `POST /assets/uploads` for a presigned URL whose signature covers
+the exact type and length, uploads the file straight to R2, and sends back only the key; the API
+checks the object (prefix, type, size) before saving it. Two kinds exist: `avatar` (up to 5 MB,
+saved with the profile) and `media` (exercise photos and GIFs up to 15 MB, confirmed with
+`POST /assets/confirm`, which returns the public URL). Videos are not copied: an exercise links a
+Google Drive file and the app plays it in Drive's own player.
 
 ## 5. AI
 
@@ -129,40 +136,39 @@ AI runs only in the cloud, inside the API: an OpenAI-compatible provider in prod
 models) and a deterministic mock for development and tests. The provider key is a Worker secret;
 the app never holds it.
 
-Career uses five tasks through `POST /ai/career/<task>`: read a job post (from a link or pasted
-text, with a halal reading), parse a logged line, draft a follow-up, build interview prep with
-flashcards, and plan a skill path. Each asks the model for JSON matching a zod schema and validates
-the answer before it reaches the app. Reading a link refuses local and private addresses on every
-redirect, with size and time limits.
+Every module has its tasks under `POST /ai/<module>/<task>`: Career (read a job post with a halal
+reading, parse a line, draft a follow-up, interview prep, skill path), Training (ask, skill steps,
+design a program from the app's exercises), Finance, Food, Fashion, Care, Faith and Wishlist. Each
+asks the model for JSON matching a zod schema and validates the answer before it reaches the app.
+Answers are capped at 4,000 tokens and each user has 150 AI calls a day; the app says plainly when
+the allowance is used up or AI is off. Reading a link refuses local and private addresses on every
+redirect, with size and time limits, and strips HTML in linear time.
 
 ## 6. Security and known gaps
 
 - Access tokens: JWT, 15 minutes. Refresh tokens: rotated on every refresh, stored hashed; reusing
-  an old one ends the session. The app keeps the refresh token in SecureStore.
-- Email codes are hashed, single use, replaced by a newer code and locked after 5 wrong tries.
-  Responses do not reveal whether an account exists.
-- Cloudflare rate limiting per IP or user (auth 10, sync 60, AI 20 per minute), secure headers,
-  body size limits.
+  an old one ends the session, except a retry within a minute (a lost answer). The app keeps the
+  refresh token in SecureStore and shares one refresh across requests.
+- Email codes are hashed, single use, replaced by a newer code and locked after 5 wrong tries; one
+  code a minute and ten a day per email. Responses do not reveal whether an account exists.
+- Cloudflare rate limiting per IP or user (sign-in codes 10, sync 60, AI 20, upload tickets 5 per
+  minute), secure headers, body size limits. Sync skips a bad record instead of failing the batch.
+- Release builds refuse a non-HTTPS API address and never fall back to localhost.
 
 Known gaps:
 
-- **Older modules have no backup yet.** Finance, Workout, Skincare and Food still live only in
-  their JSON files on the phone; Career is synced.
+- **Some photos stay on the phone.** Wardrobe, meal and dream photos are not uploaded yet.
 - **Last write wins per record.** Two devices editing the same record offline keep only the newer
   edit.
-- **No avatar picker yet.** The upload flow exists in `usersService.uploadAvatar`; no screen calls
-  it.
 
 ## 7. Direction under discussion (not built)
 
-1. **Move the other modules onto the record store** so Finance, Workout, Skincare and Food are
-   backed up and synced like Career.
-2. **One shared primitive under the daily modules.** `actions` (what, when, part of the minimum
+1. **One shared primitive under the daily modules.** `actions` (what, when, part of the minimum
    day) and `entries` (done or skipped, value, date) as collections, so streaks and "never miss
    twice" are computed once for every module.
-3. **Files.** Photos (receipts, progress) through the same R2 upload flow, with Cloudflare image
-   resizing; long videos (training, cooking) streamed from Google Drive rather than copied.
-4. **AI with consent per module.** Insights read a compact daily digest of the modules the person
+2. **Files.** The remaining photos (wardrobe, meals, dreams, receipts) through the same R2 upload
+   flow, with Cloudflare image resizing.
+3. **AI with consent per module.** Insights read a compact daily digest of the modules the person
    has shared, and propose changes the person confirms.
-5. **Reminders on the device.** Scheduled local notifications, so the most important nudges do not
+4. **Reminders on the device.** Scheduled local notifications, so the most important nudges do not
    depend on the server.

@@ -1,43 +1,51 @@
 ---
 title: Development Workflow
-description: A simple, reliable workflow for shipping high-quality changes.
+description: How a change goes from a card to main.
 ---
 
-## 1) Branch and scope
+## 1) Claim a card
 
-- Create a focused branch.
-- Keep one concern per PR when possible.
-- Avoid mixing formatting-only changes with feature changes.
+Work starts from a card in `.agents/board/` (see `.agents/README.md`). The card names the scope;
+write only inside it.
 
-## 2) Build in small steps
+## 2) Branch
 
-- Prefer small commits with clear intent.
-- Extract shared logic into `packages/*` early.
-- Keep app boundaries clean and explicit.
+`main` is integration only. Branch from it as `agent/<role>/<card-slug>` (for example
+`agent/mobile/training-programs`), or `docs/<topic>` and `fix/<topic>` for small changes. Keep one
+concern per branch, and keep formatting-only changes out of feature commits.
 
-## 3) Run local quality checks
+## 3) Commit
 
-```bash
-bun run lint
-bun run format
-bun run typecheck
+Lefthook runs on every commit: format, lint, typecheck, the architecture and naming checks, a
+secret scan and a 2 MB large-file guard. Messages follow Conventional Commits, all lowercase:
+
+```text
+feat(training): programs with double progression
+fix(api): limit sign-in codes to one a minute
 ```
 
-Run tests for the surfaces you touched.
+Stage explicit paths rather than `git add -A`. A file over 2 MB that belongs in the repo (the
+README showcase video) is committed with `LEFTHOOK_EXCLUDE=large-files git commit ...`.
 
-## 4) Open a PR with context
+## 4) Check before pushing
 
-Include:
+```bash
+bun run preflight
+```
 
-- What changed
-- Why it changed
-- How it was tested
+`preflight` runs lint, typecheck and every test (the API's against the local Postgres). Changed
+the API? Update [Backend API](/docs/backend-api) in the same commit. Changed the database schema?
+Commit the generated migration (`bun --cwd=apps/api run db:generate`); CI fails without one.
 
-Clear PR context speeds up review and reduces regressions.
+## 5) Pull request and merge
 
-## 5) Merge-ready checklist
+Open a PR into `main` with what changed, why, and how it was tested, and record the validation on
+the card. CI runs lint, typecheck, build and tests; merge when it is green, then delete the
+branch so `main` stays the only long-lived branch.
 
-- No lint/type errors
-- No dead code or unused imports
-- Docs updated for behavior/config changes
-- CI green
+## 6) Ship
+
+- **API**: Workers Builds deploys `apps/api` on every push to `main` once the repo is connected,
+  or `wrangler deploy` from your machine; apply migrations first ([Deploy](/docs/deploy)).
+- **App**: an EAS build (see the README's "Build the Android app") or an EAS Update for JS-only
+  changes.

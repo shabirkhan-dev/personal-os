@@ -44,6 +44,36 @@
 			"types": "./src/care/index.ts",
 			"import": "./src/care/index.ts",
 			"default": "./src/care/index.ts"
+		},
+		"./place": {
+			"types": "./src/place.ts",
+			"import": "./src/place.ts",
+			"default": "./src/place.ts"
+		},
+		"./flashcards": {
+			"types": "./src/flashcards.ts",
+			"import": "./src/flashcards.ts",
+			"default": "./src/flashcards.ts"
+		},
+		"./calendar": {
+			"types": "./src/calendar/index.ts",
+			"import": "./src/calendar/index.ts",
+			"default": "./src/calendar/index.ts"
+		},
+		"./fashion": {
+			"types": "./src/fashion/index.ts",
+			"import": "./src/fashion/index.ts",
+			"default": "./src/fashion/index.ts"
+		},
+		"./wishlist": {
+			"types": "./src/wishlist/index.ts",
+			"import": "./src/wishlist/index.ts",
+			"default": "./src/wishlist/index.ts"
+		},
+		"./faith": {
+			"types": "./src/faith/index.ts",
+			"import": "./src/faith/index.ts",
+			"default": "./src/faith/index.ts"
 		}
 	},
 	"scripts": {
@@ -58,6 +88,7 @@
 		"typescript": "^7.0.2"
 	},
 	"dependencies": {
-		"@personal-os/tokens": "workspace:*"
+		"@personal-os/tokens": "workspace:*",
+		"adhan": "^4.4.6"
 	}
 }

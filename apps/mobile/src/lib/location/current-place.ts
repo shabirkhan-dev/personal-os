@@ -2,7 +2,9 @@ import * as Location from "expo-location";
 import { Platform } from "react-native";
 
 /** Where the person is: prayer times, the Qibla and the weather all start from it. */
-export type Place = { latitude: number; longitude: number; name: string };
+import type { Place } from "@personal-os/domain/place";
+
+export type { Place };
 
 /**
  * The person's place, asked only when they tap Use my location.

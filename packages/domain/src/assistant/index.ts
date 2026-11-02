@@ -64,7 +64,12 @@ export type AppLink =
 	| { screen: "finance-budget" }
 	| { screen: "finance-history" }
 	| { screen: "finance-income" }
-	| { screen: "finance-insights" };
+	| { screen: "finance-insights" }
+	| { screen: "training" }
+	| { screen: "training-insights" }
+	| { screen: "training-programs" }
+	| { screen: "training-exercises" }
+	| { screen: "training-session"; id: string };
 
 /** One row of a list card: a record, a bill, an entry. */
 export type ListItem = {

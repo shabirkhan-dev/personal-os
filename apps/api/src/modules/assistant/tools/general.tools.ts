@@ -80,6 +80,16 @@ const SCREENS = [
 	"care",
 	"care-shelf",
 	"care-insights",
+	"faith",
+	"faith-zakat",
+	"faith-tasbih",
+	"faith-recitation",
+	"fashion",
+	"fashion-wardrobe",
+	"fashion-wishlist",
+	"wishlist",
+	"wishlist-roadmap",
+	"calendar",
 ] as const;
 
 const openScreen = defineTool({

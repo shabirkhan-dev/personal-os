@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import type {
 	AppLink,
 	ApplicationSummary,
@@ -12,6 +13,9 @@ import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
 import { haptics } from "@/lib/haptics";
 import { careRoutes } from "@/modules/care/navigation";
+import { faithRoutes } from "@/modules/faith/navigation";
+import { fashionRoutes } from "@/modules/fashion/navigation";
+import { wishlistRoutes } from "@/modules/wishlist/navigation";
 import { careerRoutes } from "@/modules/career/navigation";
 import { financeRoutes } from "@/modules/finance/navigation";
 import { foodRoutes } from "@/modules/food/navigation";
@@ -93,6 +97,36 @@ export function openLink(link: AppLink) {
 			return;
 		case "care-insights":
 			careRoutes.insights();
+			return;
+		case "faith":
+			faithRoutes.today();
+			return;
+		case "faith-zakat":
+			faithRoutes.zakat();
+			return;
+		case "faith-tasbih":
+			faithRoutes.tasbih();
+			return;
+		case "faith-recitation":
+			faithRoutes.recitation();
+			return;
+		case "fashion":
+			fashionRoutes.today();
+			return;
+		case "fashion-wardrobe":
+			fashionRoutes.wardrobe();
+			return;
+		case "fashion-wishlist":
+			fashionRoutes.wishlist();
+			return;
+		case "wishlist":
+			wishlistRoutes.today();
+			return;
+		case "wishlist-roadmap":
+			wishlistRoutes.roadmap();
+			return;
+		case "calendar":
+			router.push("/calendar");
 			return;
 	}
 }

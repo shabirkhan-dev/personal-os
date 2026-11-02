@@ -126,6 +126,7 @@ export function CalendarScreen() {
 		<ModuleScreen
 			label="Calendar"
 			onHome={() => router.dismissTo("/")}
+			assistant={{ module: "calendar", screen: "calendar" }}
 			action={{ icon: "Line/Plus", label: "New event", onPress: () => setEditing("new") }}
 		>
 			<ScreenTitle eyebrow="Everything you plan" title={title}>

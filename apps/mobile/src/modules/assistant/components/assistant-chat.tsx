@@ -26,6 +26,38 @@ function starters(place: AssistantPlace): string[] {
 			"Move this to closed",
 		];
 	}
+	if (place.module === "faith") {
+		return [
+			"How are my prayers today?",
+			"Prayed fajr and isha",
+			"Read Quran for 15 minutes",
+			"How much zakat is left?",
+		];
+	}
+	if (place.module === "fashion") {
+		return [
+			"What haven't I worn lately?",
+			"Wore my navy oxford and chinos",
+			"What's on my wish list?",
+			"What colours do I own?",
+		];
+	}
+	if (place.module === "wishlist") {
+		return [
+			"When can I get my next dream?",
+			"Add a new dream",
+			"What am I saving for?",
+			"I got the headphones",
+		];
+	}
+	if (place.module === "calendar") {
+		return [
+			"What's on this week?",
+			"Am I free Thursday?",
+			"Add dinner with family Friday 8 pm",
+			"What bills are due?",
+		];
+	}
 	if (place.module === "skincare") {
 		return [
 			"What's left in my routine?",
@@ -220,8 +252,8 @@ export function AssistantChat() {
 						</View>
 						<PoText variant="title18">What can I do for you?</PoText>
 						<PoText variant="meta13" tone="textSecondary" style={styles.center}>
-							I can see your money, food, training and job hunt: log meals, spending and workouts,
-							pay bills and track your progress. I ask before changing anything.
+							I can see every part of your day: money, food, training, care, prayers, your job hunt,
+							wardrobe, wishlist and calendar. I ask before changing anything.
 						</PoText>
 						<View style={styles.starters}>
 							{starters(place).map((text) => (

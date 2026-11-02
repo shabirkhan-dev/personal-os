@@ -150,6 +150,7 @@
       "version": "0.0.0",
       "dependencies": {
         "@personal-os/tokens": "workspace:*",
+        "adhan": "^4.4.6",
       },
       "devDependencies": {
         "@personal-os/typescript-config": "workspace:*",

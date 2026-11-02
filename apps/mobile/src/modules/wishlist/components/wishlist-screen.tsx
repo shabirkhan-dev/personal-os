@@ -1,7 +1,10 @@
 import { ModuleScreen, type ModuleScreenProps } from "@/components/module-screen";
 import { wishlistRoutes } from "../navigation";
 
-export type WishlistScreenProps = Omit<ModuleScreenProps, "label" | "onHome" | "insights"> & {
+export type WishlistScreenProps = Omit<
+	ModuleScreenProps,
+	"label" | "onHome" | "insights" | "assistant"
+> & {
 	insightsActive?: boolean;
 };
 
@@ -12,6 +15,7 @@ export function WishlistScreen({ insightsActive = false, ...props }: WishlistScr
 			label="Wishlist"
 			onHome={wishlistRoutes.today}
 			insights={{ onPress: wishlistRoutes.insights, active: insightsActive }}
+			assistant={{ module: "wishlist", screen: "wishlist" }}
 			{...props}
 		/>
 	);

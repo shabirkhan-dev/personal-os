@@ -77,7 +77,17 @@ export type AppLink =
 	| { screen: "food-insights" }
 	| { screen: "care" }
 	| { screen: "care-shelf" }
-	| { screen: "care-insights" };
+	| { screen: "care-insights" }
+	| { screen: "faith" }
+	| { screen: "faith-zakat" }
+	| { screen: "faith-tasbih" }
+	| { screen: "faith-recitation" }
+	| { screen: "fashion" }
+	| { screen: "fashion-wardrobe" }
+	| { screen: "fashion-wishlist" }
+	| { screen: "wishlist" }
+	| { screen: "wishlist-roadmap" }
+	| { screen: "calendar" };
 
 /** One row of a list card: a record, a bill, an entry. */
 export type ListItem = {

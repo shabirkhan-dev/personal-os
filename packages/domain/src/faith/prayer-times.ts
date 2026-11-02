@@ -206,7 +206,8 @@ export function untilLabel(ms: number): string {
 
 /** "17:38" or "5:38 pm" → minutes after midnight; null when it isn't a time. */
 export function parseClock(text: string): number | null {
-	const match = /^\s*(\d{1,2})(?::|\.)?(\d{2})?\s*(am|pm)?\s*$/i.exec(text);
+	// Trimmed first, so the pattern has one optional space run and stays linear on odd input.
+	const match = /^(\d{1,2})(?::|\.)?(\d{2})?\s*(am|pm)?$/i.exec(text.slice(0, 20).trim());
 	if (!match) return null;
 	let hour = Number(match[1]);
 	const minute = match[2] ? Number(match[2]) : 0;

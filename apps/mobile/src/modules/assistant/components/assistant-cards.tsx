@@ -11,6 +11,7 @@ import { Card } from "@/components/ui/card";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
 import { haptics } from "@/lib/haptics";
+import { careRoutes } from "@/modules/care/navigation";
 import { careerRoutes } from "@/modules/career/navigation";
 import { financeRoutes } from "@/modules/finance/navigation";
 import { foodRoutes } from "@/modules/food/navigation";
@@ -83,6 +84,15 @@ export function openLink(link: AppLink) {
 			return;
 		case "food-insights":
 			foodRoutes.insights();
+			return;
+		case "care":
+			careRoutes.today();
+			return;
+		case "care-shelf":
+			careRoutes.shelf();
+			return;
+		case "care-insights":
+			careRoutes.insights();
 			return;
 	}
 }

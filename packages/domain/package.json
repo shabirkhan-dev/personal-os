@@ -39,6 +39,11 @@
 			"types": "./src/food/index.ts",
 			"import": "./src/food/index.ts",
 			"default": "./src/food/index.ts"
+		},
+		"./care": {
+			"types": "./src/care/index.ts",
+			"import": "./src/care/index.ts",
+			"default": "./src/care/index.ts"
 		}
 	},
 	"scripts": {
@@ -51,5 +56,8 @@
 		"@personal-os/typescript-config": "workspace:*",
 		"@types/bun": "^1.4.3",
 		"typescript": "^7.0.2"
+	},
+	"dependencies": {
+		"@personal-os/tokens": "workspace:*"
 	}
 }

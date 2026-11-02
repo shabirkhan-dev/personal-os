@@ -74,7 +74,10 @@ export type AppLink =
 	| { screen: "food-plan" }
 	| { screen: "food-grocery" }
 	| { screen: "food-recipes" }
-	| { screen: "food-insights" };
+	| { screen: "food-insights" }
+	| { screen: "care" }
+	| { screen: "care-shelf" }
+	| { screen: "care-insights" };
 
 /** One row of a list card: a record, a bill, an entry. */
 export type ListItem = {

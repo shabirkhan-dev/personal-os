@@ -148,6 +148,9 @@
     "packages/domain": {
       "name": "@personal-os/domain",
       "version": "0.0.0",
+      "dependencies": {
+        "@personal-os/tokens": "workspace:*",
+      },
       "devDependencies": {
         "@personal-os/typescript-config": "workspace:*",
         "@types/bun": "^1.4.3",

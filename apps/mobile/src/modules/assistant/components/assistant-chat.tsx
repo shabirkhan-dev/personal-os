@@ -26,6 +26,14 @@ function starters(place: AssistantPlace): string[] {
 			"Move this to closed",
 		];
 	}
+	if (place.module === "skincare") {
+		return [
+			"What's left in my routine?",
+			"Did my morning routine",
+			"Is my skin getting better?",
+			"What do I need to reorder?",
+		];
+	}
 	if (place.module === "food") {
 		return [
 			"What have I eaten today?",

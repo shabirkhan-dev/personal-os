@@ -55,8 +55,17 @@ export async function getRecord<T>(
 	return parse(row.data);
 }
 
+/** The last write time handed out, so two writes in one answer never share a time. */
+let lastStamp = 0;
+
+/** `at`, moved forward if needed so every write is strictly later than the one before it. */
+function stamp(at: number): number {
+	lastStamp = Math.max(at, Date.now(), lastStamp + 1);
+	return lastStamp;
+}
+
 /**
- * Saves a record (or deletes it with `deleted`). `at` must be later than the stored version; the
+ * Saves a record (or deletes it with `deleted`). It must be newer than the stored version; the
  * write is skipped otherwise, like a stale push from the phone. Returns whether it was kept.
  */
 export async function putRecord(
@@ -68,6 +77,7 @@ export async function putRecord(
 	at: number,
 	deleted = false,
 ): Promise<boolean> {
+	at = stamp(at);
 	const accepted = await db
 		.insert(syncRecords)
 		.values({ userId, collection, id, data, updatedAt: at, deletedAt: deleted ? at : null })

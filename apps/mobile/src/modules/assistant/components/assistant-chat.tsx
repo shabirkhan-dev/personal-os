@@ -26,6 +26,14 @@ function starters(place: AssistantPlace): string[] {
 			"Move this to closed",
 		];
 	}
+	if (place.module === "food") {
+		return [
+			"What have I eaten today?",
+			"How much protein is left?",
+			"Had 2 eggs and a paratha",
+			"How's my week of eating?",
+		];
+	}
 	if (place.module === "workout") {
 		return [
 			"How's my training this week?",
@@ -204,8 +212,8 @@ export function AssistantChat() {
 						</View>
 						<PoText variant="title18">What can I do for you?</PoText>
 						<PoText variant="meta13" tone="textSecondary" style={styles.center}>
-							I can see your money, training and job hunt: log spending and workouts, pay bills,
-							track progress and applications. I ask before changing anything.
+							I can see your money, food, training and job hunt: log meals, spending and workouts,
+							pay bills and track your progress. I ask before changing anything.
 						</PoText>
 						<View style={styles.starters}>
 							{starters(place).map((text) => (

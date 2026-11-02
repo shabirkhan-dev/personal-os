@@ -131,6 +131,7 @@ export function TasbihScreen() {
 
 	return (
 		<FaithScreen
+			ask={false}
 			action={{ icon: "Filled/Edit", label: "Edit sequence", onPress: () => setEditing(true) }}
 		>
 			<ScreenTitle eyebrow="Tasbih · tap anywhere to count" title={phrase?.label ?? "Tasbih"}>

@@ -224,7 +224,11 @@ screen) and `choices` (taps sent as the next message). A new message in a thread
 to the app's food list; unknown foods come back for the model to estimate), `log_water`,
 `log_weight`, `delete_meal` (risky). Care: `care_today` (the night counts until 04:00),
 `care_shelf`, `care_progress` (check-in trends), `tick_care` (a routine, steps or habits by name),
-`restock_product`, `add_product`, `save_check_in`. General:
+`restock_product`, `add_product`, `save_check_in`. Faith: `faith_today` (from what is logged;
+prayer times stay on the phone), `log_prayer`, `log_recitation`, `add_tasbih`, `zakat_status`,
+`log_zakat_payment`. Fashion: `wardrobe_overview`, `log_outfit`, `add_fashion_wish`. Wishlist:
+`wishlist_view`, `add_dream`, `mark_dream_got`. Calendar: `calendar_view` (events, bills due,
+interviews and follow-ups), `add_event`, `delete_event` (risky). General:
 `remember`, `forget`, `show_screen_link`, `offer_choices`. Records are referred to by id or by
 words from the company or role; an ambiguous reference returns the candidates for the model to
 ask about. Writes go to `sync_records` as a newer version, exactly like a push from the phone,
@@ -346,6 +350,7 @@ Record every public API change, newest first, so consumers can see what moved.
 
 | Date | Change | Breaking |
 | --- | --- | --- |
+| 2026-11-02 | Assistant: Faith, Fashion, Wishlist and Calendar tools | No |
 | 2026-10-30 | Assistant: Care tools | No |
 | 2026-10-30 | Assistant: Food tools | No |
 | 2026-10-30 | Assistant: Training tools | No |

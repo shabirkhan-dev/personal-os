@@ -34,12 +34,16 @@ import {
 	updateTool,
 } from "./assistant.repository";
 import { type Tool, type ToolContext, ToolError } from "./assistant.tool";
+import { calendarTools } from "./tools/calendar.tools";
 import { careTools } from "./tools/care.tools";
 import { careerTools } from "./tools/career.tools";
+import { faithTools } from "./tools/faith.tools";
+import { fashionTools } from "./tools/fashion.tools";
 import { financeTools } from "./tools/finance.tools";
 import { foodTools } from "./tools/food.tools";
 import { generalTools } from "./tools/general.tools";
 import { trainingTools } from "./tools/training.tools";
+import { wishlistTools } from "./tools/wishlist.tools";
 
 const TOOLS: readonly Tool[] = [
 	...careerTools,
@@ -47,6 +51,10 @@ const TOOLS: readonly Tool[] = [
 	...trainingTools,
 	...foodTools,
 	...careTools,
+	...faithTools,
+	...fashionTools,
+	...wishlistTools,
+	...calendarTools,
 	...generalTools,
 ];
 const byName = new Map(TOOLS.map((tool) => [tool.name, tool]));

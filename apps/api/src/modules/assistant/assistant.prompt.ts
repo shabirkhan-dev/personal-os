@@ -8,6 +8,7 @@ const MODULE_NAMES: Record<string, string> = {
 	career: "Career (job hunt)",
 	finance: "Finance",
 	workout: "Training",
+	calendar: "Calendar",
 	skincare: "Care (skin, hair, body)",
 	food: "Food",
 	faith: "Faith",
@@ -69,7 +70,10 @@ How you work:
 - When they mention a workout they did ("ran 5k in 28 min", "did 3 sets of 10 pull-ups"), log it with the sets.
 - When they say what they ate, log it with \`log_meal\`, passing their words as \`text\`; if foods are unmatched, call again with your own macro estimates. Water and weigh-ins too.
 - Care: "did my morning routine" or "put on sunscreen" ticks it; a weekly check-in needs a rating for each thing they watch, so ask rather than guess.
-- Your tools cover Career, Finance, Training, Food and Care for now. For other modules, say plainly that you can't see that yet and suggest where in the app to do it.`;
+- Faith: log prayers they say they prayed ("prayed fajr"); prayer times are on the Faith screen, never state them. Speak about faith respectfully and keep to their tradition when they've named it.
+- Calendar: check calendar_view for clashes before adding an event; times are in their zone.
+- Wishlist: ask why they want a dream if they didn't say; moving savings into a dream is done in the app.
+- Your tools cover every module: Career, Finance, Training, Food, Care, Faith, Fashion, Wishlist and the Calendar.`;
 }
 
 /** A short title for a new conversation, from its first message. */

@@ -1,7 +1,10 @@
 import { ModuleScreen, type ModuleScreenProps } from "@/components/module-screen";
 import { fashionRoutes } from "../navigation";
 
-export type FashionScreenProps = Omit<ModuleScreenProps, "label" | "onHome" | "insights"> & {
+export type FashionScreenProps = Omit<
+	ModuleScreenProps,
+	"label" | "onHome" | "insights" | "assistant"
+> & {
 	insightsActive?: boolean;
 };
 
@@ -12,6 +15,7 @@ export function FashionScreen({ insightsActive = false, ...props }: FashionScree
 			label="Fashion"
 			onHome={fashionRoutes.today}
 			insights={{ onPress: fashionRoutes.insights, active: insightsActive }}
+			assistant={{ module: "fashion", screen: "fashion" }}
 			{...props}
 		/>
 	);

@@ -2,14 +2,15 @@ import { APPROVAL_LABELS, APPROVAL_MODES } from "@personal-os/domain/assistant";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { StyleSheet, View } from "react-native";
-import { EmptyCard, ListRow, ScreenTitle, SectionLabel } from "@/components/module-ui";
+import { EmptyCard, FilterChip, ListRow, ScreenTitle, SectionLabel } from "@/components/module-ui";
 import { ModuleScreen } from "@/components/module-screen";
 import { Card } from "@/components/ui/card";
 import { PoText } from "@/components/ui/po-text";
 import { SelectCard } from "@/components/ui/select-card";
+import { Toggle } from "@/components/ui/toggle";
 import { haptics } from "@/lib/haptics";
 import { useAuth } from "@/modules/auth";
-import { setApproval, useAssistantSettings } from "../data/assistant-settings";
+import { updateAssistantSettings, useAssistantSettings } from "../data/assistant-settings";
 import { showConversation } from "../hooks/use-assistant";
 import { assistantApi, assistantErrorMessage } from "../services/assistant-api";
 
@@ -90,6 +91,15 @@ export function AssistantHistoryScreen() {
 }
 
 /** How the assistant asks before changes, and what it remembers (each fact can be deleted). */
+/** Saves some assistant settings; a failure is logged, the screen keeps the last value. */
+const save = (change: Parameters<typeof updateAssistantSettings>[0]) =>
+	updateAssistantSettings(change).catch((error: unknown) =>
+		console.error("[assistant] could not save the setting", error),
+	);
+
+/** Morning brief times to pick from. */
+const BRIEF_TIMES = [6 * 60, 7 * 60, 8 * 60, 9 * 60, 10 * 60] as const;
+
 export function AssistantSettingsScreen() {
 	const { token } = useAuth();
 	const queryClient = useQueryClient();
@@ -121,7 +131,7 @@ export function AssistantSettingsScreen() {
 						accessibilityLabel={APPROVAL_LABELS[mode].title}
 						onPress={() => {
 							haptics.select();
-							setApproval(mode).catch((error: unknown) =>
+							updateAssistantSettings({ approval: mode }).catch((error: unknown) =>
 								console.error("[assistant] could not save the setting", error),
 							);
 						}}
@@ -135,6 +145,43 @@ export function AssistantSettingsScreen() {
 					</SelectCard>
 				))}
 			</View>
+			<SectionLabel>Reaching out</SectionLabel>
+			<Card style={styles.reach}>
+				<View style={styles.reachRow}>
+					<View style={styles.reachText}>
+						<PoText variant="row15">Reach out to me</PoText>
+						<PoText variant="meta13" tone="textSecondary">
+							A morning brief, and a heads-up the evening before a bill or an interview. Tap one to
+							talk it through.
+						</PoText>
+					</View>
+					<Toggle
+						value={settings.nudges}
+						accessibilityLabel="Reach out to me"
+						onChange={(nudges) => {
+							haptics.select();
+							save({ nudges });
+						}}
+					/>
+				</View>
+				{settings.nudges ? (
+					<View style={styles.times}>
+						<PoText variant="meta13" tone="textSecondary">
+							Morning brief at
+						</PoText>
+						<View style={styles.chips}>
+							{BRIEF_TIMES.map((minutes) => (
+								<FilterChip
+									key={minutes}
+									label={`${Math.floor(minutes / 60)}:${String(minutes % 60).padStart(2, "0")}`}
+									selected={settings.briefAt === minutes}
+									onPress={() => save({ briefAt: minutes })}
+								/>
+							))}
+						</View>
+					</View>
+				) : null}
+			</Card>
 			<SectionLabel>What it remembers about you</SectionLabel>
 			{facts.length === 0 ? (
 				<PoText variant="meta13" tone="textSecondary">
@@ -160,4 +207,9 @@ const styles = StyleSheet.create({
 	list: { gap: 0, paddingVertical: 4 },
 	options: { gap: 8 },
 	option: { gap: 2, padding: 16 },
+	reach: { gap: 14, padding: 16 },
+	reachRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+	reachText: { flex: 1, gap: 2 },
+	times: { gap: 8 },
+	chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 });

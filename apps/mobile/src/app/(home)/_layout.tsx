@@ -4,6 +4,10 @@ import { RouteError } from "@/components/route-error";
 import { onboardingRoutes } from "@/modules/onboarding/lib/flow";
 import { useOnboardingProgress } from "@/modules/onboarding/store/onboarding-progress";
 import { useOnboardingSync } from "@/modules/onboarding/store/use-onboarding-sync";
+import {
+	useAssistantNudges,
+	useNotificationLinks,
+} from "@/modules/assistant/hooks/use-assistant-nudges";
 import { useHeyOs } from "@/modules/home/hooks/use-hey-os";
 import { useAvatarSync } from "@/modules/profile/hooks/use-avatar-sync";
 
@@ -16,6 +20,8 @@ export default function HomeLayout() {
 	useOnboardingSync();
 	useAvatarSync();
 	useHeyOs();
+	useAssistantNudges();
+	useNotificationLinks();
 
 	useEffect(() => {
 		if (!hydrated) {

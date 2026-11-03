@@ -31,15 +31,34 @@ export const APPROVAL_LABELS: Record<ApprovalMode, { title: string; detail: stri
 };
 
 /** Assistant preferences, synced like any record. One per person, id "settings". */
-export type AssistantSettings = { id: "settings"; approval: ApprovalMode };
+export type AssistantSettings = {
+	id: "settings";
+	approval: ApprovalMode;
+	/** Whether the assistant reaches out: the morning brief and heads-ups (bills, interviews). */
+	nudges: boolean;
+	/** Minutes after midnight for the morning brief. */
+	briefAt: number;
+};
 
-export const defaultAssistantSettings: AssistantSettings = { id: "settings", approval: "always" };
+export const defaultAssistantSettings: AssistantSettings = {
+	id: "settings",
+	approval: "always",
+	nudges: true,
+	briefAt: 8 * 60,
+};
 
 export const ASSISTANT_SETTINGS_COLLECTION = "assistant-settings";
 
 export function parseAssistantSettings(raw: unknown): AssistantSettings | null {
 	if (!isRecord(raw) || raw.id !== "settings") return null;
-	return { id: "settings", approval: oneOf(raw.approval, APPROVAL_MODES, "always") };
+	const briefAt =
+		typeof raw.briefAt === "number" ? Math.round(raw.briefAt) : defaultAssistantSettings.briefAt;
+	return {
+		id: "settings",
+		approval: oneOf(raw.approval, APPROVAL_MODES, "always"),
+		nudges: typeof raw.nudges === "boolean" ? raw.nudges : true,
+		briefAt: briefAt >= 0 && briefAt < 1440 ? briefAt : defaultAssistantSettings.briefAt,
+	};
 }
 
 export function needsApproval(mode: ApprovalMode, effect: ToolEffect): boolean {

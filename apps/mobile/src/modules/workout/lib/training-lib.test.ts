@@ -60,9 +60,9 @@ describe("library", () => {
 			for (const item of template.exercises) photos.add(item.photo);
 		}
 		for (const photo of photos) {
-			expect(existsSync(join(import.meta.dir, "../../../../assets/training", `${photo}.jpg`))).toBe(
-				true,
-			);
+			expect(
+				existsSync(join(import.meta.dir, "../../../../assets/training", `${photo}.webp`)),
+			).toBe(true);
 		}
 		expect(templateById("push-handstand")?.exercises).toHaveLength(7);
 		expect(

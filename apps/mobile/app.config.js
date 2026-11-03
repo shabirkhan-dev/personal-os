@@ -16,6 +16,9 @@ module.exports = ({ config }) => {
 	const android = {
 		enableMinifyInReleaseBuilds: true,
 		enableShrinkResourcesInReleaseBuilds: true,
+		// A dependency brings Bouncy Castle, whose post-quantum tables (about 1.2 MB) the app never
+		// uses; only those data files are left out, not its classes.
+		packagingOptions: { exclude: ["org/bouncycastle/pqc/**"] },
 		...(sideloaded ? { buildArchs: ["arm64-v8a"], useLegacyPackaging: true } : {}),
 	};
 

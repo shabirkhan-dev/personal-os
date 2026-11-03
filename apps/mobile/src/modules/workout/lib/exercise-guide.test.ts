@@ -25,9 +25,9 @@ describe("exercise guides", () => {
 		const used = new Set(CATALOG.map((exercise) => exercise.demo));
 		for (const id of DEMO_IDS) {
 			expect(used.has(id)).toBe(true);
-			const files = [...framesSource.matchAll(new RegExp(`demos/(${id}-\\d)\\.jpg`, "g"))];
+			const files = [...framesSource.matchAll(new RegExp(`demos/(${id}-\\d)\\.webp`, "g"))];
 			expect(files.length).toBeGreaterThan(0);
-			for (const [, file] of files) expect(existsSync(join(demosDir, `${file}.jpg`))).toBe(true);
+			for (const [, file] of files) expect(existsSync(join(demosDir, `${file}.webp`))).toBe(true);
 		}
 	});
 

@@ -82,7 +82,7 @@ describe("buildRoutine", () => {
 
 	it("every bundled photo exists", () => {
 		for (const entry of CATALOG) {
-			expect(existsSync(join(import.meta.dir, "../../../../assets/care", `${entry.id}.jpg`))).toBe(
+			expect(existsSync(join(import.meta.dir, "../../../../assets/care", `${entry.id}.webp`))).toBe(
 				true,
 			);
 		}

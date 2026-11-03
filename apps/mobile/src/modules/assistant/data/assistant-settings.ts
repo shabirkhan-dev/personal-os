@@ -1,10 +1,10 @@
 import {
 	ASSISTANT_SETTINGS_COLLECTION,
-	type ApprovalMode,
+	type AssistantSettings,
 	defaultAssistantSettings,
 	parseAssistantSettings,
 } from "@personal-os/domain/assistant";
-import { defineCollection, saveItem, useCollection } from "@/lib/db/collection";
+import { defineCollection, listItems, saveItem, useCollection } from "@/lib/db/collection";
 
 /**
  * The assistant's settings, a synced record like any other, so the server reads the same choice
@@ -20,6 +20,10 @@ export function useAssistantSettings() {
 	return { loading: query.isPending, settings: query.data?.[0] ?? defaultAssistantSettings };
 }
 
-export function setApproval(approval: ApprovalMode): Promise<void> {
-	return saveItem(assistantSettings, { id: "settings", approval });
+/** Changes some settings, keeping the rest as stored. */
+export async function updateAssistantSettings(
+	change: Partial<Omit<AssistantSettings, "id">>,
+): Promise<void> {
+	const current = (await listItems(assistantSettings))[0] ?? defaultAssistantSettings;
+	await saveItem(assistantSettings, { ...current, ...change, id: "settings" });
 }

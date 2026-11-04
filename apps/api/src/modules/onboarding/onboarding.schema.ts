@@ -21,6 +21,7 @@ const moduleId = z.enum([
 	"fashion",
 	"faith",
 	"wishlist",
+	"health",
 ]);
 
 /** Mirrors `OnboardingAnswers` in `apps/mobile/src/modules/onboarding/store/onboarding-store.ts`. */

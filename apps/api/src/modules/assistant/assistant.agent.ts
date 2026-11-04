@@ -42,6 +42,7 @@ import { fashionTools } from "./tools/fashion.tools";
 import { financeTools } from "./tools/finance.tools";
 import { foodTools } from "./tools/food.tools";
 import { generalTools } from "./tools/general.tools";
+import { healthTools } from "./tools/health.tools";
 import { trainingTools } from "./tools/training.tools";
 import { wishlistTools } from "./tools/wishlist.tools";
 
@@ -54,6 +55,7 @@ const TOOLS: readonly Tool[] = [
 	...faithTools,
 	...fashionTools,
 	...wishlistTools,
+	...healthTools,
 	...calendarTools,
 	...generalTools,
 ];

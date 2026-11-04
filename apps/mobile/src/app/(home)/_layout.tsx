@@ -12,6 +12,7 @@ import { useHeyOs } from "@/modules/home/hooks/use-hey-os";
 import { usePhotoSync } from "@/modules/home/hooks/use-photo-sync";
 import { usePrefetchAppPhotos } from "@/modules/home/hooks/use-prefetch-app-photos";
 import { useAvatarSync } from "@/modules/profile/hooks/use-avatar-sync";
+import { useMedicineReminders } from "@/modules/health/hooks/use-medicine-reminders";
 
 /** Shown instead of a blank screen or a crash when a Home screen fails to render. */
 export const ErrorBoundary = RouteError;
@@ -23,6 +24,7 @@ export default function HomeLayout() {
 	useAvatarSync();
 	usePhotoSync();
 	usePrefetchAppPhotos();
+	useMedicineReminders();
 	useHeyOs();
 	useAssistantNudges();
 	useNotificationLinks();

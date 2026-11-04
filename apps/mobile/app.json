@@ -31,6 +31,17 @@
       "package": "com.shabirkhandev.personalos",
       "blockedPermissions": [
         "android.permission.SYSTEM_ALERT_WINDOW"
+      ],
+      "permissions": [
+        "android.permission.health.READ_BLOOD_GLUCOSE",
+        "android.permission.health.READ_BLOOD_PRESSURE",
+        "android.permission.health.READ_BODY_TEMPERATURE",
+        "android.permission.health.READ_HEART_RATE_VARIABILITY",
+        "android.permission.health.READ_OXYGEN_SATURATION",
+        "android.permission.health.READ_RESTING_HEART_RATE",
+        "android.permission.health.READ_SLEEP",
+        "android.permission.health.READ_STEPS",
+        "android.permission.health.READ_WEIGHT"
       ]
     },
     "plugins": [
@@ -105,7 +116,15 @@
           "locationFullAccuracyPermission": false
         }
       ],
-      "./plugins/with-talk-shortcut"
+      "./plugins/with-talk-shortcut",
+      "react-native-health-connect",
+      [
+        "@kingstinct/react-native-healthkit",
+        {
+          "NSHealthShareUsageDescription": "Personal OS reads your steps, sleep, heart rate, blood pressure, blood sugar, oxygen, temperature and weight to show them in Health.",
+          "NSHealthUpdateUsageDescription": "Personal OS doesn't write to Apple Health; this is only asked by the system."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

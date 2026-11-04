@@ -396,7 +396,6 @@ export function ProfileScreen() {
 				active="profile"
 				bottomInset={insets.bottom}
 				onTodayPress={goToday}
-				onAreasPress={openAreas}
 				onInsightsPress={insightsTabPress()}
 			/>
 

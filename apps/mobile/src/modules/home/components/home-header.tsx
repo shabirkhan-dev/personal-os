@@ -19,6 +19,8 @@ export type HomeHeaderProps = {
 	/** Whether the module picker is open (the Apps button turns inverse). */
 	pickerOpen: boolean;
 	onAppsPress: () => void;
+	/** Opens the module's screens; without it the pill is just a label. */
+	onPillPress?: () => void;
 	action: { icon: IconName; label: string; onPress: () => void };
 	hero?: HomeHero;
 	amountsHidden?: boolean;
@@ -35,6 +37,7 @@ export function HomeHeader({
 	glow,
 	pickerOpen,
 	onAppsPress,
+	onPillPress,
 	action,
 	hero,
 	amountsHidden = false,
@@ -68,11 +71,12 @@ export function HomeHeader({
 					<Icon name="Filled/Grid" color={pickerOpen ? colors.textInverse : colors.textPrimary} />
 				</Pressable>
 				<Pressable
-					accessibilityRole="button"
-					accessibilityLabel={`${label}, switch module`}
+					accessibilityRole={onPillPress ? "button" : undefined}
+					accessibilityLabel={onPillPress ? `${label}, its screens` : label}
+					disabled={!onPillPress}
 					onPress={() => {
 						haptics.tap();
-						onAppsPress();
+						onPillPress?.();
 					}}
 					style={({ pressed }) => [
 						styles.pill,
@@ -85,7 +89,9 @@ export function HomeHeader({
 					<PoText variant="text14Medium" numberOfLines={1} style={styles.name}>
 						{label}
 					</PoText>
-					<Icon name="Filled/Chevron down" size={16} color={colors.textSecondary} />
+					{onPillPress ? (
+						<Icon name="Filled/Chevron down" size={16} color={colors.textSecondary} />
+					) : null}
 				</Pressable>
 				<HeaderButton
 					icon={action.icon}

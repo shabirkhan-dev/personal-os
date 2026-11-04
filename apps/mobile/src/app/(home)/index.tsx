@@ -15,6 +15,8 @@ import { AskBar } from "@/modules/home/components/ask-bar";
 import { FloatingTabBar } from "@/modules/home/components/floating-tab-bar";
 import { HomeHeader } from "@/modules/home/components/home-header";
 import { ModulePicker } from "@/modules/home/components/module-picker";
+import { SectionsMenu } from "@/modules/home/components/sections-menu";
+import { sectionsFor } from "@/modules/home/lib/module-sections";
 import { MoneyCard } from "@/modules/home/components/money-card";
 import { SoonView } from "@/modules/home/components/soon-view";
 import type { HomeHero, HomeModule } from "@/modules/home/lib/module-home";
@@ -61,6 +63,7 @@ export default function TodayScreen() {
 	const { persistAnswers } = useOnboardingProgress();
 	const { data: viewDoc, hydrate, update } = useHomeView();
 	const pickerOpen = useAreasPicker((state) => state.open);
+	const [sectionsOpen, setSectionsOpen] = useState(false);
 
 	useEffect(() => {
 		void hydrate();
@@ -114,7 +117,22 @@ export default function TodayScreen() {
 		persistAnswers().catch((error: unknown) => console.error("Could not save modules", error));
 	};
 
-	const togglePicker = () => setAreasOpen(!pickerOpen);
+	const togglePicker = () => {
+		setSectionsOpen(false);
+		setAreasOpen(!pickerOpen);
+	};
+	const moduleLabel =
+		view === "overview"
+			? "Overview"
+			: (moduleOptions.find((option) => option.id === view)?.label ?? "Module");
+	const sections = sectionsFor(moduleLabel);
+	const openSections =
+		sections.length > 0
+			? () => {
+					setAreasOpen(false);
+					setSectionsOpen(true);
+				}
+			: undefined;
 	const toggleHidden = () => update((doc) => ({ ...doc, amountsHidden: !doc.amountsHidden }));
 
 	return (
@@ -128,11 +146,12 @@ export default function TodayScreen() {
 						key={view}
 						module={moduleHome}
 						hero={heroes[view]}
-						label={moduleOptions.find((option) => option.id === view)?.label ?? "Module"}
+						label={moduleLabel}
 						name={answers.name}
 						topInset={insets.top}
 						pickerOpen={pickerOpen}
 						onAppsPress={togglePicker}
+						onPillPress={openSections}
 						amountsHidden={viewDoc.amountsHidden}
 						onToggleHidden={toggleHidden}
 					/>
@@ -145,6 +164,7 @@ export default function TodayScreen() {
 							glow="accentDefault"
 							pickerOpen={pickerOpen}
 							onAppsPress={togglePicker}
+							onPillPress={openSections}
 							action={{ icon: "Sun", label: "Morning brief", onPress: dailyRoutes.brief }}
 						/>
 						<View style={styles.content}>
@@ -181,11 +201,18 @@ export default function TodayScreen() {
 					}}
 				/>
 			) : null}
+			{sectionsOpen ? (
+				<SectionsMenu
+					top={insets.top + HEADER_HEIGHT}
+					title={moduleLabel}
+					sections={sections}
+					onClose={() => setSectionsOpen(false)}
+				/>
+			) : null}
 			<FloatingTabBar
 				active="today"
 				bottomInset={insets.bottom}
 				onTodayPress={() => select("overview")}
-				onAreasPress={() => setAreasOpen(true)}
 				onInsightsPress={moduleHome?.onInsights ?? insightsTabPress()}
 				onProfilePress={() => {
 					setAreasOpen(false);
@@ -204,6 +231,7 @@ type ModuleScreenProps = {
 	topInset: number;
 	pickerOpen: boolean;
 	onAppsPress: () => void;
+	onPillPress?: () => void;
 	amountsHidden: boolean;
 	onToggleHidden: () => void;
 };

@@ -15,6 +15,7 @@ import { assetsRoutes } from "@/modules/assets/assets.routes";
 import { authRoutes } from "@/modules/auth/auth.routes";
 import { healthRoutes } from "@/modules/health/health.routes";
 import { onboardingRoutes } from "@/modules/onboarding/onboarding.routes";
+import { staticRoutes } from "@/modules/static/static.routes";
 import { syncRoutes } from "@/modules/sync/sync.routes";
 import { usersRoutes } from "@/modules/users/users.routes";
 
@@ -39,6 +40,7 @@ export function createApp(options: AppOptions = {}) {
 		.route("/users/me/onboarding", onboardingRoutes)
 		.route("/users", usersRoutes)
 		.route("/assets", assetsRoutes)
+		.route("/static", staticRoutes)
 		.route("/sync", syncRoutes)
 		.route("/ai", aiRoutes)
 		.route("/assistant", assistantRoutes);

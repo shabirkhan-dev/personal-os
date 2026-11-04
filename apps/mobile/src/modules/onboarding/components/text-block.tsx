@@ -15,7 +15,7 @@ export type TextBlockProps = {
 	compact?: boolean;
 };
 
-/** Eyebrow (JetBrains Mono), PO/Title 30 heading and PO/Body 15 copy. */
+/** Eyebrow, PO/Title 30 heading and PO/Body 15 copy. */
 export function TextBlock({ eyebrow, title, body, dot, compact = false }: TextBlockProps) {
 	const { colors } = usePoTheme();
 

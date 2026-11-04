@@ -1,8 +1,9 @@
 /**
- * PO text styles from Figma (Kit v2). SF Pro is the platform UI font on iOS;
- * eyebrows and numerals use JetBrains Mono; Quran text and duas use Amiri Quran.
+ * PO text styles from Figma (Kit v2). One family for the whole app: the platform UI font
+ * (SF Pro on iOS, Roboto on Android), with tabular figures for times and numbers. Only Quran text
+ * and duas use another font, Amiri Quran, since the system font can't set it properly.
  */
-export type FontFamilyToken = "sans" | "mono" | "quran";
+export type FontFamilyToken = "sans" | "quran";
 export type FontWeightToken = "regular" | "medium";
 
 export type TextStyleToken = {
@@ -12,6 +13,8 @@ export type TextStyleToken = {
 	lineHeight: number;
 	letterSpacing: number;
 	uppercase?: boolean;
+	/** Same-width digits, so times and numbers line up in columns. */
+	tabular?: boolean;
 };
 
 export const textStyles = {
@@ -31,13 +34,21 @@ export const textStyles = {
 	},
 	meta13: { family: "sans", weight: "regular", size: 13, lineHeight: 18, letterSpacing: 0 },
 	tab11: { family: "sans", weight: "medium", size: 11, lineHeight: 14, letterSpacing: 0 },
-	mono13: { family: "mono", weight: "regular", size: 13, lineHeight: 18, letterSpacing: 0 },
-	eyebrow11: {
-		family: "mono",
+	/** Times, counts and amounts. Kept as "mono13" for its numbers, now in the sans family. */
+	mono13: {
+		family: "sans",
 		weight: "regular",
+		size: 13,
+		lineHeight: 18,
+		letterSpacing: 0,
+		tabular: true,
+	},
+	eyebrow11: {
+		family: "sans",
+		weight: "medium",
 		size: 11,
 		lineHeight: 14,
-		letterSpacing: 1,
+		letterSpacing: 0.6,
 		uppercase: true,
 	},
 	/** Arabic: the Ayah card and the Tasbih list; the large size for flashcards. */

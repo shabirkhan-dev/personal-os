@@ -600,7 +600,7 @@ export function AnswerCardView({ card, actions }: { card: AnswerCard; actions: C
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	tight: { gap: 12, padding: 16, borderRadius: 24 },
+	tight: { gap: 12, padding: 16, borderRadius: 20 },
 	stats: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 	stat: { flexGrow: 1, flexBasis: "45%", gap: 2, padding: 12, borderRadius: 16 },
 	head: { flexDirection: "row", alignItems: "center", gap: 6 },

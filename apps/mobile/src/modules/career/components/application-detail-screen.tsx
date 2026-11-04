@@ -382,8 +382,7 @@ const styles = StyleSheet.create({
 		paddingTop: 16,
 		paddingBottom: 6,
 		paddingHorizontal: 16,
-		borderRadius: 28,
-		borderWidth: 1,
+		borderRadius: 20,
 	},
-	notes: { padding: 16, borderRadius: 28, borderWidth: 1 },
+	notes: { padding: 16, borderRadius: 20 },
 });

@@ -488,10 +488,10 @@ export function AddDreamScreen({ editId }: { editId?: string }) {
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	input: { gap: 10, padding: 15, borderRadius: 24, borderWidth: 1 },
+	input: { gap: 10, padding: 15, borderRadius: 20 },
 	status: { flexDirection: "row", alignItems: "center", gap: 6 },
 	dot: { width: 8, height: 8, borderRadius: 4 },
-	card: { gap: 12, padding: 16, borderRadius: 28 },
+	card: { gap: 12, padding: 16, borderRadius: 20 },
 	head: { flexDirection: "row", alignItems: "center" },
 	options: { flexDirection: "row", gap: 10 },
 	option: { flex: 1, gap: 4 },

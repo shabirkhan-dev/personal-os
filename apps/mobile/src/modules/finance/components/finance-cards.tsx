@@ -513,7 +513,7 @@ export function ButtonPair({
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	card: { gap: 12, padding: 18, borderRadius: 28, borderWidth: 1 },
+	card: { gap: 12, padding: 16, borderRadius: 20 },
 	head: { flexDirection: "row", alignItems: "center", gap: 10 },
 	bars: { flexDirection: "row", gap: 8, alignItems: "flex-end" },
 	barColumn: { flex: 1, alignItems: "center", gap: 8 },

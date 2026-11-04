@@ -23,7 +23,7 @@ export type PillButtonProps = {
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 const labelStyle = toTextStyle(textStyles.row15);
 
-/** Kit v2 "Pill Button": 52px pill, radius 26. Primary is bg/inverse + text/inverse. */
+/** Kit v2 "Pill Button": a 44px pill (the touch minimum). Primary is bg/inverse + text/inverse. */
 export function PillButton({
 	label,
 	onPress,
@@ -103,18 +103,18 @@ export function PillButton({
 
 const styles = StyleSheet.create({
 	base: {
-		height: 52,
-		borderRadius: 26,
-		paddingHorizontal: 24,
+		height: 44,
+		borderRadius: 22,
+		paddingHorizontal: 20,
 		flexDirection: "row",
 		alignItems: "center",
 		justifyContent: "center",
 		gap: 8,
 	},
 	plus: {
-		width: 24,
-		height: 24,
-		borderRadius: 12,
+		width: 20,
+		height: 20,
+		borderRadius: 10,
 		alignItems: "center",
 		justifyContent: "center",
 	},

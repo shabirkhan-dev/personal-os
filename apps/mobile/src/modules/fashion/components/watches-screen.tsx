@@ -290,7 +290,7 @@ export function WatchesScreen() {
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	card: { gap: 14, padding: 16, borderRadius: 28, borderWidth: 1 },
+	card: { gap: 14, padding: 16, borderRadius: 20 },
 	head: { flexDirection: "row", alignItems: "center" },
 	row: { gap: 10 },
 	item: { width: 100, gap: 4 },
@@ -298,13 +298,12 @@ const styles = StyleSheet.create({
 	frame: { borderWidth: 2, borderRadius: 20, padding: 0 },
 	note: { flexDirection: "row", alignItems: "center", gap: 8 },
 	dot: { width: 8, height: 8, borderRadius: 4 },
-	tip: { gap: 6, padding: 18, borderRadius: 24 },
+	tip: { gap: 6, padding: 16, borderRadius: 20 },
 	low: {
 		flexDirection: "row",
 		alignItems: "center",
 		gap: 12,
 		padding: 12,
-		borderRadius: 24,
-		borderWidth: 1,
+		borderRadius: 20,
 	},
 });

@@ -22,7 +22,7 @@ export function mediaTypeOf(mimeType: string | null | undefined, uri: string): M
 }
 
 /**
- * Uploads an exercise photo or animation straight to R2 (`POST /assets/uploads` with the `media`
+ * Uploads a photo or animation straight to R2 (`POST /assets/uploads` with the `media`
  * kind, then the presigned PUT) and confirms it, returning the public URL to store.
  */
 export async function uploadMedia(

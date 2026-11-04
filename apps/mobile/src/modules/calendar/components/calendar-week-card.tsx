@@ -111,7 +111,7 @@ export function CalendarWeekCard() {
 }
 
 const styles = StyleSheet.create({
-	card: { gap: 12, padding: 16, borderRadius: 28, borderWidth: 1 },
+	card: { gap: 12, padding: 16, borderRadius: 20 },
 	head: { flexDirection: "row", alignItems: "center" },
 	flex: { flex: 1 },
 	strip: { flexDirection: "row", gap: 4 },

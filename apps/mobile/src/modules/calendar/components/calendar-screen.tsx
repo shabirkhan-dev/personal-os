@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
 	flip: { transform: [{ scaleX: -1 }] },
 	todayButton: { height: 36, paddingHorizontal: 14, borderRadius: 18, justifyContent: "center" },
 	chips: { gap: 8, paddingVertical: 2 },
-	grid: { borderRadius: 24, borderWidth: 1, padding: 8, gap: 2 },
+	grid: { borderRadius: 20, padding: 8, gap: 2 },
 	week: { flexDirection: "row" },
 	cellLabel: { flex: 1, textAlign: "center", paddingVertical: 4 },
 	cell: {

@@ -350,11 +350,11 @@ function SequenceSheet({
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
 	tabs: { gap: 8 },
-	targets: { flexDirection: "row", padding: 4, borderRadius: 24 },
+	targets: { flexDirection: "row", padding: 4, borderRadius: 20 },
 	target: { flex: 1, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
 	ringArea: { alignItems: "center", justifyContent: "center", paddingVertical: 8 },
 	ringText: { position: "absolute", alignItems: "center", gap: 2 },
-	sequence: { borderRadius: 28, borderWidth: 1, padding: 8, gap: 4 },
+	sequence: { borderRadius: 20, padding: 8, gap: 4 },
 	step: { flexDirection: "row", alignItems: "center", gap: 12, padding: 12, borderRadius: 20 },
 	badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
 	options: { flexDirection: "row", flexWrap: "wrap", gap: 8 },

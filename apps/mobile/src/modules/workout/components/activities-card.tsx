@@ -76,7 +76,7 @@ export function ActivitiesCard({
 }
 
 const styles = StyleSheet.create({
-	card: { gap: 12, padding: 18, borderRadius: 28, borderWidth: 1 },
+	card: { gap: 12, padding: 16, borderRadius: 20 },
 	head: { flexDirection: "row", alignItems: "center", gap: 8 },
 	flex: { flex: 1 },
 	wrap: { flexDirection: "row", flexWrap: "wrap", gap: 8 },

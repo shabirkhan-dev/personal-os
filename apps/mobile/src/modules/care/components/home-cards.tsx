@@ -451,9 +451,9 @@ export function CareAnswerCard({
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	card: { gap: 12, padding: 18, borderRadius: 28, borderWidth: 1 },
+	card: { gap: 12, padding: 16, borderRadius: 20 },
 	head: { flexDirection: "row", alignItems: "center", gap: 8 },
-	banner: { flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderRadius: 24 },
+	banner: { flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderRadius: 20 },
 	step: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 12 },
 	next: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
 	routineHead: { gap: 10 },

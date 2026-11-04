@@ -351,8 +351,7 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		gap: 14,
 		padding: 16,
-		borderRadius: 24,
-		borderWidth: 1,
+		borderRadius: 20,
 	},
 	score: {
 		width: 44,

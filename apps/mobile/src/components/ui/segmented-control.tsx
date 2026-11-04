@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
 		borderWidth: 1,
 		overflow: "hidden",
 	},
-	trackLarge: { borderRadius: 28, alignSelf: "stretch" },
+	trackLarge: { borderRadius: 20, alignSelf: "stretch" },
 	trackSmall: { borderRadius: 18, alignSelf: "flex-start" },
 	thumb: { position: "absolute", left: 4, top: 4 },
 	segmentLarge: {

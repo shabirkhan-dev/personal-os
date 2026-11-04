@@ -411,7 +411,7 @@ function PaymentSheet({ amount, onClose }: { amount: number; onClose: () => void
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	card: { gap: 14, padding: 18, borderRadius: 28, borderWidth: 1 },
+	card: { gap: 14, padding: 16, borderRadius: 20 },
 	dueRow: { flexDirection: "row", alignItems: "center", gap: 8 },
 	badge: {
 		flexDirection: "row",
@@ -434,7 +434,7 @@ const styles = StyleSheet.create({
 	legend: { flexDirection: "row", flexWrap: "wrap", gap: 16 },
 	legendItem: { flexDirection: "row", alignItems: "center", gap: 6 },
 	dot: { width: 8, height: 8, borderRadius: 4 },
-	list: { borderRadius: 28, borderWidth: 1, paddingHorizontal: 16, paddingBottom: 12 },
+	list: { borderRadius: 20, paddingHorizontal: 16, paddingBottom: 12 },
 	initials: {
 		width: 40,
 		height: 40,

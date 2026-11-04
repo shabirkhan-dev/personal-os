@@ -145,7 +145,7 @@ export function OsCard({ member, ready }: OsCardProps) {
 }
 
 const styles = StyleSheet.create({
-	card: { alignSelf: "stretch", height: 308, borderRadius: 32, borderWidth: 1 },
+	card: { alignSelf: "stretch", height: 308, borderRadius: 20 },
 	clip: { flex: 1, borderRadius: 31, overflow: "hidden" },
 	tab: {
 		position: "absolute",
@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
 		height: 70,
 		paddingTop: 16,
 		paddingHorizontal: 18,
-		borderRadius: 22,
+		borderRadius: 16,
 		flexDirection: "row",
 		justifyContent: "space-between",
 		alignItems: "flex-start",
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
 	inline6: { flexDirection: "row", alignItems: "center", gap: 6 },
 	dot8: { width: 8, height: 8, borderRadius: 4 },
 	dot10: { width: 10, height: 10, borderRadius: 5 },
-	pocket: { position: "absolute", left: -1, right: -1, top: 63, bottom: -1, borderRadius: 30 },
+	pocket: { position: "absolute", left: -1, right: -1, top: 63, bottom: -1, borderRadius: 20 },
 	stitch: {
 		position: "absolute",
 		left: 12,
@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
 		top: 12,
 		bottom: 12,
 		padding: 16,
-		borderRadius: 22,
+		borderRadius: 16,
 		borderWidth: 1.5,
 		borderStyle: "dashed",
 		justifyContent: "space-between",

@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
 	},
 	filters: { gap: 8 },
 	tip: { flexDirection: "row", gap: 10, paddingHorizontal: 6 },
-	featured: { padding: 8, borderRadius: 28, borderWidth: 1 },
+	featured: { padding: 8, borderRadius: 20 },
 	featuredText: { gap: 6, padding: 10 },
 	featuredHead: { flexDirection: "row", alignItems: "center", gap: 8 },
 	fits: { flexDirection: "row", alignItems: "center", gap: 6 },
@@ -236,6 +236,6 @@ const styles = StyleSheet.create({
 	sectionHead: { paddingHorizontal: 6, paddingTop: 4 },
 	none: { paddingHorizontal: 6 },
 	grid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
-	tile: { width: "48.5%", padding: 6, borderRadius: 24, borderWidth: 1 },
+	tile: { width: "48.5%", padding: 6, borderRadius: 20 },
 	tileText: { gap: 2, padding: 8 },
 });

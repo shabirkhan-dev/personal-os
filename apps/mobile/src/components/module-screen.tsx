@@ -59,10 +59,7 @@ export function ModuleScreen({
 				accessibilityRole="button"
 				accessibilityLabel={`${label}, switch area`}
 				onPress={openAreas}
-				style={[
-					styles.pill,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
+				style={[styles.pill, { backgroundColor: colors.bgSurface }]}
 			>
 				<Avatar name={name} size={32} />
 				<PoText variant="text14Medium">{label}</PoText>
@@ -135,7 +132,6 @@ const styles = StyleSheet.create({
 		paddingLeft: 4,
 		paddingRight: 12,
 		borderRadius: 999,
-		borderWidth: 1,
 	},
 	spacer: { width: 40, height: 40 },
 });

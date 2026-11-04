@@ -72,6 +72,11 @@ store coupling.
 
 ## Visual principles
 
+- Sleek pass (decision, 2026-11-04, from the owner): no outline rings. Cards are flat surfaces
+  (`bgSurface` on `bgApp`, light `bgApp` is `#f5f5f5` so white cards still separate), radius 20
+  and padding 16; header and tab buttons have no border; buttons are 44px (PillButton) and the ask
+  bar 46px. Borders stay only where they mean something: inputs, selected states, dividers.
+
 - Hierarchy through type and spacing first; colour second; glow and shadow last.
 - Glows are intentional (heroes, the personal and OS cards), never a default page background.
 - One accent per surface. Status colours carry meaning (success, danger, warning, caution, violet).

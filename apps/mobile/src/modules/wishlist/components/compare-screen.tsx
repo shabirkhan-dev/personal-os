@@ -214,9 +214,9 @@ function SpecRow({ label, values }: { label: string; values: readonly string[] }
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
 	pair: { flexDirection: "row", gap: 10 },
-	option: { flex: 1, gap: 8, padding: 10, borderRadius: 24, borderWidth: 1.5 },
+	option: { flex: 1, gap: 8, padding: 10, borderRadius: 20, borderWidth: 1.5 },
 	optionText: { gap: 2, paddingHorizontal: 4, paddingBottom: 4 },
-	card: { gap: 4, padding: 16, borderRadius: 28 },
+	card: { gap: 4, padding: 16, borderRadius: 20 },
 	tableRow: { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 8 },
 	label: { flex: 1.2 },
 	cell: { flex: 1 },

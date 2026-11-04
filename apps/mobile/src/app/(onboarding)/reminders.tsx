@@ -123,6 +123,6 @@ export default function RemindersScreen() {
 const styles = StyleSheet.create({
 	text: { flex: 1, gap: 2 },
 	note: { textAlign: "center" },
-	list: { paddingHorizontal: 18, paddingVertical: 4, borderRadius: 28, borderWidth: 1 },
+	list: { paddingHorizontal: 16, paddingVertical: 4, borderRadius: 20 },
 	row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 14 },
 });

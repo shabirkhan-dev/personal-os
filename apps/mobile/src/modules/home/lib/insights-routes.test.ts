@@ -5,8 +5,8 @@ import { insightsAreaFor, insightsAreas, insightsTarget } from "./insights-route
 describe("insights routes", () => {
 	test("lists only the person's modules that have Insights, in module order", () => {
 		const areas = insightsAreas(["faith", "career", "finance", "daily-life"]);
-		expect(areas.map((area) => area.id)).toEqual(["daily-life", "finance", "faith"]);
-		expect(areas[1]?.route).toBe("/finance/insights");
+		expect(areas.map((area) => area.id)).toEqual(["daily-life", "career", "finance", "faith"]);
+		expect(areas[2]?.route).toBe("/finance/insights");
 	});
 
 	test("finds the module from a pathname", () => {
@@ -17,6 +17,7 @@ describe("insights routes", () => {
 	test("goes back to the last Insights while it is still on, else the first", () => {
 		expect(insightsTarget(["food", "faith"], "faith")).toBe("/faith/insights");
 		expect(insightsTarget(["food", "faith"], "finance")).toBe("/food/insights");
-		expect(insightsTarget(["career"], null)).toBeNull();
+		expect(insightsTarget(["career"], null)).toBe("/career/insights");
+		expect(insightsTarget([], null)).toBeNull();
 	});
 });

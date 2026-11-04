@@ -1,9 +1,7 @@
 import type { ColorTokens } from "@personal-os/tokens";
 import type { ReactNode } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
-import Svg, { Circle } from "react-native-svg";
 import { Icon } from "@/components/icons";
-import { ProgressBar } from "@/components/module-ui";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
@@ -36,10 +34,10 @@ export function Card({ children, tone }: { children: ReactNode; tone?: "accent" 
 	const { colors } = usePoTheme();
 	const style =
 		tone === "accent"
-			? { backgroundColor: colors.bgSurface, borderColor: colors.accentDefault }
+			? { backgroundColor: colors.accentSubtle, borderColor: colors.accentSubtle }
 			: tone === "success"
 				? { backgroundColor: colors.statusSuccessSubtle, borderColor: colors.statusSuccessSubtle }
-				: { backgroundColor: colors.bgSurface, borderColor: colors.borderDefault };
+				: { backgroundColor: colors.bgSurface, borderColor: colors.bgSurface };
 	return <View style={[styles.card, style]}>{children}</View>;
 }
 
@@ -115,46 +113,9 @@ export function RightNowCard({
 	);
 }
 
-function Ring({ share, tone, children }: { share: number; tone: Tone; children: ReactNode }) {
-	const { colors } = usePoTheme();
-	const size = 44;
-	const width = 3;
-	const radius = (size - width) / 2;
-	const length = 2 * Math.PI * radius;
-	const filled = Math.min(1, Math.max(0, share));
-	return (
-		<View style={styles.ring}>
-			<Svg width={size} height={size} style={StyleSheet.absoluteFill}>
-				<Circle
-					cx={size / 2}
-					cy={size / 2}
-					r={radius}
-					stroke={colors.borderDefault}
-					strokeWidth={width}
-					fill="none"
-				/>
-				{filled > 0 ? (
-					<Circle
-						cx={size / 2}
-						cy={size / 2}
-						r={radius}
-						stroke={colors[tone]}
-						strokeWidth={width}
-						strokeLinecap="round"
-						fill="none"
-						strokeDasharray={`${length * filled} ${length}`}
-						transform={`rotate(-90 ${size / 2} ${size / 2})`}
-					/>
-				) : null}
-			</Svg>
-			{children}
-		</View>
-	);
-}
-
 export type MinimumRing = { id: MinimumId; label: string; module: PlanModule; state: MinimumState };
 
-/** The minimum day as rings: Pray 2/3, Apply 1/2, Protein 96g, Train 18:30, Skin AM ✓. */
+/** The minimum day as compact chips: Pray 2/3, Apply 1/2, Protein 96g, Train 18:30, Skin ✓. */
 export function MinimumCard({
 	rings,
 	streak,
@@ -166,6 +127,7 @@ export function MinimumCard({
 	onPress: () => void;
 	onRing: (ring: MinimumRing) => void;
 }) {
+	const { colors } = usePoTheme();
 	return (
 		<Card>
 			<Pressable accessibilityRole="button" onPress={onPress}>
@@ -175,101 +137,54 @@ export function MinimumCard({
 					rightTone="textWarning"
 				/>
 			</Pressable>
-			<View style={styles.rings}>
-				{rings.map((ring) => (
-					<Pressable
-						key={ring.id}
-						accessibilityRole="button"
-						accessibilityLabel={`${ring.label}, ${ring.state.done ? "done" : ring.state.value}`}
-						onPress={() => {
-							haptics.tap();
-							onRing(ring);
-						}}
-						style={styles.ringItem}
-					>
-						<Ring
-							share={ring.state.done ? 1 : ring.state.share}
-							tone={
-								MODULE_TONES[ring.module] === "textPrimary"
-									? "accentDefault"
-									: MODULE_TONES[ring.module]
-							}
+			<View style={styles.chips}>
+				{rings.map((ring) => {
+					const tone =
+						MODULE_TONES[ring.module] === "textPrimary"
+							? "accentDefault"
+							: MODULE_TONES[ring.module];
+					const share = ring.state.done ? 1 : Math.min(1, Math.max(0, ring.state.share));
+					return (
+						<Pressable
+							key={ring.id}
+							accessibilityRole="button"
+							accessibilityLabel={`${ring.label}, ${ring.state.done ? "done" : ring.state.value}`}
+							onPress={() => {
+								haptics.tap();
+								onRing(ring);
+							}}
+							style={({ pressed }) => [
+								styles.chip,
+								{ backgroundColor: pressed ? colors.bgHover : colors.bgSubtle },
+							]}
 						>
+							{ring.state.done ? (
+								<Icon name="Line/Check" size={14} color={colors.statusSuccess} />
+							) : (
+								<View style={[styles.dot, { backgroundColor: colors[tone] }]} />
+							)}
 							<PoText
-								variant="mono13"
-								tone={ring.state.done ? "textSuccess" : "textPrimary"}
-								style={styles.ringText}
+								variant="text14Medium"
+								tone={ring.state.done ? "textSecondary" : "textPrimary"}
+								numberOfLines={1}
+								style={styles.flex}
 							>
-								{ring.state.value}
+								{ring.label}
 							</PoText>
-						</Ring>
-						<PoText variant="meta13" tone="textSecondary">
-							{ring.label}
-						</PoText>
-					</Pressable>
-				))}
+							<PoText variant="mono13" tone={ring.state.done ? "textSuccess" : "textTertiary"}>
+								{ring.state.done ? "done" : ring.state.value}
+							</PoText>
+							<View
+								style={[
+									styles.chipBar,
+									{ width: `${share * 100}%`, backgroundColor: colors[tone] },
+								]}
+							/>
+						</Pressable>
+					);
+				})}
 			</View>
 		</Card>
-	);
-}
-
-export type ModuleTile = {
-	id: string;
-	label: string;
-	status: string;
-	share: number;
-	tone: Tone;
-	onPress: () => void;
-};
-
-/** "Your modules today": two columns of tiles with a line and a bar each. */
-export function ModuleTiles({ tiles }: { tiles: readonly ModuleTile[] }) {
-	const { colors } = usePoTheme();
-	return (
-		<View style={styles.section}>
-			<View style={styles.sectionHead}>
-				<PoText variant="eyebrow11" tone="textTertiary">
-					Your modules today
-				</PoText>
-				<PoText variant="mono13" tone="textTertiary">
-					{String(tiles.length)}
-				</PoText>
-			</View>
-			<View style={styles.tiles}>
-				{tiles.map((tile) => (
-					<Pressable
-						key={tile.id}
-						accessibilityRole="button"
-						accessibilityLabel={`${tile.label}, ${tile.status}`}
-						onPress={() => {
-							haptics.tap();
-							tile.onPress();
-						}}
-						style={({ pressed }) => [
-							styles.tile,
-							{
-								backgroundColor: pressed ? colors.bgHover : colors.bgSurface,
-								borderColor: colors.borderDefault,
-							},
-						]}
-					>
-						<View style={styles.tileHead}>
-							<View style={[styles.dot, { backgroundColor: colors[tile.tone] }]} />
-							<PoText variant="row15" style={styles.flex} numberOfLines={1}>
-								{tile.label}
-							</PoText>
-							<Icon name="Line/Chevron right" size={14} color={colors.textTertiary} />
-						</View>
-						<PoText variant="meta13" tone="textSecondary" numberOfLines={1}>
-							{tile.status}
-						</PoText>
-						<View style={styles.tileBar}>
-							<ProgressBar share={tile.share} tone={tile.tone} />
-						</View>
-					</Pressable>
-				))}
-			</View>
-		</View>
 	);
 }
 
@@ -277,10 +192,13 @@ export function ModuleTiles({ tiles }: { tiles: readonly ModuleTile[] }) {
 export function AgendaRow({
 	item,
 	past = false,
+	time,
 	onPress,
 }: {
 	item: AgendaItem;
 	past?: boolean;
+	/** In place of the clock time ("All day"). */
+	time?: string;
 	onPress?: () => void;
 }) {
 	const { colors } = usePoTheme();
@@ -292,7 +210,7 @@ export function AgendaRow({
 			style={({ pressed }) => [styles.agenda, pressed && onPress ? { opacity: 0.7 } : null]}
 		>
 			<PoText variant="mono13" tone="textTertiary" style={styles.time}>
-				{clockOf(item.minutes)}
+				{time ?? clockOf(item.minutes)}
 			</PoText>
 			<View
 				style={[
@@ -313,6 +231,24 @@ export function AgendaRow({
 			</View>
 			{item.done ? <Icon name="Line/Check" size={16} color={colors.statusSuccess} /> : null}
 		</Pressable>
+	);
+}
+
+/** The "Now 14:20" line between what is over and what is ahead on the Today timeline. */
+export function NowLine({ minutes }: { minutes: number }) {
+	const { colors } = usePoTheme();
+	return (
+		<View
+			style={styles.now}
+			accessibilityRole="text"
+			accessibilityLabel={`Now, ${clockOf(minutes)}`}
+		>
+			<PoText variant="mono13" tone="accentDefault" style={styles.time}>
+				{clockOf(minutes)}
+			</PoText>
+			<View style={[styles.nowDot, { backgroundColor: colors.accentDefault }]} />
+			<View style={[styles.nowRule, { backgroundColor: colors.accentDefault }]} />
+		</View>
 	);
 }
 
@@ -358,24 +294,30 @@ export function CheckRow({
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	card: { gap: 12, padding: 18, borderRadius: 28, borderWidth: 1.5 },
+	card: { gap: 12, padding: 16, borderRadius: 20, borderWidth: 1.5 },
 	head: { flexDirection: "row", alignItems: "center", gap: 8 },
 	eyebrow: { flexDirection: "row", alignItems: "center", gap: 8 },
 	dot: { width: 8, height: 8, borderRadius: 4 },
+	chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+	chip: {
+		flexBasis: "48%",
+		flexGrow: 1,
+		flexDirection: "row",
+		alignItems: "center",
+		gap: 8,
+		paddingHorizontal: 12,
+		paddingVertical: 10,
+		borderRadius: 14,
+		overflow: "hidden",
+	},
+	chipBar: { position: "absolute", left: 0, bottom: 0, height: 2 },
 	smallDot: { width: 6, height: 6, borderRadius: 3 },
 	row: { flexDirection: "row", gap: 10, alignItems: "center" },
-	rings: { flexDirection: "row", justifyContent: "space-between" },
-	ringItem: { alignItems: "center", gap: 6, minWidth: 56 },
-	ring: { width: 44, height: 44, alignItems: "center", justifyContent: "center" },
-	ringText: { fontSize: 11 },
-	section: { gap: 10 },
-	sectionHead: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 6 },
-	tiles: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-	tile: { width: "48.8%", gap: 8, padding: 14, borderRadius: 22, borderWidth: 1 },
-	tileHead: { flexDirection: "row", alignItems: "center", gap: 8 },
-	tileBar: { width: "55%" },
 	agenda: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8 },
-	time: { width: 44 },
+	time: { width: 52 },
+	now: { flexDirection: "row", alignItems: "center", gap: 0, paddingVertical: 4 },
+	nowDot: { width: 7, height: 7, borderRadius: 4, marginLeft: 10 },
+	nowRule: { flex: 1, height: 1.5 },
 	bar: { width: 3, height: 32, borderRadius: 2 },
 	check: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 6 },
 });

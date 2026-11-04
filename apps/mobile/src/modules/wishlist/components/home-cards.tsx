@@ -336,7 +336,7 @@ export function StartCard({ onPick }: { onPick: (starter: (typeof STARTERS)[numb
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
 	pressed: { opacity: 0.7 },
-	surface: { gap: 12, borderRadius: 28, overflow: "hidden" },
+	surface: { gap: 12, borderRadius: 20, overflow: "hidden" },
 	track: { height: 8, borderRadius: 4, overflow: "hidden" },
 	fill: { height: 8, borderRadius: 4, minWidth: 4 },
 	upNextText: { gap: 4, paddingHorizontal: 4 },
@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
 	listHead: { flexDirection: "row", alignItems: "center", paddingHorizontal: 4, paddingBottom: 2 },
 	row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 6 },
 	rowText: { flex: 1, gap: 2 },
-	rules: { gap: 6, padding: 16, borderRadius: 28 },
+	rules: { gap: 6, padding: 16, borderRadius: 20 },
 	garage: { flexDirection: "row", alignItems: "center", gap: 12 },
 	startHead: { gap: 14 },
 	grid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },

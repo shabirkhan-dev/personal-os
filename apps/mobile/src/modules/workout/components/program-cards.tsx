@@ -145,9 +145,8 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		gap: 14,
 		padding: 12,
-		borderRadius: 24,
-		borderWidth: 1,
+		borderRadius: 20,
 	},
-	card: { gap: 10, padding: 18, borderRadius: 28, borderWidth: 1 },
+	card: { gap: 10, padding: 16, borderRadius: 20 },
 	head: { flexDirection: "row", alignItems: "center" },
 });

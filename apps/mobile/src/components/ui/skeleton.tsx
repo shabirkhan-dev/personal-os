@@ -99,7 +99,7 @@ export function SkeletonList({ count = 3, label = "content" }: { count?: number;
 }
 
 const styles = StyleSheet.create({
-	card: { gap: 12, padding: 20, borderRadius: 28, borderWidth: 1 },
+	card: { gap: 12, padding: 16, borderRadius: 20 },
 	media: { height: 180, borderRadius: 20, marginBottom: 4 },
 	list: { gap: 12 },
 });

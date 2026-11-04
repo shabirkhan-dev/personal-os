@@ -393,7 +393,7 @@ export function LogMealScreen() {
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	said: { gap: 8, padding: 16, borderRadius: 24, borderWidth: 1.5 },
+	said: { gap: 8, padding: 16, borderRadius: 20, borderWidth: 1.5 },
 	status: { flexDirection: "row", alignItems: "center", gap: 6 },
 	dot: { width: 8, height: 8, borderRadius: 4 },
 	notice: { paddingHorizontal: 6 },

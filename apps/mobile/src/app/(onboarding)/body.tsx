@@ -174,8 +174,7 @@ const styles = StyleSheet.create({
 		paddingTop: 16,
 		paddingBottom: 14,
 		paddingHorizontal: 16,
-		borderRadius: 28,
-		borderWidth: 1,
+		borderRadius: 20,
 	},
 	labelRow: {
 		flexDirection: "row",

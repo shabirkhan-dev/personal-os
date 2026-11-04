@@ -89,7 +89,7 @@ export function ScanScreen() {
 }
 
 const styles = StyleSheet.create({
-	frame: { height: 360, borderRadius: 28, borderWidth: 1, overflow: "hidden" },
+	frame: { height: 360, borderRadius: 20, overflow: "hidden" },
 	camera: { flex: 1 },
 	target: {
 		position: "absolute",

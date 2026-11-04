@@ -51,11 +51,7 @@ export function FloatingTabBar({
 		<View pointerEvents="box-none" style={[styles.wrap, { bottom: Math.max(12, bottomInset + 2) }]}>
 			<View
 				accessibilityRole="tablist"
-				style={[
-					styles.bar,
-					{ backgroundColor: colors.bgApp, borderColor: colors.borderDefault },
-					toShadowStyle(elevation.tabBar),
-				]}
+				style={[styles.bar, { backgroundColor: colors.bgSurface }, toShadowStyle(elevation.tabBar)]}
 			>
 				{tabs.map((tab) => {
 					const active = tab.id === activeTab;
@@ -100,20 +96,19 @@ const styles = StyleSheet.create({
 	bar: {
 		flexDirection: "row",
 		alignItems: "center",
-		gap: 4,
-		padding: 6,
-		borderRadius: 32,
-		borderWidth: 1,
+		gap: 2,
+		padding: 4,
+		borderRadius: 999,
 	},
 	active: {
-		height: 52,
+		height: 44,
 		flexDirection: "row",
 		alignItems: "center",
 		gap: 8,
-		paddingLeft: 18,
-		paddingRight: 20,
-		borderRadius: 26,
+		paddingLeft: 14,
+		paddingRight: 16,
+		borderRadius: 22,
 	},
-	icon: { width: 52, height: 52, borderRadius: 26, alignItems: "center", justifyContent: "center" },
+	icon: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center" },
 	inactive: { opacity: 0.45 },
 });

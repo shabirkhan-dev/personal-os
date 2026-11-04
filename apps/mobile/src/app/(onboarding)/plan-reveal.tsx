@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
 	gap12: { height: 12 },
 	center: { textAlign: "center" },
 	flex: { flex: 1 },
-	day: { paddingHorizontal: 18, paddingVertical: 6, borderRadius: 28, borderWidth: 1 },
+	day: { paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20 },
 	row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 10 },
 	time: { width: 44 },
 	tile32: {
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 	},
 	goals: { flexDirection: "row", gap: 8 },
-	goal: { flex: 1, gap: 8, padding: 12, borderRadius: 22, borderWidth: 1 },
+	goal: { flex: 1, gap: 8, padding: 12, borderRadius: 16, borderWidth: 1 },
 	tile28: {
 		width: 28,
 		height: 28,

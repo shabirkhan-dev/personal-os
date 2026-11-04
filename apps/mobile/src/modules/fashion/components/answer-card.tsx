@@ -101,7 +101,7 @@ export function AnswerCard({
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	card: { gap: 12, padding: 18, borderRadius: 28, borderWidth: 1 },
+	card: { gap: 12, padding: 16, borderRadius: 20 },
 	eyebrow: { flexDirection: "row", alignItems: "center", gap: 8 },
 	outfit: { gap: 10 },
 	item: { width: 72, gap: 4 },

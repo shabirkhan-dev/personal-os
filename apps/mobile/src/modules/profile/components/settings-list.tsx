@@ -173,8 +173,7 @@ const styles = StyleSheet.create({
 	card: {
 		paddingHorizontal: 14,
 		paddingVertical: 4,
-		borderRadius: 28,
-		borderWidth: 1,
+		borderRadius: 20,
 		overflow: "hidden",
 	},
 	hairline: { height: 1 },

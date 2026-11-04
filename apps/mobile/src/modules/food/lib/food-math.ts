@@ -401,10 +401,10 @@ export function foodNotes(input: {
 }): FoodNote[] {
 	const notes: FoodNote[] = [];
 	const left = remaining(input.settings.targets, eatenOn(input.meals, input.today));
-	const dinnerLogged = input.meals.some(
-		(meal) => meal.day === input.today && meal.slot === "dinner" && !meal.planned,
-	);
-	const recipe = dinnerLogged ? null : pickRecipe("dinner", left);
+	const loggedToday = input.meals.filter((meal) => meal.day === input.today && !meal.planned);
+	const dinnerLogged = loggedToday.some((meal) => meal.slot === "dinner");
+	// "You need 120 g more today" only means something once today has meals in it.
+	const recipe = dinnerLogged || loggedToday.length === 0 ? null : pickRecipe("dinner", left);
 	if (recipe && left.protein >= 15) {
 		notes.push({
 			kind: "dinner",

@@ -255,6 +255,13 @@ describe("weight and recap", () => {
 		const notes = foodNotes({ meals, water: [], settings, today: "2026-10-16", days, recap });
 		expect(notes.map((note) => note.kind)).toEqual(["dinner", "breakfast", "protein-price"]);
 	});
+
+	it("suggests no dinner before anything is logged today", () => {
+		const days = weekDays(new Date("2026-10-16T12:00:00")).slice(0, 5);
+		const recap = weekRecap([], weighIns, settings, days);
+		const notes = foodNotes({ meals: [], water: [], settings, today: "2026-10-16", days, recap });
+		expect(notes.map((note) => note.kind)).not.toContain("dinner");
+	});
 });
 
 describe("content", () => {

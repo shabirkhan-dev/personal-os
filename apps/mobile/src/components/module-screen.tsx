@@ -14,6 +14,7 @@ import { sectionsFor } from "@/modules/home/lib/module-sections";
 import { Avatar } from "@/modules/onboarding/components/avatar";
 import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
 import { KeyboardAwareScrollView } from "@/components/ui/keyboard-aware-scroll-view";
+import { STICKY_ROW, StickyBar, scrolledPast } from "@/components/ui/sticky-bar";
 import { usePoTheme } from "@/theme";
 
 export type ModuleScreenProps = {
@@ -55,6 +56,7 @@ export function ModuleScreen({
 	const insets = useSafeAreaInsets();
 	const name = useOnboardingStore((state) => state.name);
 	const [menuOpen, setMenuOpen] = useState(false);
+	const [solid, setSolid] = useState(false);
 	const sections = sectionsFor(label);
 
 	const header = (
@@ -86,8 +88,9 @@ export function ModuleScreen({
 	);
 	const switcher = insights?.active ? <InsightsSwitcher /> : null;
 	// Room for the tab bar, and the Ask button above it when there is one.
+	// The header is pinned in a StickyBar, so content starts below its row.
 	const padding = {
-		paddingTop: insets.top + 6,
+		paddingTop: insets.top + 6 + STICKY_ROW + 12,
 		paddingBottom: (assistant ? 160 : 110) + insets.bottom,
 	};
 
@@ -97,18 +100,21 @@ export function ModuleScreen({
 				<KeyboardAwareScrollView
 					keyboardShouldPersistTaps="handled"
 					contentContainerStyle={[styles.content, padding]}
+					scrollEventThrottle={16}
+					onScroll={(event) => setSolid(scrolledPast(event.nativeEvent.contentOffset.y))}
 				>
-					{header}
 					{switcher}
 					{children}
 				</KeyboardAwareScrollView>
 			) : (
 				<View style={[styles.root, styles.content, padding]}>
-					{header}
 					{switcher}
 					{children}
 				</View>
 			)}
+			<StickyBar topInset={insets.top} solid={solid || menuOpen}>
+				{header}
+			</StickyBar>
 			<FloatingTabBar
 				active={insights?.active ? "insights" : tab}
 				bottomInset={insets.bottom}
@@ -137,7 +143,6 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "center",
 		gap: 8,
-		paddingBottom: 12,
 	},
 	pill: {
 		height: 40,

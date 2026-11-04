@@ -13,7 +13,8 @@ import { foodHome, useFoodStatus } from "@/modules/food";
 import { financeHome, useFinanceStatus } from "@/modules/finance";
 import { AskBar } from "@/modules/home/components/ask-bar";
 import { FloatingTabBar } from "@/modules/home/components/floating-tab-bar";
-import { HomeHeader } from "@/modules/home/components/home-header";
+import { HeaderBar, HomeHeader } from "@/modules/home/components/home-header";
+import { StickyBar, scrolledPast } from "@/components/ui/sticky-bar";
 import { ModulePicker } from "@/modules/home/components/module-picker";
 import { SectionsMenu } from "@/modules/home/components/sections-menu";
 import { sectionsFor } from "@/modules/home/lib/module-sections";
@@ -63,6 +64,8 @@ export default function TodayScreen() {
 	const { data: viewDoc, hydrate, update } = useHomeView();
 	const pickerOpen = useAreasPicker((state) => state.open);
 	const [sectionsOpen, setSectionsOpen] = useState(false);
+	const [solid, setSolid] = useState(false);
+	const [actionRequest, setActionRequest] = useState({ view: "overview" as HomeView, count: 0 });
 
 	useEffect(() => {
 		void hydrate();
@@ -107,6 +110,8 @@ export default function TodayScreen() {
 	const moduleHome = view === "overview" ? undefined : moduleHomes[view];
 
 	const select = (target: HomeView) => {
+		// A module's action fires on a change of this count, so a new Home starts from zero.
+		setActionRequest({ view: target, count: 0 });
 		update((doc) => ({ ...doc, view: target }));
 		setAreasOpen(false);
 	};
@@ -139,6 +144,8 @@ export default function TodayScreen() {
 			<KeyboardAwareScrollView
 				contentContainerStyle={[styles.scroll, { paddingBottom: 110 + insets.bottom }]}
 				keyboardShouldPersistTaps="handled"
+				scrollEventThrottle={16}
+				onScroll={(event) => setSolid(scrolledPast(event.nativeEvent.contentOffset.y))}
 			>
 				{moduleHome && view !== "overview" ? (
 					<ModuleScreen
@@ -151,6 +158,7 @@ export default function TodayScreen() {
 						pickerOpen={pickerOpen}
 						onAppsPress={togglePicker}
 						onPillPress={openSections}
+						actionRequest={actionRequest.view === view ? actionRequest.count : 0}
 						amountsHidden={viewDoc.amountsHidden}
 						onToggleHidden={toggleHidden}
 					/>
@@ -165,6 +173,7 @@ export default function TodayScreen() {
 							onAppsPress={togglePicker}
 							onPillPress={openSections}
 							action={{ icon: "Sun", label: "Morning brief", onPress: dailyRoutes.brief }}
+							bar="spacer"
 						/>
 						<View style={styles.content}>
 							{view === "overview" ? (
@@ -187,6 +196,28 @@ export default function TodayScreen() {
 					</>
 				)}
 			</KeyboardAwareScrollView>
+			<StickyBar topInset={insets.top} solid={solid || pickerOpen || sectionsOpen}>
+				<HeaderBar
+					name={answers.name}
+					label={view === "overview" ? answers.name.trim().split(/\s+/)[0] || "You" : moduleLabel}
+					pickerOpen={pickerOpen}
+					onAppsPress={togglePicker}
+					onPillPress={openSections}
+					action={
+						moduleHome
+							? {
+									icon: moduleHome.action.icon,
+									label: moduleHome.action.label,
+									onPress: () =>
+										setActionRequest((current) => ({
+											view,
+											count: current.view === view ? current.count + 1 : 1,
+										})),
+								}
+							: { icon: "Sun", label: "Morning brief", onPress: dailyRoutes.brief }
+					}
+				/>
+			</StickyBar>
 			{pickerOpen ? (
 				<ModulePicker
 					top={insets.top + HEADER_HEIGHT}
@@ -232,13 +263,13 @@ type ModuleScreenProps = {
 	pickerOpen: boolean;
 	onAppsPress: () => void;
 	onPillPress?: () => void;
+	actionRequest: number;
 	amountsHidden: boolean;
 	onToggleHidden: () => void;
 };
 
 /** One module's Home. Keyed by module so its view starts fresh when switching. */
-function ModuleScreen({ module, hero, label, ...header }: ModuleScreenProps) {
-	const [actionRequest, setActionRequest] = useState(0);
+function ModuleScreen({ module, hero, label, actionRequest, ...header }: ModuleScreenProps) {
 	const { View: ModuleView, Backdrop } = module;
 
 	return (
@@ -249,11 +280,8 @@ function ModuleScreen({ module, hero, label, ...header }: ModuleScreenProps) {
 				glow={hero?.glow ?? module.glow}
 				hero={hero}
 				backdrop={Backdrop ? <Backdrop /> : null}
-				action={{
-					icon: module.action.icon,
-					label: module.action.label,
-					onPress: () => setActionRequest((count) => count + 1),
-				}}
+				action={{ icon: module.action.icon, label: module.action.label, onPress: () => undefined }}
+				bar="spacer"
 			/>
 			<View style={styles.content}>
 				<ModuleView actionRequest={actionRequest} />

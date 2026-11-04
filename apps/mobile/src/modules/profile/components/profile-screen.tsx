@@ -10,7 +10,8 @@ import { haptics } from "@/lib/haptics";
 import { useSync } from "@/lib/sync/sync-provider";
 import { useAuth } from "@/modules/auth/context/auth-context";
 import { FloatingTabBar } from "@/modules/home/components/floating-tab-bar";
-import { HomeHeader } from "@/modules/home/components/home-header";
+import { HeaderBar, HomeHeader } from "@/modules/home/components/home-header";
+import { StickyBar, scrolledPast } from "@/components/ui/sticky-bar";
 import { insightsTabPress } from "@/modules/home/components/insights-switcher";
 import { openAreas } from "@/modules/home/store/areas-picker";
 import { OsCard } from "@/modules/onboarding/components/os-card";
@@ -76,6 +77,12 @@ export function ProfileScreen() {
 	const member = useMemberStore((state) => state.member);
 	const hydrateProfile = useProfileStore((state) => state.hydrate);
 	const [sheet, setSheet] = useState<OpenSheet>(null);
+	const [solid, setSolid] = useState(false);
+	const headerAction = {
+		icon: "Filled/Edit" as const,
+		label: "Edit profile",
+		onPress: () => setSheet("edit"),
+	};
 	const [exporting, setExporting] = useState(false);
 	const [deleting, setDeleting] = useState(false);
 	const backup = useSync();
@@ -179,7 +186,11 @@ export function ProfileScreen() {
 
 	return (
 		<View style={[styles.root, { backgroundColor: colors.bgApp }]}>
-			<KeyboardAwareScrollView contentContainerStyle={{ paddingBottom: 120 + insets.bottom }}>
+			<KeyboardAwareScrollView
+				contentContainerStyle={{ paddingBottom: 120 + insets.bottom }}
+				scrollEventThrottle={16}
+				onScroll={(event) => setSolid(scrolledPast(event.nativeEvent.contentOffset.y))}
+			>
 				<HomeHeader
 					name={name}
 					topInset={insets.top}
@@ -187,11 +198,8 @@ export function ProfileScreen() {
 					glow="statusViolet"
 					pickerOpen={false}
 					onAppsPress={openAreas}
-					action={{
-						icon: "Filled/Edit",
-						label: "Edit profile",
-						onPress: () => setSheet("edit"),
-					}}
+					action={headerAction}
+					bar="spacer"
 				/>
 				<View style={styles.content}>
 					<OsCard member={member} />
@@ -319,6 +327,15 @@ export function ProfileScreen() {
 					</View>
 				</View>
 			</KeyboardAwareScrollView>
+			<StickyBar topInset={insets.top} solid={solid}>
+				<HeaderBar
+					name={name}
+					label="Profile"
+					pickerOpen={false}
+					onAppsPress={openAreas}
+					action={headerAction}
+				/>
+			</StickyBar>
 
 			<FloatingTabBar
 				active="profile"

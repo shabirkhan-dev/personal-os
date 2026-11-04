@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import { Icon } from "@/components/icons";
-import { ProgressBar } from "@/components/module-ui";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
@@ -213,74 +212,17 @@ export function MinimumCard({
 	);
 }
 
-export type ModuleTile = {
-	id: string;
-	label: string;
-	status: string;
-	share: number;
-	tone: Tone;
-	onPress: () => void;
-};
-
-/** "Your modules today": two columns of tiles with a line and a bar each. */
-export function ModuleTiles({ tiles }: { tiles: readonly ModuleTile[] }) {
-	const { colors } = usePoTheme();
-	return (
-		<View style={styles.section}>
-			<View style={styles.sectionHead}>
-				<PoText variant="eyebrow11" tone="textTertiary">
-					Your modules today
-				</PoText>
-				<PoText variant="mono13" tone="textTertiary">
-					{String(tiles.length)}
-				</PoText>
-			</View>
-			<View style={styles.tiles}>
-				{tiles.map((tile) => (
-					<Pressable
-						key={tile.id}
-						accessibilityRole="button"
-						accessibilityLabel={`${tile.label}, ${tile.status}`}
-						onPress={() => {
-							haptics.tap();
-							tile.onPress();
-						}}
-						style={({ pressed }) => [
-							styles.tile,
-							{
-								backgroundColor: pressed ? colors.bgHover : colors.bgSurface,
-								borderColor: colors.borderDefault,
-							},
-						]}
-					>
-						<View style={styles.tileHead}>
-							<View style={[styles.dot, { backgroundColor: colors[tile.tone] }]} />
-							<PoText variant="row15" style={styles.flex} numberOfLines={1}>
-								{tile.label}
-							</PoText>
-							<Icon name="Line/Chevron right" size={14} color={colors.textTertiary} />
-						</View>
-						<PoText variant="meta13" tone="textSecondary" numberOfLines={1}>
-							{tile.status}
-						</PoText>
-						<View style={styles.tileBar}>
-							<ProgressBar share={tile.share} tone={tile.tone} />
-						</View>
-					</Pressable>
-				))}
-			</View>
-		</View>
-	);
-}
-
 /** One timeline row: time, a coloured bar, title and module. */
 export function AgendaRow({
 	item,
 	past = false,
+	time,
 	onPress,
 }: {
 	item: AgendaItem;
 	past?: boolean;
+	/** In place of the clock time ("All day"). */
+	time?: string;
 	onPress?: () => void;
 }) {
 	const { colors } = usePoTheme();
@@ -292,7 +234,7 @@ export function AgendaRow({
 			style={({ pressed }) => [styles.agenda, pressed && onPress ? { opacity: 0.7 } : null]}
 		>
 			<PoText variant="mono13" tone="textTertiary" style={styles.time}>
-				{clockOf(item.minutes)}
+				{time ?? clockOf(item.minutes)}
 			</PoText>
 			<View
 				style={[
@@ -313,6 +255,24 @@ export function AgendaRow({
 			</View>
 			{item.done ? <Icon name="Line/Check" size={16} color={colors.statusSuccess} /> : null}
 		</Pressable>
+	);
+}
+
+/** The "Now 14:20" line between what is over and what is ahead on the Today timeline. */
+export function NowLine({ minutes }: { minutes: number }) {
+	const { colors } = usePoTheme();
+	return (
+		<View
+			style={styles.now}
+			accessibilityRole="text"
+			accessibilityLabel={`Now, ${clockOf(minutes)}`}
+		>
+			<PoText variant="mono13" tone="accentDefault" style={styles.time}>
+				{clockOf(minutes)}
+			</PoText>
+			<View style={[styles.nowDot, { backgroundColor: colors.accentDefault }]} />
+			<View style={[styles.nowRule, { backgroundColor: colors.accentDefault }]} />
+		</View>
 	);
 }
 
@@ -368,14 +328,11 @@ const styles = StyleSheet.create({
 	ringItem: { alignItems: "center", gap: 6, minWidth: 56 },
 	ring: { width: 44, height: 44, alignItems: "center", justifyContent: "center" },
 	ringText: { fontSize: 11 },
-	section: { gap: 10 },
-	sectionHead: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 6 },
-	tiles: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-	tile: { width: "48.8%", gap: 8, padding: 14, borderRadius: 22, borderWidth: 1 },
-	tileHead: { flexDirection: "row", alignItems: "center", gap: 8 },
-	tileBar: { width: "55%" },
 	agenda: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8 },
-	time: { width: 44 },
+	time: { width: 52 },
+	now: { flexDirection: "row", alignItems: "center", gap: 0, paddingVertical: 4 },
+	nowDot: { width: 7, height: 7, borderRadius: 4, marginLeft: 10 },
+	nowRule: { flex: 1, height: 1.5 },
 	bar: { width: 3, height: 32, borderRadius: 2 },
 	check: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 6 },
 });

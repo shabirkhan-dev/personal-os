@@ -70,6 +70,11 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
   results against their ranges, symptoms with a short-sleep pattern check, a health profile (blood
   group, allergies, conditions, emergency contact, doctor) and Insights. Synced through the
   record store.
+- Phone health data: Health Connect on Android (steps, sleep, resting heart rate, HRV, oxygen,
+  blood pressure, blood sugar, temperature and weight from Samsung Health, Fitbit, Garmin, Oura
+  and others) and Apple Health on iPhone (written, not yet run on a device), pulled for the last
+  two weeks when Health opens; and the assistant's Health tools (view, log a reading, mark a dose,
+  add a checkup, note a symptom).
 - Voice in and out on the phone behind one swappable layer (`src/lib/voice`), and Talk to OS
   (`personalos://listen`), which opens listening and hands the line to the right module.
 - "Hey OS" while the app is open (on-device speech, off until turned on in Profile), and a Talk to
@@ -107,11 +112,13 @@ Roughly in order; each item becomes board cards.
 1. **Production hardening**: error tracking (Sentry on the app and the Worker), migrations and
    deploys in `cd.yml` behind CI (it is still a template; Workers Builds deploys today), a
    staging Worker, branch protection on `main`, and a privacy policy and terms linked in the app.
-2. **"Hey OS" with the app closed**: today it listens while the app is open (Profile → Hey OS) and
+2. **Direct device links** (Whoop and watches that skip Health Connect / Apple Health), and
+   iPhone testing of the Apple Health sync.
+3. **"Hey OS" with the app closed**: today it listens while the app is open (Profile → Hey OS) and
    Android has a Talk to OS launcher shortcut. Waking from the background needs an on-device
    wake-word engine in an Android foreground service; iOS does not allow always-on listening.
-3. **Insights**: AI over a per-module, opt-in daily digest, shown in the Insights tab.
-4. **Desktop app** on the same record store and sync.
+4. **Insights**: AI over a per-module, opt-in daily digest, shown in the Insights tab.
+5. **Desktop app** on the same record store and sync.
 
 ## Engineering rules
 

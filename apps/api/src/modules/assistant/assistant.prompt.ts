@@ -14,6 +14,7 @@ const MODULE_NAMES: Record<string, string> = {
 	faith: "Faith",
 	fashion: "Fashion",
 	wishlist: "Wishlist",
+	health: "Health (blood pressure, medicines, checkups; not Care)",
 };
 
 const APPROVAL: Record<ApprovalMode, string> = {

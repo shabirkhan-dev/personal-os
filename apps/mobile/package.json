@@ -27,8 +27,10 @@
   "dependencies": {
     "@expo-google-fonts/amiri-quran": "^0.4.1",
     "@expo/metro-runtime": "~58.0.14",
+    "@kingstinct/react-native-healthkit": "16.2.0",
     "@personal-os/domain": "workspace:*",
     "@personal-os/tokens": "workspace:*",
+    "@react-native-healthkit/core": "16.2.0",
     "@react-navigation/native": "^7.5.0",
     "@tanstack/react-query": "^5.104.0",
     "adhan": "^4.4.6",
@@ -61,6 +63,8 @@
     "react": "19.3.0",
     "react-native": "0.88.0-rc.4",
     "react-native-gesture-handler": "~3.3.0",
+    "react-native-health-connect": "4.1.3",
+    "react-native-nitro-modules": "0.37.1",
     "react-native-reanimated": "4.7.1",
     "react-native-safe-area-context": "~5.10.1",
     "react-native-screens": "~4.30.0",
@@ -76,5 +80,16 @@
     "react-native-web": "~0.21.4",
     "typescript": "~6.0.3"
   },
-  "private": true
+  "private": true,
+  "expo": {
+    "autolinking": {
+      "android": {
+        "exclude": [
+          "@kingstinct/react-native-healthkit",
+          "@react-native-healthkit/core",
+          "react-native-nitro-modules"
+        ]
+      }
+    }
+  }
 }

@@ -21,6 +21,7 @@ import {
 	VitalsGrid,
 } from "./health-cards";
 import { LogReadingSheet } from "./log-reading-sheet";
+import { PhoneHealthCard } from "./phone-health-card";
 
 const round = (value: number) => String(Math.round(value * 10) / 10);
 
@@ -188,7 +189,7 @@ export function HealthHomeView({ actionRequest }: HomeModuleViewProps) {
 				<EmptyCard
 					icon="Heart"
 					title="Start with one reading"
-					body="Add your blood pressure, a medicine you take or your next checkup. Phone and watch data can come in from Health Connect."
+					body="Add your blood pressure, a medicine you take or your next checkup, or connect your phone's health data below."
 				>
 					<PillButton label="Add a reading" onPress={() => setSheet({ open: true, kind: "bp" })} />
 				</EmptyCard>
@@ -208,6 +209,7 @@ export function HealthHomeView({ actionRequest }: HomeModuleViewProps) {
 				</View>
 			)}
 			{due[0] ? <NextCheckupCard due={due[0]} onOpen={healthRoutes.checkups} /> : null}
+			<PhoneHealthCard />
 			<LogReadingSheet
 				visible={sheet.open}
 				initialKind={sheet.kind}

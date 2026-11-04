@@ -5,6 +5,7 @@ import {
 	type DoseLog,
 	doseId,
 	type HealthProfile,
+	type HealthRecord,
 	type LabResult,
 	type Medicine,
 	type Reading,
@@ -19,6 +20,7 @@ import {
 	healthMedicines,
 	healthProfile,
 	healthReadings,
+	healthRecords,
 	healthSymptoms,
 } from "./collections";
 
@@ -104,3 +106,7 @@ export function logSymptom(kind: Symptom["kind"], severity: Symptom["severity"],
 export const removeSymptom = (id: string) => removeItem(healthSymptoms, id);
 
 export const saveProfile = (profile: HealthProfile) => saveItem(healthProfile, profile);
+
+export const saveRecord = (record: HealthRecord) => saveItem(healthRecords, record);
+export const removeRecord = (id: string) => removeItem(healthRecords, id);
+export const newRecordId = () => newId();

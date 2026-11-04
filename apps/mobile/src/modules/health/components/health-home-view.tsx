@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
-import { ActionPills, EmptyCard } from "@/components/module-ui";
-import { PillButton } from "@/components/ui/pill-button";
+import { useEffect, useMemo, useState } from "react";
+import { StyleSheet } from "react-native";
+import { ActionPills } from "@/components/module-ui";
 import { PoText } from "@/components/ui/po-text";
 import { haptics } from "@/lib/haptics";
 import { voiceOut } from "@/lib/voice";
@@ -10,7 +9,13 @@ import type { HomeModuleViewProps } from "@/modules/home/lib/module-home";
 import { useAskInbox } from "@/modules/home/store/ask-inbox";
 import { logReading, logSymptom, markDose } from "../data/health-actions";
 import { useHealthToday } from "../hooks/use-health";
-import { READING_LABELS, type ReadingKind, readingBand, type TodayDose } from "../lib/health-model";
+import {
+	daily,
+	READING_LABELS,
+	type ReadingKind,
+	readingBand,
+	type TodayDose,
+} from "../lib/health-model";
 import { parseHealthLine, symptomLabel } from "../lib/parse-health-line";
 import { healthRoutes } from "../navigation";
 import {
@@ -21,7 +26,15 @@ import {
 	VitalsGrid,
 } from "./health-cards";
 import { LogReadingSheet } from "./log-reading-sheet";
+import { type Shortcut, ShortcutGrid, type TodayStat, TodayStrip } from "./health-widgets";
 import { PhoneHealthCard } from "./phone-health-card";
+
+/** "7 h 20" from minutes. */
+export function hoursOf(minutes: number): string {
+	const hours = Math.floor(minutes / 60);
+	const rest = Math.round(minutes % 60);
+	return rest ? `${hours} h ${String(rest).padStart(2, "0")}` : `${hours} h`;
+}
 
 const round = (value: number) => String(Math.round(value * 10) / 10);
 
@@ -30,8 +43,34 @@ const round = (value: number) => String(Math.round(value * 10) / 10);
  * checkup. The header's button adds a reading.
  */
 export function HealthHomeView({ actionRequest }: HomeModuleViewProps) {
-	const { data, readiness, bp, sugar, heart, spo2, weight, steps, doses, due, today } =
-		useHealthToday();
+	const {
+		data,
+		now,
+		readiness,
+		bp,
+		sugar,
+		heart,
+		spo2,
+		weight,
+		steps,
+		sleep,
+		heartToday,
+		doses,
+		due,
+		today,
+	} = useHealthToday();
+	const trend = useMemo(() => {
+		const week = (kind: ReadingKind) => daily(data.readings, kind, now, 7).map((day) => day.value);
+		return {
+			bp: week("bp"),
+			"resting-hr": week("resting-hr"),
+			"heart-rate": week("heart-rate"),
+			"blood-sugar": week("blood-sugar"),
+			spo2: week("spo2"),
+			weight: week("weight"),
+			steps: week("steps"),
+		} as Partial<Record<ReadingKind, (number | null)[]>>;
+	}, [data.readings, now]);
 	const [sheet, setSheet] = useState<{ open: boolean; kind: ReadingKind }>({
 		open: false,
 		kind: "bp",
@@ -121,6 +160,7 @@ export function HealthHomeView({ actionRequest }: HomeModuleViewProps) {
 			reading: bp,
 			value: bp?.value2 ? `${bp.value}/${bp.value2}` : null,
 			unit: "mmHg",
+			trend: trend.bp,
 		},
 		{
 			kind: heart?.kind ?? "resting-hr",
@@ -129,6 +169,7 @@ export function HealthHomeView({ actionRequest }: HomeModuleViewProps) {
 			reading: heart,
 			value: heart ? round(heart.value) : null,
 			unit: "bpm",
+			trend: trend[heart?.kind ?? "resting-hr"],
 		},
 		{
 			kind: "blood-sugar",
@@ -137,6 +178,7 @@ export function HealthHomeView({ actionRequest }: HomeModuleViewProps) {
 			reading: sugar,
 			value: sugar ? round(sugar.value) : null,
 			unit: "mg/dL",
+			trend: trend["blood-sugar"],
 		},
 		{
 			kind: "spo2",
@@ -145,6 +187,7 @@ export function HealthHomeView({ actionRequest }: HomeModuleViewProps) {
 			reading: spo2,
 			value: spo2 ? round(spo2.value) : null,
 			unit: "%",
+			trend: trend.spo2,
 		},
 		{
 			kind: "weight",
@@ -153,14 +196,76 @@ export function HealthHomeView({ actionRequest }: HomeModuleViewProps) {
 			reading: weight,
 			value: weight ? round(weight.value) : null,
 			unit: "kg",
+			trend: trend.weight,
+		},
+	];
+	const { stepGoal, sleepGoal } = data.profile;
+	const stats: TodayStat[] = [
+		{
+			label: "Sleep",
+			icon: "Moon",
+			value: sleep ? hoursOf(sleep.value) : null,
+			detail: `Goal ${hoursOf(sleepGoal)}`,
+			progress: sleep ? sleep.value / sleepGoal : null,
+			onPress: () => healthRoutes.vitals("sleep"),
 		},
 		{
-			kind: "steps",
-			label: "Steps today",
+			label: "Steps",
 			icon: "Footsteps",
-			reading: steps,
 			value: steps ? Math.round(steps.value).toLocaleString("en-US") : null,
-			unit: "",
+			detail: `Goal ${stepGoal.toLocaleString("en-US")}`,
+			progress: steps ? steps.value / stepGoal : null,
+			onPress: () => healthRoutes.vitals("steps"),
+		},
+		{
+			label: "Heart",
+			icon: "Heart",
+			value: heartToday ? `${Math.round(heartToday.value)} bpm` : null,
+			detail: heartToday?.kind === "resting-hr" ? "Resting" : heartToday ? "Average" : "Today",
+			progress: null,
+			onPress: () => healthRoutes.vitals(heartToday?.kind ?? "resting-hr"),
+		},
+	];
+	const active = data.medicines.filter((medicine) => medicine.active);
+	const supplements = active.filter((medicine) => medicine.type === "supplement").length;
+	const shortcuts: Shortcut[] = [
+		{
+			label: "Medicines",
+			icon: "Drop",
+			detail: active.length
+				? `${active.length - supplements} meds · ${supplements} supps`
+				: "Add yours",
+			onPress: healthRoutes.medicines,
+		},
+		{
+			label: "Checkups",
+			icon: "Filled/Calendar",
+			detail: due[0] ? (due[0].overdue ? "One overdue" : "One coming up") : "None due",
+			onPress: healthRoutes.checkups,
+		},
+		{
+			label: "Lab results",
+			icon: "Filled/Chart",
+			detail: data.labs.length ? `${data.labs.length} saved` : "Add a test",
+			onPress: healthRoutes.labs,
+		},
+		{
+			label: "Records",
+			icon: "Filled/Camera",
+			detail: data.records.length ? `${data.records.length} saved` : "Photo a paper",
+			onPress: healthRoutes.records,
+		},
+		{
+			label: "Symptoms",
+			icon: "Heart",
+			detail: "How you feel",
+			onPress: healthRoutes.symptoms,
+		},
+		{
+			label: "Insights",
+			icon: "Filled/Sparkle",
+			detail: "Patterns",
+			onPress: healthRoutes.insights,
 		},
 	];
 	const nothingYet = !data.loading && data.readings.length === 0 && data.medicines.length === 0;
@@ -184,32 +289,20 @@ export function HealthHomeView({ actionRequest }: HomeModuleViewProps) {
 					{ label: "My profile", icon: "Filled/User", onPress: healthRoutes.profile },
 				]}
 			/>
+			<TodayStrip stats={stats} />
 			{readiness ? <ReadinessCard readiness={readiness} /> : null}
-			{nothingYet ? (
-				<EmptyCard
-					icon="Heart"
-					title="Start with one reading"
-					body="Add your blood pressure, a medicine you take or your next checkup, or connect your phone's health data below."
-				>
-					<PillButton label="Add a reading" onPress={() => setSheet({ open: true, kind: "bp" })} />
-				</EmptyCard>
+			{nothingYet ? <PhoneHealthCard /> : null}
+			{doses.length > 0 ? (
+				<DosesCard doses={doses} onTake={take} onSkip={skip} onOpen={healthRoutes.medicines} />
 			) : null}
 			<VitalsGrid
 				tiles={tiles}
 				onOpen={(kind) => healthRoutes.vitals(kind)}
-				onAdd={(kind) =>
-					kind === "steps" ? healthRoutes.vitals("steps") : setSheet({ open: true, kind })
-				}
+				onAdd={(kind) => setSheet({ open: true, kind })}
 			/>
-			{doses.length > 0 ? (
-				<DosesCard doses={doses} onTake={take} onSkip={skip} onOpen={healthRoutes.medicines} />
-			) : (
-				<View>
-					<PillButton label="Add a medicine" variant="secondary" onPress={healthRoutes.medicines} />
-				</View>
-			)}
 			{due[0] ? <NextCheckupCard due={due[0]} onOpen={healthRoutes.checkups} /> : null}
-			<PhoneHealthCard />
+			<ShortcutGrid items={shortcuts} />
+			{nothingYet ? null : <PhoneHealthCard />}
 			<LogReadingSheet
 				visible={sheet.open}
 				initialKind={sheet.kind}

@@ -35,8 +35,8 @@ export function useHealthSync() {
 		setSyncing(true);
 		setError(null);
 		try {
-			await syncHealthStore();
-			update((doc) => ({ ...doc, lastSyncAt: new Date().toISOString() }));
+			const report = await syncHealthStore();
+			update((doc) => ({ ...doc, lastSyncAt: new Date().toISOString(), lastReport: report }));
 		} catch (caught) {
 			console.warn("[health] sync from the health store failed", caught);
 			setError("Couldn't read from it this time. Try Sync now.");
@@ -81,6 +81,7 @@ export function useHealthSync() {
 		status,
 		enabled,
 		lastSyncAt: data.lastSyncAt,
+		report: data.lastReport,
 		syncing,
 		error,
 		connect,

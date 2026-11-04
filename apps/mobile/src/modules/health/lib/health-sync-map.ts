@@ -36,10 +36,7 @@ function reading(
 /** Health Connect's relation-to-meal codes: 1 general, 2 fasting, 3 before, 4 after a meal. */
 const HC_MEAL: Record<number, Reading["context"]> = { 2: "fasting", 4: "after-meal" };
 
-type HcRecord = { metadata?: { id?: string }; time?: string; recordType?: string } & Record<
-	string,
-	unknown
->;
+type HcRecord = { metadata?: { id?: string }; time?: string } & Record<string, unknown>;
 
 const num = (value: unknown) =>
 	typeof value === "number" && Number.isFinite(value) ? value : null;
@@ -50,12 +47,15 @@ const field = (record: Record<string, unknown>, key: string, unit: string) => {
 		: null;
 };
 
-/** One Health Connect instantaneous record → a reading, or null for a type Health doesn't keep. */
-export function fromHealthConnect(record: HcRecord): Reading | null {
+/**
+ * One Health Connect instantaneous record → a reading, or null for a type Health doesn't keep.
+ * The type comes from the request: Health Connect's records don't carry it themselves.
+ */
+export function fromHealthConnect(type: string, record: HcRecord): Reading | null {
 	const id = record.metadata?.id;
 	const at = record.time;
 	if (!id || typeof at !== "string") return null;
-	switch (record.recordType) {
+	switch (type) {
 		case "RestingHeartRate": {
 			const bpm = num(record.beatsPerMinute);
 			return bpm === null ? null : reading("health-connect", id, "resting-hr", bpm, at);
@@ -104,6 +104,15 @@ export function stepsReading(
 	count: number,
 ): Reading | null {
 	return reading(source, `steps:${day}`, "steps", Math.round(count), `${day}T12:00:00.000Z`);
+}
+
+/** One day's average heart rate, from the watch's all-day samples. */
+export function heartRateReading(
+	source: Exclude<ReadingSource, "manual">,
+	day: string,
+	bpm: number,
+): Reading | null {
+	return reading(source, `hr:${day}`, "heart-rate", Math.round(bpm), `${day}T12:00:00.000Z`);
 }
 
 export type Interval = { start: string; end: string };

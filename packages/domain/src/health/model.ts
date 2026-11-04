@@ -120,11 +120,57 @@ export type LabResult = {
 	on: string;
 };
 
+export const MEDICINE_TYPES = ["medicine", "supplement"] as const;
+export type MedicineType = (typeof MEDICINE_TYPES)[number];
+
+export const MEDICINE_FORMS = [
+	"tablet",
+	"capsule",
+	"liquid",
+	"powder",
+	"drops",
+	"spray",
+	"injection",
+	"cream",
+	"other",
+] as const;
+export type MedicineForm = (typeof MEDICINE_FORMS)[number];
+
+export const MEDICINE_FORM_LABELS: Record<MedicineForm, string> = {
+	tablet: "Tablet",
+	capsule: "Capsule",
+	liquid: "Syrup",
+	powder: "Powder",
+	drops: "Drops",
+	spray: "Spray",
+	injection: "Injection",
+	cream: "Cream",
+	other: "Other",
+};
+
+export const WITH_FOOD = ["any", "with", "before", "after"] as const;
+export type WithFood = (typeof WITH_FOOD)[number];
+
+export const WITH_FOOD_LABELS: Record<WithFood, string> = {
+	any: "Any time",
+	with: "With food",
+	before: "Before food",
+	after: "After food",
+};
+
+/** A prescribed medicine or a supplement you take on your own (vitamin D, omega 3, whey…). */
 export type Medicine = {
 	id: string;
+	type: MedicineType;
 	name: string;
 	/** "500 mg", "1 tablet". */
 	dose: string;
+	form: MedicineForm;
+	/** What it's for: "blood pressure", "energy". */
+	purpose: string;
+	withFood: WithFood;
+	/** A photo of the pack, so it's easy to recognise; a file on the phone or its R2 copy. */
+	photo: string | null;
 	/** Minutes after midnight for each daily dose. */
 	times: number[];
 	/** Pills (or doses) left; null when not tracked. */
@@ -192,6 +238,10 @@ export type Contact = { name: string; phone: string };
 /** The facts a doctor or a stranger helping in an emergency needs. One per person, id "profile". */
 export type HealthProfile = {
 	id: "profile";
+	/** Daily steps to aim for. */
+	stepGoal: number;
+	/** Minutes of sleep to aim for. */
+	sleepGoal: number;
 	bloodGroup: BloodGroup;
 	allergies: string[];
 	conditions: string[];
@@ -202,12 +252,44 @@ export type HealthProfile = {
 
 export const emptyProfile: HealthProfile = {
 	id: "profile",
+	stepGoal: 8_000,
+	sleepGoal: 450,
 	bloodGroup: "unknown",
 	allergies: [],
 	conditions: [],
 	emergency: null,
 	doctor: null,
 	notes: "",
+};
+
+export const RECORD_KINDS = [
+	"prescription",
+	"report",
+	"scan",
+	"vaccine",
+	"insurance",
+	"other",
+] as const;
+export type RecordKind = (typeof RECORD_KINDS)[number];
+
+export const RECORD_LABELS: Record<RecordKind, string> = {
+	prescription: "Prescription",
+	report: "Report",
+	scan: "Scan or X-ray",
+	vaccine: "Vaccine card",
+	insurance: "Insurance",
+	other: "Other",
+};
+
+/** A photo of a paper that matters: a prescription, a lab report, a scan, a vaccine card. */
+export type HealthRecord = {
+	id: string;
+	kind: RecordKind;
+	title: string;
+	/** "YYYY-MM-DD" on the paper. */
+	on: string;
+	photo: string | null;
+	note: string;
 };
 
 // --- parsing ------------------------------------------------------------------------------------
@@ -299,10 +381,16 @@ export function parseMedicine(raw: unknown): Medicine | null {
 		return minutes !== null && minutes >= 0 && minutes < 1_440 ? Math.round(minutes) : null;
 	});
 	const stock = finite(raw.stock);
+	const photo = text(raw.photo, 600);
 	return {
 		id: mid,
+		type: oneOf(raw.type, MEDICINE_TYPES, "medicine"),
 		name,
 		dose: text(raw.dose, 40),
+		form: oneOf(raw.form, MEDICINE_FORMS, "tablet"),
+		purpose: text(raw.purpose, 80),
+		withFood: oneOf(raw.withFood, WITH_FOOD, "any"),
+		photo: photo || null,
 		times: [...new Set(times)].sort((a, b) => a - b),
 		stock: stock !== null && stock >= 0 ? Math.round(stock) : null,
 		active: asBoolean(raw.active, true),
@@ -352,6 +440,11 @@ function parseContact(raw: unknown): Contact | null {
 	return contact.name || contact.phone ? contact : null;
 }
 
+const goal = (value: unknown, low: number, high: number, fallback: number) => {
+	const number = finite(value);
+	return number !== null && number >= low && number <= high ? Math.round(number) : fallback;
+};
+
 export function parseHealthProfile(raw: unknown): HealthProfile | null {
 	if (!isRecord(raw) || raw.id !== "profile") return null;
 	const list = (value: unknown) =>
@@ -361,11 +454,30 @@ export function parseHealthProfile(raw: unknown): HealthProfile | null {
 		}).slice(0, 30);
 	return {
 		id: "profile",
+		stepGoal: goal(raw.stepGoal, 1_000, 50_000, emptyProfile.stepGoal),
+		sleepGoal: goal(raw.sleepGoal, 240, 720, emptyProfile.sleepGoal),
 		bloodGroup: oneOf(raw.bloodGroup, BLOOD_GROUPS, "unknown"),
 		allergies: list(raw.allergies),
 		conditions: list(raw.conditions),
 		emergency: parseContact(raw.emergency),
 		doctor: parseContact(raw.doctor),
 		notes: text(raw.notes, 1_000),
+	};
+}
+
+export function parseHealthRecord(raw: unknown): HealthRecord | null {
+	if (!isRecord(raw)) return null;
+	const rid = id(raw.id);
+	const on = day(raw.on);
+	if (!rid || !on) return null;
+	const kind = oneOf(raw.kind, RECORD_KINDS, "other");
+	const photo = text(raw.photo, 600);
+	return {
+		id: rid,
+		kind,
+		title: text(raw.title, 120) || RECORD_LABELS[kind],
+		on,
+		photo: photo || null,
+		note: text(raw.note),
 	};
 }

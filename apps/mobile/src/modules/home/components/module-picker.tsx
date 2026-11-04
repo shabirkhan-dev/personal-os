@@ -136,7 +136,11 @@ export function ModulePicker({
 					toShadowStyle(elevation.floating),
 				]}
 			>
-				<ScrollView contentContainerStyle={styles.content} bounces={false}>
+				<ScrollView
+					contentContainerStyle={styles.content}
+					bounces={false}
+					showsVerticalScrollIndicator={false}
+				>
 					<View style={styles.head}>
 						<PoText variant="title18">Modules</PoText>
 						<Pressable

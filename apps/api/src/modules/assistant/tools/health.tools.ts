@@ -77,7 +77,7 @@ const shown = (reading: Reading) =>
 const healthView = defineTool({
 	name: "health_view",
 	description:
-		"Their health at a glance: the latest blood pressure, heart rate, sugar, oxygen, weight and today's steps with each one's band; today's medicine doses; checkups coming up or overdue; out-of-range lab results; and their health profile (blood group, allergies, conditions). Use it for 'how's my blood pressure', 'did I take my pills', 'when is my next checkup'. Not a diagnosis: suggest a doctor for anything worrying.",
+		"Their health at a glance: the latest blood pressure, heart rate, sugar, oxygen, weight and today's steps with each one's band; today's medicine and supplement doses; checkups coming up or overdue; out-of-range lab results; and their health profile (blood group, allergies, conditions). Use it for 'how's my blood pressure', 'did I take my pills', 'when is my next checkup'. Not a diagnosis: suggest a doctor for anything worrying.",
 	input: z.object({}).strict(),
 	effect: "read",
 	label: () => "Checking your health",
@@ -139,7 +139,9 @@ const healthView = defineTool({
 				})),
 				dosesToday: todayDoses.map((dose) => ({
 					medicine: dose.medicine.name,
+					type: dose.medicine.type,
 					dose: dose.medicine.dose,
+					withFood: dose.medicine.withFood,
 					time: `${String(Math.floor(dose.minutes / 60)).padStart(2, "0")}:${String(dose.minutes % 60).padStart(2, "0")}`,
 					state: dose.state,
 				})),

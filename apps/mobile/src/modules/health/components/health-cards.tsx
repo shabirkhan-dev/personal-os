@@ -5,6 +5,7 @@ import { PoText } from "@/components/ui/po-text";
 import { clockOf } from "@/modules/home/lib/module-day";
 import { haptics } from "@/lib/haptics";
 import { usePoTheme } from "@/theme";
+import { PhotoThumb, TrendBars } from "./health-widgets";
 import {
 	type Band,
 	CHECKUP_LABELS,
@@ -23,6 +24,14 @@ export const BAND_TONES: Record<Band["tone"], Tone> = {
 	watch: "textWarning",
 	high: "textDanger",
 	urgent: "textDanger",
+};
+
+/** The bar colour for a band. */
+const BAND_FILLS: Record<Band["tone"], Tone> = {
+	good: "statusSuccess",
+	watch: "textWarning",
+	high: "statusDanger",
+	urgent: "statusDanger",
 };
 
 export function Card({ children, tint }: { children: React.ReactNode; tint?: Tone }) {
@@ -90,6 +99,8 @@ export type VitalTile = {
 	reading: Reading | null;
 	value: string | null;
 	unit: string;
+	/** One value a day for the last week, oldest first. */
+	trend?: readonly (number | null)[];
 };
 
 /** Two columns of the latest vitals; an empty one offers to add it. */
@@ -131,22 +142,31 @@ export function VitalsGrid({
 							</PoText>
 						</View>
 						{tile.value ? (
-							<PoText variant="title18" numberOfLines={1}>
-								{tile.value}
-								<PoText variant="meta13" tone="textTertiary">{` ${tile.unit}`}</PoText>
-							</PoText>
+							<>
+								<PoText variant="title18" numberOfLines={1}>
+									{tile.value}
+									<PoText variant="meta13" tone="textTertiary">{` ${tile.unit}`}</PoText>
+								</PoText>
+								{tile.trend ? (
+									<TrendBars
+										values={tile.trend}
+										tone={band ? BAND_FILLS[band.tone] : "accentDefault"}
+										height={20}
+									/>
+								) : null}
+								<PoText
+									variant="meta13"
+									tone={band ? BAND_TONES[band.tone] : "textTertiary"}
+									numberOfLines={1}
+								>
+									{band?.label ?? (tile.reading ? ago(tile.reading.at) : "")}
+								</PoText>
+							</>
 						) : (
-							<PoText variant="row15" tone="textLink">
-								Add
+							<PoText variant="meta13" tone="textTertiary" numberOfLines={1}>
+								Tap to add
 							</PoText>
 						)}
-						<PoText
-							variant="meta13"
-							tone={band ? BAND_TONES[band.tone] : "textTertiary"}
-							numberOfLines={1}
-						>
-							{band?.label ?? (tile.reading ? ago(tile.reading.at) : "Not logged")}
-						</PoText>
 					</Pressable>
 				);
 			})}
@@ -194,21 +214,29 @@ export function DosesCard({
 	const taken = doses.filter((dose) => dose.state === "taken").length;
 	return (
 		<Card>
-			<CardHead title="Medicines today" right={`${taken} of ${doses.length} ›`} onPress={onOpen} />
+			<CardHead
+				title={
+					doses.every((dose) => dose.medicine.type === "supplement")
+						? "Supplements today"
+						: "Medicines today"
+				}
+				right={`${taken} of ${doses.length} ›`}
+				onPress={onOpen}
+			/>
 			{doses.map((dose) => {
 				const state = DOSE_TEXT[dose.state];
 				const open = dose.state === "due" || dose.state === "missed" || dose.state === "later";
 				return (
 					<View key={`${dose.medicine.id}-${dose.minutes}`} style={styles.dose}>
-						<PoText variant="mono13" tone="textSecondary" style={styles.time}>
-							{clockOf(dose.minutes)}
-						</PoText>
+						<PhotoThumb uri={dose.medicine.photo} size={36} icon="Drop" />
 						<View style={styles.flex}>
 							<PoText variant="row15" numberOfLines={1}>
 								{dose.medicine.name}
 							</PoText>
-							<PoText variant="meta13" tone={state.tone}>
-								{[dose.medicine.dose, state.text].filter(Boolean).join(" · ")}
+							<PoText variant="meta13" tone={state.tone} numberOfLines={1}>
+								{[clockOf(dose.minutes), dose.medicine.dose, state.text]
+									.filter(Boolean)
+									.join(" · ")}
 							</PoText>
 						</View>
 						{open ? (
@@ -302,6 +330,5 @@ const styles = StyleSheet.create({
 	tile: { flexBasis: "48%", flexGrow: 1, gap: 4, padding: 12, borderRadius: 16 },
 	tileHead: { flexDirection: "row", alignItems: "center", gap: 8 },
 	dose: { flexDirection: "row", alignItems: "center", gap: 12 },
-	time: { width: 48 },
 	small: { height: 36, paddingHorizontal: 16, borderRadius: 18, justifyContent: "center" },
 });

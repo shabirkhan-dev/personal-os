@@ -9,6 +9,7 @@ import {
 	healthMedicines,
 	healthProfile,
 	healthReadings,
+	healthRecords,
 	healthSymptoms,
 } from "../data/collections";
 import {
@@ -30,9 +31,10 @@ export function useHealth() {
 	const doses = useCollection(healthDoses);
 	const symptoms = useCollection(healthSymptoms);
 	const profile = useCollection(healthProfile);
+	const records = useCollection(healthRecords);
 
 	return useMemo(() => {
-		const queries = [readings, checkups, labs, medicines, doses, symptoms, profile];
+		const queries = [readings, checkups, labs, medicines, doses, symptoms, profile, records];
 		return {
 			loading: queries.some((query) => query.isPending),
 			error: queries.find((query) => query.error)?.error ?? null,
@@ -43,8 +45,9 @@ export function useHealth() {
 			doses: doses.data ?? [],
 			symptoms: symptoms.data ?? [],
 			profile: profile.data?.[0] ?? emptyProfile,
+			records: [...(records.data ?? [])].sort((a, b) => b.on.localeCompare(a.on)),
 		};
-	}, [readings, checkups, labs, medicines, doses, symptoms, profile]);
+	}, [readings, checkups, labs, medicines, doses, symptoms, profile, records]);
 }
 
 export type HealthData = ReturnType<typeof useHealth>;
@@ -59,6 +62,9 @@ export function useHealthToday() {
 		const sleep = onDay(data.readings, "sleep", today);
 		return {
 			today,
+			sleep,
+			heartToday:
+				onDay(data.readings, "resting-hr", today) ?? onDay(data.readings, "heart-rate", today),
 			readiness: readiness({
 				sleepMinutes: sleep?.value ?? null,
 				restingHr: onDay(data.readings, "resting-hr", today)?.value ?? null,

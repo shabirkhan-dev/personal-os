@@ -1,6 +1,7 @@
 import { photoTarget } from "@/lib/photos/photo-sync";
 import { pieces, wishes } from "@/modules/fashion/data/collections";
 import { meals } from "@/modules/food/data/collections";
+import { healthMedicines, healthRecords } from "@/modules/health/data/collections";
 import { wishlistDreams, wishlistOwned } from "@/modules/wishlist/data/collections";
 import type { Photo } from "@/modules/wishlist/lib/wishlist-model";
 
@@ -25,6 +26,16 @@ export const PHOTO_TARGETS = [
 		meals,
 		(meal) => meal.photo,
 		(meal, photo) => ({ ...meal, photo }),
+	),
+	photoTarget(
+		healthMedicines,
+		(medicine) => medicine.photo,
+		(medicine, photo) => ({ ...medicine, photo }),
+	),
+	photoTarget(
+		healthRecords,
+		(record) => record.photo,
+		(record, photo) => ({ ...record, photo }),
 	),
 	photoTarget(
 		wishlistDreams,

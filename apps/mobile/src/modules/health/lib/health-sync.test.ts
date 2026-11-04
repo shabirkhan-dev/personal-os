@@ -14,8 +14,7 @@ const at = "2026-11-04T07:30:00.000Z";
 describe("health store records", () => {
 	test("maps Health Connect records with stable ids", () => {
 		expect(
-			fromHealthConnect({
-				recordType: "BloodPressure",
+			fromHealthConnect("BloodPressure", {
 				time: at,
 				metadata: { id: "abc" },
 				systolic: { inMillimetersOfMercury: 128.4 },
@@ -29,8 +28,7 @@ describe("health store records", () => {
 			source: "health-connect",
 		});
 		expect(
-			fromHealthConnect({
-				recordType: "BloodGlucose",
+			fromHealthConnect("BloodGlucose", {
 				time: at,
 				metadata: { id: "g" },
 				level: { inMilligramsPerDeciliter: 96 },
@@ -38,24 +36,20 @@ describe("health store records", () => {
 			}),
 		).toMatchObject({ kind: "blood-sugar", context: "fasting" });
 		expect(
-			fromHealthConnect({
-				recordType: "OxygenSaturation",
+			fromHealthConnect("OxygenSaturation", {
 				time: at,
 				metadata: { id: "o" },
 				percentage: 97,
 			})?.value,
 		).toBe(97);
 		expect(
-			fromHealthConnect({
-				recordType: "OxygenSaturation",
+			fromHealthConnect("OxygenSaturation", {
 				time: at,
 				metadata: { id: "o" },
 				percentage: 140,
 			}),
 		).toBeNull();
-		expect(
-			fromHealthConnect({ recordType: "Nutrition", time: at, metadata: { id: "n" } }),
-		).toBeNull();
+		expect(fromHealthConnect("Nutrition", { time: at, metadata: { id: "n" } })).toBeNull();
 	});
 
 	test("keeps one steps and one sleep reading per day, overlaps counted once", () => {

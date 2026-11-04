@@ -13,5 +13,6 @@ export const careerRoutes = {
 		router.push({ pathname: "/career/flashcards/[deck]", params: { deck } }),
 	skill: () => router.push("/career/skill"),
 	skillPath: () => router.push("/career/skill-path"),
+	insights: () => router.push("/career/insights"),
 	today: () => router.dismissTo("/"),
 } as const;

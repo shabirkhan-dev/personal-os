@@ -1,6 +1,7 @@
 import type { HomeModule } from "@/modules/home/lib/module-home";
 import { CareerHomeView } from "./components/career-home-view";
 import { useCareerHero } from "./hooks/use-career-hero";
+import { careerRoutes } from "./navigation";
 
 export { useCareerStatus } from "./hooks/use-career-hero";
 export { type CareerDay, useCareerDay } from "./hooks/use-career-day";
@@ -11,4 +12,5 @@ export const careerHome: HomeModule = {
 	action: { icon: "List", label: "Applications" },
 	useHero: useCareerHero,
 	View: CareerHomeView,
+	onInsights: careerRoutes.insights,
 };

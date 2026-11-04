@@ -1,9 +1,10 @@
 import type { Href } from "expo-router";
 import { type ModuleId, moduleOptions } from "@/modules/onboarding/lib/options";
 
-/** Each module's Insights screen. Career has none yet. */
+/** Each module's Insights screen. */
 export const INSIGHTS_ROUTES: Partial<Record<ModuleId, Href & string>> = {
 	"daily-life": "/daily/insights",
+	career: "/career/insights",
 	workout: "/training/insights",
 	finance: "/finance/insights",
 	skincare: "/care/insights",

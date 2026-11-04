@@ -81,5 +81,6 @@ export const MODULE_SECTIONS: Record<string, readonly Section[]> = {
 };
 
 export function sectionsFor(label: string): readonly Section[] {
-	return MODULE_SECTIONS[label] ?? [];
+	// Daily life's inner screens carry the "Today" pill.
+	return MODULE_SECTIONS[label === "Today" ? "Daily life" : label] ?? [];
 }

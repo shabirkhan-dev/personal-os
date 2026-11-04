@@ -25,7 +25,7 @@ export const APPROVAL_LABELS: Record<ApprovalMode, { title: string; detail: stri
 		detail: "Small updates happen straight away. Deleting or anything hard to undo waits for you.",
 	},
 	never: {
-		title: "Don't ask",
+		title: "Make changes without asking",
 		detail: "Changes happen straight away. You can still undo them.",
 	},
 };

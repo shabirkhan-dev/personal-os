@@ -27,7 +27,7 @@ import {
 	PATTERNS,
 	type Pattern,
 } from "../lib/exercise-guide";
-import { mediaTypeOf, uploadMedia } from "../services/media-upload";
+import { mediaTypeOf, uploadMedia } from "@/lib/photos/media-upload";
 import { DrivePlayer } from "./drive-player";
 import { ExerciseDemo } from "./exercise-demo";
 import { Card } from "./home-cards";

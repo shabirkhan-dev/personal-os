@@ -46,7 +46,7 @@ export type Meal = {
 	day: string;
 	slot: Slot;
 	items: FoodItem[];
-	/** A photo of the plate, kept on the phone. */
+	/** A photo of the plate: on this phone (file://) until it is uploaded, then its R2 link. */
 	photo: string | null;
 	/** Planned, not eaten yet. */
 	planned: boolean;

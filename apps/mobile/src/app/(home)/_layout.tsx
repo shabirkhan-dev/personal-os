@@ -9,6 +9,7 @@ import {
 	useNotificationLinks,
 } from "@/modules/assistant/hooks/use-assistant-nudges";
 import { useHeyOs } from "@/modules/home/hooks/use-hey-os";
+import { usePhotoSync } from "@/modules/home/hooks/use-photo-sync";
 import { useAvatarSync } from "@/modules/profile/hooks/use-avatar-sync";
 
 /** Shown instead of a blank screen or a crash when a Home screen fails to render. */
@@ -19,6 +20,7 @@ export default function HomeLayout() {
 	const { hydrated, completed, resumeRoute, hydrate } = useOnboardingProgress();
 	useOnboardingSync();
 	useAvatarSync();
+	usePhotoSync();
 	useHeyOs();
 	useAssistantNudges();
 	useNotificationLinks();

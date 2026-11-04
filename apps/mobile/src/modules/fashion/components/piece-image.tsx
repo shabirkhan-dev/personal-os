@@ -1,5 +1,6 @@
 import { swatches } from "@personal-os/tokens";
 import { Image, type ImageStyle, type StyleProp, StyleSheet, View } from "react-native";
+import { photoSource } from "@/lib/photos/local-photo";
 import { usePoTheme } from "@/theme";
 import { lookAlike } from "../lib/catalog";
 import { CATALOG_IMAGES } from "../lib/catalog-images";
@@ -32,7 +33,11 @@ export function PieceImage({
 		: image
 			? null
 			: lookAlike(category, colour)?.id;
-	const source = catalogId ? CATALOG_IMAGES[catalogId] : image ? { uri: image } : undefined;
+	const source = catalogId
+		? CATALOG_IMAGES[catalogId]
+		: image
+			? { uri: photoSource(image) }
+			: undefined;
 	const box = [
 		fill ? styles.fill : { width: size, height: size },
 		{ borderRadius: radius, backgroundColor: colors.bgSubtle },

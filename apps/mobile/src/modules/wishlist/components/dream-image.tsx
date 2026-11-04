@@ -1,4 +1,5 @@
 import { Image, type ImageStyle, type StyleProp, StyleSheet, View } from "react-native";
+import { photoSource } from "@/lib/photos/local-photo";
 import { Icon } from "@/components/icons";
 import { usePoTheme } from "@/theme";
 import { WISHLIST_PHOTOS } from "../lib/wishlist-images";
@@ -30,7 +31,7 @@ export function DreamImage({
 	const { colors } = usePoTheme();
 	const source =
 		photo?.kind === "file"
-			? { uri: photo.uri }
+			? { uri: photoSource(photo.uri) }
 			: photo?.kind === "bundled"
 				? WISHLIST_PHOTOS[photo.key]
 				: undefined;

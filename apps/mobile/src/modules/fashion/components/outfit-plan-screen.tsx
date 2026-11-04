@@ -273,7 +273,7 @@ function fakeWears(
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
 	pad: { paddingHorizontal: 6 },
-	row: { gap: 12, padding: 12, borderRadius: 22 },
+	row: { gap: 12, padding: 12, borderRadius: 16 },
 	top: { flexDirection: "row", alignItems: "center", gap: 10 },
 	when: { width: 40, gap: 2 },
 	thumbs: { flexDirection: "row", gap: 2 },

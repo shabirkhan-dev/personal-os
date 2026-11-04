@@ -94,7 +94,7 @@ export function MoneyCard({ period, leftToSpend, hidden, onPress }: MoneyCardPro
 }
 
 const styles = StyleSheet.create({
-	card: { height: 240, borderRadius: 32, borderWidth: 1, overflow: "hidden" },
+	card: { height: 240, borderRadius: 20, overflow: "hidden" },
 	tab: {
 		position: "absolute",
 		left: 13,
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
 		alignItems: "flex-start",
 		paddingTop: 16,
 		paddingHorizontal: 18,
-		borderRadius: 22,
+		borderRadius: 16,
 	},
 	label: { flexDirection: "row", alignItems: "center", gap: 8 },
 	setup: {
@@ -114,9 +114,8 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		alignItems: "center",
 		gap: 14,
-		paddingHorizontal: 20,
-		borderRadius: 24,
-		borderWidth: 1,
+		paddingHorizontal: 16,
+		borderRadius: 20,
 	},
 	setupText: { flex: 1, gap: 2 },
 	dot: { width: 8, height: 8, borderRadius: 4 },
@@ -126,7 +125,7 @@ const styles = StyleSheet.create({
 		right: -1,
 		top: 63,
 		height: 176,
-		borderRadius: 30,
+		borderRadius: 20,
 		padding: 12,
 	},
 	stitch: {
@@ -135,7 +134,7 @@ const styles = StyleSheet.create({
 		gap: 4,
 		paddingHorizontal: 18,
 		paddingBottom: 20,
-		borderRadius: 22,
+		borderRadius: 16,
 		borderWidth: 1.5,
 		borderStyle: "dashed",
 	},

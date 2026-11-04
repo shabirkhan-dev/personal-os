@@ -318,7 +318,7 @@ function ItemSheet({
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	input: { gap: 10, padding: 16, borderRadius: 24, borderWidth: 1.5 },
+	input: { gap: 10, padding: 16, borderRadius: 20, borderWidth: 1.5 },
 	text: { minHeight: 48, padding: 0, textAlignVertical: "top" },
 	matchRow: { flexDirection: "row", alignItems: "center", gap: 8 },
 	dot: { width: 8, height: 8, borderRadius: 4 },

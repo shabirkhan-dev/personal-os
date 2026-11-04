@@ -203,7 +203,7 @@ function Stop({ group, first, last }: { group: Group; first: boolean; last: bool
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	card: { gap: 12, padding: 16, borderRadius: 28 },
+	card: { gap: 12, padding: 16, borderRadius: 20 },
 	shares: { flexDirection: "row", gap: 6 },
 	timeline: { gap: 0 },
 	stop: { flexDirection: "row", gap: 14 },

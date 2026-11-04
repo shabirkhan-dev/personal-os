@@ -464,7 +464,7 @@ export function CapsuleCard({
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	card: { gap: 14, padding: 18, borderRadius: 28, borderWidth: 1 },
+	card: { gap: 14, padding: 16, borderRadius: 20 },
 	headRow: { flexDirection: "row", alignItems: "center", gap: 8 },
 	dots: { flexDirection: "row", gap: 4 },
 	dot: { width: 6, height: 6, borderRadius: 3 },
@@ -486,8 +486,7 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		gap: 12,
 		padding: 12,
-		borderRadius: 24,
-		borderWidth: 1,
+		borderRadius: 20,
 	},
 	rail: { height: 64, justifyContent: "flex-start" },
 	railLine: { height: 3, borderRadius: 2 },

@@ -245,6 +245,6 @@ const styles = StyleSheet.create({
 	filters: { gap: 10 },
 	chips: { gap: 8, paddingVertical: 2 },
 	row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 10 },
-	card: { borderRadius: 28, borderWidth: 1, paddingHorizontal: 16, paddingVertical: 4 },
+	card: { borderRadius: 20, paddingHorizontal: 16, paddingVertical: 4 },
 	empty: { paddingVertical: 16 },
 });

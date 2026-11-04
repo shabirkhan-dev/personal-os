@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
 		borderRadius: 24,
 	},
 	filters: { gap: 8 },
-	card: { gap: 14, padding: 16, borderRadius: 28, borderWidth: 1 },
+	card: { gap: 14, padding: 16, borderRadius: 20 },
 	head: { flexDirection: "row", alignItems: "center", gap: 6 },
 	row: { gap: 10 },
 	item: { width: 104, gap: 4 },

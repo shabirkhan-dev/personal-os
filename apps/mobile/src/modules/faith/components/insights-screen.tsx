@@ -294,6 +294,6 @@ const styles = StyleSheet.create({
 	stats: { flexDirection: "row", gap: 8 },
 	stat: { flex: 1, gap: 4, padding: 14, borderRadius: 20, borderWidth: 1 },
 	notice: { paddingHorizontal: 6 },
-	card: { gap: 12, padding: 18, borderRadius: 28, borderWidth: 1 },
+	card: { gap: 12, padding: 16, borderRadius: 20 },
 	actions: { flexDirection: "row", gap: 8 },
 });

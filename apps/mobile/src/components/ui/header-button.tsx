@@ -11,7 +11,7 @@ export type HeaderButtonProps = {
 	accessibilityLabel: string;
 };
 
-/** Kit v2 "Header Button": round 40px surface button with a 20px glyph. */
+/** Kit v2 "Header Button": round 40px surface button with a 20px glyph, no outline. */
 export function HeaderButton({
 	icon = "Filled/Back",
 	onPress,
@@ -35,10 +35,7 @@ export function HeaderButton({
 			}
 			style={({ pressed }) => [
 				styles.button,
-				{
-					backgroundColor: pressed ? colors.bgHover : colors.bgSurface,
-					borderColor: colors.borderDefault,
-				},
+				{ backgroundColor: pressed ? colors.bgHover : colors.bgSurface },
 			]}
 		>
 			<Icon name={icon} size={20} color={colors.textPrimary} />
@@ -59,7 +56,6 @@ const styles = StyleSheet.create({
 		width: 40,
 		height: 40,
 		borderRadius: 20,
-		borderWidth: 1,
 		alignItems: "center",
 		justifyContent: "center",
 	},

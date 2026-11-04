@@ -354,10 +354,10 @@ function Stat({ label, value, good = false }: { label: string; value: string; go
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	hero: { padding: 8, borderRadius: 32, borderWidth: 1 },
+	hero: { padding: 8, borderRadius: 20 },
 	stats: { flexDirection: "row", gap: 8 },
 	stat: { flex: 1, gap: 6, padding: 14, borderRadius: 20, borderWidth: 1 },
-	card: { gap: 12, padding: 18, borderRadius: 28, borderWidth: 1 },
+	card: { gap: 12, padding: 16, borderRadius: 20 },
 	head: { flexDirection: "row", alignItems: "center" },
 	pairs: { gap: 10 },
 	pair: { width: 76, gap: 4 },

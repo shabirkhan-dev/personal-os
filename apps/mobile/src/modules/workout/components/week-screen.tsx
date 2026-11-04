@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
 		gap: 12,
 		paddingHorizontal: 14,
 		paddingVertical: 12,
-		borderRadius: 22,
+		borderRadius: 16,
 		borderWidth: 1,
 	},
 	name: { width: 36 },

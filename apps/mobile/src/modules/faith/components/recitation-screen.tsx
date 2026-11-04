@@ -281,8 +281,8 @@ const styles = StyleSheet.create({
 	flex: { flex: 1 },
 	row: { flexDirection: "row", alignItems: "center", gap: 8 },
 	notice: { paddingHorizontal: 6 },
-	timer: { alignItems: "center", gap: 8, padding: 20, borderRadius: 28, borderWidth: 1.5 },
-	week: { gap: 14, padding: 18, borderRadius: 28, borderWidth: 1 },
+	timer: { alignItems: "center", gap: 8, padding: 16, borderRadius: 20, borderWidth: 1.5 },
+	week: { gap: 14, padding: 16, borderRadius: 20 },
 	dayRow: { flexDirection: "row", alignItems: "center", gap: 14 },
 	check: {
 		width: 22,

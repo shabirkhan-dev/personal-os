@@ -378,7 +378,7 @@ const styles = StyleSheet.create({
 	flex: { flex: 1 },
 	priceRow: { flexDirection: "row", alignItems: "center", gap: 8 },
 	tag: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999 },
-	box: { gap: 6, padding: 16, borderRadius: 24 },
+	box: { gap: 6, padding: 16, borderRadius: 20 },
 	plan: { gap: 4 },
 	head: { flexDirection: "row", alignItems: "center" },
 	planRow: { flexDirection: "row", alignItems: "center", paddingVertical: 6 },

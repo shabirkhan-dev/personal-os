@@ -153,7 +153,7 @@ function ShimmerLine({ width, delay }: { width: `${number}%`; delay: number }) {
 }
 
 const styles = StyleSheet.create({
-	card: { gap: 16, padding: 20, borderRadius: 28, borderWidth: 1 },
+	card: { gap: 16, padding: 16, borderRadius: 20 },
 	head: { flexDirection: "row", alignItems: "center", gap: 12 },
 	flex: { flex: 1, gap: 2 },
 	spark: {

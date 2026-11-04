@@ -450,7 +450,7 @@ export function FoodAnswerCard({
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	card: { gap: 12, padding: 18, borderRadius: 28, borderWidth: 1 },
+	card: { gap: 12, padding: 16, borderRadius: 20 },
 	eyebrow: { flexDirection: "row", alignItems: "center", gap: 8 },
 	macros: { flexDirection: "row", gap: 14 },
 	macro: { flex: 1, gap: 6 },
@@ -463,8 +463,7 @@ const styles = StyleSheet.create({
 		paddingVertical: 12,
 		paddingLeft: 12,
 		paddingRight: 12,
-		borderRadius: 28,
-		borderWidth: 1,
+		borderRadius: 20,
 	},
 	drop: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
 	dashes: { flexDirection: "row", gap: 4, paddingTop: 6, maxWidth: 180 },

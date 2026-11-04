@@ -566,12 +566,12 @@ function SourceButton({
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
 	pad: { paddingHorizontal: 6 },
-	input: { gap: 10, padding: 16, borderRadius: 24, borderWidth: 1.5, minHeight: 92 },
+	input: { gap: 10, padding: 16, borderRadius: 20, borderWidth: 1.5, minHeight: 92 },
 	status: { flexDirection: "row", alignItems: "center", gap: 8 },
 	dot: { width: 8, height: 8, borderRadius: 4 },
-	card: { gap: 12, padding: 18, borderRadius: 28, borderWidth: 1 },
+	card: { gap: 12, padding: 16, borderRadius: 20 },
 	imageRow: { flexDirection: "row", gap: 10 },
-	current: { flex: 1, borderWidth: 1.5, borderRadius: 22, padding: 2 },
+	current: { flex: 1, borderWidth: 1.5, borderRadius: 16, padding: 2 },
 	sources: { flex: 1, gap: 10 },
 	source: {
 		flex: 1,

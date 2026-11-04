@@ -42,7 +42,7 @@ export type ColorTokens = {
 export const colors: Record<ColorMode, ColorTokens> = {
 	light: {
 		bgCanvas: "#f5f5f5",
-		bgApp: "#ffffff",
+		bgApp: "#f5f5f5",
 		bgSubtle: "#fafafa",
 		bgSurface: "#ffffff",
 		bgHover: "#fafafa",

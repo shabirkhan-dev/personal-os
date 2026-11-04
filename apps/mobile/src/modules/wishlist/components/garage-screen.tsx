@@ -408,7 +408,7 @@ function ServiceSheet({
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	card: { gap: 12, padding: 16, borderRadius: 28 },
+	card: { gap: 12, padding: 16, borderRadius: 20 },
 	vehicle: { padding: 14 },
 	head: { flexDirection: "row", alignItems: "center", gap: 8 },
 	row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 6 },

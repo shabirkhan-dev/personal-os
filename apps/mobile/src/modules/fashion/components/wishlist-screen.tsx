@@ -283,10 +283,9 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		gap: 12,
 		padding: 16,
-		borderRadius: 24,
-		borderWidth: 1,
+		borderRadius: 20,
 	},
-	card: { gap: 12, padding: 16, borderRadius: 28, borderWidth: 1 },
+	card: { gap: 12, padding: 16, borderRadius: 20 },
 	head: { flexDirection: "row", alignItems: "center", gap: 14 },
 	tag: {
 		alignSelf: "flex-start",

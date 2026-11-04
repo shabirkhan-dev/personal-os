@@ -280,8 +280,7 @@ const styles = StyleSheet.create({
 		paddingVertical: 8,
 		paddingLeft: 8,
 		paddingRight: 8,
-		borderRadius: 28,
-		borderWidth: 1,
+		borderRadius: 20,
 	},
 	fitIcon: {
 		width: 36,

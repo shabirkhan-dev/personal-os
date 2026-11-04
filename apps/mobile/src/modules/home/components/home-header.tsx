@@ -62,7 +62,7 @@ export function HomeHeader({
 						styles.round,
 						pickerOpen
 							? { backgroundColor: colors.bgInverse, borderColor: colors.bgInverse }
-							: { backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
+							: { backgroundColor: colors.bgSurface },
 					]}
 				>
 					<Icon name="Filled/Grid" color={pickerOpen ? colors.textInverse : colors.textPrimary} />
@@ -78,7 +78,6 @@ export function HomeHeader({
 						styles.pill,
 						{
 							backgroundColor: pressed ? colors.bgHover : colors.bgSurface,
-							borderColor: colors.borderDefault,
 						},
 					]}
 				>
@@ -148,7 +147,6 @@ const styles = StyleSheet.create({
 		width: 40,
 		height: 40,
 		borderRadius: 20,
-		borderWidth: 1,
 		alignItems: "center",
 		justifyContent: "center",
 	},
@@ -160,7 +158,6 @@ const styles = StyleSheet.create({
 		paddingLeft: 4,
 		paddingRight: 12,
 		borderRadius: 999,
-		borderWidth: 1,
 	},
 	name: { maxWidth: 140 },
 	hero: { alignItems: "center", gap: 4, maxWidth: "100%" },

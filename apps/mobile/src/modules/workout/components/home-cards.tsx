@@ -449,15 +449,14 @@ export function TrainingAnswerCard({
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	card: { gap: 12, padding: 18, borderRadius: 28, borderWidth: 1 },
+	card: { gap: 12, padding: 16, borderRadius: 20 },
 	head: { flexDirection: "row", alignItems: "center", gap: 8 },
 	today: {
 		flexDirection: "row",
 		alignItems: "center",
 		gap: 12,
 		padding: 10,
-		borderRadius: 28,
-		borderWidth: 1,
+		borderRadius: 20,
 	},
 	play: { width: 60, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center" },
 	week: { flexDirection: "row", justifyContent: "space-between" },
@@ -478,7 +477,7 @@ const styles = StyleSheet.create({
 	section: { gap: 8 },
 	label: { paddingHorizontal: 6 },
 	bests: { flexDirection: "row", gap: 8 },
-	best: { flex: 1, gap: 4, padding: 14, borderRadius: 22, borderWidth: 1 },
+	best: { flex: 1, gap: 4, padding: 14, borderRadius: 16, borderWidth: 1 },
 	bestHead: { flexDirection: "row", alignItems: "center", gap: 6 },
 	tags: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
 	tag: { flexDirection: "row", alignItems: "center", gap: 6 },

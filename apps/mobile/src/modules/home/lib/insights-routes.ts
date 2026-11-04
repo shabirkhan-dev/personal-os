@@ -12,6 +12,7 @@ export const INSIGHTS_ROUTES: Partial<Record<ModuleId, Href & string>> = {
 	fashion: "/fashion/insights",
 	faith: "/faith/insights",
 	wishlist: "/wishlist/insights",
+	health: "/health/insights",
 };
 
 export type InsightsArea = { id: ModuleId; label: string; route: Href & string };

@@ -107,7 +107,8 @@ export type ModuleId =
 	| "food"
 	| "fashion"
 	| "faith"
-	| "wishlist";
+	| "wishlist"
+	| "health";
 
 export type ModuleOption = {
 	id: ModuleId;
@@ -196,6 +197,14 @@ export const moduleOptions: readonly ModuleOption[] = [
 		icon: "Star",
 		iconTone: "statusCaution",
 		tileTone: "statusCautionSubtle",
+	},
+	{
+		id: "health",
+		label: "Health",
+		summary: "Blood pressure · checkups · medicines",
+		icon: "Heart",
+		iconTone: "statusDanger",
+		tileTone: "statusDangerSubtle",
 	},
 ];
 

@@ -31,6 +31,7 @@ import { moduleOptions } from "@/modules/onboarding/lib/options";
 import { useOnboardingProgress } from "@/modules/onboarding/store/onboarding-progress";
 import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
 import { usePlan } from "@/modules/onboarding/store/use-plan";
+import { healthHome, useHealthStatus } from "@/modules/health";
 import { useWishlistStatus, wishlistHome } from "@/modules/wishlist";
 import { useWorkoutStatus, workoutHome } from "@/modules/workout";
 import { KeyboardAwareScrollView } from "@/components/ui/keyboard-aware-scroll-view";
@@ -50,6 +51,7 @@ const moduleHomes: Partial<Record<ModuleId, HomeModule>> = {
 	faith: faithHome,
 	fashion: fashionHome,
 	wishlist: wishlistHome,
+	health: healthHome,
 };
 
 /** Today: Overview or one module's Home, switched from the module picker. */
@@ -86,6 +88,7 @@ export default function TodayScreen() {
 		faith: faithHome.useHero(),
 		fashion: fashionHome.useHero(),
 		wishlist: wishlistHome.useHero(),
+		health: healthHome.useHero(),
 	};
 	const liveStatus: Partial<Record<ModuleId, string>> = {
 		"daily-life": useDailyStatus(),
@@ -97,6 +100,7 @@ export default function TodayScreen() {
 		faith: useFaithStatus(),
 		fashion: useFashionStatus(),
 		wishlist: useWishlistStatus(),
+		health: useHealthStatus(),
 	};
 	const modules = moduleStatuses(plan.input, items);
 	for (const item of modules) item.status = liveStatus[item.id] ?? item.status;

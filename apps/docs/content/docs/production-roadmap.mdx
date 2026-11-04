@@ -63,6 +63,13 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
   across every module plus bills and personal events, with a Now line; a morning brief, a day plan drafted from the modules, closing
   the day with energy and one good thing, sleep with a wind-down and alarms, and Insights.
   Modules feed it through one small hook each.
+- Health (apart from Care, which is grooming): readings typed, said or logged by hand (blood
+  pressure, heart rate, HRV, blood oxygen, blood sugar, temperature, weight, steps, sleep) with
+  AHA and ADA bands, a daily readiness score against your own 30-day normal, medicines with daily
+  reminders, Take or Skip, adherence and refill warnings, checkups that repeat on their own, lab
+  results against their ranges, symptoms with a short-sleep pattern check, a health profile (blood
+  group, allergies, conditions, emergency contact, doctor) and Insights. Synced through the
+  record store.
 - Voice in and out on the phone behind one swappable layer (`src/lib/voice`), and Talk to OS
   (`personalos://listen`), which opens listening and hands the line to the right module.
 - "Hey OS" while the app is open (on-device speech, off until turned on in Profile), and a Talk to

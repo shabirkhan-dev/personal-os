@@ -67,7 +67,7 @@ export default function ChooseHowScreen() {
 					<View style={styles.text}>
 						<PoText variant="title18">Just talk</PoText>
 						<PoText variant="meta13" tone="textSecondary">
-							Tell me about you and your day in about 30 seconds. I'll fill in everything.
+							Talk about you and your day for about 30 seconds and everything is filled in.
 						</PoText>
 					</View>
 					<View style={styles.example}>
@@ -95,7 +95,7 @@ export default function ChooseHowScreen() {
 					<View style={styles.text}>
 						<PoText variant="title18">Step by step</PoText>
 						<PoText variant="meta13" tone="textSecondary">
-							8 quick questions. Tap, slide, done.
+							6 quick questions. Tap, slide, done.
 						</PoText>
 					</View>
 				</SelectCard>
@@ -108,11 +108,11 @@ const styles = StyleSheet.create({
 	gap24: { height: 24 },
 	gap12: { height: 12 },
 	center: { textAlign: "center" },
-	card: { padding: 18, gap: 14 },
+	card: { padding: 20, gap: 16 },
 	top: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
 	tile: { width: 52, height: 52, borderRadius: 26, alignItems: "center", justifyContent: "center" },
 	right: { flexDirection: "row", alignItems: "center", gap: 8 },
-	tag: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12 },
+	tag: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12 },
 	text: { gap: 4 },
-	example: { flexDirection: "row", alignItems: "center", gap: 6 },
+	example: { flexDirection: "row", alignItems: "center", gap: 8 },
 });

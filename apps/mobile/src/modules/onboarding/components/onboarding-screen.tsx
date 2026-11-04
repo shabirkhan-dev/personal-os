@@ -65,5 +65,5 @@ const styles = StyleSheet.create({
 	root: { flex: 1, paddingHorizontal: 16, overflow: "hidden" },
 	fill: { flex: 1 },
 	scrollContent: { flexGrow: 1 },
-	footer: { gap: 10, paddingTop: 16 },
+	footer: { gap: 12, paddingTop: 16 },
 });

@@ -31,8 +31,7 @@ export function Card({ children, accent = false }: { children: ReactNode; accent
 			style={[
 				styles.card,
 				{
-					backgroundColor: colors.bgSurface,
-					borderColor: accent ? colors.accentDefault : colors.borderDefault,
+					backgroundColor: accent ? colors.accentSubtle : colors.bgSurface,
 				},
 			]}
 		>
@@ -126,10 +125,7 @@ export function WeightCard({
 				haptics.tap();
 				onPress();
 			}}
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
+			style={[styles.card, { backgroundColor: colors.bgSurface }]}
 		>
 			<Eyebrow
 				left={
@@ -182,12 +178,7 @@ export function WaterCard({
 	const { colors } = usePoTheme();
 	const filled = Math.round(Math.min(1, targetMl > 0 ? ml / targetMl : 0) * 10);
 	return (
-		<View
-			style={[
-				styles.water,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
+		<View style={[styles.water, { backgroundColor: colors.bgSurface }]}>
 			<View style={[styles.drop, { backgroundColor: colors.accentSubtle }]}>
 				<Icon name="Drop" size={20} color={colors.accentDefault} />
 			</View>
@@ -382,7 +373,7 @@ export function FirstMealCard() {
 		<Card>
 			<PoText variant="row15">Then log your first meal</PoText>
 			<PoText variant="meta13" tone="textSecondary">
-				No forms. Say what you ate, snap a photo or scan a barcode, and I'll work out the numbers.
+				No forms. Say what you ate, take a photo or scan a barcode, and the numbers are worked out.
 			</PoText>
 		</Card>
 	);
@@ -450,10 +441,10 @@ export function FoodAnswerCard({
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	card: { gap: 12, padding: 18, borderRadius: 28, borderWidth: 1 },
+	card: { gap: 12, padding: 16, borderRadius: 20 },
 	eyebrow: { flexDirection: "row", alignItems: "center", gap: 8 },
-	macros: { flexDirection: "row", gap: 14 },
-	macro: { flex: 1, gap: 6 },
+	macros: { flexDirection: "row", gap: 16 },
+	macro: { flex: 1, gap: 8 },
 	weightRow: { flexDirection: "row", alignItems: "baseline", gap: 12, flexWrap: "wrap" },
 	weightFoot: { flexDirection: "row", justifyContent: "space-between" },
 	water: {
@@ -463,15 +454,14 @@ const styles = StyleSheet.create({
 		paddingVertical: 12,
 		paddingLeft: 12,
 		paddingRight: 12,
-		borderRadius: 28,
-		borderWidth: 1,
+		borderRadius: 20,
 	},
 	drop: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
-	dashes: { flexDirection: "row", gap: 4, paddingTop: 6, maxWidth: 180 },
+	dashes: { flexDirection: "row", gap: 4, paddingTop: 8, maxWidth: 180 },
 	dash: { flex: 1, height: 4, borderRadius: 2 },
 	plus: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
 	section: { gap: 8 },
-	sectionHead: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 6 },
+	sectionHead: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 8 },
 	mealRow: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 12 },
 	mealTitle: { flexDirection: "row", alignItems: "baseline", gap: 8 },
 	logButton: { height: 34, borderRadius: 17, paddingHorizontal: 16, justifyContent: "center" },

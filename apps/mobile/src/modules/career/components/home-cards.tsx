@@ -72,10 +72,7 @@ export function PipelineCard({
 			accessibilityRole="button"
 			accessibilityLabel={`Pipeline, ${appliedThisWeek} of ${weeklyTarget} applied this week`}
 			onPress={onPress}
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
+			style={[styles.card, { backgroundColor: colors.bgSurface }]}
 		>
 			<View style={styles.head}>
 				<PoText variant="title18">Pipeline</PoText>
@@ -272,27 +269,26 @@ const styles = StyleSheet.create({
 		flex: 1,
 		height: 44,
 		borderRadius: 22,
-		borderWidth: 1,
+
 		flexDirection: "row",
 		alignItems: "center",
 		justifyContent: "center",
-		gap: 6,
+		gap: 8,
 	},
-	card: { gap: 12, padding: 16, borderRadius: 28, borderWidth: 1 },
+	card: { gap: 12, padding: 16, borderRadius: 20 },
 	head: { flexDirection: "row", alignItems: "baseline", justifyContent: "space-between" },
 	value: { flexDirection: "row", alignItems: "baseline", gap: 4 },
 	split: { height: 10, borderRadius: 5, overflow: "hidden", flexDirection: "row" },
-	legend: { flexDirection: "row", flexWrap: "wrap", columnGap: 14, rowGap: 8 },
-	legendItem: { flexDirection: "row", alignItems: "center", gap: 6 },
+	legend: { flexDirection: "row", flexWrap: "wrap", columnGap: 16, rowGap: 8 },
+	legendItem: { flexDirection: "row", alignItems: "center", gap: 8 },
 	legendDot: { width: 8, height: 8, borderRadius: 4 },
 	progressHead: { flexDirection: "row", alignItems: "center", gap: 12 },
 	result: {
-		gap: 10,
+		gap: 12,
 		paddingHorizontal: 16,
-		paddingVertical: 14,
-		borderRadius: 28,
-		borderWidth: 1.5,
+		paddingVertical: 16,
+		borderRadius: 20,
 	},
 	eyebrow: { flexDirection: "row", alignItems: "center", gap: 8 },
-	footer: { flexDirection: "row", gap: 10 },
+	footer: { flexDirection: "row", gap: 12 },
 });

@@ -4,8 +4,15 @@ import { RouteError } from "@/components/route-error";
 import { onboardingRoutes } from "@/modules/onboarding/lib/flow";
 import { useOnboardingProgress } from "@/modules/onboarding/store/onboarding-progress";
 import { useOnboardingSync } from "@/modules/onboarding/store/use-onboarding-sync";
+import {
+	useAssistantNudges,
+	useNotificationLinks,
+} from "@/modules/assistant/hooks/use-assistant-nudges";
 import { useHeyOs } from "@/modules/home/hooks/use-hey-os";
+import { usePhotoSync } from "@/modules/home/hooks/use-photo-sync";
+import { usePrefetchAppPhotos } from "@/modules/home/hooks/use-prefetch-app-photos";
 import { useAvatarSync } from "@/modules/profile/hooks/use-avatar-sync";
+import { useMedicineReminders } from "@/modules/health/hooks/use-medicine-reminders";
 
 /** Shown instead of a blank screen or a crash when a Home screen fails to render. */
 export const ErrorBoundary = RouteError;
@@ -15,7 +22,12 @@ export default function HomeLayout() {
 	const { hydrated, completed, resumeRoute, hydrate } = useOnboardingProgress();
 	useOnboardingSync();
 	useAvatarSync();
+	usePhotoSync();
+	usePrefetchAppPhotos();
+	useMedicineReminders();
 	useHeyOs();
+	useAssistantNudges();
+	useNotificationLinks();
 
 	useEffect(() => {
 		if (!hydrated) {

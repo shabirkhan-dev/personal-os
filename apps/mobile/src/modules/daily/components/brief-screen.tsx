@@ -6,6 +6,7 @@ import { PoText } from "@/components/ui/po-text";
 import { haptics } from "@/lib/haptics";
 import { PieceImage, useFashionDay } from "@/modules/fashion";
 import { useFaithPlace } from "@/modules/faith";
+import { useFinanceSummary } from "@/modules/finance";
 import { MealImage } from "@/modules/food";
 import { clockOf } from "@/modules/home/lib/module-day";
 import { usePoTheme } from "@/theme";
@@ -39,6 +40,7 @@ export function BriefScreen() {
 	const place = useFaithPlace();
 	const fashion = useFashionDay();
 	const { faith, food, career } = sources.extra;
+	const finance = useFinanceSummary();
 	const lastNight = data.sleep.find((item) => item.id === today) ?? null;
 	const slept = lastNight ? sleptMinutes(lastNight) : null;
 
@@ -72,7 +74,10 @@ export function BriefScreen() {
 			tone: "textSuccess",
 		});
 	}
-	if (sources.career && career.runwayWeeks !== null) {
+	// Finance's runway in days when it is set up; else Career's own estimate, in weeks.
+	if (finance.runwayDays !== null) {
+		status.push({ label: "Runway", value: `${finance.runwayDays} days`, tone: "textPrimary" });
+	} else if (sources.career && career.runwayWeeks !== null) {
 		status.push({ label: "Runway", value: `${career.runwayWeeks * 7} days`, tone: "textPrimary" });
 	}
 
@@ -140,7 +145,7 @@ export function BriefScreen() {
 			)}
 			{fashion.look || food.breakfast ? (
 				<Card>
-					<CardHead title="Ready for you" />
+					<CardHead title="Ready" />
 					<View style={styles.ready}>
 						{fashion.look ? (
 							<View style={styles.readyItem}>
@@ -197,9 +202,9 @@ export function BriefScreen() {
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	status: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 6 },
+	status: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8 },
 	three: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 4 },
 	bar: { width: 3, height: 32, borderRadius: 2 },
-	ready: { flexDirection: "row", gap: 10 },
+	ready: { flexDirection: "row", gap: 12 },
 	readyItem: { flex: 1, gap: 4 },
 });

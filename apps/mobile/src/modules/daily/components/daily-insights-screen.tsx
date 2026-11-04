@@ -153,7 +153,7 @@ export function DailyInsightsScreen() {
 			) : null}
 			{notes.length > 0 ? (
 				<PoText variant="eyebrow11" tone="textTertiary" style={styles.pad}>
-					What I noticed
+					Worth a look
 				</PoText>
 			) : null}
 			{notes.map((note) => {
@@ -216,12 +216,7 @@ function noteText(note: DailyNote, windDownAt: number) {
 function Stat({ label, value, foot }: { label: string; value: string; foot: string }) {
 	const { colors } = usePoTheme();
 	return (
-		<View
-			style={[
-				styles.stat,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
+		<View style={[styles.stat, { backgroundColor: colors.bgSurface }]}>
 			<PoText variant="meta13" tone="textSecondary">
 				{label}
 			</PoText>
@@ -239,7 +234,7 @@ const styles = StyleSheet.create({
 	recap: { gap: 8, paddingHorizontal: 4 },
 	eyebrow: { flexDirection: "row", alignItems: "center", gap: 8 },
 	stats: { flexDirection: "row", gap: 8 },
-	stat: { flex: 1, gap: 4, padding: 14, borderRadius: 24, borderWidth: 1 },
-	pad: { paddingHorizontal: 6 },
+	stat: { flex: 1, gap: 4, padding: 16, borderRadius: 20 },
+	pad: { paddingHorizontal: 8 },
 	actions: { flexDirection: "row", gap: 8 },
 });

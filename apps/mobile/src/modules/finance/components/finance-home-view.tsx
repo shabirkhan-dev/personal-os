@@ -332,7 +332,7 @@ export function FinanceHomeView({ actionRequest }: HomeModuleViewProps) {
 		return (
 			<>
 				<Card>
-					<Eyebrow>Three numbers, that's it</Eyebrow>
+					<Eyebrow>Set up your runway</Eyebrow>
 					<NumberField
 						label="Money you have now"
 						value={setup.balance}
@@ -468,7 +468,7 @@ export function FinanceHomeView({ actionRequest }: HomeModuleViewProps) {
 
 const styles = StyleSheet.create({
 	ask: { gap: 12 },
-	notice: { paddingHorizontal: 6 },
+	notice: { paddingHorizontal: 8 },
 	previewRow: { flexDirection: "row", alignItems: "center", gap: 8 },
 	dot: { width: 8, height: 8, borderRadius: 4 },
 });

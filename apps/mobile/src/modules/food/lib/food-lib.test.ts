@@ -255,13 +255,20 @@ describe("weight and recap", () => {
 		const notes = foodNotes({ meals, water: [], settings, today: "2026-10-16", days, recap });
 		expect(notes.map((note) => note.kind)).toEqual(["dinner", "breakfast", "protein-price"]);
 	});
+
+	it("suggests no dinner before anything is logged today", () => {
+		const days = weekDays(new Date("2026-10-16T12:00:00")).slice(0, 5);
+		const recap = weekRecap([], weighIns, settings, days);
+		const notes = foodNotes({ meals: [], water: [], settings, today: "2026-10-16", days, recap });
+		expect(notes.map((note) => note.kind)).not.toContain("dinner");
+	});
 });
 
 describe("content", () => {
 	it("every recipe has a photo, valid groceries and steps", () => {
 		for (const recipe of RECIPES) {
 			expect(
-				existsSync(join(import.meta.dir, "../../../../assets/food", `${recipe.photo}.jpg`)),
+				existsSync(join(import.meta.dir, "../../../../app-photos/food", `${recipe.photo}.webp`)),
 			).toBe(true);
 			expect(recipe.steps.length).toBeGreaterThan(0);
 			for (const use of recipe.uses) expect(productById(use.product)).toBeDefined();

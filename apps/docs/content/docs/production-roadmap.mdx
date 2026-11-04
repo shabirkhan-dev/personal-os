@@ -16,19 +16,21 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
 
 ### Mobile app
 
-- Onboarding end to end: voice input, saved progress, reminders, plan reveal and sign-in.
+- Onboarding end to end: one welcome screen, then talk or six quick steps (about you, body, your
+  day, goals, modules, reminders), saved progress, plan reveal and sign-in.
 - Today: Overview plus a Finance Home, and Profile, all on what the person enters. Module data is stored on the phone
   ([ADR 0001](/docs/architecture/adr-0001-on-device-module-data)).
 - Ask bar that parses typed lines into module entries.
 - Career module: pipeline, follow-ups with AI-drafted nudges, job links read by AI with a halal
-  reading, interview prep with flashcards, and a 30-minute-a-day skill path.
+  reading, interview prep with flashcards, a 30-minute-a-day skill path, and Insights (sent,
+  replies and skill time by week or month, with what to do next).
 - Faith module: prayer times on the phone (location or typed times) with reminders, a Sky header
   that follows the time of day, prayer logging and consistency, Qibla compass, Tasbih, Quran
   recitation timer, ayah and dua cards read aloud, Zakat, Grow (challenges, paths, flashcards,
   notes) and Insights, plus questions answered by the Faith AI.
 - Fashion module: wardrobe with photos (starter photos, camera, gallery or a product link read by
   AI), today's look picked on the phone for the weather (Open-Meteo) with layer advice, a watch and
-  a scent, a rotating week plan, piece detail with cost per wear, wishlist with a buying pause,
+  a scent, a rotating week plan, piece detail with cost per wear, a "To buy" list with a buying pause,
   watches and scents, and Insights.
 - Food module: meals logged from a line, Say it, a photo or a barcode (Open Food Facts), matched
   on the phone with the Food AI reading what it doesn't know; goal and targets from height,
@@ -57,17 +59,38 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
   money moved between lines, bills with Pay, income kept halal with interest set apart to give
   away, history and Insights. Synced through the record store; the old Finance file moves over.
 - Daily life, the hub that ties the modules together: the minimum day (3 to 5 small things the
-  OS protects, with a "never miss twice" streak), what's on right now, every module's line for
-  today and the rest of the day; a morning brief, a day plan drafted from the modules, closing
+  OS protects, with a "never miss twice" streak), what's on right now, and one Today timeline
+  across every module plus bills and personal events, with a Now line; a morning brief, a day plan drafted from the modules, closing
   the day with energy and one good thing, sleep with a wind-down and alarms, and Insights.
   Modules feed it through one small hook each.
+- Health (apart from Care, which is grooming): readings typed, said or logged by hand (blood
+  pressure, heart rate, HRV, blood oxygen, blood sugar, temperature, weight, steps, sleep) with
+  AHA and ADA bands, a daily readiness score against your own 30-day normal, medicines with daily
+  reminders, Take or Skip, adherence and refill warnings, checkups that repeat on their own, lab
+  results against their ranges, symptoms with a short-sleep pattern check, a health profile (blood
+  group, allergies, conditions, emergency contact, doctor, step and sleep goals) and Insights.
+  Medicines and supplements are kept apart, each with its form, what it's for, food timing and a
+  photo of the pack; Records keeps photos of prescriptions, reports, scans and vaccine cards. The
+  home shows today's sleep, steps and heart against your goals and a week's trend on each vital.
+  Synced through the record store; photos upload to R2.
+- Phone health data: Health Connect on Android (steps, sleep, all-day and resting heart rate, HRV, oxygen,
+  blood pressure, blood sugar, temperature and weight from Samsung Health, Fitbit, Garmin, Oura
+  and others) and Apple Health on iPhone (written, not yet run on a device), pulled for the last
+  30 days when Health opens, with a summary of what each sync found; and the assistant's Health tools (view, log a reading, mark a dose,
+  add a checkup, note a symptom).
 - Voice in and out on the phone behind one swappable layer (`src/lib/voice`), and Talk to OS
   (`personalos://listen`), which opens listening and hands the line to the right module.
 - "Hey OS" while the app is open (on-device speech, off until turned on in Profile), and a Talk to
   OS launcher shortcut on Android.
 - Profile photo (camera or gallery, kept on the phone and uploaded to R2 when signed in) and name
   synced to the account; fields and sheets stay above the keyboard everywhere.
+- Piece, meal, dream and owned-item photos upload to R2 after a sync while signed in, so they
+  follow their records to a new phone; the uploading phone keeps its copy for offline.
 - Long AI work runs in the background with a working card, so no screen waits on it.
+- One app shell: Areas (the tab and the header pill) opens the module switcher from any screen,
+  one Insights tab with a module switcher on top, one ask surface per screen (the ask bar on
+  every Home, the Ask button on inner screens), Kit v2 dialogs in place of system alerts, and
+  card-shaped loading placeholders. Career and the Daily brief share Finance's runway.
 - Offline-first record store on the phone with sync to the API
   ([ADR 0002](/docs/architecture/adr-0002-offline-first-sync)).
 - EAS development builds, EAS Update channels and a one-command APK build.
@@ -92,8 +115,8 @@ Roughly in order; each item becomes board cards.
 1. **Production hardening**: error tracking (Sentry on the app and the Worker), migrations and
    deploys in `cd.yml` behind CI (it is still a template; Workers Builds deploys today), a
    staging Worker, branch protection on `main`, and a privacy policy and terms linked in the app.
-2. **Piece, meal and dream photos to R2** so a wardrobe, food log and wishlist sync with their
-   photos (they stay on the phone for now).
+2. **Direct device links** (Whoop and watches that skip Health Connect / Apple Health), and
+   iPhone testing of the Apple Health sync.
 3. **"Hey OS" with the app closed**: today it listens while the app is open (Profile → Hey OS) and
    Android has a Talk to OS launcher shortcut. Waking from the background needs an on-device
    wake-word engine in an Android foreground service; iOS does not allow always-on listening.

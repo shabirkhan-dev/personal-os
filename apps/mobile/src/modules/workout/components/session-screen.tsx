@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 import { useState } from "react";
-import { Alert, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import { showDialog } from "@/components/ui/dialog";
 import { EmptyCard, FilterChip, Footer, ScreenTitle } from "@/components/module-ui";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
@@ -86,7 +87,7 @@ export function SessionScreen({ id }: { id: string }) {
 	const slowest = Math.max(...session.splits);
 
 	const remove = () =>
-		Alert.alert("Delete this session?", "It comes off your week and your bests.", [
+		showDialog("Delete this session?", "It comes off your week and your bests.", [
 			{ text: "Keep", style: "cancel" },
 			{
 				text: "Delete",
@@ -108,13 +109,7 @@ export function SessionScreen({ id }: { id: string }) {
 			<TrainingImage photo={heroOf(photo)} size={170} fill radius={28} />
 			<View style={styles.stats}>
 				{stats.map((stat) => (
-					<View
-						key={stat.label}
-						style={[
-							styles.stat,
-							{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-						]}
-					>
+					<View key={stat.label} style={[styles.stat, { backgroundColor: colors.bgSurface }]}>
 						<PoText variant="eyebrow11" tone="textTertiary">
 							{stat.label}
 						</PoText>
@@ -222,7 +217,7 @@ export function SessionScreen({ id }: { id: string }) {
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
 	stats: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-	stat: { width: "48.8%", gap: 4, padding: 14, borderRadius: 22, borderWidth: 1 },
+	stat: { width: "48.8%", gap: 4, padding: 16, borderRadius: 16 },
 	split: { flexDirection: "row", alignItems: "center", gap: 12 },
 	km: { width: 40 },
 	track: { flex: 1, height: 6, borderRadius: 3, overflow: "hidden" },

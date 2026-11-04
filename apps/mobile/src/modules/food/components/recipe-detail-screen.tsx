@@ -144,12 +144,7 @@ export function RecipeDetailScreen({ id }: { id: string }) {
 				</View>
 			</View>
 
-			<View
-				style={[
-					styles.fit,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.fit, { backgroundColor: colors.bgSurface }]}>
 				<View style={[styles.fitIcon, { backgroundColor: colors.accentSubtle }]}>
 					<Icon name="Filled/Sparkle" size={16} color={colors.accentDefault} />
 				</View>
@@ -265,23 +260,22 @@ export function RecipeDetailScreen({ id }: { id: string }) {
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
 	title: { gap: 12, paddingHorizontal: 4 },
-	titleRow: { flexDirection: "row", alignItems: "flex-end", gap: 10 },
-	chips: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
+	titleRow: { flexDirection: "row", alignItems: "flex-end", gap: 12 },
+	chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 	macroBlock: { gap: 8, paddingHorizontal: 4 },
 	macroBar: { flexDirection: "row", gap: 2, height: 6, borderRadius: 3, overflow: "hidden" },
 	macroPart: { height: 6 },
 	legend: { flexDirection: "row", justifyContent: "space-between" },
-	legendItem: { flexDirection: "row", alignItems: "center", gap: 6 },
+	legendItem: { flexDirection: "row", alignItems: "center", gap: 8 },
 	dot: { width: 8, height: 8, borderRadius: 4 },
 	fit: {
 		flexDirection: "row",
 		alignItems: "center",
-		gap: 10,
+		gap: 12,
 		paddingVertical: 8,
 		paddingLeft: 8,
 		paddingRight: 8,
-		borderRadius: 28,
-		borderWidth: 1,
+		borderRadius: 20,
 	},
 	fitIcon: {
 		width: 36,
@@ -293,13 +287,13 @@ const styles = StyleSheet.create({
 	stepper: {
 		flexDirection: "row",
 		alignItems: "center",
-		gap: 14,
+		gap: 16,
 		height: 36,
 		paddingHorizontal: 12,
 		borderRadius: 18,
 	},
 	sectionHead: { flexDirection: "row", alignItems: "center", paddingHorizontal: 4, paddingTop: 4 },
-	ingredient: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 6 },
+	ingredient: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8 },
 	stepsTitle: { paddingHorizontal: 4, paddingTop: 4 },
 	step: { flexDirection: "row", gap: 12, paddingHorizontal: 4 },
 	number: {
@@ -314,8 +308,8 @@ const styles = StyleSheet.create({
 		alignSelf: "flex-start",
 		flexDirection: "row",
 		alignItems: "center",
-		gap: 6,
-		paddingHorizontal: 10,
+		gap: 8,
+		paddingHorizontal: 12,
 		paddingVertical: 4,
 		borderRadius: 12,
 	},

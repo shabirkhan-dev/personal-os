@@ -144,12 +144,7 @@ function MeasureCard({ label, unitPicker, value, unit, children }: MeasureCardPr
 	const { colors } = usePoTheme();
 
 	return (
-		<View
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
+		<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 			<View style={styles.labelRow}>
 				<PoText variant="eyebrow11" tone="textTertiary">
 					{label}
@@ -170,20 +165,19 @@ function MeasureCard({ label, unitPicker, value, unit, children }: MeasureCardPr
 const styles = StyleSheet.create({
 	form: { gap: 12 },
 	card: {
-		gap: 10,
+		gap: 12,
 		paddingTop: 16,
-		paddingBottom: 14,
+		paddingBottom: 16,
 		paddingHorizontal: 16,
-		borderRadius: 28,
-		borderWidth: 1,
+		borderRadius: 20,
 	},
 	labelRow: {
 		flexDirection: "row",
 		alignItems: "center",
 		justifyContent: "space-between",
-		paddingHorizontal: 6,
+		paddingHorizontal: 8,
 	},
-	valueRow: { flexDirection: "row", alignItems: "baseline", justifyContent: "center", gap: 6 },
+	valueRow: { flexDirection: "row", alignItems: "baseline", justifyContent: "center", gap: 8 },
 	unit: { lineHeight: textStyles.title18.lineHeight },
 	gap14: { height: 14 },
 });

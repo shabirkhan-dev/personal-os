@@ -75,7 +75,7 @@ export function AskBar({
 
 	return (
 		<View style={styles.ask}>
-			<View style={[styles.bar, { backgroundColor: colors.bgSubtle }]}>
+			<View style={[styles.bar, { backgroundColor: colors.bgSurface }]}>
 				<Icon name="Filled/Sparkle" color={colors.textSecondary} />
 				<TextInput
 					value={shown}
@@ -140,8 +140,7 @@ export function AskBar({
 							style={({ pressed }) => [
 								styles.chip,
 								{
-									borderColor: colors.borderDefault,
-									backgroundColor: pressed ? colors.bgHover : "transparent",
+									backgroundColor: pressed ? colors.bgHover : colors.bgSurface,
 								},
 							]}
 						>
@@ -159,16 +158,16 @@ export function AskBar({
 const styles = StyleSheet.create({
 	ask: { gap: 12, paddingBottom: 8 },
 	bar: {
-		height: 52,
+		height: 46,
 		flexDirection: "row",
 		alignItems: "center",
-		gap: 10,
-		paddingLeft: 18,
-		paddingRight: 6,
-		borderRadius: 26,
+		gap: 12,
+		paddingLeft: 16,
+		paddingRight: 4,
+		borderRadius: 23,
 	},
 	input: { flex: 1, paddingVertical: 0 },
-	send: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
+	send: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" },
 	suggestions: { gap: 8 },
-	chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 18, borderWidth: 1 },
+	chip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 18 },
 });

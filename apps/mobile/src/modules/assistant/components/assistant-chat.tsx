@@ -1,6 +1,6 @@
 import type { ThreadMessage } from "@personal-os/domain/assistant";
 import { textStyles } from "@personal-os/tokens";
-import { type ComponentRef, useRef, useState } from "react";
+import { type ComponentRef, useEffect, useRef, useState } from "react";
 import {
 	ActivityIndicator,
 	Pressable,
@@ -12,6 +12,7 @@ import {
 import { Icon } from "@/components/icons";
 import { PoText } from "@/components/ui/po-text";
 import { haptics } from "@/lib/haptics";
+import { deviceSpeechModule, useVoiceInput, voiceOut } from "@/lib/voice";
 import { toTextStyle, usePoTheme } from "@/theme";
 import { type AssistantPlace, useAssistant } from "../hooks/use-assistant";
 import { AnswerCardView, type CardActions } from "./assistant-cards";
@@ -227,13 +228,52 @@ export function AssistantChat() {
 	const thinking = status === "thinking";
 
 	const messages = conversation.messages;
+	const voice = useVoiceInput();
+	const listening = voice.status === "listening" || voice.status === "starting";
+	const canTalk = deviceSpeechModule !== null && voice.status !== "unavailable";
+	const shown = listening ? voice.transcript : draft;
+	/** True while the answer to a spoken question is coming, so it is read aloud when done. */
+	const speakAnswer = useRef(false);
 
-	const send = (text: string) => {
+	const send = (text: string, spoken = false) => {
 		if (!text.trim() || thinking) return;
 		haptics.tap();
+		speakAnswer.current = spoken;
 		assistant.send(text);
 		setDraft("");
 	};
+
+	// A spoken question goes out as soon as listening stops.
+	const heard = useRef(false);
+	useEffect(() => {
+		if (listening) heard.current = true;
+		else if (heard.current && voice.status === "stopped") {
+			heard.current = false;
+			send(voice.transcript, true);
+		}
+		// oxlint-disable-next-line react/exhaustive-deps -- runs on status changes only
+	}, [voice.status]);
+
+	// ...and its answer is read back once it has finished streaming.
+	useEffect(() => {
+		if (status !== "idle" || !speakAnswer.current) return;
+		speakAnswer.current = false;
+		const answer = messages.at(-1);
+		const text = answer?.role === "assistant" ? answer.text.replace(/\*\*/g, "").trim() : "";
+		if (text) voiceOut.speak(text);
+		// oxlint-disable-next-line react/exhaustive-deps -- runs when an answer finishes
+	}, [status]);
+
+	const talk = () => {
+		haptics.tap();
+		if (listening) voice.stop();
+		else {
+			voiceOut.stop();
+			voice.reset();
+			void voice.start();
+		}
+	};
+	const showMic = canTalk && (listening || !draft.trim()) && !thinking;
 
 	return (
 		<View style={styles.root}>
@@ -244,6 +284,7 @@ export function AssistantChat() {
 				onContentSizeChange={() => scroll.current?.scrollToEnd({ animated: true })}
 				contentContainerStyle={styles.list}
 				keyboardShouldPersistTaps="handled"
+				showsVerticalScrollIndicator={false}
 			>
 				{messages.length === 0 ? (
 					<View style={styles.empty}>
@@ -264,7 +305,6 @@ export function AssistantChat() {
 									style={({ pressed }) => [
 										styles.starter,
 										{
-											borderColor: colors.borderDefault,
 											backgroundColor: pressed ? colors.bgHover : colors.bgSurface,
 										},
 									]}
@@ -298,17 +338,17 @@ export function AssistantChat() {
 					</View>
 				) : null}
 			</ScrollView>
-			<View
-				style={[
-					styles.composer,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.composer, { backgroundColor: colors.bgSurface }]}>
 				<TextInput
-					value={draft}
+					value={shown}
 					onChangeText={setDraft}
+					editable={!listening}
 					placeholder={
-						status === "waiting" ? "Or tell me something else…" : "Ask or tell me anything…"
+						listening
+							? "Listening…"
+							: status === "waiting"
+								? "Or tell me something else…"
+								: "Ask or tell me anything…"
 					}
 					placeholderTextColor={colors.textTertiary}
 					multiline
@@ -318,27 +358,54 @@ export function AssistantChat() {
 					submitBehavior="submit"
 					returnKeyType="send"
 				/>
-				<Pressable
-					accessibilityRole="button"
-					accessibilityLabel="Send"
-					disabled={!draft.trim() || thinking}
-					onPress={() => send(draft)}
-					style={[
-						styles.send,
-						{ backgroundColor: draft.trim() && !thinking ? colors.accentDefault : colors.bgSubtle },
-					]}
-				>
-					{thinking ? (
-						<ActivityIndicator size="small" color={colors.textSecondary} />
-					) : (
+				{showMic ? (
+					<Pressable
+						accessibilityRole="button"
+						accessibilityLabel={listening ? "Stop and send" : "Speak instead"}
+						onPress={talk}
+						style={[
+							styles.send,
+							{ backgroundColor: listening ? colors.accentDefault : colors.bgSubtle },
+						]}
+					>
 						<Icon
-							name="Line/Arrow up"
+							name={listening ? "Line/Check" : "Mic"}
 							size={18}
-							color={draft.trim() ? colors.textOnAccent : colors.textTertiary}
+							color={listening ? colors.textOnAccent : colors.textPrimary}
 						/>
-					)}
-				</Pressable>
+					</Pressable>
+				) : (
+					<Pressable
+						accessibilityRole="button"
+						accessibilityLabel="Send"
+						disabled={!draft.trim() || thinking}
+						onPress={() => send(draft)}
+						style={[
+							styles.send,
+							{
+								backgroundColor: draft.trim() && !thinking ? colors.accentDefault : colors.bgSubtle,
+							},
+						]}
+					>
+						{thinking ? (
+							<ActivityIndicator size="small" color={colors.textSecondary} />
+						) : (
+							<Icon
+								name="Line/Arrow up"
+								size={18}
+								color={draft.trim() ? colors.textOnAccent : colors.textTertiary}
+							/>
+						)}
+					</Pressable>
+				)}
 			</View>
+			{voice.status === "denied" ? (
+				<Pressable accessibilityRole="button" onPress={voice.openSettings} style={styles.denied}>
+					<PoText variant="meta13" tone="textWarning">
+						Allow the microphone in Settings to talk to the assistant.
+					</PoText>
+				</Pressable>
+			) : null}
 		</View>
 	);
 }
@@ -347,8 +414,9 @@ const medium = toTextStyle(textStyles.text14Medium);
 
 const styles = StyleSheet.create({
 	root: { flex: 1 },
+	denied: { paddingTop: 8, paddingHorizontal: 8 },
 	list: { gap: 16, paddingVertical: 12, flexGrow: 1 },
-	empty: { flex: 1, alignItems: "center", justifyContent: "center", gap: 10, paddingVertical: 24 },
+	empty: { flex: 1, alignItems: "center", justifyContent: "center", gap: 12, paddingVertical: 24 },
 	spark: {
 		width: 48,
 		height: 48,
@@ -358,34 +426,33 @@ const styles = StyleSheet.create({
 	},
 	center: { textAlign: "center", maxWidth: 320 },
 	starters: { gap: 8, alignSelf: "stretch", marginTop: 8 },
-	starter: { paddingHorizontal: 16, paddingVertical: 12, borderRadius: 18, borderWidth: 1 },
+	starter: { paddingHorizontal: 16, paddingVertical: 12, borderRadius: 18 },
 	user: {
 		alignSelf: "flex-end",
 		maxWidth: "85%",
-		paddingHorizontal: 14,
-		paddingVertical: 10,
+		paddingHorizontal: 16,
+		paddingVertical: 12,
 		borderRadius: 20,
 		borderBottomRightRadius: 6,
 	},
-	answer: { gap: 10 },
+	answer: { gap: 12 },
 	// The medium weight of the type scale, at the body size.
 	bold: { fontFamily: medium.fontFamily, fontWeight: medium.fontWeight },
 	paragraphs: { gap: 8 },
-	bullet: { flexDirection: "row", gap: 10, paddingLeft: 2 },
-	bulletDot: { width: 5, height: 5, borderRadius: 3, marginTop: 9 },
+	bullet: { flexDirection: "row", gap: 12, paddingLeft: 2 },
+	bulletDot: { width: 5, height: 5, borderRadius: 3, marginTop: 8 },
 	flex: { flex: 1 },
 	steps: { gap: 4 },
-	step: { flexDirection: "row", alignItems: "center", gap: 6 },
+	step: { flexDirection: "row", alignItems: "center", gap: 8 },
 	error: { padding: 12, borderRadius: 14 },
 	composer: {
 		flexDirection: "row",
 		alignItems: "flex-end",
 		gap: 8,
 		paddingLeft: 16,
-		paddingRight: 6,
-		paddingVertical: 6,
-		borderRadius: 24,
-		borderWidth: 1,
+		paddingRight: 8,
+		paddingVertical: 8,
+		borderRadius: 20,
 		marginTop: 8,
 	},
 	input: { ...toTextStyle(textStyles.body15), flex: 1, maxHeight: 120, paddingVertical: 8 },

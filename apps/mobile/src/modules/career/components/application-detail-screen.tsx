@@ -1,6 +1,8 @@
 import { router } from "expo-router";
 import { useState } from "react";
-import { Alert, Linking, Pressable, StyleSheet, View } from "react-native";
+import { Linking, Pressable, StyleSheet, View } from "react-native";
+import { SkeletonCard } from "@/components/ui/skeleton";
+import { showDialog } from "@/components/ui/dialog";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
 import { usePoTheme } from "@/theme";
@@ -62,13 +64,13 @@ function steps(
 		list.push({
 			when: shortDate(saved),
 			title: "Saved",
-			note: app.cv ? `CV · ${app.cv}` : "Waiting for you to apply",
+			note: app.cv ? `CV · ${app.cv}` : "Not applied yet",
 			state: "done",
 		});
 		list.push({
 			when: "—",
 			title: "Apply",
-			note: "Then I'll remind you to follow up",
+			note: "Then a follow-up reminder is set",
 			state: app.stage === "saved" ? "next" : "done",
 			onPress: app.stage === "saved" ? actions.apply : undefined,
 		});
@@ -123,11 +125,11 @@ function steps(
 function tipFor(app: Application, now: Date): string {
 	switch (app.stage) {
 		case "saved":
-			return "Apply while it's fresh. I'll set a follow-up for a week later.";
+			return "Apply while it's fresh. A follow-up is set for a week later.";
 		case "applied": {
 			const due = app.followUpAt !== null && new Date(app.followUpAt) <= now;
 			return due
-				? "A nudge is due. I'll draft three short lines from your notes for you to review."
+				? "A nudge is due. Get three short drafts from your notes to choose from."
 				: "Waiting on a reply. Add the recruiter as a contact so the nudge goes to the right person.";
 		}
 		case "interview":
@@ -149,11 +151,15 @@ export function ApplicationDetailScreen({ id }: { id: string }) {
 	if (!app) {
 		return (
 			<CareerScreen>
-				<EmptyCard
-					icon="Briefcase"
-					title={data.loading ? "Loading…" : "Application not found"}
-					body={data.loading ? "" : "It may have been deleted on another device."}
-				/>
+				{data.loading ? (
+					<SkeletonCard lines={3} label="this application" />
+				) : (
+					<EmptyCard
+						icon="Briefcase"
+						title="Application not found"
+						body="It may have been deleted on another device."
+					/>
+				)}
 			</CareerScreen>
 		);
 	}
@@ -164,7 +170,7 @@ export function ApplicationDetailScreen({ id }: { id: string }) {
 		);
 
 	const confirmDelete = () =>
-		Alert.alert(
+		showDialog(
 			"Delete application?",
 			`${app.company} and its prep will be removed from all your devices.`,
 			[
@@ -189,7 +195,7 @@ export function ApplicationDetailScreen({ id }: { id: string }) {
 		apply: () => move("applied"),
 		book: () => setSheet("interview"),
 		offer: () =>
-			Alert.alert("Record an offer?", `Mark ${app.company} as an offer.`, [
+			showDialog("Record an offer?", `Mark ${app.company} as an offer.`, [
 				{ text: "Cancel", style: "cancel" },
 				{ text: "Offer received", onPress: () => move("offer") },
 			]),
@@ -232,7 +238,7 @@ export function ApplicationDetailScreen({ id }: { id: string }) {
 						app.halal.confirmed
 							? undefined
 							: () =>
-									Alert.alert(
+									showDialog(
 										"Halal check",
 										app.halal.note || "Check what the company earns from before you go further.",
 										[
@@ -251,12 +257,7 @@ export function ApplicationDetailScreen({ id }: { id: string }) {
 				{app.where ? <MetaChip icon="Clock" label={app.where} /> : null}
 			</ScreenTitle>
 
-			<View
-				style={[
-					styles.status,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.status, { backgroundColor: colors.bgSurface }]}>
 				<PoText variant="title18">Status</PoText>
 				{timeline.map((step, index) => (
 					<TimelineRow key={step.title} {...step} last={index === timeline.length - 1} />
@@ -308,10 +309,7 @@ export function ApplicationDetailScreen({ id }: { id: string }) {
 				accessibilityRole="button"
 				accessibilityLabel="Edit notes"
 				onPress={() => setSheet("edit")}
-				style={[
-					styles.notes,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
+				style={[styles.notes, { backgroundColor: colors.bgSurface }]}
 			>
 				<PoText variant="body15" tone={app.notes ? "textSecondary" : "textTertiary"}>
 					{app.notes || "Stack, people, what to mention. Notes shape the AI's nudges and prep."}
@@ -374,10 +372,9 @@ const styles = StyleSheet.create({
 	status: {
 		gap: 4,
 		paddingTop: 16,
-		paddingBottom: 6,
+		paddingBottom: 8,
 		paddingHorizontal: 16,
-		borderRadius: 28,
-		borderWidth: 1,
+		borderRadius: 20,
 	},
-	notes: { padding: 16, borderRadius: 28, borderWidth: 1 },
+	notes: { padding: 16, borderRadius: 20 },
 });

@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { SkeletonList } from "@/components/ui/skeleton";
 import { EmptyCard, FilterChip, ScreenTitle } from "@/components/module-ui";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
@@ -116,7 +117,7 @@ export function RoadmapScreen() {
 			</View>
 
 			{data.loading ? (
-				<ActivityIndicator color={colors.accentDefault} />
+				<SkeletonList label="your roadmap" />
 			) : groups.length === 0 ? (
 				<EmptyCard
 					icon="List"
@@ -154,12 +155,7 @@ function Stop({ group, first, last }: { group: Group; first: boolean; last: bool
 	return (
 		<View style={styles.stop}>
 			<View style={styles.rail}>
-				<View
-					style={[
-						styles.dot,
-						first ? { backgroundColor: tone, borderColor: tone } : { borderColor: tone },
-					]}
-				/>
+				<View style={[styles.dot, first ? { backgroundColor: tone } : {}]} />
 				{last ? null : <View style={[styles.line, { backgroundColor: colors.borderDefault }]} />}
 			</View>
 			<View style={styles.stopText}>
@@ -202,14 +198,14 @@ function Stop({ group, first, last }: { group: Group; first: boolean; last: bool
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	card: { gap: 12, padding: 16, borderRadius: 28 },
-	shares: { flexDirection: "row", gap: 6 },
+	card: { gap: 12, padding: 16, borderRadius: 20 },
+	shares: { flexDirection: "row", gap: 8 },
 	timeline: { gap: 0 },
-	stop: { flexDirection: "row", gap: 14 },
+	stop: { flexDirection: "row", gap: 16 },
 	rail: { width: 14, alignItems: "center" },
-	dot: { width: 14, height: 14, borderRadius: 7, borderWidth: 2 },
+	dot: { width: 14, height: 14, borderRadius: 7 },
 	line: { flex: 1, width: 2, borderRadius: 1 },
-	stopText: { flex: 1, gap: 6, paddingBottom: 18 },
+	stopText: { flex: 1, gap: 8, paddingBottom: 20 },
 	stopHead: { flexDirection: "row", alignItems: "center", gap: 8 },
-	thumbs: { flexDirection: "row", gap: 6 },
+	thumbs: { flexDirection: "row", gap: 8 },
 });

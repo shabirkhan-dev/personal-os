@@ -2,6 +2,7 @@ import { textStyles } from "@personal-os/tokens";
 import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from "react-native";
+import { SkeletonCard } from "@/components/ui/skeleton";
 import { Footer, ScreenTitle, SectionLabel } from "@/components/module-ui";
 import { ChoiceChips } from "@/components/ui/choice-chips";
 import { PillButton } from "@/components/ui/pill-button";
@@ -237,7 +238,7 @@ export function AddDreamScreen({ editId }: { editId?: string }) {
 		return (
 			<WishlistScreen>
 				{loading ? (
-					<ActivityIndicator color={colors.accentDefault} />
+					<SkeletonCard media lines={3} label="this dream" />
 				) : (
 					<PoText variant="body15" tone="textSecondary">
 						This dream isn't on your list any more.
@@ -267,8 +268,7 @@ export function AddDreamScreen({ editId }: { editId?: string }) {
 					style={[
 						styles.input,
 						{
-							backgroundColor: colors.bgSurface,
-							borderColor: text ? colors.accentDefault : colors.borderDefault,
+							backgroundColor: text ? colors.accentSubtle : colors.bgSurface,
 						},
 					]}
 				>
@@ -337,7 +337,7 @@ export function AddDreamScreen({ editId }: { editId?: string }) {
 									<View
 										style={[
 											styles.optionImage,
-											{ borderColor: selected ? colors.accentDefault : colors.bgSurface },
+											{ backgroundColor: selected ? colors.accentSubtle : "transparent" },
 										]}
 									>
 										<DreamImage
@@ -487,14 +487,14 @@ export function AddDreamScreen({ editId }: { editId?: string }) {
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	input: { gap: 10, padding: 15, borderRadius: 24, borderWidth: 1 },
-	status: { flexDirection: "row", alignItems: "center", gap: 6 },
+	input: { gap: 12, padding: 16, borderRadius: 20 },
+	status: { flexDirection: "row", alignItems: "center", gap: 8 },
 	dot: { width: 8, height: 8, borderRadius: 4 },
-	card: { gap: 12, padding: 16, borderRadius: 28 },
+	card: { gap: 12, padding: 16, borderRadius: 20 },
 	head: { flexDirection: "row", alignItems: "center" },
-	options: { flexDirection: "row", gap: 10 },
+	options: { flexDirection: "row", gap: 12 },
 	option: { flex: 1, gap: 4 },
-	optionImage: { borderRadius: 16, borderWidth: 2, padding: 2 },
-	row: { flexDirection: "row", gap: 10 },
+	optionImage: { borderRadius: 16, padding: 2 },
+	row: { flexDirection: "row", gap: 12 },
 	toggleRow: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 4 },
 });

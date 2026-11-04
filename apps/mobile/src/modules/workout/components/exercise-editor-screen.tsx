@@ -1,6 +1,7 @@
 import * as ImagePicker from "expo-image-picker";
 import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Alert, Pressable, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
+import { showDialog } from "@/components/ui/dialog";
 import { FilterChip, Footer, ScreenTitle } from "@/components/module-ui";
 import { Icon } from "@/components/icons";
 import { PillButton } from "@/components/ui/pill-button";
@@ -26,7 +27,7 @@ import {
 	PATTERNS,
 	type Pattern,
 } from "../lib/exercise-guide";
-import { mediaTypeOf, uploadMedia } from "../services/media-upload";
+import { mediaTypeOf, uploadMedia } from "@/lib/photos/media-upload";
 import { DrivePlayer } from "./drive-player";
 import { ExerciseDemo } from "./exercise-demo";
 import { Card } from "./home-cards";
@@ -202,7 +203,7 @@ export function ExerciseEditorScreen({ id }: { id?: string }) {
 
 	const remove = () => {
 		if (!id) return;
-		Alert.alert(
+		showDialog(
 			isOwn ? `Delete ${draft.name || "this exercise"}?` : "Reset to the built-in version?",
 			isOwn
 				? "Programs that use it skip it from now on. Logged sets stay."

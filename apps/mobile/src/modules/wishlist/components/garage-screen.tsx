@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { ActivityIndicator, Alert, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { SkeletonList } from "@/components/ui/skeleton";
+import { showDialog } from "@/components/ui/dialog";
 import { Icon } from "@/components/icons";
 import { EmptyCard, Footer, ScreenTitle } from "@/components/module-ui";
 import { ChoiceChips } from "@/components/ui/choice-chips";
@@ -36,7 +38,7 @@ export function GarageScreen() {
 		<WishlistScreen>
 			<ScreenTitle eyebrow="What you own · keep it running" title="Garage" />
 			{loading ? (
-				<ActivityIndicator color={colors.accentDefault} />
+				<SkeletonList label="your garage" />
 			) : owned.length === 0 ? (
 				<EmptyCard
 					icon="Settings"
@@ -257,7 +259,7 @@ function OwnedSheet({
 
 	const remove = () => {
 		if (!owned) return;
-		Alert.alert(`Remove ${owned.name}?`, "It leaves your garage.", [
+		showDialog(`Remove ${owned.name}?`, "It leaves your garage.", [
 			{ text: "Keep", style: "cancel" },
 			{
 				text: "Remove",
@@ -406,10 +408,10 @@ function ServiceSheet({
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	card: { gap: 12, padding: 16, borderRadius: 28 },
-	vehicle: { padding: 14 },
+	card: { gap: 12, padding: 16, borderRadius: 20 },
+	vehicle: { padding: 16 },
 	head: { flexDirection: "row", alignItems: "center", gap: 8 },
-	row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 6 },
-	service: { gap: 6, paddingHorizontal: 4 },
+	row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8 },
+	service: { gap: 8, paddingHorizontal: 4 },
 	meter: { height: 6, borderRadius: 3 },
 });

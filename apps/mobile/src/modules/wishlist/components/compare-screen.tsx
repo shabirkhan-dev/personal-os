@@ -1,6 +1,8 @@
 import { router } from "expo-router";
 import { useState } from "react";
-import { ActivityIndicator, Alert, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { SkeletonList } from "@/components/ui/skeleton";
+import { showDialog } from "@/components/ui/dialog";
 import { EmptyCard, Footer, ScreenTitle } from "@/components/module-ui";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
@@ -51,7 +53,7 @@ export function CompareScreen({ a, b }: { a?: string; b?: string }) {
 		return (
 			<WishlistScreen>
 				{data.loading ? (
-					<ActivityIndicator color={colors.accentDefault} />
+					<SkeletonList count={2} label="the comparison" />
 				) : (
 					<EmptyCard
 						icon="Layers"
@@ -74,7 +76,7 @@ export function CompareScreen({ a, b }: { a?: string; b?: string }) {
 	};
 
 	const choose = () =>
-		Alert.alert(
+		showDialog(
 			`Pick ${pick.name}?`,
 			`${pick.name} goes first in line and ${other.name} leaves the list${
 				other.savedAmount > 0 ? "; what you saved for it goes back to the budget" : ""
@@ -121,8 +123,7 @@ export function CompareScreen({ a, b }: { a?: string; b?: string }) {
 							style={[
 								styles.option,
 								{
-									backgroundColor: colors.bgSurface,
-									borderColor: selected ? colors.accentDefault : colors.bgSurface,
+									backgroundColor: selected ? colors.accentSubtle : colors.bgSurface,
 								},
 							]}
 						>
@@ -211,10 +212,10 @@ function SpecRow({ label, values }: { label: string; values: readonly string[] }
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	pair: { flexDirection: "row", gap: 10 },
-	option: { flex: 1, gap: 8, padding: 10, borderRadius: 24, borderWidth: 1.5 },
+	pair: { flexDirection: "row", gap: 12 },
+	option: { flex: 1, gap: 8, padding: 12, borderRadius: 20 },
 	optionText: { gap: 2, paddingHorizontal: 4, paddingBottom: 4 },
-	card: { gap: 4, padding: 16, borderRadius: 28 },
+	card: { gap: 4, padding: 16, borderRadius: 20 },
 	tableRow: { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 8 },
 	label: { flex: 1.2 },
 	cell: { flex: 1 },

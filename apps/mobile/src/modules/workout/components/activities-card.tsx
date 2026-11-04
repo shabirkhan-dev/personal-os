@@ -23,12 +23,7 @@ export function ActivitiesCard({
 }) {
 	const { colors } = usePoTheme();
 	return (
-		<View
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
+		<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 			<View style={styles.head}>
 				<PoText variant="title18" style={styles.flex}>
 					Your activities
@@ -65,7 +60,7 @@ export function ActivitiesCard({
 					accessibilityRole="button"
 					accessibilityLabel="Add an activity"
 					onPress={onAdd}
-					style={[styles.chip, { borderColor: colors.borderDefault, borderWidth: 1 }]}
+					style={[styles.chip, {}]}
 				>
 					<Icon name="Line/Plus" size={14} color={colors.textPrimary} />
 					<PoText variant="row15">Add</PoText>
@@ -76,7 +71,7 @@ export function ActivitiesCard({
 }
 
 const styles = StyleSheet.create({
-	card: { gap: 12, padding: 18, borderRadius: 28, borderWidth: 1 },
+	card: { gap: 12, padding: 16, borderRadius: 20 },
 	head: { flexDirection: "row", alignItems: "center", gap: 8 },
 	flex: { flex: 1 },
 	wrap: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
@@ -84,7 +79,7 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		alignItems: "center",
 		gap: 8,
-		paddingHorizontal: 14,
+		paddingHorizontal: 16,
 		height: 40,
 		borderRadius: 20,
 	},

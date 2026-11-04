@@ -2,6 +2,7 @@ import { type ReactNode, useRef, type ComponentRef } from "react";
 import { Modal, Pressable, StyleSheet, useWindowDimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Icon } from "@/components/icons";
+import { DialogHost } from "@/components/ui/dialog";
 import { PillButton } from "@/components/ui/pill-button";
 import { KeyboardAwareScrollView } from "@/components/ui/keyboard-aware-scroll-view";
 import { PoText } from "@/components/ui/po-text";
@@ -53,7 +54,6 @@ export function Sheet({ visible, title, onClose, children, action, footer }: She
 						styles.sheet,
 						{
 							backgroundColor: colors.bgSurface,
-							borderColor: colors.borderDefault,
 							paddingBottom: keyboard > 0 ? keyboard + 12 : Math.max(20, insets.bottom + 12),
 						},
 					]}
@@ -88,6 +88,7 @@ export function Sheet({ visible, title, onClose, children, action, footer }: She
 							/>
 						) : null)}
 				</View>
+				<DialogHost />
 			</View>
 		</Modal>
 	);
@@ -101,7 +102,7 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 20,
 		borderTopLeftRadius: 28,
 		borderTopRightRadius: 28,
-		borderWidth: 1,
+
 		borderBottomWidth: 0,
 	},
 	head: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
@@ -112,5 +113,5 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "center",
 	},
-	body: { gap: 14 },
+	body: { gap: 16 },
 });

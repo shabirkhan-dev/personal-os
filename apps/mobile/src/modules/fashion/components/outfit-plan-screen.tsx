@@ -146,9 +146,7 @@ export function OutfitPlanScreen() {
 						style={[
 							styles.row,
 							{
-								backgroundColor: colors.bgSurface,
-								borderColor: open ? colors.accentDefault : colors.borderDefault,
-								borderWidth: open ? 1.5 : 1,
+								backgroundColor: open ? colors.accentSubtle : colors.bgSurface,
 							},
 						]}
 					>
@@ -272,11 +270,11 @@ function fakeWears(
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	pad: { paddingHorizontal: 6 },
-	row: { gap: 12, padding: 12, borderRadius: 22 },
-	top: { flexDirection: "row", alignItems: "center", gap: 10 },
+	pad: { paddingHorizontal: 8 },
+	row: { gap: 12, padding: 12, borderRadius: 16 },
+	top: { flexDirection: "row", alignItems: "center", gap: 12 },
 	when: { width: 40, gap: 2 },
 	thumbs: { flexDirection: "row", gap: 2 },
 	actions: { flexDirection: "row", gap: 8 },
-	note: { flexDirection: "row", alignItems: "center", gap: 10, padding: 14, borderRadius: 20 },
+	note: { flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderRadius: 20 },
 });

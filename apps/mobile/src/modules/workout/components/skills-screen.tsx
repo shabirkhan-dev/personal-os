@@ -111,10 +111,7 @@ export function SkillsScreen() {
 						key={skill.id}
 						accessibilityRole="button"
 						onPress={() => setOpen(skill)}
-						style={[
-							styles.skill,
-							{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-						]}
+						style={[styles.skill, { backgroundColor: colors.bgSurface }]}
 					>
 						<TrainingImage photo={skill.photo} size={64} radius={16} />
 						<View style={styles.flex}>
@@ -141,7 +138,7 @@ export function SkillsScreen() {
 			<Pressable
 				accessibilityRole="button"
 				onPress={() => setAdding(true)}
-				style={[styles.add, { borderColor: colors.borderStrong }]}
+				style={[styles.add, {}]}
 			>
 				<Icon name="Line/Plus" size={16} color={colors.textSecondary} />
 				<PoText variant="meta13" tone="textSecondary">
@@ -257,12 +254,11 @@ const styles = StyleSheet.create({
 	skill: {
 		flexDirection: "row",
 		alignItems: "center",
-		gap: 14,
+		gap: 16,
 		padding: 12,
-		borderRadius: 26,
-		borderWidth: 1,
+		borderRadius: 20,
 	},
-	head: { flexDirection: "row", alignItems: "center", gap: 8, paddingBottom: 6 },
+	head: { flexDirection: "row", alignItems: "center", gap: 8, paddingBottom: 8 },
 	add: {
 		flexDirection: "row",
 		alignItems: "center",
@@ -270,9 +266,9 @@ const styles = StyleSheet.create({
 		gap: 8,
 		height: 56,
 		borderRadius: 28,
-		borderWidth: 1,
+
 		borderStyle: "dashed",
 	},
-	sheet: { gap: 10 },
+	sheet: { gap: 12 },
 	step: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 4 },
 });

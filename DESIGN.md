@@ -6,13 +6,17 @@ Keep it updated before generating new screens with Claude Code, Cursor, Figma MC
 ## Product intent
 
 Personal OS is a personal life operating system: Daily life, Training, Career, Finance, Food, Care,
-Faith, Fashion and Wishlist, with one calendar, in one mobile app. Screens should feel calm, personal and precise — a quiet dark canvas, clear type,
+Faith, Fashion, Wishlist and Health, with one calendar, in one mobile app. Screens should feel calm, personal and precise — a quiet dark canvas, clear type,
 and colour used to carry meaning (a module, a status, a highlight), not decoration.
 
 ## Figma source
 
 - File: **Kit v2** — `3KjKY0nbjCHqKZb0xRhWIh`
 - Onboarding v5: frames 01–18 (splash → plan → personal card → OS card)
+- Onboarding in code is a trimmed v5 (decision, 2026-11-04): frames 02–05 are one welcome screen
+  (the Modules frame) and frame 13 (Connect devices) is dropped, since none of its connections work
+  yet; the microphone is asked for the first time it is used. Setup is 6 steps: about you, body,
+  your day, goals, modules, reminders. Do not add these frames back without a product decision.
 - Read frames with the Figma MCP (`get_design_context`, `get_screenshot`, `get_variable_defs`)
   instead of guessing values. When code and Figma disagree, Figma wins unless this file records a
   decision otherwise.
@@ -36,14 +40,14 @@ system preference. **No raw colour values in screens.**
 | --- | --- |
 | `colors.light` / `colors.dark` | `bg*` (canvas, app, subtle, surface, hover, selected, inverse), `text*`, `border*`, `accent*`, `status*` |
 | `glowOpacity` | Fill opacity of the blurred colour glows per mode (hero, card, member) |
-| `space` | 0, 4, 6, 8, 16, 24, 32 |
+| `space` | 0, 2, 4, 8, 12, 16, 20, 24, 32, 40, 48, 64: every gap, padding and margin is one of these |
 | `radius` | `xs` 4, `lg` 12, `2xl` 20, `full` (pills and circles) |
 | `stroke` | hairline 1, selected 1.5, checkbox ring 1.75 |
 | `elevation` | `card`, `floating`, `pocket` shadows (converted by `toShadowStyle`) |
 | `textStyles` | `hero40`, `display36`, `title30`, `title18`, `body15`, `row15`, `text14`, `text14Medium`, `meta13`, `tab11`, `mono13`, `eyebrow11`, `arabic20`, `arabic30`, `arabic56` |
 
-Type is SF Pro (system) for sans, JetBrains Mono for mono and Amiri Quran for Arabic (Quran text,
-duas, Tasbih phrases); `toTextStyle` maps a token to a
+Type is one family, the system font (SF Pro on iOS, Roboto on Android), with tabular figures for
+times and numbers; Amiri Quran is only for Arabic (Quran text, duas, Tasbih phrases). `toTextStyle` maps a token to a
 React Native style and `PoText` renders it. Do not invent one-off sizes or colours: add a token
 that matches Figma first.
 
@@ -67,6 +71,11 @@ Promote a component to `components/ui` only when a second feature needs it and i
 store coupling.
 
 ## Visual principles
+
+- Sleek pass (decision, 2026-11-04, from the owner): no outline rings. Cards are flat surfaces
+  (`bgSurface` on `bgApp`, light `bgApp` is `#f5f5f5` so white cards still separate), radius 20
+  and padding 16; header and tab buttons have no border; buttons are 44px (PillButton) and the ask
+  bar 46px. Borders stay only where they mean something: inputs, selected states, dividers.
 
 - Hierarchy through type and spacing first; colour second; glow and shadow last.
 - Glows are intentional (heroes, the personal and OS cards), never a default page background.

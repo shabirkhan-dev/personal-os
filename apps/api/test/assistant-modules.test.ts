@@ -2,6 +2,7 @@ import type { AssistantEvent, Card } from "@personal-os/domain/assistant";
 import { parseEvent } from "@personal-os/domain/calendar";
 import { parsePrayerLog } from "@personal-os/domain/faith";
 import { parseWear } from "@personal-os/domain/fashion";
+import { parseDoseLog, parseMedicine, parseReading } from "@personal-os/domain/health";
 import { parseDream } from "@personal-os/domain/wishlist";
 import { and, eq } from "drizzle-orm";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -185,5 +186,43 @@ describe("assistant faith, calendar, wishlist and fashion tools", () => {
 		await events(session.accessToken, "wore my navy oxford and chinos");
 		const [wear] = (await stored(session.user.id, "fashion-wears")).map(parseWear);
 		expect(wear).toMatchObject({ id: today, look: "Office", pieceIds: ["p1", "p2"] });
+	});
+});
+
+describe("health tools", () => {
+	it("logs a blood pressure reading from what they say", async () => {
+		const session = await account();
+		provider(
+			[call("h1", "log_health_reading", { kind: "bp", value: 142, value2: 92 })],
+			[say("Logged.")],
+		);
+		await events(session.accessToken, "my bp is 142 over 92");
+		const [reading] = (await stored(session.user.id, "health-readings")).map(parseReading);
+		expect(reading).toMatchObject({ kind: "bp", value: 142, value2: 92, source: "manual" });
+	});
+
+	it("marks today's dose taken and takes a pill from the stock", async () => {
+		const session = await account([
+			{
+				collection: "health-medicines",
+				id: "m1",
+				data: {
+					id: "m1",
+					name: "Metformin",
+					dose: "500 mg",
+					times: [0],
+					stock: 10,
+					active: true,
+					startedOn: "2020-01-01",
+					note: "",
+				},
+			},
+		]);
+		provider([call("h2", "log_medicine_dose", { medicine: "metformin" })], [say("Done.")]);
+		await events(session.accessToken, "took my metformin");
+		const [dose] = (await stored(session.user.id, "health-doses")).map(parseDoseLog);
+		expect(dose).toMatchObject({ medicineId: "m1", day: today, minutes: 0, status: "taken" });
+		const [medicine] = (await stored(session.user.id, "health-medicines")).map(parseMedicine);
+		expect(medicine?.stock).toBe(9);
 	});
 });

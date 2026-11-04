@@ -1,6 +1,8 @@
 import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Alert, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { SkeletonCard } from "@/components/ui/skeleton";
+import { showDialog } from "@/components/ui/dialog";
 import { EmptyCard, Footer, ListRow, MetaChip, ScreenTitle } from "@/components/module-ui";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PillButton } from "@/components/ui/pill-button";
@@ -62,7 +64,7 @@ export function DreamDetailScreen({ id, openSave = false }: { id: string; openSa
 		return (
 			<WishlistScreen>
 				{data.loading ? (
-					<ActivityIndicator color={colors.accentDefault} />
+					<SkeletonCard media lines={3} label="this dream" />
 				) : (
 					<EmptyCard
 						icon="Star"
@@ -116,7 +118,7 @@ export function DreamDetailScreen({ id, openSave = false }: { id: string; openSa
 	};
 
 	const undo = (contribution: Contribution) =>
-		Alert.alert(
+		showDialog(
 			`Undo ${fullMoney(contribution.amount)}?`,
 			"It goes back to the budget line it came from in Finance.",
 			[
@@ -134,7 +136,7 @@ export function DreamDetailScreen({ id, openSave = false }: { id: string; openSa
 		);
 
 	const remove = () =>
-		Alert.alert(
+		showDialog(
 			`Remove ${dream.name}?`,
 			dream.savedAmount > 0
 				? `The ${fullMoney(dream.savedAmount)} saved for it goes back to your budget in Finance.`
@@ -155,7 +157,7 @@ export function DreamDetailScreen({ id, openSave = false }: { id: string; openSa
 		);
 
 	const buy = () =>
-		Alert.alert(
+		showDialog(
 			`Bought ${dream.name}?`,
 			`Paid ${fullMoney(dream.price)} in cash. ${
 				dream.category === "trips" ? "" : "It moves to your garage so you can look after it."
@@ -375,12 +377,12 @@ function PlanRow({
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
 	priceRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-	tag: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999 },
-	box: { gap: 6, padding: 16, borderRadius: 24 },
+	tag: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: 999 },
+	box: { gap: 8, padding: 16, borderRadius: 20 },
 	plan: { gap: 4 },
 	head: { flexDirection: "row", alignItems: "center" },
-	planRow: { flexDirection: "row", alignItems: "center", paddingVertical: 6 },
-	saved: { gap: 6, paddingTop: 8 },
-	check: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 7 },
-	notice: { paddingHorizontal: 6 },
+	planRow: { flexDirection: "row", alignItems: "center", paddingVertical: 8 },
+	saved: { gap: 8, paddingTop: 8 },
+	check: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8 },
+	notice: { paddingHorizontal: 8 },
 });

@@ -82,9 +82,9 @@ describe("buildRoutine", () => {
 
 	it("every bundled photo exists", () => {
 		for (const entry of CATALOG) {
-			expect(existsSync(join(import.meta.dir, "../../../../assets/care", `${entry.id}.jpg`))).toBe(
-				true,
-			);
+			expect(
+				existsSync(join(import.meta.dir, "../../../../app-photos/care", `${entry.id}.webp`)),
+			).toBe(true);
 		}
 		expect(photoFor("CeraVe foaming cleanser")).toBe("catalog:cleanser");
 		expect(photoFor("Mystery thing")).toBeNull();

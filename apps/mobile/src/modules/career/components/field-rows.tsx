@@ -105,8 +105,8 @@ export function TextBox({
 }
 
 const styles = StyleSheet.create({
-	group: { borderRadius: 24, paddingHorizontal: 16, paddingVertical: 2 },
-	row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 14 },
+	group: { borderRadius: 20, paddingHorizontal: 16, paddingVertical: 2 },
+	row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 16 },
 	input: { flex: 1, textAlign: "right", paddingVertical: 0 },
-	box: { borderRadius: 22, padding: 16 },
+	box: { borderRadius: 16, padding: 16 },
 });

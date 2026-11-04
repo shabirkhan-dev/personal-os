@@ -2,7 +2,7 @@ import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { AskAssistant, startConversation, useAssistant } from "@/modules/assistant";
+import { startConversation, useAssistant } from "@/modules/assistant";
 import { CalendarWeekCard } from "@/modules/calendar/components/calendar-week-card";
 import { careHome, useCareStatus } from "@/modules/care";
 import { careerHome, useCareerStatus } from "@/modules/career";
@@ -10,16 +10,20 @@ import { DailyOverview, dailyRoutes, useDailyLine, useDailyStatus } from "@/modu
 import { faithHome, useFaithStatus } from "@/modules/faith";
 import { fashionHome, useFashionStatus } from "@/modules/fashion";
 import { foodHome, useFoodStatus } from "@/modules/food";
-import { financeHome, useFinanceStatus, useFinanceSummary } from "@/modules/finance";
+import { financeHome, useFinanceStatus } from "@/modules/finance";
 import { AskBar } from "@/modules/home/components/ask-bar";
 import { FloatingTabBar } from "@/modules/home/components/floating-tab-bar";
-import { HomeHeader } from "@/modules/home/components/home-header";
+import { HeaderBar, HomeHeader } from "@/modules/home/components/home-header";
+import { StickyBar, scrolledPast } from "@/components/ui/sticky-bar";
 import { ModulePicker } from "@/modules/home/components/module-picker";
-import { MoneyCard } from "@/modules/home/components/money-card";
+import { SectionsMenu } from "@/modules/home/components/sections-menu";
+import { sectionsFor } from "@/modules/home/lib/module-sections";
 import { SoonView } from "@/modules/home/components/soon-view";
 import type { HomeHero, HomeModule } from "@/modules/home/lib/module-home";
 import { routeLine } from "@/modules/home/lib/route-line";
-import { moduleStatuses, periodLabel, todayItems } from "@/modules/home/lib/today";
+import { insightsTabPress } from "@/modules/home/components/insights-switcher";
+import { setAreasOpen, useAreasPicker } from "@/modules/home/store/areas-picker";
+import { moduleStatuses, todayItems } from "@/modules/home/lib/today";
 import { useAskInbox } from "@/modules/home/store/ask-inbox";
 import { type HomeView, useHomeView } from "@/modules/home/store/home-view";
 import type { ModuleId } from "@/modules/onboarding/lib/options";
@@ -27,6 +31,7 @@ import { moduleOptions } from "@/modules/onboarding/lib/options";
 import { useOnboardingProgress } from "@/modules/onboarding/store/onboarding-progress";
 import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
 import { usePlan } from "@/modules/onboarding/store/use-plan";
+import { healthHome, useHealthStatus } from "@/modules/health";
 import { useWishlistStatus, wishlistHome } from "@/modules/wishlist";
 import { useWorkoutStatus, workoutHome } from "@/modules/workout";
 import { KeyboardAwareScrollView } from "@/components/ui/keyboard-aware-scroll-view";
@@ -46,6 +51,7 @@ const moduleHomes: Partial<Record<ModuleId, HomeModule>> = {
 	faith: faithHome,
 	fashion: fashionHome,
 	wishlist: wishlistHome,
+	health: healthHome,
 };
 
 /** Today: Overview or one module's Home, switched from the module picker. */
@@ -58,7 +64,10 @@ export default function TodayScreen() {
 	const toggleModule = useOnboardingStore((state) => state.toggleModule);
 	const { persistAnswers } = useOnboardingProgress();
 	const { data: viewDoc, hydrate, update } = useHomeView();
-	const [pickerOpen, setPickerOpen] = useState(false);
+	const pickerOpen = useAreasPicker((state) => state.open);
+	const [sectionsOpen, setSectionsOpen] = useState(false);
+	const [solid, setSolid] = useState(false);
+	const [actionRequest, setActionRequest] = useState({ view: "overview" as HomeView, count: 0 });
 
 	useEffect(() => {
 		void hydrate();
@@ -79,6 +88,7 @@ export default function TodayScreen() {
 		faith: faithHome.useHero(),
 		fashion: fashionHome.useHero(),
 		wishlist: wishlistHome.useHero(),
+		health: healthHome.useHero(),
 	};
 	const liveStatus: Partial<Record<ModuleId, string>> = {
 		"daily-life": useDailyStatus(),
@@ -90,6 +100,7 @@ export default function TodayScreen() {
 		faith: useFaithStatus(),
 		fashion: useFashionStatus(),
 		wishlist: useWishlistStatus(),
+		health: useHealthStatus(),
 	};
 	const modules = moduleStatuses(plan.input, items);
 	for (const item of modules) item.status = liveStatus[item.id] ?? item.status;
@@ -103,8 +114,10 @@ export default function TodayScreen() {
 	const moduleHome = view === "overview" ? undefined : moduleHomes[view];
 
 	const select = (target: HomeView) => {
+		// A module's action fires on a change of this count, so a new Home starts from zero.
+		setActionRequest({ view: target, count: 0 });
 		update((doc) => ({ ...doc, view: target }));
-		setPickerOpen(false);
+		setAreasOpen(false);
 	};
 
 	const addModule = (id: ModuleId) => {
@@ -112,25 +125,44 @@ export default function TodayScreen() {
 		persistAnswers().catch((error: unknown) => console.error("Could not save modules", error));
 	};
 
-	const togglePicker = () => setPickerOpen((open) => !open);
+	const togglePicker = () => {
+		setSectionsOpen(false);
+		setAreasOpen(!pickerOpen);
+	};
+	const moduleLabel =
+		view === "overview"
+			? "Overview"
+			: (moduleOptions.find((option) => option.id === view)?.label ?? "Module");
+	const sections = sectionsFor(moduleLabel);
+	const openSections =
+		sections.length > 0
+			? () => {
+					setAreasOpen(false);
+					setSectionsOpen(true);
+				}
+			: undefined;
 	const toggleHidden = () => update((doc) => ({ ...doc, amountsHidden: !doc.amountsHidden }));
 
 	return (
 		<View style={[styles.root, { backgroundColor: colors.bgApp }]}>
 			<KeyboardAwareScrollView
-				contentContainerStyle={[styles.scroll, { paddingBottom: 160 + insets.bottom }]}
+				contentContainerStyle={[styles.scroll, { paddingBottom: 110 + insets.bottom }]}
 				keyboardShouldPersistTaps="handled"
+				scrollEventThrottle={16}
+				onScroll={(event) => setSolid(scrolledPast(event.nativeEvent.contentOffset.y))}
 			>
 				{moduleHome && view !== "overview" ? (
 					<ModuleScreen
 						key={view}
 						module={moduleHome}
 						hero={heroes[view]}
-						label={moduleOptions.find((option) => option.id === view)?.label ?? "Module"}
+						label={moduleLabel}
 						name={answers.name}
 						topInset={insets.top}
 						pickerOpen={pickerOpen}
 						onAppsPress={togglePicker}
+						onPillPress={openSections}
+						actionRequest={actionRequest.view === view ? actionRequest.count : 0}
 						amountsHidden={viewDoc.amountsHidden}
 						onToggleHidden={toggleHidden}
 					/>
@@ -143,12 +175,15 @@ export default function TodayScreen() {
 							glow="accentDefault"
 							pickerOpen={pickerOpen}
 							onAppsPress={togglePicker}
+							onPillPress={openSections}
 							action={{ icon: "Sun", label: "Morning brief", onPress: dailyRoutes.brief }}
+							bar="spacer"
 						/>
 						<View style={styles.content}>
 							{view === "overview" ? (
 								<OverviewBody
-									period={periodLabel(now)}
+									name={answers.name}
+									now={now}
 									modules={answers.modules}
 									amountsHidden={viewDoc.amountsHidden}
 									onOpen={select}
@@ -165,49 +200,60 @@ export default function TodayScreen() {
 					</>
 				)}
 			</KeyboardAwareScrollView>
+			<StickyBar topInset={insets.top} solid={solid || pickerOpen || sectionsOpen}>
+				<HeaderBar
+					name={answers.name}
+					label={view === "overview" ? answers.name.trim().split(/\s+/)[0] || "You" : moduleLabel}
+					pickerOpen={pickerOpen}
+					onAppsPress={togglePicker}
+					onPillPress={openSections}
+					action={
+						moduleHome
+							? {
+									icon: moduleHome.action.icon,
+									label: moduleHome.action.label,
+									onPress: () =>
+										setActionRequest((current) => ({
+											view,
+											count: current.view === view ? current.count + 1 : 1,
+										})),
+								}
+							: { icon: "Sun", label: "Morning brief", onPress: dailyRoutes.brief }
+					}
+				/>
+			</StickyBar>
 			{pickerOpen ? (
 				<ModulePicker
 					top={insets.top + HEADER_HEIGHT}
 					view={view}
 					modules={modules}
-					onClose={() => setPickerOpen(false)}
+					onClose={() => setAreasOpen(false)}
 					onSelect={select}
 					onAddModule={addModule}
 					onEdit={() => {
-						setPickerOpen(false);
+						setAreasOpen(false);
 						router.push("/profile");
 					}}
+				/>
+			) : null}
+			{sectionsOpen ? (
+				<SectionsMenu
+					top={insets.top + HEADER_HEIGHT}
+					title={moduleLabel}
+					sections={sections}
+					onClose={() => setSectionsOpen(false)}
 				/>
 			) : null}
 			<FloatingTabBar
 				active="today"
 				bottomInset={insets.bottom}
 				onTodayPress={() => select("overview")}
-				onAreasPress={() => setPickerOpen(true)}
-				onInsightsPress={moduleHome ? moduleHome.onInsights : dailyRoutes.insights}
-				onProfilePress={() => router.replace("/profile")}
+				onInsightsPress={moduleHome?.onInsights ?? insightsTabPress()}
+				onProfilePress={() => {
+					setAreasOpen(false);
+					router.push("/profile");
+				}}
 			/>
-			{view === "overview" ? <AskAssistant place={{ screen: "overview" }} /> : null}
-			{view === "career" ? (
-				<AskAssistant place={{ module: "career", screen: "career home" }} />
-			) : null}
-			{view === "finance" ? (
-				<AskAssistant place={{ module: "finance", screen: "finance home" }} />
-			) : null}
-			{view === "food" ? <AskAssistant place={{ module: "food", screen: "food home" }} /> : null}
-			{view === "faith" ? <AskAssistant place={{ module: "faith", screen: "faith home" }} /> : null}
-			{view === "fashion" ? (
-				<AskAssistant place={{ module: "fashion", screen: "fashion home" }} />
-			) : null}
-			{view === "wishlist" ? (
-				<AskAssistant place={{ module: "wishlist", screen: "wishlist home" }} />
-			) : null}
-			{view === "skincare" ? (
-				<AskAssistant place={{ module: "skincare", screen: "care home" }} />
-			) : null}
-			{view === "workout" ? (
-				<AskAssistant place={{ module: "workout", screen: "training home" }} />
-			) : null}
 		</View>
 	);
 }
@@ -220,13 +266,14 @@ type ModuleScreenProps = {
 	topInset: number;
 	pickerOpen: boolean;
 	onAppsPress: () => void;
+	onPillPress?: () => void;
+	actionRequest: number;
 	amountsHidden: boolean;
 	onToggleHidden: () => void;
 };
 
 /** One module's Home. Keyed by module so its view starts fresh when switching. */
-function ModuleScreen({ module, hero, label, ...header }: ModuleScreenProps) {
-	const [actionRequest, setActionRequest] = useState(0);
+function ModuleScreen({ module, hero, label, actionRequest, ...header }: ModuleScreenProps) {
 	const { View: ModuleView, Backdrop } = module;
 
 	return (
@@ -237,11 +284,8 @@ function ModuleScreen({ module, hero, label, ...header }: ModuleScreenProps) {
 				glow={hero?.glow ?? module.glow}
 				hero={hero}
 				backdrop={Backdrop ? <Backdrop /> : null}
-				action={{
-					icon: module.action.icon,
-					label: module.action.label,
-					onPress: () => setActionRequest((count) => count + 1),
-				}}
+				action={{ icon: module.action.icon, label: module.action.label, onPress: () => undefined }}
+				bar="spacer"
 			/>
 			<View style={styles.content}>
 				<ModuleView actionRequest={actionRequest} />
@@ -251,15 +295,26 @@ function ModuleScreen({ module, hero, label, ...header }: ModuleScreenProps) {
 }
 
 type OverviewBodyProps = {
-	period: string;
+	name: string;
+	now: Date;
 	modules: readonly ModuleId[];
 	amountsHidden: boolean;
 	onOpen: (view: HomeView) => void;
 };
 
-/** Overview, the day's hub: money at a glance, the ask bar, the day and the week's calendar. */
-function OverviewBody({ period, modules, amountsHidden, onOpen }: OverviewBodyProps) {
-	const finance = useFinanceSummary();
+/**
+ * Overview, the day's hub: a greeting, the ask bar, what's next, the day's numbers, one timeline
+ * and the week's calendar.
+ */
+function OverviewBody({ name, now, modules, amountsHidden, onOpen }: OverviewBodyProps) {
+	const hour = now.getHours();
+	const first = name.trim().split(/\s+/)[0];
+	const greeting = `${hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening"}${first ? `, ${first}` : ""}`;
+	const period = now.toLocaleDateString("en-GB", {
+		weekday: "long",
+		day: "numeric",
+		month: "long",
+	});
 	const send = useAskInbox((state) => state.send);
 	const [notice, setNotice] = useState<string | null>(null);
 	const say = (text: string, spoken: boolean) => {
@@ -306,32 +361,22 @@ function OverviewBody({ period, modules, amountsHidden, onOpen }: OverviewBodyPr
 			? { label: "What to wear", onPress: () => onOpen("fashion") }
 			: null,
 	].filter((item): item is { label: string; onPress: () => void } => item !== null);
-	const talk = { label: "Talk to OS", onPress: () => router.push("/listen") };
-	const askAi = {
-		label: "Ask AI",
-		onPress: () => {
-			startConversation({ screen: "overview" });
-			router.push("/assistant");
-		},
-	};
 
 	return (
 		<>
-			{modules.includes("finance") ? (
-				<MoneyCard
-					period={period}
-					leftToSpend={finance.leftToSpend}
-					hidden={amountsHidden}
-					onPress={() => onOpen("finance")}
-				/>
-			) : null}
-			<AskBar suggestions={[askAi, ...suggestions.slice(0, 3), talk]} onSubmit={ask} />
+			<View style={styles.greeting}>
+				<PoText variant="title30">{greeting}</PoText>
+				<PoText variant="body15" tone="textSecondary">
+					{period}
+				</PoText>
+			</View>
+			<AskBar suggestions={suggestions.slice(0, 4)} onSubmit={ask} />
 			{notice ? (
 				<PoText variant="meta13" tone="textSecondary" style={styles.notice}>
 					{notice}
 				</PoText>
 			) : null}
-			<DailyOverview onOpen={onOpen} onNotice={setNotice} />
+			<DailyOverview onOpen={onOpen} onNotice={setNotice} amountsHidden={amountsHidden} />
 			<CalendarWeekCard />
 		</>
 	);
@@ -341,5 +386,6 @@ const styles = StyleSheet.create({
 	root: { flex: 1 },
 	scroll: { flexGrow: 1 },
 	content: { gap: 16, paddingHorizontal: 16 },
-	notice: { paddingHorizontal: 6 },
+	notice: { paddingHorizontal: 4 },
+	greeting: { gap: 4, paddingHorizontal: 4, paddingBottom: 4 },
 });

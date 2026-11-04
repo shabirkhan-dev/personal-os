@@ -35,12 +35,7 @@ export function AyahCard({
 }: AyahCardProps) {
 	const { colors } = usePoTheme();
 	return (
-		<View
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
+		<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 			<View style={styles.eyebrow}>
 				<Icon name="Filled/Sparkle" size={14} color={colors.statusViolet} />
 				<PoText variant="eyebrow11" tone="textTertiary" numberOfLines={1} style={styles.flex}>
@@ -97,12 +92,7 @@ export function AnswerCard({
 }: AnswerCardProps) {
 	const { colors } = usePoTheme();
 	return (
-		<View
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.accentDefault },
-			]}
-		>
+		<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 			<View style={styles.eyebrow}>
 				<Icon name="Filled/Sparkle" size={14} color={colors.accentDefault} />
 				<PoText variant="eyebrow11" tone="textTertiary">
@@ -152,7 +142,7 @@ export function AnswerCard({
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	card: { gap: 12, padding: 18, borderRadius: 28, borderWidth: 1 },
+	card: { gap: 12, padding: 16, borderRadius: 20 },
 	eyebrow: { flexDirection: "row", alignItems: "center", gap: 8 },
 	arabic: { textAlign: "right", writingDirection: "rtl" },
 	actions: { flexDirection: "row", gap: 8, paddingTop: 4 },

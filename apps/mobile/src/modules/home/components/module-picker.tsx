@@ -132,11 +132,15 @@ export function ModulePicker({
 				exiting={FadeOut.duration(150)}
 				style={[
 					styles.card,
-					{ top, backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
+					{ top, backgroundColor: colors.bgSurface },
 					toShadowStyle(elevation.floating),
 				]}
 			>
-				<ScrollView contentContainerStyle={styles.content} bounces={false}>
+				<ScrollView
+					contentContainerStyle={styles.content}
+					bounces={false}
+					showsVerticalScrollIndicator={false}
+				>
 					<View style={styles.head}>
 						<PoText variant="title18">Modules</PoText>
 						<Pressable
@@ -203,29 +207,28 @@ const styles = StyleSheet.create({
 		left: 8,
 		right: 8,
 		maxHeight: 662,
-		borderRadius: 32,
-		borderWidth: 1,
+		borderRadius: 20,
 		overflow: "hidden",
 	},
-	content: { gap: 6, paddingTop: 18, paddingBottom: 12, paddingHorizontal: 10 },
+	content: { gap: 8, paddingTop: 20, paddingBottom: 12, paddingHorizontal: 12 },
 	head: {
 		flexDirection: "row",
 		alignItems: "center",
 		justifyContent: "space-between",
-		paddingLeft: 10,
+		paddingLeft: 12,
 		paddingRight: 4,
-		paddingBottom: 6,
+		paddingBottom: 8,
 		minHeight: 34,
 	},
-	edit: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 16 },
-	section: { paddingLeft: 10, paddingTop: 8, paddingBottom: 2 },
+	edit: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 16 },
+	section: { paddingLeft: 12, paddingTop: 8, paddingBottom: 2 },
 	row: {
 		height: 60,
 		flexDirection: "row",
 		alignItems: "center",
 		gap: 12,
 		paddingLeft: 8,
-		paddingRight: 14,
+		paddingRight: 16,
 		borderRadius: 30,
 	},
 	tile: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center" },

@@ -302,13 +302,13 @@ export function SleepScreen() {
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	last: { flexDirection: "row", alignItems: "baseline", gap: 10 },
-	chart: { flexDirection: "row", gap: 10, height: 96, paddingTop: 4 },
+	last: { flexDirection: "row", alignItems: "baseline", gap: 12 },
+	chart: { flexDirection: "row", gap: 12, height: 96, paddingTop: 4 },
 	target: { position: "absolute", left: 0, right: 0, height: 1 },
-	column: { flex: 1, alignItems: "center", gap: 6 },
+	column: { flex: 1, alignItems: "center", gap: 8 },
 	track: { flex: 1, width: "100%", justifyContent: "flex-end" },
 	barFill: { width: "100%", borderRadius: 8 },
-	chips: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
-	label: { paddingHorizontal: 6 },
+	chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+	label: { paddingHorizontal: 8 },
 	sheet: { gap: 12 },
 });

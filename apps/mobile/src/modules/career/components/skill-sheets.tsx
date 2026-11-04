@@ -193,5 +193,5 @@ export function SkillTimerSheet({
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
 	chips: { gap: 8 },
-	clock: { alignItems: "center", gap: 6, paddingVertical: 24 },
+	clock: { alignItems: "center", gap: 8, paddingVertical: 24 },
 });

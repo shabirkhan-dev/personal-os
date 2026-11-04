@@ -96,6 +96,7 @@ export function KeyboardAwareScrollView({
 				keyboardShouldPersistTaps="handled"
 				keyboardDismissMode="interactive"
 				scrollEventThrottle={32}
+				showsVerticalScrollIndicator={false}
 				{...props}
 				onScroll={handleScroll}
 			>

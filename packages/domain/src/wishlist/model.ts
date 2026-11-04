@@ -62,7 +62,10 @@ export const PHOTO_KEYS = [
 ] as const;
 export type PhotoKey = (typeof PHOTO_KEYS)[number];
 
-/** A dream's photo: a bundled one, or a file the person took or picked. */
+/**
+ * A dream's photo: a bundled one, or one the person took or picked, on this phone (file://) until
+ * it is uploaded, then its R2 link (https://).
+ */
 export type Photo = { kind: "bundled"; key: PhotoKey } | { kind: "file"; uri: string } | null;
 
 export type Contribution = {

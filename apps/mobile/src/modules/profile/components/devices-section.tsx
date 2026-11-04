@@ -1,16 +1,15 @@
 import { Platform } from "react-native";
-import { LogoMark } from "@/components/icons";
 import { Toggle } from "@/components/ui/toggle";
 import { haptics } from "@/lib/haptics";
 import type { WakeStatus } from "@/lib/voice";
 import { useHeyOsSettings, useHeyOsStatus } from "@/modules/home/store/hey-os";
 import { useMicPermission } from "@/modules/onboarding/hooks/use-mic-permission";
-import { healthName, micAction } from "../lib/labels";
-import { RowPill, SettingsCard, SettingsRow, SoonTag } from "./settings-list";
+import { micAction } from "../lib/labels";
+import { RowPill, SettingsCard, SettingsRow } from "./settings-list";
 
 /**
- * HEY OS & DEVICES. The microphone and "Hey OS" (while the app is open) are real; the desktop
- * app, health, calendar and watch connections do not exist yet, so they say "Soon".
+ * HEY OS & DEVICES: the microphone and "Hey OS" (while the app is open). Connections that do not
+ * exist yet (desktop app, health, calendar, watch) are left out rather than listed as "Soon".
  */
 export function DevicesSection() {
 	const mic = useMicPermission();
@@ -83,29 +82,6 @@ export function DevicesSection() {
 					meta="Long-press the Personal OS icon, then Talk to OS. Drag it to your home screen for one tap."
 				/>
 			) : null}
-			<SettingsRow
-				icon="Layers"
-				mark={<LogoMark size={40} />}
-				title="Hey OS desktop"
-				meta="Mac and PC app"
-				accessory={<SoonTag />}
-			/>
-			<SettingsRow
-				icon="Heart"
-				iconTone="statusDanger"
-				title={healthName(Platform.OS)}
-				meta="Steps, sleep and workouts"
-				accessory={<SoonTag />}
-			/>
-			<SettingsRow
-				icon="Filled/Calendar"
-				iconTone="accentDefault"
-				tileTone="accentSubtle"
-				title="Calendar"
-				meta="Your events on Today"
-				accessory={<SoonTag />}
-			/>
-			<SettingsRow icon="Clock" title="Smartwatch" meta="Not connected" accessory={<SoonTag />} />
 		</SettingsCard>
 	);
 }

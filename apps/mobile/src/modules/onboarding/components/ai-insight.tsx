@@ -12,10 +12,7 @@ export function AiInsight({ parts }: { parts: readonly RichPart[] }) {
 		<Animated.View
 			entering={FadeIn.duration(300)}
 			accessibilityLiveRegion="polite"
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
+			style={[styles.card, { backgroundColor: colors.bgSurface }]}
 		>
 			<View style={[styles.tile, { backgroundColor: colors.statusVioletSubtle }]}>
 				<Icon name="Filled/Sparkle" size={16} color={colors.statusViolet} />
@@ -33,8 +30,7 @@ const styles = StyleSheet.create({
 		paddingLeft: 8,
 		paddingRight: 16,
 		paddingVertical: 8,
-		borderRadius: 26,
-		borderWidth: 1,
+		borderRadius: 20,
 	},
 	tile: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" },
 	text: { flex: 1 },

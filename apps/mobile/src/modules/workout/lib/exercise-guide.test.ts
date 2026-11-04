@@ -5,7 +5,7 @@ import { CATALOG, DEMO_IDS, guideFor, videoSearchUrl } from "./exercise-guide";
 import { TEMPLATES } from "./library";
 
 const framesSource = readFileSync(join(import.meta.dir, "demo-frames.ts"), "utf8");
-const demosDir = join(import.meta.dir, "../../../../assets/training/demos");
+const demosDir = join(import.meta.dir, "../../../../app-photos/training/demos");
 
 describe("exercise guides", () => {
 	it("covers every exercise the fixed sessions plan, apart from team sport", () => {
@@ -25,9 +25,9 @@ describe("exercise guides", () => {
 		const used = new Set(CATALOG.map((exercise) => exercise.demo));
 		for (const id of DEMO_IDS) {
 			expect(used.has(id)).toBe(true);
-			const files = [...framesSource.matchAll(new RegExp(`demos/(${id}-\\d)\\.jpg`, "g"))];
+			const files = [...framesSource.matchAll(new RegExp(`demos/(${id}-\\d)\\.webp`, "g"))];
 			expect(files.length).toBeGreaterThan(0);
-			for (const [, file] of files) expect(existsSync(join(demosDir, `${file}.jpg`))).toBe(true);
+			for (const [, file] of files) expect(existsSync(join(demosDir, `${file}.webp`))).toBe(true);
 		}
 	});
 

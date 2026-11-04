@@ -42,10 +42,7 @@ export function AiWorkingCard({ job, steps, onRetry, onDismiss }: AiWorkingCardP
 
 	return (
 		<View
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
+			style={[styles.card, { backgroundColor: colors.bgSurface }]}
 			accessibilityRole="progressbar"
 			accessibilityLabel={failed ? `${job.label} failed` : `${job.label}. ${step}`}
 		>
@@ -153,7 +150,7 @@ function ShimmerLine({ width, delay }: { width: `${number}%`; delay: number }) {
 }
 
 const styles = StyleSheet.create({
-	card: { gap: 16, padding: 20, borderRadius: 28, borderWidth: 1 },
+	card: { gap: 16, padding: 16, borderRadius: 20 },
 	head: { flexDirection: "row", alignItems: "center", gap: 12 },
 	flex: { flex: 1, gap: 2 },
 	spark: {
@@ -163,7 +160,7 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "center",
 	},
-	lines: { gap: 10 },
+	lines: { gap: 12 },
 	line: { height: 12, borderRadius: 6 },
 	actions: { flexDirection: "row", gap: 8 },
 });

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Alert, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { showDialog } from "@/components/ui/dialog";
 import { Icon } from "@/components/icons";
 import { ScreenTitle } from "@/components/module-ui";
 import { ChoiceChips } from "@/components/ui/choice-chips";
@@ -35,7 +36,7 @@ const TAG_TONE = {
 
 /** "Bought it": the wish moves into the wardrobe and opens there. */
 function bought(wish: Wish): void {
-	Alert.alert(`Bought ${wish.name}?`, "It moves into your wardrobe.", [
+	showDialog(`Bought ${wish.name}?`, "It moves into your wardrobe.", [
 		{ text: "Not yet", style: "cancel" },
 		{
 			text: "Bought it",
@@ -50,7 +51,10 @@ function bought(wish: Wish): void {
 	]);
 }
 
-/** Wishlist: what to buy next and why, on hold while buying is paused. */
+/**
+ * To buy: the clothes to buy next and why, on hold while buying is paused. Named apart from the
+ * Wishlist module, which saves up for big things.
+ */
 export function WishlistScreen() {
 	const { colors } = usePoTheme();
 	const { wishes, pieces, settings } = useFashion();
@@ -66,16 +70,19 @@ export function WishlistScreen() {
 
 	return (
 		<FashionScreen
-			action={{ icon: "Line/Plus", label: "Add to wishlist", onPress: () => edit(null) }}
+			action={{ icon: "Line/Plus", label: "Add to To buy", onPress: () => edit(null) }}
 		>
-			<ScreenTitle eyebrow={`${wishes.length} items · ${formatMoney(total)}`} title="Wishlist" />
+			<ScreenTitle eyebrow={`${wishes.length} items · ${formatMoney(total)}`} title="To buy" />
 
 			<View
 				style={[
 					styles.hold,
 					{
-						backgroundColor: settings.buyingPaused ? colors.statusCautionSubtle : colors.bgSurface,
-						borderColor: settings.buyingPaused ? colors.statusCaution : colors.borderDefault,
+						backgroundColor: settings.buyingPaused
+							? colors.statusCautionSubtle
+							: settings.buyingPaused
+								? colors.statusCautionSubtle
+								: colors.bgSurface,
 					},
 				]}
 			>
@@ -104,10 +111,7 @@ export function WishlistScreen() {
 						key={wish.id}
 						accessibilityRole="button"
 						onPress={() => edit(wish)}
-						style={[
-							styles.card,
-							{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-						]}
+						style={[styles.card, { backgroundColor: colors.bgSurface }]}
 					>
 						<View style={styles.head}>
 							<PieceImage
@@ -154,11 +158,7 @@ export function WishlistScreen() {
 				);
 			})}
 
-			<Pressable
-				accessibilityRole="button"
-				onPress={() => edit(null)}
-				style={[styles.add, { borderColor: colors.borderDefault }]}
-			>
+			<Pressable accessibilityRole="button" onPress={() => edit(null)} style={[styles.add, {}]}>
 				<Icon name="Line/Plus" size={16} color={colors.textSecondary} />
 				<PoText variant="meta13" tone="textSecondary">
 					Add by name or link
@@ -208,7 +208,7 @@ function WishSheet({ wish, onClose }: { wish: Wish | null; onClose: () => void }
 	return (
 		<Sheet
 			visible
-			title={wish ? "Edit wish" : "Add to wishlist"}
+			title={wish ? "Edit" : "Add to To buy"}
 			onClose={onClose}
 			footer={
 				<View style={styles.sheetFoot}>
@@ -279,14 +279,13 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		gap: 12,
 		padding: 16,
-		borderRadius: 24,
-		borderWidth: 1,
+		borderRadius: 20,
 	},
-	card: { gap: 12, padding: 16, borderRadius: 28, borderWidth: 1 },
-	head: { flexDirection: "row", alignItems: "center", gap: 14 },
+	card: { gap: 12, padding: 16, borderRadius: 20 },
+	head: { flexDirection: "row", alignItems: "center", gap: 16 },
 	tag: {
 		alignSelf: "flex-start",
-		paddingHorizontal: 10,
+		paddingHorizontal: 12,
 		paddingVertical: 4,
 		borderRadius: 10,
 		marginBottom: 4,
@@ -300,7 +299,7 @@ const styles = StyleSheet.create({
 		gap: 8,
 		height: 52,
 		borderRadius: 26,
-		borderWidth: 1,
+
 		borderStyle: "dashed",
 	},
 	sheetFoot: { flexDirection: "row", gap: 8 },

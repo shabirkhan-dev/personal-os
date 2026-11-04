@@ -32,7 +32,6 @@ export function AskAssistant({ place }: { place: AssistantPlace }) {
 					{
 						bottom: insets.bottom + 92,
 						backgroundColor: pressed ? colors.bgHover : colors.bgSurface,
-						borderColor: colors.accentSubtleBorder,
 					},
 					toShadowStyle(elevation.floating),
 				]}
@@ -51,10 +50,9 @@ const styles = StyleSheet.create({
 		right: 16,
 		flexDirection: "row",
 		alignItems: "center",
-		gap: 6,
-		paddingHorizontal: 14,
+		gap: 8,
+		paddingHorizontal: 16,
 		height: 40,
 		borderRadius: 999,
-		borderWidth: 1,
 	},
 });

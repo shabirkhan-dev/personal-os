@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { Alert, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { showDialog } from "@/components/ui/dialog";
 import { EmptyCard, Footer, MetaChip, ScreenTitle } from "@/components/module-ui";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
@@ -63,7 +64,7 @@ export function ProgramScreen({ id }: { id: string }) {
 	};
 
 	const stop = () =>
-		Alert.alert(
+		showDialog(
 			"End this program?",
 			"Your levels and sessions stay. This week goes back to your usual plan.",
 			[
@@ -77,7 +78,7 @@ export function ProgramScreen({ id }: { id: string }) {
 		);
 
 	const remove = () =>
-		Alert.alert(`Delete ${program.title}?`, "This can't be undone. Logged sessions stay.", [
+		showDialog(`Delete ${program.title}?`, "This can't be undone. Logged sessions stay.", [
 			{ text: "Keep", style: "cancel" },
 			{
 				text: "Delete",
@@ -355,9 +356,9 @@ function LevelSheet({
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
 	points: { gap: 8 },
-	point: { flexDirection: "row", gap: 10, alignItems: "flex-start" },
-	dot: { width: 6, height: 6, borderRadius: 3, marginTop: 7 },
-	row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 6 },
+	point: { flexDirection: "row", gap: 12, alignItems: "flex-start" },
+	dot: { width: 6, height: 6, borderRadius: 3, marginTop: 8 },
+	row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8 },
 	levels: { gap: 12, paddingBottom: 8 },
 	wrap: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 });

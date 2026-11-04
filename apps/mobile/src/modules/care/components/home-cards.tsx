@@ -31,8 +31,7 @@ export function Card({ children, accent = false }: { children: ReactNode; accent
 			style={[
 				styles.card,
 				{
-					backgroundColor: colors.bgSurface,
-					borderColor: accent ? colors.accentDefault : colors.borderDefault,
+					backgroundColor: accent ? colors.accentSubtle : colors.bgSurface,
 				},
 			]}
 		>
@@ -266,8 +265,6 @@ export function WeekCard({
 										? { backgroundColor: colors.statusSuccessSubtle }
 										: today
 											? {
-													borderWidth: 1.5,
-													borderColor: colors.accentDefault,
 													backgroundColor: colors.accentSubtle,
 												}
 											: null,
@@ -402,7 +399,7 @@ export function SetupCard({
 				))}
 			</View>
 			<PoText variant="meta13" tone="textSecondary">
-				I'll build a simple morning, night and weekly routine from what you pick. Start with 4
+				You get a simple morning, night and weekly routine from what you pick. Start with 4
 				products, not 14.
 			</PoText>
 			<PillButton label={busy ? "Building…" : action} disabled={busy} onPress={onBuild} />
@@ -451,16 +448,16 @@ export function CareAnswerCard({
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	card: { gap: 12, padding: 18, borderRadius: 28, borderWidth: 1 },
+	card: { gap: 12, padding: 16, borderRadius: 20 },
 	head: { flexDirection: "row", alignItems: "center", gap: 8 },
-	banner: { flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderRadius: 24 },
+	banner: { flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderRadius: 20 },
 	step: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 12 },
 	next: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
-	routineHead: { gap: 10 },
+	routineHead: { gap: 12 },
 	tiles: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 	tile: { width: "48.5%", gap: 4, padding: 12, borderRadius: 18 },
 	week: { flexDirection: "row", justifyContent: "space-between" },
-	weekDay: { alignItems: "center", gap: 6, width: 44 },
+	weekDay: { alignItems: "center", gap: 8, width: 44 },
 	weekDot: {
 		width: 40,
 		height: 40,
@@ -469,8 +466,8 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 	},
 	dot: { width: 4, height: 4, borderRadius: 2 },
-	low: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 6 },
-	lowText: { flex: 1, gap: 6 },
+	low: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8 },
+	lowText: { flex: 1, gap: 8 },
 	lowHead: { flexDirection: "row", alignItems: "center", gap: 8 },
 	chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 	answerHead: { flexDirection: "row", alignItems: "center", gap: 8 },

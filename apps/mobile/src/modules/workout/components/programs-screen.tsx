@@ -124,7 +124,7 @@ export function ProgramsScreen() {
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	buttons: { flexDirection: "row", gap: 10 },
+	buttons: { flexDirection: "row", gap: 12 },
 	chips: { gap: 8, paddingVertical: 2 },
-	list: { gap: 10 },
+	list: { gap: 12 },
 });

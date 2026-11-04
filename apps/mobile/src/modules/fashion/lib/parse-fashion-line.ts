@@ -97,7 +97,7 @@ export type FashionIntent =
 
 const SCREENS: readonly [RegExp, FashionScreen][] = [
 	[/\bplan\b.*\bweek\b|\bweek(ly)? plan\b|\boutfit plan\b/, "plan"],
-	[/\bwish ?list\b/, "wishlist"],
+	[/\b(?:wish ?list|shopping list)\b/, "wishlist"],
 	[/\b(wardrobe|closet)\b/, "wardrobe"],
 	[/\b(watch box|watches|scents?|perfumes?)\b/, "watches"],
 	[/\b(insights?|recap)\b/, "insights"],

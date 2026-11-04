@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Alert, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { showDialog } from "@/components/ui/dialog";
 import { FilterChip } from "@/components/module-ui";
 import { Icon } from "@/components/icons";
 import { PillButton } from "@/components/ui/pill-button";
@@ -142,7 +143,7 @@ export function EventSheet({
 
 	const remove = () => {
 		if (!event) return;
-		Alert.alert(`Delete ${event.title}?`, "This can't be undone.", [
+		showDialog(`Delete ${event.title}?`, "This can't be undone.", [
 			{ text: "Keep", style: "cancel" },
 			{
 				text: "Delete",
@@ -262,7 +263,7 @@ const styles = StyleSheet.create({
 	flex: { flex: 1 },
 	body: { gap: 12, paddingBottom: 8 },
 	wrap: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-	stepper: { flexDirection: "row", alignItems: "center", gap: 10 },
+	stepper: { flexDirection: "row", alignItems: "center", gap: 12 },
 	round: {
 		width: 36,
 		height: 36,
@@ -271,5 +272,5 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 	},
 	value: { minWidth: 110, textAlign: "center" },
-	footer: { flexDirection: "row", gap: 10 },
+	footer: { flexDirection: "row", gap: 12 },
 });

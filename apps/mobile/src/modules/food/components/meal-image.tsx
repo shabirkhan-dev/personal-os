@@ -1,4 +1,5 @@
 import { Image, type ImageStyle, type StyleProp, StyleSheet, View } from "react-native";
+import { photoSource } from "@/lib/photos/local-photo";
 import { Icon } from "@/components/icons";
 import { usePoTheme } from "@/theme";
 import { RECIPE_HEROES, RECIPE_IMAGES } from "../lib/recipe-images";
@@ -30,7 +31,7 @@ export function MealImage({
 	const bundled = recipeId
 		? ((hero ? RECIPE_HEROES[recipeId] : undefined) ?? RECIPE_IMAGES[recipeId])
 		: undefined;
-	const source = photo ? { uri: photo } : bundled;
+	const source = photo ? { uri: photoSource(photo) } : bundled;
 	const box = [
 		fill ? { alignSelf: "stretch" as const, height: size } : { width: size, height: size },
 		{ borderRadius: radius, backgroundColor: colors.bgSubtle },

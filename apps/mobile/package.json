@@ -26,12 +26,13 @@
   },
   "dependencies": {
     "@expo-google-fonts/amiri-quran": "^0.4.1",
-    "@expo-google-fonts/jetbrains-mono": "^0.4.1",
     "@expo/metro-runtime": "~58.0.14",
+    "@kingstinct/react-native-healthkit": "16.2.0",
     "@personal-os/domain": "workspace:*",
     "@personal-os/tokens": "workspace:*",
-    "@react-navigation/native": "^7.5.0",
-    "@tanstack/react-query": "^5.104.0",
+    "@react-native-healthkit/core": "16.2.0",
+    "@react-navigation/native": "^7.5.1",
+    "@tanstack/react-query": "^5.105.1",
     "adhan": "^4.4.6",
     "expo": "~58.0.10",
     "expo-build-properties": "~58.0.10",
@@ -62,20 +63,33 @@
     "react": "19.3.0",
     "react-native": "0.88.0-rc.4",
     "react-native-gesture-handler": "~3.3.0",
+    "react-native-health-connect": "4.1.3",
+    "react-native-nitro-modules": "0.37.1",
     "react-native-reanimated": "4.7.1",
     "react-native-safe-area-context": "~5.10.1",
     "react-native-screens": "~4.30.0",
     "react-native-svg": "15.15.5",
     "react-native-webview": "14.0.1",
     "react-native-worklets": "0.13.0",
-    "zustand": "^5.0.15"
+    "zustand": "^5.0.16"
   },
   "devDependencies": {
-    "@types/bun": "^1.4.3",
+    "@types/bun": "^1.4.4",
     "@types/react": "~19.3.0",
     "react-dom": "19.3.0",
     "react-native-web": "~0.21.4",
     "typescript": "~6.0.3"
   },
-  "private": true
+  "private": true,
+  "expo": {
+    "autolinking": {
+      "android": {
+        "exclude": [
+          "@kingstinct/react-native-healthkit",
+          "@react-native-healthkit/core",
+          "react-native-nitro-modules"
+        ]
+      }
+    }
+  }
 }

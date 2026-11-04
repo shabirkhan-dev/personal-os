@@ -4,19 +4,8 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-na
 import { HeaderButton } from "@/components/ui/header-button";
 import { usePoTheme } from "@/theme";
 import { ChipButton } from "./chip-button";
-import { StepDots } from "./step-dots";
 
-export const SETUP_STEPS = 8;
-
-/** Welcome header: pager dots on the left, Skip on the right. */
-export function WelcomeTop({ step, onSkip }: { step: number; onSkip: () => void }) {
-	return (
-		<View style={[styles.bar, styles.welcome]}>
-			<StepDots count={4} active={step} />
-			<ChipButton label="Skip" onPress={onSkip} />
-		</View>
-	);
-}
+export const SETUP_STEPS = 6;
 
 export type SetupTopProps = {
 	onBack: () => void;
@@ -69,8 +58,7 @@ function ProgressBar({ value }: { value: number }) {
 
 const styles = StyleSheet.create({
 	bar: { height: 40, flexDirection: "row", alignItems: "center" },
-	welcome: { justifyContent: "space-between", paddingLeft: 4 },
-	setup: { gap: 14 },
+	setup: { gap: 16 },
 	flex: { flex: 1 },
 	track: { flex: 1, height: 4, borderRadius: 2, overflow: "hidden" },
 	fill: { height: 4, borderRadius: 2 },

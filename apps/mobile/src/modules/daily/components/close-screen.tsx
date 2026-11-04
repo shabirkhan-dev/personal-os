@@ -122,8 +122,8 @@ export function CloseScreen() {
 								style={[
 									styles.score,
 									on
-										? { backgroundColor: colors.accentSubtle, borderColor: colors.accentDefault }
-										: { backgroundColor: colors.bgSubtle, borderColor: colors.bgSubtle },
+										? { backgroundColor: colors.accentSubtle }
+										: { backgroundColor: colors.bgSubtle },
 								]}
 							>
 								<PoText variant="row15" tone={on ? "accentDefault" : "textTertiary"}>
@@ -186,17 +186,17 @@ export function CloseScreen() {
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	result: { flexDirection: "row", alignItems: "baseline", gap: 10 },
-	energy: { flexDirection: "row", gap: 6 },
+	result: { flexDirection: "row", alignItems: "baseline", gap: 12 },
+	energy: { flexDirection: "row", gap: 8 },
 	score: {
 		flex: 1,
 		height: 40,
 		borderRadius: 12,
-		borderWidth: 1.5,
+
 		alignItems: "center",
 		justifyContent: "center",
 	},
-	input: { paddingHorizontal: 14, paddingVertical: 12, borderRadius: 16 },
+	input: { paddingHorizontal: 16, paddingVertical: 12, borderRadius: 16 },
 	tomorrow: { flexDirection: "row", alignItems: "center", gap: 12 },
 	bar: { width: 3, height: 32, borderRadius: 2 },
 });

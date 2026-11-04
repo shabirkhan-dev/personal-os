@@ -87,20 +87,14 @@ export function WardrobeScreen() {
 				<EmptyCard
 					icon="Shirt"
 					title="Nothing here yet"
-					body="Add what you wear most and I'll start putting outfits together."
+					body="Add what you wear most to start getting outfit ideas."
 				>
 					<PillButton label="Add a piece" onPress={() => fashionRoutes.add()} />
 				</EmptyCard>
 			) : null}
 
 			{groups.map((group) => (
-				<View
-					key={group.category}
-					style={[
-						styles.card,
-						{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-					]}
-				>
+				<View key={group.category} style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 					<Pressable
 						accessibilityRole="button"
 						onPress={() => setFilter(group.category)}
@@ -161,7 +155,7 @@ export function WardrobeScreen() {
 			<Pressable
 				accessibilityRole="button"
 				onPress={() => fashionRoutes.add({ category: filter === "all" ? undefined : filter })}
-				style={[styles.add, { borderColor: colors.borderDefault }]}
+				style={[styles.add, {}]}
 			>
 				<Icon name="Line/Plus" size={16} color={colors.textSecondary} />
 				<PoText variant="meta13" tone="textSecondary">
@@ -179,13 +173,13 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		gap: 8,
 		height: 48,
-		paddingHorizontal: 14,
+		paddingHorizontal: 16,
 		borderRadius: 24,
 	},
 	filters: { gap: 8 },
-	card: { gap: 14, padding: 16, borderRadius: 28, borderWidth: 1 },
-	head: { flexDirection: "row", alignItems: "center", gap: 6 },
-	row: { gap: 10 },
+	card: { gap: 16, padding: 16, borderRadius: 20 },
+	head: { flexDirection: "row", alignItems: "center", gap: 8 },
+	row: { gap: 12 },
 	item: { width: 104, gap: 4 },
 	add: {
 		flexDirection: "row",
@@ -194,7 +188,7 @@ const styles = StyleSheet.create({
 		gap: 8,
 		height: 52,
 		borderRadius: 26,
-		borderWidth: 1,
+
 		borderStyle: "dashed",
 	},
 });

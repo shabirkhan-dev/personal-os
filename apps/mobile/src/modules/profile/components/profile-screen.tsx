@@ -2,81 +2,42 @@ import Constants from "expo-constants";
 import { KeyboardAwareScrollView } from "@/components/ui/keyboard-aware-scroll-view";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Alert, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import { showDialog } from "@/components/ui/dialog";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PoText } from "@/components/ui/po-text";
 import { haptics } from "@/lib/haptics";
 import { useSync } from "@/lib/sync/sync-provider";
-import { CURRENCY } from "@/lib/money";
 import { useAuth } from "@/modules/auth/context/auth-context";
 import { FloatingTabBar } from "@/modules/home/components/floating-tab-bar";
-import { HomeHeader } from "@/modules/home/components/home-header";
+import { HeaderBar, HomeHeader } from "@/modules/home/components/home-header";
+import { StickyBar, scrolledPast } from "@/components/ui/sticky-bar";
+import { insightsTabPress } from "@/modules/home/components/insights-switcher";
+import { openAreas } from "@/modules/home/store/areas-picker";
 import { OsCard } from "@/modules/onboarding/components/os-card";
 import { useMemberStore } from "@/modules/onboarding/store/member-store";
 import { useOnboardingProgress } from "@/modules/onboarding/store/onboarding-progress";
 import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
-import { type ThemePreference, usePoTheme } from "@/theme";
-import {
-	modulesOnLabel,
-	syncState,
-	themeLabel,
-	type UnitSystem,
-	unitsFor,
-	unitsLabel,
-	unitSystem,
-	versionLabel,
-	weekStartLabel,
-} from "../lib/labels";
-import type { WeekStart } from "../lib/profile-document";
+import { usePoTheme } from "@/theme";
+import { modulesOnLabel, syncState, versionLabel } from "../lib/labels";
 import { eraseThisPhone } from "../services/erase-device";
 import { exportData } from "../services/export-data";
 import { useProfileStore } from "../store/profile-store";
 import { DevicesSection } from "./devices-section";
 import { EditProfileSheet } from "./edit-profile-sheet";
 import { ManageModulesSheet } from "./manage-modules-sheet";
-import { OptionSheet } from "./option-sheet";
-import { SectionLabel, SettingsCard, SettingsRow, SoonTag } from "./settings-list";
+import { SectionLabel, SettingsCard, SettingsRow } from "./settings-list";
 import { useAssistantSettings } from "@/modules/assistant/data/assistant-settings";
 import { APPROVAL_LABELS } from "@personal-os/domain/assistant";
 
-type OpenSheet = "modules" | "edit" | "theme" | "currency" | "units" | "week" | null;
+type OpenSheet = "modules" | "edit" | null;
 
-const themeOptions = [
-	{ value: "system", label: "System", detail: "Follow the phone" },
-	{ value: "light", label: "Light" },
-	{ value: "dark", label: "Dark" },
-] as const;
+const goToday = () => router.dismissTo("/");
 
-const unitOptions = [
-	{ value: "metric", label: "cm · kg", detail: "Metric" },
-	{ value: "imperial", label: "ft · lb", detail: "Imperial" },
-] as const;
-
-const weekOptions = [
-	{ value: "monday", label: "Monday" },
-	{ value: "sunday", label: "Sunday" },
-] as const;
-
-const currencyOptions = [{ value: CURRENCY.code, label: CURRENCY.code, detail: "Pakistani rupee" }];
-
-const goToday = () => router.replace("/");
-
-/** Units are saved with the onboarding answers. */
-function saveUnits(system: UnitSystem) {
-	const store = useOnboardingStore.getState();
-	const next = unitsFor(system);
-	store.set("heightUnit", next.heightUnit);
-	store.set("weightUnit", next.weightUnit);
-	useOnboardingProgress
-		.getState()
-		.persistAnswers()
-		.catch((error: unknown) => console.error("Could not save units", error));
-}
-
-/** An Alert as a promise: true when the person picks `action`. */
+/** A confirm dialog as a promise: true when the person picks `action`. */
 function confirm(title: string, message: string, action: string): Promise<boolean> {
 	return new Promise((resolve) => {
-		Alert.alert(title, message, [
+		showDialog(title, message, [
 			{ text: "Cancel", style: "cancel", onPress: () => resolve(false) },
 			{ text: action, style: "destructive", onPress: () => resolve(true) },
 		]);
@@ -85,7 +46,7 @@ function confirm(title: string, message: string, action: string): Promise<boolea
 
 /** Clears the answers and restarts setup, after a confirm. */
 function replayOnboarding() {
-	Alert.alert(
+	showDialog(
 		"Replay onboarding?",
 		"Your answers are cleared and setup starts again. Your module logs stay on this phone.",
 		[
@@ -107,19 +68,21 @@ function replayOnboarding() {
 
 /** Profile (Figma 163:1583): member card, modules, devices, data, preferences and account. */
 export function ProfileScreen() {
-	const { colors, preference, setPreference } = usePoTheme();
+	const { colors, preference } = usePoTheme();
 	const insets = useSafeAreaInsets();
 	const auth = useAuth();
 	const name = useOnboardingStore((state) => state.name);
 	const { settings: assistantSettings } = useAssistantSettings();
 	const modules = useOnboardingStore((state) => state.modules);
-	const heightUnit = useOnboardingStore((state) => state.heightUnit);
-	const weightUnit = useOnboardingStore((state) => state.weightUnit);
 	const member = useMemberStore((state) => state.member);
-	const weekStart = useProfileStore((state) => state.data.weekStart);
-	const updateProfile = useProfileStore((state) => state.update);
 	const hydrateProfile = useProfileStore((state) => state.hydrate);
 	const [sheet, setSheet] = useState<OpenSheet>(null);
+	const [solid, setSolid] = useState(false);
+	const headerAction = {
+		icon: "Filled/Edit" as const,
+		label: "Edit profile",
+		onPress: () => setSheet("edit"),
+	};
 	const [exporting, setExporting] = useState(false);
 	const [deleting, setDeleting] = useState(false);
 	const backup = useSync();
@@ -145,7 +108,7 @@ export function ProfileScreen() {
 			})
 			.catch((error: unknown) => {
 				console.error("Export failed", error);
-				Alert.alert("Export failed", "Your data could not be exported. Please try again.");
+				showDialog("Export failed", "Your data could not be exported. Please try again.");
 			})
 			.finally(() => setExporting(false));
 	};
@@ -170,7 +133,7 @@ export function ProfileScreen() {
 	};
 
 	const signOut = () => {
-		Alert.alert(
+		showDialog(
 			"Sign out?",
 			"Your changes are backed up first. Keep your plan and logs on this phone, or erase them.",
 			[
@@ -191,7 +154,7 @@ export function ProfileScreen() {
 	};
 
 	const removeAccount = () => {
-		Alert.alert(
+		showDialog(
 			"Delete your account?",
 			"This deletes your account and everything backed up to it, and erases this phone. It can't be undone.",
 			[
@@ -209,7 +172,7 @@ export function ProfileScreen() {
 							})
 							.catch((error: unknown) => {
 								console.error("Account deletion failed", error);
-								Alert.alert(
+								showDialog(
 									"Couldn't delete your account",
 									"Check your connection and try again. Nothing was deleted.",
 								);
@@ -223,19 +186,20 @@ export function ProfileScreen() {
 
 	return (
 		<View style={[styles.root, { backgroundColor: colors.bgApp }]}>
-			<KeyboardAwareScrollView contentContainerStyle={{ paddingBottom: 120 + insets.bottom }}>
+			<KeyboardAwareScrollView
+				contentContainerStyle={{ paddingBottom: 120 + insets.bottom }}
+				scrollEventThrottle={16}
+				onScroll={(event) => setSolid(scrolledPast(event.nativeEvent.contentOffset.y))}
+			>
 				<HomeHeader
 					name={name}
 					topInset={insets.top}
 					label="Profile"
 					glow="statusViolet"
 					pickerOpen={false}
-					onAppsPress={goToday}
-					action={{
-						icon: "Filled/Edit",
-						label: "Edit profile",
-						onPress: () => setSheet("edit"),
-					}}
+					onAppsPress={openAreas}
+					action={headerAction}
+					bar="spacer"
 				/>
 				<View style={styles.content}>
 					<OsCard member={member} />
@@ -246,14 +210,7 @@ export function ProfileScreen() {
 							icon="Filled/Grid"
 							title="Manage modules"
 							meta={modulesOnLabel(modules.length)}
-							value={`${modules.length} on`}
 							onPress={() => setSheet("modules")}
-						/>
-						<SettingsRow
-							icon="Pin"
-							title="Pinned order"
-							meta="Choose which modules come first"
-							accessory={<SoonTag />}
 						/>
 					</SettingsCard>
 
@@ -308,37 +265,13 @@ export function ProfileScreen() {
 						/>
 					</SettingsCard>
 
-					<SectionLabel>Preferences</SectionLabel>
+					<SectionLabel>Settings</SectionLabel>
 					<SettingsCard>
 						<SettingsRow
-							icon="Sun"
-							iconTone="statusCaution"
-							tileTone="statusCautionSubtle"
-							title="Theme"
-							value={themeLabel(preference)}
-							onPress={() => setSheet("theme")}
-						/>
-						<SettingsRow
-							icon="Wallet"
-							iconTone="statusCaution"
-							tileTone="statusCautionSubtle"
-							title="Currency"
-							value={CURRENCY.code}
-							onPress={() => setSheet("currency")}
-						/>
-						<SettingsRow
-							icon="Lightning"
-							title="Units"
-							value={unitsLabel(heightUnit, weightUnit)}
-							onPress={() => setSheet("units")}
-						/>
-						<SettingsRow
-							icon="Filled/Calendar"
-							iconTone="accentDefault"
-							tileTone="accentSubtle"
-							title="Week starts on"
-							value={weekStartLabel(weekStart)}
-							onPress={() => setSheet("week")}
+							icon="Settings"
+							title="Settings"
+							meta="Height, weight, birthday, units, theme"
+							onPress={() => router.push("/settings")}
 						/>
 					</SettingsCard>
 
@@ -394,49 +327,25 @@ export function ProfileScreen() {
 					</View>
 				</View>
 			</KeyboardAwareScrollView>
+			<StickyBar topInset={insets.top} solid={solid}>
+				<HeaderBar
+					name={name}
+					label="Profile"
+					pickerOpen={false}
+					onAppsPress={openAreas}
+					action={headerAction}
+				/>
+			</StickyBar>
 
 			<FloatingTabBar
 				active="profile"
 				bottomInset={insets.bottom}
 				onTodayPress={goToday}
-				onAreasPress={goToday}
+				onInsightsPress={insightsTabPress()}
 			/>
 
 			<ManageModulesSheet visible={sheet === "modules"} onClose={close} />
 			<EditProfileSheet visible={sheet === "edit"} onClose={close} />
-			<OptionSheet<ThemePreference>
-				visible={sheet === "theme"}
-				title="Theme"
-				options={themeOptions}
-				value={preference}
-				onChange={setPreference}
-				onClose={close}
-			/>
-			<OptionSheet
-				visible={sheet === "currency"}
-				title="Currency"
-				options={currencyOptions}
-				value={CURRENCY.code}
-				onChange={() => undefined}
-				onClose={close}
-				note="More currencies soon."
-			/>
-			<OptionSheet<UnitSystem>
-				visible={sheet === "units"}
-				title="Units"
-				options={unitOptions}
-				value={unitSystem(heightUnit, weightUnit)}
-				onChange={saveUnits}
-				onClose={close}
-			/>
-			<OptionSheet<WeekStart>
-				visible={sheet === "week"}
-				title="Week starts on"
-				options={weekOptions}
-				value={weekStart}
-				onChange={(next) => updateProfile((current) => ({ ...current, weekStart: next }))}
-				onClose={close}
-			/>
 		</View>
 	);
 }

@@ -40,8 +40,8 @@ export function ChoiceChips<T extends string>({
 							style={[
 								styles.chip,
 								selected
-									? { backgroundColor: colors.bgInverse, borderColor: colors.bgInverse }
-									: { backgroundColor: colors.bgSubtle, borderColor: colors.borderDefault },
+									? { backgroundColor: colors.bgInverse }
+									: { backgroundColor: colors.bgSubtle },
 							]}
 						>
 							<PoText variant="meta13" tone={selected ? "textInverse" : "textSecondary"}>
@@ -56,7 +56,7 @@ export function ChoiceChips<T extends string>({
 }
 
 const styles = StyleSheet.create({
-	group: { gap: 6 },
+	group: { gap: 8 },
 	row: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-	chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 18, borderWidth: 1 },
+	chip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 18 },
 });

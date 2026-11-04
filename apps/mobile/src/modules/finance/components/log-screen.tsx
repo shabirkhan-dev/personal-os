@@ -124,12 +124,7 @@ export function LogScreen() {
 				eyebrow={`Today · ${clock(now)} · ${receiptUri ? "receipt attached" : "AI splits it"}`}
 				title="What did you spend?"
 			/>
-			<View
-				style={[
-					styles.input,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.accentDefault },
-				]}
-			>
+			<View style={[styles.input, { backgroundColor: colors.bgSurface }]}>
 				<TextInput
 					value={text}
 					onChangeText={onText}
@@ -318,11 +313,11 @@ function ItemSheet({
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	input: { gap: 10, padding: 16, borderRadius: 24, borderWidth: 1.5 },
+	input: { gap: 12, padding: 16, borderRadius: 20 },
 	text: { minHeight: 48, padding: 0, textAlignVertical: "top" },
 	matchRow: { flexDirection: "row", alignItems: "center", gap: 8 },
 	dot: { width: 8, height: 8, borderRadius: 4 },
-	chips: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
+	chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 	sheet: { gap: 12 },
-	pair: { flexDirection: "row", gap: 10 },
+	pair: { flexDirection: "row", gap: 12 },
 });

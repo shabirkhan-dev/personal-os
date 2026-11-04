@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { SkeletonCard } from "@/components/ui/skeleton";
 import { Icon } from "@/components/icons";
 import { EmptyCard, Footer, ScreenTitle } from "@/components/module-ui";
 import { PillButton } from "@/components/ui/pill-button";
@@ -60,17 +61,21 @@ export function PieceDetailScreen({ id }: { id: string }) {
 	if (!piece) {
 		return (
 			<FashionScreen>
-				<EmptyCard
-					icon="Shirt"
-					title={data.loading ? "Loading…" : "Piece not found"}
-					body={data.loading ? "" : "It may have been removed on another device."}
-				>
-					<PillButton
-						label="Back to wardrobe"
-						variant="secondary"
-						onPress={fashionRoutes.wardrobe}
-					/>
-				</EmptyCard>
+				{data.loading ? (
+					<SkeletonCard media lines={3} label="this piece" />
+				) : (
+					<EmptyCard
+						icon="Shirt"
+						title="Piece not found"
+						body="It may have been removed on another device."
+					>
+						<PillButton
+							label="Back to wardrobe"
+							variant="secondary"
+							onPress={fashionRoutes.wardrobe}
+						/>
+					</EmptyCard>
+				)}
 			</FashionScreen>
 		);
 	}
@@ -157,12 +162,7 @@ export function PieceDetailScreen({ id }: { id: string }) {
 				eyebrow={`${CATEGORY_ONE[piece.category]}${boughtLabel(piece.boughtOn)}`}
 				title={piece.name}
 			/>
-			<View
-				style={[
-					styles.hero,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.hero, { backgroundColor: colors.bgSurface }]}>
 				<PieceImage
 					image={piece.image}
 					category={piece.category}
@@ -203,12 +203,7 @@ export function PieceDetailScreen({ id }: { id: string }) {
 			</View>
 
 			{isScent ? (
-				<View
-					style={[
-						styles.card,
-						{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-					]}
-				>
+				<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 					<PoText variant="title18">How full is it?</PoText>
 					<View style={styles.levels}>
 						{[1, 0.8, 0.6, 0.4, 0.2, 0].map((level) => {
@@ -233,12 +228,7 @@ export function PieceDetailScreen({ id }: { id: string }) {
 					</View>
 				</View>
 			) : shownPairs.length > 0 ? (
-				<View
-					style={[
-						styles.card,
-						{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-					]}
-				>
+				<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 					<View style={styles.head}>
 						<PoText variant="title18" style={styles.flex}>
 							{pairs.length > 0 ? "Pairs with" : "Goes with"}
@@ -276,12 +266,7 @@ export function PieceDetailScreen({ id }: { id: string }) {
 			) : null}
 
 			{details.length > 0 || piece.note ? (
-				<View
-					style={[
-						styles.card,
-						{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-					]}
-				>
+				<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 					{details.map(([label, value]) => (
 						<View key={label} style={styles.detail}>
 							<PoText variant="text14" tone="textSecondary" style={styles.flex}>
@@ -326,12 +311,7 @@ export function PieceDetailScreen({ id }: { id: string }) {
 function Stat({ label, value, good = false }: { label: string; value: string; good?: boolean }) {
 	const { colors } = usePoTheme();
 	return (
-		<View
-			style={[
-				styles.stat,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
+		<View style={[styles.stat, { backgroundColor: colors.bgSurface }]}>
 			<PoText variant="eyebrow11" tone="textTertiary">
 				{label}
 			</PoText>
@@ -349,16 +329,16 @@ function Stat({ label, value, good = false }: { label: string; value: string; go
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	hero: { padding: 8, borderRadius: 32, borderWidth: 1 },
+	hero: { padding: 8, borderRadius: 20 },
 	stats: { flexDirection: "row", gap: 8 },
-	stat: { flex: 1, gap: 6, padding: 14, borderRadius: 20, borderWidth: 1 },
-	card: { gap: 12, padding: 18, borderRadius: 28, borderWidth: 1 },
+	stat: { flex: 1, gap: 8, padding: 16, borderRadius: 20 },
+	card: { gap: 12, padding: 16, borderRadius: 20 },
 	head: { flexDirection: "row", alignItems: "center" },
-	pairs: { gap: 10 },
+	pairs: { gap: 12 },
 	pair: { width: 76, gap: 4 },
 	detail: { flexDirection: "row", alignItems: "center", paddingVertical: 2 },
 	note: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 4 },
 	flag: { width: 8, height: 8, borderRadius: 4 },
 	levels: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-	level: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 16 },
+	level: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 16 },
 });

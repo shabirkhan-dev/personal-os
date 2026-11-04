@@ -39,12 +39,7 @@ export function Card({
 			style={[
 				styles.card,
 				{
-					backgroundColor: tone ? colors[tone.bg] : colors.bgSurface,
-					borderColor: tone
-						? colors[tone.border]
-						: accent
-							? colors.accentDefault
-							: colors.borderDefault,
+					backgroundColor: tone ? colors[tone.bg] : accent ? colors.accentSubtle : colors.bgSurface,
 				},
 			]}
 		>
@@ -513,25 +508,25 @@ export function ButtonPair({
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	card: { gap: 12, padding: 18, borderRadius: 28, borderWidth: 1 },
-	head: { flexDirection: "row", alignItems: "center", gap: 10 },
+	card: { gap: 12, padding: 16, borderRadius: 20 },
+	head: { flexDirection: "row", alignItems: "center", gap: 12 },
 	bars: { flexDirection: "row", gap: 8, alignItems: "flex-end" },
 	barColumn: { flex: 1, alignItems: "center", gap: 8 },
 	barTrack: { height: 80, alignSelf: "stretch", justifyContent: "flex-end" },
 	bar: { borderRadius: 8, alignSelf: "stretch" },
 	lineRow: { flexDirection: "row", alignItems: "center", gap: 8 },
 	dot: { width: 8, height: 8, borderRadius: 4 },
-	balanceRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+	balanceRow: { flexDirection: "row", alignItems: "center", gap: 12 },
 	when: { width: 52 },
 	amount: { minWidth: 84, textAlign: "right" },
 	track: { flex: 1, height: 8, borderRadius: 4, overflow: "hidden" },
 	fill: { height: 8, borderRadius: 4 },
 	goalTrack: { height: 8, borderRadius: 4, overflow: "hidden" },
 	stack: { flexDirection: "row", height: 8, borderRadius: 4, overflow: "hidden", gap: 2 },
-	legend: { flexDirection: "row", flexWrap: "wrap", gap: 14 },
-	legendItem: { flexDirection: "row", alignItems: "center", gap: 6 },
-	chips: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
+	legend: { flexDirection: "row", flexWrap: "wrap", gap: 16 },
+	legendItem: { flexDirection: "row", alignItems: "center", gap: 8 },
+	chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 	numberField: { gap: 8 },
-	numberBox: { height: 52, borderRadius: 16, paddingHorizontal: 14 },
-	pair: { flexDirection: "row", gap: 10 },
+	numberBox: { height: 52, borderRadius: 16, paddingHorizontal: 16 },
+	pair: { flexDirection: "row", gap: 12 },
 });

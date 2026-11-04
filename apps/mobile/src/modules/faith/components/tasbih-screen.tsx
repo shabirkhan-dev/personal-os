@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { showDialog } from "@/components/ui/dialog";
 import Svg, { Circle } from "react-native-svg";
 import { FilterChip, Footer, MetaChip, ScreenTitle, SectionLabel } from "@/components/module-ui";
 import { PillButton } from "@/components/ui/pill-button";
@@ -108,7 +109,7 @@ export function TasbihScreen() {
 
 	const reset = () => {
 		if (!phrase) return;
-		Alert.alert(`Reset ${phrase.label}?`, "Today's count for this phrase goes back to 0.", [
+		showDialog(`Reset ${phrase.label}?`, "Today's count for this phrase goes back to 0.", [
 			{ text: "Cancel", style: "cancel" },
 			{
 				text: "Reset",
@@ -233,12 +234,7 @@ export function TasbihScreen() {
 			</Pressable>
 
 			<SectionLabel>{`Your sequence · ${sequence.length} sets`}</SectionLabel>
-			<View
-				style={[
-					styles.sequence,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.sequence, { backgroundColor: colors.bgSurface }]}>
 				{sequence.map((item, index) => {
 					const done = (live[item.id] ?? 0) >= item.target;
 					const current = item.id === phrase?.id;
@@ -349,12 +345,12 @@ function SequenceSheet({
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
 	tabs: { gap: 8 },
-	targets: { flexDirection: "row", padding: 4, borderRadius: 24 },
+	targets: { flexDirection: "row", padding: 4, borderRadius: 20 },
 	target: { flex: 1, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
 	ringArea: { alignItems: "center", justifyContent: "center", paddingVertical: 8 },
 	ringText: { position: "absolute", alignItems: "center", gap: 2 },
-	sequence: { borderRadius: 28, borderWidth: 1, padding: 8, gap: 4 },
+	sequence: { borderRadius: 20, padding: 8, gap: 4 },
 	step: { flexDirection: "row", alignItems: "center", gap: 12, padding: 12, borderRadius: 20 },
-	badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
+	badge: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8 },
 	options: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 });

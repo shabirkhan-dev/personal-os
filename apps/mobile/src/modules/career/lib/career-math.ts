@@ -173,14 +173,17 @@ export function prepProgress(prep: Prep | null): { done: number; total: number }
 }
 
 /**
- * Weeks the cash lasts at the current burn. Costs come from the settings, or else from what
- * Finance shows spent so far this month. Null when either side is unknown.
+ * Weeks the cash lasts at the current burn. Finance's runway wins when it is set up, so the app
+ * shows one runway; otherwise cash and costs come from Career's settings, costs falling back to
+ * what Finance shows spent so far this month. Null when either side is unknown.
  */
 export function runwayWeeks(
 	settings: CareerSettings,
 	spentThisMonth: number,
 	now: Date,
+	financeDays: number | null = null,
 ): number | null {
+	if (financeDays !== null) return Math.floor(financeDays / 7);
 	if (settings.cashOnHand === null) return null;
 	const monthly =
 		settings.monthlyCosts ?? (spentThisMonth > 0 ? (spentThisMonth / now.getDate()) * 30 : null);
@@ -212,7 +215,7 @@ export function careerTip(
 	const sent = appliedThisWeek(apps, now);
 	const due = followUps(apps, now).filter((item) => item.due).length;
 	if (apps.length === 0) {
-		return "Paste a job link and I'll fill in the company, role and pay. Aim for 2 today.";
+		return "Paste a job link to fill in the company, role and pay. Aim for 2 today.";
 	}
 	if (due > 0) {
 		return `${due} follow-up${due === 1 ? " is" : "s are"} due. A short nudge today keeps you on their list.`;

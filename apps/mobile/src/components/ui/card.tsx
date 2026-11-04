@@ -6,18 +6,10 @@ import { usePoTheme } from "@/theme";
 export function Card({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
 	const { colors } = usePoTheme();
 	return (
-		<View
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				style,
-			]}
-		>
-			{children}
-		</View>
+		<View style={[styles.card, { backgroundColor: colors.bgSurface }, style]}>{children}</View>
 	);
 }
 
 const styles = StyleSheet.create({
-	card: { gap: 16, padding: 20, borderRadius: 28, borderWidth: 1 },
+	card: { gap: 16, padding: 16, borderRadius: 20 },
 });

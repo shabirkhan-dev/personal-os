@@ -13,6 +13,16 @@ export function memoryBucket() {
 		put(key: string, size: number, contentType: string) {
 			objects.set(key, { size, contentType });
 		},
+		async get(key: string) {
+			const object = objects.get(key);
+			return object
+				? {
+						body: new Uint8Array(object.size),
+						httpEtag: `"${key}"`,
+						httpMetadata: { contentType: object.contentType },
+					}
+				: null;
+		},
 		async head(key: string) {
 			const object = objects.get(key);
 			return object

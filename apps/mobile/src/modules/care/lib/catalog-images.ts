@@ -1,15 +1,16 @@
 import type { ImageSourcePropType } from "react-native";
+import { appPhoto } from "@/lib/photos/app-photo";
 
-/** The shelf photos (from the Figma "Care · Photo assets" frame), bundled with the app. */
+/** The shelf photos (from the Figma "Care · Photo assets" frame), served from R2 through the API (`appPhoto`). */
 export const CATALOG_IMAGES: Record<string, ImageSourcePropType> = {
-	cleanser: require("../../../../assets/care/cleanser.jpg"),
-	serum: require("../../../../assets/care/serum.jpg"),
-	moisturizer: require("../../../../assets/care/moisturizer.jpg"),
-	sunscreen: require("../../../../assets/care/sunscreen.jpg"),
-	shampoo: require("../../../../assets/care/shampoo.jpg"),
-	"hair-oil": require("../../../../assets/care/hair-oil.jpg"),
-	"comb-and-brush": require("../../../../assets/care/comb-and-brush.jpg"),
-	"body-lotion": require("../../../../assets/care/body-lotion.jpg"),
-	"nail-kit": require("../../../../assets/care/nail-kit.jpg"),
-	"teeth-and-lips": require("../../../../assets/care/teeth-and-lips.jpg"),
+	cleanser: appPhoto("care/cleanser.webp"),
+	serum: appPhoto("care/serum.webp"),
+	moisturizer: appPhoto("care/moisturizer.webp"),
+	sunscreen: appPhoto("care/sunscreen.webp"),
+	shampoo: appPhoto("care/shampoo.webp"),
+	"hair-oil": appPhoto("care/hair-oil.webp"),
+	"comb-and-brush": appPhoto("care/comb-and-brush.webp"),
+	"body-lotion": appPhoto("care/body-lotion.webp"),
+	"nail-kit": appPhoto("care/nail-kit.webp"),
+	"teeth-and-lips": appPhoto("care/teeth-and-lips.webp"),
 };

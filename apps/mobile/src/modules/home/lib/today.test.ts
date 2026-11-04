@@ -1,7 +1,7 @@
 /// <reference types="bun" />
 import { describe, expect, test } from "bun:test";
 import type { PlanInput } from "@/modules/onboarding/lib/plan";
-import { moduleStatuses, periodLabel, todayItems } from "./today";
+import { moduleStatuses, todayItems } from "./today";
 
 const input: PlanInput = {
 	wakeMinutes: 6 * 60 + 30,
@@ -63,10 +63,5 @@ describe("today", () => {
 		expect(statuses.find((status) => status.id === "daily-life")?.status).toBe(
 			"7 things planned today",
 		);
-	});
-
-	test("labels", () => {
-		const date = new Date(2026, 9, 13, 16, 20);
-		expect(periodLabel(date)).toBe("PKR · OCT");
 	});
 });

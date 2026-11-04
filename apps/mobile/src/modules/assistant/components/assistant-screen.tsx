@@ -5,14 +5,24 @@ import { Icon } from "@/components/icons";
 import { HeaderButton } from "@/components/ui/header-button";
 import { PoText } from "@/components/ui/po-text";
 import { usePoTheme } from "@/theme";
+import { useEffect, useRef } from "react";
 import { startConversation, useAssistant } from "../hooks/use-assistant";
 import { AssistantChat } from "./assistant-chat";
 
 /** The assistant on its own screen: the conversation, past chats behind the title, and New. */
-export function AssistantScreen() {
+export function AssistantScreen({ ask }: { ask?: string }) {
 	const { colors } = usePoTheme();
 	const insets = useSafeAreaInsets();
-	const { conversation } = useAssistant();
+	const { conversation, send, available } = useAssistant();
+
+	// Opened from a nudge: a fresh conversation that asks its question once.
+	const asked = useRef<string | null>(null);
+	useEffect(() => {
+		if (!ask || !available || asked.current === ask) return;
+		asked.current = ask;
+		startConversation({ screen: "notification" });
+		send(ask);
+	}, [ask, available, send]);
 	return (
 		<KeyboardAvoidingView
 			behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -31,10 +41,7 @@ export function AssistantScreen() {
 					accessibilityRole="button"
 					accessibilityLabel="Past chats"
 					onPress={() => router.push("/assistant/history")}
-					style={[
-						styles.pill,
-						{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-					]}
+					style={[styles.pill, { backgroundColor: colors.bgSurface }]}
 				>
 					<Icon name="Filled/Sparkle" size={16} color={colors.accentDefault} />
 					<PoText variant="text14Medium" numberOfLines={1} style={styles.title}>
@@ -65,7 +72,6 @@ const styles = StyleSheet.create({
 		gap: 8,
 		paddingHorizontal: 12,
 		borderRadius: 999,
-		borderWidth: 1,
 	},
 	title: { flexShrink: 1 },
 });

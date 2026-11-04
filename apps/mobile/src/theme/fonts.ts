@@ -1,10 +1,9 @@
 import { AmiriQuran_400Regular } from "@expo-google-fonts/amiri-quran";
-import { JetBrainsMono_400Regular } from "@expo-google-fonts/jetbrains-mono";
 import type { TextStyleToken } from "@personal-os/tokens";
 import { Platform, type TextStyle } from "react-native";
 
 /** Fonts loaded at startup with `useFonts(poFontAssets)`. */
-export const poFontAssets = { JetBrainsMono_400Regular, AmiriQuran_400Regular };
+export const poFontAssets = { AmiriQuran_400Regular };
 
 const sansFamily = Platform.select({
 	// SF Pro is the iOS system font, so no family is needed there.
@@ -21,20 +20,20 @@ const sansMediumFamily = Platform.select({
 
 export type PoTextStyle = Pick<
 	TextStyle,
-	"fontFamily" | "fontSize" | "lineHeight" | "letterSpacing" | "fontWeight" | "textTransform"
+	| "fontFamily"
+	| "fontSize"
+	| "lineHeight"
+	| "letterSpacing"
+	| "fontWeight"
+	| "textTransform"
+	| "fontVariant"
 >;
 
 /** Converts a PO text-style token into a React Native text style. */
 export function toTextStyle(token: TextStyleToken): PoTextStyle {
 	const isMedium = token.weight === "medium";
 	const fontFamily =
-		token.family === "quran"
-			? "AmiriQuran_400Regular"
-			: token.family === "mono"
-				? "JetBrainsMono_400Regular"
-				: isMedium
-					? sansMediumFamily
-					: sansFamily;
+		token.family === "quran" ? "AmiriQuran_400Regular" : isMedium ? sansMediumFamily : sansFamily;
 
 	return {
 		fontFamily,
@@ -44,5 +43,6 @@ export function toTextStyle(token: TextStyleToken): PoTextStyle {
 		// Figma uses SF Pro Medium (510); 500 is the closest native weight.
 		fontWeight: isMedium && Platform.OS !== "android" ? "500" : "400",
 		textTransform: token.uppercase ? "uppercase" : "none",
+		...(token.tabular ? { fontVariant: ["tabular-nums" as const] } : {}),
 	};
 }

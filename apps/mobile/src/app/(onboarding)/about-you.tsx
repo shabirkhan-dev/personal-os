@@ -33,7 +33,7 @@ export default function AboutYouScreen() {
 			step={1}
 			route={onboardingRoutes.aboutYou}
 			title="Tell us about you"
-			body={["So the AI can plan days that fit you."]}
+			body={["So your days are planned around you."]}
 			canContinue={name.trim().length > 0}
 		>
 			<View style={styles.form}>
@@ -58,8 +58,7 @@ export default function AboutYouScreen() {
 							styles.field,
 							{
 								color: colors.textPrimary,
-								backgroundColor: colors.bgSurface,
-								borderColor: focused ? colors.textSecondary : colors.borderDefault,
+								backgroundColor: focused ? colors.bgHover : colors.bgSurface,
 							},
 						]}
 					/>
@@ -87,8 +86,8 @@ export default function AboutYouScreen() {
 }
 
 const styles = StyleSheet.create({
-	form: { gap: 18 },
+	form: { gap: 20 },
 	group: { gap: 8 },
-	field: { height: 56, borderRadius: 28, borderWidth: 1, paddingHorizontal: 20 },
+	field: { height: 56, borderRadius: 28, paddingHorizontal: 20 },
 	gap14: { height: 14 },
 });

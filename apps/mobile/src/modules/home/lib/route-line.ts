@@ -10,6 +10,10 @@ const MODULE_WORDS: readonly [ModuleId, RegExp][] = [
 		/\b(pray|prayed|prayer|namaz|salah|salat|fajr|fajar|dhuhr|zuhr|asr|maghrib|isha|quran|recit\w*|tasbih|dhikr|qibla|zakat|dua|ayah|surah|allah|imam|mosque|masjid|jamatkhana)\b/,
 	],
 	[
+		"health",
+		/\b(bp|blood pressure|sugar|glucose|spo2|oxygen|pulse|heart rate|hrv|temperature|fever|medicine|tablet|pills?|headache|migraine|symptoms?|checkup|doctor|dentist|dizzy)\b|\d{2,3}\s*\/\s*\d{2,3}/,
+	],
+	[
 		"career",
 		/\b(job|jobs|applied|apply|application|interview|recruiter|offer|cv|resume|hiring|role)\b/,
 	],

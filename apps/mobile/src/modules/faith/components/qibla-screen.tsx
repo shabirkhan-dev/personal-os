@@ -1,6 +1,7 @@
 import * as Location from "expo-location";
 import { useEffect, useRef, useState } from "react";
-import { Alert, Platform, StyleSheet, View } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
+import { showDialog } from "@/components/ui/dialog";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import Svg, { Circle, G, Line, Path, Polygon, Text as SvgText } from "react-native-svg";
 import { EmptyCard, MetaChip, ScreenTitle } from "@/components/module-ui";
@@ -247,7 +248,6 @@ export function QiblaScreen() {
 					style={[
 						styles.kaabaRing,
 						{
-							borderColor: colors.borderDefault,
 							backgroundColor: aligned ? colors.statusSuccessSubtle : colors.statusCautionSubtle,
 						},
 					]}
@@ -318,7 +318,7 @@ export function QiblaScreen() {
 					icon="Settings"
 					label="Calibrate"
 					onPress={() =>
-						Alert.alert(
+						showDialog(
 							"Calibrate the compass",
 							"Move your phone in a slow figure 8 a few times, away from metal, magnets and other devices.",
 						)
@@ -346,11 +346,11 @@ const styles = StyleSheet.create({
 		width: 116,
 		height: 116,
 		borderRadius: 58,
-		borderWidth: 1,
+
 		alignItems: "center",
 		justifyContent: "center",
 	},
-	meter: { gap: 10, paddingHorizontal: 12 },
+	meter: { gap: 12, paddingHorizontal: 12 },
 	track: { height: 6, borderRadius: 3, justifyContent: "center" },
 	mid: { position: "absolute", left: "50%", width: 2, height: 20, marginLeft: -1 },
 	knob: { position: "absolute", width: 14, height: 14, borderRadius: 7, marginLeft: -7 },

@@ -195,7 +195,7 @@ export function PlanScreen() {
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	free: { gap: 4, padding: 14, borderRadius: 22 },
+	free: { gap: 4, padding: 16, borderRadius: 16 },
 	sheet: { gap: 12 },
 	chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 });

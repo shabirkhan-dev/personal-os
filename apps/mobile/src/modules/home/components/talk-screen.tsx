@@ -26,6 +26,7 @@ const LISTENERS: ReadonlySet<ModuleId> = new Set<ModuleId>([
 	"daily-life",
 	"finance",
 	"wishlist",
+	"health",
 ]);
 
 /**
@@ -129,6 +130,6 @@ const styles = StyleSheet.create({
 	root: { flex: 1, paddingHorizontal: 16 },
 	head: { flexDirection: "row", paddingBottom: 24 },
 	body: { gap: 16 },
-	pick: { gap: 10 },
+	pick: { gap: 12 },
 	chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 });

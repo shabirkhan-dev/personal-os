@@ -1,26 +1,27 @@
 import type { ImageSourcePropType } from "react-native";
+import { appPhoto } from "@/lib/photos/app-photo";
 
-/** The recipe photos (from the Figma "Food" frames), bundled with the app. */
+/** The recipe photos (from the Figma "Food" frames), served from R2 through the API (`appPhoto`). */
 export const RECIPE_IMAGES: Record<string, ImageSourcePropType> = {
-	"chicken-karahi": require("../../../../assets/food/chicken-karahi.jpg"),
-	"chicken-pulao": require("../../../../assets/food/chicken-pulao.jpg"),
-	"chana-masala": require("../../../../assets/food/chana-masala.jpg"),
-	"daal-chawal": require("../../../../assets/food/daal-chawal.jpg"),
-	"home-chicken-curry": require("../../../../assets/food/home-chicken-curry.jpg"),
-	"chicken-tikka-plate": require("../../../../assets/food/chicken-tikka-plate.jpg"),
-	"desi-omelette": require("../../../../assets/food/desi-omelette.jpg"),
-	"egg-paratha-chai": require("../../../../assets/food/egg-paratha-chai.jpg"),
-	"milk-oats": require("../../../../assets/food/milk-oats.jpg"),
-	"egg-toast": require("../../../../assets/food/egg-toast.jpg"),
-	"lassi-boiled-eggs": require("../../../../assets/food/lassi-boiled-eggs.jpg"),
-	"banana-pb-shake": require("../../../../assets/food/banana-pb-shake.jpg"),
-	"yogurt-fruit-bowl": require("../../../../assets/food/yogurt-fruit-bowl.jpg"),
-	"fruit-platter": require("../../../../assets/food/fruit-platter.jpg"),
-	"apricots-walnuts": require("../../../../assets/food/apricots-walnuts.jpg"),
+	"chicken-karahi": appPhoto("food/chicken-karahi.webp"),
+	"chicken-pulao": appPhoto("food/chicken-pulao.webp"),
+	"chana-masala": appPhoto("food/chana-masala.webp"),
+	"daal-chawal": appPhoto("food/daal-chawal.webp"),
+	"home-chicken-curry": appPhoto("food/home-chicken-curry.webp"),
+	"chicken-tikka-plate": appPhoto("food/chicken-tikka-plate.webp"),
+	"desi-omelette": appPhoto("food/desi-omelette.webp"),
+	"egg-paratha-chai": appPhoto("food/egg-paratha-chai.webp"),
+	"milk-oats": appPhoto("food/milk-oats.webp"),
+	"egg-toast": appPhoto("food/egg-toast.webp"),
+	"lassi-boiled-eggs": appPhoto("food/lassi-boiled-eggs.webp"),
+	"banana-pb-shake": appPhoto("food/banana-pb-shake.webp"),
+	"yogurt-fruit-bowl": appPhoto("food/yogurt-fruit-bowl.webp"),
+	"fruit-platter": appPhoto("food/fruit-platter.webp"),
+	"apricots-walnuts": appPhoto("food/apricots-walnuts.webp"),
 };
 
 /** Wider crops for a recipe's header. */
 export const RECIPE_HEROES: Record<string, ImageSourcePropType> = {
-	"chicken-karahi": require("../../../../assets/food/chicken-karahi-hero.jpg"),
-	"egg-paratha-chai": require("../../../../assets/food/egg-paratha-chai-hero.jpg"),
+	"chicken-karahi": appPhoto("food/chicken-karahi-hero.webp"),
+	"egg-paratha-chai": appPhoto("food/egg-paratha-chai-hero.webp"),
 };

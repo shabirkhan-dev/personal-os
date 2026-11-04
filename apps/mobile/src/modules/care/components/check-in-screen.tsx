@@ -93,9 +93,7 @@ export function CheckInScreen() {
 											}}
 											style={[
 												styles.score,
-												on
-													? { backgroundColor: bg, borderColor: colors[tone] }
-													: { backgroundColor: colors.bgSubtle, borderColor: colors.bgSubtle },
+												on ? { backgroundColor: bg } : { backgroundColor: colors.bgSubtle },
 											]}
 										>
 											<PoText variant="row15" tone={on ? tone : "textTertiary"}>
@@ -143,14 +141,14 @@ export function CheckInScreen() {
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	metric: { gap: 10, paddingVertical: 6 },
+	metric: { gap: 12, paddingVertical: 8 },
 	head: { flexDirection: "row", alignItems: "center" },
-	scale: { flexDirection: "row", gap: 6 },
+	scale: { flexDirection: "row", gap: 8 },
 	score: {
 		flex: 1,
 		height: 44,
 		borderRadius: 14,
-		borderWidth: 1.5,
+
 		alignItems: "center",
 		justifyContent: "center",
 	},

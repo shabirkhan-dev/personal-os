@@ -1,4 +1,3 @@
-import { stroke } from "@personal-os/tokens";
 import { type ReactNode, useEffect } from "react";
 import { Pressable, type StyleProp, StyleSheet, type ViewStyle } from "react-native";
 import Animated, {
@@ -21,15 +20,12 @@ export type SelectCardProps = {
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-/**
- * Selectable card. Selected = bg/surface with a 1.5px accent border and no tinted
- * fill; unselected keeps the 1px border/default hairline.
- */
+/** Selectable card: no outline; selected fills with the accent tint. */
 export function SelectCard({
 	selected,
 	onPress,
 	children,
-	radius = 30,
+	radius = 20,
 	style,
 	accessibilityLabel,
 }: SelectCardProps) {
@@ -41,12 +37,11 @@ export function SelectCard({
 	}, [selected, progress]);
 
 	const animatedStyle = useAnimatedStyle(() => ({
-		borderColor: interpolateColor(
+		backgroundColor: interpolateColor(
 			progress.value,
 			[0, 1],
-			[colors.borderDefault, colors.accentDefault],
+			[colors.bgSurface, colors.accentSubtle],
 		),
-		borderWidth: stroke.hairline + progress.value * (stroke.selected - stroke.hairline),
 	}));
 
 	return (
@@ -62,12 +57,7 @@ export function SelectCard({
 						}
 					: undefined
 			}
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderRadius: radius },
-				animatedStyle,
-				style,
-			]}
+			style={[styles.card, { borderRadius: radius }, animatedStyle, style]}
 		>
 			{children}
 		</AnimatedPressable>

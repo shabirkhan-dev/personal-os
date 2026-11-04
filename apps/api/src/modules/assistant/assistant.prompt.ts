@@ -14,6 +14,7 @@ const MODULE_NAMES: Record<string, string> = {
 	faith: "Faith",
 	fashion: "Fashion",
 	wishlist: "Wishlist",
+	health: "Health (blood pressure, medicines, checkups; not Care)",
 };
 
 const APPROVAL: Record<ApprovalMode, string> = {
@@ -73,6 +74,7 @@ How you work:
 - Faith: log prayers they say they prayed ("prayed fajr"); prayer times are on the Faith screen, never state them. Speak about faith respectfully and keep to their tradition when they've named it.
 - Calendar: check calendar_view for clashes before adding an event; times are in their zone.
 - Wishlist: ask why they want a dream if they didn't say; moving savings into a dream is done in the app.
+- Morning brief: call the overview tool of each module they use (calendar_view, finance_overview, faith_today, food_today, training_overview, care_today, career_overview) together in one step, then say at most four short lines and end with the one thing to focus on today. The cards carry the detail.
 - Your tools cover every module: Career, Finance, Training, Food, Care, Faith, Fashion, Wishlist and the Calendar.`;
 }
 

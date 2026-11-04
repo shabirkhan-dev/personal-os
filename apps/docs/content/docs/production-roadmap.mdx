@@ -68,12 +68,15 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
   AHA and ADA bands, a daily readiness score against your own 30-day normal, medicines with daily
   reminders, Take or Skip, adherence and refill warnings, checkups that repeat on their own, lab
   results against their ranges, symptoms with a short-sleep pattern check, a health profile (blood
-  group, allergies, conditions, emergency contact, doctor) and Insights. Synced through the
-  record store.
-- Phone health data: Health Connect on Android (steps, sleep, resting heart rate, HRV, oxygen,
+  group, allergies, conditions, emergency contact, doctor, step and sleep goals) and Insights.
+  Medicines and supplements are kept apart, each with its form, what it's for, food timing and a
+  photo of the pack; Records keeps photos of prescriptions, reports, scans and vaccine cards. The
+  home shows today's sleep, steps and heart against your goals and a week's trend on each vital.
+  Synced through the record store; photos upload to R2.
+- Phone health data: Health Connect on Android (steps, sleep, all-day and resting heart rate, HRV, oxygen,
   blood pressure, blood sugar, temperature and weight from Samsung Health, Fitbit, Garmin, Oura
   and others) and Apple Health on iPhone (written, not yet run on a device), pulled for the last
-  two weeks when Health opens; and the assistant's Health tools (view, log a reading, mark a dose,
+  30 days when Health opens, with a summary of what each sync found; and the assistant's Health tools (view, log a reading, mark a dose,
   add a checkup, note a symptom).
 - Voice in and out on the phone behind one swappable layer (`src/lib/voice`), and Talk to OS
   (`personalos://listen`), which opens listening and hands the line to the right module.

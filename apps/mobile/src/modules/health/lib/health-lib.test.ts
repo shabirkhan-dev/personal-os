@@ -79,8 +79,13 @@ describe("health insights", () => {
 			medicines: [
 				{
 					id: "m",
+					type: "medicine",
 					name: "Amlodipine",
 					dose: "5 mg",
+					form: "tablet",
+					purpose: "",
+					withFood: "any",
+					photo: null,
 					times: [480],
 					stock: 3,
 					active: true,

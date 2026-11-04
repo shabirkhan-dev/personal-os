@@ -8,7 +8,18 @@ import { TextField } from "@/components/ui/text-field";
 import { haptics } from "@/lib/haptics";
 import { saveProfile } from "../data/health-actions";
 import { useHealth } from "../hooks/use-health";
-import { BLOOD_GROUPS, type BloodGroup, type Contact } from "../lib/health-model";
+import { BLOOD_GROUPS, type BloodGroup, type Contact, emptyProfile } from "../lib/health-model";
+
+const STEP_GOALS = ["5000", "8000", "10000", "12000"].map((value) => ({
+	value,
+	label: Number(value).toLocaleString("en"),
+}));
+const SLEEP_GOALS = [
+	{ value: "420", label: "7 h" },
+	{ value: "450", label: "7 h 30" },
+	{ value: "480", label: "8 h" },
+	{ value: "540", label: "9 h" },
+];
 import { Card, CardHead } from "./health-cards";
 import { HealthScreen } from "./health-screen";
 
@@ -36,6 +47,8 @@ export function HealthProfileScreen() {
 	const [doctorName, setDoctorName] = useState("");
 	const [doctorPhone, setDoctorPhone] = useState("");
 	const [notes, setNotes] = useState("");
+	const [stepGoal, setStepGoal] = useState(String(emptyProfile.stepGoal));
+	const [sleepGoal, setSleepGoal] = useState(String(emptyProfile.sleepGoal));
 	const [notice, setNotice] = useState<string | null>(null);
 
 	useEffect(() => {
@@ -48,6 +61,8 @@ export function HealthProfileScreen() {
 		setDoctorName(profile.doctor?.name ?? "");
 		setDoctorPhone(profile.doctor?.phone ?? "");
 		setNotes(profile.notes);
+		setStepGoal(String(profile.stepGoal));
+		setSleepGoal(String(profile.sleepGoal));
 	}, [loading, profile]);
 
 	const save = async () => {
@@ -60,6 +75,8 @@ export function HealthProfileScreen() {
 				emergency: contact(emergencyName, emergencyPhone),
 				doctor: contact(doctorName, doctorPhone),
 				notes: notes.trim(),
+				stepGoal: Number(stepGoal),
+				sleepGoal: Number(sleepGoal),
 			});
 			haptics.success();
 			setNotice("Saved.");
@@ -72,6 +89,16 @@ export function HealthProfileScreen() {
 	return (
 		<HealthScreen>
 			<ScreenTitle eyebrow="Kept on your phone and in your backup" title="Health profile" />
+			<Card>
+				<CardHead title="Daily goals" />
+				<ChoiceChips label="Steps" options={STEP_GOALS} value={stepGoal} onChange={setStepGoal} />
+				<ChoiceChips
+					label="Sleep"
+					options={SLEEP_GOALS}
+					value={sleepGoal}
+					onChange={setSleepGoal}
+				/>
+			</Card>
 			<Card>
 				<CardHead title="Blood group" />
 				<ChoiceChips

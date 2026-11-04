@@ -3,6 +3,7 @@ import {
 	parseCheckup,
 	parseDoseLog,
 	parseHealthProfile,
+	parseHealthRecord,
 	parseLabResult,
 	parseMedicine,
 	parseReading,
@@ -17,3 +18,4 @@ export const healthMedicines = defineCollection("health-medicines", parseMedicin
 export const healthDoses = defineCollection("health-doses", parseDoseLog);
 export const healthSymptoms = defineCollection("health-symptoms", parseSymptom);
 export const healthProfile = defineCollection("health-profile", parseHealthProfile);
+export const healthRecords = defineCollection("health-records", parseHealthRecord);

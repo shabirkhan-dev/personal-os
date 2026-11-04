@@ -8,6 +8,7 @@ export const healthRoutes = {
 	medicines: () => router.push("/health/medicines"),
 	checkups: () => router.push("/health/checkups"),
 	labs: () => router.push("/health/labs"),
+	records: () => router.push("/health/records"),
 	symptoms: () => router.push("/health/symptoms"),
 	profile: () => router.push("/health/profile"),
 	insights: () => router.push("/health/insights"),

@@ -74,9 +74,10 @@ export const MODULE_SECTIONS: Record<string, readonly Section[]> = {
 	],
 	Health: [
 		{ label: "Vitals", href: "/health/vitals" },
-		{ label: "Medicines", href: "/health/medicines" },
+		{ label: "Medicines and supplements", href: "/health/medicines" },
 		{ label: "Checkups", href: "/health/checkups" },
 		{ label: "Lab results", href: "/health/labs" },
+		{ label: "Records", href: "/health/records" },
 		{ label: "Symptoms", href: "/health/symptoms" },
 		{ label: "Health profile", href: "/health/profile" },
 	],

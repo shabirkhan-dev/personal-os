@@ -284,6 +284,7 @@ export function AssistantChat() {
 				onContentSizeChange={() => scroll.current?.scrollToEnd({ animated: true })}
 				contentContainerStyle={styles.list}
 				keyboardShouldPersistTaps="handled"
+				showsVerticalScrollIndicator={false}
 			>
 				{messages.length === 0 ? (
 					<View style={styles.empty}>

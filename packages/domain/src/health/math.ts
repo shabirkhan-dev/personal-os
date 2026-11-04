@@ -118,6 +118,36 @@ export function onDay(
 	);
 }
 
+/** Totals the store keeps one of per day; the rest are averaged over the day. */
+const DAILY_TOTALS: ReadonlySet<ReadingKind> = new Set(["steps", "sleep"]);
+
+export type DayValue = { day: string; value: number | null };
+
+/**
+ * One value per day for the `days` up to today, oldest first, for a small trend chart: the day's
+ * total for steps and sleep, the day's average for everything else (systolic for blood pressure).
+ */
+export function daily(
+	readings: readonly Reading[],
+	kind: ReadingKind,
+	now: Date,
+	days: number,
+): DayValue[] {
+	const byDay = new Map<string, Reading[]>();
+	for (const reading of recent(readings, kind, now, days)) {
+		const key = dayKey(new Date(reading.at));
+		byDay.set(key, [...(byDay.get(key) ?? []), reading]);
+	}
+	return Array.from({ length: days }, (_, index) => {
+		const day = dayKey(addDays(now, index - (days - 1)));
+		const list = byDay.get(day) ?? [];
+		const value = DAILY_TOTALS.has(kind)
+			? (list[0]?.value ?? null)
+			: average(list.map((reading) => reading.value));
+		return { day, value: value === null ? null : Math.round(value * 10) / 10 };
+	});
+}
+
 // --- readiness ----------------------------------------------------------------------------------
 
 export type Readiness = {

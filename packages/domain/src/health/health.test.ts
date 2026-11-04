@@ -4,6 +4,7 @@ import {
 	adherence,
 	baseline,
 	bpBand,
+	daily,
 	daysLeft,
 	doseId,
 	dosesOn,
@@ -18,6 +19,7 @@ import {
 	type Medicine,
 	parseCheckup,
 	parseHealthProfile,
+	parseHealthRecord,
 	parseMedicine,
 	parseReading,
 	type Reading,
@@ -25,6 +27,7 @@ import {
 } from "./model";
 
 const now = new Date(2026, 10, 4, 9, 0);
+const when = (day: string, hour: number) => new Date(`${day}T${hour}:00:00`).toISOString();
 const at = (daysAgo: number, hour = 8) => new Date(2026, 10, 4 - daysAgo, hour).toISOString();
 
 describe("health model", () => {
@@ -43,7 +46,14 @@ describe("health model", () => {
 	test("parses medicines, checkups and the profile defensively", () => {
 		const medicine = parseMedicine({ id: "m", name: "Metformin", times: [1200, 480, 480, -5] });
 		expect(medicine?.times).toEqual([480, 1200]);
-		expect(medicine?.active).toBe(true);
+		expect(medicine).toMatchObject({ active: true, type: "medicine", form: "tablet", photo: null });
+		expect(parseMedicine({ id: "s", name: "Vitamin D", type: "supplement" })?.type).toBe(
+			"supplement",
+		);
+		expect(parseHealthRecord({ id: "r", on: "2026-11-01", kind: "prescription" })?.title).toBe(
+			"Prescription",
+		);
+		expect(parseHealthRecord({ id: "r", on: "later" })).toBeNull();
 		expect(parseCheckup({ id: "c", on: "2026-12-01", kind: "dentist" })?.title).toBe("Dentist");
 		expect(parseCheckup({ id: "c", on: "soon" })).toBeNull();
 		const profile = parseHealthProfile({
@@ -51,7 +61,11 @@ describe("health model", () => {
 			bloodGroup: "Z",
 			allergies: ["Peanuts", ""],
 		});
-		expect(profile).toMatchObject({ bloodGroup: "unknown", allergies: ["Peanuts"] });
+		expect(profile).toMatchObject({
+			bloodGroup: "unknown",
+			allergies: ["Peanuts"],
+			stepGoal: 8_000,
+		});
 	});
 });
 
@@ -150,8 +164,13 @@ describe("health math", () => {
 	test("tracks today's doses, adherence and refills", () => {
 		const metformin: Medicine = {
 			id: "m",
+			type: "medicine",
 			name: "Metformin",
 			dose: "500 mg",
+			form: "tablet",
+			purpose: "",
+			withFood: "with",
+			photo: null,
 			times: [8 * 60, 20 * 60],
 			stock: 9,
 			active: true,
@@ -214,5 +233,50 @@ describe("health math", () => {
 		const link = shortSleepLink(symptoms, sleep, "headache");
 		expect(link?.short).toBeCloseTo(2 / 3);
 		expect(link?.rest).toBeCloseTo(1 / 3);
+	});
+
+	test("gives one value per day for a trend", () => {
+		const days = daily(
+			[
+				{
+					id: "a",
+					kind: "resting-hr",
+					value: 60,
+					value2: null,
+					at: when("2026-11-04", 10),
+					source: "manual",
+					context: null,
+					note: "",
+				},
+				{
+					id: "b",
+					kind: "resting-hr",
+					value: 64,
+					value2: null,
+					at: when("2026-11-04", 12),
+					source: "manual",
+					context: null,
+					note: "",
+				},
+				{
+					id: "c",
+					kind: "resting-hr",
+					value: 70,
+					value2: null,
+					at: when("2026-11-02", 10),
+					source: "manual",
+					context: null,
+					note: "",
+				},
+			],
+			"resting-hr",
+			now,
+			3,
+		);
+		expect(days).toEqual([
+			{ day: "2026-11-02", value: 70 },
+			{ day: "2026-11-03", value: null },
+			{ day: "2026-11-04", value: 62 },
+		]);
 	});
 });

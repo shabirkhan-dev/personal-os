@@ -51,12 +51,7 @@ export default function PlanRevealScreen() {
 				body={["Built from your answers. Change anything later."]}
 			/>
 			<View style={styles.gap18} />
-			<View
-				style={[
-					styles.day,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.day, { backgroundColor: colors.bgSurface }]}>
 				{rows.map((row, index) => (
 					<Animated.View
 						key={`${row.time}-${row.title}`}
@@ -89,10 +84,7 @@ export default function PlanRevealScreen() {
 					<Animated.View
 						key={tile.label}
 						entering={rise(450 + 80 * index)}
-						style={[
-							styles.goal,
-							{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-						]}
+						style={[styles.goal, { backgroundColor: colors.bgSurface }]}
 					>
 						<View style={[styles.tile28, { backgroundColor: colors[tile.tileTone] }]}>
 							<Icon name={tile.icon} size={14} color={colors[tile.iconTone]} />
@@ -130,7 +122,7 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 	},
 	goals: { flexDirection: "row", gap: 8 },
-	goal: { flex: 1, gap: 8, padding: 12, borderRadius: 16, borderWidth: 1 },
+	goal: { flex: 1, gap: 8, padding: 12, borderRadius: 16 },
 	tile28: {
 		width: 28,
 		height: 28,

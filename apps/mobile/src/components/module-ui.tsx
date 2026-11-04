@@ -38,7 +38,7 @@ export function ListCard({
 			style={[
 				styles.listCard,
 				title ? styles.listCardTitled : null,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
+				{ backgroundColor: colors.bgSurface },
 			]}
 		>
 			{title ? (
@@ -236,7 +236,7 @@ export function TimelineRow({
 		state === "done"
 			? { backgroundColor: colors.statusSuccess }
 			: state === "next"
-				? { borderWidth: 2, borderColor: colors.textPrimary }
+				? {}
 				: { backgroundColor: colors.borderDefault };
 	return (
 		<Pressable
@@ -279,9 +279,7 @@ export function TimelineRow({
 export function AiTip({ children }: { children: ReactNode }) {
 	const { colors } = usePoTheme();
 	return (
-		<View
-			style={[styles.tip, { backgroundColor: colors.bgSurface, borderColor: colors.borderDefault }]}
-		>
+		<View style={[styles.tip, { backgroundColor: colors.bgSurface }]}>
 			<View style={[styles.tipIcon, { backgroundColor: colors.statusVioletSubtle }]}>
 				<Icon name="Filled/Sparkle" size={16} color={colors.statusViolet} />
 			</View>
@@ -372,12 +370,7 @@ export function EmptyCard({
 }) {
 	const { colors } = usePoTheme();
 	return (
-		<View
-			style={[
-				styles.empty,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
+		<View style={[styles.empty, { backgroundColor: colors.bgSurface }]}>
 			<IconTile name={icon} tone="accentDefault" tile="accentSubtle" size={56} />
 			<PoText variant="title18">{title}</PoText>
 			<PoText variant="body15" tone="textSecondary" style={styles.center}>
@@ -410,8 +403,8 @@ export function FilterChip({
 			style={[
 				styles.filter,
 				selected
-					? { backgroundColor: colors.accentDefault, borderColor: colors.accentDefault }
-					: { backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
+					? { backgroundColor: colors.accentDefault }
+					: { backgroundColor: colors.bgSurface },
 			]}
 		>
 			<PoText variant="meta13" tone={selected ? "textOnAccent" : "textSecondary"}>
@@ -470,7 +463,6 @@ export function ActionPills({
 						styles.quickButton,
 						{
 							backgroundColor: pressed ? colors.bgHover : colors.bgSurface,
-							borderColor: colors.borderDefault,
 						},
 					]}
 				>
@@ -509,10 +501,7 @@ export function ProgressCard({
 				haptics.tap();
 				onPress();
 			}}
-			style={[
-				styles.progressCard,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
+			style={[styles.progressCard, { backgroundColor: colors.bgSurface }]}
 		>
 			<View style={styles.progressHead}>
 				<IconTile name={icon.name} tone={icon.tone} tile={icon.tile} />
@@ -547,12 +536,7 @@ export function ResultCard({
 }) {
 	const { colors } = usePoTheme();
 	return (
-		<View
-			style={[
-				styles.result,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.accentDefault },
-			]}
-		>
+		<View style={[styles.result, { backgroundColor: colors.bgSurface }]}>
 			<View style={styles.eyebrowRow}>
 				<Icon name="Filled/Sparkle" size={14} color={colors.accentDefault} />
 				<PoText variant="eyebrow11" tone="textTertiary">
@@ -589,7 +573,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 		height: 44,
 		borderRadius: 22,
-		borderWidth: 1,
+
 		flexDirection: "row",
 		alignItems: "center",
 		justifyContent: "center",
@@ -602,7 +586,6 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 16,
 		paddingVertical: 14,
 		borderRadius: 20,
-		borderWidth: 1.5,
 	},
 	eyebrowRow: { flexDirection: "row", alignItems: "center", gap: 8 },
 	resultFooter: { flexDirection: "row", gap: 10 },
@@ -662,7 +645,7 @@ const styles = StyleSheet.create({
 		borderRadius: 20,
 	},
 	emptyActions: { alignSelf: "stretch", gap: 8, paddingTop: 6 },
-	filter: { paddingHorizontal: 14, paddingVertical: 9, borderRadius: 20, borderWidth: 1 },
+	filter: { paddingHorizontal: 14, paddingVertical: 9, borderRadius: 20 },
 	title: { gap: 10, paddingHorizontal: 4 },
 	chips: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
 	footer: { flexDirection: "row", gap: 10 },

@@ -234,12 +234,7 @@ export function TasbihScreen() {
 			</Pressable>
 
 			<SectionLabel>{`Your sequence · ${sequence.length} sets`}</SectionLabel>
-			<View
-				style={[
-					styles.sequence,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.sequence, { backgroundColor: colors.bgSurface }]}>
 				{sequence.map((item, index) => {
 					const done = (live[item.id] ?? 0) >= item.target;
 					const current = item.id === phrase?.id;

@@ -51,7 +51,7 @@ export function OsCard({ member, ready }: OsCardProps) {
 		<View
 			style={[
 				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
+				{ backgroundColor: colors.bgSurface },
 				toShadowStyle(elevation.floating),
 			]}
 		>
@@ -81,7 +81,7 @@ export function OsCard({ member, ready }: OsCardProps) {
 						toShadowStyle(elevation.pocket),
 					]}
 				>
-					<View style={[styles.stitch, { borderColor: colors.borderDefault }]}>
+					<View style={[styles.stitch, {}]}>
 						<View style={styles.who}>
 							<Avatar name={answers.name} size={52} />
 							<View style={styles.whoText}>
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
 		bottom: 12,
 		padding: 16,
 		borderRadius: 16,
-		borderWidth: 1.5,
+
 		borderStyle: "dashed",
 		justifyContent: "space-between",
 	},

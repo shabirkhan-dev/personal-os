@@ -255,12 +255,7 @@ function Stat({
 }) {
 	const { colors } = usePoTheme();
 	return (
-		<View
-			style={[
-				styles.stat,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
+		<View style={[styles.stat, { backgroundColor: colors.bgSurface }]}>
 			<PoText variant="meta13" tone="textSecondary">
 				{label}
 			</PoText>

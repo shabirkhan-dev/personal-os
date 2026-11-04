@@ -155,12 +155,7 @@ export default function VoiceScreen() {
 				onAction={() => finish(onboardingRoutes.aboutYou)}
 			/>
 			<View style={styles.gap20} />
-			<View
-				style={[
-					styles.listening,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.listening, { backgroundColor: colors.bgSurface }]}>
 				<View
 					style={[
 						styles.dot8,
@@ -205,10 +200,7 @@ export default function VoiceScreen() {
 								<Animated.View
 									key={chip.id}
 									entering={pop()}
-									style={[
-										styles.fact,
-										{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-									]}
+									style={[styles.fact, { backgroundColor: colors.bgSurface }]}
 								>
 									<Checkbox checked size={24} />
 									<View>
@@ -224,11 +216,7 @@ export default function VoiceScreen() {
 										accessibilityRole="button"
 										accessibilityLabel={`Add ${chip.value}`}
 										onPress={() => onFact(chip)}
-										style={[
-											styles.fact,
-											styles.missing,
-											{ backgroundColor: colors.bgApp, borderColor: colors.textTertiary },
-										]}
+										style={[styles.fact, styles.missing, { backgroundColor: colors.bgApp }]}
 									>
 										<View style={[styles.help, { backgroundColor: colors.bgSubtle }]}>
 											<Icon name="Help" size={14} color={colors.textSecondary} />
@@ -261,7 +249,6 @@ export default function VoiceScreen() {
 										styles.genderOption,
 										{
 											backgroundColor: pressed ? colors.bgHover : colors.bgSurface,
-											borderColor: colors.borderDefault,
 										},
 									]}
 								>
@@ -289,12 +276,7 @@ function Blocked({ status, onRetry, onSettings }: BlockedProps) {
 				: "Something stopped the recording. Try again, or type your answers instead.";
 
 	return (
-		<View
-			style={[
-				styles.blocked,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
+		<View style={[styles.blocked, { backgroundColor: colors.bgSurface }]}>
 			<Icon name="Mic" size={20} color={colors.textSecondary} />
 			<PoText variant="body15" tone="textSecondary">
 				{copy}
@@ -314,12 +296,7 @@ function Recorder({ listening, levels, clock, onToggle }: RecorderProps) {
 	const { colors } = usePoTheme();
 
 	return (
-		<View
-			style={[
-				styles.recorder,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
+		<View style={[styles.recorder, { backgroundColor: colors.bgSurface }]}>
 			<View
 				style={[
 					styles.dot10,
@@ -380,7 +357,6 @@ const styles = StyleSheet.create({
 		paddingRight: 14,
 		paddingVertical: 7,
 		borderRadius: 16,
-		borderWidth: 1,
 	},
 	dot8: { width: 8, height: 8, borderRadius: 4 },
 	dot10: { width: 10, height: 10, borderRadius: 5 },
@@ -394,12 +370,11 @@ const styles = StyleSheet.create({
 		paddingRight: 14,
 		paddingVertical: 6,
 		borderRadius: 16,
-		borderWidth: 1,
 	},
 	missing: { borderStyle: "dashed" },
 	help: { width: 24, height: 24, borderRadius: 12, alignItems: "center", justifyContent: "center" },
 	genderRow: { flexDirection: "row", gap: 8, marginTop: 12 },
-	genderOption: { paddingHorizontal: 16, paddingVertical: 9, borderRadius: 18, borderWidth: 1 },
+	genderOption: { paddingHorizontal: 16, paddingVertical: 9, borderRadius: 18 },
 	blocked: { gap: 14, padding: 16, borderRadius: 20, alignItems: "flex-start" },
 	recorder: {
 		height: 64,
@@ -409,7 +384,6 @@ const styles = StyleSheet.create({
 		paddingLeft: 20,
 		paddingRight: 8,
 		borderRadius: 32,
-		borderWidth: 1,
 	},
 	wave: { flex: 1, flexDirection: "row", alignItems: "center", gap: 3, overflow: "hidden" },
 	bar: { width: 2, borderRadius: 1 },

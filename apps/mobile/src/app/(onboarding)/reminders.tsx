@@ -86,12 +86,7 @@ export default function RemindersScreen() {
 				</>
 			}
 		>
-			<View
-				style={[
-					styles.list,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.list, { backgroundColor: colors.bgSurface }]}>
 				{rows.map((row, index) => (
 					<View
 						key={row.id}

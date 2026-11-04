@@ -208,12 +208,7 @@ export function LogMealScreen() {
 			) : null}
 
 			{current.text ? (
-				<View
-					style={[
-						styles.said,
-						{ backgroundColor: colors.bgSurface, borderColor: colors.accentDefault },
-					]}
-				>
+				<View style={[styles.said, { backgroundColor: colors.bgSurface }]}>
 					<PoText variant="body15">{current.text}</PoText>
 					<View style={styles.status}>
 						<View
@@ -308,13 +303,7 @@ export function LogMealScreen() {
 						{ label: "Carbs", value: `${Math.round(totals.carbs)} g` },
 						{ label: "Fat", value: `${Math.round(totals.fat)} g` },
 					].map((total) => (
-						<View
-							key={total.label}
-							style={[
-								styles.total,
-								{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-							]}
-						>
+						<View key={total.label} style={[styles.total, { backgroundColor: colors.bgSurface }]}>
 							<PoText variant="eyebrow11" tone="textTertiary">
 								{total.label}
 							</PoText>
@@ -393,7 +382,7 @@ export function LogMealScreen() {
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	said: { gap: 8, padding: 16, borderRadius: 20, borderWidth: 1.5 },
+	said: { gap: 8, padding: 16, borderRadius: 20 },
 	status: { flexDirection: "row", alignItems: "center", gap: 6 },
 	dot: { width: 8, height: 8, borderRadius: 4 },
 	notice: { paddingHorizontal: 6 },
@@ -409,6 +398,6 @@ const styles = StyleSheet.create({
 	},
 	kcal: { minWidth: 72, textAlign: "right" },
 	totals: { flexDirection: "row", gap: 8 },
-	total: { flex: 1, gap: 4, padding: 12, borderRadius: 20, borderWidth: 1 },
+	total: { flex: 1, gap: 4, padding: 12, borderRadius: 20 },
 	slots: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 });

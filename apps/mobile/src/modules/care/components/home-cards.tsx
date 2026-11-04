@@ -31,8 +31,7 @@ export function Card({ children, accent = false }: { children: ReactNode; accent
 			style={[
 				styles.card,
 				{
-					backgroundColor: colors.bgSurface,
-					borderColor: accent ? colors.accentDefault : colors.borderDefault,
+					backgroundColor: accent ? colors.accentSubtle : colors.bgSurface,
 				},
 			]}
 		>
@@ -266,8 +265,6 @@ export function WeekCard({
 										? { backgroundColor: colors.statusSuccessSubtle }
 										: today
 											? {
-													borderWidth: 1.5,
-													borderColor: colors.accentDefault,
 													backgroundColor: colors.accentSubtle,
 												}
 											: null,

@@ -152,12 +152,7 @@ export function InterviewPrepScreen({ id }: { id?: string }) {
 					onDismiss={() => dismiss(job.key)}
 				/>
 			) : prep ? (
-				<View
-					style={[
-						styles.topics,
-						{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-					]}
-				>
+				<View style={[styles.topics, { backgroundColor: colors.bgSurface }]}>
 					<View style={styles.head}>
 						<PoText variant="title18" style={styles.flex}>
 							Topics
@@ -207,10 +202,7 @@ export function InterviewPrepScreen({ id }: { id?: string }) {
 					accessibilityRole="button"
 					accessibilityLabel={`Flashcards, ${deck.length} cards`}
 					onPress={() => careerRoutes.flashcards(app.id)}
-					style={[
-						styles.entry,
-						{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-					]}
+					style={[styles.entry, { backgroundColor: colors.bgSurface }]}
 				>
 					<IconTile name="Layers" tone="accentDefault" tile="accentSubtle" />
 					<View style={styles.flex}>
@@ -235,12 +227,7 @@ export function InterviewPrepScreen({ id }: { id?: string }) {
 			{prep && prep.questions.length > 0 ? (
 				<>
 					<SectionLabel>Questions to ask</SectionLabel>
-					<View
-						style={[
-							styles.questions,
-							{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-						]}
-					>
+					<View style={[styles.questions, { backgroundColor: colors.bgSurface }]}>
 						{prep.questions.map((question) => (
 							<PoText key={question} variant="body15" tone="textSecondary">
 								{question}

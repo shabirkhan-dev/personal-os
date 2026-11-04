@@ -23,7 +23,6 @@ export function ChipButton({ label, onPress }: { label: string; onPress?: () => 
 				styles.chip,
 				{
 					backgroundColor: pressed ? colors.bgHover : colors.bgSurface,
-					borderColor: colors.borderDefault,
 				},
 			]}
 		>
@@ -35,5 +34,5 @@ export function ChipButton({ label, onPress }: { label: string; onPress?: () => 
 }
 
 const styles = StyleSheet.create({
-	chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 18, borderWidth: 1 },
+	chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 18 },
 });

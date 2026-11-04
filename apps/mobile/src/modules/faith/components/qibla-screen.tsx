@@ -248,7 +248,6 @@ export function QiblaScreen() {
 					style={[
 						styles.kaabaRing,
 						{
-							borderColor: colors.borderDefault,
 							backgroundColor: aligned ? colors.statusSuccessSubtle : colors.statusCautionSubtle,
 						},
 					]}
@@ -347,7 +346,7 @@ const styles = StyleSheet.create({
 		width: 116,
 		height: 116,
 		borderRadius: 58,
-		borderWidth: 1,
+
 		alignItems: "center",
 		justifyContent: "center",
 	},

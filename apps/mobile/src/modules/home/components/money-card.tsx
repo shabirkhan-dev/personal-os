@@ -33,7 +33,6 @@ export function MoneyCard({ period, leftToSpend, hidden, onPress }: MoneyCardPro
 					styles.setup,
 					{
 						backgroundColor: pressed ? colors.bgHover : colors.bgSurface,
-						borderColor: colors.borderDefault,
 					},
 				]}
 			>
@@ -54,10 +53,7 @@ export function MoneyCard({ period, leftToSpend, hidden, onPress }: MoneyCardPro
 			accessibilityRole="button"
 			accessibilityLabel={`Finance, ${hidden ? "amount hidden" : `${parts.whole} left this month`}`}
 			onPress={onPress}
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
+			style={[styles.card, { backgroundColor: colors.bgSurface }]}
 		>
 			<View style={[styles.tab, { backgroundColor: colors.bgSubtle }]}>
 				<View style={styles.label}>
@@ -75,7 +71,7 @@ export function MoneyCard({ period, leftToSpend, hidden, onPress }: MoneyCardPro
 					toShadowStyle(elevation.pocket),
 				]}
 			>
-				<View style={[styles.stitch, { borderColor: colors.borderDefault }]}>
+				<View style={[styles.stitch, {}]}>
 					<PoText variant="meta13" tone="textSecondary">
 						Left to spend this month
 					</PoText>
@@ -135,7 +131,7 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 18,
 		paddingBottom: 20,
 		borderRadius: 16,
-		borderWidth: 1.5,
+
 		borderStyle: "dashed",
 	},
 });

@@ -72,10 +72,7 @@ export function PipelineCard({
 			accessibilityRole="button"
 			accessibilityLabel={`Pipeline, ${appliedThisWeek} of ${weeklyTarget} applied this week`}
 			onPress={onPress}
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
+			style={[styles.card, { backgroundColor: colors.bgSurface }]}
 		>
 			<View style={styles.head}>
 				<PoText variant="title18">Pipeline</PoText>
@@ -272,7 +269,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 		height: 44,
 		borderRadius: 22,
-		borderWidth: 1,
+
 		flexDirection: "row",
 		alignItems: "center",
 		justifyContent: "center",
@@ -291,7 +288,6 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 16,
 		paddingVertical: 14,
 		borderRadius: 20,
-		borderWidth: 1.5,
 	},
 	eyebrow: { flexDirection: "row", alignItems: "center", gap: 8 },
 	footer: { flexDirection: "row", gap: 10 },

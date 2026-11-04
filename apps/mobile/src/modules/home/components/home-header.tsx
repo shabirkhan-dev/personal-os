@@ -61,7 +61,7 @@ export function HomeHeader({
 					style={[
 						styles.round,
 						pickerOpen
-							? { backgroundColor: colors.bgInverse, borderColor: colors.bgInverse }
+							? { backgroundColor: colors.bgInverse }
 							: { backgroundColor: colors.bgSurface },
 					]}
 				>

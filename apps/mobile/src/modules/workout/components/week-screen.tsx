@@ -84,8 +84,7 @@ export function WeekScreen() {
 						style={[
 							styles.day,
 							{
-								backgroundColor: colors.bgSurface,
-								borderColor: isToday ? colors.accentDefault : colors.borderDefault,
+								backgroundColor: isToday ? colors.accentSubtle : colors.bgSurface,
 							},
 						]}
 					>
@@ -221,7 +220,6 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 14,
 		paddingVertical: 12,
 		borderRadius: 16,
-		borderWidth: 1,
 	},
 	name: { width: 36 },
 	bar: { width: 3, height: 32, borderRadius: 2 },

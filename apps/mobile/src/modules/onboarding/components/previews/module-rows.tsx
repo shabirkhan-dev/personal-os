@@ -62,7 +62,7 @@ export function ModuleRowsPreview() {
 					<View
 						style={[
 							styles.row,
-							{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
+							{ backgroundColor: colors.bgSurface },
 							row.dimmed ? styles.dimmed : null,
 						]}
 					>
@@ -97,7 +97,6 @@ const styles = StyleSheet.create({
 		paddingLeft: 8,
 		paddingRight: 18,
 		borderRadius: 32,
-		borderWidth: 1,
 	},
 	dimmed: { opacity: 0.45 },
 	tile: { width: 48, height: 48, borderRadius: 24, alignItems: "center", justifyContent: "center" },

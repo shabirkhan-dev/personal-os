@@ -200,12 +200,7 @@ export function ExerciseLibraryScreen() {
 				mine={mine}
 				onMine={setMine}
 			/>
-			<View
-				style={[
-					styles.card,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 				{list.map((exercise, index) => (
 					<ExerciseRow
 						key={exercise.id}

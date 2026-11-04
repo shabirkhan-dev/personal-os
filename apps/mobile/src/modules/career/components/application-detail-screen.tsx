@@ -257,12 +257,7 @@ export function ApplicationDetailScreen({ id }: { id: string }) {
 				{app.where ? <MetaChip icon="Clock" label={app.where} /> : null}
 			</ScreenTitle>
 
-			<View
-				style={[
-					styles.status,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.status, { backgroundColor: colors.bgSurface }]}>
 				<PoText variant="title18">Status</PoText>
 				{timeline.map((step, index) => (
 					<TimelineRow key={step.title} {...step} last={index === timeline.length - 1} />
@@ -314,10 +309,7 @@ export function ApplicationDetailScreen({ id }: { id: string }) {
 				accessibilityRole="button"
 				accessibilityLabel="Edit notes"
 				onPress={() => setSheet("edit")}
-				style={[
-					styles.notes,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
+				style={[styles.notes, { backgroundColor: colors.bgSurface }]}
 			>
 				<PoText variant="body15" tone={app.notes ? "textSecondary" : "textTertiary"}>
 					{app.notes || "Stack, people, what to mention. Notes shape the AI's nudges and prep."}

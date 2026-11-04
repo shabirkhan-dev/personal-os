@@ -135,9 +135,7 @@ export function CardStack({
 				style={[
 					styles.card,
 					{
-						backgroundColor: colors.bgSurface,
-						borderColor: review.flipped ? colors.statusSuccess : colors.borderDefault,
-						borderWidth: review.flipped ? 1.5 : 1,
+						backgroundColor: review.flipped ? colors.statusSuccessSubtle : colors.bgSurface,
 					},
 				]}
 			>

@@ -36,8 +36,7 @@ export function Card({ children, accent = false }: { children: ReactNode; accent
 			style={[
 				styles.card,
 				{
-					backgroundColor: colors.bgSurface,
-					borderColor: accent ? colors.accentDefault : colors.borderDefault,
+					backgroundColor: accent ? colors.accentSubtle : colors.bgSurface,
 				},
 			]}
 		>
@@ -88,10 +87,7 @@ export function TodayCard({
 		<Pressable
 			accessibilityRole="button"
 			onPress={onOpen}
-			style={[
-				styles.today,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
+			style={[styles.today, { backgroundColor: colors.bgSurface }]}
 		>
 			<TrainingImage photo={template.photo} size={60} radius={16} />
 			<View style={styles.flex}>
@@ -135,10 +131,7 @@ export function WeekDotsCard({
 		<Pressable
 			accessibilityRole="button"
 			onPress={onPress}
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
+			style={[styles.card, { backgroundColor: colors.bgSurface }]}
 		>
 			<CardHead title="This week" right={`Goal ${goal} sessions`} />
 			<View style={styles.week}>
@@ -156,7 +149,7 @@ export function WeekDotsCard({
 								cell.state === "done"
 									? { backgroundColor: colors.accentDefault }
 									: cell.state === "today"
-										? { borderWidth: 1.5, borderColor: colors.accentDefault }
+										? {}
 										: { backgroundColor: colors.bgSubtle },
 							]}
 						>
@@ -272,13 +265,7 @@ export function BestsRow({ bests }: { bests: readonly Best[] }) {
 			</PoText>
 			<View style={styles.bests}>
 				{bests.map((best) => (
-					<View
-						key={best.label}
-						style={[
-							styles.best,
-							{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-						]}
-					>
+					<View key={best.label} style={[styles.best, { backgroundColor: colors.bgSurface }]}>
 						<View style={styles.bestHead}>
 							<Icon name="Star" size={14} color={colors.statusCaution} />
 							<PoText variant="meta13" tone="textSecondary">
@@ -357,11 +344,7 @@ export function SetupCard({
 								size={88}
 								fill
 								radius={16}
-								style={
-									on
-										? { borderWidth: 2, borderColor: colors[SPORT_TONES[item.sport]] }
-										: { opacity: 0.55 }
-								}
+								style={on ? {} : { opacity: 0.55 }}
 							/>
 							<PoText variant="meta13" tone={on ? "textPrimary" : "textTertiary"}>
 								{SPORT_LABELS[item.sport]}
@@ -477,7 +460,7 @@ const styles = StyleSheet.create({
 	section: { gap: 8 },
 	label: { paddingHorizontal: 6 },
 	bests: { flexDirection: "row", gap: 8 },
-	best: { flex: 1, gap: 4, padding: 14, borderRadius: 16, borderWidth: 1 },
+	best: { flex: 1, gap: 4, padding: 14, borderRadius: 16 },
 	bestHead: { flexDirection: "row", alignItems: "center", gap: 6 },
 	tags: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
 	tag: { flexDirection: "row", alignItems: "center", gap: 6 },

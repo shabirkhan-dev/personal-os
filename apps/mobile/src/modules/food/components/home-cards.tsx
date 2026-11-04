@@ -31,8 +31,7 @@ export function Card({ children, accent = false }: { children: ReactNode; accent
 			style={[
 				styles.card,
 				{
-					backgroundColor: colors.bgSurface,
-					borderColor: accent ? colors.accentDefault : colors.borderDefault,
+					backgroundColor: accent ? colors.accentSubtle : colors.bgSurface,
 				},
 			]}
 		>
@@ -126,10 +125,7 @@ export function WeightCard({
 				haptics.tap();
 				onPress();
 			}}
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
+			style={[styles.card, { backgroundColor: colors.bgSurface }]}
 		>
 			<Eyebrow
 				left={
@@ -182,12 +178,7 @@ export function WaterCard({
 	const { colors } = usePoTheme();
 	const filled = Math.round(Math.min(1, targetMl > 0 ? ml / targetMl : 0) * 10);
 	return (
-		<View
-			style={[
-				styles.water,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
+		<View style={[styles.water, { backgroundColor: colors.bgSurface }]}>
 			<View style={[styles.drop, { backgroundColor: colors.accentSubtle }]}>
 				<Icon name="Drop" size={20} color={colors.accentDefault} />
 			</View>

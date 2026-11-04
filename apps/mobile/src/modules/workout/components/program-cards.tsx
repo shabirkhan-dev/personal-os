@@ -58,7 +58,6 @@ export function ProgramRow({
 				styles.row,
 				{
 					backgroundColor: colors.bgSurface,
-					borderColor: colors.borderDefault,
 				},
 			]}
 		>
@@ -95,10 +94,7 @@ export function ActiveProgramCard({
 		<Pressable
 			accessibilityRole="button"
 			onPress={onPress}
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
+			style={[styles.card, { backgroundColor: colors.bgSurface }]}
 		>
 			<View style={styles.head}>
 				<PoText variant="eyebrow11" tone="accentDefault">
@@ -127,7 +123,7 @@ export function ActiveProgramCard({
 export function ProgramPromptCard({ onPress }: { onPress: () => void }) {
 	const { colors } = usePoTheme();
 	return (
-		<View style={[styles.card, { backgroundColor: colors.bgSubtle, borderColor: colors.bgSubtle }]}>
+		<View style={[styles.card, { backgroundColor: colors.bgSubtle }]}>
 			<PoText variant="title18">Follow a program</PoText>
 			<PoText variant="meta13" tone="textSecondary">
 				Weeks with a goal, exercises that move up as you get stronger, built around your team days.

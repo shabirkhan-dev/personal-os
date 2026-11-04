@@ -49,7 +49,6 @@ export function PieceImage({
 
 /** The colour dot beside a piece's name. */
 export function Swatch({ colour, size = 10 }: { colour: Colour; size?: number }) {
-	const { colors } = usePoTheme();
 	return (
 		<View
 			style={{
@@ -57,8 +56,6 @@ export function Swatch({ colour, size = 10 }: { colour: Colour; size?: number })
 				height: size,
 				borderRadius: size / 2,
 				backgroundColor: swatches[colour],
-				borderWidth: colour === "white" || colour === "black" ? StyleSheet.hairlineWidth : 0,
-				borderColor: colors.borderStrong,
 			}}
 		/>
 	);

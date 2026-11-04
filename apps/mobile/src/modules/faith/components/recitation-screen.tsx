@@ -90,12 +90,7 @@ export function RecitationScreen() {
 			</ScreenTitle>
 
 			{timer.active ? (
-				<View
-					style={[
-						styles.timer,
-						{ backgroundColor: colors.bgSurface, borderColor: colors.statusViolet },
-					]}
-				>
+				<View style={[styles.timer, { backgroundColor: colors.bgSurface }]}>
 					<PoText variant="eyebrow11" tone="textTertiary">
 						{timer.runningSince === null ? "Paused" : "Reciting"}
 					</PoText>
@@ -143,12 +138,7 @@ export function RecitationScreen() {
 				/>
 			) : null}
 
-			<View
-				style={[
-					styles.week,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.week, { backgroundColor: colors.bgSurface }]}>
 				<View style={styles.row}>
 					<PoText variant="title18" style={styles.flex}>
 						This week
@@ -160,14 +150,7 @@ export function RecitationScreen() {
 				<Segments total={5} done={doneDays} doneTone="statusViolet" />
 				{week.map((day) => (
 					<View key={day.day} style={styles.dayRow}>
-						<View
-							style={[
-								styles.check,
-								day.done
-									? { backgroundColor: colors.accentDefault, borderColor: colors.accentDefault }
-									: { borderColor: colors.borderStrong },
-							]}
-						>
+						<View style={[styles.check, day.done ? { backgroundColor: colors.accentDefault } : {}]}>
 							{day.done ? <Icon name="Check bold" size={12} color={colors.textOnAccent} /> : null}
 						</View>
 						<View style={styles.flex}>
@@ -281,14 +264,14 @@ const styles = StyleSheet.create({
 	flex: { flex: 1 },
 	row: { flexDirection: "row", alignItems: "center", gap: 8 },
 	notice: { paddingHorizontal: 6 },
-	timer: { alignItems: "center", gap: 8, padding: 16, borderRadius: 20, borderWidth: 1.5 },
+	timer: { alignItems: "center", gap: 8, padding: 16, borderRadius: 20 },
 	week: { gap: 14, padding: 16, borderRadius: 20 },
 	dayRow: { flexDirection: "row", alignItems: "center", gap: 14 },
 	check: {
 		width: 22,
 		height: 22,
 		borderRadius: 11,
-		borderWidth: 1.5,
+
 		alignItems: "center",
 		justifyContent: "center",
 	},

@@ -31,12 +31,7 @@ export function StepperCard({
 	const { colors } = usePoTheme();
 
 	return (
-		<View
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
+		<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 			<View style={styles.top}>
 				<View style={[styles.tile, { backgroundColor: colors[tileTone] }]}>
 					<Icon name={icon} size={16} color={colors[iconTone]} />

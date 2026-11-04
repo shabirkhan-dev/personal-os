@@ -28,12 +28,7 @@ export function DateWheel({ value, onChange }: DateWheelProps) {
 	};
 
 	return (
-		<View
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
+		<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 			<View pointerEvents="none" style={[styles.band, { backgroundColor: colors.bgHover }]} />
 			<WheelColumn
 				items={DAYS}

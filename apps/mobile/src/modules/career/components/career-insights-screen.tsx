@@ -131,13 +131,7 @@ export function CareerInsightsScreen() {
 			{notes.map((note) => {
 				const text = noteText(note);
 				return (
-					<View
-						key={note.kind}
-						style={[
-							styles.card,
-							{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-						]}
-					>
+					<View key={note.kind} style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 						<View style={styles.eyebrow}>
 							<Icon name="Filled/Sparkle" size={14} color={colors.accentDefault} />
 							<PoText variant="eyebrow11" tone="textTertiary">
@@ -219,12 +213,7 @@ function Stat({
 }) {
 	const { colors } = usePoTheme();
 	return (
-		<View
-			style={[
-				styles.stat,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
+		<View style={[styles.stat, { backgroundColor: colors.bgSurface }]}>
 			<PoText variant="meta13" tone="textSecondary">
 				{label}
 			</PoText>

@@ -50,12 +50,7 @@ export function ZakatScreen() {
 		>
 			<ScreenTitle eyebrow={`Zakat · ${toHijri(now).year} AH`} title="Zakat" />
 
-			<View
-				style={[
-					styles.card,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 				<PoText variant="eyebrow11" tone="textTertiary">
 					Zakat due this year
 				</PoText>
@@ -129,12 +124,7 @@ export function ZakatScreen() {
 			</View>
 
 			<SectionLabel>Hawl · lunar year</SectionLabel>
-			<View
-				style={[
-					styles.card,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 				{since && dueOn ? (
 					<>
 						<View style={styles.dueRow}>
@@ -173,12 +163,7 @@ export function ZakatScreen() {
 			</View>
 
 			<SectionLabel>{`Paid this year · Rs ${lakhs(view.paid)} of ${lakhs(view.due)}`}</SectionLabel>
-			<View
-				style={[
-					styles.list,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.list, { backgroundColor: colors.bgSurface }]}>
 				{recent.map((payment) => (
 					<ListRow
 						key={payment.id}
@@ -217,7 +202,7 @@ export function ZakatScreen() {
 				<Pressable
 					accessibilityRole="button"
 					onPress={() => setPaying(view.left)}
-					style={[styles.addRow, { borderColor: colors.borderDefault }]}
+					style={[styles.addRow, {}]}
 				>
 					<Icon name="Line/Plus" size={16} color={colors.textSecondary} />
 					<PoText variant="meta13" tone="textSecondary">
@@ -450,7 +435,7 @@ const styles = StyleSheet.create({
 		height: 48,
 		marginTop: 8,
 		borderRadius: 24,
-		borderWidth: 1,
+
 		borderStyle: "dashed",
 	},
 	note: { flexDirection: "row", alignItems: "center", gap: 10, padding: 14, borderRadius: 20 },

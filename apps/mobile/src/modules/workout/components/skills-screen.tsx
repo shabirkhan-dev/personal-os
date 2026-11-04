@@ -111,10 +111,7 @@ export function SkillsScreen() {
 						key={skill.id}
 						accessibilityRole="button"
 						onPress={() => setOpen(skill)}
-						style={[
-							styles.skill,
-							{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-						]}
+						style={[styles.skill, { backgroundColor: colors.bgSurface }]}
 					>
 						<TrainingImage photo={skill.photo} size={64} radius={16} />
 						<View style={styles.flex}>
@@ -141,7 +138,7 @@ export function SkillsScreen() {
 			<Pressable
 				accessibilityRole="button"
 				onPress={() => setAdding(true)}
-				style={[styles.add, { borderColor: colors.borderStrong }]}
+				style={[styles.add, {}]}
 			>
 				<Icon name="Line/Plus" size={16} color={colors.textSecondary} />
 				<PoText variant="meta13" tone="textSecondary">
@@ -269,7 +266,7 @@ const styles = StyleSheet.create({
 		gap: 8,
 		height: 56,
 		borderRadius: 28,
-		borderWidth: 1,
+
 		borderStyle: "dashed",
 	},
 	sheet: { gap: 10 },

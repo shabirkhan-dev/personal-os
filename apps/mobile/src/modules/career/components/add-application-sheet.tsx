@@ -170,8 +170,7 @@ export function AddApplicationSheet({
 					style={[
 						styles.link,
 						{
-							backgroundColor: colors.bgSubtle,
-							borderColor: failed ? colors.statusDanger : "transparent",
+							backgroundColor: failed ? colors.statusDangerSubtle : colors.bgSubtle,
 						},
 					]}
 				>
@@ -307,7 +306,6 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 16,
 		paddingVertical: 14,
 		borderRadius: 16,
-		borderWidth: 1.5,
 	},
 	status: { flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 6, paddingTop: 4 },
 	help: { paddingHorizontal: 6 },

@@ -140,8 +140,7 @@ export function AskBar({
 							style={({ pressed }) => [
 								styles.chip,
 								{
-									borderColor: colors.borderDefault,
-									backgroundColor: pressed ? colors.bgHover : "transparent",
+									backgroundColor: pressed ? colors.bgHover : colors.bgSurface,
 								},
 							]}
 						>
@@ -170,5 +169,5 @@ const styles = StyleSheet.create({
 	input: { flex: 1, paddingVertical: 0 },
 	send: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" },
 	suggestions: { gap: 8 },
-	chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 18, borderWidth: 1 },
+	chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 18 },
 });

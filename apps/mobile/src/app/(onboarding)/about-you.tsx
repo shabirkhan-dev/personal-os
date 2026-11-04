@@ -58,8 +58,7 @@ export default function AboutYouScreen() {
 							styles.field,
 							{
 								color: colors.textPrimary,
-								backgroundColor: colors.bgSurface,
-								borderColor: focused ? colors.textSecondary : colors.borderDefault,
+								backgroundColor: focused ? colors.bgHover : colors.bgSurface,
 							},
 						]}
 					/>
@@ -89,6 +88,6 @@ export default function AboutYouScreen() {
 const styles = StyleSheet.create({
 	form: { gap: 18 },
 	group: { gap: 8 },
-	field: { height: 56, borderRadius: 28, borderWidth: 1, paddingHorizontal: 20 },
+	field: { height: 56, borderRadius: 28, paddingHorizontal: 20 },
 	gap14: { height: 14 },
 });

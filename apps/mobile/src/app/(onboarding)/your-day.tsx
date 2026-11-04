@@ -99,7 +99,6 @@ export default function YourDayScreen() {
 							styles.field,
 							{
 								backgroundColor: pressed ? colors.bgHover : colors.bgSurface,
-								borderColor: colors.borderDefault,
 							},
 						]}
 					>
@@ -127,8 +126,8 @@ export default function YourDayScreen() {
 									style={[
 										styles.day,
 										on
-											? { backgroundColor: colors.accentDefault, borderColor: colors.accentDefault }
-											: { backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
+											? { backgroundColor: colors.accentDefault }
+											: { backgroundColor: colors.bgSurface },
 									]}
 								>
 									<PoText variant="row15" tone={on ? "textOnAccent" : "textSecondary"}>
@@ -175,14 +174,13 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		paddingHorizontal: 20,
 		borderRadius: 28,
-		borderWidth: 1,
 	},
 	days: { flexDirection: "row", justifyContent: "space-between" },
 	day: {
 		width: 44,
 		height: 44,
 		borderRadius: 22,
-		borderWidth: 1,
+
 		alignItems: "center",
 		justifyContent: "center",
 	},

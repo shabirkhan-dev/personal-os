@@ -317,8 +317,8 @@ export function PrayerSetupSheet({
 							style={[
 								styles.prayerChip,
 								on
-									? { backgroundColor: colors.accentDefault, borderColor: colors.accentDefault }
-									: { backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
+									? { backgroundColor: colors.accentDefault }
+									: { backgroundColor: colors.bgSurface },
 							]}
 						>
 							<PoText variant="meta13" tone={on ? "textOnAccent" : "textSecondary"}>
@@ -422,5 +422,5 @@ const styles = StyleSheet.create({
 	liveDot: { width: 8, height: 8, borderRadius: 4 },
 	toggleRow: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 14 },
 	prayerChips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-	prayerChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 18, borderWidth: 1 },
+	prayerChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 18 },
 });

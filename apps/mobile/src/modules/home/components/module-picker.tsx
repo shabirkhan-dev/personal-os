@@ -132,7 +132,7 @@ export function ModulePicker({
 				exiting={FadeOut.duration(150)}
 				style={[
 					styles.card,
-					{ top, backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
+					{ top, backgroundColor: colors.bgSurface },
 					toShadowStyle(elevation.floating),
 				]}
 			>

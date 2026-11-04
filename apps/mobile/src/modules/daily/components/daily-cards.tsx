@@ -34,10 +34,10 @@ export function Card({ children, tone }: { children: ReactNode; tone?: "accent" 
 	const { colors } = usePoTheme();
 	const style =
 		tone === "accent"
-			? { backgroundColor: colors.accentSubtle, borderColor: colors.accentSubtle }
+			? { backgroundColor: colors.accentSubtle }
 			: tone === "success"
-				? { backgroundColor: colors.statusSuccessSubtle, borderColor: colors.statusSuccessSubtle }
-				: { backgroundColor: colors.bgSurface, borderColor: colors.bgSurface };
+				? { backgroundColor: colors.statusSuccessSubtle }
+				: { backgroundColor: colors.bgSurface };
 	return <View style={[styles.card, style]}>{children}</View>;
 }
 
@@ -294,7 +294,7 @@ export function CheckRow({
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	card: { gap: 12, padding: 16, borderRadius: 20, borderWidth: 1.5 },
+	card: { gap: 12, padding: 16, borderRadius: 20 },
 	head: { flexDirection: "row", alignItems: "center", gap: 8 },
 	eyebrow: { flexDirection: "row", alignItems: "center", gap: 8 },
 	dot: { width: 8, height: 8, borderRadius: 4 },

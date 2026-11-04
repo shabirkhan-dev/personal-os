@@ -48,8 +48,11 @@ export function OptionSheet<T extends string>({
 							style={({ pressed }) => [
 								styles.option,
 								{
-									backgroundColor: selected || pressed ? colors.bgSelected : colors.bgSubtle,
-									borderColor: selected ? colors.accentDefault : colors.borderDefault,
+									backgroundColor: selected
+										? colors.accentSubtle
+										: selected || pressed
+											? colors.bgSelected
+											: colors.bgSubtle,
 								},
 							]}
 						>
@@ -85,7 +88,6 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 16,
 		paddingVertical: 10,
 		borderRadius: 20,
-		borderWidth: 1,
 	},
 	text: { flex: 1, gap: 2 },
 });

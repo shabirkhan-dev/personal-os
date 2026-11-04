@@ -68,7 +68,7 @@ export function SegmentedControl<T extends string>({
 			style={[
 				styles.track,
 				isLarge ? styles.trackLarge : styles.trackSmall,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
+				{ backgroundColor: colors.bgSubtle },
 			]}
 		>
 			{segmentWidth > 0 && index >= 0 ? (
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		gap: 4,
 		padding: 4,
-		borderWidth: 1,
+
 		overflow: "hidden",
 	},
 	trackLarge: { borderRadius: 20, alignSelf: "stretch" },

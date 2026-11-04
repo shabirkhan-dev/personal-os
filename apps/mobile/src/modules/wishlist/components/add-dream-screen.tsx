@@ -268,8 +268,7 @@ export function AddDreamScreen({ editId }: { editId?: string }) {
 					style={[
 						styles.input,
 						{
-							backgroundColor: colors.bgSurface,
-							borderColor: text ? colors.accentDefault : colors.borderDefault,
+							backgroundColor: text ? colors.accentSubtle : colors.bgSurface,
 						},
 					]}
 				>
@@ -338,7 +337,7 @@ export function AddDreamScreen({ editId }: { editId?: string }) {
 									<View
 										style={[
 											styles.optionImage,
-											{ borderColor: selected ? colors.accentDefault : colors.bgSurface },
+											{ backgroundColor: selected ? colors.accentSubtle : "transparent" },
 										]}
 									>
 										<DreamImage
@@ -495,7 +494,7 @@ const styles = StyleSheet.create({
 	head: { flexDirection: "row", alignItems: "center" },
 	options: { flexDirection: "row", gap: 10 },
 	option: { flex: 1, gap: 4 },
-	optionImage: { borderRadius: 16, borderWidth: 2, padding: 2 },
+	optionImage: { borderRadius: 16, padding: 2 },
 	row: { flexDirection: "row", gap: 10 },
 	toggleRow: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 4 },
 });

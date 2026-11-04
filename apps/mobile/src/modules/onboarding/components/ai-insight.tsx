@@ -12,10 +12,7 @@ export function AiInsight({ parts }: { parts: readonly RichPart[] }) {
 		<Animated.View
 			entering={FadeIn.duration(300)}
 			accessibilityLiveRegion="polite"
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
+			style={[styles.card, { backgroundColor: colors.bgSurface }]}
 		>
 			<View style={[styles.tile, { backgroundColor: colors.statusVioletSubtle }]}>
 				<Icon name="Filled/Sparkle" size={16} color={colors.statusViolet} />

@@ -142,12 +142,7 @@ export function SkillBlockScreen() {
 			<PlanningCard />
 
 			{thisWeek ? (
-				<View
-					style={[
-						styles.card,
-						{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-					]}
-				>
+				<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 					<View style={styles.head}>
 						<PoText variant="title18" style={styles.flex}>
 							This week
@@ -274,24 +269,14 @@ export function SkillPathScreen() {
 				<MetaChip icon="Layers" label={`Week ${week + 1} of ${plan.weeks.length}`} />
 			</ScreenTitle>
 
-			<View
-				style={[
-					styles.stats,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.stats, { backgroundColor: colors.bgSurface }]}>
 				<Stat value={String(streak)} unit=" days" label="Streak" />
 				<Stat value={String(sessions.length)} label="Sessions" />
 				<Stat value={(minutes / 60).toFixed(1).replace(/\.0$/, "")} unit=" h" label="This month" />
 			</View>
 
 			<SectionLabel>Your path</SectionLabel>
-			<View
-				style={[
-					styles.path,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.path, { backgroundColor: colors.bgSurface }]}>
 				{plan.weeks.map((item, index) => {
 					const done = weekDone(sessions, index);
 					const state = index < week ? "done" : index === week ? "next" : "later";
@@ -312,12 +297,7 @@ export function SkillPathScreen() {
 				})}
 			</View>
 
-			<View
-				style={[
-					styles.activity,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.activity, { backgroundColor: colors.bgSurface }]}>
 				<View style={styles.activityHead}>
 					<IconTile name="Star" tone="textPrimary" tile="bgSubtle" />
 					<PoText variant="body15" tone="textSecondary" style={styles.flex}>
@@ -346,9 +326,8 @@ export function SkillPathScreen() {
 											: cell === "partial"
 												? {
 														backgroundColor: colors.bgSubtle,
-														borderWidth: 1,
+
 														borderStyle: "dashed",
-														borderColor: colors.textTertiary,
 													}
 												: { backgroundColor: colors.bgSubtle },
 									]}
@@ -363,9 +342,8 @@ export function SkillPathScreen() {
 						label="Partial"
 						style={{
 							backgroundColor: colors.bgSubtle,
-							borderWidth: 1,
+
 							borderStyle: "dashed",
-							borderColor: colors.textTertiary,
 						}}
 					/>
 					<Legend label="Missed" style={{ backgroundColor: colors.bgSubtle }} />

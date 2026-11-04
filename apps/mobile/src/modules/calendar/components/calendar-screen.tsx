@@ -55,10 +55,7 @@ export function ItemRow({ item, onPress }: { item: CalendarItem; onPress: () => 
 		<Pressable
 			accessibilityRole="button"
 			onPress={onPress}
-			style={[
-				styles.item,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
+			style={[styles.item, { backgroundColor: colors.bgSurface }]}
 		>
 			<View style={[styles.bar, { backgroundColor: colors[item.tone] }]} />
 			<View style={styles.flex}>
@@ -180,12 +177,7 @@ export function CalendarScreen() {
 					/>
 				))}
 			</ScrollView>
-			<View
-				style={[
-					styles.grid,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.grid, { backgroundColor: colors.bgSurface }]}>
 				<View style={styles.week}>
 					{WEEKDAYS.map((letter, index) => (
 						<PoText
@@ -313,7 +305,6 @@ const styles = StyleSheet.create({
 		gap: 12,
 		padding: 14,
 		borderRadius: 20,
-		borderWidth: 1,
 	},
 	bar: { width: 3, height: 32, borderRadius: 2 },
 });

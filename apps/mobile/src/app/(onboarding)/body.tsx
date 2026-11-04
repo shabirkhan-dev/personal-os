@@ -144,12 +144,7 @@ function MeasureCard({ label, unitPicker, value, unit, children }: MeasureCardPr
 	const { colors } = usePoTheme();
 
 	return (
-		<View
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
+		<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 			<View style={styles.labelRow}>
 				<PoText variant="eyebrow11" tone="textTertiary">
 					{label}

@@ -39,14 +39,7 @@ export function HeaderButton({
 			]}
 		>
 			<Icon name={icon} size={20} color={colors.textPrimary} />
-			{badge ? (
-				<View
-					style={[
-						styles.badge,
-						{ backgroundColor: colors.accentDefault, borderColor: colors.bgApp },
-					]}
-				/>
-			) : null}
+			{badge ? <View style={[styles.badge, { backgroundColor: colors.accentDefault }]} /> : null}
 		</Pressable>
 	);
 }
@@ -66,6 +59,5 @@ const styles = StyleSheet.create({
 		width: 12,
 		height: 12,
 		borderRadius: 6,
-		borderWidth: 2,
 	},
 });

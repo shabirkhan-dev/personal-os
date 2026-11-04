@@ -144,12 +144,7 @@ export function RecipeDetailScreen({ id }: { id: string }) {
 				</View>
 			</View>
 
-			<View
-				style={[
-					styles.fit,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.fit, { backgroundColor: colors.bgSurface }]}>
 				<View style={[styles.fitIcon, { backgroundColor: colors.accentSubtle }]}>
 					<Icon name="Filled/Sparkle" size={16} color={colors.accentDefault} />
 				</View>

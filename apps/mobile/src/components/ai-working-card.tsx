@@ -42,10 +42,7 @@ export function AiWorkingCard({ job, steps, onRetry, onDismiss }: AiWorkingCardP
 
 	return (
 		<View
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
+			style={[styles.card, { backgroundColor: colors.bgSurface }]}
 			accessibilityRole="progressbar"
 			accessibilityLabel={failed ? `${job.label} failed` : `${job.label}. ${step}`}
 		>

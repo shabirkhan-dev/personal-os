@@ -304,7 +304,6 @@ export function AssistantChat() {
 									style={({ pressed }) => [
 										styles.starter,
 										{
-											borderColor: colors.borderDefault,
 											backgroundColor: pressed ? colors.bgHover : colors.bgSurface,
 										},
 									]}
@@ -338,12 +337,7 @@ export function AssistantChat() {
 					</View>
 				) : null}
 			</ScrollView>
-			<View
-				style={[
-					styles.composer,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.composer, { backgroundColor: colors.bgSurface }]}>
 				<TextInput
 					value={shown}
 					onChangeText={setDraft}
@@ -431,7 +425,7 @@ const styles = StyleSheet.create({
 	},
 	center: { textAlign: "center", maxWidth: 320 },
 	starters: { gap: 8, alignSelf: "stretch", marginTop: 8 },
-	starter: { paddingHorizontal: 16, paddingVertical: 12, borderRadius: 18, borderWidth: 1 },
+	starter: { paddingHorizontal: 16, paddingVertical: 12, borderRadius: 18 },
 	user: {
 		alignSelf: "flex-end",
 		maxWidth: "85%",

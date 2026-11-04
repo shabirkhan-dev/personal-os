@@ -122,8 +122,8 @@ export function CloseScreen() {
 								style={[
 									styles.score,
 									on
-										? { backgroundColor: colors.accentSubtle, borderColor: colors.accentDefault }
-										: { backgroundColor: colors.bgSubtle, borderColor: colors.bgSubtle },
+										? { backgroundColor: colors.accentSubtle }
+										: { backgroundColor: colors.bgSubtle },
 								]}
 							>
 								<PoText variant="row15" tone={on ? "accentDefault" : "textTertiary"}>
@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 		height: 40,
 		borderRadius: 12,
-		borderWidth: 1.5,
+
 		alignItems: "center",
 		justifyContent: "center",
 	},

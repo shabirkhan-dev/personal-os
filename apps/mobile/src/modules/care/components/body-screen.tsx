@@ -132,10 +132,7 @@ export function BodyScreen() {
 						haptics.tap();
 						void tick(today, nail, stepsOn(steps, nail.routine, today)).catch(failed("log nails"));
 					}}
-					style={[
-						styles.nail,
-						{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-					]}
+					style={[styles.nail, { backgroundColor: colors.bgSurface }]}
 				>
 					<ProductImage photo={nailKit?.photo ?? "catalog:nail-kit"} size={72} radius={16} />
 					<View style={styles.flex}>

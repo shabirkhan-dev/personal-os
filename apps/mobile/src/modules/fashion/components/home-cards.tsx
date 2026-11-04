@@ -59,12 +59,7 @@ export function TodayLookCard({
 	const current = nowPart(hour);
 
 	return (
-		<View
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
+		<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 			<View style={styles.headRow}>
 				<View style={styles.flex}>
 					<PoText variant="eyebrow11" tone="textTertiary">
@@ -231,12 +226,7 @@ export function ColourStoryCard({
 }) {
 	const { colors } = usePoTheme();
 	return (
-		<View
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
+		<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 			<PoText variant="eyebrow11" tone="textTertiary">
 				Colour story
 			</PoText>
@@ -272,12 +262,7 @@ export function ClosetCard({
 }) {
 	const { colors } = usePoTheme();
 	return (
-		<View
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
+		<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 			<Pressable accessibilityRole="button" onPress={onAll} style={styles.headRow}>
 				<PoText variant="title18" style={styles.flex}>
 					In your closet
@@ -343,10 +328,7 @@ export function WishlistRow({
 				haptics.tap();
 				onPress();
 			}}
-			style={[
-				styles.wish,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
+			style={[styles.wish, { backgroundColor: colors.bgSurface }]}
 		>
 			<PieceImage
 				image={first.image}
@@ -397,17 +379,12 @@ export function CapsuleCard({
 }) {
 	const { colors } = usePoTheme();
 	return (
-		<View
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
+		<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 			<View style={styles.rail}>
 				<View style={[styles.railLine, { backgroundColor: colors.borderStrong }]} />
 				<View style={styles.hangers}>
 					{[0, 1, 2, 3].map((step) => (
-						<View key={step} style={[styles.hanger, { borderColor: colors.borderStrong }]} />
+						<View key={step} style={[styles.hanger, {}]} />
 					))}
 				</View>
 			</View>
@@ -436,8 +413,8 @@ export function CapsuleCard({
 							style={[
 								styles.chip,
 								on
-									? { backgroundColor: colors.accentSubtle, borderColor: colors.accentDefault }
-									: { backgroundColor: colors.bgSubtle, borderColor: colors.bgSubtle },
+									? { backgroundColor: colors.accentSubtle }
+									: { backgroundColor: colors.bgSubtle },
 							]}
 						>
 							<Swatch colour={item.colour} size={14} />
@@ -491,7 +468,7 @@ const styles = StyleSheet.create({
 	rail: { height: 64, justifyContent: "flex-start" },
 	railLine: { height: 3, borderRadius: 2 },
 	hangers: { flexDirection: "row", justifyContent: "space-around", paddingTop: 6 },
-	hanger: { width: 40, height: 46, borderWidth: 1.5, borderStyle: "dashed", borderRadius: 8 },
+	hanger: { width: 40, height: 46, borderStyle: "dashed", borderRadius: 8 },
 	chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 	chip: {
 		flexDirection: "row",
@@ -500,6 +477,5 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 12,
 		paddingVertical: 8,
 		borderRadius: 18,
-		borderWidth: 1,
 	},
 });

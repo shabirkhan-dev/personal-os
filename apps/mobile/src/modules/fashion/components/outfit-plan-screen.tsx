@@ -146,9 +146,7 @@ export function OutfitPlanScreen() {
 						style={[
 							styles.row,
 							{
-								backgroundColor: colors.bgSurface,
-								borderColor: open ? colors.accentDefault : colors.borderDefault,
-								borderWidth: open ? 1.5 : 1,
+								backgroundColor: open ? colors.accentSubtle : colors.bgSurface,
 							},
 						]}
 					>

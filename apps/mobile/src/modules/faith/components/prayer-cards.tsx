@@ -32,12 +32,7 @@ export function TodayPrayersCard({
 }) {
 	const { colors } = usePoTheme();
 	return (
-		<View
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
+		<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 			<View style={styles.head}>
 				<PoText variant="title18" style={styles.flex}>
 					Today's prayers
@@ -75,9 +70,9 @@ function PrayerTimelineRow({
 	const dot = done
 		? { backgroundColor: colors.statusSuccess }
 		: next
-			? { borderWidth: 2, borderColor: colors.accentDefault }
+			? {}
 			: row.state === "missed" || row.state === "due"
-				? { borderWidth: 1.5, borderColor: colors.textTertiary }
+				? {}
 				: { backgroundColor: colors.borderDefault };
 	const pill = PILLS[row.state];
 
@@ -143,12 +138,7 @@ export function SetupCard({
 }) {
 	const { colors } = usePoTheme();
 	return (
-		<View
-			style={[
-				styles.setup,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
+		<View style={[styles.setup, { backgroundColor: colors.bgSurface }]}>
 			<IconTile name="Moon" tone="statusSuccess" tile="statusSuccessSubtle" size={56} />
 			<PoText variant="title18">Set up your prayers</PoText>
 			<PoText variant="body15" tone="textSecondary" style={styles.center}>
@@ -184,12 +174,7 @@ export function NeverMissCard({
 }) {
 	const { colors } = usePoTheme();
 	return (
-		<View
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
+		<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 			<View style={styles.eyebrow}>
 				<Icon name="Filled/Sparkle" size={14} color={colors.statusViolet} />
 				<PoText variant="eyebrow11" tone="textTertiary">
@@ -230,7 +215,6 @@ export function Shortcuts({ items }: { items: readonly Shortcut[] }) {
 									styles.shortcutCircle,
 									{
 										backgroundColor: pressed ? colors.bgHover : colors.bgSurface,
-										borderColor: colors.borderDefault,
 									},
 								]}
 							>
@@ -254,14 +238,11 @@ export function ConsistencyCard({ grid }: { grid: readonly GridRow[] }) {
 		state === "prayed"
 			? { backgroundColor: colors.statusSuccess }
 			: state === "late"
-				? { borderWidth: 1, borderStyle: "dashed" as const, borderColor: colors.statusCaution }
+				? { borderStyle: "dashed" as const }
 				: { backgroundColor: colors.bgSubtle };
 	return (
 		<View
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
+			style={[styles.card, { backgroundColor: colors.bgSurface }]}
 			accessibilityLabel={grid
 				.map(
 					(row) =>
@@ -339,7 +320,7 @@ const styles = StyleSheet.create({
 		width: 60,
 		height: 60,
 		borderRadius: 30,
-		borderWidth: 1,
+
 		alignItems: "center",
 		justifyContent: "center",
 	},

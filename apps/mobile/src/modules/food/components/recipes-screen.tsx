@@ -136,10 +136,7 @@ export function RecipesScreen() {
 					<Pressable
 						accessibilityRole="button"
 						onPress={() => foodRoutes.recipe(featured.id)}
-						style={[
-							styles.featured,
-							{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-						]}
+						style={[styles.featured, { backgroundColor: colors.bgSurface }]}
 					>
 						<MealImage recipeId={featured.id} hero size={200} fill radius={22} />
 						<View style={styles.featuredText}>
@@ -187,10 +184,7 @@ export function RecipesScreen() {
 							key={recipe.id}
 							accessibilityRole="button"
 							onPress={() => foodRoutes.recipe(recipe.id)}
-							style={[
-								styles.tile,
-								{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-							]}
+							style={[styles.tile, { backgroundColor: colors.bgSurface }]}
 						>
 							<MealImage recipeId={recipe.id} size={110} fill radius={18} />
 							<View style={styles.tileText}>

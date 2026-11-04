@@ -94,13 +94,7 @@ export function WardrobeScreen() {
 			) : null}
 
 			{groups.map((group) => (
-				<View
-					key={group.category}
-					style={[
-						styles.card,
-						{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-					]}
-				>
+				<View key={group.category} style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 					<Pressable
 						accessibilityRole="button"
 						onPress={() => setFilter(group.category)}
@@ -161,7 +155,7 @@ export function WardrobeScreen() {
 			<Pressable
 				accessibilityRole="button"
 				onPress={() => fashionRoutes.add({ category: filter === "all" ? undefined : filter })}
-				style={[styles.add, { borderColor: colors.borderDefault }]}
+				style={[styles.add, {}]}
 			>
 				<Icon name="Line/Plus" size={16} color={colors.textSecondary} />
 				<PoText variant="meta13" tone="textSecondary">
@@ -194,7 +188,7 @@ const styles = StyleSheet.create({
 		gap: 8,
 		height: 52,
 		borderRadius: 26,
-		borderWidth: 1,
+
 		borderStyle: "dashed",
 	},
 });

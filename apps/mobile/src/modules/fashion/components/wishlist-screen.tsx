@@ -78,8 +78,11 @@ export function WishlistScreen() {
 				style={[
 					styles.hold,
 					{
-						backgroundColor: settings.buyingPaused ? colors.statusCautionSubtle : colors.bgSurface,
-						borderColor: settings.buyingPaused ? colors.statusCaution : colors.borderDefault,
+						backgroundColor: settings.buyingPaused
+							? colors.statusCautionSubtle
+							: settings.buyingPaused
+								? colors.statusCautionSubtle
+								: colors.bgSurface,
 					},
 				]}
 			>
@@ -108,10 +111,7 @@ export function WishlistScreen() {
 						key={wish.id}
 						accessibilityRole="button"
 						onPress={() => edit(wish)}
-						style={[
-							styles.card,
-							{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-						]}
+						style={[styles.card, { backgroundColor: colors.bgSurface }]}
 					>
 						<View style={styles.head}>
 							<PieceImage
@@ -158,11 +158,7 @@ export function WishlistScreen() {
 				);
 			})}
 
-			<Pressable
-				accessibilityRole="button"
-				onPress={() => edit(null)}
-				style={[styles.add, { borderColor: colors.borderDefault }]}
-			>
+			<Pressable accessibilityRole="button" onPress={() => edit(null)} style={[styles.add, {}]}>
 				<Icon name="Line/Plus" size={16} color={colors.textSecondary} />
 				<PoText variant="meta13" tone="textSecondary">
 					Add by name or link
@@ -303,7 +299,7 @@ const styles = StyleSheet.create({
 		gap: 8,
 		height: 52,
 		borderRadius: 26,
-		borderWidth: 1,
+
 		borderStyle: "dashed",
 	},
 	sheetFoot: { flexDirection: "row", gap: 8 },

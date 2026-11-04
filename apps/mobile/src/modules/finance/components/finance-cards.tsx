@@ -39,12 +39,7 @@ export function Card({
 			style={[
 				styles.card,
 				{
-					backgroundColor: tone ? colors[tone.bg] : colors.bgSurface,
-					borderColor: tone
-						? colors[tone.border]
-						: accent
-							? colors.accentDefault
-							: colors.borderDefault,
+					backgroundColor: tone ? colors[tone.bg] : accent ? colors.accentSubtle : colors.bgSurface,
 				},
 			]}
 		>

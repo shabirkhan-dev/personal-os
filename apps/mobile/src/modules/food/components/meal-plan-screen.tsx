@@ -96,8 +96,7 @@ export function MealPlanScreen() {
 								style={[
 									styles.day,
 									{
-										backgroundColor: colors.bgSurface,
-										borderColor: isToday ? colors.accentDefault : colors.borderDefault,
+										backgroundColor: isToday ? colors.accentSubtle : colors.bgSurface,
 									},
 								]}
 							>

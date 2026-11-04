@@ -41,10 +41,7 @@ export function AssistantScreen({ ask }: { ask?: string }) {
 					accessibilityRole="button"
 					accessibilityLabel="Past chats"
 					onPress={() => router.push("/assistant/history")}
-					style={[
-						styles.pill,
-						{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-					]}
+					style={[styles.pill, { backgroundColor: colors.bgSurface }]}
 				>
 					<Icon name="Filled/Sparkle" size={16} color={colors.accentDefault} />
 					<PoText variant="text14Medium" numberOfLines={1} style={styles.title}>
@@ -75,7 +72,6 @@ const styles = StyleSheet.create({
 		gap: 8,
 		paddingHorizontal: 12,
 		borderRadius: 999,
-		borderWidth: 1,
 	},
 	title: { flexShrink: 1 },
 });

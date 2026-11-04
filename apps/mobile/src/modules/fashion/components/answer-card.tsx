@@ -27,12 +27,7 @@ export function AnswerCard({
 }) {
 	const { colors } = usePoTheme();
 	return (
-		<View
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.accentDefault },
-			]}
-		>
+		<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 			<View style={styles.eyebrow}>
 				<Icon name="Filled/Sparkle" size={14} color={colors.accentDefault} />
 				<PoText variant="eyebrow11" tone="textTertiary">

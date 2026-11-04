@@ -25,12 +25,7 @@ export function CalendarWeekCard() {
 		.slice(0, 4);
 
 	return (
-		<View
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
+		<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 			<Pressable
 				accessibilityRole="button"
 				onPress={() => router.push("/calendar")}

@@ -212,13 +212,7 @@ export function InsightsScreen() {
 			{found
 				.filter((insight) => !hidden.includes(insight.id))
 				.map((insight) => (
-					<View
-						key={insight.id}
-						style={[
-							styles.card,
-							{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-						]}
-					>
+					<View key={insight.id} style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 						<View style={styles.eyebrow}>
 							<Icon name="Filled/Sparkle" size={14} color={colors.statusViolet} />
 							<PoText variant="eyebrow11" tone="textTertiary">
@@ -264,12 +258,7 @@ function Stat({
 }) {
 	const { colors } = usePoTheme();
 	return (
-		<View
-			style={[
-				styles.stat,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
+		<View style={[styles.stat, { backgroundColor: colors.bgSurface }]}>
 			<PoText variant="meta13" tone="textSecondary">
 				{label}
 			</PoText>
@@ -292,7 +281,7 @@ const styles = StyleSheet.create({
 	recap: { gap: 10, paddingHorizontal: 4 },
 	eyebrow: { flexDirection: "row", alignItems: "center", gap: 8 },
 	stats: { flexDirection: "row", gap: 8 },
-	stat: { flex: 1, gap: 4, padding: 14, borderRadius: 20, borderWidth: 1 },
+	stat: { flex: 1, gap: 4, padding: 14, borderRadius: 20 },
 	notice: { paddingHorizontal: 6 },
 	card: { gap: 12, padding: 16, borderRadius: 20 },
 	actions: { flexDirection: "row", gap: 8 },

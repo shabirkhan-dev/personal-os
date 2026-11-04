@@ -240,12 +240,7 @@ function noteText(note: CareNote) {
 function Stat({ label, value, foot }: { label: string; value: string; foot: string }) {
 	const { colors } = usePoTheme();
 	return (
-		<View
-			style={[
-				styles.stat,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
+		<View style={[styles.stat, { backgroundColor: colors.bgSurface }]}>
 			<PoText variant="meta13" tone="textSecondary">
 				{label}
 			</PoText>

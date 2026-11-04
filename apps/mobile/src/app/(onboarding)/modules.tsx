@@ -119,11 +119,9 @@ export default function ModulesScreen() {
 										styles.extra,
 										on
 											? {
-													borderColor: colors.accentDefault,
 													borderStyle: "solid",
-													borderWidth: 1.5,
 												}
-											: { borderColor: colors.borderDefault },
+											: {},
 									]}
 								>
 									<View style={[styles.tile40, { backgroundColor: colors[option.tileTone] }]}>

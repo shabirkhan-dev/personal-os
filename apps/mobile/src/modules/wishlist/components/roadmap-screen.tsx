@@ -155,12 +155,7 @@ function Stop({ group, first, last }: { group: Group; first: boolean; last: bool
 	return (
 		<View style={styles.stop}>
 			<View style={styles.rail}>
-				<View
-					style={[
-						styles.dot,
-						first ? { backgroundColor: tone, borderColor: tone } : { borderColor: tone },
-					]}
-				/>
+				<View style={[styles.dot, first ? { backgroundColor: tone } : {}]} />
 				{last ? null : <View style={[styles.line, { backgroundColor: colors.borderDefault }]} />}
 			</View>
 			<View style={styles.stopText}>
@@ -208,7 +203,7 @@ const styles = StyleSheet.create({
 	timeline: { gap: 0 },
 	stop: { flexDirection: "row", gap: 14 },
 	rail: { width: 14, alignItems: "center" },
-	dot: { width: 14, height: 14, borderRadius: 7, borderWidth: 2 },
+	dot: { width: 14, height: 14, borderRadius: 7 },
 	line: { flex: 1, width: 2, borderRadius: 1 },
 	stopText: { flex: 1, gap: 6, paddingBottom: 18 },
 	stopHead: { flexDirection: "row", alignItems: "center", gap: 8 },

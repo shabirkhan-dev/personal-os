@@ -6,6 +6,7 @@ import { PoText } from "@/components/ui/po-text";
 import { haptics } from "@/lib/haptics";
 import { PieceImage, useFashionDay } from "@/modules/fashion";
 import { useFaithPlace } from "@/modules/faith";
+import { useFinanceSummary } from "@/modules/finance";
 import { MealImage } from "@/modules/food";
 import { clockOf } from "@/modules/home/lib/module-day";
 import { usePoTheme } from "@/theme";
@@ -39,6 +40,7 @@ export function BriefScreen() {
 	const place = useFaithPlace();
 	const fashion = useFashionDay();
 	const { faith, food, career } = sources.extra;
+	const finance = useFinanceSummary();
 	const lastNight = data.sleep.find((item) => item.id === today) ?? null;
 	const slept = lastNight ? sleptMinutes(lastNight) : null;
 
@@ -72,7 +74,10 @@ export function BriefScreen() {
 			tone: "textSuccess",
 		});
 	}
-	if (sources.career && career.runwayWeeks !== null) {
+	// Finance's runway in days when it is set up; else Career's own estimate, in weeks.
+	if (finance.runwayDays !== null) {
+		status.push({ label: "Runway", value: `${finance.runwayDays} days`, tone: "textPrimary" });
+	} else if (sources.career && career.runwayWeeks !== null) {
 		status.push({ label: "Runway", value: `${career.runwayWeeks * 7} days`, tone: "textPrimary" });
 	}
 

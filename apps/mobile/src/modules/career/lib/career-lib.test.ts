@@ -160,6 +160,13 @@ describe("career math", () => {
 		expect(runwayWeeks(settings, 75_000, now)).toBe(8);
 	});
 
+	test("uses Finance's runway when it is set up", () => {
+		const settings = { ...defaultSettings, cashOnHand: 300_000, monthlyCosts: 90_000 };
+		expect(runwayWeeks(settings, 0, now, 81)).toBe(11);
+		expect(runwayWeeks(defaultSettings, 0, now, 6)).toBe(0);
+		expect(runwayWeeks(settings, 0, now, null)).toBe(14);
+	});
+
 	test("writes today's line and a tip the data backs up", () => {
 		expect(todayLine(defaultSettings, 1, true)).toBe(
 			"Today · 2 applications, 1 follow-up, 30 min skill",

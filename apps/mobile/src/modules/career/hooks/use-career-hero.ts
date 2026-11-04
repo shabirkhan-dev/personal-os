@@ -1,4 +1,4 @@
-import { useFinanceSummary } from "@/modules/finance";
+import { financeRoutes, useFinanceSummary } from "@/modules/finance";
 import type { HomeHero } from "@/modules/home/lib/module-home";
 import { followUps, runwayWeeks } from "../lib/career-math";
 import { useCareerUi } from "./career-ui-store";
@@ -10,7 +10,9 @@ export function useCareerHero(): HomeHero {
 	const finance = useFinanceSummary();
 	const now = useNow();
 	const openRunway = useCareerUi((state) => state.openRunway);
-	const weeks = runwayWeeks(settings, finance.spentThisMonth, now);
+	const weeks = runwayWeeks(settings, finance.spentThisMonth, now, finance.runwayDays);
+	// With Finance's runway set up, that is the one to look at and change.
+	const editRunway = finance.runwayDays !== null ? financeRoutes.runway : openRunway;
 
 	if (weeks === null) {
 		return { label: "Career · runway", value: "Set", faint: " runway", onLabelPress: openRunway };
@@ -20,7 +22,7 @@ export function useCareerHero(): HomeHero {
 		value: String(weeks),
 		faint: weeks === 1 ? " week" : " weeks",
 		hideable: true,
-		onLabelPress: openRunway,
+		onLabelPress: editRunway,
 	};
 }
 

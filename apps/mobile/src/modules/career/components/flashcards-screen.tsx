@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { StyleSheet, View } from "react-native";
+import { SkeletonCard } from "@/components/ui/skeleton";
 import {
 	CardStack,
 	FlipHint,
@@ -82,10 +83,12 @@ export function FlashcardsScreen({ deck }: { deck: string }) {
 					</CardStack>
 					<RatingRow review={review} />
 				</>
+			) : data.loading ? (
+				<SkeletonCard lines={3} label="your cards" />
 			) : (
 				<EmptyCard
 					icon="Layers"
-					title={data.loading ? "Loading…" : cards.length === 0 ? "No cards yet" : "All caught up"}
+					title={cards.length === 0 ? "No cards yet" : "All caught up"}
 					body={
 						cards.length === 0
 							? "Build the interview prep and its flashcards come with it."

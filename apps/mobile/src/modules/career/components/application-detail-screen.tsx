@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 import { useState } from "react";
 import { Linking, Pressable, StyleSheet, View } from "react-native";
+import { SkeletonCard } from "@/components/ui/skeleton";
 import { showDialog } from "@/components/ui/dialog";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
@@ -150,11 +151,15 @@ export function ApplicationDetailScreen({ id }: { id: string }) {
 	if (!app) {
 		return (
 			<CareerScreen>
-				<EmptyCard
-					icon="Briefcase"
-					title={data.loading ? "Loading…" : "Application not found"}
-					body={data.loading ? "" : "It may have been deleted on another device."}
-				/>
+				{data.loading ? (
+					<SkeletonCard lines={3} label="this application" />
+				) : (
+					<EmptyCard
+						icon="Briefcase"
+						title="Application not found"
+						body="It may have been deleted on another device."
+					/>
+				)}
 			</CareerScreen>
 		);
 	}

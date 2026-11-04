@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
+import { SkeletonCard } from "@/components/ui/skeleton";
 import { AiWorkingCard } from "@/components/ai-working-card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PillButton } from "@/components/ui/pill-button";
@@ -94,10 +95,12 @@ export function SkillBlockScreen() {
 				<ScreenTitle eyebrow="30 min a day" title="Skill block" />
 				{planning ? (
 					<PlanningCard />
+				) : data.loading ? (
+					<SkeletonCard lines={3} label="your skill plan" />
 				) : (
 					<EmptyCard
 						icon="Lightning"
-						title={data.loading ? "Loading…" : "Pick a skill"}
+						title="Pick a skill"
 						body="Choose one thing to get better at. I'll plan six weeks of 30-minute days around your applications."
 					>
 						<PillButton label="Pick a skill" onPress={() => setSheet("focus")} />

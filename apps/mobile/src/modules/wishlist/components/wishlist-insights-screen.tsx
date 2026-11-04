@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import { SkeletonList } from "@/components/ui/skeleton";
 import { Icon } from "@/components/icons";
 import { EmptyCard, FilterChip } from "@/components/module-ui";
 import { Card } from "@/components/ui/card";
@@ -82,7 +83,7 @@ export function WishlistInsightsScreen() {
 			</View>
 
 			{loading ? (
-				<ActivityIndicator color={colors.accentDefault} />
+				<SkeletonList label="your insights" />
 			) : dreams.length === 0 ? (
 				<EmptyCard
 					icon="Filled/Chart"

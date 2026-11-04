@@ -2,6 +2,7 @@ import { textStyles } from "@personal-os/tokens";
 import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from "react-native";
+import { SkeletonCard } from "@/components/ui/skeleton";
 import { Footer, ScreenTitle, SectionLabel } from "@/components/module-ui";
 import { ChoiceChips } from "@/components/ui/choice-chips";
 import { PillButton } from "@/components/ui/pill-button";
@@ -237,7 +238,7 @@ export function AddDreamScreen({ editId }: { editId?: string }) {
 		return (
 			<WishlistScreen>
 				{loading ? (
-					<ActivityIndicator color={colors.accentDefault} />
+					<SkeletonCard media lines={3} label="this dream" />
 				) : (
 					<PoText variant="body15" tone="textSecondary">
 						This dream isn't on your list any more.

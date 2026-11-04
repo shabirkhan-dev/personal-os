@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { SkeletonCard } from "@/components/ui/skeleton";
 import { Icon } from "@/components/icons";
 import { EmptyCard, Footer, ScreenTitle } from "@/components/module-ui";
 import { PillButton } from "@/components/ui/pill-button";
@@ -60,17 +61,21 @@ export function PieceDetailScreen({ id }: { id: string }) {
 	if (!piece) {
 		return (
 			<FashionScreen>
-				<EmptyCard
-					icon="Shirt"
-					title={data.loading ? "Loading…" : "Piece not found"}
-					body={data.loading ? "" : "It may have been removed on another device."}
-				>
-					<PillButton
-						label="Back to wardrobe"
-						variant="secondary"
-						onPress={fashionRoutes.wardrobe}
-					/>
-				</EmptyCard>
+				{data.loading ? (
+					<SkeletonCard media lines={3} label="this piece" />
+				) : (
+					<EmptyCard
+						icon="Shirt"
+						title="Piece not found"
+						body="It may have been removed on another device."
+					>
+						<PillButton
+							label="Back to wardrobe"
+							variant="secondary"
+							onPress={fashionRoutes.wardrobe}
+						/>
+					</EmptyCard>
+				)}
 			</FashionScreen>
 		);
 	}

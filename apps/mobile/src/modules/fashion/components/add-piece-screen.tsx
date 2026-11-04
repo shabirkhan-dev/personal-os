@@ -9,6 +9,7 @@ import {
 	TextInput,
 	View,
 } from "react-native";
+import { SkeletonCard } from "@/components/ui/skeleton";
 import { showDialog } from "@/components/ui/dialog";
 import { Icon } from "@/components/icons";
 import { Footer, ScreenTitle, SectionLabel } from "@/components/module-ui";
@@ -242,7 +243,7 @@ export function AddPieceScreen({ editId, category }: { editId?: string; category
 	if (editId && !editing && loading) {
 		return (
 			<FashionScreen>
-				<ActivityIndicator color={colors.accentDefault} />
+				<SkeletonCard media lines={3} label="this piece" />
 			</FashionScreen>
 		);
 	}

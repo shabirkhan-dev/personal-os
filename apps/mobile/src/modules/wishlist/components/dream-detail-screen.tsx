@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { SkeletonCard } from "@/components/ui/skeleton";
 import { showDialog } from "@/components/ui/dialog";
 import { EmptyCard, Footer, ListRow, MetaChip, ScreenTitle } from "@/components/module-ui";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -63,7 +64,7 @@ export function DreamDetailScreen({ id, openSave = false }: { id: string; openSa
 		return (
 			<WishlistScreen>
 				{data.loading ? (
-					<ActivityIndicator color={colors.accentDefault} />
+					<SkeletonCard media lines={3} label="this dream" />
 				) : (
 					<EmptyCard
 						icon="Star"

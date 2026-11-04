@@ -19,6 +19,7 @@ import { MoneyCard } from "@/modules/home/components/money-card";
 import { SoonView } from "@/modules/home/components/soon-view";
 import type { HomeHero, HomeModule } from "@/modules/home/lib/module-home";
 import { routeLine } from "@/modules/home/lib/route-line";
+import { insightsTabPress } from "@/modules/home/components/insights-switcher";
 import { setAreasOpen, useAreasPicker } from "@/modules/home/store/areas-picker";
 import { moduleStatuses, periodLabel, todayItems } from "@/modules/home/lib/today";
 import { useAskInbox } from "@/modules/home/store/ask-inbox";
@@ -185,7 +186,7 @@ export default function TodayScreen() {
 				bottomInset={insets.bottom}
 				onTodayPress={() => select("overview")}
 				onAreasPress={() => setAreasOpen(true)}
-				onInsightsPress={moduleHome ? moduleHome.onInsights : dailyRoutes.insights}
+				onInsightsPress={moduleHome?.onInsights ?? insightsTabPress()}
 				onProfilePress={() => {
 					setAreasOpen(false);
 					router.push("/profile");

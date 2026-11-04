@@ -12,6 +12,7 @@ import { CURRENCY } from "@/lib/money";
 import { useAuth } from "@/modules/auth/context/auth-context";
 import { FloatingTabBar } from "@/modules/home/components/floating-tab-bar";
 import { HomeHeader } from "@/modules/home/components/home-header";
+import { insightsTabPress } from "@/modules/home/components/insights-switcher";
 import { openAreas } from "@/modules/home/store/areas-picker";
 import { OsCard } from "@/modules/onboarding/components/os-card";
 import { useMemberStore } from "@/modules/onboarding/store/member-store";
@@ -396,6 +397,7 @@ export function ProfileScreen() {
 				bottomInset={insets.bottom}
 				onTodayPress={goToday}
 				onAreasPress={openAreas}
+				onInsightsPress={insightsTabPress()}
 			/>
 
 			<ManageModulesSheet visible={sheet === "modules"} onClose={close} />

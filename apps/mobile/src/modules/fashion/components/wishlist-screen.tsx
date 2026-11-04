@@ -51,7 +51,10 @@ function bought(wish: Wish): void {
 	]);
 }
 
-/** Wishlist: what to buy next and why, on hold while buying is paused. */
+/**
+ * To buy: the clothes to buy next and why, on hold while buying is paused. Named apart from the
+ * Wishlist module, which saves up for big things.
+ */
 export function WishlistScreen() {
 	const { colors } = usePoTheme();
 	const { wishes, pieces, settings } = useFashion();
@@ -67,9 +70,9 @@ export function WishlistScreen() {
 
 	return (
 		<FashionScreen
-			action={{ icon: "Line/Plus", label: "Add to wishlist", onPress: () => edit(null) }}
+			action={{ icon: "Line/Plus", label: "Add to To buy", onPress: () => edit(null) }}
 		>
-			<ScreenTitle eyebrow={`${wishes.length} items · ${formatMoney(total)}`} title="Wishlist" />
+			<ScreenTitle eyebrow={`${wishes.length} items · ${formatMoney(total)}`} title="To buy" />
 
 			<View
 				style={[
@@ -209,7 +212,7 @@ function WishSheet({ wish, onClose }: { wish: Wish | null; onClose: () => void }
 	return (
 		<Sheet
 			visible
-			title={wish ? "Edit wish" : "Add to wishlist"}
+			title={wish ? "Edit" : "Add to To buy"}
 			onClose={onClose}
 			footer={
 				<View style={styles.sheetFoot}>

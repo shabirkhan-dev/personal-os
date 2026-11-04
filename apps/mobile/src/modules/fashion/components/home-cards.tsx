@@ -357,7 +357,7 @@ export function WishlistRow({
 			/>
 			<View style={styles.flex}>
 				<PoText variant="row15" numberOfLines={1}>
-					Wishlist · {first.name}
+					To buy · {first.name}
 				</PoText>
 				<PoText
 					variant="meta13"

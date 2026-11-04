@@ -228,7 +228,7 @@ export function FashionHomeView({ actionRequest }: HomeModuleViewProps) {
 					actions={[
 						{ label: "Plan week", icon: "Filled/Calendar", onPress: fashionRoutes.plan },
 						{ label: "Add item", icon: "Line/Plus", onPress: () => fashionRoutes.add() },
-						{ label: "Wishlist", icon: "Tag", onPress: fashionRoutes.wishlist },
+						{ label: "To buy", icon: "Tag", onPress: fashionRoutes.wishlist },
 					]}
 				/>
 			</View>

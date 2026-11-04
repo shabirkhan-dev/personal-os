@@ -140,7 +140,7 @@ export function WatchesScreen() {
 									{wish.name.replace(/\s*watch$/i, "")}
 								</PoText>
 								<PoText variant="meta13" tone="textTertiary">
-									Wishlist
+									To buy
 								</PoText>
 							</Pressable>
 						))}
@@ -279,7 +279,7 @@ export function WatchesScreen() {
 						<PoText variant="meta13" tone="statusCaution">
 							{data.settings.buyingPaused
 								? "Refill once income starts"
-								: "Tap to add a refill to the wishlist"}
+								: "Tap to add a refill to To buy"}
 						</PoText>
 					</View>
 				</Pressable>

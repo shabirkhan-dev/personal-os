@@ -105,7 +105,7 @@ export function FashionInsightsScreen() {
 		} else if (insight.action.kind === "keep-wish" && target) {
 			const wish = data.wishes.find((item) => item.id === target);
 			if (wish) await saveWish({ ...wish, tag: "first" });
-			setNotice("Moved to the top of your wishlist.");
+			setNotice("Moved to the top of To buy.");
 		} else if (insight.action.kind === "scent-low" && target) {
 			fashionRoutes.piece(target);
 			return;

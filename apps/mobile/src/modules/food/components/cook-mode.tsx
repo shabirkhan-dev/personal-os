@@ -136,10 +136,10 @@ export function CookMode({ recipe, onClose }: { recipe: Recipe | null; onClose: 
 }
 
 const styles = StyleSheet.create({
-	root: { flex: 1, gap: 18, paddingHorizontal: 16 },
+	root: { flex: 1, gap: 20, paddingHorizontal: 16 },
 	head: { flexDirection: "row", alignItems: "center", gap: 12 },
 	flex: { flex: 1 },
-	body: { flex: 1, justifyContent: "center", gap: 28 },
+	body: { flex: 1, justifyContent: "center", gap: 32 },
 	timer: { alignItems: "flex-start", gap: 12 },
-	footer: { flexDirection: "row", gap: 10 },
+	footer: { flexDirection: "row", gap: 12 },
 });

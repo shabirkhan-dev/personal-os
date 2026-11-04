@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 16,
 		borderRadius: 20,
 	},
-	top: { flexDirection: "row", alignItems: "center", gap: 10 },
+	top: { flexDirection: "row", alignItems: "center", gap: 12 },
 	tile: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" },
 	stepper: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
 	round: {

@@ -56,7 +56,7 @@ export function ChoiceChips<T extends string>({
 }
 
 const styles = StyleSheet.create({
-	group: { gap: 6 },
+	group: { gap: 8 },
 	row: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-	chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 18 },
+	chip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 18 },
 });

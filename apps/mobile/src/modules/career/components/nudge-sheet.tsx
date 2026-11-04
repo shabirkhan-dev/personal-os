@@ -236,7 +236,7 @@ export function NudgeSheet({
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	pad: { paddingHorizontal: 6 },
-	eyebrow: { flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 6, paddingTop: 4 },
+	pad: { paddingHorizontal: 8 },
+	eyebrow: { flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 8, paddingTop: 4 },
 	tones: { gap: 8 },
 });

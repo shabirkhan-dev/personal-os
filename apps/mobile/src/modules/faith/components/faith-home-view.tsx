@@ -521,5 +521,5 @@ export function FaithHomeView({ actionRequest }: HomeModuleViewProps) {
 
 const styles = StyleSheet.create({
 	ask: { gap: 12 },
-	notice: { paddingHorizontal: 6 },
+	notice: { paddingHorizontal: 8 },
 });

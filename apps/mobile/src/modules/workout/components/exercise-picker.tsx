@@ -237,9 +237,9 @@ export function ExerciseLibraryScreen() {
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	filters: { gap: 10 },
+	filters: { gap: 12 },
 	chips: { gap: 8, paddingVertical: 2 },
-	row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 10 },
+	row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 12 },
 	card: { borderRadius: 20, paddingHorizontal: 16, paddingVertical: 4 },
 	empty: { paddingVertical: 16 },
 });

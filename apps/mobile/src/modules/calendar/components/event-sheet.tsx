@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
 	flex: { flex: 1 },
 	body: { gap: 12, paddingBottom: 8 },
 	wrap: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-	stepper: { flexDirection: "row", alignItems: "center", gap: 10 },
+	stepper: { flexDirection: "row", alignItems: "center", gap: 12 },
 	round: {
 		width: 36,
 		height: 36,
@@ -272,5 +272,5 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 	},
 	value: { minWidth: 110, textAlign: "center" },
-	footer: { flexDirection: "row", gap: 10 },
+	footer: { flexDirection: "row", gap: 12 },
 });

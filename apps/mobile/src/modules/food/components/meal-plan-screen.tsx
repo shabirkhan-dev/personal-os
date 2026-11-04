@@ -186,12 +186,12 @@ export function MealPlanScreen() {
 }
 
 const styles = StyleSheet.create({
-	flex: { flex: 1, gap: 6 },
+	flex: { flex: 1, gap: 8 },
 	day: {
 		flexDirection: "row",
 		alignItems: "center",
 		gap: 12,
-		paddingHorizontal: 14,
+		paddingHorizontal: 16,
 		paddingVertical: 12,
 		borderRadius: 20,
 	},

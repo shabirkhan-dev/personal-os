@@ -487,14 +487,14 @@ export function AddDreamScreen({ editId }: { editId?: string }) {
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	input: { gap: 10, padding: 15, borderRadius: 20 },
-	status: { flexDirection: "row", alignItems: "center", gap: 6 },
+	input: { gap: 12, padding: 16, borderRadius: 20 },
+	status: { flexDirection: "row", alignItems: "center", gap: 8 },
 	dot: { width: 8, height: 8, borderRadius: 4 },
 	card: { gap: 12, padding: 16, borderRadius: 20 },
 	head: { flexDirection: "row", alignItems: "center" },
-	options: { flexDirection: "row", gap: 10 },
+	options: { flexDirection: "row", gap: 12 },
 	option: { flex: 1, gap: 4 },
 	optionImage: { borderRadius: 16, padding: 2 },
-	row: { flexDirection: "row", gap: 10 },
+	row: { flexDirection: "row", gap: 12 },
 	toggleRow: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 4 },
 });

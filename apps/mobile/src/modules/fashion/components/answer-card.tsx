@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
 	flex: { flex: 1 },
 	card: { gap: 12, padding: 16, borderRadius: 20 },
 	eyebrow: { flexDirection: "row", alignItems: "center", gap: 8 },
-	outfit: { gap: 10 },
+	outfit: { gap: 12 },
 	item: { width: 72, gap: 4 },
 	followUps: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 	followUp: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 16 },

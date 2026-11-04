@@ -282,10 +282,10 @@ const styles = StyleSheet.create({
 		borderRadius: 20,
 	},
 	card: { gap: 12, padding: 16, borderRadius: 20 },
-	head: { flexDirection: "row", alignItems: "center", gap: 14 },
+	head: { flexDirection: "row", alignItems: "center", gap: 16 },
 	tag: {
 		alignSelf: "flex-start",
-		paddingHorizontal: 10,
+		paddingHorizontal: 12,
 		paddingVertical: 4,
 		borderRadius: 10,
 		marginBottom: 4,

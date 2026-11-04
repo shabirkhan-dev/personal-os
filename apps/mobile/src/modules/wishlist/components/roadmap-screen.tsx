@@ -199,13 +199,13 @@ function Stop({ group, first, last }: { group: Group; first: boolean; last: bool
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
 	card: { gap: 12, padding: 16, borderRadius: 20 },
-	shares: { flexDirection: "row", gap: 6 },
+	shares: { flexDirection: "row", gap: 8 },
 	timeline: { gap: 0 },
-	stop: { flexDirection: "row", gap: 14 },
+	stop: { flexDirection: "row", gap: 16 },
 	rail: { width: 14, alignItems: "center" },
 	dot: { width: 14, height: 14, borderRadius: 7 },
 	line: { flex: 1, width: 2, borderRadius: 1 },
-	stopText: { flex: 1, gap: 6, paddingBottom: 18 },
+	stopText: { flex: 1, gap: 8, paddingBottom: 20 },
 	stopHead: { flexDirection: "row", alignItems: "center", gap: 8 },
-	thumbs: { flexDirection: "row", gap: 6 },
+	thumbs: { flexDirection: "row", gap: 8 },
 });

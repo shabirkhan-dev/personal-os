@@ -416,11 +416,11 @@ export function LocateStatus({
 }
 
 const styles = StyleSheet.create({
-	status: { flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 6 },
+	status: { flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 8 },
 	flex: { flex: 1 },
-	source: { flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 6 },
+	source: { flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 8 },
 	liveDot: { width: 8, height: 8, borderRadius: 4 },
-	toggleRow: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 14 },
+	toggleRow: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 16 },
 	prayerChips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-	prayerChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 18 },
+	prayerChip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 18 },
 });

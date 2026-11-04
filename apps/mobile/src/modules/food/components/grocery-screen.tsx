@@ -170,7 +170,7 @@ export function GroceryScreen() {
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
 	head: { flexDirection: "row", alignItems: "center" },
-	row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 6 },
+	row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8 },
 	price: { minWidth: 70, textAlign: "right" },
-	hint: { paddingHorizontal: 6 },
+	hint: { paddingHorizontal: 8 },
 });

@@ -417,9 +417,9 @@ function ResourceSheet({ resource, onClose }: { resource: Resource | null; onClo
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	card: { gap: 14, padding: 16, borderRadius: 20 },
+	card: { gap: 16, padding: 16, borderRadius: 20 },
 	head: { flexDirection: "row", alignItems: "center", gap: 12 },
-	days: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
+	days: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 	day: { width: "8.6%", aspectRatio: 1, borderRadius: 6 },
 	actions: { flexDirection: "row", gap: 8 },
 	filters: { gap: 8 },

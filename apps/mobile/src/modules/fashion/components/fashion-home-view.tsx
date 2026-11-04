@@ -379,8 +379,8 @@ export function FashionHomeView({ actionRequest }: HomeModuleViewProps) {
 
 const styles = StyleSheet.create({
 	ask: { gap: 12 },
-	notice: { paddingHorizontal: 6 },
-	missing: { gap: 12, padding: 18 },
+	notice: { paddingHorizontal: 8 },
+	missing: { gap: 12, padding: 20 },
 	flex: { flex: 1 },
-	weatherRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 6 },
+	weatherRow: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 8 },
 });

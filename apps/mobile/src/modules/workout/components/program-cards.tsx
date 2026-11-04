@@ -135,14 +135,14 @@ export function ProgramPromptCard({ onPress }: { onPress: () => void }) {
 }
 
 const styles = StyleSheet.create({
-	flex: { flex: 1, gap: 3 },
+	flex: { flex: 1, gap: 4 },
 	row: {
 		flexDirection: "row",
 		alignItems: "center",
-		gap: 14,
+		gap: 16,
 		padding: 12,
 		borderRadius: 20,
 	},
-	card: { gap: 10, padding: 16, borderRadius: 20 },
+	card: { gap: 12, padding: 16, borderRadius: 20 },
 	head: { flexDirection: "row", alignItems: "center" },
 });

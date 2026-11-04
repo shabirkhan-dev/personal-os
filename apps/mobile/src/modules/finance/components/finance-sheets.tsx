@@ -656,7 +656,7 @@ export function OfferSheet({
 
 const styles = StyleSheet.create({
 	body: { gap: 12 },
-	chips: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
-	row: { flexDirection: "row", gap: 10 },
+	chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+	row: { flexDirection: "row", gap: 12 },
 	flex: { flex: 1 },
 });

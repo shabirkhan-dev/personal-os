@@ -34,5 +34,5 @@ export function ChipButton({ label, onPress }: { label: string; onPress?: () => 
 }
 
 const styles = StyleSheet.create({
-	chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 18 },
+	chip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 18 },
 });

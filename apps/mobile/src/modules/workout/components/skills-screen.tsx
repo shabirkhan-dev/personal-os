@@ -254,11 +254,11 @@ const styles = StyleSheet.create({
 	skill: {
 		flexDirection: "row",
 		alignItems: "center",
-		gap: 14,
+		gap: 16,
 		padding: 12,
 		borderRadius: 20,
 	},
-	head: { flexDirection: "row", alignItems: "center", gap: 8, paddingBottom: 6 },
+	head: { flexDirection: "row", alignItems: "center", gap: 8, paddingBottom: 8 },
 	add: {
 		flexDirection: "row",
 		alignItems: "center",
@@ -269,6 +269,6 @@ const styles = StyleSheet.create({
 
 		borderStyle: "dashed",
 	},
-	sheet: { gap: 10 },
+	sheet: { gap: 12 },
 	step: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 4 },
 });

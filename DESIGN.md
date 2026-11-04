@@ -40,7 +40,7 @@ system preference. **No raw colour values in screens.**
 | --- | --- |
 | `colors.light` / `colors.dark` | `bg*` (canvas, app, subtle, surface, hover, selected, inverse), `text*`, `border*`, `accent*`, `status*` |
 | `glowOpacity` | Fill opacity of the blurred colour glows per mode (hero, card, member) |
-| `space` | 0, 4, 6, 8, 16, 24, 32 |
+| `space` | 0, 2, 4, 8, 12, 16, 20, 24, 32, 40, 48, 64: every gap, padding and margin is one of these |
 | `radius` | `xs` 4, `lg` 12, `2xl` 20, `full` (pills and circles) |
 | `stroke` | hairline 1, selected 1.5, checkbox ring 1.75 |
 | `elevation` | `card`, `floating`, `pocket` shadows (converted by `toShadowStyle`) |

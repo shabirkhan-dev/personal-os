@@ -67,7 +67,7 @@ export function TextField({
 }
 
 const styles = StyleSheet.create({
-	group: { gap: 6 },
+	group: { gap: 8 },
 	field: {
 		height: 48,
 		flexDirection: "row",

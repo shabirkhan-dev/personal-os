@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
 	card: {
 		height: WHEEL_HEIGHT,
 		flexDirection: "row",
-		paddingHorizontal: 14,
+		paddingHorizontal: 16,
 		borderRadius: 20,
 		overflow: "hidden",
 	},

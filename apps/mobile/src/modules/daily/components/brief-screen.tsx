@@ -202,9 +202,9 @@ export function BriefScreen() {
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	status: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 6 },
+	status: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8 },
 	three: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 4 },
 	bar: { width: 3, height: 32, borderRadius: 2 },
-	ready: { flexDirection: "row", gap: 10 },
+	ready: { flexDirection: "row", gap: 12 },
 	readyItem: { flex: 1, gap: 4 },
 });

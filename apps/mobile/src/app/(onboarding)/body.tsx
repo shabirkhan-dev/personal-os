@@ -165,9 +165,9 @@ function MeasureCard({ label, unitPicker, value, unit, children }: MeasureCardPr
 const styles = StyleSheet.create({
 	form: { gap: 12 },
 	card: {
-		gap: 10,
+		gap: 12,
 		paddingTop: 16,
-		paddingBottom: 14,
+		paddingBottom: 16,
 		paddingHorizontal: 16,
 		borderRadius: 20,
 	},
@@ -175,9 +175,9 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		alignItems: "center",
 		justifyContent: "space-between",
-		paddingHorizontal: 6,
+		paddingHorizontal: 8,
 	},
-	valueRow: { flexDirection: "row", alignItems: "baseline", justifyContent: "center", gap: 6 },
+	valueRow: { flexDirection: "row", alignItems: "baseline", justifyContent: "center", gap: 8 },
 	unit: { lineHeight: textStyles.title18.lineHeight },
 	gap14: { height: 14 },
 });

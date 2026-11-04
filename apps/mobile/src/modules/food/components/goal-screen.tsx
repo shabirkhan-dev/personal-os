@@ -171,5 +171,5 @@ export function GoalScreen() {
 
 const styles = StyleSheet.create({
 	chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-	note: { paddingHorizontal: 6 },
+	note: { paddingHorizontal: 8 },
 });

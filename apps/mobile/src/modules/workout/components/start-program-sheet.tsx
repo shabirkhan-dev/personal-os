@@ -300,6 +300,6 @@ const styles = StyleSheet.create({
 	body: { gap: 12, paddingBottom: 8 },
 	label: { gap: 2, marginTop: 4 },
 	wrap: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-	chain: { gap: 6 },
+	chain: { gap: 8 },
 	row: { gap: 8, paddingVertical: 2 },
 });

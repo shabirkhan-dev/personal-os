@@ -161,9 +161,9 @@ export function RowPill({ label, onPress, accessibilityLabel }: RowPillProps) {
 }
 
 const styles = StyleSheet.create({
-	label: { paddingLeft: 6, paddingTop: 10 },
+	label: { paddingLeft: 8, paddingTop: 12 },
 	card: {
-		paddingHorizontal: 14,
+		paddingHorizontal: 16,
 		paddingVertical: 4,
 		borderRadius: 20,
 		overflow: "hidden",

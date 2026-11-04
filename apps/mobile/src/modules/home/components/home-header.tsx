@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
 	},
 	name: { maxWidth: 140 },
 	hero: { alignItems: "center", gap: 4, maxWidth: "100%" },
-	labelRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+	labelRow: { flexDirection: "row", alignItems: "center", gap: 8 },
 	amountRow: { flexDirection: "row", alignItems: "center", maxWidth: "100%" },
-	eye: { paddingLeft: 10 },
+	eye: { paddingLeft: 12 },
 });

@@ -259,12 +259,12 @@ function Stat({
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	pad: { paddingHorizontal: 6 },
+	pad: { paddingHorizontal: 8 },
 	ranges: { gap: 8 },
-	recap: { gap: 10, paddingHorizontal: 4 },
+	recap: { gap: 12, paddingHorizontal: 4 },
 	eyebrow: { flexDirection: "row", alignItems: "center", gap: 8 },
 	stats: { flexDirection: "row", gap: 8 },
-	stat: { flex: 1, gap: 4, padding: 14, borderRadius: 20 },
+	stat: { flex: 1, gap: 4, padding: 16, borderRadius: 20 },
 	card: { gap: 12, padding: 16, borderRadius: 20 },
 	actions: { flexDirection: "row", gap: 8 },
 });

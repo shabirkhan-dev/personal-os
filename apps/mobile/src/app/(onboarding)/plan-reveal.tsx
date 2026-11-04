@@ -103,7 +103,7 @@ export default function PlanRevealScreen() {
 }
 
 const styles = StyleSheet.create({
-	top: { height: 40, flexDirection: "row", alignItems: "center", gap: 14 },
+	top: { height: 40, flexDirection: "row", alignItems: "center", gap: 16 },
 	progress: { flex: 1, height: 4, borderRadius: 2 },
 	balance: { width: 40 },
 	gap22: { height: 22 },
@@ -111,8 +111,8 @@ const styles = StyleSheet.create({
 	gap12: { height: 12 },
 	center: { textAlign: "center" },
 	flex: { flex: 1 },
-	day: { paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20 },
-	row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 10 },
+	day: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20 },
+	row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 12 },
 	time: { width: 44 },
 	tile32: {
 		width: 32,

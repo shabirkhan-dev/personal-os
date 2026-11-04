@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "center",
 	},
-	lines: { gap: 10 },
+	lines: { gap: 12 },
 	line: { height: 12, borderRadius: 6 },
 	actions: { flexDirection: "row", gap: 8 },
 });

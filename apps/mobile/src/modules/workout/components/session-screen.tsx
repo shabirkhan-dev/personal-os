@@ -217,7 +217,7 @@ export function SessionScreen({ id }: { id: string }) {
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
 	stats: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-	stat: { width: "48.8%", gap: 4, padding: 14, borderRadius: 16 },
+	stat: { width: "48.8%", gap: 4, padding: 16, borderRadius: 16 },
 	split: { flexDirection: "row", alignItems: "center", gap: 12 },
 	km: { width: 40 },
 	track: { flex: 1, height: 6, borderRadius: 3, overflow: "hidden" },

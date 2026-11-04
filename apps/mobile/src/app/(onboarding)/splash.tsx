@@ -84,8 +84,8 @@ function LoaderDot({ color, index }: { color: string; index: number }) {
 
 const styles = StyleSheet.create({
 	center: { flex: 1, alignItems: "center", justifyContent: "center" },
-	brand: { alignItems: "center", gap: 18 },
-	words: { alignItems: "center", gap: 6 },
+	brand: { alignItems: "center", gap: 20 },
+	words: { alignItems: "center", gap: 8 },
 	loader: { width: 40, height: 22, flexDirection: "row", alignItems: "center", gap: 8 },
 	dot: { width: 8, height: 8, borderRadius: 4 },
 	maker: { alignItems: "center" },

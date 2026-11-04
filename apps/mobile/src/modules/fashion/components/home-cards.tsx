@@ -441,7 +441,7 @@ export function CapsuleCard({
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	card: { gap: 14, padding: 16, borderRadius: 20 },
+	card: { gap: 16, padding: 16, borderRadius: 20 },
 	headRow: { flexDirection: "row", alignItems: "center", gap: 8 },
 	dots: { flexDirection: "row", gap: 4 },
 	dot: { width: 6, height: 6, borderRadius: 3 },
@@ -449,14 +449,14 @@ const styles = StyleSheet.create({
 	row: { flexDirection: "row", gap: 8 },
 	tile: { flex: 1 },
 	legend: { flexDirection: "row", flexWrap: "wrap", columnGap: 16, rowGap: 8 },
-	legendItem: { flexDirection: "row", alignItems: "center", gap: 6 },
+	legendItem: { flexDirection: "row", alignItems: "center", gap: 8 },
 	parts: { flexDirection: "row", gap: 8 },
 	part: { flex: 1, gap: 2, padding: 12, borderRadius: 18 },
-	scent: { flexDirection: "row", alignItems: "center", gap: 12, padding: 10, borderRadius: 20 },
+	scent: { flexDirection: "row", alignItems: "center", gap: 12, padding: 12, borderRadius: 20 },
 	actions: { flexDirection: "row", gap: 8 },
 	bar: { flexDirection: "row", gap: 4, height: 24 },
-	closet: { gap: 10 },
-	closetItem: { width: 88, gap: 6 },
+	closet: { gap: 12 },
+	closetItem: { width: 88, gap: 8 },
 	flag: { width: 8, height: 8, borderRadius: 4 },
 	wish: {
 		flexDirection: "row",
@@ -467,7 +467,7 @@ const styles = StyleSheet.create({
 	},
 	rail: { height: 64, justifyContent: "flex-start" },
 	railLine: { height: 3, borderRadius: 2 },
-	hangers: { flexDirection: "row", justifyContent: "space-around", paddingTop: 6 },
+	hangers: { flexDirection: "row", justifyContent: "space-around", paddingTop: 8 },
 	hanger: { width: 40, height: 46, borderStyle: "dashed", borderRadius: 8 },
 	chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 	chip: {

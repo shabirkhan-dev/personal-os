@@ -95,5 +95,5 @@ const styles = StyleSheet.create({
 
 		borderRadius: 18,
 	},
-	note: { paddingHorizontal: 6 },
+	note: { paddingHorizontal: 8 },
 });

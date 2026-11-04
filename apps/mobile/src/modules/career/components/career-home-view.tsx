@@ -368,5 +368,5 @@ export function CareerHomeView({ actionRequest }: HomeModuleViewProps) {
 }
 
 const styles = StyleSheet.create({
-	notice: { paddingHorizontal: 6 },
+	notice: { paddingHorizontal: 8 },
 });

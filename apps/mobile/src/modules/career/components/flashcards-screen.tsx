@@ -109,6 +109,6 @@ export function FlashcardsScreen({ deck }: { deck: string }) {
 const styles = StyleSheet.create({
 	center: { textAlign: "center" },
 	answer: { lineHeight: 30 },
-	code: { paddingHorizontal: 14, paddingVertical: 10, borderRadius: 14 },
-	source: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999 },
+	code: { paddingHorizontal: 16, paddingVertical: 12, borderRadius: 14 },
+	source: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999 },
 });

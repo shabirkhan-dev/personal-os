@@ -113,5 +113,5 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "center",
 	},
-	body: { gap: 14 },
+	body: { gap: 16 },
 });

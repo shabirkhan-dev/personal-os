@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
 	list: { gap: 0, paddingVertical: 4 },
 	options: { gap: 8 },
 	option: { gap: 2, padding: 16 },
-	reach: { gap: 14, padding: 16 },
+	reach: { gap: 16, padding: 16 },
 	reachRow: { flexDirection: "row", alignItems: "center", gap: 12 },
 	reachText: { flex: 1, gap: 2 },
 	times: { gap: 8 },

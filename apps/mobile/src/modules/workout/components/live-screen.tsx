@@ -440,14 +440,14 @@ const styles = StyleSheet.create({
 	chip: {
 		flexDirection: "row",
 		alignItems: "center",
-		gap: 6,
+		gap: 8,
 		paddingHorizontal: 12,
 		paddingVertical: 8,
 		borderRadius: 16,
 		opacity: 0.9,
 	},
 	setRow: { flexDirection: "row", alignItems: "center" },
-	stepper: { flexDirection: "row", gap: 10, marginLeft: "auto" },
+	stepper: { flexDirection: "row", gap: 12, marginLeft: "auto" },
 	round: {
 		width: 44,
 		height: 44,

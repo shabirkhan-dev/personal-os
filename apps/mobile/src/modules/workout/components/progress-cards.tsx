@@ -344,7 +344,7 @@ const styles = StyleSheet.create({
 	readiness: {
 		flexDirection: "row",
 		alignItems: "center",
-		gap: 14,
+		gap: 16,
 		padding: 16,
 		borderRadius: 20,
 	},
@@ -358,7 +358,7 @@ const styles = StyleSheet.create({
 	},
 	chips: { gap: 8, paddingVertical: 2 },
 	chipsRow: { flexDirection: "row", gap: 8 },
-	line: { flexDirection: "row", alignItems: "center", gap: 10 },
+	line: { flexDirection: "row", alignItems: "center", gap: 12 },
 	block: { gap: 4 },
 	aiHead: { flexDirection: "row", alignItems: "center", gap: 8 },
 });

@@ -396,17 +396,17 @@ function PaymentSheet({ amount, onClose }: { amount: number; onClose: () => void
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	card: { gap: 14, padding: 16, borderRadius: 20 },
+	card: { gap: 16, padding: 16, borderRadius: 20 },
 	dueRow: { flexDirection: "row", alignItems: "center", gap: 8 },
 	badge: {
 		flexDirection: "row",
 		alignItems: "center",
 		gap: 4,
-		paddingHorizontal: 10,
-		paddingVertical: 6,
+		paddingHorizontal: 12,
+		paddingVertical: 8,
 		borderRadius: 10,
 	},
-	barWrap: { paddingTop: 18 },
+	barWrap: { paddingTop: 20 },
 	nisabLabel: {
 		position: "absolute",
 		top: 0,
@@ -414,10 +414,10 @@ const styles = StyleSheet.create({
 		width: 120,
 		textAlign: "center",
 	},
-	bar: { height: 10, flexDirection: "row", gap: 3 },
+	bar: { height: 10, flexDirection: "row", gap: 4 },
 	nisabMark: { position: "absolute", top: 14, width: 2, height: 18, marginLeft: -1 },
 	legend: { flexDirection: "row", flexWrap: "wrap", gap: 16 },
-	legendItem: { flexDirection: "row", alignItems: "center", gap: 6 },
+	legendItem: { flexDirection: "row", alignItems: "center", gap: 8 },
 	dot: { width: 8, height: 8, borderRadius: 4 },
 	list: { borderRadius: 20, paddingHorizontal: 16, paddingBottom: 12 },
 	initials: {
@@ -438,5 +438,5 @@ const styles = StyleSheet.create({
 
 		borderStyle: "dashed",
 	},
-	note: { flexDirection: "row", alignItems: "center", gap: 10, padding: 14, borderRadius: 20 },
+	note: { flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderRadius: 20 },
 });

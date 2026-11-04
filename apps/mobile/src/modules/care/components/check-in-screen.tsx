@@ -141,9 +141,9 @@ export function CheckInScreen() {
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	metric: { gap: 10, paddingVertical: 6 },
+	metric: { gap: 12, paddingVertical: 8 },
 	head: { flexDirection: "row", alignItems: "center" },
-	scale: { flexDirection: "row", gap: 6 },
+	scale: { flexDirection: "row", gap: 8 },
 	score: {
 		flex: 1,
 		height: 44,

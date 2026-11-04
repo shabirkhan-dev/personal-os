@@ -263,10 +263,10 @@ function clock(ms: number): string {
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
 	row: { flexDirection: "row", alignItems: "center", gap: 8 },
-	notice: { paddingHorizontal: 6 },
+	notice: { paddingHorizontal: 8 },
 	timer: { alignItems: "center", gap: 8, padding: 16, borderRadius: 20 },
-	week: { gap: 14, padding: 16, borderRadius: 20 },
-	dayRow: { flexDirection: "row", alignItems: "center", gap: 14 },
+	week: { gap: 16, padding: 16, borderRadius: 20 },
+	dayRow: { flexDirection: "row", alignItems: "center", gap: 16 },
 	check: {
 		width: 22,
 		height: 22,

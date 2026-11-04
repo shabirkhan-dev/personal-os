@@ -88,14 +88,14 @@ export function ModuleRowsPreview() {
 }
 
 const styles = StyleSheet.create({
-	list: { gap: 10 },
+	list: { gap: 12 },
 	row: {
 		height: 64,
 		flexDirection: "row",
 		alignItems: "center",
 		gap: 12,
 		paddingLeft: 8,
-		paddingRight: 18,
+		paddingRight: 20,
 		borderRadius: 32,
 	},
 	dimmed: { opacity: 0.45 },

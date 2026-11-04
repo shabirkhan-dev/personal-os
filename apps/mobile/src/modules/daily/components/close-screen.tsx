@@ -186,8 +186,8 @@ export function CloseScreen() {
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	result: { flexDirection: "row", alignItems: "baseline", gap: 10 },
-	energy: { flexDirection: "row", gap: 6 },
+	result: { flexDirection: "row", alignItems: "baseline", gap: 12 },
+	energy: { flexDirection: "row", gap: 8 },
 	score: {
 		flex: 1,
 		height: 40,
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "center",
 	},
-	input: { paddingHorizontal: 14, paddingVertical: 12, borderRadius: 16 },
+	input: { paddingHorizontal: 16, paddingVertical: 12, borderRadius: 16 },
 	tomorrow: { flexDirection: "row", alignItems: "center", gap: 12 },
 	bar: { width: 3, height: 32, borderRadius: 2 },
 });

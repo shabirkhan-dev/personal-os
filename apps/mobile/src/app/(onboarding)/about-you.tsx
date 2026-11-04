@@ -86,7 +86,7 @@ export default function AboutYouScreen() {
 }
 
 const styles = StyleSheet.create({
-	form: { gap: 18 },
+	form: { gap: 20 },
 	group: { gap: 8 },
 	field: { height: 56, borderRadius: 28, paddingHorizontal: 20 },
 	gap14: { height: 14 },

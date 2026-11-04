@@ -38,7 +38,7 @@ export function TextBlock({ eyebrow, title, body, dot, compact = false }: TextBl
 
 const styles = StyleSheet.create({
 	block: { gap: 8, paddingHorizontal: 4 },
-	welcome: { gap: 10 },
+	welcome: { gap: 12 },
 	eyebrow: { flexDirection: "row", alignItems: "center", gap: 8 },
 	dot: { width: 8, height: 8, borderRadius: 4 },
 });

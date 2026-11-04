@@ -165,7 +165,7 @@ export default function YourDayScreen() {
 
 const styles = StyleSheet.create({
 	form: { gap: 16 },
-	times: { flexDirection: "row", gap: 10 },
+	times: { flexDirection: "row", gap: 12 },
 	group: { gap: 8 },
 	flex: { flex: 1 },
 	field: {

@@ -62,7 +62,7 @@ export function ModuleRowsPreview() {
 					<View
 						style={[
 							styles.row,
-							{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
+							{ backgroundColor: colors.bgSurface },
 							row.dimmed ? styles.dimmed : null,
 						]}
 					>
@@ -88,16 +88,15 @@ export function ModuleRowsPreview() {
 }
 
 const styles = StyleSheet.create({
-	list: { gap: 10 },
+	list: { gap: 12 },
 	row: {
 		height: 64,
 		flexDirection: "row",
 		alignItems: "center",
 		gap: 12,
 		paddingLeft: 8,
-		paddingRight: 18,
+		paddingRight: 20,
 		borderRadius: 32,
-		borderWidth: 1,
 	},
 	dimmed: { opacity: 0.45 },
 	tile: { width: 48, height: 48, borderRadius: 24, alignItems: "center", justifyContent: "center" },

@@ -5,13 +5,12 @@ import { PoText } from "@/components/ui/po-text";
 import { toShadowStyle, usePoTheme } from "@/theme";
 import { haptics } from "@/lib/haptics";
 
-export type TabId = "today" | "areas" | "insights" | "profile";
+export type TabId = "today" | "insights" | "profile";
 
 type Tab = { id: TabId; label: string; icon: IconName };
 
 const tabs: readonly Tab[] = [
 	{ id: "today", label: "Today", icon: "Filled/Home" },
-	{ id: "areas", label: "Areas", icon: "Filled/Grid" },
 	{ id: "insights", label: "Insights", icon: "Filled/Chart" },
 	{ id: "profile", label: "Profile", icon: "Filled/User" },
 ];
@@ -20,14 +19,14 @@ export type FloatingTabBarProps = {
 	active: "today" | "insights" | "profile";
 	bottomInset: number;
 	onTodayPress?: () => void;
-	onAreasPress?: () => void;
 	/** Disabled only when none of the person's modules has Insights. */
 	onInsightsPress?: () => void;
 	onProfilePress?: () => void;
 };
 
 /**
- * Kit v2 "Floating Tab Bar". Areas opens the module picker; Insights opens this module's Insights
+ * Kit v2 "Floating Tab Bar": Today, Insights and Profile (the header's grid button switches
+ * modules). Insights opens this module's Insights
  * or the last one opened. A tab without a handler is disabled. It sits just above the home
  * indicator.
  */
@@ -35,14 +34,12 @@ export function FloatingTabBar({
 	active: activeTab,
 	bottomInset,
 	onTodayPress,
-	onAreasPress,
 	onInsightsPress,
 	onProfilePress,
 }: FloatingTabBarProps) {
 	const { colors } = usePoTheme();
 	const handlers: Partial<Record<TabId, () => void>> = {
 		today: onTodayPress,
-		areas: onAreasPress,
 		insights: onInsightsPress,
 		profile: onProfilePress,
 	};
@@ -74,7 +71,7 @@ export function FloatingTabBar({
 							}
 							style={[
 								active ? styles.active : styles.icon,
-								active ? { backgroundColor: colors.bgHover } : styles.inactive,
+								active ? { backgroundColor: colors.accentSubtle } : styles.inactive,
 							]}
 						>
 							<Icon name={tab.icon} color={active ? colors.textLink : colors.textPrimary} />
@@ -105,7 +102,7 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		alignItems: "center",
 		gap: 8,
-		paddingLeft: 14,
+		paddingLeft: 16,
 		paddingRight: 16,
 		borderRadius: 22,
 	},

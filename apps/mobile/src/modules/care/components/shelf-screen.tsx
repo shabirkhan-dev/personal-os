@@ -247,8 +247,8 @@ export function ShelfScreen() {
 }
 
 const styles = StyleSheet.create({
-	row: { gap: 10 },
-	item: { width: 96, gap: 6 },
+	row: { gap: 12 },
+	item: { width: 96, gap: 8 },
 	sheet: { gap: 12 },
 	chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 });

@@ -58,7 +58,6 @@ export function ProgramRow({
 				styles.row,
 				{
 					backgroundColor: colors.bgSurface,
-					borderColor: colors.borderDefault,
 				},
 			]}
 		>
@@ -95,10 +94,7 @@ export function ActiveProgramCard({
 		<Pressable
 			accessibilityRole="button"
 			onPress={onPress}
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
+			style={[styles.card, { backgroundColor: colors.bgSurface }]}
 		>
 			<View style={styles.head}>
 				<PoText variant="eyebrow11" tone="accentDefault">
@@ -127,7 +123,7 @@ export function ActiveProgramCard({
 export function ProgramPromptCard({ onPress }: { onPress: () => void }) {
 	const { colors } = usePoTheme();
 	return (
-		<View style={[styles.card, { backgroundColor: colors.bgSubtle, borderColor: colors.bgSubtle }]}>
+		<View style={[styles.card, { backgroundColor: colors.bgSubtle }]}>
 			<PoText variant="title18">Follow a program</PoText>
 			<PoText variant="meta13" tone="textSecondary">
 				Weeks with a goal, exercises that move up as you get stronger, built around your team days.
@@ -139,14 +135,14 @@ export function ProgramPromptCard({ onPress }: { onPress: () => void }) {
 }
 
 const styles = StyleSheet.create({
-	flex: { flex: 1, gap: 3 },
+	flex: { flex: 1, gap: 4 },
 	row: {
 		flexDirection: "row",
 		alignItems: "center",
-		gap: 14,
+		gap: 16,
 		padding: 12,
 		borderRadius: 20,
 	},
-	card: { gap: 10, padding: 16, borderRadius: 20 },
+	card: { gap: 12, padding: 16, borderRadius: 20 },
 	head: { flexDirection: "row", alignItems: "center" },
 });

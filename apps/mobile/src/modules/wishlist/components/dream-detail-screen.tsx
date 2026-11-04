@@ -377,12 +377,12 @@ function PlanRow({
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
 	priceRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-	tag: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999 },
-	box: { gap: 6, padding: 16, borderRadius: 20 },
+	tag: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: 999 },
+	box: { gap: 8, padding: 16, borderRadius: 20 },
 	plan: { gap: 4 },
 	head: { flexDirection: "row", alignItems: "center" },
-	planRow: { flexDirection: "row", alignItems: "center", paddingVertical: 6 },
-	saved: { gap: 6, paddingTop: 8 },
-	check: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 7 },
-	notice: { paddingHorizontal: 6 },
+	planRow: { flexDirection: "row", alignItems: "center", paddingVertical: 8 },
+	saved: { gap: 8, paddingTop: 8 },
+	check: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8 },
+	notice: { paddingHorizontal: 8 },
 });

@@ -61,7 +61,7 @@ describe("library", () => {
 		}
 		for (const photo of photos) {
 			expect(
-				existsSync(join(import.meta.dir, "../../../../assets/training", `${photo}.webp`)),
+				existsSync(join(import.meta.dir, "../../../../app-photos/training", `${photo}.webp`)),
 			).toBe(true);
 		}
 		expect(templateById("push-handstand")?.exercises).toHaveLength(7);

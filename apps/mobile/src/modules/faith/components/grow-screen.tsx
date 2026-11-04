@@ -90,12 +90,7 @@ export function GrowScreen() {
 			<ScreenTitle eyebrow="Challenges · paths · resources" title="Grow in faith" />
 
 			<SectionLabel>Challenge</SectionLabel>
-			<View
-				style={[
-					styles.card,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 				{challenge ? (
 					<>
 						<View style={styles.head}>
@@ -121,7 +116,7 @@ export function GrowScreen() {
 										challenge.done.includes(day)
 											? { backgroundColor: colors.statusSuccess }
 											: day === today
-												? { borderWidth: 1.5, borderColor: colors.accentDefault }
+												? {}
 												: { backgroundColor: colors.bgSubtle },
 									]}
 								/>
@@ -213,10 +208,7 @@ export function GrowScreen() {
 					accessibilityRole="button"
 					onPress={() => open(resource)}
 					onLongPress={() => edit(resource)}
-					style={[
-						styles.resource,
-						{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-					]}
+					style={[styles.resource, { backgroundColor: colors.bgSurface }]}
 				>
 					<IconTile
 						name={KIND_ICON[resource.kind]}
@@ -241,11 +233,7 @@ export function GrowScreen() {
 					</View>
 				</Pressable>
 			))}
-			<Pressable
-				accessibilityRole="button"
-				onPress={() => edit(null)}
-				style={[styles.add, { borderColor: colors.borderDefault }]}
-			>
+			<Pressable accessibilityRole="button" onPress={() => edit(null)} style={[styles.add, {}]}>
 				<Icon name="Line/Plus" size={16} color={colors.textSecondary} />
 				<PoText variant="meta13" tone="textSecondary">
 					Add a note or link
@@ -327,12 +315,7 @@ function PathSheet({
 							last={index === path.lessons.length - 1}
 							leading={
 								<View
-									style={[
-										styles.check,
-										checked
-											? { backgroundColor: colors.accentDefault, borderColor: colors.accentDefault }
-											: { borderColor: colors.borderStrong },
-									]}
+									style={[styles.check, checked ? { backgroundColor: colors.accentDefault } : {}]}
 								>
 									{checked ? (
 										<Icon name="Check bold" size={12} color={colors.textOnAccent} />
@@ -434,9 +417,9 @@ function ResourceSheet({ resource, onClose }: { resource: Resource | null; onClo
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	card: { gap: 14, padding: 16, borderRadius: 20 },
+	card: { gap: 16, padding: 16, borderRadius: 20 },
 	head: { flexDirection: "row", alignItems: "center", gap: 12 },
-	days: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
+	days: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 	day: { width: "8.6%", aspectRatio: 1, borderRadius: 6 },
 	actions: { flexDirection: "row", gap: 8 },
 	filters: { gap: 8 },
@@ -448,14 +431,14 @@ const styles = StyleSheet.create({
 		gap: 8,
 		height: 52,
 		borderRadius: 26,
-		borderWidth: 1,
+
 		borderStyle: "dashed",
 	},
 	check: {
 		width: 22,
 		height: 22,
 		borderRadius: 11,
-		borderWidth: 1.5,
+
 		alignItems: "center",
 		justifyContent: "center",
 	},

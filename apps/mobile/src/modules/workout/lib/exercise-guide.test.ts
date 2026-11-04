@@ -5,7 +5,7 @@ import { CATALOG, DEMO_IDS, guideFor, videoSearchUrl } from "./exercise-guide";
 import { TEMPLATES } from "./library";
 
 const framesSource = readFileSync(join(import.meta.dir, "demo-frames.ts"), "utf8");
-const demosDir = join(import.meta.dir, "../../../../assets/training/demos");
+const demosDir = join(import.meta.dir, "../../../../app-photos/training/demos");
 
 describe("exercise guides", () => {
 	it("covers every exercise the fixed sessions plan, apart from team sport", () => {

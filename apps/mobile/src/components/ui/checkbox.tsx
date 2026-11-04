@@ -1,4 +1,3 @@
-import { stroke } from "@personal-os/tokens";
 import { useEffect } from "react";
 import { StyleSheet } from "react-native";
 import Animated, {
@@ -31,18 +30,11 @@ export function Checkbox({ checked, size = 24 }: CheckboxProps) {
 		progress.value = withTiming(checked ? 1 : 0, { duration: 160 });
 	}, [checked, progress]);
 
-	const ringWidth = size === 20 ? stroke.selected : stroke.ring;
-
 	const boxStyle = useAnimatedStyle(() => ({
 		backgroundColor: interpolateColor(
 			progress.value,
 			[0, 1],
-			[`${colors.accentDefault}00`, colors.accentDefault],
-		),
-		borderColor: interpolateColor(
-			progress.value,
-			[0, 1],
-			[colors.textTertiary, colors.accentDefault],
+			[colors.bgHover, colors.accentDefault],
 		),
 	}));
 
@@ -55,11 +47,7 @@ export function Checkbox({ checked, size = 24 }: CheckboxProps) {
 		<Animated.View
 			accessibilityRole="checkbox"
 			accessibilityState={{ checked }}
-			style={[
-				styles.box,
-				{ width: size, height: size, borderRadius: size / 2, borderWidth: ringWidth },
-				boxStyle,
-			]}
+			style={[styles.box, { width: size, height: size, borderRadius: size / 2 }, boxStyle]}
 		>
 			<Animated.View style={checkStyle}>
 				<Icon name="Check bold" size={checkSize[size]} color={colors.textOnAccent} />

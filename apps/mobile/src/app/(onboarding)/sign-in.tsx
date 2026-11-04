@@ -147,8 +147,8 @@ function SignedInActions({ saved }: { saved: SavedPlan }) {
 const styles = StyleSheet.create({
 	spacer: { flex: 1 },
 	gap: { height: 32 },
-	brand: { alignItems: "center", gap: 22 },
-	text: { alignItems: "center", gap: 10, paddingHorizontal: 4 },
+	brand: { alignItems: "center", gap: 24 },
+	text: { alignItems: "center", gap: 12, paddingHorizontal: 4 },
 	center: { textAlign: "center" },
 	footer: { gap: 8 },
 });

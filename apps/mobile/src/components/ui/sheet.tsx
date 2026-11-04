@@ -54,7 +54,6 @@ export function Sheet({ visible, title, onClose, children, action, footer }: She
 						styles.sheet,
 						{
 							backgroundColor: colors.bgSurface,
-							borderColor: colors.borderDefault,
 							paddingBottom: keyboard > 0 ? keyboard + 12 : Math.max(20, insets.bottom + 12),
 						},
 					]}
@@ -103,7 +102,7 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 20,
 		borderTopLeftRadius: 28,
 		borderTopRightRadius: 28,
-		borderWidth: 1,
+
 		borderBottomWidth: 0,
 	},
 	head: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
@@ -114,5 +113,5 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "center",
 	},
-	body: { gap: 14 },
+	body: { gap: 16 },
 });

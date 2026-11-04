@@ -135,9 +135,7 @@ export function CardStack({
 				style={[
 					styles.card,
 					{
-						backgroundColor: colors.bgSurface,
-						borderColor: review.flipped ? colors.statusSuccess : colors.borderDefault,
-						borderWidth: review.flipped ? 1.5 : 1,
+						backgroundColor: review.flipped ? colors.statusSuccessSubtle : colors.bgSurface,
 					},
 				]}
 			>
@@ -215,16 +213,16 @@ const styles = StyleSheet.create({
 		height: 416,
 		borderRadius: 20,
 		padding: 16,
-		gap: 14,
+		gap: 16,
 		alignItems: "center",
 		justifyContent: "center",
 	},
 	hint: {
 		flexDirection: "row",
 		alignItems: "center",
-		gap: 6,
-		paddingHorizontal: 14,
-		paddingVertical: 10,
+		gap: 8,
+		paddingHorizontal: 16,
+		paddingVertical: 12,
 		borderRadius: 999,
 	},
 	ratings: { flexDirection: "row", gap: 8, paddingTop: 4 },

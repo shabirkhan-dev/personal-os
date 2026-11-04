@@ -50,12 +50,7 @@ export function ZakatScreen() {
 		>
 			<ScreenTitle eyebrow={`Zakat · ${toHijri(now).year} AH`} title="Zakat" />
 
-			<View
-				style={[
-					styles.card,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 				<PoText variant="eyebrow11" tone="textTertiary">
 					Zakat due this year
 				</PoText>
@@ -129,12 +124,7 @@ export function ZakatScreen() {
 			</View>
 
 			<SectionLabel>Hawl · lunar year</SectionLabel>
-			<View
-				style={[
-					styles.card,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 				{since && dueOn ? (
 					<>
 						<View style={styles.dueRow}>
@@ -173,12 +163,7 @@ export function ZakatScreen() {
 			</View>
 
 			<SectionLabel>{`Paid this year · Rs ${lakhs(view.paid)} of ${lakhs(view.due)}`}</SectionLabel>
-			<View
-				style={[
-					styles.list,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.list, { backgroundColor: colors.bgSurface }]}>
 				{recent.map((payment) => (
 					<ListRow
 						key={payment.id}
@@ -217,7 +202,7 @@ export function ZakatScreen() {
 				<Pressable
 					accessibilityRole="button"
 					onPress={() => setPaying(view.left)}
-					style={[styles.addRow, { borderColor: colors.borderDefault }]}
+					style={[styles.addRow, {}]}
 				>
 					<Icon name="Line/Plus" size={16} color={colors.textSecondary} />
 					<PoText variant="meta13" tone="textSecondary">
@@ -411,17 +396,17 @@ function PaymentSheet({ amount, onClose }: { amount: number; onClose: () => void
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	card: { gap: 14, padding: 16, borderRadius: 20 },
+	card: { gap: 16, padding: 16, borderRadius: 20 },
 	dueRow: { flexDirection: "row", alignItems: "center", gap: 8 },
 	badge: {
 		flexDirection: "row",
 		alignItems: "center",
 		gap: 4,
-		paddingHorizontal: 10,
-		paddingVertical: 6,
+		paddingHorizontal: 12,
+		paddingVertical: 8,
 		borderRadius: 10,
 	},
-	barWrap: { paddingTop: 18 },
+	barWrap: { paddingTop: 20 },
 	nisabLabel: {
 		position: "absolute",
 		top: 0,
@@ -429,10 +414,10 @@ const styles = StyleSheet.create({
 		width: 120,
 		textAlign: "center",
 	},
-	bar: { height: 10, flexDirection: "row", gap: 3 },
+	bar: { height: 10, flexDirection: "row", gap: 4 },
 	nisabMark: { position: "absolute", top: 14, width: 2, height: 18, marginLeft: -1 },
 	legend: { flexDirection: "row", flexWrap: "wrap", gap: 16 },
-	legendItem: { flexDirection: "row", alignItems: "center", gap: 6 },
+	legendItem: { flexDirection: "row", alignItems: "center", gap: 8 },
 	dot: { width: 8, height: 8, borderRadius: 4 },
 	list: { borderRadius: 20, paddingHorizontal: 16, paddingBottom: 12 },
 	initials: {
@@ -450,8 +435,8 @@ const styles = StyleSheet.create({
 		height: 48,
 		marginTop: 8,
 		borderRadius: 24,
-		borderWidth: 1,
+
 		borderStyle: "dashed",
 	},
-	note: { flexDirection: "row", alignItems: "center", gap: 10, padding: 14, borderRadius: 20 },
+	note: { flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderRadius: 20 },
 });

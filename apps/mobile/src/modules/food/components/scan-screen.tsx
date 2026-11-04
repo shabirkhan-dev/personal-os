@@ -6,7 +6,6 @@ import { EmptyCard, ScreenTitle } from "@/components/module-ui";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
 import { haptics } from "@/lib/haptics";
-import { usePoTheme } from "@/theme";
 import { useFoodUi } from "../hooks/food-ui-store";
 import { lookupBarcode } from "../services/barcode-lookup";
 import { FoodScreen } from "./food-screen";
@@ -19,7 +18,6 @@ const MESSAGES = {
 
 /** Barcode: point the camera at a packet; the label's numbers go to the Log meal screen. */
 export function ScanScreen() {
-	const { colors } = usePoTheme();
 	const [permission, requestPermission] = useCameraPermissions();
 	const [status, setStatus] = useState<string | null>(null);
 	const busy = useRef(false);
@@ -54,17 +52,14 @@ export function ScanScreen() {
 		<FoodScreen>
 			<ScreenTitle eyebrow="Barcode" title="Scan a packet" />
 			{!permission ? null : permission.granted ? (
-				<View style={[styles.frame, { borderColor: colors.borderDefault }]}>
+				<View style={[styles.frame, {}]}>
 					<CameraView
 						style={styles.camera}
 						facing="back"
 						barcodeScannerSettings={{ barcodeTypes: ["ean13", "ean8", "upc_a", "upc_e"] }}
 						onBarcodeScanned={(result) => onCode(result.data)}
 					/>
-					<View
-						pointerEvents="none"
-						style={[styles.target, { borderColor: colors.accentDefault }]}
-					/>
+					<View pointerEvents="none" style={[styles.target, {}]} />
 				</View>
 			) : (
 				<EmptyCard
@@ -97,8 +92,8 @@ const styles = StyleSheet.create({
 		right: "12%",
 		top: "34%",
 		height: "32%",
-		borderWidth: 2,
+
 		borderRadius: 18,
 	},
-	note: { paddingHorizontal: 6 },
+	note: { paddingHorizontal: 8 },
 });

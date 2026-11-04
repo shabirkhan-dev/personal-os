@@ -51,7 +51,7 @@ export function OsCard({ member, ready }: OsCardProps) {
 		<View
 			style={[
 				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
+				{ backgroundColor: colors.bgSurface },
 				toShadowStyle(elevation.floating),
 			]}
 		>
@@ -81,7 +81,7 @@ export function OsCard({ member, ready }: OsCardProps) {
 						toShadowStyle(elevation.pocket),
 					]}
 				>
-					<View style={[styles.stitch, { borderColor: colors.borderDefault }]}>
+					<View style={[styles.stitch, {}]}>
 						<View style={styles.who}>
 							<Avatar name={answers.name} size={52} />
 							<View style={styles.whoText}>
@@ -154,14 +154,14 @@ const styles = StyleSheet.create({
 		top: 14,
 		height: 70,
 		paddingTop: 16,
-		paddingHorizontal: 18,
+		paddingHorizontal: 20,
 		borderRadius: 16,
 		flexDirection: "row",
 		justifyContent: "space-between",
 		alignItems: "flex-start",
 	},
 	inline8: { flexDirection: "row", alignItems: "center", gap: 8 },
-	inline6: { flexDirection: "row", alignItems: "center", gap: 6 },
+	inline6: { flexDirection: "row", alignItems: "center", gap: 8 },
 	dot8: { width: 8, height: 8, borderRadius: 4 },
 	dot10: { width: 10, height: 10, borderRadius: 5 },
 	pocket: { position: "absolute", left: -1, right: -1, top: 63, bottom: -1, borderRadius: 20 },
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
 		bottom: 12,
 		padding: 16,
 		borderRadius: 16,
-		borderWidth: 1.5,
+
 		borderStyle: "dashed",
 		justifyContent: "space-between",
 	},
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
 	whoText: { flex: 1, gap: 2 },
 	stats: { flexDirection: "row", alignItems: "center" },
 	stat: { flex: 1, alignItems: "center", gap: 2 },
-	number: { flexDirection: "row", alignItems: "baseline", gap: 3 },
+	number: { flexDirection: "row", alignItems: "baseline", gap: 4 },
 	divider: { width: 1, height: 32 },
 	bottom: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
 });

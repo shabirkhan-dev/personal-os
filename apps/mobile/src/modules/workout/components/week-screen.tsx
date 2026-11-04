@@ -84,8 +84,7 @@ export function WeekScreen() {
 						style={[
 							styles.day,
 							{
-								backgroundColor: colors.bgSurface,
-								borderColor: isToday ? colors.accentDefault : colors.borderDefault,
+								backgroundColor: isToday ? colors.accentSubtle : colors.bgSurface,
 							},
 						]}
 					>
@@ -218,16 +217,15 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		alignItems: "center",
 		gap: 12,
-		paddingHorizontal: 14,
+		paddingHorizontal: 16,
 		paddingVertical: 12,
 		borderRadius: 16,
-		borderWidth: 1,
 	},
 	name: { width: 36 },
 	bar: { width: 3, height: 32, borderRadius: 2 },
-	hint: { paddingHorizontal: 6 },
+	hint: { paddingHorizontal: 8 },
 	sheet: { gap: 8 },
-	chips: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
+	chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 	chip: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 16 },
-	option: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 6 },
+	option: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8 },
 });

@@ -289,7 +289,7 @@ export function RoutineScreen({ routine }: { routine: Routine }) {
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	hint: { paddingHorizontal: 6 },
+	hint: { paddingHorizontal: 8 },
 	sheet: { gap: 12 },
 	chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 });

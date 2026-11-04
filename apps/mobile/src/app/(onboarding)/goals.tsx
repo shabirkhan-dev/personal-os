@@ -111,9 +111,9 @@ function GoalCard({
 }
 
 const styles = StyleSheet.create({
-	grid: { gap: 10 },
-	row: { flexDirection: "row", gap: 10 },
-	card: { flex: 1, gap: 12, paddingTop: 14, paddingBottom: 16, paddingHorizontal: 14 },
+	grid: { gap: 12 },
+	row: { flexDirection: "row", gap: 12 },
+	card: { flex: 1, gap: 12, paddingTop: 16, paddingBottom: 16, paddingHorizontal: 16 },
 	top: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
 	tile: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
 	rank: { width: 28, height: 28, borderRadius: 14, alignItems: "center", justifyContent: "center" },

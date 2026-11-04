@@ -403,6 +403,6 @@ export function CareHomeView({ actionRequest }: HomeModuleViewProps) {
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
 	ask: { gap: 12 },
-	notice: { paddingHorizontal: 6 },
-	locate: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 6 },
+	notice: { paddingHorizontal: 8 },
+	locate: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 8 },
 });

@@ -32,12 +32,7 @@ export function TodayPrayersCard({
 }) {
 	const { colors } = usePoTheme();
 	return (
-		<View
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
+		<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 			<View style={styles.head}>
 				<PoText variant="title18" style={styles.flex}>
 					Today's prayers
@@ -75,9 +70,9 @@ function PrayerTimelineRow({
 	const dot = done
 		? { backgroundColor: colors.statusSuccess }
 		: next
-			? { borderWidth: 2, borderColor: colors.accentDefault }
+			? {}
 			: row.state === "missed" || row.state === "due"
-				? { borderWidth: 1.5, borderColor: colors.textTertiary }
+				? {}
 				: { backgroundColor: colors.borderDefault };
 	const pill = PILLS[row.state];
 
@@ -143,17 +138,12 @@ export function SetupCard({
 }) {
 	const { colors } = usePoTheme();
 	return (
-		<View
-			style={[
-				styles.setup,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
+		<View style={[styles.setup, { backgroundColor: colors.bgSurface }]}>
 			<IconTile name="Moon" tone="statusSuccess" tile="statusSuccessSubtle" size={56} />
 			<PoText variant="title18">Set up your prayers</PoText>
 			<PoText variant="body15" tone="textSecondary" style={styles.center}>
-				Takes ten seconds. I'll find the Fajr, Maghrib and Isha times for where you are and remind
-				you gently before each one.
+				Takes ten seconds. Prayer times are worked out for where you are, with a gentle reminder
+				before each one.
 			</PoText>
 			{error ? (
 				<PoText variant="meta13" tone="textDanger" style={styles.center}>
@@ -184,12 +174,7 @@ export function NeverMissCard({
 }) {
 	const { colors } = usePoTheme();
 	return (
-		<View
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
+		<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 			<View style={styles.eyebrow}>
 				<Icon name="Filled/Sparkle" size={14} color={colors.statusViolet} />
 				<PoText variant="eyebrow11" tone="textTertiary">
@@ -230,7 +215,6 @@ export function Shortcuts({ items }: { items: readonly Shortcut[] }) {
 									styles.shortcutCircle,
 									{
 										backgroundColor: pressed ? colors.bgHover : colors.bgSurface,
-										borderColor: colors.borderDefault,
 									},
 								]}
 							>
@@ -254,14 +238,11 @@ export function ConsistencyCard({ grid }: { grid: readonly GridRow[] }) {
 		state === "prayed"
 			? { backgroundColor: colors.statusSuccess }
 			: state === "late"
-				? { borderWidth: 1, borderStyle: "dashed" as const, borderColor: colors.statusCaution }
+				? { borderStyle: "dashed" as const }
 				: { backgroundColor: colors.bgSubtle };
 	return (
 		<View
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
+			style={[styles.card, { backgroundColor: colors.bgSurface }]}
 			accessibilityLabel={grid
 				.map(
 					(row) =>
@@ -313,11 +294,11 @@ const styles = StyleSheet.create({
 	flex: { flex: 1 },
 	full: { alignSelf: "stretch" },
 	center: { textAlign: "center" },
-	card: { gap: 14, padding: 16, borderRadius: 20 },
+	card: { gap: 16, padding: 16, borderRadius: 20 },
 	head: { flexDirection: "row", alignItems: "center" },
 	row: { flexDirection: "row", gap: 12 },
-	when: { width: 44, paddingTop: 1 },
-	rail: { width: 12, alignItems: "center", gap: 4, paddingTop: 5 },
+	when: { width: 44, paddingTop: 2 },
+	rail: { width: 12, alignItems: "center", gap: 4, paddingTop: 4 },
 	dot: { width: 10, height: 10, borderRadius: 5 },
 	line: { flex: 1, width: 2, borderRadius: 1 },
 	rowText: { flex: 1, gap: 2 },
@@ -327,10 +308,10 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		gap: 4,
 		height: 26,
-		paddingHorizontal: 10,
+		paddingHorizontal: 12,
 		borderRadius: 8,
 	},
-	setup: { alignItems: "center", gap: 14, padding: 16, borderRadius: 20 },
+	setup: { alignItems: "center", gap: 16, padding: 16, borderRadius: 20 },
 	eyebrow: { flexDirection: "row", alignItems: "center", gap: 8 },
 	actions: { flexDirection: "row", gap: 8 },
 	shortcuts: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 4 },
@@ -339,16 +320,16 @@ const styles = StyleSheet.create({
 		width: 60,
 		height: 60,
 		borderRadius: 30,
-		borderWidth: 1,
+
 		alignItems: "center",
 		justifyContent: "center",
 	},
 	consistencyHead: { flexDirection: "row", alignItems: "center", gap: 12 },
-	chip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16 },
+	chip: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 16 },
 	grid: { gap: 8 },
-	gridRow: { flexDirection: "row", gap: 6 },
+	gridRow: { flexDirection: "row", gap: 8 },
 	cell: { flex: 1, height: 18, borderRadius: 9 },
-	legend: { flexDirection: "row", gap: 18 },
-	legendItem: { flexDirection: "row", alignItems: "center", gap: 6 },
+	legend: { flexDirection: "row", gap: 20 },
+	legendItem: { flexDirection: "row", alignItems: "center", gap: 8 },
 	legendCell: { width: 26, height: 14, borderRadius: 7 },
 });

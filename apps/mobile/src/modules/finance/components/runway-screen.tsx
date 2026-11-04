@@ -262,10 +262,10 @@ function MinimumSheet({
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	chips: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
-	rows: { gap: 14, paddingVertical: 4 },
+	chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+	rows: { gap: 16, paddingVertical: 4 },
 	minRow: { flexDirection: "row", alignItems: "center", paddingVertical: 4 },
 	sheet: { gap: 12 },
-	sheetRow: { flexDirection: "row", gap: 10 },
+	sheetRow: { flexDirection: "row", gap: 12 },
 	amountField: { width: 120 },
 });

@@ -137,7 +137,7 @@ export function FashionHomeView({ actionRequest }: HomeModuleViewProps) {
 			say(
 				first
 					? `Offline pick: ${first.name}, ${first.clothes.map((piece) => piece.name.toLowerCase()).join(", ")}.`
-					: "Add a few tops and bottoms and I'll put looks together.",
+					: "Add a few tops and bottoms to get outfit ideas.",
 				spoken,
 			);
 			return;
@@ -379,8 +379,8 @@ export function FashionHomeView({ actionRequest }: HomeModuleViewProps) {
 
 const styles = StyleSheet.create({
 	ask: { gap: 12 },
-	notice: { paddingHorizontal: 6 },
-	missing: { gap: 12, padding: 18 },
+	notice: { paddingHorizontal: 8 },
+	missing: { gap: 12, padding: 20 },
 	flex: { flex: 1 },
-	weatherRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 6 },
+	weatherRow: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 8 },
 });

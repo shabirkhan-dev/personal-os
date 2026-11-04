@@ -132,10 +132,7 @@ export function BodyScreen() {
 						haptics.tap();
 						void tick(today, nail, stepsOn(steps, nail.routine, today)).catch(failed("log nails"));
 					}}
-					style={[
-						styles.nail,
-						{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-					]}
+					style={[styles.nail, { backgroundColor: colors.bgSurface }]}
 				>
 					<ProductImage photo={nailKit?.photo ?? "catalog:nail-kit"} size={72} radius={16} />
 					<View style={styles.flex}>
@@ -257,15 +254,15 @@ export function BodyScreen() {
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	area: { gap: 6, paddingVertical: 6 },
+	area: { gap: 8, paddingVertical: 8 },
 	areaHead: { flexDirection: "row", alignItems: "center", gap: 8 },
 	nail: {
 		flexDirection: "row",
 		alignItems: "center",
-		gap: 14,
-		padding: 14,
+		gap: 16,
+		padding: 16,
 		borderRadius: 20,
 	},
-	habit: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 6 },
+	habit: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8 },
 	sheet: { gap: 12 },
 });

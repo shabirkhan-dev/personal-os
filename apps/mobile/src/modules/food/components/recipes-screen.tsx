@@ -136,10 +136,7 @@ export function RecipesScreen() {
 					<Pressable
 						accessibilityRole="button"
 						onPress={() => foodRoutes.recipe(featured.id)}
-						style={[
-							styles.featured,
-							{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-						]}
+						style={[styles.featured, { backgroundColor: colors.bgSurface }]}
 					>
 						<MealImage recipeId={featured.id} hero size={200} fill radius={22} />
 						<View style={styles.featuredText}>
@@ -170,7 +167,7 @@ export function RecipesScreen() {
 					{query.trim()
 						? `${shown.length} found`
 						: showFeatured
-							? "More for you"
+							? "More recipes"
 							: `${shown.length} recipes`}
 				</PoText>
 			</View>
@@ -187,10 +184,7 @@ export function RecipesScreen() {
 							key={recipe.id}
 							accessibilityRole="button"
 							onPress={() => foodRoutes.recipe(recipe.id)}
-							style={[
-								styles.tile,
-								{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-							]}
+							style={[styles.tile, { backgroundColor: colors.bgSurface }]}
 						>
 							<MealImage recipeId={recipe.id} size={110} fill radius={18} />
 							<View style={styles.tileText}>
@@ -216,15 +210,15 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		gap: 8,
 		height: 48,
-		paddingHorizontal: 14,
+		paddingHorizontal: 16,
 		borderRadius: 24,
 	},
 	filters: { gap: 8 },
-	tip: { flexDirection: "row", gap: 10, paddingHorizontal: 6 },
+	tip: { flexDirection: "row", gap: 12, paddingHorizontal: 8 },
 	featured: { padding: 8, borderRadius: 20 },
-	featuredText: { gap: 6, padding: 10 },
+	featuredText: { gap: 8, padding: 12 },
 	featuredHead: { flexDirection: "row", alignItems: "center", gap: 8 },
-	fits: { flexDirection: "row", alignItems: "center", gap: 6 },
+	fits: { flexDirection: "row", alignItems: "center", gap: 8 },
 	dot: { width: 6, height: 6, borderRadius: 3 },
 	heart: {
 		width: 36,
@@ -233,9 +227,9 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "center",
 	},
-	sectionHead: { paddingHorizontal: 6, paddingTop: 4 },
-	none: { paddingHorizontal: 6 },
-	grid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
-	tile: { width: "48.5%", padding: 6, borderRadius: 20 },
+	sectionHead: { paddingHorizontal: 8, paddingTop: 4 },
+	none: { paddingHorizontal: 8 },
+	grid: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
+	tile: { width: "48.5%", padding: 8, borderRadius: 20 },
 	tileText: { gap: 2, padding: 8 },
 });

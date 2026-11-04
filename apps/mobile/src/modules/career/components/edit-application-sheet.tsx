@@ -120,6 +120,6 @@ export function EditApplicationSheet({
 }
 
 const styles = StyleSheet.create({
-	label: { paddingLeft: 6, paddingTop: 4 },
+	label: { paddingLeft: 8, paddingTop: 4 },
 	delete: { paddingTop: 4 },
 });

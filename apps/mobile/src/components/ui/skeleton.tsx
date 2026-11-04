@@ -67,11 +67,7 @@ export function SkeletonCard({
 			accessibilityLabel={decorative ? undefined : `Loading ${label}`}
 			importantForAccessibility={decorative ? "no-hide-descendants" : "auto"}
 			accessibilityElementsHidden={decorative}
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				style,
-			]}
+			style={[styles.card, { backgroundColor: colors.bgSurface }, style]}
 		>
 			{media ? <View style={[styles.media, { backgroundColor: colors.bgHover }]} /> : null}
 			<Bar width="45%" height={14} />

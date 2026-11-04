@@ -45,7 +45,7 @@ export function WatchesScreen() {
 				<EmptyCard
 					icon="Clock"
 					title="No watches or scents yet"
-					body="Add them and I'll rotate the watch and pick a scent for the weather and time of day."
+					body="Add them to get a watch and a scent picked for the weather and time of day."
 				>
 					<PillButton
 						label="Add a watch"
@@ -72,12 +72,7 @@ export function WatchesScreen() {
 			<ScreenTitle eyebrow="Finishing touches" title="Watches & scents" />
 
 			{watches.length > 0 ? (
-				<View
-					style={[
-						styles.card,
-						{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-					]}
-				>
+				<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 					<View style={styles.head}>
 						<PoText variant="title18" style={styles.flex}>
 							Watch box
@@ -101,12 +96,7 @@ export function WatchesScreen() {
 									onPress={() => fashionRoutes.piece(watch.id)}
 									style={styles.item}
 								>
-									<View
-										style={[
-											styles.frame,
-											{ borderColor: on ? colors.accentDefault : "transparent" },
-										]}
-									>
+									<View style={[styles.frame, { opacity: on ? 1 : 0.55 }]}>
 										<PieceImage
 											image={watch.image}
 											category="watch"
@@ -182,12 +172,7 @@ export function WatchesScreen() {
 			) : null}
 
 			{scents.length > 0 ? (
-				<View
-					style={[
-						styles.card,
-						{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-					]}
-				>
+				<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 					<View style={styles.head}>
 						<PoText variant="title18" style={styles.flex}>
 							Scent shelf
@@ -260,10 +245,7 @@ export function WatchesScreen() {
 							});
 					}}
 					disabled={addingRefill}
-					style={[
-						styles.low,
-						{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-					]}
+					style={[styles.low, { backgroundColor: colors.bgSurface }]}
 				>
 					<PieceImage
 						image={low.image}
@@ -290,15 +272,15 @@ export function WatchesScreen() {
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	card: { gap: 14, padding: 16, borderRadius: 20 },
+	card: { gap: 16, padding: 16, borderRadius: 20 },
 	head: { flexDirection: "row", alignItems: "center" },
-	row: { gap: 10 },
+	row: { gap: 12 },
 	item: { width: 100, gap: 4 },
 	dim: { opacity: 0.6 },
-	frame: { borderWidth: 2, borderRadius: 20, padding: 0 },
+	frame: { borderRadius: 20, padding: 0 },
 	note: { flexDirection: "row", alignItems: "center", gap: 8 },
 	dot: { width: 8, height: 8, borderRadius: 4 },
-	tip: { gap: 6, padding: 16, borderRadius: 20 },
+	tip: { gap: 8, padding: 16, borderRadius: 20 },
 	low: {
 		flexDirection: "row",
 		alignItems: "center",

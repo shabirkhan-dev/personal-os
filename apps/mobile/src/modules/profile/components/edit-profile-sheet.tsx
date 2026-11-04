@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 import { Icon } from "@/components/icons";
 import { PoText } from "@/components/ui/po-text";
-import { SegmentedControl } from "@/components/ui/segmented-control";
 import { Sheet } from "@/components/ui/sheet";
 import { TextField } from "@/components/ui/text-field";
 import { haptics } from "@/lib/haptics";
@@ -12,16 +11,10 @@ import { useOnboardingProgress } from "@/modules/onboarding/store/onboarding-pro
 import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
 import { usersService } from "@/modules/users/services/users.service";
 import { usePoTheme } from "@/theme";
-import { type UnitSystem, unitsFor, unitSystem } from "../lib/labels";
 import { pickAvatar, removeLocalAvatar, uploadPendingAvatar } from "../services/avatar";
 import { useAvatarStore } from "../store/avatar-store";
 
 type EditProfileSheetProps = { visible: boolean; onClose: () => void };
-
-const unitOptions = [
-	{ value: "metric", label: "cm · kg" },
-	{ value: "imperial", label: "ft · lb" },
-] as const;
 
 const LATER: Record<"offline" | "storage-off" | "failed", string> = {
 	offline: "Saved on this phone. It uploads when you're online.",
@@ -29,17 +22,14 @@ const LATER: Record<"offline" | "storage-off" | "failed", string> = {
 	failed: "Saved on this phone. The upload will be tried again.",
 };
 
-/** Edit profile: photo, name and units. Saved on the phone at once, then to the account. */
+/** Edit profile: your photo and name. Saved on the phone at once, then to the account. */
 export function EditProfileSheet({ visible, onClose }: EditProfileSheetProps) {
 	const { colors } = usePoTheme();
 	const auth = useAuth();
 	const savedName = useOnboardingStore((state) => state.name);
-	const heightUnit = useOnboardingStore((state) => state.heightUnit);
-	const weightUnit = useOnboardingStore((state) => state.weightUnit);
 	const photo = useAvatarStore((state) => state.data.uri);
 	const pending = useAvatarStore((state) => state.data.pending);
 	const [name, setName] = useState(savedName);
-	const [units, setUnits] = useState<UnitSystem>(unitSystem(heightUnit, weightUnit));
 	const [uploading, setUploading] = useState(false);
 	const [photoNote, setPhotoNote] = useState<string | null>(null);
 	const [saveNote, setSaveNote] = useState<string | null>(null);
@@ -47,10 +37,9 @@ export function EditProfileSheet({ visible, onClose }: EditProfileSheetProps) {
 	useEffect(() => {
 		if (!visible) return;
 		setName(savedName);
-		setUnits(unitSystem(heightUnit, weightUnit));
 		setPhotoNote(null);
 		setSaveNote(null);
-	}, [visible, savedName, heightUnit, weightUnit]);
+	}, [visible, savedName]);
 
 	const upload = async () => {
 		if (auth.status !== "signed-in" || !auth.token) {
@@ -94,11 +83,7 @@ export function EditProfileSheet({ visible, onClose }: EditProfileSheetProps) {
 	const save = async () => {
 		const trimmed = name.trim();
 		if (!trimmed) return;
-		const store = useOnboardingStore.getState();
-		const next = unitsFor(units);
-		store.set("name", trimmed);
-		store.set("heightUnit", next.heightUnit);
-		store.set("weightUnit", next.weightUnit);
+		useOnboardingStore.getState().set("name", trimmed);
 		useOnboardingProgress
 			.getState()
 			.persistAnswers()
@@ -127,7 +112,7 @@ export function EditProfileSheet({ visible, onClose }: EditProfileSheetProps) {
 		>
 			<View style={styles.photo}>
 				<View>
-					<Avatar name={name || savedName} size={88} />
+					<Avatar name={name || savedName} size={96} />
 					{uploading ? (
 						<View style={[styles.busy, { backgroundColor: colors.bgCanvas }]}>
 							<ActivityIndicator color={colors.accentDefault} />
@@ -137,12 +122,12 @@ export function EditProfileSheet({ visible, onClose }: EditProfileSheetProps) {
 				<View style={styles.photoActions}>
 					<PhotoButton
 						icon="Line/Plus"
-						label={hasPhoto ? "Change photo" : "Add a photo"}
+						label={hasPhoto ? "Change" : "Choose photo"}
 						onPress={() => void choose("library")}
 					/>
 					<PhotoButton
 						icon="Filled/Camera"
-						label="Take a photo"
+						label="Take photo"
 						onPress={() => void choose("camera")}
 					/>
 					{hasPhoto ? (
@@ -174,24 +159,15 @@ export function EditProfileSheet({ visible, onClose }: EditProfileSheetProps) {
 				onSubmitEditing={() => void save()}
 			/>
 			{auth.user?.email ? (
-				<View style={styles.group}>
+				<View style={[styles.email, { backgroundColor: colors.bgSubtle }]}>
 					<PoText variant="meta13" tone="textSecondary">
-						Email
+						Signed in as
 					</PoText>
-					<PoText variant="body15">{auth.user.email}</PoText>
+					<PoText variant="row15" numberOfLines={1}>
+						{auth.user.email}
+					</PoText>
 				</View>
 			) : null}
-			<View style={styles.group}>
-				<PoText variant="meta13" tone="textSecondary">
-					Units
-				</PoText>
-				<SegmentedControl
-					options={unitOptions}
-					value={units}
-					onChange={setUnits}
-					accessibilityLabel="Units"
-				/>
-			</View>
 			{saveNote ? (
 				<PoText variant="meta13" tone="textSecondary">
 					{saveNote}
@@ -230,9 +206,9 @@ function PhotoButton({
 }
 
 const styles = StyleSheet.create({
-	group: { gap: 8 },
-	photo: { flexDirection: "row", alignItems: "center", gap: 16 },
-	photoActions: { flex: 1, gap: 8 },
+	email: { gap: 4, paddingHorizontal: 16, paddingVertical: 12, borderRadius: 16 },
+	photo: { alignItems: "center", gap: 12 },
+	photoActions: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 8 },
 	photoButton: {
 		flexDirection: "row",
 		alignItems: "center",
@@ -244,7 +220,7 @@ const styles = StyleSheet.create({
 	busy: {
 		position: "absolute",
 		inset: 0,
-		borderRadius: 44,
+		borderRadius: 48,
 		opacity: 0.7,
 		alignItems: "center",
 		justifyContent: "center",

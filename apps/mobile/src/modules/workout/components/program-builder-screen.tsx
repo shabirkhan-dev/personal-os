@@ -655,8 +655,8 @@ const styles = StyleSheet.create({
 	flex: { flex: 1 },
 	aiHead: { flexDirection: "row", alignItems: "center", gap: 8 },
 	wrap: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-	sessionHead: { flexDirection: "row", alignItems: "flex-end", gap: 10 },
-	row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 6 },
+	sessionHead: { flexDirection: "row", alignItems: "flex-end", gap: 12 },
+	row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8 },
 	round: {
 		width: 36,
 		height: 36,
@@ -664,8 +664,8 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "center",
 	},
-	stepperRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+	stepperRow: { flexDirection: "row", alignItems: "center", gap: 12 },
 	value: { minWidth: 40, textAlign: "center" },
 	sheetBody: { gap: 12, paddingBottom: 8 },
-	sheetFooter: { flexDirection: "row", gap: 10 },
+	sheetFooter: { flexDirection: "row", gap: 12 },
 });

@@ -119,11 +119,9 @@ export default function ModulesScreen() {
 										styles.extra,
 										on
 											? {
-													borderColor: colors.accentDefault,
 													borderStyle: "solid",
-													borderWidth: 1.5,
 												}
-											: { borderColor: colors.borderDefault },
+											: {},
 									]}
 								>
 									<View style={[styles.tile40, { backgroundColor: colors[option.tileTone] }]}>
@@ -162,17 +160,17 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		alignItems: "center",
 		justifyContent: "space-between",
-		paddingHorizontal: 6,
+		paddingHorizontal: 8,
 	},
-	labelLeft: { flexDirection: "row", alignItems: "center", gap: 6 },
+	labelLeft: { flexDirection: "row", alignItems: "center", gap: 8 },
 	list: { gap: 8 },
 	row: {
 		flexDirection: "row",
 		alignItems: "center",
 		gap: 12,
-		paddingLeft: 10,
-		paddingRight: 14,
-		paddingVertical: 10,
+		paddingLeft: 12,
+		paddingRight: 16,
+		paddingVertical: 12,
 	},
 	tile44: {
 		width: 44,
@@ -188,16 +186,16 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "center",
 	},
-	text: { flex: 1, gap: 3 },
+	text: { flex: 1, gap: 4 },
 	nameRow: { flexDirection: "row", alignItems: "center", gap: 8 },
 	why: { flexShrink: 1, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10 },
-	extras: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
+	extras: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
 	extra: {
 		flexBasis: "47%",
 		flexGrow: 1,
 		flexDirection: "row",
 		alignItems: "center",
-		gap: 10,
+		gap: 12,
 		padding: 8,
 		borderRadius: 20,
 		borderStyle: "dashed",

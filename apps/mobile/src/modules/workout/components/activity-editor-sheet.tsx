@@ -277,11 +277,11 @@ export function ActivityEditorSheet({
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	body: { gap: 10, paddingBottom: 8 },
+	body: { gap: 12, paddingBottom: 8 },
 	row: { gap: 8, paddingVertical: 2 },
 	wrap: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-	metric: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 4 },
-	add: { flexDirection: "row", gap: 10, alignItems: "flex-end" },
+	metric: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 4 },
+	add: { flexDirection: "row", gap: 12, alignItems: "flex-end" },
 	unit: { width: 90 },
-	footer: { flexDirection: "row", gap: 10 },
+	footer: { flexDirection: "row", gap: 12 },
 });

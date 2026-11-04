@@ -24,12 +24,7 @@ export function SettingsCard({ children }: { children: ReactNode }) {
 	const { colors } = usePoTheme();
 	const rows = Children.toArray(children);
 	return (
-		<View
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
+		<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 			{rows.map((row, index) => (
 				<Fragment key={index}>
 					{index > 0 ? (
@@ -139,10 +134,7 @@ export type RowPillProps = {
 /** Small 36px pill at the end of a row: "Connect"-style action, or a quiet "Soon" tag. */
 export function RowPill({ label, onPress, accessibilityLabel }: RowPillProps) {
 	const { colors } = usePoTheme();
-	const style = [
-		styles.pill,
-		{ backgroundColor: colors.bgSubtle, borderColor: colors.borderDefault },
-	];
+	const style = [styles.pill, { backgroundColor: colors.bgSubtle }];
 	if (!onPress) {
 		return (
 			<View style={style}>
@@ -169,9 +161,9 @@ export function RowPill({ label, onPress, accessibilityLabel }: RowPillProps) {
 }
 
 const styles = StyleSheet.create({
-	label: { paddingLeft: 6, paddingTop: 10 },
+	label: { paddingLeft: 8, paddingTop: 12 },
 	card: {
-		paddingHorizontal: 14,
+		paddingHorizontal: 16,
 		paddingVertical: 4,
 		borderRadius: 20,
 		overflow: "hidden",
@@ -193,7 +185,7 @@ const styles = StyleSheet.create({
 		height: 36,
 		paddingHorizontal: 16,
 		borderRadius: 18,
-		borderWidth: 1,
+
 		alignItems: "center",
 		justifyContent: "center",
 	},

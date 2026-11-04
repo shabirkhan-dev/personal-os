@@ -51,12 +51,7 @@ export default function PlanRevealScreen() {
 				body={["Built from your answers. Change anything later."]}
 			/>
 			<View style={styles.gap18} />
-			<View
-				style={[
-					styles.day,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.day, { backgroundColor: colors.bgSurface }]}>
 				{rows.map((row, index) => (
 					<Animated.View
 						key={`${row.time}-${row.title}`}
@@ -89,10 +84,7 @@ export default function PlanRevealScreen() {
 					<Animated.View
 						key={tile.label}
 						entering={rise(450 + 80 * index)}
-						style={[
-							styles.goal,
-							{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-						]}
+						style={[styles.goal, { backgroundColor: colors.bgSurface }]}
 					>
 						<View style={[styles.tile28, { backgroundColor: colors[tile.tileTone] }]}>
 							<Icon name={tile.icon} size={14} color={colors[tile.iconTone]} />
@@ -111,7 +103,7 @@ export default function PlanRevealScreen() {
 }
 
 const styles = StyleSheet.create({
-	top: { height: 40, flexDirection: "row", alignItems: "center", gap: 14 },
+	top: { height: 40, flexDirection: "row", alignItems: "center", gap: 16 },
 	progress: { flex: 1, height: 4, borderRadius: 2 },
 	balance: { width: 40 },
 	gap22: { height: 22 },
@@ -119,8 +111,8 @@ const styles = StyleSheet.create({
 	gap12: { height: 12 },
 	center: { textAlign: "center" },
 	flex: { flex: 1 },
-	day: { paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20 },
-	row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 10 },
+	day: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20 },
+	row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 12 },
 	time: { width: 44 },
 	tile32: {
 		width: 32,
@@ -130,7 +122,7 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 	},
 	goals: { flexDirection: "row", gap: 8 },
-	goal: { flex: 1, gap: 8, padding: 12, borderRadius: 16, borderWidth: 1 },
+	goal: { flex: 1, gap: 8, padding: 12, borderRadius: 16 },
 	tile28: {
 		width: 28,
 		height: 28,

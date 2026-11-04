@@ -327,7 +327,7 @@ export function StartCard({ onPick }: { onPick: (starter: (typeof STARTERS)[numb
 				))}
 			</View>
 			<PoText variant="meta13" tone="textSecondary">
-				Tap one or just type it. I'll find the price in Pakistan when you're signed in.
+				Tap one or type it. The price in Pakistan is looked up when you're signed in.
 			</PoText>
 		</Surface>
 	);
@@ -342,14 +342,14 @@ const styles = StyleSheet.create({
 	upNextText: { gap: 4, paddingHorizontal: 4 },
 	baseline: { flexDirection: "row", alignItems: "baseline", gap: 8 },
 	noteRow: { flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 4 },
-	tag: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999 },
-	chips: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
+	tag: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 999 },
+	chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 	listHead: { flexDirection: "row", alignItems: "center", paddingHorizontal: 4, paddingBottom: 2 },
-	row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 6 },
+	row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8 },
 	rowText: { flex: 1, gap: 2 },
-	rules: { gap: 6, padding: 16, borderRadius: 20 },
+	rules: { gap: 8, padding: 16, borderRadius: 20 },
 	garage: { flexDirection: "row", alignItems: "center", gap: 12 },
-	startHead: { gap: 14 },
+	startHead: { gap: 16 },
 	grid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-	tile: { width: "31%", flexGrow: 1, gap: 6 },
+	tile: { width: "31%", flexGrow: 1, gap: 8 },
 });

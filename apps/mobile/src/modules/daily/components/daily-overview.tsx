@@ -1,14 +1,14 @@
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
-import { ActionPills } from "@/components/module-ui";
 import { PoText } from "@/components/ui/po-text";
+import { formatMoney } from "@/lib/money";
 import { useCalendar } from "@/modules/calendar/hooks/use-calendar";
+import { useFinanceSummary } from "@/modules/finance";
 import { clockOf, minutesOf } from "@/modules/home/lib/module-day";
 import type { ModuleId } from "@/modules/onboarding/lib/options";
-import { pushLater, recordResult, toggleTick } from "../data/daily-actions";
+import { pushLater, recordResult } from "../data/daily-actions";
 import { useDailyToday } from "../hooks/use-daily";
-import { MINIMUM, minimumState } from "../lib/daily-math";
 import type { PlanModule } from "../lib/daily-model";
 import { splitAtNow, type TimelineItem, todayTimeline } from "../lib/timeline";
 import { dailyRoutes } from "../navigation";
@@ -17,10 +17,10 @@ import {
 	AgendaRow,
 	Card,
 	CardHead,
-	MinimumCard,
-	type MinimumRing,
 	NowLine,
-	RightNowCard,
+	type StatTile,
+	StatTiles,
+	UpNextCard,
 } from "./daily-cards";
 import { MinimumPicker } from "./minimum-picker";
 
@@ -29,6 +29,8 @@ export type DailyOverviewProps = {
 	onOpen: (module: ModuleId) => void;
 	/** Shows a short message under the ask bar. */
 	onNotice: (text: string) => void;
+	/** Money is hidden (the eye on Overview). */
+	amountsHidden?: boolean;
 };
 
 /** Earlier rows shown above Now before "Show earlier"; the rest fold away. */
@@ -39,7 +41,7 @@ const EARLIER_SHOWN = 2;
  * routine is on) and one Today timeline across every module, bills and personal events. It also
  * keeps today's result for the streak and the day's alarms scheduled.
  */
-export function DailyOverview({ onOpen, onNotice }: DailyOverviewProps) {
+export function DailyOverview({ onOpen, onNotice, amountsHidden = false }: DailyOverviewProps) {
 	const {
 		data,
 		sources,
@@ -54,6 +56,7 @@ export function DailyOverview({ onOpen, onNotice }: DailyOverviewProps) {
 	} = useDailyToday();
 	const { settings } = data;
 	const calendar = useCalendar(today, today);
+	const finance = useFinanceSummary();
 	const [showEarlier, setShowEarlier] = useState(false);
 	const routine = sources.modules.includes("daily-life");
 	const failed = (error: unknown) => {
@@ -82,12 +85,28 @@ export function DailyOverview({ onOpen, onNotice }: DailyOverviewProps) {
 		else onOpen(module);
 	};
 
-	const rings: MinimumRing[] = settings.minimum.map((id) => ({
-		id,
-		label: MINIMUM[id].label,
-		module: MINIMUM[id].module,
-		state: minimumState(id, sources, log),
-	}));
+	const money =
+		finance.leftToSpend === null
+			? "No budget"
+			: amountsHidden
+				? "••••"
+				: formatMoney(Math.round(finance.leftToSpend)).replace(/\.00$/, "");
+	const tiles: StatTile[] = [
+		...(routine && settings.setUp
+			? [
+					{
+						label: "Minimum day",
+						value: `${kept} of ${total}`,
+						tone: total > 0 && kept >= total ? ("textSuccess" as const) : undefined,
+						onPress: dailyRoutes.minimum,
+					},
+				]
+			: []),
+		{ label: "Streak", value: streak === 1 ? "1 day" : `${streak} days` },
+		...(sources.modules.includes("finance")
+			? [{ label: "Left to spend", value: money, onPress: () => onOpen("finance") }]
+			: []),
+	];
 
 	const minuteNow = minutesOf(now);
 	const timeline = todayTimeline(agenda, calendar.items, today);
@@ -104,7 +123,6 @@ export function DailyOverview({ onOpen, onNotice }: DailyOverviewProps) {
 			onPress={() => openRow(item)}
 		/>
 	);
-	const evening = now.getHours() >= 18;
 
 	const detail = (() => {
 		if (!rightNow) return "";
@@ -119,36 +137,18 @@ export function DailyOverview({ onOpen, onNotice }: DailyOverviewProps) {
 
 	return (
 		<>
-			<ActionPills
-				actions={[
-					{ label: "Plan day", icon: "Filled/Calendar", onPress: dailyRoutes.plan },
-					evening
-						? { label: "Close day", icon: "Moon", onPress: dailyRoutes.close }
-						: { label: "Sleep", icon: "Moon", onPress: dailyRoutes.sleep },
-				]}
-			/>
 			{routine && !data.loading && !settings.setUp ? (
 				<MinimumPicker settings={settings} sources={sources} />
 			) : null}
 			{rightNow ? (
-				<RightNowCard
+				<UpNextCard
 					now={rightNow}
 					detail={detail}
 					onStart={() => open(rightNow.item.module)}
 					onLater={() => void pushLater(today, rightNow.item.id).catch(failed)}
 				/>
 			) : null}
-			{routine && settings.setUp ? (
-				<MinimumCard
-					rings={rings}
-					streak={streak}
-					onPress={dailyRoutes.minimum}
-					onRing={(ring) => {
-						if (ring.module === "daily-life") void toggleTick(today, ring.id).catch(failed);
-						else open(ring.module);
-					}}
-				/>
-			) : null}
+			<StatTiles tiles={tiles} />
 			{timeline.length > 0 ? (
 				<Card>
 					<CardHead

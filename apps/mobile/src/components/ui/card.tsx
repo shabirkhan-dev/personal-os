@@ -6,15 +6,7 @@ import { usePoTheme } from "@/theme";
 export function Card({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
 	const { colors } = usePoTheme();
 	return (
-		<View
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				style,
-			]}
-		>
-			{children}
-		</View>
+		<View style={[styles.card, { backgroundColor: colors.bgSurface }, style]}>{children}</View>
 	);
 }
 

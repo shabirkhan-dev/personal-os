@@ -143,6 +143,6 @@ export function SavingsSheet({
 }
 
 const styles = StyleSheet.create({
-	group: { gap: 6 },
+	group: { gap: 8 },
 	chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 });

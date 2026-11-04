@@ -277,11 +277,11 @@ function SourceSheet({
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	source: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 8 },
+	source: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8 },
 	sourceHead: { flexDirection: "row", alignItems: "center", gap: 8 },
 	badge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
-	rule: { flexDirection: "row", alignItems: "center", paddingVertical: 6, gap: 8 },
+	rule: { flexDirection: "row", alignItems: "center", paddingVertical: 8, gap: 8 },
 	sheet: { gap: 12 },
-	chips: { flexDirection: "row", gap: 6 },
-	pair: { flexDirection: "row", gap: 10 },
+	chips: { flexDirection: "row", gap: 8 },
+	pair: { flexDirection: "row", gap: 12 },
 });

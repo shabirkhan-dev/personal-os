@@ -39,8 +39,7 @@ export function TextField({
 				style={[
 					styles.field,
 					{
-						backgroundColor: colors.bgSubtle,
-						borderColor: focused ? colors.accentDefault : colors.borderDefault,
+						backgroundColor: focused ? colors.accentSubtle : colors.bgSubtle,
 					},
 				]}
 			>
@@ -68,7 +67,7 @@ export function TextField({
 }
 
 const styles = StyleSheet.create({
-	group: { gap: 6 },
+	group: { gap: 8 },
 	field: {
 		height: 48,
 		flexDirection: "row",
@@ -76,7 +75,6 @@ const styles = StyleSheet.create({
 		gap: 8,
 		paddingHorizontal: 16,
 		borderRadius: 16,
-		borderWidth: 1,
 	},
 	input: { flex: 1, paddingVertical: 0 },
 });

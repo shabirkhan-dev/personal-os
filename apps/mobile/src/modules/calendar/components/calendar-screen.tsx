@@ -55,10 +55,7 @@ export function ItemRow({ item, onPress }: { item: CalendarItem; onPress: () => 
 		<Pressable
 			accessibilityRole="button"
 			onPress={onPress}
-			style={[
-				styles.item,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
+			style={[styles.item, { backgroundColor: colors.bgSurface }]}
 		>
 			<View style={[styles.bar, { backgroundColor: colors[item.tone] }]} />
 			<View style={styles.flex}>
@@ -180,12 +177,7 @@ export function CalendarScreen() {
 					/>
 				))}
 			</ScrollView>
-			<View
-				style={[
-					styles.grid,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.grid, { backgroundColor: colors.bgSurface }]}>
 				<View style={styles.week}>
 					{WEEKDAYS.map((letter, index) => (
 						<PoText
@@ -291,7 +283,7 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 	},
 	flip: { transform: [{ scaleX: -1 }] },
-	todayButton: { height: 36, paddingHorizontal: 14, borderRadius: 18, justifyContent: "center" },
+	todayButton: { height: 36, paddingHorizontal: 16, borderRadius: 18, justifyContent: "center" },
 	chips: { gap: 8, paddingVertical: 2 },
 	grid: { borderRadius: 20, padding: 8, gap: 2 },
 	week: { flexDirection: "row" },
@@ -299,21 +291,20 @@ const styles = StyleSheet.create({
 	cell: {
 		flex: 1,
 		alignItems: "center",
-		paddingVertical: 6,
+		paddingVertical: 8,
 		borderRadius: 12,
-		gap: 3,
+		gap: 4,
 		minHeight: 46,
 	},
-	dots: { flexDirection: "row", gap: 3, height: 5 },
+	dots: { flexDirection: "row", gap: 4, height: 5 },
 	dot: { width: 5, height: 5, borderRadius: 2.5 },
 	agendaHead: { flexDirection: "row", alignItems: "center", paddingTop: 4 },
 	item: {
 		flexDirection: "row",
 		alignItems: "center",
 		gap: 12,
-		padding: 14,
+		padding: 16,
 		borderRadius: 20,
-		borderWidth: 1,
 	},
 	bar: { width: 3, height: 32, borderRadius: 2 },
 });

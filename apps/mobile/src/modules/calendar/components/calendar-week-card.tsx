@@ -25,12 +25,7 @@ export function CalendarWeekCard() {
 		.slice(0, 4);
 
 	return (
-		<View
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
+		<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 			<Pressable
 				accessibilityRole="button"
 				onPress={() => router.push("/calendar")}
@@ -115,7 +110,7 @@ const styles = StyleSheet.create({
 	head: { flexDirection: "row", alignItems: "center" },
 	flex: { flex: 1 },
 	strip: { flexDirection: "row", gap: 4 },
-	day: { flex: 1, alignItems: "center", gap: 3, paddingVertical: 8, borderRadius: 14 },
-	dots: { flexDirection: "row", gap: 3, height: 5 },
+	day: { flex: 1, alignItems: "center", gap: 4, paddingVertical: 8, borderRadius: 14 },
+	dots: { flexDirection: "row", gap: 4, height: 5 },
 	dot: { width: 5, height: 5, borderRadius: 2.5 },
 });

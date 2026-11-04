@@ -52,13 +52,8 @@ export function ReadinessCard({ value }: { value: Readiness }) {
 	const { colors } = usePoTheme();
 	const text = LEVEL_TEXT[value.level];
 	return (
-		<View
-			style={[
-				styles.readiness,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
-			<View style={[styles.score, { borderColor: colors[text.tone] }]}>
+		<View style={[styles.readiness, { backgroundColor: colors.bgSurface }]}>
+			<View style={[styles.score, {}]}>
 				<PoText variant="row15">{String(value.score)}</PoText>
 			</View>
 			<View style={styles.flex}>
@@ -349,7 +344,7 @@ const styles = StyleSheet.create({
 	readiness: {
 		flexDirection: "row",
 		alignItems: "center",
-		gap: 14,
+		gap: 16,
 		padding: 16,
 		borderRadius: 20,
 	},
@@ -357,13 +352,13 @@ const styles = StyleSheet.create({
 		width: 44,
 		height: 44,
 		borderRadius: 22,
-		borderWidth: 2,
+
 		alignItems: "center",
 		justifyContent: "center",
 	},
 	chips: { gap: 8, paddingVertical: 2 },
 	chipsRow: { flexDirection: "row", gap: 8 },
-	line: { flexDirection: "row", alignItems: "center", gap: 10 },
+	line: { flexDirection: "row", alignItems: "center", gap: 12 },
 	block: { gap: 4 },
 	aiHead: { flexDirection: "row", alignItems: "center", gap: 8 },
 });

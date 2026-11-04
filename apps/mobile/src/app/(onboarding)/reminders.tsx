@@ -86,12 +86,7 @@ export default function RemindersScreen() {
 				</>
 			}
 		>
-			<View
-				style={[
-					styles.list,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.list, { backgroundColor: colors.bgSurface }]}>
 				{rows.map((row, index) => (
 					<View
 						key={row.id}
@@ -124,5 +119,5 @@ const styles = StyleSheet.create({
 	text: { flex: 1, gap: 2 },
 	note: { textAlign: "center" },
 	list: { paddingHorizontal: 16, paddingVertical: 4, borderRadius: 20 },
-	row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 14 },
+	row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 16 },
 });

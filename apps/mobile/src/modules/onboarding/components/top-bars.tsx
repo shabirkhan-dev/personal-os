@@ -58,7 +58,7 @@ function ProgressBar({ value }: { value: number }) {
 
 const styles = StyleSheet.create({
 	bar: { height: 40, flexDirection: "row", alignItems: "center" },
-	setup: { gap: 14 },
+	setup: { gap: 16 },
 	flex: { flex: 1 },
 	track: { flex: 1, height: 4, borderRadius: 2, overflow: "hidden" },
 	fill: { height: 4, borderRadius: 2 },

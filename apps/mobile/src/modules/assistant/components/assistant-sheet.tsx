@@ -28,7 +28,6 @@ export function AssistantSheet({ visible, onClose }: { visible: boolean; onClose
 						styles.sheet,
 						{
 							backgroundColor: colors.bgApp,
-							borderColor: colors.borderDefault,
 							paddingBottom: Math.max(16, insets.bottom + 8),
 						},
 					]}
@@ -79,11 +78,10 @@ const styles = StyleSheet.create({
 		paddingTop: 16,
 		borderTopLeftRadius: 28,
 		borderTopRightRadius: 28,
-		borderWidth: 1,
 	},
 	head: { flexDirection: "row", alignItems: "center", gap: 8, paddingBottom: 4 },
 	title: { flex: 1, flexDirection: "row", alignItems: "center", gap: 8 },
-	full: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999 },
+	full: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999 },
 	close: {
 		width: 32,
 		height: 32,

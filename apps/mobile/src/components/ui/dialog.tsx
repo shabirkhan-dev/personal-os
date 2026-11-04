@@ -95,7 +95,7 @@ function DialogCard({ dialog }: { dialog: Dialog }) {
 				accessibilityRole="alert"
 				style={[
 					styles.card,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
+					{ backgroundColor: colors.bgSurface },
 					toShadowStyle(elevation.floating),
 				]}
 			>

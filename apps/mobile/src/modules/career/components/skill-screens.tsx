@@ -101,7 +101,7 @@ export function SkillBlockScreen() {
 					<EmptyCard
 						icon="Lightning"
 						title="Pick a skill"
-						body="Choose one thing to get better at. I'll plan six weeks of 30-minute days around your applications."
+						body="Choose one thing to get better at: six weeks of 30-minute days, planned around your applications."
 					>
 						<PillButton label="Pick a skill" onPress={() => setSheet("focus")} />
 					</EmptyCard>
@@ -142,12 +142,7 @@ export function SkillBlockScreen() {
 			<PlanningCard />
 
 			{thisWeek ? (
-				<View
-					style={[
-						styles.card,
-						{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-					]}
-				>
+				<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 					<View style={styles.head}>
 						<PoText variant="title18" style={styles.flex}>
 							This week
@@ -274,24 +269,14 @@ export function SkillPathScreen() {
 				<MetaChip icon="Layers" label={`Week ${week + 1} of ${plan.weeks.length}`} />
 			</ScreenTitle>
 
-			<View
-				style={[
-					styles.stats,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.stats, { backgroundColor: colors.bgSurface }]}>
 				<Stat value={String(streak)} unit=" days" label="Streak" />
 				<Stat value={String(sessions.length)} label="Sessions" />
 				<Stat value={(minutes / 60).toFixed(1).replace(/\.0$/, "")} unit=" h" label="This month" />
 			</View>
 
 			<SectionLabel>Your path</SectionLabel>
-			<View
-				style={[
-					styles.path,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.path, { backgroundColor: colors.bgSurface }]}>
 				{plan.weeks.map((item, index) => {
 					const done = weekDone(sessions, index);
 					const state = index < week ? "done" : index === week ? "next" : "later";
@@ -312,12 +297,7 @@ export function SkillPathScreen() {
 				})}
 			</View>
 
-			<View
-				style={[
-					styles.activity,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.activity, { backgroundColor: colors.bgSurface }]}>
 				<View style={styles.activityHead}>
 					<IconTile name="Star" tone="textPrimary" tile="bgSubtle" />
 					<PoText variant="body15" tone="textSecondary" style={styles.flex}>
@@ -346,9 +326,8 @@ export function SkillPathScreen() {
 											: cell === "partial"
 												? {
 														backgroundColor: colors.bgSubtle,
-														borderWidth: 1,
+
 														borderStyle: "dashed",
-														borderColor: colors.textTertiary,
 													}
 												: { backgroundColor: colors.bgSubtle },
 									]}
@@ -363,9 +342,8 @@ export function SkillPathScreen() {
 						label="Partial"
 						style={{
 							backgroundColor: colors.bgSubtle,
-							borderWidth: 1,
+
 							borderStyle: "dashed",
-							borderColor: colors.textTertiary,
 						}}
 					/>
 					<Legend label="Missed" style={{ backgroundColor: colors.bgSubtle }} />
@@ -453,26 +431,26 @@ const styles = StyleSheet.create({
 		borderRadius: 20,
 	},
 	head: { flexDirection: "row", alignItems: "center" },
-	segments: { paddingTop: 10, paddingBottom: 6 },
+	segments: { paddingTop: 12, paddingBottom: 8 },
 	stats: {
 		flexDirection: "row",
 		justifyContent: "space-between",
 		paddingHorizontal: 16,
-		paddingVertical: 18,
+		paddingVertical: 20,
 		borderRadius: 20,
 	},
 	stat: { alignItems: "center", gap: 4 },
 	path: {
 		gap: 4,
-		paddingTop: 14,
-		paddingBottom: 6,
+		paddingTop: 16,
+		paddingBottom: 8,
 		paddingHorizontal: 16,
 		borderRadius: 20,
 	},
-	activity: { gap: 18, padding: 16, borderRadius: 20 },
+	activity: { gap: 20, padding: 16, borderRadius: 20 },
 	activityHead: { flexDirection: "row", alignItems: "center", gap: 12 },
-	grid: { gap: 6 },
-	gridRow: { flexDirection: "row", gap: 5 },
+	grid: { gap: 8 },
+	gridRow: { flexDirection: "row", gap: 4 },
 	cell: { flex: 1, height: 18, borderRadius: 9 },
 	legend: { flexDirection: "row", gap: 16 },
 	legendItem: { flexDirection: "row", alignItems: "center", gap: 8 },

@@ -262,9 +262,9 @@ export function HairScreen() {
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	plan: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 6 },
+	plan: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8 },
 	chart: { flexDirection: "row", gap: 8, height: 110 },
-	barColumn: { flex: 1, alignItems: "center", gap: 6 },
+	barColumn: { flex: 1, alignItems: "center", gap: 8 },
 	barTrack: { flex: 1, width: "100%", justifyContent: "flex-end" },
 	bar: { width: "100%", borderRadius: 8, minHeight: 8 },
 	eye: { flexDirection: "row", justifyContent: "space-between", gap: 12, paddingVertical: 4 },

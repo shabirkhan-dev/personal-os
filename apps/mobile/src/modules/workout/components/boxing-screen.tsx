@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
 	flex: { flex: 1 },
 	ringBox: { alignItems: "center", paddingVertical: 8 },
 	time: { fontSize: 64, lineHeight: 72 },
-	segments: { flexDirection: "row", gap: 6 },
+	segments: { flexDirection: "row", gap: 8 },
 	segment: { flex: 1, height: 6, borderRadius: 3 },
 	combo: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 	punch: {

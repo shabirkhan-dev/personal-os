@@ -252,7 +252,7 @@ export function AnswerCardView({ card, actions }: { card: AnswerCard; actions: C
 		case "approval": {
 			const waiting = card.state === "waiting";
 			return (
-				<Card style={[styles.tight, waiting ? { borderColor: colors.accentSubtleBorder } : null]}>
+				<Card style={[styles.tight, waiting ? {} : null]}>
 					<View style={styles.head}>
 						<Icon
 							name={
@@ -327,7 +327,7 @@ export function AnswerCardView({ card, actions }: { card: AnswerCard; actions: C
 								haptics.tap();
 								actions.onUndo(card.callId);
 							}}
-							style={[styles.undo, { borderColor: colors.borderDefault }]}
+							style={[styles.undo, {}]}
 						>
 							<PoText variant="meta13">Undo</PoText>
 						</Pressable>
@@ -342,10 +342,7 @@ export function AnswerCardView({ card, actions }: { card: AnswerCard; actions: C
 						haptics.tap();
 						openLink(card.link);
 					}}
-					style={[
-						styles.link,
-						{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-					]}
+					style={[styles.link, { backgroundColor: colors.bgSurface }]}
 				>
 					<PoText variant="text14Medium">{card.label}</PoText>
 					<Icon name="Line/Chevron right" size={16} color={colors.textSecondary} />
@@ -583,7 +580,6 @@ export function AnswerCardView({ card, actions }: { card: AnswerCard; actions: C
 							style={({ pressed }) => [
 								styles.choice,
 								{
-									borderColor: colors.accentSubtleBorder,
 									backgroundColor: pressed ? colors.accentSubtle : colors.bgSurface,
 								},
 							]}
@@ -603,11 +599,11 @@ const styles = StyleSheet.create({
 	tight: { gap: 12, padding: 16, borderRadius: 20 },
 	stats: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 	stat: { flexGrow: 1, flexBasis: "45%", gap: 2, padding: 12, borderRadius: 16 },
-	head: { flexDirection: "row", alignItems: "center", gap: 6 },
+	head: { flexDirection: "row", alignItems: "center", gap: 8 },
 	text: { gap: 2 },
 	buttons: { flexDirection: "row", justifyContent: "flex-end", gap: 8 },
-	change: { flexDirection: "row", alignItems: "center", gap: 10, padding: 12, borderRadius: 16 },
-	undo: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999, borderWidth: 1 },
+	change: { flexDirection: "row", alignItems: "center", gap: 12, padding: 12, borderRadius: 16 },
+	undo: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999 },
 	link: {
 		flexDirection: "row",
 		alignItems: "center",
@@ -615,14 +611,14 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 16,
 		paddingVertical: 12,
 		borderRadius: 999,
-		borderWidth: 1,
+
 		alignSelf: "flex-start",
 		gap: 8,
 	},
 	choices: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 	metric: { gap: 4 },
-	bars: { gap: 10 },
-	barRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+	bars: { gap: 12 },
+	barRow: { flexDirection: "row", alignItems: "center", gap: 12 },
 	barLabel: { width: 84 },
 	barValue: { minWidth: 72, textAlign: "right" },
 	track: { flex: 1, height: 8, borderRadius: 4, overflow: "hidden" },
@@ -631,13 +627,13 @@ const styles = StyleSheet.create({
 	column: { flex: 1, alignItems: "center", gap: 4, height: "100%" },
 	columnTrack: { flex: 1, width: "100%", justifyContent: "flex-end" },
 	columnFill: { width: "100%", borderRadius: 4 },
-	progress: { gap: 6 },
+	progress: { gap: 8 },
 	progressHead: { flexDirection: "row", justifyContent: "space-between", gap: 8 },
 	step: { flexDirection: "row", gap: 12 },
 	rail: { width: 10, alignItems: "center" },
-	dot: { width: 10, height: 10, borderRadius: 5, marginTop: 5 },
+	dot: { width: 10, height: 10, borderRadius: 5, marginTop: 4 },
 	line: { width: 2, flex: 1, marginVertical: 2 },
 	stepText: { flex: 1, gap: 2, paddingBottom: 12 },
-	callout: { gap: 4, padding: 14, borderRadius: 16 },
-	choice: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999, borderWidth: 1 },
+	callout: { gap: 4, padding: 16, borderRadius: 16 },
+	choice: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 999 },
 });

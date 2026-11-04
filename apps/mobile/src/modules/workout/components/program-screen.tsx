@@ -356,9 +356,9 @@ function LevelSheet({
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
 	points: { gap: 8 },
-	point: { flexDirection: "row", gap: 10, alignItems: "flex-start" },
-	dot: { width: 6, height: 6, borderRadius: 3, marginTop: 7 },
-	row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 6 },
+	point: { flexDirection: "row", gap: 12, alignItems: "flex-start" },
+	dot: { width: 6, height: 6, borderRadius: 3, marginTop: 8 },
+	row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8 },
 	levels: { gap: 12, paddingBottom: 8 },
 	wrap: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 });

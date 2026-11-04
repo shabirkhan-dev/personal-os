@@ -59,12 +59,7 @@ export function TodayLookCard({
 	const current = nowPart(hour);
 
 	return (
-		<View
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
+		<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 			<View style={styles.headRow}>
 				<View style={styles.flex}>
 					<PoText variant="eyebrow11" tone="textTertiary">
@@ -231,12 +226,7 @@ export function ColourStoryCard({
 }) {
 	const { colors } = usePoTheme();
 	return (
-		<View
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
+		<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 			<PoText variant="eyebrow11" tone="textTertiary">
 				Colour story
 			</PoText>
@@ -272,12 +262,7 @@ export function ClosetCard({
 }) {
 	const { colors } = usePoTheme();
 	return (
-		<View
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
+		<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 			<Pressable accessibilityRole="button" onPress={onAll} style={styles.headRow}>
 				<PoText variant="title18" style={styles.flex}>
 					In your closet
@@ -343,10 +328,7 @@ export function WishlistRow({
 				haptics.tap();
 				onPress();
 			}}
-			style={[
-				styles.wish,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
+			style={[styles.wish, { backgroundColor: colors.bgSurface }]}
 		>
 			<PieceImage
 				image={first.image}
@@ -397,24 +379,19 @@ export function CapsuleCard({
 }) {
 	const { colors } = usePoTheme();
 	return (
-		<View
-			style={[
-				styles.card,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
+		<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 			<View style={styles.rail}>
 				<View style={[styles.railLine, { backgroundColor: colors.borderStrong }]} />
 				<View style={styles.hangers}>
 					{[0, 1, 2, 3].map((step) => (
-						<View key={step} style={[styles.hanger, { borderColor: colors.borderStrong }]} />
+						<View key={step} style={[styles.hanger, {}]} />
 					))}
 				</View>
 			</View>
 			<PoText variant="title18">Build your capsule</PoText>
 			<PoText variant="body15" tone="textSecondary">
-				Name a piece or paste a link and I'll fill in the rest. Start with what you wear most, then
-				I'll suggest outfits.
+				Name a piece or paste a link and the rest is filled in. Start with what you wear most;
+				outfit ideas follow.
 			</PoText>
 			<PoText variant="eyebrow11" tone="textTertiary">
 				Quick add · tap what you own
@@ -436,8 +413,8 @@ export function CapsuleCard({
 							style={[
 								styles.chip,
 								on
-									? { backgroundColor: colors.accentSubtle, borderColor: colors.accentDefault }
-									: { backgroundColor: colors.bgSubtle, borderColor: colors.bgSubtle },
+									? { backgroundColor: colors.accentSubtle }
+									: { backgroundColor: colors.bgSubtle },
 							]}
 						>
 							<Swatch colour={item.colour} size={14} />
@@ -464,7 +441,7 @@ export function CapsuleCard({
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	card: { gap: 14, padding: 16, borderRadius: 20 },
+	card: { gap: 16, padding: 16, borderRadius: 20 },
 	headRow: { flexDirection: "row", alignItems: "center", gap: 8 },
 	dots: { flexDirection: "row", gap: 4 },
 	dot: { width: 6, height: 6, borderRadius: 3 },
@@ -472,14 +449,14 @@ const styles = StyleSheet.create({
 	row: { flexDirection: "row", gap: 8 },
 	tile: { flex: 1 },
 	legend: { flexDirection: "row", flexWrap: "wrap", columnGap: 16, rowGap: 8 },
-	legendItem: { flexDirection: "row", alignItems: "center", gap: 6 },
+	legendItem: { flexDirection: "row", alignItems: "center", gap: 8 },
 	parts: { flexDirection: "row", gap: 8 },
 	part: { flex: 1, gap: 2, padding: 12, borderRadius: 18 },
-	scent: { flexDirection: "row", alignItems: "center", gap: 12, padding: 10, borderRadius: 20 },
+	scent: { flexDirection: "row", alignItems: "center", gap: 12, padding: 12, borderRadius: 20 },
 	actions: { flexDirection: "row", gap: 8 },
 	bar: { flexDirection: "row", gap: 4, height: 24 },
-	closet: { gap: 10 },
-	closetItem: { width: 88, gap: 6 },
+	closet: { gap: 12 },
+	closetItem: { width: 88, gap: 8 },
 	flag: { width: 8, height: 8, borderRadius: 4 },
 	wish: {
 		flexDirection: "row",
@@ -490,8 +467,8 @@ const styles = StyleSheet.create({
 	},
 	rail: { height: 64, justifyContent: "flex-start" },
 	railLine: { height: 3, borderRadius: 2 },
-	hangers: { flexDirection: "row", justifyContent: "space-around", paddingTop: 6 },
-	hanger: { width: 40, height: 46, borderWidth: 1.5, borderStyle: "dashed", borderRadius: 8 },
+	hangers: { flexDirection: "row", justifyContent: "space-around", paddingTop: 8 },
+	hanger: { width: 40, height: 46, borderStyle: "dashed", borderRadius: 8 },
 	chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 	chip: {
 		flexDirection: "row",
@@ -500,6 +477,5 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 12,
 		paddingVertical: 8,
 		borderRadius: 18,
-		borderWidth: 1,
 	},
 });

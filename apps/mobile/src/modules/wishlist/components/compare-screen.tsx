@@ -123,8 +123,7 @@ export function CompareScreen({ a, b }: { a?: string; b?: string }) {
 							style={[
 								styles.option,
 								{
-									backgroundColor: colors.bgSurface,
-									borderColor: selected ? colors.accentDefault : colors.bgSurface,
+									backgroundColor: selected ? colors.accentSubtle : colors.bgSurface,
 								},
 							]}
 						>
@@ -213,8 +212,8 @@ function SpecRow({ label, values }: { label: string; values: readonly string[] }
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	pair: { flexDirection: "row", gap: 10 },
-	option: { flex: 1, gap: 8, padding: 10, borderRadius: 20, borderWidth: 1.5 },
+	pair: { flexDirection: "row", gap: 12 },
+	option: { flex: 1, gap: 8, padding: 12, borderRadius: 20 },
 	optionText: { gap: 2, paddingHorizontal: 4, paddingBottom: 4 },
 	card: { gap: 4, padding: 16, borderRadius: 20 },
 	tableRow: { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 8 },

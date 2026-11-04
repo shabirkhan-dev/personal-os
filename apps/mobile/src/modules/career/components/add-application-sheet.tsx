@@ -170,8 +170,7 @@ export function AddApplicationSheet({
 					style={[
 						styles.link,
 						{
-							backgroundColor: colors.bgSubtle,
-							borderColor: failed ? colors.statusDanger : "transparent",
+							backgroundColor: failed ? colors.statusDangerSubtle : colors.bgSubtle,
 						},
 					]}
 				>
@@ -299,24 +298,23 @@ export function AddApplicationSheet({
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	gap: { gap: 10 },
+	gap: { gap: 12 },
 	link: {
 		flexDirection: "row",
 		alignItems: "center",
-		gap: 10,
+		gap: 12,
 		paddingHorizontal: 16,
-		paddingVertical: 14,
+		paddingVertical: 16,
 		borderRadius: 16,
-		borderWidth: 1.5,
 	},
-	status: { flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 6, paddingTop: 4 },
-	help: { paddingHorizontal: 6 },
-	label: { paddingLeft: 6, paddingTop: 4 },
+	status: { flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 8, paddingTop: 4 },
+	help: { paddingHorizontal: 8 },
+	label: { paddingLeft: 8, paddingTop: 4 },
 	halal: {
 		flexDirection: "row",
 		alignItems: "center",
 		gap: 12,
-		paddingVertical: 14,
+		paddingVertical: 16,
 		borderBottomWidth: 1,
 	},
 });

@@ -409,9 +409,9 @@ function ServiceSheet({
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
 	card: { gap: 12, padding: 16, borderRadius: 20 },
-	vehicle: { padding: 14 },
+	vehicle: { padding: 16 },
 	head: { flexDirection: "row", alignItems: "center", gap: 8 },
-	row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 6 },
-	service: { gap: 6, paddingHorizontal: 4 },
+	row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8 },
+	service: { gap: 8, paddingHorizontal: 4 },
 	meter: { height: 6, borderRadius: 3 },
 });

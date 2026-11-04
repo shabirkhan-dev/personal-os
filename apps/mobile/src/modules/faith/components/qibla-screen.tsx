@@ -248,7 +248,6 @@ export function QiblaScreen() {
 					style={[
 						styles.kaabaRing,
 						{
-							borderColor: colors.borderDefault,
 							backgroundColor: aligned ? colors.statusSuccessSubtle : colors.statusCautionSubtle,
 						},
 					]}
@@ -347,11 +346,11 @@ const styles = StyleSheet.create({
 		width: 116,
 		height: 116,
 		borderRadius: 58,
-		borderWidth: 1,
+
 		alignItems: "center",
 		justifyContent: "center",
 	},
-	meter: { gap: 10, paddingHorizontal: 12 },
+	meter: { gap: 12, paddingHorizontal: 12 },
 	track: { height: 6, borderRadius: 3, justifyContent: "center" },
 	mid: { position: "absolute", left: "50%", width: 2, height: 20, marginLeft: -1 },
 	knob: { position: "absolute", width: 14, height: 14, borderRadius: 7, marginLeft: -7 },

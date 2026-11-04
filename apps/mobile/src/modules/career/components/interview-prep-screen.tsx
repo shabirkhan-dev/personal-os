@@ -85,7 +85,7 @@ export function InterviewPrepScreen({ id }: { id?: string }) {
 				<EmptyCard
 					icon="Briefcase"
 					title="No interview booked yet"
-					body="Your stories are ready to practise. When an interview is booked, I'll build a plan for that company."
+					body="Your stories are ready to practise. When an interview is booked, a plan for that company appears here."
 				/>
 				<Stories data={data} onOpen={openStory} />
 				<AiTip>Fifteen minutes out loud each day keeps you sharp between interviews.</AiTip>
@@ -152,12 +152,7 @@ export function InterviewPrepScreen({ id }: { id?: string }) {
 					onDismiss={() => dismiss(job.key)}
 				/>
 			) : prep ? (
-				<View
-					style={[
-						styles.topics,
-						{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-					]}
-				>
+				<View style={[styles.topics, { backgroundColor: colors.bgSurface }]}>
 					<View style={styles.head}>
 						<PoText variant="title18" style={styles.flex}>
 							Topics
@@ -207,10 +202,7 @@ export function InterviewPrepScreen({ id }: { id?: string }) {
 					accessibilityRole="button"
 					accessibilityLabel={`Flashcards, ${deck.length} cards`}
 					onPress={() => careerRoutes.flashcards(app.id)}
-					style={[
-						styles.entry,
-						{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-					]}
+					style={[styles.entry, { backgroundColor: colors.bgSurface }]}
 				>
 					<IconTile name="Layers" tone="accentDefault" tile="accentSubtle" />
 					<View style={styles.flex}>
@@ -235,12 +227,7 @@ export function InterviewPrepScreen({ id }: { id?: string }) {
 			{prep && prep.questions.length > 0 ? (
 				<>
 					<SectionLabel>Questions to ask</SectionLabel>
-					<View
-						style={[
-							styles.questions,
-							{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-						]}
-					>
+					<View style={[styles.questions, { backgroundColor: colors.bgSurface }]}>
 						{prep.questions.map((question) => (
 							<PoText key={question} variant="body15" tone="textSecondary">
 								{question}
@@ -287,16 +274,16 @@ const styles = StyleSheet.create({
 		borderRadius: 20,
 	},
 	head: { flexDirection: "row", alignItems: "center" },
-	segments: { paddingTop: 10, paddingBottom: 6 },
+	segments: { paddingTop: 12, paddingBottom: 8 },
 	entry: {
 		flexDirection: "row",
 		alignItems: "center",
 		gap: 12,
 		paddingLeft: 12,
-		paddingRight: 14,
+		paddingRight: 16,
 		paddingVertical: 12,
 		borderRadius: 20,
 	},
-	badge: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999 },
+	badge: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999 },
 	questions: { gap: 4, padding: 16, borderRadius: 20 },
 });

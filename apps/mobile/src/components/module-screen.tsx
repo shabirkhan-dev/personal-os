@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import type { ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Icon, type IconName } from "@/components/icons";
@@ -9,10 +9,12 @@ import { AskAssistant } from "@/modules/assistant";
 import type { AssistantPlace } from "@/modules/assistant/hooks/use-assistant";
 import { FloatingTabBar } from "@/modules/home/components/floating-tab-bar";
 import { InsightsSwitcher, insightsTabPress } from "@/modules/home/components/insights-switcher";
-import { openAreas } from "@/modules/home/store/areas-picker";
+import { SectionsMenu } from "@/modules/home/components/sections-menu";
+import { sectionsFor } from "@/modules/home/lib/module-sections";
 import { Avatar } from "@/modules/onboarding/components/avatar";
 import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
 import { KeyboardAwareScrollView } from "@/components/ui/keyboard-aware-scroll-view";
+import { STICKY_ROW, StickyBar, scrolledPast } from "@/components/ui/sticky-bar";
 import { usePoTheme } from "@/theme";
 
 export type ModuleScreenProps = {
@@ -32,12 +34,13 @@ export type ModuleScreenProps = {
 	insights?: { onPress: () => void; active?: boolean };
 	/** Shows the Ask button, opening the assistant about this screen. */
 	assistant?: AssistantPlace;
+	/** Which tab is lit when this screen belongs to Profile (Settings). */
+	tab?: "today" | "profile";
 };
 
 /**
  * An inner module screen: the shared header (Back, the module pill, one action), a column with
- * the Figma 16px gutter, and the floating tab bar. The pill and the Areas tab both open the module
- * switcher, as they do on Home.
+ * the Figma 16px gutter, and the floating tab bar. The module pill opens the module's other screens.
  */
 export function ModuleScreen({
 	label,
@@ -47,23 +50,30 @@ export function ModuleScreen({
 	scroll = true,
 	insights,
 	assistant,
+	tab = "today",
 }: ModuleScreenProps) {
 	const { colors } = usePoTheme();
 	const insets = useSafeAreaInsets();
 	const name = useOnboardingStore((state) => state.name);
+	const [menuOpen, setMenuOpen] = useState(false);
+	const [solid, setSolid] = useState(false);
+	const sections = sectionsFor(label);
 
 	const header = (
 		<View style={styles.header}>
 			<HeaderButton accessibilityLabel="Back" onPress={() => router.back()} />
 			<Pressable
-				accessibilityRole="button"
-				accessibilityLabel={`${label}, switch area`}
-				onPress={openAreas}
+				accessibilityRole={sections.length > 0 ? "button" : undefined}
+				accessibilityLabel={sections.length > 0 ? `${label}, its screens` : label}
+				disabled={sections.length === 0}
+				onPress={() => setMenuOpen(true)}
 				style={[styles.pill, { backgroundColor: colors.bgSurface }]}
 			>
 				<Avatar name={name} size={32} />
 				<PoText variant="text14Medium">{label}</PoText>
-				<Icon name="Filled/Chevron down" size={16} color={colors.textSecondary} />
+				{sections.length > 0 ? (
+					<Icon name="Filled/Chevron down" size={16} color={colors.textSecondary} />
+				) : null}
 			</Pressable>
 			{action ? (
 				<HeaderButton
@@ -78,8 +88,9 @@ export function ModuleScreen({
 	);
 	const switcher = insights?.active ? <InsightsSwitcher /> : null;
 	// Room for the tab bar, and the Ask button above it when there is one.
+	// The header is pinned in a StickyBar, so content starts below its row.
 	const padding = {
-		paddingTop: insets.top + 6,
+		paddingTop: insets.top + 6 + STICKY_ROW + 12,
 		paddingBottom: (assistant ? 160 : 110) + insets.bottom,
 	};
 
@@ -89,27 +100,37 @@ export function ModuleScreen({
 				<KeyboardAwareScrollView
 					keyboardShouldPersistTaps="handled"
 					contentContainerStyle={[styles.content, padding]}
+					scrollEventThrottle={16}
+					onScroll={(event) => setSolid(scrolledPast(event.nativeEvent.contentOffset.y))}
 				>
-					{header}
 					{switcher}
 					{children}
 				</KeyboardAwareScrollView>
 			) : (
 				<View style={[styles.root, styles.content, padding]}>
-					{header}
 					{switcher}
 					{children}
 				</View>
 			)}
+			<StickyBar topInset={insets.top} solid={solid || menuOpen}>
+				{header}
+			</StickyBar>
 			<FloatingTabBar
-				active={insights?.active ? "insights" : "today"}
+				active={insights?.active ? "insights" : tab}
 				bottomInset={insets.bottom}
 				onTodayPress={onHome}
-				onAreasPress={openAreas}
 				onInsightsPress={insights?.onPress ?? insightsTabPress()}
 				onProfilePress={() => router.push("/profile")}
 			/>
 			{assistant ? <AskAssistant place={assistant} /> : null}
+			{menuOpen ? (
+				<SectionsMenu
+					top={insets.top + 54}
+					title={label}
+					sections={sections}
+					onClose={() => setMenuOpen(false)}
+				/>
+			) : null}
 		</View>
 	);
 }
@@ -122,7 +143,6 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "center",
 		gap: 8,
-		paddingBottom: 12,
 	},
 	pill: {
 		height: 40,

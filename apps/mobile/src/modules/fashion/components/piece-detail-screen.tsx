@@ -162,12 +162,7 @@ export function PieceDetailScreen({ id }: { id: string }) {
 				eyebrow={`${CATEGORY_ONE[piece.category]}${boughtLabel(piece.boughtOn)}`}
 				title={piece.name}
 			/>
-			<View
-				style={[
-					styles.hero,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.hero, { backgroundColor: colors.bgSurface }]}>
 				<PieceImage
 					image={piece.image}
 					category={piece.category}
@@ -208,12 +203,7 @@ export function PieceDetailScreen({ id }: { id: string }) {
 			</View>
 
 			{isScent ? (
-				<View
-					style={[
-						styles.card,
-						{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-					]}
-				>
+				<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 					<PoText variant="title18">How full is it?</PoText>
 					<View style={styles.levels}>
 						{[1, 0.8, 0.6, 0.4, 0.2, 0].map((level) => {
@@ -238,12 +228,7 @@ export function PieceDetailScreen({ id }: { id: string }) {
 					</View>
 				</View>
 			) : shownPairs.length > 0 ? (
-				<View
-					style={[
-						styles.card,
-						{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-					]}
-				>
+				<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 					<View style={styles.head}>
 						<PoText variant="title18" style={styles.flex}>
 							{pairs.length > 0 ? "Pairs with" : "Goes with"}
@@ -281,12 +266,7 @@ export function PieceDetailScreen({ id }: { id: string }) {
 			) : null}
 
 			{details.length > 0 || piece.note ? (
-				<View
-					style={[
-						styles.card,
-						{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-					]}
-				>
+				<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 					{details.map(([label, value]) => (
 						<View key={label} style={styles.detail}>
 							<PoText variant="text14" tone="textSecondary" style={styles.flex}>
@@ -331,12 +311,7 @@ export function PieceDetailScreen({ id }: { id: string }) {
 function Stat({ label, value, good = false }: { label: string; value: string; good?: boolean }) {
 	const { colors } = usePoTheme();
 	return (
-		<View
-			style={[
-				styles.stat,
-				{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-			]}
-		>
+		<View style={[styles.stat, { backgroundColor: colors.bgSurface }]}>
 			<PoText variant="eyebrow11" tone="textTertiary">
 				{label}
 			</PoText>
@@ -356,14 +331,14 @@ const styles = StyleSheet.create({
 	flex: { flex: 1 },
 	hero: { padding: 8, borderRadius: 20 },
 	stats: { flexDirection: "row", gap: 8 },
-	stat: { flex: 1, gap: 6, padding: 14, borderRadius: 20, borderWidth: 1 },
+	stat: { flex: 1, gap: 8, padding: 16, borderRadius: 20 },
 	card: { gap: 12, padding: 16, borderRadius: 20 },
 	head: { flexDirection: "row", alignItems: "center" },
-	pairs: { gap: 10 },
+	pairs: { gap: 12 },
 	pair: { width: 76, gap: 4 },
 	detail: { flexDirection: "row", alignItems: "center", paddingVertical: 2 },
 	note: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 4 },
 	flag: { width: 8, height: 8, borderRadius: 4 },
 	levels: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-	level: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 16 },
+	level: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 16 },
 });

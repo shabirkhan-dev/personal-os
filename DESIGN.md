@@ -40,14 +40,14 @@ system preference. **No raw colour values in screens.**
 | --- | --- |
 | `colors.light` / `colors.dark` | `bg*` (canvas, app, subtle, surface, hover, selected, inverse), `text*`, `border*`, `accent*`, `status*` |
 | `glowOpacity` | Fill opacity of the blurred colour glows per mode (hero, card, member) |
-| `space` | 0, 4, 6, 8, 16, 24, 32 |
+| `space` | 0, 2, 4, 8, 12, 16, 20, 24, 32, 40, 48, 64: every gap, padding and margin is one of these |
 | `radius` | `xs` 4, `lg` 12, `2xl` 20, `full` (pills and circles) |
 | `stroke` | hairline 1, selected 1.5, checkbox ring 1.75 |
 | `elevation` | `card`, `floating`, `pocket` shadows (converted by `toShadowStyle`) |
 | `textStyles` | `hero40`, `display36`, `title30`, `title18`, `body15`, `row15`, `text14`, `text14Medium`, `meta13`, `tab11`, `mono13`, `eyebrow11`, `arabic20`, `arabic30`, `arabic56` |
 
-Type is SF Pro (system) for sans, JetBrains Mono for mono and Amiri Quran for Arabic (Quran text,
-duas, Tasbih phrases); `toTextStyle` maps a token to a
+Type is one family, the system font (SF Pro on iOS, Roboto on Android), with tabular figures for
+times and numbers; Amiri Quran is only for Arabic (Quran text, duas, Tasbih phrases). `toTextStyle` maps a token to a
 React Native style and `PoText` renders it. Do not invent one-off sizes or colours: add a token
 that matches Figma first.
 

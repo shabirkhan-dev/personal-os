@@ -171,5 +171,5 @@ export function WishlistHomeView({ actionRequest }: HomeModuleViewProps) {
 }
 
 const styles = StyleSheet.create({
-	loading: { paddingHorizontal: 6 },
+	loading: { paddingHorizontal: 8 },
 });

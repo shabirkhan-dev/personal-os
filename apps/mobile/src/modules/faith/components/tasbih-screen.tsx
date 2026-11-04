@@ -234,12 +234,7 @@ export function TasbihScreen() {
 			</Pressable>
 
 			<SectionLabel>{`Your sequence · ${sequence.length} sets`}</SectionLabel>
-			<View
-				style={[
-					styles.sequence,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.sequence, { backgroundColor: colors.bgSurface }]}>
 				{sequence.map((item, index) => {
 					const done = (live[item.id] ?? 0) >= item.target;
 					const current = item.id === phrase?.id;
@@ -356,6 +351,6 @@ const styles = StyleSheet.create({
 	ringText: { position: "absolute", alignItems: "center", gap: 2 },
 	sequence: { borderRadius: 20, padding: 8, gap: 4 },
 	step: { flexDirection: "row", alignItems: "center", gap: 12, padding: 12, borderRadius: 20 },
-	badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
+	badge: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8 },
 	options: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 });

@@ -103,7 +103,7 @@ export function HowToSheet({
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	body: { gap: 14, paddingBottom: 8 },
+	body: { gap: 16, paddingBottom: 8 },
 	cues: { gap: 12 },
 	cue: { flexDirection: "row", gap: 12, alignItems: "flex-start" },
 	number: {

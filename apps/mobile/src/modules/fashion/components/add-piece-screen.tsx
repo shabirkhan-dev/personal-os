@@ -260,8 +260,7 @@ export function AddPieceScreen({ editId, category }: { editId?: string; category
 					style={[
 						styles.input,
 						{
-							backgroundColor: colors.bgSurface,
-							borderColor: text ? colors.accentDefault : colors.borderDefault,
+							backgroundColor: text ? colors.accentSubtle : colors.bgSurface,
 						},
 					]}
 				>
@@ -312,18 +311,13 @@ export function AddPieceScreen({ editId, category }: { editId?: string; category
 				</PoText>
 			) : null}
 
-			<View
-				style={[
-					styles.card,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 				<PoText variant="title18">Product image</PoText>
 				<View style={styles.imageRow}>
 					<View
 						style={[
 							styles.current,
-							{ borderColor: form.image ? colors.accentDefault : colors.borderDefault },
+							{ backgroundColor: form.image ? colors.accentSubtle : "transparent" },
 						]}
 					>
 						<PieceImage
@@ -372,7 +366,7 @@ export function AddPieceScreen({ editId, category }: { editId?: string; category
 									set("image", value);
 									if (!touched.has("colour") && !form.colour) set("colour", item.colour);
 								}}
-								style={[styles.alike, { borderColor: on ? colors.accentDefault : "transparent" }]}
+								style={[styles.alike, { opacity: on ? 1 : 0.55 }]}
 							>
 								<PieceImage
 									image={value}
@@ -387,12 +381,7 @@ export function AddPieceScreen({ editId, category }: { editId?: string; category
 				</ScrollView>
 			</View>
 
-			<View
-				style={[
-					styles.card,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 				<SectionLabel>Category</SectionLabel>
 				<ChoiceChips
 					options={CATEGORIES.map((value) => ({ value, label: CATEGORY_ONE[value] }))}
@@ -415,8 +404,8 @@ export function AddPieceScreen({ editId, category }: { editId?: string; category
 								style={[
 									styles.colour,
 									on
-										? { backgroundColor: colors.accentSubtle, borderColor: colors.accentDefault }
-										: { backgroundColor: colors.bgSubtle, borderColor: colors.bgSubtle },
+										? { backgroundColor: colors.accentSubtle }
+										: { backgroundColor: colors.bgSubtle },
 								]}
 							>
 								<Swatch colour={colour} size={12} />
@@ -429,12 +418,7 @@ export function AddPieceScreen({ editId, category }: { editId?: string; category
 				</View>
 			</View>
 
-			<View
-				style={[
-					styles.card,
-					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
-				]}
-			>
+			<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 				<TextField
 					label="Name"
 					value={form.name}
@@ -550,7 +534,7 @@ function SourceButton({
 				haptics.tap();
 				onPress();
 			}}
-			style={[styles.source, { borderColor: colors.borderStrong }]}
+			style={[styles.source, {}]}
 		>
 			<View style={styles.sourceHead}>
 				<Icon name={icon} size={16} color={colors.textPrimary} />
@@ -565,35 +549,34 @@ function SourceButton({
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	pad: { paddingHorizontal: 6 },
-	input: { gap: 10, padding: 16, borderRadius: 20, borderWidth: 1.5, minHeight: 92 },
+	pad: { paddingHorizontal: 8 },
+	input: { gap: 12, padding: 16, borderRadius: 20, minHeight: 92 },
 	status: { flexDirection: "row", alignItems: "center", gap: 8 },
 	dot: { width: 8, height: 8, borderRadius: 4 },
 	card: { gap: 12, padding: 16, borderRadius: 20 },
-	imageRow: { flexDirection: "row", gap: 10 },
-	current: { flex: 1, borderWidth: 1.5, borderRadius: 16, padding: 2 },
-	sources: { flex: 1, gap: 10 },
+	imageRow: { flexDirection: "row", gap: 12 },
+	current: { flex: 1, borderRadius: 16, padding: 2 },
+	sources: { flex: 1, gap: 12 },
 	source: {
 		flex: 1,
 		justifyContent: "center",
 		alignItems: "center",
 		gap: 4,
 		borderRadius: 20,
-		borderWidth: 1,
+
 		borderStyle: "dashed",
-		padding: 10,
+		padding: 12,
 	},
-	sourceHead: { flexDirection: "row", alignItems: "center", gap: 6 },
+	sourceHead: { flexDirection: "row", alignItems: "center", gap: 8 },
 	alikes: { gap: 8 },
-	alike: { borderWidth: 2, borderRadius: 16, padding: 1 },
+	alike: { borderRadius: 16, padding: 2 },
 	colours: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 	colour: {
 		flexDirection: "row",
 		alignItems: "center",
-		gap: 6,
+		gap: 8,
 		paddingHorizontal: 12,
 		paddingVertical: 8,
 		borderRadius: 18,
-		borderWidth: 1,
 	},
 });

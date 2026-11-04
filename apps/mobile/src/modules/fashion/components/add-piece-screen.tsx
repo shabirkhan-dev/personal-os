@@ -3,13 +3,13 @@ import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
 	ActivityIndicator,
-	Alert,
 	Pressable,
 	ScrollView,
 	StyleSheet,
 	TextInput,
 	View,
 } from "react-native";
+import { showDialog } from "@/components/ui/dialog";
 import { Icon } from "@/components/icons";
 import { Footer, ScreenTitle, SectionLabel } from "@/components/module-ui";
 import { ChoiceChips } from "@/components/ui/choice-chips";
@@ -223,21 +223,17 @@ export function AddPieceScreen({ editId, category }: { editId?: string; category
 
 	const remove = () => {
 		if (!editing) return;
-		Alert.alert(
-			`Remove ${editing.name}?`,
-			"It leaves your wardrobe. Outfits already logged stay.",
-			[
-				{ text: "Keep", style: "cancel" },
-				{
-					text: "Remove",
-					style: "destructive",
-					onPress: () =>
-						void deletePiece(editing)
-							.then(() => router.dismissTo("/fashion/wardrobe"))
-							.catch((error: unknown) => console.error("[fashion] could not remove", error)),
-				},
-			],
-		);
+		showDialog(`Remove ${editing.name}?`, "It leaves your wardrobe. Outfits already logged stay.", [
+			{ text: "Keep", style: "cancel" },
+			{
+				text: "Remove",
+				style: "destructive",
+				onPress: () =>
+					void deletePiece(editing)
+						.then(() => router.dismissTo("/fashion/wardrobe"))
+						.catch((error: unknown) => console.error("[fashion] could not remove", error)),
+			},
+		]);
 	};
 
 	const lookAlikes = CATALOG.filter((item) => !form.category || item.category === form.category);

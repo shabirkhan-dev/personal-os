@@ -2,6 +2,7 @@ import { type ReactNode, useRef, type ComponentRef } from "react";
 import { Modal, Pressable, StyleSheet, useWindowDimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Icon } from "@/components/icons";
+import { DialogHost } from "@/components/ui/dialog";
 import { PillButton } from "@/components/ui/pill-button";
 import { KeyboardAwareScrollView } from "@/components/ui/keyboard-aware-scroll-view";
 import { PoText } from "@/components/ui/po-text";
@@ -88,6 +89,7 @@ export function Sheet({ visible, title, onClose, children, action, footer }: She
 							/>
 						) : null)}
 				</View>
+				<DialogHost />
 			</View>
 		</Modal>
 	);

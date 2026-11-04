@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { Alert, Linking, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Linking, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { showDialog } from "@/components/ui/dialog";
 import { Icon, type IconName } from "@/components/icons";
 import {
 	FilterChip,
@@ -77,7 +78,7 @@ export function GrowScreen() {
 		if (resource.url) {
 			Linking.openURL(resource.url).catch((error: unknown) => {
 				console.warn("[faith] could not open the link", error);
-				Alert.alert("Couldn't open that link", resource.url);
+				showDialog("Couldn't open that link", resource.url);
 			});
 		} else edit(resource);
 	};

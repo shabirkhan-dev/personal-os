@@ -2,7 +2,8 @@ import Constants from "expo-constants";
 import { KeyboardAwareScrollView } from "@/components/ui/keyboard-aware-scroll-view";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Alert, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import { showDialog } from "@/components/ui/dialog";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PoText } from "@/components/ui/po-text";
 import { haptics } from "@/lib/haptics";
@@ -36,7 +37,7 @@ import { DevicesSection } from "./devices-section";
 import { EditProfileSheet } from "./edit-profile-sheet";
 import { ManageModulesSheet } from "./manage-modules-sheet";
 import { OptionSheet } from "./option-sheet";
-import { SectionLabel, SettingsCard, SettingsRow, SoonTag } from "./settings-list";
+import { SectionLabel, SettingsCard, SettingsRow } from "./settings-list";
 import { useAssistantSettings } from "@/modules/assistant/data/assistant-settings";
 import { APPROVAL_LABELS } from "@personal-os/domain/assistant";
 
@@ -74,10 +75,10 @@ function saveUnits(system: UnitSystem) {
 		.catch((error: unknown) => console.error("Could not save units", error));
 }
 
-/** An Alert as a promise: true when the person picks `action`. */
+/** A confirm dialog as a promise: true when the person picks `action`. */
 function confirm(title: string, message: string, action: string): Promise<boolean> {
 	return new Promise((resolve) => {
-		Alert.alert(title, message, [
+		showDialog(title, message, [
 			{ text: "Cancel", style: "cancel", onPress: () => resolve(false) },
 			{ text: action, style: "destructive", onPress: () => resolve(true) },
 		]);
@@ -86,7 +87,7 @@ function confirm(title: string, message: string, action: string): Promise<boolea
 
 /** Clears the answers and restarts setup, after a confirm. */
 function replayOnboarding() {
-	Alert.alert(
+	showDialog(
 		"Replay onboarding?",
 		"Your answers are cleared and setup starts again. Your module logs stay on this phone.",
 		[
@@ -146,7 +147,7 @@ export function ProfileScreen() {
 			})
 			.catch((error: unknown) => {
 				console.error("Export failed", error);
-				Alert.alert("Export failed", "Your data could not be exported. Please try again.");
+				showDialog("Export failed", "Your data could not be exported. Please try again.");
 			})
 			.finally(() => setExporting(false));
 	};
@@ -171,7 +172,7 @@ export function ProfileScreen() {
 	};
 
 	const signOut = () => {
-		Alert.alert(
+		showDialog(
 			"Sign out?",
 			"Your changes are backed up first. Keep your plan and logs on this phone, or erase them.",
 			[
@@ -192,7 +193,7 @@ export function ProfileScreen() {
 	};
 
 	const removeAccount = () => {
-		Alert.alert(
+		showDialog(
 			"Delete your account?",
 			"This deletes your account and everything backed up to it, and erases this phone. It can't be undone.",
 			[
@@ -210,7 +211,7 @@ export function ProfileScreen() {
 							})
 							.catch((error: unknown) => {
 								console.error("Account deletion failed", error);
-								Alert.alert(
+								showDialog(
 									"Couldn't delete your account",
 									"Check your connection and try again. Nothing was deleted.",
 								);
@@ -249,12 +250,6 @@ export function ProfileScreen() {
 							meta={modulesOnLabel(modules.length)}
 							value={`${modules.length} on`}
 							onPress={() => setSheet("modules")}
-						/>
-						<SettingsRow
-							icon="Pin"
-							title="Pinned order"
-							meta="Choose which modules come first"
-							accessory={<SoonTag />}
 						/>
 					</SettingsCard>
 

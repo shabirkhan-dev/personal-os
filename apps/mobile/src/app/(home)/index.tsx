@@ -2,8 +2,7 @@ import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { AskAssistant, startConversation, useAssistant } from "@/modules/assistant";
-import type { AssistantPlace } from "@/modules/assistant/hooks/use-assistant";
+import { startConversation, useAssistant } from "@/modules/assistant";
 import { CalendarWeekCard } from "@/modules/calendar/components/calendar-week-card";
 import { careHome, useCareStatus } from "@/modules/care";
 import { careerHome, useCareerStatus } from "@/modules/career";
@@ -48,18 +47,6 @@ const moduleHomes: Partial<Record<ModuleId, HomeModule>> = {
 	faith: faithHome,
 	fashion: fashionHome,
 	wishlist: wishlistHome,
-};
-
-/**
- * The floating Ask button for each Home. Overview, Finance, Food and Faith have their own ask bar
- * (type or speak to log and ask), so a second Ask button there would only compete with it.
- */
-const askPlaces: Partial<Record<HomeView, AssistantPlace>> = {
-	career: { module: "career", screen: "career home" },
-	fashion: { module: "fashion", screen: "fashion home" },
-	wishlist: { module: "wishlist", screen: "wishlist home" },
-	skincare: { module: "skincare", screen: "care home" },
-	workout: { module: "workout", screen: "training home" },
 };
 
 /** Today: Overview or one module's Home, switched from the module picker. */
@@ -132,7 +119,7 @@ export default function TodayScreen() {
 	return (
 		<View style={[styles.root, { backgroundColor: colors.bgApp }]}>
 			<KeyboardAwareScrollView
-				contentContainerStyle={[styles.scroll, { paddingBottom: 160 + insets.bottom }]}
+				contentContainerStyle={[styles.scroll, { paddingBottom: 110 + insets.bottom }]}
 				keyboardShouldPersistTaps="handled"
 			>
 				{moduleHome && view !== "overview" ? (
@@ -204,7 +191,6 @@ export default function TodayScreen() {
 					router.push("/profile");
 				}}
 			/>
-			{askPlaces[view] ? <AskAssistant key={view} place={askPlaces[view]} /> : null}
 		</View>
 	);
 }

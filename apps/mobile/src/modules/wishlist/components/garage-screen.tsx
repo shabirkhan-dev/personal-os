@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { ActivityIndicator, Alert, Pressable, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
+import { showDialog } from "@/components/ui/dialog";
 import { Icon } from "@/components/icons";
 import { EmptyCard, Footer, ScreenTitle } from "@/components/module-ui";
 import { ChoiceChips } from "@/components/ui/choice-chips";
@@ -257,7 +258,7 @@ function OwnedSheet({
 
 	const remove = () => {
 		if (!owned) return;
-		Alert.alert(`Remove ${owned.name}?`, "It leaves your garage.", [
+		showDialog(`Remove ${owned.name}?`, "It leaves your garage.", [
 			{ text: "Keep", style: "cancel" },
 			{
 				text: "Remove",

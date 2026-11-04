@@ -1,5 +1,6 @@
 import { elevation } from "@personal-os/tokens";
 import { Pressable, StyleSheet, View } from "react-native";
+import { Icon } from "@/components/icons";
 import { PoText } from "@/components/ui/po-text";
 import { moneyParts } from "@/lib/money";
 import { toShadowStyle, usePoTheme } from "@/theme";
@@ -15,20 +16,43 @@ export type MoneyCardProps = {
 
 /**
  * Home "Money card": the Finance tab with the dashed pocket, showing what is left of this month's
- * budget, or "Not set" until a budget exists. Tapping opens Finance.
+ * budget. Until a budget exists it is one short row asking for one, not an empty pocket.
+ * Tapping opens Finance.
  */
 export function MoneyCard({ period, leftToSpend, hidden, onPress }: MoneyCardProps) {
 	const { colors } = usePoTheme();
 	const parts = leftToSpend === null ? null : moneyParts(leftToSpend);
 
+	if (!parts) {
+		return (
+			<Pressable
+				accessibilityRole="button"
+				accessibilityLabel="Finance, set a monthly budget"
+				onPress={onPress}
+				style={({ pressed }) => [
+					styles.setup,
+					{
+						backgroundColor: pressed ? colors.bgHover : colors.bgSurface,
+						borderColor: colors.borderDefault,
+					},
+				]}
+			>
+				<View style={[styles.dot, { backgroundColor: colors.statusSuccess }]} />
+				<View style={styles.setupText}>
+					<PoText variant="row15">Set a monthly budget</PoText>
+					<PoText variant="meta13" tone="textSecondary">
+						See what's left to spend, right here
+					</PoText>
+				</View>
+				<Icon name="Line/Chevron right" size={16} color={colors.textSecondary} />
+			</Pressable>
+		);
+	}
+
 	return (
 		<Pressable
 			accessibilityRole="button"
-			accessibilityLabel={
-				parts
-					? `Finance, ${hidden ? "amount hidden" : `${parts.whole} left this month`}`
-					: "Finance, set a monthly budget"
-			}
+			accessibilityLabel={`Finance, ${hidden ? "amount hidden" : `${parts.whole} left this month`}`}
 			onPress={onPress}
 			style={[
 				styles.card,
@@ -53,22 +77,16 @@ export function MoneyCard({ period, leftToSpend, hidden, onPress }: MoneyCardPro
 			>
 				<View style={[styles.stitch, { borderColor: colors.borderDefault }]}>
 					<PoText variant="meta13" tone="textSecondary">
-						{parts ? "Left to spend this month" : "Monthly budget"}
+						Left to spend this month
 					</PoText>
-					{parts ? (
-						<PoText variant="hero40" numberOfLines={1} adjustsFontSizeToFit>
-							{hidden ? "••••••" : parts.whole}
-							{hidden ? null : (
-								<PoText variant="hero40" tone="textTertiary">
-									{parts.decimal}
-								</PoText>
-							)}
-						</PoText>
-					) : (
-						<PoText variant="hero40" tone="textTertiary">
-							Not set
-						</PoText>
-					)}
+					<PoText variant="hero40" numberOfLines={1} adjustsFontSizeToFit>
+						{hidden ? "••••••" : parts.whole}
+						{hidden ? null : (
+							<PoText variant="hero40" tone="textTertiary">
+								{parts.decimal}
+							</PoText>
+						)}
+					</PoText>
 				</View>
 			</View>
 		</Pressable>
@@ -91,6 +109,16 @@ const styles = StyleSheet.create({
 		borderRadius: 22,
 	},
 	label: { flexDirection: "row", alignItems: "center", gap: 8 },
+	setup: {
+		minHeight: 72,
+		flexDirection: "row",
+		alignItems: "center",
+		gap: 14,
+		paddingHorizontal: 20,
+		borderRadius: 24,
+		borderWidth: 1,
+	},
+	setupText: { flex: 1, gap: 2 },
 	dot: { width: 8, height: 8, borderRadius: 4 },
 	pocket: {
 		position: "absolute",

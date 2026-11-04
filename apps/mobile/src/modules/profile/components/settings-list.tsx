@@ -168,11 +168,6 @@ export function RowPill({ label, onPress, accessibilityLabel }: RowPillProps) {
 	);
 }
 
-/** The honest end-of-row tag for things that do not exist yet. */
-export function SoonTag() {
-	return <RowPill label="Soon" />;
-}
-
 const styles = StyleSheet.create({
 	label: { paddingLeft: 6, paddingTop: 10 },
 	card: {

@@ -30,7 +30,7 @@ export function useFinanceSummary(): FinanceSummary {
 export function useFinanceHero(): HomeHero {
 	const { data, balance, days } = useFinanceToday();
 	if (!data.settings.setUp) {
-		return { label: "Finance · getting started", value: "How long", faint: " can you last?" };
+		return { label: "Finance · getting started", value: "Runway", faint: " not set" };
 	}
 	return {
 		label: data.settings.protect ? "Finance · minimum only" : "Finance · runway mode",

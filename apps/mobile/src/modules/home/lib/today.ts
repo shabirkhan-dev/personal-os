@@ -118,9 +118,3 @@ export function moduleStatuses(input: PlanInput, items: readonly TodayItem[]): M
 		enabled: input.modules.includes(option.id),
 	}));
 }
-
-/** "PKR · OCT" style period label for the money card. */
-export function periodLabel(date: Date, currency = "PKR"): string {
-	const month = date.toLocaleString("en-US", { month: "short" }).toUpperCase();
-	return `${currency} · ${month}`;
-}

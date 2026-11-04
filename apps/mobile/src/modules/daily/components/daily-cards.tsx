@@ -3,18 +3,12 @@ import type { ReactNode } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Icon } from "@/components/icons";
 import { Checkbox } from "@/components/ui/checkbox";
-import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
 import { haptics } from "@/lib/haptics";
 import { clockOf } from "@/modules/home/lib/module-day";
 import { usePoTheme } from "@/theme";
-import {
-	type AgendaItem,
-	MODULE_LABELS,
-	type MinimumState,
-	type RightNow,
-} from "../lib/daily-math";
-import type { MinimumId, PlanModule } from "../lib/daily-model";
+import { type AgendaItem, MODULE_LABELS, type RightNow } from "../lib/daily-math";
+import type { PlanModule } from "../lib/daily-model";
 
 type Tone = keyof ColorTokens;
 
@@ -64,8 +58,8 @@ export function CardHead({
 	);
 }
 
-/** "NOW · 15:00 · CAREER": the block happening now, with Start focus and Later. */
-export function RightNowCard({
+/** What's on now, or next: one compact row with the time, the block and Start or Later. */
+export function UpNextCard({
 	now,
 	detail,
 	onStart,
@@ -77,114 +71,106 @@ export function RightNowCard({
 	onLater: () => void;
 }) {
 	const { colors } = usePoTheme();
-	const tone = MODULE_TONES[now.item.module];
 	return (
 		<Card tone="accent">
-			<View style={styles.eyebrow}>
-				<View style={[styles.dot, { backgroundColor: colors[tone] }]} />
-				<PoText variant="eyebrow11" tone="accentDefault">
-					{`${now.state === "now" ? "Now" : "Next"} · ${clockOf(now.item.minutes)} · ${MODULE_LABELS[now.item.module]}`}
-				</PoText>
-			</View>
-			<PoText variant="title30">{now.item.title}</PoText>
-			<PoText variant="meta13" tone="textSecondary">
-				{detail}
-			</PoText>
-			<View style={styles.row}>
-				<PillButton
-					label={now.state === "now" ? "Start focus" : "Open"}
-					variant="secondary"
-					style={styles.flex}
-					onPress={onStart}
-				/>
-				<PillButton label="Later" variant="ghost" onPress={onLater} />
-			</View>
-			{now.next ? (
-				<View style={styles.eyebrow}>
-					<View
-						style={[styles.smallDot, { backgroundColor: colors[MODULE_TONES[now.next.module]] }]}
-					/>
-					<PoText variant="meta13" tone="textSecondary">
-						{`Next · ${now.next.title} at ${clockOf(now.next.minutes)}`}
+			<View style={styles.upNext}>
+				<View style={styles.upTime}>
+					<PoText variant="meta13" tone="accentDefault">
+						{now.state === "now" ? "Now" : "Next"}
+					</PoText>
+					<PoText variant="title18">{clockOf(now.item.minutes)}</PoText>
+				</View>
+				<View style={[styles.bar, { backgroundColor: colors[MODULE_TONES[now.item.module]] }]} />
+				<View style={styles.flex}>
+					<PoText variant="row15" numberOfLines={1}>
+						{now.item.title}
+					</PoText>
+					<PoText variant="meta13" tone="textSecondary" numberOfLines={1}>
+						{detail || MODULE_LABELS[now.item.module]}
 					</PoText>
 				</View>
-			) : null}
+			</View>
+			<View style={styles.row}>
+				<SmallButton label={now.state === "now" ? "Start" : "Open"} primary onPress={onStart} />
+				<SmallButton label="Later" onPress={onLater} />
+				{now.next ? (
+					<PoText variant="meta13" tone="textTertiary" numberOfLines={1} style={styles.flex}>
+						{`Then ${now.next.title} at ${clockOf(now.next.minutes)}`}
+					</PoText>
+				) : null}
+			</View>
 		</Card>
 	);
 }
 
-export type MinimumRing = { id: MinimumId; label: string; module: PlanModule; state: MinimumState };
-
-/** The minimum day as compact chips: Pray 2/3, Apply 1/2, Protein 96g, Train 18:30, Skin ✓. */
-export function MinimumCard({
-	rings,
-	streak,
+function SmallButton({
+	label,
+	primary = false,
 	onPress,
-	onRing,
 }: {
-	rings: readonly MinimumRing[];
-	streak: number;
+	label: string;
+	primary?: boolean;
 	onPress: () => void;
-	onRing: (ring: MinimumRing) => void;
 }) {
 	const { colors } = usePoTheme();
 	return (
-		<Card>
-			<Pressable accessibilityRole="button" onPress={onPress}>
-				<CardHead
-					title="Minimum day"
-					right={streak > 0 ? `⚡ ${streak}-day streak` : "start today"}
-					rightTone="textWarning"
-				/>
-			</Pressable>
-			<View style={styles.chips}>
-				{rings.map((ring) => {
-					const tone =
-						MODULE_TONES[ring.module] === "textPrimary"
-							? "accentDefault"
-							: MODULE_TONES[ring.module];
-					const share = ring.state.done ? 1 : Math.min(1, Math.max(0, ring.state.share));
-					return (
-						<Pressable
-							key={ring.id}
-							accessibilityRole="button"
-							accessibilityLabel={`${ring.label}, ${ring.state.done ? "done" : ring.state.value}`}
-							onPress={() => {
-								haptics.tap();
-								onRing(ring);
-							}}
-							style={({ pressed }) => [
-								styles.chip,
-								{ backgroundColor: pressed ? colors.bgHover : colors.bgSubtle },
-							]}
-						>
-							{ring.state.done ? (
-								<Icon name="Line/Check" size={14} color={colors.statusSuccess} />
-							) : (
-								<View style={[styles.dot, { backgroundColor: colors[tone] }]} />
-							)}
-							<PoText
-								variant="text14Medium"
-								tone={ring.state.done ? "textSecondary" : "textPrimary"}
-								numberOfLines={1}
-								style={styles.flex}
-							>
-								{ring.label}
-							</PoText>
-							<PoText variant="mono13" tone={ring.state.done ? "textSuccess" : "textTertiary"}>
-								{ring.state.done ? "done" : ring.state.value}
-							</PoText>
-							<View
-								style={[
-									styles.chipBar,
-									{ width: `${share * 100}%`, backgroundColor: colors[tone] },
-								]}
-							/>
-						</Pressable>
-					);
-				})}
-			</View>
-		</Card>
+		<Pressable
+			accessibilityRole="button"
+			onPress={() => {
+				haptics.tap();
+				onPress();
+			}}
+			style={({ pressed }) => [
+				styles.small,
+				{
+					backgroundColor: primary ? colors.bgInverse : colors.bgSurface,
+					opacity: pressed ? 0.8 : 1,
+				},
+			]}
+		>
+			<PoText variant="text14Medium" tone={primary ? "textInverse" : "textPrimary"}>
+				{label}
+			</PoText>
+		</Pressable>
+	);
+}
+
+export type StatTile = { label: string; value: string; tone?: Tone; onPress?: () => void };
+
+/** A row of small numbers: minimum day, streak, money left. */
+export function StatTiles({ tiles }: { tiles: readonly StatTile[] }) {
+	const { colors } = usePoTheme();
+	return (
+		<View style={styles.stats}>
+			{tiles.map((tile) => (
+				<Pressable
+					key={tile.label}
+					accessibilityRole={tile.onPress ? "button" : undefined}
+					accessibilityLabel={`${tile.label}, ${tile.value}`}
+					disabled={!tile.onPress}
+					onPress={() => {
+						haptics.tap();
+						tile.onPress?.();
+					}}
+					style={({ pressed }) => [
+						styles.stat,
+						{ backgroundColor: pressed ? colors.bgHover : colors.bgSurface },
+					]}
+				>
+					<PoText variant="meta13" tone="textSecondary" numberOfLines={1}>
+						{tile.label}
+					</PoText>
+					<PoText
+						variant="title18"
+						tone={tile.tone ?? "textPrimary"}
+						numberOfLines={1}
+						adjustsFontSizeToFit
+					>
+						{tile.value}
+					</PoText>
+				</Pressable>
+			))}
+		</View>
 	);
 }
 
@@ -299,6 +285,11 @@ const styles = StyleSheet.create({
 	eyebrow: { flexDirection: "row", alignItems: "center", gap: 8 },
 	dot: { width: 8, height: 8, borderRadius: 4 },
 	chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+	upNext: { flexDirection: "row", alignItems: "center", gap: 12 },
+	upTime: { width: 52 },
+	small: { height: 36, paddingHorizontal: 16, borderRadius: 18, justifyContent: "center" },
+	stats: { flexDirection: "row", gap: 8 },
+	stat: { flex: 1, gap: 4, padding: 12, borderRadius: 16 },
 	chip: {
 		flexBasis: "48%",
 		flexGrow: 1,

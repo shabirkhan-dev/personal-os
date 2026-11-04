@@ -33,6 +33,8 @@ export type ModuleScreenProps = {
 	insights?: { onPress: () => void; active?: boolean };
 	/** Shows the Ask button, opening the assistant about this screen. */
 	assistant?: AssistantPlace;
+	/** Which tab is lit when this screen belongs to Profile (Settings). */
+	tab?: "today" | "profile";
 };
 
 /**
@@ -47,6 +49,7 @@ export function ModuleScreen({
 	scroll = true,
 	insights,
 	assistant,
+	tab = "today",
 }: ModuleScreenProps) {
 	const { colors } = usePoTheme();
 	const insets = useSafeAreaInsets();
@@ -107,7 +110,7 @@ export function ModuleScreen({
 				</View>
 			)}
 			<FloatingTabBar
-				active={insights?.active ? "insights" : "today"}
+				active={insights?.active ? "insights" : tab}
 				bottomInset={insets.bottom}
 				onTodayPress={onHome}
 				onInsightsPress={insights?.onPress ?? insightsTabPress()}

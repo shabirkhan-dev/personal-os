@@ -97,7 +97,7 @@ export function SettingsScreen() {
 	}, [hydrateProfile]);
 
 	return (
-		<ModuleScreen label="Settings" onHome={() => router.dismissTo("/")}>
+		<ModuleScreen label="Settings" tab="profile" onHome={() => router.dismissTo("/")}>
 			<ScreenTitle eyebrow="You and the app" title="Settings" />
 
 			<SectionLabel>About you</SectionLabel>

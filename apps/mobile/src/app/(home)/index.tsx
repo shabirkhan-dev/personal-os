@@ -10,20 +10,19 @@ import { DailyOverview, dailyRoutes, useDailyLine, useDailyStatus } from "@/modu
 import { faithHome, useFaithStatus } from "@/modules/faith";
 import { fashionHome, useFashionStatus } from "@/modules/fashion";
 import { foodHome, useFoodStatus } from "@/modules/food";
-import { financeHome, useFinanceStatus, useFinanceSummary } from "@/modules/finance";
+import { financeHome, useFinanceStatus } from "@/modules/finance";
 import { AskBar } from "@/modules/home/components/ask-bar";
 import { FloatingTabBar } from "@/modules/home/components/floating-tab-bar";
 import { HomeHeader } from "@/modules/home/components/home-header";
 import { ModulePicker } from "@/modules/home/components/module-picker";
 import { SectionsMenu } from "@/modules/home/components/sections-menu";
 import { sectionsFor } from "@/modules/home/lib/module-sections";
-import { MoneyCard } from "@/modules/home/components/money-card";
 import { SoonView } from "@/modules/home/components/soon-view";
 import type { HomeHero, HomeModule } from "@/modules/home/lib/module-home";
 import { routeLine } from "@/modules/home/lib/route-line";
 import { insightsTabPress } from "@/modules/home/components/insights-switcher";
 import { setAreasOpen, useAreasPicker } from "@/modules/home/store/areas-picker";
-import { moduleStatuses, periodLabel, todayItems } from "@/modules/home/lib/today";
+import { moduleStatuses, todayItems } from "@/modules/home/lib/today";
 import { useAskInbox } from "@/modules/home/store/ask-inbox";
 import { type HomeView, useHomeView } from "@/modules/home/store/home-view";
 import type { ModuleId } from "@/modules/onboarding/lib/options";
@@ -170,7 +169,8 @@ export default function TodayScreen() {
 						<View style={styles.content}>
 							{view === "overview" ? (
 								<OverviewBody
-									period={periodLabel(now)}
+									name={answers.name}
+									now={now}
 									modules={answers.modules}
 									amountsHidden={viewDoc.amountsHidden}
 									onOpen={select}
@@ -263,15 +263,26 @@ function ModuleScreen({ module, hero, label, ...header }: ModuleScreenProps) {
 }
 
 type OverviewBodyProps = {
-	period: string;
+	name: string;
+	now: Date;
 	modules: readonly ModuleId[];
 	amountsHidden: boolean;
 	onOpen: (view: HomeView) => void;
 };
 
-/** Overview, the day's hub: money at a glance, the ask bar, the day and the week's calendar. */
-function OverviewBody({ period, modules, amountsHidden, onOpen }: OverviewBodyProps) {
-	const finance = useFinanceSummary();
+/**
+ * Overview, the day's hub: a greeting, the ask bar, what's next, the day's numbers, one timeline
+ * and the week's calendar.
+ */
+function OverviewBody({ name, now, modules, amountsHidden, onOpen }: OverviewBodyProps) {
+	const hour = now.getHours();
+	const first = name.trim().split(/\s+/)[0];
+	const greeting = `${hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening"}${first ? `, ${first}` : ""}`;
+	const period = now.toLocaleDateString("en-GB", {
+		weekday: "long",
+		day: "numeric",
+		month: "long",
+	});
 	const send = useAskInbox((state) => state.send);
 	const [notice, setNotice] = useState<string | null>(null);
 	const say = (text: string, spoken: boolean) => {
@@ -321,21 +332,19 @@ function OverviewBody({ period, modules, amountsHidden, onOpen }: OverviewBodyPr
 
 	return (
 		<>
-			{modules.includes("finance") ? (
-				<MoneyCard
-					period={period}
-					leftToSpend={finance.leftToSpend}
-					hidden={amountsHidden}
-					onPress={() => onOpen("finance")}
-				/>
-			) : null}
+			<View style={styles.greeting}>
+				<PoText variant="title30">{greeting}</PoText>
+				<PoText variant="body15" tone="textSecondary">
+					{period}
+				</PoText>
+			</View>
 			<AskBar suggestions={suggestions.slice(0, 4)} onSubmit={ask} />
 			{notice ? (
 				<PoText variant="meta13" tone="textSecondary" style={styles.notice}>
 					{notice}
 				</PoText>
 			) : null}
-			<DailyOverview onOpen={onOpen} onNotice={setNotice} />
+			<DailyOverview onOpen={onOpen} onNotice={setNotice} amountsHidden={amountsHidden} />
 			<CalendarWeekCard />
 		</>
 	);
@@ -345,5 +354,6 @@ const styles = StyleSheet.create({
 	root: { flex: 1 },
 	scroll: { flexGrow: 1 },
 	content: { gap: 16, paddingHorizontal: 16 },
-	notice: { paddingHorizontal: 6 },
+	notice: { paddingHorizontal: 4 },
+	greeting: { gap: 4, paddingHorizontal: 4, paddingBottom: 4 },
 });

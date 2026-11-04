@@ -21,14 +21,15 @@ export type FloatingTabBarProps = {
 	bottomInset: number;
 	onTodayPress?: () => void;
 	onAreasPress?: () => void;
-	/** Insights stays disabled until a module has one (Faith does). */
+	/** Disabled only when none of the person's modules has Insights. */
 	onInsightsPress?: () => void;
 	onProfilePress?: () => void;
 };
 
 /**
- * Kit v2 "Floating Tab Bar". Areas opens the module picker; Insights is disabled unless the
- * screen passes a handler. It sits just above the home indicator.
+ * Kit v2 "Floating Tab Bar". Areas opens the module picker; Insights opens this module's Insights
+ * or the last one opened. A tab without a handler is disabled. It sits just above the home
+ * indicator.
  */
 export function FloatingTabBar({
 	active: activeTab,

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Alert, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
+import { showDialog } from "@/components/ui/dialog";
 import { FilterChip } from "@/components/module-ui";
 import { PoText } from "@/components/ui/po-text";
 import { Sheet } from "@/components/ui/sheet";
@@ -150,7 +151,7 @@ export function StartProgramSheet({
 			void start();
 			return;
 		}
-		Alert.alert(
+		showDialog(
 			`Switch from ${switchingFrom}?`,
 			"Your levels and history stay. This week is planned again from the new program.",
 			[

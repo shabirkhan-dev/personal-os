@@ -2,7 +2,8 @@ import Constants from "expo-constants";
 import { KeyboardAwareScrollView } from "@/components/ui/keyboard-aware-scroll-view";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Alert, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import { showDialog } from "@/components/ui/dialog";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PoText } from "@/components/ui/po-text";
 import { haptics } from "@/lib/haptics";
@@ -11,6 +12,8 @@ import { CURRENCY } from "@/lib/money";
 import { useAuth } from "@/modules/auth/context/auth-context";
 import { FloatingTabBar } from "@/modules/home/components/floating-tab-bar";
 import { HomeHeader } from "@/modules/home/components/home-header";
+import { insightsTabPress } from "@/modules/home/components/insights-switcher";
+import { openAreas } from "@/modules/home/store/areas-picker";
 import { OsCard } from "@/modules/onboarding/components/os-card";
 import { useMemberStore } from "@/modules/onboarding/store/member-store";
 import { useOnboardingProgress } from "@/modules/onboarding/store/onboarding-progress";
@@ -35,7 +38,7 @@ import { DevicesSection } from "./devices-section";
 import { EditProfileSheet } from "./edit-profile-sheet";
 import { ManageModulesSheet } from "./manage-modules-sheet";
 import { OptionSheet } from "./option-sheet";
-import { SectionLabel, SettingsCard, SettingsRow, SoonTag } from "./settings-list";
+import { SectionLabel, SettingsCard, SettingsRow } from "./settings-list";
 import { useAssistantSettings } from "@/modules/assistant/data/assistant-settings";
 import { APPROVAL_LABELS } from "@personal-os/domain/assistant";
 
@@ -59,7 +62,7 @@ const weekOptions = [
 
 const currencyOptions = [{ value: CURRENCY.code, label: CURRENCY.code, detail: "Pakistani rupee" }];
 
-const goToday = () => router.replace("/");
+const goToday = () => router.dismissTo("/");
 
 /** Units are saved with the onboarding answers. */
 function saveUnits(system: UnitSystem) {
@@ -73,10 +76,10 @@ function saveUnits(system: UnitSystem) {
 		.catch((error: unknown) => console.error("Could not save units", error));
 }
 
-/** An Alert as a promise: true when the person picks `action`. */
+/** A confirm dialog as a promise: true when the person picks `action`. */
 function confirm(title: string, message: string, action: string): Promise<boolean> {
 	return new Promise((resolve) => {
-		Alert.alert(title, message, [
+		showDialog(title, message, [
 			{ text: "Cancel", style: "cancel", onPress: () => resolve(false) },
 			{ text: action, style: "destructive", onPress: () => resolve(true) },
 		]);
@@ -85,7 +88,7 @@ function confirm(title: string, message: string, action: string): Promise<boolea
 
 /** Clears the answers and restarts setup, after a confirm. */
 function replayOnboarding() {
-	Alert.alert(
+	showDialog(
 		"Replay onboarding?",
 		"Your answers are cleared and setup starts again. Your module logs stay on this phone.",
 		[
@@ -145,7 +148,7 @@ export function ProfileScreen() {
 			})
 			.catch((error: unknown) => {
 				console.error("Export failed", error);
-				Alert.alert("Export failed", "Your data could not be exported. Please try again.");
+				showDialog("Export failed", "Your data could not be exported. Please try again.");
 			})
 			.finally(() => setExporting(false));
 	};
@@ -170,7 +173,7 @@ export function ProfileScreen() {
 	};
 
 	const signOut = () => {
-		Alert.alert(
+		showDialog(
 			"Sign out?",
 			"Your changes are backed up first. Keep your plan and logs on this phone, or erase them.",
 			[
@@ -191,7 +194,7 @@ export function ProfileScreen() {
 	};
 
 	const removeAccount = () => {
-		Alert.alert(
+		showDialog(
 			"Delete your account?",
 			"This deletes your account and everything backed up to it, and erases this phone. It can't be undone.",
 			[
@@ -209,7 +212,7 @@ export function ProfileScreen() {
 							})
 							.catch((error: unknown) => {
 								console.error("Account deletion failed", error);
-								Alert.alert(
+								showDialog(
 									"Couldn't delete your account",
 									"Check your connection and try again. Nothing was deleted.",
 								);
@@ -230,7 +233,7 @@ export function ProfileScreen() {
 					label="Profile"
 					glow="statusViolet"
 					pickerOpen={false}
-					onAppsPress={goToday}
+					onAppsPress={openAreas}
 					action={{
 						icon: "Filled/Edit",
 						label: "Edit profile",
@@ -248,12 +251,6 @@ export function ProfileScreen() {
 							meta={modulesOnLabel(modules.length)}
 							value={`${modules.length} on`}
 							onPress={() => setSheet("modules")}
-						/>
-						<SettingsRow
-							icon="Pin"
-							title="Pinned order"
-							meta="Choose which modules come first"
-							accessory={<SoonTag />}
 						/>
 					</SettingsCard>
 
@@ -399,7 +396,8 @@ export function ProfileScreen() {
 				active="profile"
 				bottomInset={insets.bottom}
 				onTodayPress={goToday}
-				onAreasPress={goToday}
+				onAreasPress={openAreas}
+				onInsightsPress={insightsTabPress()}
 			/>
 
 			<ManageModulesSheet visible={sheet === "modules"} onClose={close} />

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { StyleSheet } from "react-native";
+import { SkeletonList } from "@/components/ui/skeleton";
 import { ActionPills, EmptyCard } from "@/components/module-ui";
 import { PoText } from "@/components/ui/po-text";
 import { AskBar } from "@/modules/home/components/ask-bar";
@@ -97,9 +98,7 @@ export function WishlistHomeView({ actionRequest }: HomeModuleViewProps) {
 		return (
 			<>
 				{ask}
-				<PoText variant="meta13" tone="textTertiary" style={styles.loading}>
-					Loading your list…
-				</PoText>
+				<SkeletonList count={2} label="your list" />
 			</>
 		);
 	}

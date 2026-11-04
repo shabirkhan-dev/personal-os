@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { SkeletonList } from "@/components/ui/skeleton";
 import { EmptyCard, FilterChip, ScreenTitle } from "@/components/module-ui";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
@@ -116,7 +117,7 @@ export function RoadmapScreen() {
 			</View>
 
 			{data.loading ? (
-				<ActivityIndicator color={colors.accentDefault} />
+				<SkeletonList label="your roadmap" />
 			) : groups.length === 0 ? (
 				<EmptyCard
 					icon="List"

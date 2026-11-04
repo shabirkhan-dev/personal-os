@@ -41,11 +41,6 @@ export function weekStartLabel(weekStart: WeekStart): string {
 	return weekStart === "sunday" ? "Sunday" : "Monday";
 }
 
-/** The health platform this phone has: Apple Health on iOS, Health Connect on Android. */
-export function healthName(os: string): string {
-	return os === "ios" ? "Apple Health" : "Health Connect";
-}
-
 export type SyncState = { title: string; meta: string; canSignIn: boolean };
 
 /** The Sync row from the account state; nothing claims a sync that did not happen. */

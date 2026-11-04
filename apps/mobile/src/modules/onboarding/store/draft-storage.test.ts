@@ -19,7 +19,7 @@ describe("parseDraft", () => {
 	});
 
 	test("does not resume the intro screens", () => {
-		expect(parseDraft({ answers: {}, route: onboardingRoutes.welcomeVoice })?.route).toBeNull();
+		expect(parseDraft({ answers: {}, route: onboardingRoutes.welcomeModules })?.route).toBeNull();
 	});
 
 	test("drops unknown routes and damaged answers", () => {

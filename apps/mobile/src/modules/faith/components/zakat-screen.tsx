@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Alert, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { showDialog } from "@/components/ui/dialog";
 import { Icon } from "@/components/icons";
 import { Footer, ListRow, ScreenTitle, SectionLabel, Segments } from "@/components/module-ui";
 import { PillButton } from "@/components/ui/pill-button";
@@ -195,7 +196,7 @@ export function ZakatScreen() {
 						value={formatMoney(payment.amount)}
 						valueTone="textPrimary"
 						onPress={() =>
-							Alert.alert(
+							showDialog(
 								payment.to,
 								`${formatMoney(payment.amount)} on ${dayKey(new Date(payment.at))}`,
 								[

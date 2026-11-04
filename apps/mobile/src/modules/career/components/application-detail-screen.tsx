@@ -1,6 +1,8 @@
 import { router } from "expo-router";
 import { useState } from "react";
-import { Alert, Linking, Pressable, StyleSheet, View } from "react-native";
+import { Linking, Pressable, StyleSheet, View } from "react-native";
+import { SkeletonCard } from "@/components/ui/skeleton";
+import { showDialog } from "@/components/ui/dialog";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
 import { usePoTheme } from "@/theme";
@@ -149,11 +151,15 @@ export function ApplicationDetailScreen({ id }: { id: string }) {
 	if (!app) {
 		return (
 			<CareerScreen>
-				<EmptyCard
-					icon="Briefcase"
-					title={data.loading ? "Loading…" : "Application not found"}
-					body={data.loading ? "" : "It may have been deleted on another device."}
-				/>
+				{data.loading ? (
+					<SkeletonCard lines={3} label="this application" />
+				) : (
+					<EmptyCard
+						icon="Briefcase"
+						title="Application not found"
+						body="It may have been deleted on another device."
+					/>
+				)}
 			</CareerScreen>
 		);
 	}
@@ -164,7 +170,7 @@ export function ApplicationDetailScreen({ id }: { id: string }) {
 		);
 
 	const confirmDelete = () =>
-		Alert.alert(
+		showDialog(
 			"Delete application?",
 			`${app.company} and its prep will be removed from all your devices.`,
 			[
@@ -189,7 +195,7 @@ export function ApplicationDetailScreen({ id }: { id: string }) {
 		apply: () => move("applied"),
 		book: () => setSheet("interview"),
 		offer: () =>
-			Alert.alert("Record an offer?", `Mark ${app.company} as an offer.`, [
+			showDialog("Record an offer?", `Mark ${app.company} as an offer.`, [
 				{ text: "Cancel", style: "cancel" },
 				{ text: "Offer received", onPress: () => move("offer") },
 			]),
@@ -232,7 +238,7 @@ export function ApplicationDetailScreen({ id }: { id: string }) {
 						app.halal.confirmed
 							? undefined
 							: () =>
-									Alert.alert(
+									showDialog(
 										"Halal check",
 										app.halal.note || "Check what the company earns from before you go further.",
 										[

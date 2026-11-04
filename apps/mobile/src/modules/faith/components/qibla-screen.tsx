@@ -1,6 +1,7 @@
 import * as Location from "expo-location";
 import { useEffect, useRef, useState } from "react";
-import { Alert, Platform, StyleSheet, View } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
+import { showDialog } from "@/components/ui/dialog";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import Svg, { Circle, G, Line, Path, Polygon, Text as SvgText } from "react-native-svg";
 import { EmptyCard, MetaChip, ScreenTitle } from "@/components/module-ui";
@@ -318,7 +319,7 @@ export function QiblaScreen() {
 					icon="Settings"
 					label="Calibrate"
 					onPress={() =>
-						Alert.alert(
+						showDialog(
 							"Calibrate the compass",
 							"Move your phone in a slow figure 8 a few times, away from metal, magnets and other devices.",
 						)

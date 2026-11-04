@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Alert, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { showDialog } from "@/components/ui/dialog";
 import { FilterChip } from "@/components/module-ui";
 import { Icon } from "@/components/icons";
 import { PillButton } from "@/components/ui/pill-button";
@@ -142,7 +143,7 @@ export function EventSheet({
 
 	const remove = () => {
 		if (!event) return;
-		Alert.alert(`Delete ${event.title}?`, "This can't be undone.", [
+		showDialog(`Delete ${event.title}?`, "This can't be undone.", [
 			{ text: "Keep", style: "cancel" },
 			{
 				text: "Delete",

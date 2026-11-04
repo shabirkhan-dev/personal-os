@@ -8,6 +8,8 @@ import { PoText } from "@/components/ui/po-text";
 import { AskAssistant } from "@/modules/assistant";
 import type { AssistantPlace } from "@/modules/assistant/hooks/use-assistant";
 import { FloatingTabBar } from "@/modules/home/components/floating-tab-bar";
+import { InsightsSwitcher, insightsTabPress } from "@/modules/home/components/insights-switcher";
+import { openAreas } from "@/modules/home/store/areas-picker";
 import { Avatar } from "@/modules/onboarding/components/avatar";
 import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
 import { KeyboardAwareScrollView } from "@/components/ui/keyboard-aware-scroll-view";
@@ -16,14 +18,17 @@ import { usePoTheme } from "@/theme";
 export type ModuleScreenProps = {
 	/** The module name in the header pill. */
 	label: string;
-	/** Where the pill and the Today tab go. */
+	/** Where the Today tab goes. */
 	onHome: () => void;
 	children: ReactNode;
 	/** The round button on the right of the header (Edit, Settings…). */
 	action?: { icon: IconName; label: string; onPress: () => void };
 	/** False for screens that size their own area (Tasbih counts taps anywhere). */
 	scroll?: boolean;
-	/** The module's Insights screen: enables the tab, or marks it active when this is it. */
+	/**
+	 * The module's Insights screen, or marks this as it (then the module switcher shows). Without
+	 * one, the Insights tab goes to the last Insights opened.
+	 */
 	insights?: { onPress: () => void; active?: boolean };
 	/** Shows the Ask button, opening the assistant about this screen. */
 	assistant?: AssistantPlace;
@@ -31,7 +36,8 @@ export type ModuleScreenProps = {
 
 /**
  * An inner module screen: the shared header (Back, the module pill, one action), a column with
- * the Figma 16px gutter, and the floating tab bar.
+ * the Figma 16px gutter, and the floating tab bar. The pill and the Areas tab both open the module
+ * switcher, as they do on Home.
  */
 export function ModuleScreen({
 	label,
@@ -51,8 +57,8 @@ export function ModuleScreen({
 			<HeaderButton accessibilityLabel="Back" onPress={() => router.back()} />
 			<Pressable
 				accessibilityRole="button"
-				accessibilityLabel={`${label}, back to Today`}
-				onPress={onHome}
+				accessibilityLabel={`${label}, switch area`}
+				onPress={openAreas}
 				style={[
 					styles.pill,
 					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
@@ -73,6 +79,7 @@ export function ModuleScreen({
 			)}
 		</View>
 	);
+	const switcher = insights?.active ? <InsightsSwitcher /> : null;
 	// Room for the tab bar, and the Ask button above it when there is one.
 	const padding = {
 		paddingTop: insets.top + 6,
@@ -87,11 +94,13 @@ export function ModuleScreen({
 					contentContainerStyle={[styles.content, padding]}
 				>
 					{header}
+					{switcher}
 					{children}
 				</KeyboardAwareScrollView>
 			) : (
 				<View style={[styles.root, styles.content, padding]}>
 					{header}
+					{switcher}
 					{children}
 				</View>
 			)}
@@ -99,8 +108,8 @@ export function ModuleScreen({
 				active={insights?.active ? "insights" : "today"}
 				bottomInset={insets.bottom}
 				onTodayPress={onHome}
-				onAreasPress={onHome}
-				onInsightsPress={insights?.onPress}
+				onAreasPress={openAreas}
+				onInsightsPress={insights?.onPress ?? insightsTabPress()}
 				onProfilePress={() => router.push("/profile")}
 			/>
 			{assistant ? <AskAssistant place={assistant} /> : null}

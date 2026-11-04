@@ -2,7 +2,7 @@ import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { AskAssistant, startConversation, useAssistant } from "@/modules/assistant";
+import { startConversation, useAssistant } from "@/modules/assistant";
 import { CalendarWeekCard } from "@/modules/calendar/components/calendar-week-card";
 import { careHome, useCareStatus } from "@/modules/care";
 import { careerHome, useCareerStatus } from "@/modules/career";
@@ -19,6 +19,8 @@ import { MoneyCard } from "@/modules/home/components/money-card";
 import { SoonView } from "@/modules/home/components/soon-view";
 import type { HomeHero, HomeModule } from "@/modules/home/lib/module-home";
 import { routeLine } from "@/modules/home/lib/route-line";
+import { insightsTabPress } from "@/modules/home/components/insights-switcher";
+import { setAreasOpen, useAreasPicker } from "@/modules/home/store/areas-picker";
 import { moduleStatuses, periodLabel, todayItems } from "@/modules/home/lib/today";
 import { useAskInbox } from "@/modules/home/store/ask-inbox";
 import { type HomeView, useHomeView } from "@/modules/home/store/home-view";
@@ -58,7 +60,7 @@ export default function TodayScreen() {
 	const toggleModule = useOnboardingStore((state) => state.toggleModule);
 	const { persistAnswers } = useOnboardingProgress();
 	const { data: viewDoc, hydrate, update } = useHomeView();
-	const [pickerOpen, setPickerOpen] = useState(false);
+	const pickerOpen = useAreasPicker((state) => state.open);
 
 	useEffect(() => {
 		void hydrate();
@@ -104,7 +106,7 @@ export default function TodayScreen() {
 
 	const select = (target: HomeView) => {
 		update((doc) => ({ ...doc, view: target }));
-		setPickerOpen(false);
+		setAreasOpen(false);
 	};
 
 	const addModule = (id: ModuleId) => {
@@ -112,13 +114,13 @@ export default function TodayScreen() {
 		persistAnswers().catch((error: unknown) => console.error("Could not save modules", error));
 	};
 
-	const togglePicker = () => setPickerOpen((open) => !open);
+	const togglePicker = () => setAreasOpen(!pickerOpen);
 	const toggleHidden = () => update((doc) => ({ ...doc, amountsHidden: !doc.amountsHidden }));
 
 	return (
 		<View style={[styles.root, { backgroundColor: colors.bgApp }]}>
 			<KeyboardAwareScrollView
-				contentContainerStyle={[styles.scroll, { paddingBottom: 160 + insets.bottom }]}
+				contentContainerStyle={[styles.scroll, { paddingBottom: 110 + insets.bottom }]}
 				keyboardShouldPersistTaps="handled"
 			>
 				{moduleHome && view !== "overview" ? (
@@ -170,11 +172,11 @@ export default function TodayScreen() {
 					top={insets.top + HEADER_HEIGHT}
 					view={view}
 					modules={modules}
-					onClose={() => setPickerOpen(false)}
+					onClose={() => setAreasOpen(false)}
 					onSelect={select}
 					onAddModule={addModule}
 					onEdit={() => {
-						setPickerOpen(false);
+						setAreasOpen(false);
 						router.push("/profile");
 					}}
 				/>
@@ -183,31 +185,13 @@ export default function TodayScreen() {
 				active="today"
 				bottomInset={insets.bottom}
 				onTodayPress={() => select("overview")}
-				onAreasPress={() => setPickerOpen(true)}
-				onInsightsPress={moduleHome ? moduleHome.onInsights : dailyRoutes.insights}
-				onProfilePress={() => router.replace("/profile")}
+				onAreasPress={() => setAreasOpen(true)}
+				onInsightsPress={moduleHome?.onInsights ?? insightsTabPress()}
+				onProfilePress={() => {
+					setAreasOpen(false);
+					router.push("/profile");
+				}}
 			/>
-			{view === "overview" ? <AskAssistant place={{ screen: "overview" }} /> : null}
-			{view === "career" ? (
-				<AskAssistant place={{ module: "career", screen: "career home" }} />
-			) : null}
-			{view === "finance" ? (
-				<AskAssistant place={{ module: "finance", screen: "finance home" }} />
-			) : null}
-			{view === "food" ? <AskAssistant place={{ module: "food", screen: "food home" }} /> : null}
-			{view === "faith" ? <AskAssistant place={{ module: "faith", screen: "faith home" }} /> : null}
-			{view === "fashion" ? (
-				<AskAssistant place={{ module: "fashion", screen: "fashion home" }} />
-			) : null}
-			{view === "wishlist" ? (
-				<AskAssistant place={{ module: "wishlist", screen: "wishlist home" }} />
-			) : null}
-			{view === "skincare" ? (
-				<AskAssistant place={{ module: "skincare", screen: "care home" }} />
-			) : null}
-			{view === "workout" ? (
-				<AskAssistant place={{ module: "workout", screen: "training home" }} />
-			) : null}
 		</View>
 	);
 }
@@ -306,14 +290,6 @@ function OverviewBody({ period, modules, amountsHidden, onOpen }: OverviewBodyPr
 			? { label: "What to wear", onPress: () => onOpen("fashion") }
 			: null,
 	].filter((item): item is { label: string; onPress: () => void } => item !== null);
-	const talk = { label: "Talk to OS", onPress: () => router.push("/listen") };
-	const askAi = {
-		label: "Ask AI",
-		onPress: () => {
-			startConversation({ screen: "overview" });
-			router.push("/assistant");
-		},
-	};
 
 	return (
 		<>
@@ -325,7 +301,7 @@ function OverviewBody({ period, modules, amountsHidden, onOpen }: OverviewBodyPr
 					onPress={() => onOpen("finance")}
 				/>
 			) : null}
-			<AskBar suggestions={[askAi, ...suggestions.slice(0, 3), talk]} onSubmit={ask} />
+			<AskBar suggestions={suggestions.slice(0, 4)} onSubmit={ask} />
 			{notice ? (
 				<PoText variant="meta13" tone="textSecondary" style={styles.notice}>
 					{notice}

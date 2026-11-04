@@ -13,6 +13,10 @@ and colour used to carry meaning (a module, a status, a highlight), not decorati
 
 - File: **Kit v2** — `3KjKY0nbjCHqKZb0xRhWIh`
 - Onboarding v5: frames 01–18 (splash → plan → personal card → OS card)
+- Onboarding in code is a trimmed v5 (decision, 2026-11-04): frames 02–05 are one welcome screen
+  (the Modules frame) and frame 13 (Connect devices) is dropped, since none of its connections work
+  yet; the microphone is asked for the first time it is used. Setup is 6 steps: about you, body,
+  your day, goals, modules, reminders. Do not add these frames back without a product decision.
 - Read frames with the Figma MCP (`get_design_context`, `get_screenshot`, `get_variable_defs`)
   instead of guessing values. When code and Figma disagree, Figma wins unless this file records a
   decision otherwise.

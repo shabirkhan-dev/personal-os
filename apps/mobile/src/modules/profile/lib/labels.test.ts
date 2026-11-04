@@ -1,7 +1,6 @@
 /// <reference types="bun" />
 import { describe, expect, test } from "bun:test";
 import {
-	healthName,
 	micAction,
 	modulesOnLabel,
 	syncState,
@@ -31,8 +30,6 @@ describe("profile labels", () => {
 		expect(themeLabel("system")).toBe("System");
 		expect(themeLabel("dark")).toBe("Dark");
 		expect(weekStartLabel("sunday")).toBe("Sunday");
-		expect(healthName("ios")).toBe("Apple Health");
-		expect(healthName("android")).toBe("Health Connect");
 	});
 
 	test("sync never claims a sync that did not happen", () => {

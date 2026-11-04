@@ -95,7 +95,7 @@ export default function ChooseHowScreen() {
 					<View style={styles.text}>
 						<PoText variant="title18">Step by step</PoText>
 						<PoText variant="meta13" tone="textSecondary">
-							8 quick questions. Tap, slide, done.
+							6 quick questions. Tap, slide, done.
 						</PoText>
 					</View>
 				</SelectCard>

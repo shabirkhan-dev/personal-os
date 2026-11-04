@@ -1,6 +1,8 @@
 import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Alert, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { SkeletonCard } from "@/components/ui/skeleton";
+import { showDialog } from "@/components/ui/dialog";
 import { EmptyCard, Footer, ListRow, MetaChip, ScreenTitle } from "@/components/module-ui";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PillButton } from "@/components/ui/pill-button";
@@ -62,7 +64,7 @@ export function DreamDetailScreen({ id, openSave = false }: { id: string; openSa
 		return (
 			<WishlistScreen>
 				{data.loading ? (
-					<ActivityIndicator color={colors.accentDefault} />
+					<SkeletonCard media lines={3} label="this dream" />
 				) : (
 					<EmptyCard
 						icon="Star"
@@ -116,7 +118,7 @@ export function DreamDetailScreen({ id, openSave = false }: { id: string; openSa
 	};
 
 	const undo = (contribution: Contribution) =>
-		Alert.alert(
+		showDialog(
 			`Undo ${fullMoney(contribution.amount)}?`,
 			"It goes back to the budget line it came from in Finance.",
 			[
@@ -134,7 +136,7 @@ export function DreamDetailScreen({ id, openSave = false }: { id: string; openSa
 		);
 
 	const remove = () =>
-		Alert.alert(
+		showDialog(
 			`Remove ${dream.name}?`,
 			dream.savedAmount > 0
 				? `The ${fullMoney(dream.savedAmount)} saved for it goes back to your budget in Finance.`
@@ -155,7 +157,7 @@ export function DreamDetailScreen({ id, openSave = false }: { id: string; openSa
 		);
 
 	const buy = () =>
-		Alert.alert(
+		showDialog(
 			`Bought ${dream.name}?`,
 			`Paid ${fullMoney(dream.price)} in cash. ${
 				dream.category === "trips" ? "" : "It moves to your garage so you can look after it."

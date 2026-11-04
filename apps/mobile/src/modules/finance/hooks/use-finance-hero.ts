@@ -11,11 +11,16 @@ export type FinanceSummary = {
 	spentToday: number;
 	/** Budget minus spent this month (negative when over); null with no budget. */
 	leftToSpend: number | null;
+	/**
+	 * Days the money lasts, from Finance's runway mode: the one runway the app shows, Career's
+	 * included. Null until runway mode is set up, or when nothing is burning.
+	 */
+	runwayDays: number | null;
 };
 
 /** This month's money at a glance, for the Overview money card, Career and Daily life. */
 export function useFinanceSummary(): FinanceSummary {
-	const { data, spent, spentToday, budget } = useFinanceToday();
+	const { data, spent, spentToday, budget, days } = useFinanceToday();
 	const set = data.settings.setUp && budget > 0;
 	return {
 		hydrated: !data.loading,
@@ -23,6 +28,7 @@ export function useFinanceSummary(): FinanceSummary {
 		spentThisMonth: spent,
 		spentToday,
 		leftToSpend: set ? Math.round((budget - spent) * 100) / 100 : null,
+		runwayDays: data.settings.setUp ? days : null,
 	};
 }
 
@@ -30,7 +36,7 @@ export function useFinanceSummary(): FinanceSummary {
 export function useFinanceHero(): HomeHero {
 	const { data, balance, days } = useFinanceToday();
 	if (!data.settings.setUp) {
-		return { label: "Finance · getting started", value: "How long", faint: " can you last?" };
+		return { label: "Finance · getting started", value: "Runway", faint: " not set" };
 	}
 	return {
 		label: data.settings.protect ? "Finance · minimum only" : "Finance · runway mode",

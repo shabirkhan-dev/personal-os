@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 import { useState } from "react";
-import { Alert, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import { showDialog } from "@/components/ui/dialog";
 import { EmptyCard, FilterChip, Footer, ScreenTitle } from "@/components/module-ui";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
@@ -86,7 +87,7 @@ export function SessionScreen({ id }: { id: string }) {
 	const slowest = Math.max(...session.splits);
 
 	const remove = () =>
-		Alert.alert("Delete this session?", "It comes off your week and your bests.", [
+		showDialog("Delete this session?", "It comes off your week and your bests.", [
 			{ text: "Keep", style: "cancel" },
 			{
 				text: "Delete",

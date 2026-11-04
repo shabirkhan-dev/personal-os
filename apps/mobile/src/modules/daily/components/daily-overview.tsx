@@ -1,4 +1,3 @@
-import { router } from "expo-router";
 import { useEffect } from "react";
 import { View } from "react-native";
 import { ActionPills } from "@/components/module-ui";
@@ -170,7 +169,6 @@ export function DailyOverview({ onOpen, onNotice }: DailyOverviewProps) {
 			<ActionPills
 				actions={[
 					{ label: "Plan day", icon: "Filled/Calendar", onPress: dailyRoutes.plan },
-					{ label: "Log", icon: "Line/Plus", onPress: () => router.push("/listen") },
 					evening
 						? { label: "Close day", icon: "Moon", onPress: dailyRoutes.close }
 						: { label: "Sleep", icon: "Moon", onPress: dailyRoutes.sleep },

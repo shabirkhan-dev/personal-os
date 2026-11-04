@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Alert, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { showDialog } from "@/components/ui/dialog";
 import { Icon } from "@/components/icons";
 import { ScreenTitle } from "@/components/module-ui";
 import { ChoiceChips } from "@/components/ui/choice-chips";
@@ -35,7 +36,7 @@ const TAG_TONE = {
 
 /** "Bought it": the wish moves into the wardrobe and opens there. */
 function bought(wish: Wish): void {
-	Alert.alert(`Bought ${wish.name}?`, "It moves into your wardrobe.", [
+	showDialog(`Bought ${wish.name}?`, "It moves into your wardrobe.", [
 		{ text: "Not yet", style: "cancel" },
 		{
 			text: "Bought it",
@@ -50,7 +51,10 @@ function bought(wish: Wish): void {
 	]);
 }
 
-/** Wishlist: what to buy next and why, on hold while buying is paused. */
+/**
+ * To buy: the clothes to buy next and why, on hold while buying is paused. Named apart from the
+ * Wishlist module, which saves up for big things.
+ */
 export function WishlistScreen() {
 	const { colors } = usePoTheme();
 	const { wishes, pieces, settings } = useFashion();
@@ -66,9 +70,9 @@ export function WishlistScreen() {
 
 	return (
 		<FashionScreen
-			action={{ icon: "Line/Plus", label: "Add to wishlist", onPress: () => edit(null) }}
+			action={{ icon: "Line/Plus", label: "Add to To buy", onPress: () => edit(null) }}
 		>
-			<ScreenTitle eyebrow={`${wishes.length} items · ${formatMoney(total)}`} title="Wishlist" />
+			<ScreenTitle eyebrow={`${wishes.length} items · ${formatMoney(total)}`} title="To buy" />
 
 			<View
 				style={[
@@ -208,7 +212,7 @@ function WishSheet({ wish, onClose }: { wish: Wish | null; onClose: () => void }
 	return (
 		<Sheet
 			visible
-			title={wish ? "Edit wish" : "Add to wishlist"}
+			title={wish ? "Edit" : "Add to To buy"}
 			onClose={onClose}
 			footer={
 				<View style={styles.sheetFoot}>

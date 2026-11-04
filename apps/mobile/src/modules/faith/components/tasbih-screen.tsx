@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { showDialog } from "@/components/ui/dialog";
 import Svg, { Circle } from "react-native-svg";
 import { FilterChip, Footer, MetaChip, ScreenTitle, SectionLabel } from "@/components/module-ui";
 import { PillButton } from "@/components/ui/pill-button";
@@ -108,7 +109,7 @@ export function TasbihScreen() {
 
 	const reset = () => {
 		if (!phrase) return;
-		Alert.alert(`Reset ${phrase.label}?`, "Today's count for this phrase goes back to 0.", [
+		showDialog(`Reset ${phrase.label}?`, "Today's count for this phrase goes back to 0.", [
 			{ text: "Cancel", style: "cancel" },
 			{
 				text: "Reset",

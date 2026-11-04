@@ -1,10 +1,10 @@
-/** Onboarding v5 routes, in Figma frame order (01–18). */
+/**
+ * Onboarding routes in flow order. Trimmed from the Figma Onboarding v5 frames (01–18): one welcome
+ * instead of four and no Connect step (see DESIGN.md, "Onboarding").
+ */
 export const onboardingRoutes = {
 	splash: "/(onboarding)/splash",
 	welcomeModules: "/(onboarding)/welcome-modules",
-	welcomeUpcoming: "/(onboarding)/welcome-upcoming",
-	welcomeVoice: "/(onboarding)/welcome-voice",
-	welcomeHomes: "/(onboarding)/welcome-homes",
 	/** Sign in to an existing account and restore its plan (not a Figma frame). */
 	welcomeBack: "/(onboarding)/welcome-back",
 	chooseHow: "/(onboarding)/choose-how",
@@ -14,7 +14,6 @@ export const onboardingRoutes = {
 	yourDay: "/(onboarding)/your-day",
 	goals: "/(onboarding)/goals",
 	modules: "/(onboarding)/modules",
-	connect: "/(onboarding)/connect",
 	reminders: "/(onboarding)/reminders",
 	building: "/(onboarding)/building",
 	planReveal: "/(onboarding)/plan-reveal",
@@ -26,19 +25,15 @@ export type OnboardingRoute = (typeof onboardingRoutes)[keyof typeof onboardingR
 
 /** Where Back goes when there is no screen to return to (after Skip, or after resuming). */
 const previous: Partial<Record<OnboardingRoute, OnboardingRoute>> = {
-	[onboardingRoutes.welcomeUpcoming]: onboardingRoutes.welcomeModules,
-	[onboardingRoutes.welcomeVoice]: onboardingRoutes.welcomeUpcoming,
-	[onboardingRoutes.welcomeHomes]: onboardingRoutes.welcomeVoice,
 	[onboardingRoutes.welcomeBack]: onboardingRoutes.welcomeModules,
-	[onboardingRoutes.chooseHow]: onboardingRoutes.welcomeHomes,
+	[onboardingRoutes.chooseHow]: onboardingRoutes.welcomeModules,
 	[onboardingRoutes.voice]: onboardingRoutes.chooseHow,
 	[onboardingRoutes.aboutYou]: onboardingRoutes.chooseHow,
 	[onboardingRoutes.body]: onboardingRoutes.aboutYou,
 	[onboardingRoutes.yourDay]: onboardingRoutes.body,
 	[onboardingRoutes.goals]: onboardingRoutes.yourDay,
 	[onboardingRoutes.modules]: onboardingRoutes.goals,
-	[onboardingRoutes.connect]: onboardingRoutes.modules,
-	[onboardingRoutes.reminders]: onboardingRoutes.connect,
+	[onboardingRoutes.reminders]: onboardingRoutes.modules,
 	[onboardingRoutes.planReveal]: onboardingRoutes.reminders,
 	[onboardingRoutes.signIn]: onboardingRoutes.planReveal,
 	[onboardingRoutes.allSet]: onboardingRoutes.signIn,
@@ -57,7 +52,6 @@ const resumable = new Set<OnboardingRoute>([
 	onboardingRoutes.yourDay,
 	onboardingRoutes.goals,
 	onboardingRoutes.modules,
-	onboardingRoutes.connect,
 	onboardingRoutes.reminders,
 	onboardingRoutes.building,
 	onboardingRoutes.planReveal,
@@ -84,7 +78,6 @@ export const setupSequence: readonly OnboardingRoute[] = [
 	onboardingRoutes.yourDay,
 	onboardingRoutes.goals,
 	onboardingRoutes.modules,
-	onboardingRoutes.connect,
 	onboardingRoutes.reminders,
 	onboardingRoutes.building,
 ];

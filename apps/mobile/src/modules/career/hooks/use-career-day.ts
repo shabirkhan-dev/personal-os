@@ -45,7 +45,7 @@ export function useCareerDay(): CareerDay {
 					done: at.getTime() < now.getTime(),
 				})),
 			interviewSoon: soon ? { company: soon.app.company, at: soon.at.toISOString() } : null,
-			runwayWeeks: runwayWeeks(settings, finance.spentThisMonth, now),
+			runwayWeeks: runwayWeeks(settings, finance.spentThisMonth, now, finance.runwayDays),
 		};
-	}, [apps, settings, finance.spentThisMonth, now]);
+	}, [apps, settings, finance.spentThisMonth, finance.runwayDays, now]);
 }

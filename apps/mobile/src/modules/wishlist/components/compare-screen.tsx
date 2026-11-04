@@ -1,6 +1,8 @@
 import { router } from "expo-router";
 import { useState } from "react";
-import { ActivityIndicator, Alert, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { SkeletonList } from "@/components/ui/skeleton";
+import { showDialog } from "@/components/ui/dialog";
 import { EmptyCard, Footer, ScreenTitle } from "@/components/module-ui";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
@@ -51,7 +53,7 @@ export function CompareScreen({ a, b }: { a?: string; b?: string }) {
 		return (
 			<WishlistScreen>
 				{data.loading ? (
-					<ActivityIndicator color={colors.accentDefault} />
+					<SkeletonList count={2} label="the comparison" />
 				) : (
 					<EmptyCard
 						icon="Layers"
@@ -74,7 +76,7 @@ export function CompareScreen({ a, b }: { a?: string; b?: string }) {
 	};
 
 	const choose = () =>
-		Alert.alert(
+		showDialog(
 			`Pick ${pick.name}?`,
 			`${pick.name} goes first in line and ${other.name} leaves the list${
 				other.savedAmount > 0 ? "; what you saved for it goes back to the budget" : ""

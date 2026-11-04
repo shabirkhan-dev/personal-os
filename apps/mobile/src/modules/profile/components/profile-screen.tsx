@@ -11,6 +11,7 @@ import { CURRENCY } from "@/lib/money";
 import { useAuth } from "@/modules/auth/context/auth-context";
 import { FloatingTabBar } from "@/modules/home/components/floating-tab-bar";
 import { HomeHeader } from "@/modules/home/components/home-header";
+import { openAreas } from "@/modules/home/store/areas-picker";
 import { OsCard } from "@/modules/onboarding/components/os-card";
 import { useMemberStore } from "@/modules/onboarding/store/member-store";
 import { useOnboardingProgress } from "@/modules/onboarding/store/onboarding-progress";
@@ -59,7 +60,7 @@ const weekOptions = [
 
 const currencyOptions = [{ value: CURRENCY.code, label: CURRENCY.code, detail: "Pakistani rupee" }];
 
-const goToday = () => router.replace("/");
+const goToday = () => router.dismissTo("/");
 
 /** Units are saved with the onboarding answers. */
 function saveUnits(system: UnitSystem) {
@@ -230,7 +231,7 @@ export function ProfileScreen() {
 					label="Profile"
 					glow="statusViolet"
 					pickerOpen={false}
-					onAppsPress={goToday}
+					onAppsPress={openAreas}
 					action={{
 						icon: "Filled/Edit",
 						label: "Edit profile",
@@ -399,7 +400,7 @@ export function ProfileScreen() {
 				active="profile"
 				bottomInset={insets.bottom}
 				onTodayPress={goToday}
-				onAreasPress={goToday}
+				onAreasPress={openAreas}
 			/>
 
 			<ManageModulesSheet visible={sheet === "modules"} onClose={close} />

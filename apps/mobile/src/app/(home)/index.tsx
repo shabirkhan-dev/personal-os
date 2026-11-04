@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AskAssistant, startConversation, useAssistant } from "@/modules/assistant";
+import type { AssistantPlace } from "@/modules/assistant/hooks/use-assistant";
 import { CalendarWeekCard } from "@/modules/calendar/components/calendar-week-card";
 import { careHome, useCareStatus } from "@/modules/care";
 import { careerHome, useCareerStatus } from "@/modules/career";
@@ -19,6 +20,7 @@ import { MoneyCard } from "@/modules/home/components/money-card";
 import { SoonView } from "@/modules/home/components/soon-view";
 import type { HomeHero, HomeModule } from "@/modules/home/lib/module-home";
 import { routeLine } from "@/modules/home/lib/route-line";
+import { setAreasOpen, useAreasPicker } from "@/modules/home/store/areas-picker";
 import { moduleStatuses, periodLabel, todayItems } from "@/modules/home/lib/today";
 import { useAskInbox } from "@/modules/home/store/ask-inbox";
 import { type HomeView, useHomeView } from "@/modules/home/store/home-view";
@@ -48,6 +50,18 @@ const moduleHomes: Partial<Record<ModuleId, HomeModule>> = {
 	wishlist: wishlistHome,
 };
 
+/**
+ * The floating Ask button for each Home. Overview, Finance, Food and Faith have their own ask bar
+ * (type or speak to log and ask), so a second Ask button there would only compete with it.
+ */
+const askPlaces: Partial<Record<HomeView, AssistantPlace>> = {
+	career: { module: "career", screen: "career home" },
+	fashion: { module: "fashion", screen: "fashion home" },
+	wishlist: { module: "wishlist", screen: "wishlist home" },
+	skincare: { module: "skincare", screen: "care home" },
+	workout: { module: "workout", screen: "training home" },
+};
+
 /** Today: Overview or one module's Home, switched from the module picker. */
 export default function TodayScreen() {
 	const { colors } = usePoTheme();
@@ -58,7 +72,7 @@ export default function TodayScreen() {
 	const toggleModule = useOnboardingStore((state) => state.toggleModule);
 	const { persistAnswers } = useOnboardingProgress();
 	const { data: viewDoc, hydrate, update } = useHomeView();
-	const [pickerOpen, setPickerOpen] = useState(false);
+	const pickerOpen = useAreasPicker((state) => state.open);
 
 	useEffect(() => {
 		void hydrate();
@@ -104,7 +118,7 @@ export default function TodayScreen() {
 
 	const select = (target: HomeView) => {
 		update((doc) => ({ ...doc, view: target }));
-		setPickerOpen(false);
+		setAreasOpen(false);
 	};
 
 	const addModule = (id: ModuleId) => {
@@ -112,7 +126,7 @@ export default function TodayScreen() {
 		persistAnswers().catch((error: unknown) => console.error("Could not save modules", error));
 	};
 
-	const togglePicker = () => setPickerOpen((open) => !open);
+	const togglePicker = () => setAreasOpen(!pickerOpen);
 	const toggleHidden = () => update((doc) => ({ ...doc, amountsHidden: !doc.amountsHidden }));
 
 	return (
@@ -170,11 +184,11 @@ export default function TodayScreen() {
 					top={insets.top + HEADER_HEIGHT}
 					view={view}
 					modules={modules}
-					onClose={() => setPickerOpen(false)}
+					onClose={() => setAreasOpen(false)}
 					onSelect={select}
 					onAddModule={addModule}
 					onEdit={() => {
-						setPickerOpen(false);
+						setAreasOpen(false);
 						router.push("/profile");
 					}}
 				/>
@@ -183,31 +197,14 @@ export default function TodayScreen() {
 				active="today"
 				bottomInset={insets.bottom}
 				onTodayPress={() => select("overview")}
-				onAreasPress={() => setPickerOpen(true)}
+				onAreasPress={() => setAreasOpen(true)}
 				onInsightsPress={moduleHome ? moduleHome.onInsights : dailyRoutes.insights}
-				onProfilePress={() => router.replace("/profile")}
+				onProfilePress={() => {
+					setAreasOpen(false);
+					router.push("/profile");
+				}}
 			/>
-			{view === "overview" ? <AskAssistant place={{ screen: "overview" }} /> : null}
-			{view === "career" ? (
-				<AskAssistant place={{ module: "career", screen: "career home" }} />
-			) : null}
-			{view === "finance" ? (
-				<AskAssistant place={{ module: "finance", screen: "finance home" }} />
-			) : null}
-			{view === "food" ? <AskAssistant place={{ module: "food", screen: "food home" }} /> : null}
-			{view === "faith" ? <AskAssistant place={{ module: "faith", screen: "faith home" }} /> : null}
-			{view === "fashion" ? (
-				<AskAssistant place={{ module: "fashion", screen: "fashion home" }} />
-			) : null}
-			{view === "wishlist" ? (
-				<AskAssistant place={{ module: "wishlist", screen: "wishlist home" }} />
-			) : null}
-			{view === "skincare" ? (
-				<AskAssistant place={{ module: "skincare", screen: "care home" }} />
-			) : null}
-			{view === "workout" ? (
-				<AskAssistant place={{ module: "workout", screen: "training home" }} />
-			) : null}
+			{askPlaces[view] ? <AskAssistant key={view} place={askPlaces[view]} /> : null}
 		</View>
 	);
 }
@@ -306,14 +303,6 @@ function OverviewBody({ period, modules, amountsHidden, onOpen }: OverviewBodyPr
 			? { label: "What to wear", onPress: () => onOpen("fashion") }
 			: null,
 	].filter((item): item is { label: string; onPress: () => void } => item !== null);
-	const talk = { label: "Talk to OS", onPress: () => router.push("/listen") };
-	const askAi = {
-		label: "Ask AI",
-		onPress: () => {
-			startConversation({ screen: "overview" });
-			router.push("/assistant");
-		},
-	};
 
 	return (
 		<>
@@ -325,7 +314,7 @@ function OverviewBody({ period, modules, amountsHidden, onOpen }: OverviewBodyPr
 					onPress={() => onOpen("finance")}
 				/>
 			) : null}
-			<AskBar suggestions={[askAi, ...suggestions.slice(0, 3), talk]} onSubmit={ask} />
+			<AskBar suggestions={suggestions.slice(0, 4)} onSubmit={ask} />
 			{notice ? (
 				<PoText variant="meta13" tone="textSecondary" style={styles.notice}>
 					{notice}

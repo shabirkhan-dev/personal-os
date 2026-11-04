@@ -8,6 +8,7 @@ import { PoText } from "@/components/ui/po-text";
 import { AskAssistant } from "@/modules/assistant";
 import type { AssistantPlace } from "@/modules/assistant/hooks/use-assistant";
 import { FloatingTabBar } from "@/modules/home/components/floating-tab-bar";
+import { openAreas } from "@/modules/home/store/areas-picker";
 import { Avatar } from "@/modules/onboarding/components/avatar";
 import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
 import { KeyboardAwareScrollView } from "@/components/ui/keyboard-aware-scroll-view";
@@ -16,7 +17,7 @@ import { usePoTheme } from "@/theme";
 export type ModuleScreenProps = {
 	/** The module name in the header pill. */
 	label: string;
-	/** Where the pill and the Today tab go. */
+	/** Where the Today tab goes. */
 	onHome: () => void;
 	children: ReactNode;
 	/** The round button on the right of the header (Edit, Settings…). */
@@ -31,7 +32,8 @@ export type ModuleScreenProps = {
 
 /**
  * An inner module screen: the shared header (Back, the module pill, one action), a column with
- * the Figma 16px gutter, and the floating tab bar.
+ * the Figma 16px gutter, and the floating tab bar. The pill and the Areas tab both open the module
+ * switcher, as they do on Home.
  */
 export function ModuleScreen({
 	label,
@@ -51,8 +53,8 @@ export function ModuleScreen({
 			<HeaderButton accessibilityLabel="Back" onPress={() => router.back()} />
 			<Pressable
 				accessibilityRole="button"
-				accessibilityLabel={`${label}, back to Today`}
-				onPress={onHome}
+				accessibilityLabel={`${label}, switch area`}
+				onPress={openAreas}
 				style={[
 					styles.pill,
 					{ backgroundColor: colors.bgSurface, borderColor: colors.borderDefault },
@@ -99,7 +101,7 @@ export function ModuleScreen({
 				active={insights?.active ? "insights" : "today"}
 				bottomInset={insets.bottom}
 				onTodayPress={onHome}
-				onAreasPress={onHome}
+				onAreasPress={openAreas}
 				onInsightsPress={insights?.onPress}
 				onProfilePress={() => router.push("/profile")}
 			/>

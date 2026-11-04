@@ -137,7 +137,7 @@ export function FashionHomeView({ actionRequest }: HomeModuleViewProps) {
 			say(
 				first
 					? `Offline pick: ${first.name}, ${first.clothes.map((piece) => piece.name.toLowerCase()).join(", ")}.`
-					: "Add a few tops and bottoms and I'll put looks together.",
+					: "Add a few tops and bottoms to get outfit ideas.",
 				spoken,
 			);
 			return;

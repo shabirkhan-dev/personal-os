@@ -12,7 +12,7 @@ export type FoodDay = {
 	proteinTarget: number;
 	/** The five meal slots, planned or eaten. */
 	entries: DayEntry[];
-	/** Breakfast, for the morning brief's "Ready for you". */
+	/** Breakfast, for the morning brief's "Ready". */
 	breakfast: { title: string; kcal: number; protein: number; recipeId: string | null } | null;
 	weight: { kg: number; week: number | null } | null;
 };

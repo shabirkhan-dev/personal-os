@@ -327,7 +327,7 @@ export function StartCard({ onPick }: { onPick: (starter: (typeof STARTERS)[numb
 				))}
 			</View>
 			<PoText variant="meta13" tone="textSecondary">
-				Tap one or just type it. I'll find the price in Pakistan when you're signed in.
+				Tap one or type it. The price in Pakistan is looked up when you're signed in.
 			</PoText>
 		</Surface>
 	);

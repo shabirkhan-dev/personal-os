@@ -45,7 +45,7 @@ export function WatchesScreen() {
 				<EmptyCard
 					icon="Clock"
 					title="No watches or scents yet"
-					body="Add them and I'll rotate the watch and pick a scent for the weather and time of day."
+					body="Add them to get a watch and a scent picked for the weather and time of day."
 				>
 					<PillButton
 						label="Add a watch"

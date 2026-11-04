@@ -64,13 +64,13 @@ function steps(
 		list.push({
 			when: shortDate(saved),
 			title: "Saved",
-			note: app.cv ? `CV · ${app.cv}` : "Waiting for you to apply",
+			note: app.cv ? `CV · ${app.cv}` : "Not applied yet",
 			state: "done",
 		});
 		list.push({
 			when: "—",
 			title: "Apply",
-			note: "Then I'll remind you to follow up",
+			note: "Then a follow-up reminder is set",
 			state: app.stage === "saved" ? "next" : "done",
 			onPress: app.stage === "saved" ? actions.apply : undefined,
 		});
@@ -125,11 +125,11 @@ function steps(
 function tipFor(app: Application, now: Date): string {
 	switch (app.stage) {
 		case "saved":
-			return "Apply while it's fresh. I'll set a follow-up for a week later.";
+			return "Apply while it's fresh. A follow-up is set for a week later.";
 		case "applied": {
 			const due = app.followUpAt !== null && new Date(app.followUpAt) <= now;
 			return due
-				? "A nudge is due. I'll draft three short lines from your notes for you to review."
+				? "A nudge is due. Get three short drafts from your notes to choose from."
 				: "Waiting on a reply. Add the recruiter as a contact so the nudge goes to the right person.";
 		}
 		case "interview":

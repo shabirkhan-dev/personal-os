@@ -67,7 +67,7 @@ export default function ChooseHowScreen() {
 					<View style={styles.text}>
 						<PoText variant="title18">Just talk</PoText>
 						<PoText variant="meta13" tone="textSecondary">
-							Tell me about you and your day in about 30 seconds. I'll fill in everything.
+							Talk about you and your day for about 30 seconds and everything is filled in.
 						</PoText>
 					</View>
 					<View style={styles.example}>

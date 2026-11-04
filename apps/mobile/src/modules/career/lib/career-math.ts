@@ -215,7 +215,7 @@ export function careerTip(
 	const sent = appliedThisWeek(apps, now);
 	const due = followUps(apps, now).filter((item) => item.due).length;
 	if (apps.length === 0) {
-		return "Paste a job link and I'll fill in the company, role and pay. Aim for 2 today.";
+		return "Paste a job link to fill in the company, role and pay. Aim for 2 today.";
 	}
 	if (due > 0) {
 		return `${due} follow-up${due === 1 ? " is" : "s are"} due. A short nudge today keeps you on their list.`;

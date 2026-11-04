@@ -390,8 +390,8 @@ export function CapsuleCard({
 			</View>
 			<PoText variant="title18">Build your capsule</PoText>
 			<PoText variant="body15" tone="textSecondary">
-				Name a piece or paste a link and I'll fill in the rest. Start with what you wear most, then
-				I'll suggest outfits.
+				Name a piece or paste a link and the rest is filled in. Start with what you wear most;
+				outfit ideas follow.
 			</PoText>
 			<PoText variant="eyebrow11" tone="textTertiary">
 				Quick add · tap what you own

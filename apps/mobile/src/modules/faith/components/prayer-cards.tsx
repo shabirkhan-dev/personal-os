@@ -142,8 +142,8 @@ export function SetupCard({
 			<IconTile name="Moon" tone="statusSuccess" tile="statusSuccessSubtle" size={56} />
 			<PoText variant="title18">Set up your prayers</PoText>
 			<PoText variant="body15" tone="textSecondary" style={styles.center}>
-				Takes ten seconds. I'll find the Fajr, Maghrib and Isha times for where you are and remind
-				you gently before each one.
+				Takes ten seconds. Prayer times are worked out for where you are, with a gentle reminder
+				before each one.
 			</PoText>
 			{error ? (
 				<PoText variant="meta13" tone="textDanger" style={styles.center}>

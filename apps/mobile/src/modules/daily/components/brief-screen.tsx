@@ -145,7 +145,7 @@ export function BriefScreen() {
 			)}
 			{fashion.look || food.breakfast ? (
 				<Card>
-					<CardHead title="Ready for you" />
+					<CardHead title="Ready" />
 					<View style={styles.ready}>
 						{fashion.look ? (
 							<View style={styles.readyItem}>

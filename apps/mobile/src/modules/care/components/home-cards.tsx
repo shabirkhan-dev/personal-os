@@ -399,7 +399,7 @@ export function SetupCard({
 				))}
 			</View>
 			<PoText variant="meta13" tone="textSecondary">
-				I'll build a simple morning, night and weekly routine from what you pick. Start with 4
+				You get a simple morning, night and weekly routine from what you pick. Start with 4
 				products, not 14.
 			</PoText>
 			<PillButton label={busy ? "Building…" : action} disabled={busy} onPress={onBuild} />

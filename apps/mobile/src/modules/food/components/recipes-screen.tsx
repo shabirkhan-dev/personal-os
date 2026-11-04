@@ -167,7 +167,7 @@ export function RecipesScreen() {
 					{query.trim()
 						? `${shown.length} found`
 						: showFeatured
-							? "More for you"
+							? "More recipes"
 							: `${shown.length} recipes`}
 				</PoText>
 			</View>

@@ -59,7 +59,7 @@ export function MinimumPicker({
 		<Card>
 			<PoText variant="title18">Choose your minimum day</PoText>
 			<PoText variant="body15" tone="textSecondary">
-				Pick 3 to 5 things small enough to do even on your worst day. I'll protect them.
+				Pick 3 to 5 things small enough to do even on your worst day.
 			</PoText>
 			<View>
 				{options.map((id) => {

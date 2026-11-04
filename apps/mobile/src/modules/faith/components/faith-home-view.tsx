@@ -172,7 +172,7 @@ export function FaithHomeView({ actionRequest }: HomeModuleViewProps) {
 		if (!intent) return;
 		if (intent.kind === "prayer") {
 			if (!settings.setUp) {
-				say("Set up your prayers first, then I can log them.", spoken);
+				say("Set up your prayers first, then you can log them.", spoken);
 				return;
 			}
 			const prayer = intent.prayer ?? currentPrayer(rows)?.prayer ?? null;
@@ -338,7 +338,7 @@ export function FaithHomeView({ actionRequest }: HomeModuleViewProps) {
 				<>
 					{missed ? (
 						<NeverMissCard
-							body={`${missed.label} slipped today.${next ? ` ${PRAYER_LABELS[next.prayer]} is at ${hhmm(next.at)} and I'll remind you ${settings.reminderLead} minutes before.` : ""} An earlier night makes tomorrow's Fajr easier.`}
+							body={`${missed.label} slipped today.${next ? ` ${PRAYER_LABELS[next.prayer]} is at ${hhmm(next.at)}, with a reminder ${settings.reminderLead} minutes before.` : ""} An earlier night makes tomorrow's Fajr easier.`}
 							primary={
 								tomorrowFajr
 									? {
@@ -360,7 +360,7 @@ export function FaithHomeView({ actionRequest }: HomeModuleViewProps) {
 										bedtime,
 										"Wind down for Fajr",
 										"Lights out by 11 makes Fajr easier.",
-										"I'll nudge you at 22:30 tonight.",
+										"Reminder set for 22:30 tonight.",
 									),
 							}}
 						/>

@@ -85,7 +85,7 @@ export function InterviewPrepScreen({ id }: { id?: string }) {
 				<EmptyCard
 					icon="Briefcase"
 					title="No interview booked yet"
-					body="Your stories are ready to practise. When an interview is booked, I'll build a plan for that company."
+					body="Your stories are ready to practise. When an interview is booked, a plan for that company appears here."
 				/>
 				<Stories data={data} onOpen={openStory} />
 				<AiTip>Fifteen minutes out loud each day keeps you sharp between interviews.</AiTip>

@@ -276,7 +276,7 @@ export function CareerHomeView({ actionRequest }: HomeModuleViewProps) {
 				<EmptyCard
 					icon="Briefcase"
 					title="Start your pipeline"
-					body="Paste a job link and I'll fill in the company, role and pay. Aim for 2 today."
+					body="Paste a job link to fill in the company, role and pay. Aim for 2 today."
 				>
 					<PillButton label="Paste a job link" onPress={() => openAdd()} />
 					<PillButton label="Add manually" variant="ghost" onPress={() => openAdd()} />

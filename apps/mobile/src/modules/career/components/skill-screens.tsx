@@ -101,7 +101,7 @@ export function SkillBlockScreen() {
 					<EmptyCard
 						icon="Lightning"
 						title="Pick a skill"
-						body="Choose one thing to get better at. I'll plan six weeks of 30-minute days around your applications."
+						body="Choose one thing to get better at: six weeks of 30-minute days, planned around your applications."
 					>
 						<PillButton label="Pick a skill" onPress={() => setSheet("focus")} />
 					</EmptyCard>

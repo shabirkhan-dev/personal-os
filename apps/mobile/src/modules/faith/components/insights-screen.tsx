@@ -117,7 +117,7 @@ export function InsightsScreen() {
 				`${settings.recitationMinutes} minutes, right after Fajr.`,
 			);
 			message = ok
-				? "I'll remind you after Fajr tomorrow."
+				? "Reminder set for after Fajr tomorrow."
 				: "Turn on notifications for Personal OS first.";
 		} else {
 			openSheet("reminders");
@@ -208,7 +208,7 @@ export function InsightsScreen() {
 				</PoText>
 			) : null}
 
-			<SectionLabel>What I noticed</SectionLabel>
+			<SectionLabel>Worth a look</SectionLabel>
 			{found
 				.filter((insight) => !hidden.includes(insight.id))
 				.map((insight) => (

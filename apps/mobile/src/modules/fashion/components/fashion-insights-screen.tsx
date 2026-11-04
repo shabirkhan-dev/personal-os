@@ -190,7 +190,7 @@ export function FashionInsightsScreen() {
 				</PoText>
 			) : null}
 
-			<SectionLabel>What I noticed</SectionLabel>
+			<SectionLabel>Worth a look</SectionLabel>
 			{view.found
 				.filter((insight) => !hidden.includes(insight.id))
 				.map((insight) => (

@@ -146,7 +146,7 @@ export function FinanceInsightsScreen() {
 			</View>
 			{notes.length > 0 ? (
 				<PoText variant="eyebrow11" tone="textTertiary" style={styles.pad}>
-					What I noticed
+					Worth a look
 				</PoText>
 			) : null}
 			{notes.map((note) => {

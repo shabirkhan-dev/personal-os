@@ -373,7 +373,7 @@ export function FirstMealCard() {
 		<Card>
 			<PoText variant="row15">Then log your first meal</PoText>
 			<PoText variant="meta13" tone="textSecondary">
-				No forms. Say what you ate, snap a photo or scan a barcode, and I'll work out the numbers.
+				No forms. Say what you ate, take a photo or scan a barcode, and the numbers are worked out.
 			</PoText>
 		</Card>
 	);

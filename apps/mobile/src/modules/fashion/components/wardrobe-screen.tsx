@@ -87,7 +87,7 @@ export function WardrobeScreen() {
 				<EmptyCard
 					icon="Shirt"
 					title="Nothing here yet"
-					body="Add what you wear most and I'll start putting outfits together."
+					body="Add what you wear most to start getting outfit ideas."
 				>
 					<PillButton label="Add a piece" onPress={() => fashionRoutes.add()} />
 				</EmptyCard>

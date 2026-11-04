@@ -332,7 +332,7 @@ export function FinanceHomeView({ actionRequest }: HomeModuleViewProps) {
 		return (
 			<>
 				<Card>
-					<Eyebrow>Three numbers, that's it</Eyebrow>
+					<Eyebrow>Set up your runway</Eyebrow>
 					<NumberField
 						label="Money you have now"
 						value={setup.balance}

@@ -91,10 +91,11 @@ export function careerNotes(input: {
 	const due = followUps(apps, now).filter((item) => item.due).length;
 	if (due > 0) notes.push({ kind: "follow-ups", count: due });
 
-	// Only from Wednesday on, so a quiet Monday isn't flagged.
+	// From Wednesday on, so a quiet Monday isn't flagged; and not before the first job is added,
+	// when the empty screen already says what to do.
 	const week = careerRecap(apps, [], settings, "week", now);
 	const weekday = (now.getDay() + 6) % 7;
-	if (weekday >= 2 && week.applied < settings.weeklyTarget * (weekday / 5)) {
+	if (apps.length > 0 && weekday >= 2 && week.applied < settings.weeklyTarget * (weekday / 5)) {
 		notes.push({
 			kind: "behind",
 			applied: week.applied,

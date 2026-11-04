@@ -85,6 +85,7 @@ describe("career insights", () => {
 			(note) => note.kind,
 		);
 		expect(kinds).toContain("no-replies");
+		expect(careerNotes({ apps: [], preps: [], settings: defaultSettings, now })).toEqual([]);
 		const monday = new Date(2026, 9, 12, 10, 0);
 		expect(careerNotes({ apps: [], preps: [], settings: defaultSettings, now: monday })).toEqual(
 			[],

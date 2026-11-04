@@ -1,7 +1,6 @@
 import { router } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { Icon } from "@/components/icons";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
 import { Toggle } from "@/components/ui/toggle";
@@ -66,9 +65,9 @@ export default function RemindersScreen() {
 
 	return (
 		<SetupFrame
-			step={7}
+			step={6}
 			route={onboardingRoutes.reminders}
-			title="Voice and reminders"
+			title="Reminders"
 			body={["Small nudges at the right moment, timed to your day."]}
 			gap={20}
 			footer={
@@ -87,25 +86,6 @@ export default function RemindersScreen() {
 				</>
 			}
 		>
-			<View
-				style={[styles.hey, { backgroundColor: colors.bgHover, borderColor: colors.borderDefault }]}
-			>
-				<View style={[styles.tile56, { backgroundColor: colors.statusVioletSubtle }]}>
-					<Icon name="Mic" color={colors.statusViolet} />
-				</View>
-				<View style={styles.text}>
-					<PoText variant="title18">Say “Hey OS”</PoText>
-					<PoText variant="meta13" tone="textSecondary">
-						Talk to it with the app closed
-					</PoText>
-				</View>
-				<View style={[styles.soon, { backgroundColor: colors.bgSubtle }]}>
-					<PoText variant="eyebrow11" tone="textSecondary">
-						Soon
-					</PoText>
-				</View>
-			</View>
-			<View style={styles.gap12} />
 			<View
 				style={[
 					styles.list,
@@ -141,27 +121,8 @@ export default function RemindersScreen() {
 }
 
 const styles = StyleSheet.create({
-	hey: {
-		height: 72,
-		flexDirection: "row",
-		alignItems: "center",
-		gap: 12,
-		paddingLeft: 8,
-		paddingRight: 16,
-		borderRadius: 36,
-		borderWidth: 1.5,
-	},
-	tile56: {
-		width: 56,
-		height: 56,
-		borderRadius: 28,
-		alignItems: "center",
-		justifyContent: "center",
-	},
 	text: { flex: 1, gap: 2 },
-	soon: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12 },
 	note: { textAlign: "center" },
-	gap12: { height: 12 },
 	list: { paddingHorizontal: 18, paddingVertical: 4, borderRadius: 28, borderWidth: 1 },
 	row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 14 },
 });

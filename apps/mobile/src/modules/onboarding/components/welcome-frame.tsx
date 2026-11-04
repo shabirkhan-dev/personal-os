@@ -7,10 +7,8 @@ import { onboardingRoutes } from "../lib/flow";
 import { OnboardingScreen } from "./onboarding-screen";
 import type { RichPart } from "./rich-text";
 import { TextBlock } from "./text-block";
-import { WelcomeTop } from "./top-bars";
 
 export type WelcomeFrameProps = {
-	step: number;
 	tone: keyof ColorTokens;
 	eyebrow: string;
 	title: string;
@@ -19,15 +17,13 @@ export type WelcomeFrameProps = {
 	cta: string;
 	showPlus?: boolean;
 	onNext: () => void;
-	onSkip: () => void;
 };
 
 /**
- * Frames 02–05: dots + Skip, a 420px preview, the text block, the primary pill and a way back in
- * for an existing account.
+ * The one welcome screen (Figma frames 02–05 folded into one): a 420px preview, the text block, the
+ * primary pill and a way back in for an existing account.
  */
 export function WelcomeFrame({
-	step,
 	tone,
 	eyebrow,
 	title,
@@ -36,7 +32,6 @@ export function WelcomeFrame({
 	cta,
 	showPlus,
 	onNext,
-	onSkip,
 }: WelcomeFrameProps) {
 	return (
 		<OnboardingScreen
@@ -52,7 +47,6 @@ export function WelcomeFrame({
 				</>
 			}
 		>
-			<WelcomeTop step={step} onSkip={onSkip} />
 			<View style={styles.preview}>{preview}</View>
 			<TextBlock dot={tone} eyebrow={eyebrow} title={title} body={body} />
 		</OnboardingScreen>
@@ -60,5 +54,5 @@ export function WelcomeFrame({
 }
 
 const styles = StyleSheet.create({
-	preview: { height: 420, justifyContent: "center" },
+	preview: { height: 420, marginTop: 40, justifyContent: "center" },
 });

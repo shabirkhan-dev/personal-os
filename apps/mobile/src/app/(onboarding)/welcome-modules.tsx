@@ -3,22 +3,18 @@ import { ModuleRowsPreview } from "@/modules/onboarding/components/previews/modu
 import { WelcomeFrame } from "@/modules/onboarding/components/welcome-frame";
 import { onboardingRoutes } from "@/modules/onboarding/lib/flow";
 
-/** 02 Welcome · Modules */
+/** Welcome: the one intro screen before setup. */
 export default function WelcomeModulesScreen() {
 	return (
 		<WelcomeFrame
-			step={0}
 			tone="statusSuccess"
 			eyebrow="Modules"
 			title="One place for your whole life"
-			body={[
-				"Routines, money, workouts, skincare, food and style. ",
-				["Switch between them in one tap."],
-			]}
+			body={["Money, training, food, faith and more. ", ["Type or say it, and it's done."]]}
 			preview={<ModuleRowsPreview />}
-			cta="Continue"
-			onNext={() => router.push(onboardingRoutes.welcomeUpcoming)}
-			onSkip={() => router.push(onboardingRoutes.chooseHow)}
+			cta="Get started"
+			showPlus
+			onNext={() => router.push(onboardingRoutes.chooseHow)}
 		/>
 	);
 }

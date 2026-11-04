@@ -46,10 +46,7 @@ const SCREENS: readonly [RegExp, FaithScreen][] = [
 ];
 
 export function parseFaithLine(input: string): FaithIntent | null {
-	const text = input
-		.trim()
-		.toLowerCase()
-		.replace(/[’']/g, "");
+	const text = input.trim().toLowerCase().replace(/[’']/g, "");
 	if (!text) return null;
 	const prayer = prayerIn(text);
 	const question = /\?$|^(what|why|how|who|which|can|is|are|does|do|should|tell me|explain)\b/.test(

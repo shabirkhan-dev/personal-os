@@ -16,7 +16,8 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
 
 ### Mobile app
 
-- Onboarding end to end: voice input, saved progress, reminders, plan reveal and sign-in.
+- Onboarding end to end: one welcome screen, then talk or six quick steps (about you, body, your
+  day, goals, modules, reminders), saved progress, plan reveal and sign-in.
 - Today: Overview plus a Finance Home, and Profile, all on what the person enters. Module data is stored on the phone
   ([ADR 0001](/docs/architecture/adr-0001-on-device-module-data)).
 - Ask bar that parses typed lines into module entries.
@@ -28,7 +29,7 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
   notes) and Insights, plus questions answered by the Faith AI.
 - Fashion module: wardrobe with photos (starter photos, camera, gallery or a product link read by
   AI), today's look picked on the phone for the weather (Open-Meteo) with layer advice, a watch and
-  a scent, a rotating week plan, piece detail with cost per wear, wishlist with a buying pause,
+  a scent, a rotating week plan, piece detail with cost per wear, a "To buy" list with a buying pause,
   watches and scents, and Insights.
 - Food module: meals logged from a line, Say it, a photo or a barcode (Open Food Facts), matched
   on the phone with the Food AI reading what it doesn't know; goal and targets from height,
@@ -68,6 +69,10 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
 - Profile photo (camera or gallery, kept on the phone and uploaded to R2 when signed in) and name
   synced to the account; fields and sheets stay above the keyboard everywhere.
 - Long AI work runs in the background with a working card, so no screen waits on it.
+- One app shell: Areas (the tab and the header pill) opens the module switcher from any screen,
+  one Insights tab with a module switcher on top, one ask surface per screen (the ask bar on
+  every Home, the Ask button on inner screens), Kit v2 dialogs in place of system alerts, and
+  card-shaped loading placeholders. Career and the Daily brief share Finance's runway.
 - Offline-first record store on the phone with sync to the API
   ([ADR 0002](/docs/architecture/adr-0002-offline-first-sync)).
 - EAS development builds, EAS Update channels and a one-command APK build.

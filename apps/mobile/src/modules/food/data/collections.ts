@@ -8,6 +8,7 @@ import {
 	parseWater,
 	parseWeighIn,
 } from "../lib/food-model";
+import { parseMyRecipe } from "../lib/my-recipes";
 
 /** Food's slices of the record store. Names are part of the sync contract: never rename one. */
 export const meals = defineCollection("food-meals", parseMeal);
@@ -17,3 +18,4 @@ export const foodSettings = defineCollection("food-settings", parseSettings);
 export const foodPlans = defineCollection("food-plans", parsePlan);
 export const groceries = defineCollection("food-grocery", parseGrocery);
 export const recipeStates = defineCollection("food-recipes", parseRecipeState);
+export const myRecipes = defineCollection("food-my-recipes", parseMyRecipe);

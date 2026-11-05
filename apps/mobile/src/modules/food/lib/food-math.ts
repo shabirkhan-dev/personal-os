@@ -16,7 +16,7 @@ import {
 } from "./food-model";
 import { foodById } from "./foods";
 import { packLabel, productById } from "./groceries";
-import { RECIPES, type Recipe, recipeById } from "./recipes";
+import { allRecipes, RECIPES, type Recipe, recipeById } from "./recipes";
 import { remaining } from "./targets";
 
 /** The numbers behind Food's screens. Pure, so they're tested without a phone. */
@@ -176,7 +176,9 @@ export function planDayCost(day: PlanDay): number {
 	}, 0);
 }
 
-const forSlot = (slot: Slot) => RECIPES.filter((recipe) => recipe.slots.includes(slot));
+/** Recipes for `slot` that have numbers to plan with (a recipe of the person's may not yet). */
+const forSlot = (slot: Slot) =>
+	allRecipes().filter((recipe) => recipe.slots.includes(slot) && recipe.kcal > 0);
 
 /**
  * A week of meals near the calorie and protein targets: each slot rotates through the recipes
@@ -223,16 +225,26 @@ export function groceriesFor(
 	previous: readonly GroceryItem[] = [],
 ): GroceryItem[] {
 	const need = new Map<string, number>();
+	const written = new Map<string, { name: string; amounts: string[] }>();
 	for (const day of days) {
 		for (const meal of day.meals) {
 			const recipe = recipeById(meal.recipeId);
 			for (const use of recipe?.uses ?? []) {
 				need.set(use.product, (need.get(use.product) ?? 0) + use.per * meal.portions);
 			}
+			// The person's own recipes have no pack data: list their ingredients as written.
+			if (recipe?.mine) {
+				for (const item of recipe.ingredients) {
+					const id = `own-${item.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+					const entry = written.get(id) ?? { name: item.name, amounts: [] };
+					if (item.amount) entry.amounts.push(item.amount);
+					written.set(id, entry);
+				}
+			}
 		}
 	}
 	const kept = new Map(previous.map((item) => [item.id, item]));
-	return [...need.entries()].flatMap(([id, share]) => {
+	const fromPacks = [...need.entries()].flatMap(([id, share]) => {
 		const product = productById(id);
 		if (!product) return [];
 		const packs = Math.max(1, Math.ceil(share - 0.05));
@@ -246,9 +258,52 @@ export function groceriesFor(
 				price: product.price * packs,
 				bought: before?.bought ?? false,
 				atHome: before?.atHome ?? false,
+				custom: false,
+				photo: before?.photo ?? null,
+				note: before?.note ?? "",
 			},
 		];
 	});
+	const fromWritten = [...written.entries()].map(([id, entry]): GroceryItem => {
+		const before = kept.get(id);
+		const amounts = [...new Set(entry.amounts)];
+		return {
+			id,
+			name: entry.name,
+			amount: amounts.length > 2 ? `${amounts.length} recipes` : amounts.join(" + "),
+			section: sectionFor(entry.name),
+			price: before?.price ?? 0,
+			bought: before?.bought ?? false,
+			atHome: before?.atHome ?? false,
+			custom: false,
+			photo: before?.photo ?? null,
+			note: before?.note ?? "",
+		};
+	});
+	// What the person added by hand stays on every new list.
+	const own = previous.filter((item) => item.custom);
+	return [...fromPacks, ...fromWritten, ...own];
+}
+
+const SECTION_WORDS: [GroceryItem["section"], RegExp][] = [
+	[
+		"protein",
+		/chicken|beef|mutton|meat|keema|fish|prawn|egg|milk|yogurt|dahi|paneer|cheese|daal|dal|lentil|chana|beans|tofu/,
+	],
+	[
+		"carbs",
+		/rice|atta|flour|bread|roti|naan|potato|aloo|oats|pasta|noodle|fruit|banana|apple|mango|dates|sugar/,
+	],
+	[
+		"veg",
+		/onion|tomato|garlic|ginger|chilli|chili|pepper|coriander|mint|spinach|palak|carrot|peas|cabbage|cucumber|lemon|masala|spice|salt|cumin|haldi|turmeric/,
+	],
+];
+
+/** Which aisle a written ingredient most likely sits in. */
+export function sectionFor(name: string): GroceryItem["section"] {
+	const lower = name.toLowerCase();
+	return SECTION_WORDS.find(([, words]) => words.test(lower))?.[0] ?? "extras";
 }
 
 /** The money still to spend: items not bought and not already at home. */
@@ -260,6 +315,41 @@ export function groceryTotal(items: readonly GroceryItem[]): number {
 
 export function waterOn(water: readonly WaterDay[], day: string): number {
 	return water.find((item) => item.id === day)?.ml ?? 0;
+}
+
+export type WaterPace = {
+	/** What "on pace" would be by now, in ml. */
+	expected: number;
+	state: "done" | "ahead" | "on-pace" | "behind";
+	/** Glasses (250 ml) still to drink today. */
+	glassesLeft: number;
+};
+
+/**
+ * How today's water compares with an even pace from 07:00 to 22:00. A glass either way of the
+ * pace still counts as on pace.
+ */
+export function waterPace(ml: number, targetMl: number, now: Date): WaterPace {
+	const minutes = now.getHours() * 60 + now.getMinutes();
+	const share = Math.min(1, Math.max(0, (minutes - 7 * 60) / (15 * 60)));
+	const expected = Math.round(targetMl * share);
+	const glassesLeft = Math.max(0, Math.ceil((targetMl - ml) / 250));
+	if (targetMl > 0 && ml >= targetMl) return { expected, state: "done", glassesLeft: 0 };
+	if (ml >= expected + 250) return { expected, state: "ahead", glassesLeft };
+	if (ml >= expected - 250) return { expected, state: "on-pace", glassesLeft };
+	return { expected, state: "behind", glassesLeft };
+}
+
+/** Days in a row, up to yesterday (today counts once it's done), that reached the target. */
+export function waterStreak(water: readonly WaterDay[], targetMl: number, today: string): number {
+	const met = new Set(water.filter((item) => item.ml >= targetMl).map((item) => item.id));
+	let streak = met.has(today) ? 1 : 0;
+	for (let back = 1; back < 400; back += 1) {
+		const day = dayKey(addDays(new Date(`${today}T12:00:00`), -back));
+		if (!met.has(day)) break;
+		streak += 1;
+	}
+	return streak;
 }
 
 export type WeightTrend = {

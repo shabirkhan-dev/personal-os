@@ -321,6 +321,9 @@ const groceryItem = (id: string, name: string, bought = false) => ({
 	price: 0,
 	bought,
 	atHome: false,
+	custom: false,
+	photo: null,
+	note: "",
 });
 
 describe("ask bar", () => {

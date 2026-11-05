@@ -13,6 +13,8 @@ export type TextFieldProps = {
 	/** Shown after the input, e.g. "kcal" or "Rs". */
 	suffix?: string;
 	onSubmitEditing?: () => void;
+	/** A few lines of text, like a recipe step or a note. */
+	multiline?: boolean;
 };
 
 const inputStyle = toTextStyle(textStyles.body15);
@@ -26,6 +28,7 @@ export function TextField({
 	keyboardType,
 	suffix,
 	onSubmitEditing,
+	multiline = false,
 }: TextFieldProps) {
 	const { colors } = usePoTheme();
 	const [focused, setFocused] = useState(false);
@@ -38,6 +41,7 @@ export function TextField({
 			<View
 				style={[
 					styles.field,
+					multiline ? styles.tall : null,
 					{
 						backgroundColor: focused ? colors.accentSubtle : colors.bgSubtle,
 					},
@@ -52,6 +56,8 @@ export function TextField({
 					onFocus={() => setFocused(true)}
 					onBlur={() => setFocused(false)}
 					onSubmitEditing={onSubmitEditing}
+					multiline={multiline}
+					textAlignVertical={multiline ? "top" : "center"}
 					selectionColor={colors.accentDefault}
 					accessibilityLabel={label}
 					style={[inputStyle, styles.input, { color: colors.textPrimary }]}
@@ -76,5 +82,6 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 16,
 		borderRadius: 16,
 	},
-	input: { flex: 1, paddingVertical: 0 },
+	tall: { height: undefined, minHeight: 88, alignItems: "flex-start", paddingVertical: 12 },
+	input: { flex: 1, minWidth: 0, paddingVertical: 0 },
 });

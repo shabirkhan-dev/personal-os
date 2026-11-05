@@ -16,12 +16,21 @@ import { addWater, deleteMeal, logRecipe, saveSettings, weighIn } from "../data/
 import { draftFromText, FOOD_ASK_JOB, useFoodUi } from "../hooks/food-ui-store";
 import { bodyLine, useBody } from "../hooks/use-body";
 import { useFoodToday } from "../hooks/use-food";
-import { itemsLine, nextSlot, pickRecipe, slotRows } from "../lib/food-math";
+import {
+	itemsLine,
+	nextSlot,
+	pickRecipe,
+	slotRows,
+	waterOn,
+	waterPace,
+	waterStreak,
+} from "../lib/food-math";
 import { GOAL_LABELS, type Goal, SLOT_LABELS, SLOT_TIMES } from "../lib/food-model";
 import { parseFoodLine } from "../lib/parse-meal";
 import { RECIPES } from "../lib/recipes";
 import { goalWeight, remaining, targetsFor } from "../lib/targets";
 import { foodRoutes } from "../navigation";
+import { WaterCard } from "./water-card";
 import { foodAiMessage, useFoodAi } from "../services/food-ai";
 import { mealPhoto } from "../services/meal-photo";
 import {
@@ -31,7 +40,6 @@ import {
 	kcalText,
 	MacrosCard,
 	MealsCard,
-	WaterCard,
 	WeightCard,
 } from "./home-cards";
 
@@ -58,6 +66,19 @@ export function FoodHomeView({ actionRequest }: HomeModuleViewProps) {
 	const [weighing, setWeighing] = useState(false);
 	const [kg, setKg] = useState("");
 	const [waterSheet, setWaterSheet] = useState(false);
+	const [customMl, setCustomMl] = useState("");
+	const waterWeek = useMemo(
+		() =>
+			Array.from({ length: 7 }, (_, index) => {
+				const date = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (6 - index));
+				return {
+					label: "SMTWTFS"[date.getDay()] ?? "",
+					met: waterOn(data.water, dayKey(date)) >= settings.targets.waterMl,
+					today: index === 6,
+				};
+			}),
+		[data.water, now, settings.targets.waterMl],
+	);
 
 	const failed = (what: string) => (error: unknown) => {
 		console.error(`[food] could not ${what}`, error);
@@ -313,8 +334,11 @@ export function FoodHomeView({ actionRequest }: HomeModuleViewProps) {
 					<WaterCard
 						ml={waterMl}
 						targetMl={settings.targets.waterMl}
-						onAdd={() => drink(GLASS_ML, "+ a glass of water")}
-						onLongAdd={() => setWaterSheet(true)}
+						pace={waterPace(waterMl, settings.targets.waterMl, now)}
+						week={waterWeek}
+						streak={waterStreak(data.water, settings.targets.waterMl, today)}
+						onAdd={(ml) => drink(ml, ml === GLASS_ML ? "+ a glass of water" : `+ ${ml} ml water`)}
+						onMore={() => setWaterSheet(true)}
 					/>
 					<MealsCard
 						rows={rows}
@@ -355,6 +379,11 @@ export function FoodHomeView({ actionRequest }: HomeModuleViewProps) {
 						<FilterChip label="Meal plan" selected={false} onPress={foodRoutes.plan} />
 						<FilterChip label="Grocery list" selected={false} onPress={foodRoutes.grocery} />
 						<FilterChip label="Recipes" selected={false} onPress={foodRoutes.recipes} />
+						<FilterChip
+							label="Write a recipe"
+							selected={false}
+							onPress={() => foodRoutes.recipeEdit()}
+						/>
 					</View>
 				</>
 			) : (
@@ -380,8 +409,11 @@ export function FoodHomeView({ actionRequest }: HomeModuleViewProps) {
 				</PoText>
 			</Sheet>
 			<Sheet visible={waterSheet} title="Water" onClose={() => setWaterSheet(false)}>
+				<PoText variant="meta13" tone="textSecondary">
+					{`${(waterMl / 1000).toFixed(2).replace(/0$/, "")} L so far today. Tap an amount, or type your own.`}
+				</PoText>
 				<View style={styles.links}>
-					{[250, 500, 750, 1000].map((ml) => (
+					{[150, 250, 330, 500, 750, 1000].map((ml) => (
 						<FilterChip
 							key={ml}
 							label={`+${ml} ml`}
@@ -403,6 +435,21 @@ export function FoodHomeView({ actionRequest }: HomeModuleViewProps) {
 						/>
 					) : null}
 				</View>
+				<TextField
+					label="Your own amount"
+					value={customMl}
+					onChangeText={setCustomMl}
+					keyboardType="number-pad"
+					suffix="ml"
+					placeholder="400"
+					onSubmitEditing={() => {
+						const ml = Math.round(Number(customMl));
+						if (!Number.isFinite(ml) || ml <= 0 || ml > 3000) return;
+						setWaterSheet(false);
+						setCustomMl("");
+						drink(ml, `+ ${ml} ml water`);
+					}}
+				/>
 			</Sheet>
 		</>
 	);

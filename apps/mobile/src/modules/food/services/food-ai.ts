@@ -16,6 +16,19 @@ export type MealReadingAi = {
 
 export type FoodAnswer = { answer: string; recipeId: string | null; followUps: string[] };
 
+export type RecipeDraftAi = Macros & {
+	kind: string;
+	slots: Slot[];
+	minutes: number;
+	ingredients: { name: string; amount: string }[];
+	steps: { text: string; minutes: number | null }[];
+};
+
+export type WeekPlanAi = {
+	days: { day: string; meals: { slot: Slot; recipeId: string; portions: number }[] }[];
+	note: string;
+};
+
 export function foodAiMessage(error: unknown): string {
 	const limit = aiLimitMessage(error);
 	if (limit) return limit;
@@ -47,6 +60,32 @@ export function useFoodAi() {
 		() => ({
 			available,
 			readMeal: (text: string) => call<MealReadingAi>("read-meal", { text: text.slice(0, 600) }),
+			draftRecipe: (input: { name: string; notes: string; serves: number }) =>
+				call<RecipeDraftAi>("draft-recipe", {
+					name: input.name.slice(0, 60),
+					notes: input.notes.slice(0, 400),
+					serves: Math.min(12, Math.max(1, Math.round(input.serves))),
+				}),
+			planWeek: (input: {
+				goal: string;
+				targets: Macros;
+				wishes: string;
+				days: readonly string[];
+				recipes: readonly {
+					id: string;
+					name: string;
+					slots: Slot[];
+					kcal: number;
+					protein: number;
+					cost: number;
+				}[];
+			}) =>
+				call<WeekPlanAi>("plan-week", {
+					...input,
+					wishes: input.wishes.slice(0, 300),
+					days: input.days.slice(0, 7),
+					recipes: input.recipes.slice(0, 80),
+				}),
 			ask: (input: {
 				question: string;
 				goal: string;

@@ -16,12 +16,14 @@ import {
 	type Slot,
 	type WeekPlan,
 } from "../lib/food-model";
-import { recipeById } from "../lib/recipes";
+import { sectionFor } from "../lib/food-math";
+import { type Recipe, recipeById } from "../lib/recipes";
 import {
 	foodPlans,
 	foodSettings,
 	groceries,
 	meals,
+	myRecipes,
 	recipeStates,
 	water,
 	weighIns,
@@ -188,6 +190,195 @@ export function saveGroceryItems(list: GroceryList, items: readonly GroceryItem[
 
 export function saveRecipeState(state: RecipeState): Promise<void> {
 	return saveItem(recipeStates, state);
+}
+
+// --- the person's own recipes -------------------------------------------------------------------
+
+export function saveMyRecipe(recipe: Recipe): Promise<void> {
+	return saveItem(myRecipes, { ...recipe, mine: true, photo: "", uses: [] });
+}
+
+export function deleteMyRecipe(id: string): Promise<void> {
+	return removeItem(myRecipes, id);
+}
+
+// --- groceries by hand --------------------------------------------------------------------------
+
+/** This week's list, made empty when there isn't one yet, so things can be added by hand. */
+export function listFor(
+	lists: readonly GroceryList[],
+	weekId: string,
+	now = new Date(),
+): GroceryList {
+	return (
+		lists.find((list) => list.id === weekId) ?? {
+			id: weekId,
+			items: [],
+			createdAt: now.toISOString(),
+		}
+	);
+}
+
+export const newGroceryId = () => `add-${newId()}`;
+
+/** Adds or replaces one item the person entered. */
+export function saveGroceryItem(list: GroceryList, item: GroceryItem): Promise<void> {
+	const exists = list.items.some((row) => row.id === item.id);
+	return saveGroceryItems(
+		list,
+		exists ? list.items.map((row) => (row.id === item.id ? item : row)) : [...list.items, item],
+	);
+}
+
+export function removeGroceryItem(list: GroceryList, id: string): Promise<void> {
+	return saveGroceryItems(
+		list,
+		list.items.filter((row) => row.id !== id),
+	);
+}
+
+/** Puts a recipe's ingredients not at home on the list; returns how many were new. */
+export async function addMissingToList(
+	list: GroceryList,
+	recipe: Recipe,
+	atHome: readonly number[],
+): Promise<number> {
+	const have = new Set(list.items.map((item) => item.name.toLowerCase()));
+	const missing = recipe.ingredients.filter(
+		(item, index) => !atHome.includes(index) && !have.has(item.name.toLowerCase()),
+	);
+	if (missing.length === 0) return 0;
+	await saveGroceryItems(list, [
+		...list.items,
+		...missing.map((item): GroceryItem => ({
+			id: newGroceryId(),
+			name: item.name,
+			amount: item.amount,
+			section: sectionFor(item.name),
+			price: 0,
+			bought: false,
+			atHome: false,
+			custom: true,
+			photo: null,
+			note: `For ${recipe.name}`,
+		})),
+	]);
+	return missing.length;
+}
+
+// --- the plan by hand ---------------------------------------------------------------------------
+
+/** Sets (or, with `recipeId` null, clears) one slot of one day in the week's plan. */
+export async function setPlanSlot(
+	plan: WeekPlan | null,
+	weekId: string,
+	week: readonly string[],
+	day: string,
+	slot: Slot,
+	recipeId: string | null,
+	portions = 1,
+): Promise<WeekPlan> {
+	const base = week.map(
+		(each) => plan?.days.find((item) => item.day === each) ?? { day: each, meals: [] },
+	);
+	return savePlan(
+		weekId,
+		base.map((item) =>
+			item.day !== day
+				? item
+				: {
+						day,
+						meals: [
+							...item.meals.filter((meal) => meal.slot !== slot),
+							...(recipeId ? [{ slot, recipeId, portions }] : []),
+						].sort((a, b) => SLOTS.indexOf(a.slot) - SLOTS.indexOf(b.slot)),
+					},
+		),
+	);
+}
+
+/** Fills only the empty slots of the days from `today` on, keeping what the person picked. */
+export function fillPlan(
+	plan: WeekPlan | null,
+	weekId: string,
+	week: readonly string[],
+	settings: FoodSettings,
+	seed: number,
+	today: string,
+): Promise<WeekPlan> {
+	const generated = generatePlan(week, settings.targets, seed);
+	return savePlan(
+		weekId,
+		week.map((day) => {
+			const current = plan?.days.find((item) => item.day === day) ?? { day, meals: [] };
+			if (day < today) return current;
+			const fresh = generated.find((item) => item.day === day)?.meals ?? [];
+			const taken = new Set(current.meals.map((meal) => meal.slot));
+			return {
+				day,
+				meals: [...current.meals, ...fresh.filter((meal) => !taken.has(meal.slot))].sort(
+					(a, b) => SLOTS.indexOf(a.slot) - SLOTS.indexOf(b.slot),
+				),
+			};
+		}),
+	);
+}
+
+/** Puts the AI's days into the week, keeping days it didn't plan (and those already past). */
+export function applyPlanDays(
+	plan: WeekPlan | null,
+	weekId: string,
+	week: readonly string[],
+	days: readonly PlanDay[],
+	today: string,
+): Promise<WeekPlan> {
+	return savePlan(
+		weekId,
+		week.map((day) => {
+			const current = plan?.days.find((item) => item.day === day) ?? { day, meals: [] };
+			const planned = days.find((item) => item.day === day);
+			return day >= today && planned && planned.meals.length > 0 ? planned : current;
+		}),
+	);
+}
+
+/** Empties the days from `today` on; days already past keep their plan. */
+export function clearWeek(
+	plan: WeekPlan | null,
+	weekId: string,
+	week: readonly string[],
+	today: string,
+): Promise<WeekPlan> {
+	return savePlan(
+		weekId,
+		week.map((day) =>
+			day < today
+				? (plan?.days.find((item) => item.day === day) ?? { day, meals: [] })
+				: { day, meals: [] },
+		),
+	);
+}
+
+/** An empty week to fill by hand. */
+export function emptyPlan(weekId: string, week: readonly string[]): Promise<WeekPlan> {
+	return savePlan(
+		weekId,
+		week.map((day) => ({ day, meals: [] })),
+	);
+}
+
+/** Copies one day's meals onto the days after it that are still empty. */
+export function repeatDay(plan: WeekPlan, weekId: string, from: string): Promise<WeekPlan> {
+	const source = plan.days.find((item) => item.day === from);
+	if (!source) return Promise.resolve(plan);
+	return savePlan(
+		weekId,
+		plan.days.map((item) =>
+			item.day > from && item.meals.length === 0
+				? { day: item.day, meals: source.meals.map((meal) => Object.assign({}, meal)) }
+				: item,
+		),
+	);
 }
 
 // --- the old single-file Food store ---------------------------------------------------------------

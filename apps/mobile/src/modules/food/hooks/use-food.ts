@@ -7,6 +7,7 @@ import {
 	foodSettings,
 	groceries,
 	meals,
+	myRecipes,
 	recipeStates,
 	water,
 	weighIns,
@@ -14,6 +15,7 @@ import {
 import { migrateOldFood } from "../data/food-actions";
 import { eatenOn, planFor, waterOn, weekDays, weightTrend } from "../lib/food-math";
 import { defaultSettings } from "../lib/food-model";
+import { setMyRecipes } from "../lib/recipes";
 
 let migration: Promise<unknown> | null = null;
 
@@ -26,6 +28,7 @@ export function useFood() {
 	const planList = useCollection(foodPlans);
 	const groceryList = useCollection(groceries);
 	const recipeList = useCollection(recipeStates);
+	const mineList = useCollection(myRecipes);
 
 	useEffect(() => {
 		migration ??= migrateOldFood().catch((error: unknown) =>
@@ -42,7 +45,11 @@ export function useFood() {
 			planList,
 			groceryList,
 			recipeList,
+			mineList,
 		];
+		const mine = [...(mineList.data ?? [])].sort((a, b) => a.name.localeCompare(b.name));
+		// Every screen and the plan look recipes up by id; keep the person's own in that lookup.
+		setMyRecipes(mine);
 		return {
 			loading: queries.some((query) => query.isPending),
 			error: queries.find((query) => query.error)?.error ?? null,
@@ -53,8 +60,9 @@ export function useFood() {
 			plans: [...(planList.data ?? [])].sort((a, b) => b.id.localeCompare(a.id)),
 			groceries: groceryList.data ?? [],
 			recipes: recipeList.data ?? [],
+			myRecipes: mine,
 		};
-	}, [mealList, waterList, weightList, settingsList, planList, groceryList, recipeList]);
+	}, [mealList, waterList, weightList, settingsList, planList, groceryList, recipeList, mineList]);
 }
 
 export type FoodData = ReturnType<typeof useFood>;

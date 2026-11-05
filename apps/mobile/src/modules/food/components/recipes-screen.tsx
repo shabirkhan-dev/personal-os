@@ -10,7 +10,7 @@ import { saveRecipeState } from "../data/food-actions";
 import { useFoodToday } from "../hooks/use-food";
 import { nextSlot, pickRecipe } from "../lib/food-math";
 import { SLOT_LABELS, SLOT_TIMES } from "../lib/food-model";
-import { RECIPES, type Recipe, type RecipeTag, TAG_LABELS } from "../lib/recipes";
+import { allRecipes, type Recipe, type RecipeTag, TAG_LABELS } from "../lib/recipes";
 import { remaining } from "../lib/targets";
 import { foodRoutes } from "../navigation";
 import { FoodScreen } from "./food-screen";
@@ -19,10 +19,11 @@ import { MealImage } from "./meal-image";
 
 const inputStyle = toTextStyle(textStyles.body15);
 
-type Filter = "for-you" | "saved" | RecipeTag;
+type Filter = "for-you" | "mine" | "saved" | RecipeTag;
 
 const FILTERS: readonly { id: Filter; label: string }[] = [
 	{ id: "for-you", label: "For you" },
+	{ id: "mine", label: "My recipes" },
 	{ id: "high-protein", label: TAG_LABELS["high-protein"] },
 	{ id: "bulk", label: TAG_LABELS.bulk },
 	{ id: "desi", label: TAG_LABELS.desi },
@@ -55,14 +56,13 @@ export function RecipesScreen() {
 	const { colors } = usePoTheme();
 	const { data, eaten, now } = useFoodToday();
 	const [filter, setFilter] = useState<Filter>("for-you");
-	const [searching, setSearching] = useState(false);
 	const [query, setQuery] = useState("");
 	const left = remaining(data.settings.targets, eaten);
 	const slot = nextSlot(now.getHours() * 60 + now.getMinutes(), SLOT_TIMES);
 	const featured = pickRecipe(slot, left);
 	const saved = new Set(data.recipes.filter((state) => state.saved).map((state) => state.id));
 	const words = query.trim().toLowerCase();
-	const shown = RECIPES.filter((recipe) => {
+	const shown = allRecipes().filter((recipe) => {
 		if (words) {
 			return (
 				recipe.name.toLowerCase().includes(words) ||
@@ -70,6 +70,7 @@ export function RecipesScreen() {
 			);
 		}
 		if (filter === "for-you") return recipe.id !== featured?.id;
+		if (filter === "mine") return recipe.mine === true;
 		if (filter === "saved") return saved.has(recipe.id);
 		return recipe.tags.includes(filter);
 	});
@@ -89,23 +90,32 @@ export function RecipesScreen() {
 		<FoodScreen
 			label="Recipes"
 			action={{
-				icon: "Search",
-				label: "Search recipes",
-				onPress: () => setSearching((value) => !value),
+				icon: "Line/Plus",
+				label: "Write a recipe",
+				onPress: () => foodRoutes.recipeEdit(),
 			}}
 		>
-			{searching ? (
-				<View style={[styles.search, { backgroundColor: colors.bgSubtle }]}>
-					<Icon name="Search" size={16} color={colors.textSecondary} />
-					<TextInput
-						value={query}
-						onChangeText={setQuery}
-						placeholder="Dish or ingredient"
-						placeholderTextColor={colors.textTertiary}
-						style={[inputStyle, styles.flex, { color: colors.textPrimary }]}
-					/>
-				</View>
-			) : null}
+			<View style={[styles.search, { backgroundColor: colors.bgSubtle }]}>
+				<Icon name="Search" size={16} color={colors.textSecondary} />
+				<TextInput
+					value={query}
+					onChangeText={setQuery}
+					placeholder="Search a dish or an ingredient"
+					placeholderTextColor={colors.textTertiary}
+					accessibilityLabel="Search recipes"
+					style={[inputStyle, styles.flex, { color: colors.textPrimary }]}
+				/>
+				{query ? (
+					<Pressable
+						accessibilityRole="button"
+						accessibilityLabel="Clear search"
+						hitSlop={8}
+						onPress={() => setQuery("")}
+					>
+						<Icon name="Line/Close" size={14} color={colors.textSecondary} />
+					</Pressable>
+				) : null}
+			</View>
 			<ScrollView
 				horizontal
 				showsHorizontalScrollIndicator={false}
@@ -120,6 +130,28 @@ export function RecipesScreen() {
 					/>
 				))}
 			</ScrollView>
+
+			{filter === "mine" || (showFeatured && data.myRecipes.length === 0) ? (
+				<Pressable
+					accessibilityRole="button"
+					onPress={() => foodRoutes.recipeEdit()}
+					style={({ pressed }) => [
+						styles.write,
+						{ backgroundColor: pressed ? colors.bgHover : colors.accentSubtle },
+					]}
+				>
+					<View style={[styles.writeIcon, { backgroundColor: colors.accentDefault }]}>
+						<Icon name="Filled/Edit" size={16} color={colors.textOnAccent} />
+					</View>
+					<View style={styles.flex}>
+						<PoText variant="row15">Write your own recipe</PoText>
+						<PoText variant="meta13" tone="textSecondary">
+							A photo, ingredients, steps with timers and a video link. It plans and shops like the
+							rest.
+						</PoText>
+					</View>
+				</Pressable>
+			) : null}
 
 			{showFeatured ? (
 				<>
@@ -175,7 +207,9 @@ export function RecipesScreen() {
 				<PoText variant="body15" tone="textSecondary" style={styles.none}>
 					{filter === "saved"
 						? "Tap the heart on a recipe to keep it here."
-						: "Nothing matches yet."}
+						: filter === "mine"
+							? "The recipes you write show here."
+							: "Nothing matches yet."}
 				</PoText>
 			) : (
 				<View style={styles.grid}>
@@ -186,13 +220,31 @@ export function RecipesScreen() {
 							onPress={() => foodRoutes.recipe(recipe.id)}
 							style={[styles.tile, { backgroundColor: colors.bgSurface }]}
 						>
-							<MealImage recipeId={recipe.id} size={110} fill radius={18} />
+							<View>
+								<MealImage recipeId={recipe.id} size={110} fill radius={18} />
+								<View style={styles.tileHeart}>
+									<HeartButton saved={saved.has(recipe.id)} onPress={() => toggleSaved(recipe)} />
+								</View>
+								{recipe.mine ? (
+									<View style={[styles.badge, { backgroundColor: colors.accentDefault }]}>
+										<PoText variant="eyebrow11" tone="textOnAccent">
+											Yours
+										</PoText>
+									</View>
+								) : null}
+							</View>
 							<View style={styles.tileText}>
 								<PoText variant="row15" numberOfLines={1}>
 									{recipe.name}
 								</PoText>
-								<PoText variant="meta13" tone="textSecondary">
-									{`${recipe.minutes} min  •  ${recipe.kcal} kcal`}
+								<PoText variant="meta13" tone="textSecondary" numberOfLines={1}>
+									{[
+										`${recipe.minutes} min`,
+										recipe.kcal ? `${recipe.kcal} kcal` : "",
+										recipe.protein ? `${recipe.protein} g protein` : "",
+									]
+										.filter(Boolean)
+										.join("  •  ")}
 								</PoText>
 							</View>
 						</Pressable>
@@ -204,7 +256,7 @@ export function RecipesScreen() {
 }
 
 const styles = StyleSheet.create({
-	flex: { flex: 1 },
+	flex: { flex: 1, minWidth: 0 },
 	search: {
 		flexDirection: "row",
 		alignItems: "center",
@@ -232,4 +284,21 @@ const styles = StyleSheet.create({
 	grid: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
 	tile: { width: "48.5%", padding: 8, borderRadius: 20 },
 	tileText: { gap: 2, padding: 8 },
+	tileHeart: { position: "absolute", top: 6, right: 6 },
+	badge: {
+		position: "absolute",
+		left: 8,
+		top: 8,
+		paddingHorizontal: 8,
+		paddingVertical: 2,
+		borderRadius: 8,
+	},
+	write: { flexDirection: "row", alignItems: "center", gap: 12, padding: 12, borderRadius: 20 },
+	writeIcon: {
+		width: 36,
+		height: 36,
+		borderRadius: 18,
+		alignItems: "center",
+		justifyContent: "center",
+	},
 });

@@ -163,61 +163,6 @@ export function WeightCard({
 	);
 }
 
-/** "1.5 / 3 L water" with ten dashes and a + for one glass. */
-export function WaterCard({
-	ml,
-	targetMl,
-	onAdd,
-	onLongAdd,
-}: {
-	ml: number;
-	targetMl: number;
-	onAdd: () => void;
-	onLongAdd: () => void;
-}) {
-	const { colors } = usePoTheme();
-	const filled = Math.round(Math.min(1, targetMl > 0 ? ml / targetMl : 0) * 10);
-	return (
-		<View style={[styles.water, { backgroundColor: colors.bgSurface }]}>
-			<View style={[styles.drop, { backgroundColor: colors.accentSubtle }]}>
-				<Icon name="Drop" size={20} color={colors.accentDefault} />
-			</View>
-			<View style={styles.flex}>
-				<PoText variant="row15">
-					{(ml / 1000).toFixed(1).replace(/\.0$/, "")}
-					<PoText variant="text14" tone="textSecondary">
-						{` / ${(targetMl / 1000).toFixed(1).replace(/\.0$/, "")} L water`}
-					</PoText>
-				</PoText>
-				<View style={styles.dashes}>
-					{Array.from({ length: 10 }, (_, step) => step).map((step) => (
-						<View
-							key={step}
-							style={[
-								styles.dash,
-								{ backgroundColor: step < filled ? colors.accentDefault : colors.borderDefault },
-							]}
-						/>
-					))}
-				</View>
-			</View>
-			<Pressable
-				accessibilityRole="button"
-				accessibilityLabel="Add a glass of water"
-				accessibilityHint="Long press for other amounts"
-				onPress={() => {
-					haptics.tap();
-					onAdd();
-				}}
-				onLongPress={onLongAdd}
-				style={[styles.plus, { backgroundColor: colors.bgSubtle }]}
-			>
-				<Icon name="Line/Plus" size={18} color={colors.textPrimary} />
-			</Pressable>
-		</View>
-	);
-}
-
 /** Today's five slots with photos; planned ones have Log. */
 export function MealsCard({
 	rows,
@@ -447,19 +392,6 @@ const styles = StyleSheet.create({
 	macro: { flex: 1, gap: 8 },
 	weightRow: { flexDirection: "row", alignItems: "baseline", gap: 12, flexWrap: "wrap" },
 	weightFoot: { flexDirection: "row", justifyContent: "space-between" },
-	water: {
-		flexDirection: "row",
-		alignItems: "center",
-		gap: 12,
-		paddingVertical: 12,
-		paddingLeft: 12,
-		paddingRight: 12,
-		borderRadius: 20,
-	},
-	drop: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
-	dashes: { flexDirection: "row", gap: 4, paddingTop: 8, maxWidth: 180 },
-	dash: { flex: 1, height: 4, borderRadius: 2 },
-	plus: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
 	section: { gap: 8 },
 	sectionHead: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 8 },
 	mealRow: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 12 },

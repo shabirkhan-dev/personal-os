@@ -7,6 +7,11 @@ export const foodRoutes = {
 	grocery: () => router.push("/food/grocery"),
 	recipes: () => router.push("/food/recipes"),
 	recipe: (id: string) => router.push({ pathname: "/food/recipe/[id]", params: { id } }),
+	/** After saving a recipe: its page in place of the editor. */
+	recipeReplace: (id: string) => router.replace({ pathname: "/food/recipe/[id]", params: { id } }),
+	/** Write a recipe; `id` edits one of the person's, `copy` starts from a bundled one. */
+	recipeEdit: (options: { id?: string; copy?: string } = {}) =>
+		router.push({ pathname: "/food/recipe-edit", params: options }),
 	insights: () => router.push("/food/insights"),
 	scan: () => router.push("/food/scan"),
 	goal: () => router.push("/food/goal"),

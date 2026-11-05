@@ -1,8 +1,8 @@
 import { useKeepAwake } from "expo-keep-awake";
 import { useEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
-import Svg, { Circle } from "react-native-svg";
 import { EmptyCard, Footer, ScreenTitle } from "@/components/module-ui";
+import { DotTimer } from "@/components/ui/dot-timer";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
 import { haptics } from "@/lib/haptics";
@@ -12,14 +12,14 @@ import { usePoTheme } from "@/theme";
 import { startSession } from "../hooks/live-actions";
 import { useLiveSession } from "../hooks/live-store";
 import { COMBO_WORDS, COMBOS, ROUND_FOCUS, templateById } from "../lib/library";
-import { clockTime, roundAt } from "../lib/training-math";
+import { roundAt } from "../lib/training-math";
 import { Card } from "./home-cards";
 import { FinishSheet } from "./finish-sheet";
 import { TrainingScreen } from "./training-screen";
 
 const CALL_EVERY_S = 20;
 
-/** Boxing rounds: a work/rest ring, round segments, call-outs read aloud and a focus per round. */
+/** Boxing rounds: the Dot timer for work and rest, round segments, call-outs read aloud and a focus per round. */
 export function BoxingScreen() {
 	useKeepAwake();
 	const { colors } = usePoTheme();
@@ -87,13 +87,31 @@ export function BoxingScreen() {
 		);
 	}
 
-	const size = 240;
-	const width = 10;
-	const radius = (size - width) / 2;
-	const length = 2 * Math.PI * radius;
-	const share = state.work ? state.left / workS : state.left / restS;
-	const tone = state.work ? colors.statusDanger : colors.statusSuccess;
 	const paused = live.pausedAtMs !== null;
+	const togglePause = () =>
+		update((current) =>
+			current
+				? current.pausedAtMs
+					? {
+							...current,
+							pausedMs: current.pausedMs + (Date.now() - current.pausedAtMs),
+							pausedAtMs: null,
+						}
+					: { ...current, pausedAtMs: Date.now() }
+				: current,
+		);
+	// Back to round 1, keeping it paused or running as it was.
+	const restart = () =>
+		update((current) =>
+			current
+				? {
+						...current,
+						startedAtMs: Date.now(),
+						pausedMs: 0,
+						pausedAtMs: current.pausedAtMs ? Date.now() : null,
+					}
+				: current,
+		);
 
 	return (
 		<TrainingScreen
@@ -105,43 +123,31 @@ export function BoxingScreen() {
 				title={state.done ? "Done" : `Round ${state.round}`}
 			/>
 			<Card>
-				<View style={styles.ringBox}>
-					<View
-						style={{ width: size, height: size, alignItems: "center", justifyContent: "center" }}
-					>
-						<Svg width={size} height={size} style={StyleSheet.absoluteFill}>
-							<Circle
-								cx={size / 2}
-								cy={size / 2}
-								r={radius}
-								stroke={colors.bgSubtle}
-								strokeWidth={width}
-								fill="none"
-							/>
-							<Circle
-								cx={size / 2}
-								cy={size / 2}
-								r={radius}
-								stroke={tone}
-								strokeWidth={width}
-								strokeLinecap="round"
-								fill="none"
-								strokeDasharray={`${length * share} ${length}`}
-								transform={`rotate(-90 ${size / 2} ${size / 2})`}
-							/>
-						</Svg>
-						<PoText variant="eyebrow11" tone={state.work ? "textDanger" : "textSuccess"}>
-							{state.done
-								? "All rounds done"
-								: `${state.work ? "Work" : "Rest"} · round ${state.round} of ${rounds}`}
-						</PoText>
-						<PoText variant="hero40" style={styles.time}>
-							{clockTime(state.left)}
-						</PoText>
-						<PoText variant="meta13" tone="textSecondary">
-							{state.work ? `${restS / 60}:00 rest next` : "Hands up, breathe"}
-						</PoText>
-					</View>
+				<View style={styles.timerBox}>
+					<PoText variant="eyebrow11" tone={state.work ? "textDanger" : "textSuccess"}>
+						{state.done
+							? "All rounds done"
+							: `${state.work ? "Work" : "Rest"} · round ${state.round} of ${rounds}`}
+					</PoText>
+					<DotTimer
+						ms={state.left * 1000}
+						running={!paused && !state.done}
+						color={state.work ? "red" : "green"}
+						size="lg"
+						label={state.work ? `Round ${state.round}, time left` : "Rest, time left"}
+						disabled={state.done}
+						onToggle={togglePause}
+						onReset={restart}
+					/>
+					<PoText variant="meta13" tone="textSecondary">
+						{state.done
+							? "Hold the timer to go again"
+							: paused
+								? "Paused. Tap the timer to carry on, hold it to start over."
+								: state.work
+									? `${restS / 60}:00 rest next`
+									: "Hands up, breathe"}
+					</PoText>
 				</View>
 				<View style={styles.segments}>
 					{Array.from({ length: rounds }, (_, index) => index).map((index) => (
@@ -198,17 +204,7 @@ export function BoxingScreen() {
 					style={styles.flex}
 					onPress={() => {
 						haptics.tap();
-						update((current) =>
-							current
-								? current.pausedAtMs
-									? {
-											...current,
-											pausedMs: current.pausedMs + (Date.now() - current.pausedAtMs),
-											pausedAtMs: null,
-										}
-									: { ...current, pausedAtMs: Date.now() }
-								: current,
-						);
+						togglePause();
 					}}
 				/>
 				<PillButton label="End session" style={styles.flex} onPress={() => setFinishing(true)} />
@@ -226,8 +222,7 @@ export function BoxingScreen() {
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
-	ringBox: { alignItems: "center", paddingVertical: 8 },
-	time: { fontSize: 64, lineHeight: 72 },
+	timerBox: { alignItems: "center", gap: 16, paddingVertical: 16 },
 	segments: { flexDirection: "row", gap: 8 },
 	segment: { flex: 1, height: 6, borderRadius: 3 },
 	combo: { flexDirection: "row", flexWrap: "wrap", gap: 8 },

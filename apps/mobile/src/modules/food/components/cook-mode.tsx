@@ -3,6 +3,7 @@ import { Modal, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useKeepAwake } from "expo-keep-awake";
 import { Segments } from "@/components/module-ui";
+import { DotTimer } from "@/components/ui/dot-timer";
 import { HeaderButton } from "@/components/ui/header-button";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
@@ -10,8 +11,6 @@ import { haptics } from "@/lib/haptics";
 import { useSpeaker } from "@/lib/voice";
 import { usePoTheme } from "@/theme";
 import type { Recipe } from "../lib/recipes";
-
-const pad = (value: number) => String(value).padStart(2, "0");
 
 function KeepAwake() {
 	useKeepAwake();
@@ -92,23 +91,29 @@ export function CookMode({ recipe, onClose }: { recipe: Recipe | null; onClose: 
 					<PoText variant="display36">{step?.text ?? ""}</PoText>
 					{step?.minutes ? (
 						<View style={styles.timer}>
-							<PoText variant="hero40" tone={left === 0 ? "textSuccess" : "textPrimary"}>
-								{left === null
-									? `${step.minutes}:00`
-									: `${Math.floor(left / 60)}:${pad(left % 60)}`}
-							</PoText>
-							<PillButton
-								label={
-									running ? "Pause" : left === 0 ? "Done" : left === null ? "Start timer" : "Resume"
-								}
-								variant="secondary"
-								onPress={() => {
-									haptics.tap();
+							<DotTimer
+								ms={Math.abs(left ?? step.minutes * 60) * 1000}
+								running={running}
+								color={left === 0 ? "green" : "amber"}
+								size="lg"
+								label={`Step ${index + 1} timer`}
+								onToggle={() => {
 									if (running) setLeft((value) => (value === null ? null : -value));
-									else if (left === null) setLeft(step.minutes ? step.minutes * 60 : null);
+									else if (left === null || left === 0)
+										setLeft(step.minutes ? step.minutes * 60 : null);
 									else if (left < 0) setLeft(-left);
 								}}
+								onReset={() => setLeft(null)}
 							/>
+							<PoText variant="meta13" tone={left === 0 ? "textSuccess" : "textSecondary"}>
+								{left === 0
+									? "Time's up. Tap to run it again."
+									: running
+										? "Tap to pause, hold to start over"
+										: left === null
+											? `Tap the timer to start ${step.minutes} min`
+											: "Paused. Tap to carry on."}
+							</PoText>
 						</View>
 					) : null}
 				</View>
@@ -140,6 +145,6 @@ const styles = StyleSheet.create({
 	head: { flexDirection: "row", alignItems: "center", gap: 12 },
 	flex: { flex: 1 },
 	body: { flex: 1, justifyContent: "center", gap: 32 },
-	timer: { alignItems: "flex-start", gap: 12 },
+	timer: { alignItems: "center", gap: 12 },
 	footer: { flexDirection: "row", gap: 12 },
 });

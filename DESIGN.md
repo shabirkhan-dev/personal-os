@@ -60,11 +60,12 @@ Kit v2 primitives live in `apps/mobile/src/components/ui`:
 | `PoText` | All text, by `textStyles` name and colour token |
 | `PillButton` | Primary / secondary actions, full-width CTAs |
 | `HeaderButton` | Circular back / close in the header |
-| `Checkbox` | Multi-select rows |
+| `Checkbox` | Multi-select rows; unchecked is an empty circle with a visible ring |
 | `SegmentedControl` | Small mutually exclusive choices |
 | `SelectCard` | Selectable cards (surface + 1.5px accent border when selected) |
 | `Toggle` | Binary settings |
 | `Glow` | Blurred colour glow behind heroes and cards |
+| `DotTimer` | Every timer (rounds, rest, cook steps, recitation, focus): a dark pill with a sweeping 21-LED lamp; tap to start or pause, hold to reset. Red work, green rest or done, amber cooking and sets, blue rest and focus. Port of Bruno Delorence's MIT Dot timer |
 
 Feature-specific building blocks stay in their module (e.g. `src/modules/onboarding/components`).
 Promote a component to `components/ui` only when a second feature needs it and it has no route or

@@ -1,9 +1,9 @@
 import { useKeepAwake } from "expo-keep-awake";
 import { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
-import Svg, { Circle } from "react-native-svg";
 import { Icon } from "@/components/icons";
 import { EmptyCard, Footer, ScreenTitle, Segments } from "@/components/module-ui";
+import { DotTimer } from "@/components/ui/dot-timer";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
 import { haptics } from "@/lib/haptics";
@@ -23,41 +23,6 @@ import { Card } from "./home-cards";
 import { FinishSheet } from "./finish-sheet";
 import { HowToSheet, plannedLine } from "./how-to-sheet";
 import { TrainingScreen } from "./training-screen";
-
-function RestRing({ left, total }: { left: number; total: number }) {
-	const { colors } = usePoTheme();
-	const size = 92;
-	const width = 8;
-	const radius = (size - width) / 2;
-	const length = 2 * Math.PI * radius;
-	const share = total > 0 ? Math.max(0, Math.min(1, left / total)) : 0;
-	return (
-		<View style={styles.ring}>
-			<Svg width={size} height={size} style={StyleSheet.absoluteFill}>
-				<Circle
-					cx={size / 2}
-					cy={size / 2}
-					r={radius}
-					stroke={colors.bgSubtle}
-					strokeWidth={width}
-					fill="none"
-				/>
-				<Circle
-					cx={size / 2}
-					cy={size / 2}
-					r={radius}
-					stroke={colors.accentDefault}
-					strokeWidth={width}
-					strokeLinecap="round"
-					fill="none"
-					strokeDasharray={`${length * share} ${length}`}
-					transform={`rotate(-90 ${size / 2} ${size / 2})`}
-				/>
-			</Svg>
-			<PoText variant="title18">{clockTime(left)}</PoText>
-		</View>
-	);
-}
 
 /** A chip laid over the demo: How to, Pause, Resume. */
 function DemoChip({
@@ -295,21 +260,24 @@ export function LiveScreen() {
 					</View>
 				</View>
 				{timedTotal !== null && timerLeft !== null ? (
-					<PillButton
-						variant="secondary"
-						disabled={paused || resting}
-						label={
-							timerRunning
-								? `Stop · ${clockTime(timerLeft)} left`
+					<View style={styles.timed}>
+						<DotTimer
+							ms={(timerStart === null ? timedTotal : timerLeft) * 1000}
+							running={timerRunning}
+							color="amber"
+							label={timerDone ? "Time's up" : "Set timer"}
+							disabled={paused || resting}
+							onToggle={() => setTimerStart(timerStart === null || timerDone ? Date.now() : null)}
+							onReset={() => setTimerStart(null)}
+						/>
+						<PoText variant="meta13" tone={timerDone ? "textSuccess" : "textSecondary"}>
+							{timerRunning
+								? "Tap to stop, hold to start over"
 								: timerDone
-									? "Time's up · tap Done"
-									: `Start ${clockTime(timedTotal)} timer`
-						}
-						onPress={() => {
-							haptics.tap();
-							setTimerStart(timerStart === null ? Date.now() : null);
-						}}
-					/>
+									? "Time's up. Tap Done"
+									: `Tap the timer to start ${clockTime(timedTotal)}`}
+						</PoText>
+					</View>
 				) : null}
 				{exercise.weighted ? (
 					<View style={styles.setRow}>
@@ -355,19 +323,27 @@ export function LiveScreen() {
 			</Card>
 			<Card>
 				<View style={styles.restRow}>
-					<RestRing left={resting ? restLeft : exercise.restS} total={exercise.restS || 1} />
 					<View style={styles.flex}>
 						<PoText variant="row15">
 							{resting ? "Resting" : exercise.restS ? "Rest after this set" : "No rest needed"}
 						</PoText>
 						<PoText variant="meta13" tone="textSecondary">
 							{resting
-								? "Breathe. Next set when the ring empties."
+								? "Breathe. Next set when the timer reaches 0:00."
 								: exercise.restS
 									? `${exercise.restS} s · starts when you tap Done`
 									: "Go straight on"}
 						</PoText>
 					</View>
+					{exercise.restS ? (
+						<DotTimer
+							ms={(resting ? restLeft : exercise.restS) * 1000}
+							running={resting && !paused}
+							color="blue"
+							size="sm"
+							label="Rest timer"
+						/>
+					) : null}
 				</View>
 				{next ? (
 					<View style={styles.next}>
@@ -455,7 +431,7 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "center",
 	},
-	ring: { width: 92, height: 92, alignItems: "center", justifyContent: "center" },
+	timed: { alignItems: "center", gap: 8 },
 	restRow: { flexDirection: "row", alignItems: "center", gap: 16 },
 	next: { flexDirection: "row", alignItems: "center", gap: 12 },
 });

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
+import { DotTimer } from "@/components/ui/dot-timer";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
 import { Sheet } from "@/components/ui/sheet";
@@ -132,7 +133,11 @@ export function SkillTimerSheet({
 
 	const finished = elapsed >= SESSION_SECONDS;
 	const remaining = SESSION_SECONDS - elapsed;
-	const clock = `${String(Math.floor(remaining / 60)).padStart(2, "0")}:${String(remaining % 60).padStart(2, "0")}`;
+	const restart = () => {
+		banked.current = 0;
+		startedAt.current = Date.now();
+		setElapsed(0);
+	};
 
 	const save = async () => {
 		const minutes = Math.max(1, Math.round(elapsed / 60));
@@ -171,13 +176,16 @@ export function SkillTimerSheet({
 				{detail}
 			</PoText>
 			<View style={styles.clock}>
-				<PoText
-					variant="hero40"
-					accessibilityRole="timer"
-					accessibilityLabel={`${Math.ceil(remaining / 60)} minutes left`}
-				>
-					{clock}
-				</PoText>
+				<DotTimer
+					ms={remaining * 1000}
+					running={running && !finished}
+					color="blue"
+					size="lg"
+					label="Skill block, time left"
+					disabled={finished}
+					onToggle={() => setRunning((value) => !value)}
+					onReset={restart}
+				/>
 				<PoText variant="meta13" tone="textTertiary">
 					{finished
 						? "Thirty minutes done."

@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { FilterChip, ScreenTitle } from "@/components/module-ui";
+import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
 import { Sheet } from "@/components/ui/sheet";
 import { TextField } from "@/components/ui/text-field";
 import { haptics } from "@/lib/haptics";
 import { parseAmount } from "@/lib/money";
-import { saveSettings, updateNumbers } from "../data/finance-actions";
+import { applySuggestedMinimum, saveSettings, updateNumbers } from "../data/finance-actions";
 import { useFinanceToday } from "../hooks/use-finance";
 import {
 	balanceTone,
@@ -120,7 +121,30 @@ export function RunwayScreen() {
 				onPress={() => setMinimum(true)}
 			>
 				<Card>
-					<CardHead title="The minimum, always paid" right={`Rs ${shortK(essentials)} / mo`} mono />
+					<CardHead
+						title="The minimum, always paid"
+						right={settings.minimum.length ? `Rs ${shortK(essentials)} / mo` : undefined}
+						mono
+					/>
+					{settings.minimum.length === 0 ? (
+						<View style={styles.emptyMinimum}>
+							<PoText variant="meta13" tone="textSecondary">
+								What must be paid whatever happens: rent, food, bills. Tap here to add your own, or
+								take the suggested list.
+							</PoText>
+							<PillButton
+								label="Use the suggested list"
+								variant="secondary"
+								onPress={() =>
+									void applySuggestedMinimum(settings)
+										.then(() => haptics.success())
+										.catch((error: unknown) =>
+											console.error("[finance] could not save the minimum", error),
+										)
+								}
+							/>
+						</View>
+					) : null}
 					{settings.minimum.map((item) => (
 						<View key={item.label} style={styles.minRow}>
 							<PoText variant="meta13" tone="textSecondary" style={styles.flex}>
@@ -261,6 +285,7 @@ function MinimumSheet({
 }
 
 const styles = StyleSheet.create({
+	emptyMinimum: { gap: 12 },
 	flex: { flex: 1 },
 	chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 	rows: { gap: 16, paddingVertical: 4 },

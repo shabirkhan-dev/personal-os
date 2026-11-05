@@ -101,7 +101,8 @@ export function defaultSettings(): DailySettings {
 	return {
 		id: "settings",
 		setUp: false,
-		minimum: ["pray", "train", "protein", "apply", "routines"],
+		/** Empty until the person picks their own. */
+		minimum: [],
 		bedAt: 23 * 60,
 		wakeAt: 5 * 60 + 30,
 		weekendWakeAt: 6 * 60 + 30,

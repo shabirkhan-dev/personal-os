@@ -194,9 +194,8 @@ const lengthLabel = (minutes: number) =>
 		: `${minutes} min`;
 
 /** A day drafted from the modules: prayers, meals, routines, training, work blocks and sleep. */
-export function draftPlan(sources: Sources, settings: DailySettings, date: Date): Block[] {
+export function draftPlan(sources: Sources, settings: DailySettings): Block[] {
 	const blocks: Block[] = [];
-	const weekend = date.getDay() === 0 || date.getDay() === 6;
 	for (const entry of sources.faith?.entries ?? []) {
 		const fajr = /fajr/i.test(entry.title);
 		blocks.push(
@@ -248,14 +247,6 @@ export function draftPlan(sources: Sources, settings: DailySettings, date: Date)
 					`Career · ${entry.length} min`,
 					entry.id,
 				),
-			);
-		}
-		if (!weekend) {
-			blocks.push(
-				block("career", 9 * 60, 120, "Deep work · applications", "Career · 2 h", "career-deep-1"),
-			);
-			blocks.push(
-				block("career", 15 * 60, 120, "Applications · 2nd block", "Career · 2 h", "career-deep-2"),
 			);
 		}
 		if (sources.career.interviewSoon) {

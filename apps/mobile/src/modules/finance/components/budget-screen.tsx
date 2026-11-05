@@ -8,7 +8,7 @@ import { haptics } from "@/lib/haptics";
 import { useZakatLine } from "@/modules/faith";
 import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
 import { usePoTheme } from "@/theme";
-import { moveMoney, saveLimits } from "../data/finance-actions";
+import { applySuggestedBudget, moveMoney, saveLimits } from "../data/finance-actions";
 import { useFinanceToday } from "../hooks/use-finance";
 import { MONTHS, rupees, spends } from "../lib/finance-math";
 import {
@@ -87,6 +87,24 @@ export function BudgetScreen() {
 					{status.text}
 				</PoText>
 			</Card>
+			{budget === 0 ? (
+				<Card>
+					<CardHead title="No budget yet" />
+					<PoText variant="meta13" tone="textSecondary">
+						{`Set a limit for each line yourself, or take a suggested split of your ${rupees(settings.monthlyCost)} month: food, bills, transport, care, giving and a buffer. You can change any of it after.`}
+					</PoText>
+					<ButtonPair
+						secondary={{ label: "Set my own", onPress: () => setLimits(true) }}
+						primary={{
+							label: "Use the suggested split",
+							onPress: () =>
+								void applySuggestedBudget(settings)
+									.then(() => haptics.success())
+									.catch(failed),
+						}}
+					/>
+				</Card>
+			) : null}
 			<Card>
 				<CardHead title="Where it goes" />
 				{lines.map((category) => {

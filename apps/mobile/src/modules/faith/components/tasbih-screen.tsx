@@ -13,7 +13,12 @@ import { usePoTheme } from "@/theme";
 import { saveSettings, saveTasbih } from "../data/faith-actions";
 import { useFaith } from "../hooks/use-faith";
 import { tasbihProgress } from "../lib/faith-math";
-import { TASBIH_PHRASES, TASBIH_TARGETS, type TasbihPhrase } from "../lib/faith-model";
+import {
+	DEFAULT_TASBIH,
+	TASBIH_PHRASES,
+	TASBIH_TARGETS,
+	type TasbihPhrase,
+} from "../lib/faith-model";
 import { FaithScreen } from "./faith-screen";
 
 const RING = 260;
@@ -136,11 +141,13 @@ export function TasbihScreen() {
 			action={{ icon: "Filled/Edit", label: "Edit sequence", onPress: () => setEditing(true) }}
 		>
 			<ScreenTitle eyebrow="Tasbih · tap anywhere to count" title={phrase?.label ?? "Tasbih"}>
-				<MetaChip
-					icon="Layers"
-					iconTone="statusCaution"
-					label={`Set ${setNumber} of ${sequence.length}`}
-				/>
+				{sequence.length > 0 ? (
+					<MetaChip
+						icon="Layers"
+						iconTone="statusCaution"
+						label={`Set ${setNumber} of ${sequence.length}`}
+					/>
+				) : null}
 				<MetaChip icon="Filled/Check all" label={`${progress.total} today`} />
 			</ScreenTitle>
 
@@ -233,8 +240,44 @@ export function TasbihScreen() {
 				</View>
 			</Pressable>
 
-			<SectionLabel>{`Your sequence · ${sequence.length} sets`}</SectionLabel>
-			<View style={[styles.sequence, { backgroundColor: colors.bgSurface }]}>
+			<SectionLabel>
+				{sequence.length ? `Your sequence · ${sequence.length} sets` : "Your sequence"}
+			</SectionLabel>
+			{sequence.length === 0 ? (
+				<View
+					style={[styles.sequence, styles.emptySequence, { backgroundColor: colors.bgSurface }]}
+				>
+					<PoText variant="body15" tone="textSecondary">
+						No sequence yet: count any phrase above as you like. Build your own sets in order, or
+						use the classic one.
+					</PoText>
+					<View style={styles.emptyButtons}>
+						<PillButton
+							label="Build my own"
+							variant="secondary"
+							onPress={() => setEditing(true)}
+							style={styles.flex}
+						/>
+						<PillButton
+							label="Use the classic"
+							variant="secondary"
+							style={styles.flex}
+							onPress={() =>
+								void saveSettings({ ...data.settings, tasbih: [...DEFAULT_TASBIH] }).catch(
+									(error: unknown) => console.error("[faith] could not save the sequence", error),
+								)
+							}
+						/>
+					</View>
+				</View>
+			) : null}
+			<View
+				style={[
+					styles.sequence,
+					sequence.length === 0 ? styles.hidden : null,
+					{ backgroundColor: colors.bgSurface },
+				]}
+			>
 				{sequence.map((item, index) => {
 					const done = (live[item.id] ?? 0) >= item.target;
 					const current = item.id === phrase?.id;
@@ -344,6 +387,9 @@ function SequenceSheet({
 
 const styles = StyleSheet.create({
 	flex: { flex: 1 },
+	hidden: { display: "none" },
+	emptySequence: { gap: 12, padding: 16 },
+	emptyButtons: { flexDirection: "row", gap: 8 },
 	tabs: { gap: 8 },
 	targets: { flexDirection: "row", padding: 4, borderRadius: 20 },
 	target: { flex: 1, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },

@@ -81,7 +81,7 @@ export function useDailyToday() {
 	const view = useMemo(() => {
 		const log = data.logs.find((item) => item.id === today) ?? null;
 		const saved = data.plans.find((plan) => plan.id === today) ?? null;
-		const blocks = saved?.blocks ?? draftPlan(sources, data.settings, now);
+		const blocks = saved?.blocks ?? draftPlan(sources, data.settings);
 		const agenda = withDone(blocks, sources);
 		const minimum = data.settings.minimum;
 		const kept = keptToday(minimum, sources, log);

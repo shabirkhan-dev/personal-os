@@ -172,8 +172,15 @@ export function defaultMinimum(limits: Record<Category, number>): MinimumItem[] 
 	].filter((item) => item.amount > 0);
 }
 
+/** No limits: the budget is empty until the person sets it, or takes the suggested split. */
+export function noLimits(): Record<Category, number> {
+	const limits = {} as Record<Category, number>;
+	for (const category of CATEGORIES) limits[category] = 0;
+	return limits;
+}
+
 export function defaultSettings(now = new Date()): FinanceSettings {
-	const limits = defaultLimits(55_000);
+	const limits = noLimits();
 	return {
 		id: "settings",
 		setUp: false,
@@ -183,7 +190,7 @@ export function defaultSettings(now = new Date()): FinanceSettings {
 		monthlyIncome: 0,
 		salary: 0,
 		limits,
-		minimum: defaultMinimum(limits),
+		minimum: [],
 		protect: false,
 		savingsTarget: 6 * 55_000,
 		saved: 0,
@@ -210,7 +217,7 @@ export function parseSettings(raw: unknown): FinanceSettings | null {
 	if (!isRecord(raw)) return null;
 	const base = defaultSettings();
 	const monthlyCost = money(raw.monthlyCost, base.monthlyCost);
-	const fallback = defaultLimits(monthlyCost);
+	const fallback = noLimits();
 	const limitsRaw = isRecord(raw.limits) ? raw.limits : {};
 	const limits = {} as Record<Category, number>;
 	for (const category of CATEGORIES) {
@@ -231,7 +238,7 @@ export function parseSettings(raw: unknown): FinanceSettings | null {
 		monthlyIncome: money(raw.monthlyIncome, 0),
 		salary: money(raw.salary, 0),
 		limits,
-		minimum: Array.isArray(raw.minimum) ? minimum.slice(0, 12) : defaultMinimum(limits),
+		minimum: minimum.slice(0, 12),
 		protect: asBoolean(raw.protect, false),
 		savingsTarget: money(raw.savingsTarget, monthlyCost * 6),
 		saved: money(raw.saved, 0),

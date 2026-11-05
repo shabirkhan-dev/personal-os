@@ -1,44 +1,22 @@
 import { router } from "expo-router";
 import { useState } from "react";
-import { StyleSheet, View } from "react-native";
-import { FilterChip, Footer, ScreenTitle } from "@/components/module-ui";
+import { ScrollView, StyleSheet, View } from "react-native";
+import { Footer, ScreenTitle } from "@/components/module-ui";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
 import { Sheet } from "@/components/ui/sheet";
-import { TextField } from "@/components/ui/text-field";
 import { haptics } from "@/lib/haptics";
 import { useSpeaker } from "@/lib/voice";
-import { deleteStep, saveStep, skip, tick } from "../data/care-actions";
+import { skip, tick } from "../data/care-actions";
 import { useCareToday } from "../hooks/use-care";
 import { stepsOn } from "../lib/care-math";
-import { type Area, AREAS, AREA_LABELS, type Routine, type Step } from "../lib/care-model";
+import type { Routine, Step } from "../lib/care-model";
+import { careRoutes } from "../navigation";
 import { CareScreen } from "./care-screen";
 import { Banner, Card, CardHead, StepRow } from "./home-cards";
+import { ProductImage } from "./product-image";
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-type Draft = {
-	id?: string;
-	name: string;
-	detail: string;
-	minutes: string;
-	area: Area;
-	days: number[];
-	short: string;
-	order: number;
-	productId: string | null;
-};
-
-const blank = (order: number): Draft => ({
-	name: "",
-	detail: "",
-	minutes: "1",
-	area: "face",
-	days: [],
-	short: "",
-	order,
-	productId: null,
-});
 
 /** Morning or night routine: the steps by area with their products, Start to go one by one. */
 export function RoutineScreen({ routine }: { routine: Routine }) {
@@ -48,7 +26,7 @@ export function RoutineScreen({ routine }: { routine: Routine }) {
 	const list = stepsOn(steps, routine, today);
 	const all = steps.filter((step) => step.routine === routine);
 	const [guided, setGuided] = useState(false);
-	const [draft, setDraft] = useState<Draft | null>(null);
+	const [open, setOpen] = useState<Step | null>(null);
 	const [notice, setNotice] = useState<string | null>(null);
 	const done = record?.steps ?? {};
 	const minutes = list.reduce((sum, step) => sum + step.minutes, 0);
@@ -78,42 +56,7 @@ export function RoutineScreen({ routine }: { routine: Routine }) {
 		if (!after) setGuided(false);
 	};
 
-	const save = () => {
-		if (!draft) return;
-		const name = draft.name.trim();
-		if (!name) {
-			setNotice("Give the step a name.");
-			return;
-		}
-		saveStep({
-			...(draft.id ? { id: draft.id } : {}),
-			routine,
-			area: draft.area,
-			name,
-			detail: draft.detail.trim(),
-			productId: draft.productId,
-			minutes: Math.min(60, Math.max(0, Math.round(Number(draft.minutes) || 0))),
-			days: draft.days,
-			short:
-				draft.short || (draft.days.length > 0 ? (name.split(/\s+/)[0]?.slice(0, 8) ?? "") : ""),
-			order: draft.order,
-		})
-			.then(() => setDraft(null))
-			.catch(failed("save the step"));
-	};
-
-	const edit = (step: Step) =>
-		setDraft({
-			id: step.id,
-			name: step.name,
-			detail: step.detail,
-			minutes: String(step.minutes),
-			area: step.area,
-			days: step.days,
-			short: step.short,
-			order: step.order,
-			productId: step.productId,
-		});
+	const edit = (step: Step) => careRoutes.step(routine, step.id);
 
 	const groups: { title: string; steps: Step[] }[] = [
 		{ title: "Face", steps: list.filter((step) => step.area === "face") },
@@ -129,7 +72,7 @@ export function RoutineScreen({ routine }: { routine: Routine }) {
 			action={{
 				icon: "Filled/Edit",
 				label: "Add a step",
-				onPress: () => setDraft(blank(all.length)),
+				onPress: () => careRoutes.step(routine),
 			}}
 		>
 			<ScreenTitle
@@ -144,7 +87,9 @@ export function RoutineScreen({ routine }: { routine: Routine }) {
 			{groups.length === 0 ? (
 				<Card>
 					<PoText variant="body15" tone="textSecondary">
-						{`Nothing in the ${routine} routine today. Add a step with the pencil.`}
+						{all.length === 0
+							? `Your ${routine} routine is empty. Add your own steps with the pencil, or start from a template.`
+							: `Nothing in the ${routine} routine today.`}
 					</PoText>
 				</Card>
 			) : null}
@@ -170,6 +115,7 @@ export function RoutineScreen({ routine }: { routine: Routine }) {
 									next={guided && step.id === next?.id}
 									onPress={() => void onTick(step)}
 									onLongPress={() => edit(step)}
+									onInfo={() => setOpen(step)}
 									last={index === group.steps.length - 1}
 								/>
 							))}
@@ -184,7 +130,7 @@ export function RoutineScreen({ routine }: { routine: Routine }) {
 				</Banner>
 			) : null}
 			<PoText variant="meta13" tone="textTertiary" style={styles.hint}>
-				Tap to tick. Long press a step to change it or move it to other days.
+				Tap to tick. The i shows how to apply it; long press to change it.
 			</PoText>
 			<Footer>
 				<PillButton
@@ -212,74 +158,46 @@ export function RoutineScreen({ routine }: { routine: Routine }) {
 				/>
 			</Footer>
 
-			<Sheet
-				visible={draft !== null}
-				title={draft?.id ? "Edit step" : "Add a step"}
-				onClose={() => setDraft(null)}
-				action={{ label: "Save", onPress: save }}
-			>
-				{draft ? (
+			<Sheet visible={open !== null} title={open?.name ?? ""} onClose={() => setOpen(null)}>
+				{open ? (
 					<View style={styles.sheet}>
-						<TextField
-							label="Name"
-							value={draft.name}
-							onChangeText={(name) => setDraft({ ...draft, name })}
-							placeholder="Vitamin C serum"
-						/>
-						<TextField
-							label="How"
-							value={draft.detail}
-							onChangeText={(detail) => setDraft({ ...draft, detail })}
-							placeholder="3 drops · let it dry"
-						/>
-						<TextField
-							label="Minutes"
-							value={draft.minutes}
-							onChangeText={(value) => setDraft({ ...draft, minutes: value })}
-							keyboardType="number-pad"
-							suffix="min"
-						/>
-						<View style={styles.chips}>
-							{AREAS.map((area) => (
-								<FilterChip
-									key={area}
-									label={AREA_LABELS[area]}
-									selected={draft.area === area}
-									onPress={() => setDraft({ ...draft, area })}
-								/>
-							))}
-						</View>
-						<PoText variant="meta13" tone="textSecondary">
-							Days (none picked = every day)
-						</PoText>
-						<View style={styles.chips}>
-							{WEEKDAYS.map((label, day) => (
-								<FilterChip
-									key={label}
-									label={label}
-									selected={draft.days.includes(day)}
-									onPress={() =>
-										setDraft({
-											...draft,
-											days: draft.days.includes(day)
-												? draft.days.filter((item) => item !== day)
-												: [...draft.days, day].sort((a, b) => a - b),
-										})
-									}
-								/>
-							))}
-						</View>
-						{draft.id ? (
-							<PillButton
-								label="Delete step"
-								variant="secondary"
-								onPress={() => {
-									const step = steps.find((item) => item.id === draft.id);
-									if (step) void deleteStep(step).catch(failed("delete the step"));
-									setDraft(null);
-								}}
-							/>
+						{open.photos.length > 0 ? (
+							<ScrollView
+								horizontal
+								showsHorizontalScrollIndicator={false}
+								contentContainerStyle={styles.photos}
+							>
+								{open.photos.map((photo) => (
+									<ProductImage key={photo} photo={photo} size={200} radius={20} />
+								))}
+							</ScrollView>
 						) : null}
+						{open.detail ? (
+							<PoText variant="row15" tone="textSecondary">
+								{open.detail}
+							</PoText>
+						) : null}
+						<PoText variant="body15">
+							{open.howTo ||
+								"No instructions yet. Edit the step to add how you apply it, or a photo."}
+						</PoText>
+						{productOf(open) ? (
+							<View style={styles.product}>
+								<ProductImage photo={productOf(open)?.photo ?? null} size={40} radius={12} />
+								<PoText variant="meta13" tone="textSecondary">
+									{`Uses ${productOf(open)?.name ?? ""}`}
+								</PoText>
+							</View>
+						) : null}
+						<PillButton
+							label="Edit step"
+							variant="secondary"
+							onPress={() => {
+								const step = open;
+								setOpen(null);
+								edit(step);
+							}}
+						/>
 					</View>
 				) : null}
 			</Sheet>
@@ -291,5 +209,6 @@ const styles = StyleSheet.create({
 	flex: { flex: 1 },
 	hint: { paddingHorizontal: 8 },
 	sheet: { gap: 12 },
-	chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+	photos: { gap: 8 },
+	product: { flexDirection: "row", alignItems: "center", gap: 12 },
 });

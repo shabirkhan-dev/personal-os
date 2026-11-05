@@ -3,6 +3,7 @@ import { useCollection } from "@/lib/db/collection";
 import { dayKey } from "@/lib/day";
 import { useNow } from "@/lib/use-now";
 import {
+	careAreas,
 	careCheckIns,
 	careDays,
 	careHabits,
@@ -24,6 +25,7 @@ export function useCare() {
 	const habitList = useCollection(careHabits);
 	const dayList = useCollection(careDays);
 	const checkInList = useCollection(careCheckIns);
+	const areaList = useCollection(careAreas);
 
 	useEffect(() => {
 		migration ??= migrateOldSkincare().catch((error: unknown) =>
@@ -32,7 +34,15 @@ export function useCare() {
 	}, []);
 
 	return useMemo(() => {
-		const queries = [settingsList, stepList, productList, habitList, dayList, checkInList];
+		const queries = [
+			settingsList,
+			stepList,
+			productList,
+			habitList,
+			dayList,
+			checkInList,
+			areaList,
+		];
 		return {
 			loading: queries.some((query) => query.isPending),
 			error: queries.find((query) => query.error)?.error ?? null,
@@ -42,8 +52,14 @@ export function useCare() {
 			habits: [...(habitList.data ?? [])].sort((a, b) => a.order - b.order),
 			days: [...(dayList.data ?? [])].sort((a, b) => a.id.localeCompare(b.id)),
 			checkIns: [...(checkInList.data ?? [])].sort((a, b) => a.id.localeCompare(b.id)),
+			areas: [...(areaList.data ?? [])].sort((a, b) => a.order - b.order),
+			/** Nothing added yet: Care starts empty. */
+			empty:
+				(stepList.data ?? []).length === 0 &&
+				(productList.data ?? []).length === 0 &&
+				(habitList.data ?? []).length === 0,
 		};
-	}, [settingsList, stepList, productList, habitList, dayList, checkInList]);
+	}, [settingsList, stepList, productList, habitList, dayList, checkInList, areaList]);
 }
 
 export type CareData = ReturnType<typeof useCare>;

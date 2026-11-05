@@ -3,6 +3,7 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { dayKey } from "@/lib/day";
 import { buildRoutine, CATALOG, photoFor } from "./catalog";
+import { CARE_TEMPLATES, templateById } from "./care-templates";
 import {
 	bodyTiles,
 	careDate,
@@ -31,6 +32,7 @@ import {
 	type CareSettings,
 	type CheckIn,
 	defaultSettings,
+	parseBodyArea,
 	parseCheckIn,
 	parseDay,
 	parseProduct,
@@ -135,6 +137,8 @@ describe("shelf", () => {
 		openedOn: "2026-09-26",
 		lastsDays: 30,
 		price: 1600,
+		howTo: "",
+		note: "",
 	};
 	const comb = { ...sunscreen, id: "c", name: "Comb", lastsDays: 0, price: 800 };
 
@@ -273,5 +277,51 @@ describe("parsing and UV", () => {
 			"UV 8 at Gilgit's altitude. Reapply sunscreen at 13:00 if you're out.",
 		);
 		expect(uvLine(uv && { ...uv, max: 2 }, "13:00")).toBeNull();
+	});
+});
+
+describe("starting empty", () => {
+	it("keeps photos and how-to on a step, and reads body areas defensively", () => {
+		const step = parseStep({
+			id: "s",
+			name: "Serum",
+			photos: [
+				"file:///a.jpg",
+				"javascript:x",
+				"https://cdn/b.webp",
+				"file:///c",
+				"file:///d",
+				"file:///e",
+			],
+			howTo: "  Three drops.  ",
+		});
+		expect(step?.photos).toEqual(["file:///a.jpg", "https://cdn/b.webp", "file:///c", "file:///d"]);
+		expect(step?.howTo).toBe("Three drops.");
+		expect(parseStep({ id: "t", name: "Old step" })).toMatchObject({ photos: [], howTo: "" });
+		expect(
+			parseBodyArea({ id: "a", name: "Back", metrics: ["dark-spots", "made-up"] }),
+		).toMatchObject({
+			name: "Back",
+			metrics: ["dark-spots"],
+		});
+		expect(parseBodyArea({ id: "a", name: " " })).toBeNull();
+	});
+
+	it("offers templates whose steps point at their own products, with how-to filled in", () => {
+		expect(CARE_TEMPLATES.length).toBeGreaterThan(4);
+		for (const template of CARE_TEMPLATES) {
+			const plan = template.plan();
+			expect(plan.steps.length + plan.habits.length + plan.areas.length).toBeGreaterThan(0);
+			const names = new Set(plan.products.map((product) => product.name));
+			for (const step of plan.steps) {
+				if (step.productId) expect(names.has(step.productId)).toBe(true);
+				expect(step.howTo.length).toBeGreaterThan(0);
+			}
+		}
+		expect(
+			templateById("dandruff")
+				?.plan()
+				.steps.every((step) => step.area === "hair"),
+		).toBe(true);
 	});
 });

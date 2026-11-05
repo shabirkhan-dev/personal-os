@@ -15,6 +15,7 @@ import { monthlyCost, reorderSoon, supply } from "../lib/care-math";
 import { type Area, AREAS, AREA_LABELS, type Product } from "../lib/care-model";
 import { Banner, Card, CardHead } from "./home-cards";
 import { CareScreen } from "./care-screen";
+import { PhotoStrip } from "./photo-strip";
 import { ProductImage } from "./product-image";
 
 const money = (amount: number) => formatMoney(Math.round(amount)).replace(/\.00$/, "");
@@ -28,6 +29,8 @@ type Draft = {
 	tool: boolean;
 	openedOn?: string;
 	photo?: string | null;
+	howTo: string;
+	note: string;
 };
 
 /** Shelf: every product by area with how long it lasts, and what to reorder this week. */
@@ -63,6 +66,8 @@ export function ShelfScreen() {
 				? 0
 				: Math.max(1, Math.round((Number.isFinite(weeks) && weeks > 0 ? weeks : 6) * 7)),
 			price: Math.max(0, Math.round(Number(draft.price) || 0)),
+			howTo: draft.howTo.trim(),
+			note: draft.note.trim(),
 		})
 			.then(() => {
 				haptics.success();
@@ -76,7 +81,16 @@ export function ShelfScreen() {
 			action={{
 				icon: "Filled/Edit",
 				label: "Add a product",
-				onPress: () => setDraft({ name: "", area: "face", weeks: "6", price: "", tool: false }),
+				onPress: () =>
+					setDraft({
+						name: "",
+						area: "face",
+						weeks: "6",
+						price: "",
+						tool: false,
+						howTo: "",
+						note: "",
+					}),
 			}}
 		>
 			<ScreenTitle
@@ -153,6 +167,22 @@ export function ShelfScreen() {
 								? `Opened ${open.openedOn} · lasts about ${Math.round(open.lastsDays / 7)} weeks${open.price ? ` · ${money(open.price)}` : ""}`
 								: `A tool you keep${open.price ? ` · ${money(open.price)}` : ""}`}
 						</PoText>
+						{open.howTo ? (
+							<View style={styles.block}>
+								<PoText variant="eyebrow11" tone="textTertiary">
+									How to use
+								</PoText>
+								<PoText variant="body15">{open.howTo}</PoText>
+							</View>
+						) : null}
+						{open.note ? (
+							<View style={styles.block}>
+								<PoText variant="eyebrow11" tone="textTertiary">
+									Note
+								</PoText>
+								<PoText variant="body15">{open.note}</PoText>
+							</View>
+						) : null}
 						{open.lastsDays > 0 ? (
 							<PillButton
 								label="Opened a new one today"
@@ -177,6 +207,8 @@ export function ShelfScreen() {
 									tool: open.lastsDays === 0,
 									openedOn: open.openedOn,
 									photo: open.photo,
+									howTo: open.howTo,
+									note: open.note,
 								});
 								setOpen(null);
 							}}
@@ -201,6 +233,12 @@ export function ShelfScreen() {
 			>
 				{draft ? (
 					<View style={styles.sheet}>
+						<PhotoStrip
+							photos={draft.photo && !draft.photo.startsWith("catalog:") ? [draft.photo] : []}
+							onChange={(photos) => setDraft({ ...draft, photo: photos[0] ?? null })}
+							max={1}
+							size={72}
+						/>
 						<TextField
 							label="Name"
 							value={draft.name}
@@ -237,7 +275,19 @@ export function ShelfScreen() {
 							onChangeText={(price) => setDraft({ ...draft, price })}
 							keyboardType="number-pad"
 							suffix="Rs"
-							onSubmitEditing={save}
+						/>
+						<TextField
+							label="How to use (optional)"
+							value={draft.howTo}
+							onChangeText={(howTo) => setDraft({ ...draft, howTo })}
+							placeholder="Two pumps on damp skin, morning only"
+							multiline
+						/>
+						<TextField
+							label="Note (optional)"
+							value={draft.note}
+							onChangeText={(note) => setDraft({ ...draft, note })}
+							placeholder="From the pharmacy on Main Boulevard"
 						/>
 					</View>
 				) : null}
@@ -250,5 +300,6 @@ const styles = StyleSheet.create({
 	row: { gap: 12 },
 	item: { width: 96, gap: 8 },
 	sheet: { gap: 12 },
+	block: { gap: 4 },
 	chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 });

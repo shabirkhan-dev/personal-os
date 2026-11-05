@@ -421,6 +421,8 @@ const addProduct = defineTool({
 			name: input.name,
 			area: input.area,
 			photo: null,
+			howTo: "",
+			note: "",
 			openedOn: dayKey(now),
 			lastsDays: input.lastsDays,
 			price: input.price,

@@ -17,10 +17,10 @@ import {
 } from "./career.schema";
 import { buildInterviewPrep, draftNudge, parseLine, planSkillPath, readJob } from "./career.tasks";
 import { aiQuota } from "./ai.quota";
-import { askCareSchema } from "./care.schema";
+import { askCareSchema, designRoutineSchema } from "./care.schema";
 import { findDreamSchema } from "./wishlist.schema";
 import { findDream } from "./wishlist.tasks";
-import { askCare } from "./care.tasks";
+import { askCare, designRoutine } from "./care.tasks";
 import { askFashionSchema, readPieceSchema } from "./fashion.schema";
 import { askFashion, readPiece } from "./fashion.tasks";
 import { askFaithSchema } from "./faith.schema";
@@ -83,6 +83,9 @@ export const aiRoutes = new Hono<AppEnv>()
 	)
 	.post("/care/ask", validate("json", askCareSchema), async (c) =>
 		ok(c, await askCare({ config: c.get("config") }, c.req.valid("json"))),
+	)
+	.post("/care/design-routine", validate("json", designRoutineSchema), async (c) =>
+		ok(c, await designRoutine({ config: c.get("config") }, c.req.valid("json"))),
 	)
 	.post("/training/ask", validate("json", askTrainingSchema), async (c) =>
 		ok(c, await askTraining({ config: c.get("config") }, c.req.valid("json"))),

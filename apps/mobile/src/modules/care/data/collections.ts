@@ -1,5 +1,6 @@
 import { defineCollection } from "@/lib/db/collection";
 import {
+	parseBodyArea,
 	parseCheckIn,
 	parseDay,
 	parseHabit,
@@ -15,3 +16,4 @@ export const careProducts = defineCollection("care-products", parseProduct);
 export const careHabits = defineCollection("care-habits", parseHabit);
 export const careDays = defineCollection("care-days", parseDay);
 export const careCheckIns = defineCollection("care-checkins", parseCheckIn);
+export const careAreas = defineCollection("care-areas", parseBodyArea);

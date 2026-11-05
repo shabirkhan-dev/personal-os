@@ -694,3 +694,55 @@ describe("AI allowance", () => {
 		});
 	});
 });
+
+describe("Care AI routine", () => {
+	it("drafts a routine with the mock provider", async () => {
+		const response = await mockApp.call("POST", "/ai/care/design-routine", {
+			token,
+			body: { concerns: ["dark spots"], skin: ["oily"], notes: "5 minutes" },
+		});
+		expect(response.json?.data).toMatchObject({
+			steps: [{ name: "Cleanser" }, { name: "Sunscreen" }, { name: "Moisturiser" }],
+		});
+	});
+
+	it("trims what the model returns", async () => {
+		provider(
+			JSON.stringify({
+				steps: [
+					{
+						routine: "noon",
+						area: "face",
+						name: " Serum ",
+						detail: "3 drops",
+						howTo: "Pat in.",
+						minutes: 99,
+						days: [3, 3, 1],
+					},
+					{ name: "" },
+				],
+				habits: [{ name: "Floss", detail: "Before bed" }],
+				note: "Short.",
+			}),
+		);
+		const response = await realApp.call("POST", "/ai/care/design-routine", {
+			token,
+			body: { concerns: [] },
+		});
+		expect(response.json?.data).toEqual({
+			steps: [
+				{
+					routine: "morning",
+					area: "face",
+					name: "Serum",
+					detail: "3 drops",
+					howTo: "Pat in.",
+					minutes: 1,
+					days: [1, 3],
+				},
+			],
+			habits: [{ name: "Floss", detail: "Before bed" }],
+			note: "Short.",
+		});
+	});
+});

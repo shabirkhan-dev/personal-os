@@ -11,6 +11,7 @@ import {
 	Segments,
 } from "@/components/module-ui";
 import { ChoiceChips } from "@/components/ui/choice-chips";
+import { DotTimer } from "@/components/ui/dot-timer";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
 import { Sheet } from "@/components/ui/sheet";
@@ -94,9 +95,15 @@ export function RecitationScreen() {
 					<PoText variant="eyebrow11" tone="textTertiary">
 						{timer.runningSince === null ? "Paused" : "Reciting"}
 					</PoText>
-					<PoText variant="hero40" accessibilityLiveRegion="polite">
-						{clock(leftMs)}
-					</PoText>
+					<DotTimer
+						ms={Math.ceil(leftMs / 1000) * 1000}
+						running={timer.runningSince !== null && leftMs > 0}
+						color="green"
+						size="lg"
+						label="Recitation, time left"
+						onToggle={timer.runningSince === null ? timer.resume : timer.pause}
+						onReset={() => timer.start(timer.targetMinutes)}
+					/>
 					<PoText variant="meta13" tone="textSecondary">
 						{leftMs === 0
 							? "Time's up. Finish when you reach a stopping point."
@@ -253,11 +260,6 @@ export function RecitationScreen() {
 			</Sheet>
 		</FaithScreen>
 	);
-}
-
-function clock(ms: number): string {
-	const seconds = Math.ceil(ms / 1000);
-	return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
 }
 
 const styles = StyleSheet.create({

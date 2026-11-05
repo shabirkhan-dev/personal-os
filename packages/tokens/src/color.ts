@@ -37,6 +37,16 @@ export type ColorTokens = {
 	statusViolet: string;
 	statusVioletSubtle: string;
 	statusVioletBorder: string;
+	/** The Dot timer's pill: dark in both modes, with its edge and its figures. */
+	timerPill: string;
+	timerEdge: string;
+	timerInk: string;
+	/** The Dot timer's LED colours (bright enough to show at the lamp's dim 27.5%). */
+	ledRed: string;
+	ledAmber: string;
+	ledGreen: string;
+	ledBlue: string;
+	ledWhite: string;
 };
 
 export const colors: Record<ColorMode, ColorTokens> = {
@@ -73,6 +83,14 @@ export const colors: Record<ColorMode, ColorTokens> = {
 		statusViolet: "#8e5cf0",
 		statusVioletSubtle: "#f1eafd",
 		statusVioletBorder: "#cab6f9",
+		timerPill: "#18171e",
+		timerEdge: "#504f56",
+		timerInk: "#ffffff",
+		ledRed: "#ff0418",
+		ledAmber: "#ffa31a",
+		ledGreen: "#35f26b",
+		ledBlue: "#3aa7ff",
+		ledWhite: "#f3efe6",
 	},
 	dark: {
 		bgCanvas: "#0e0e0e",
@@ -107,6 +125,14 @@ export const colors: Record<ColorMode, ColorTokens> = {
 		statusViolet: "#a382f5",
 		statusVioletSubtle: "#2e1d55",
 		statusVioletBorder: "#543693",
+		timerPill: "#18171e",
+		timerEdge: "#45444c",
+		timerInk: "#ffffff",
+		ledRed: "#ff0418",
+		ledAmber: "#ffa31a",
+		ledGreen: "#35f26b",
+		ledBlue: "#3aa7ff",
+		ledWhite: "#f3efe6",
 	},
 };
 

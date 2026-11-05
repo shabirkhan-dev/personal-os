@@ -84,7 +84,8 @@ export function defaultSettings(): FaithSettings {
 		silence: false,
 		tradition: "",
 		recitationMinutes: 10,
-		tasbih: [...DEFAULT_TASBIH],
+		/** Empty until the person builds a sequence, or picks the classic one. */
+		tasbih: [],
 		readAloud: false,
 	};
 }
@@ -253,7 +254,7 @@ export function parseSettings(raw: unknown): FaithSettings | null {
 		silence: asBoolean(raw.silence, false),
 		tradition: asString(raw.tradition, "").slice(0, 80),
 		recitationMinutes: Math.min(120, Math.max(1, Math.round(asNumber(raw.recitationMinutes, 10)))),
-		tasbih: tasbih.length > 0 ? tasbih : base.tasbih,
+		tasbih: Array.isArray(raw.tasbih) ? tasbih : base.tasbih,
 		readAloud: asBoolean(raw.readAloud, false),
 	};
 }

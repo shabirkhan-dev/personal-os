@@ -25,7 +25,7 @@ export function PlanScreen() {
 	const { colors } = usePoTheme();
 	const { data, sources, now, today, saved } = useDailyToday();
 	const [blocks, setBlocks] = useState<Block[]>(
-		() => saved?.blocks ?? draftPlan(sources, data.settings, now),
+		() => saved?.blocks ?? draftPlan(sources, data.settings),
 	);
 	const [draft, setDraft] = useState<Draft | null>(null);
 	const [notice, setNotice] = useState<string | null>(null);
@@ -128,7 +128,7 @@ export function PlanScreen() {
 					style={styles.flex}
 					onPress={() => {
 						haptics.tap();
-						setBlocks(draftPlan(sources, data.settings, now));
+						setBlocks(draftPlan(sources, data.settings));
 						if (saved)
 							void removePlan(today).catch((error: unknown) =>
 								console.error("[daily] could not reset the plan", error),

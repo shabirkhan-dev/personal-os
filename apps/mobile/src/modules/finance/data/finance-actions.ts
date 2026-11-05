@@ -39,10 +39,8 @@ export function setUp(
 	numbers: Numbers,
 	now = new Date(),
 ): Promise<FinanceSettings> {
-	const limits =
-		budgetTotal(settings.limits) === numbers.monthlyCost
-			? settings.limits
-			: defaultLimits(numbers.monthlyCost);
+	// The budget stays as the person set it: no split is made for them (Budget offers one).
+	const limits = settings.limits;
 	const next: FinanceSettings = {
 		...settings,
 		setUp: true,
@@ -52,7 +50,7 @@ export function setUp(
 		monthlyIncome: roundCents(numbers.monthlyIncome),
 		salary: roundCents(numbers.salary ?? settings.salary),
 		limits,
-		minimum: settings.minimum.length > 0 ? settings.minimum : defaultMinimum(limits),
+		minimum: settings.minimum,
 		savingsTarget: settings.saved > 0 ? settings.savingsTarget : numbers.monthlyCost * 6,
 	};
 	return saveSettings(next).then(() => next);
@@ -219,6 +217,23 @@ export function addSavings(settings: FinanceSettings, amount: number): Promise<v
 
 export function saveLimits(settings: FinanceSettings, limits: Record<Category, number>) {
 	return saveSettings({ ...settings, limits });
+}
+
+/** The suggested split of the month's cost into budget lines, and the minimum that's always paid. */
+export function applySuggestedBudget(settings: FinanceSettings) {
+	const limits = defaultLimits(settings.monthlyCost);
+	return saveSettings({
+		...settings,
+		limits,
+		minimum: settings.minimum.length ? settings.minimum : defaultMinimum(limits),
+	});
+}
+
+/** The suggested minimum (food, bills, transport, care basics) from the budget lines. */
+export function applySuggestedMinimum(settings: FinanceSettings) {
+	const limits =
+		budgetTotal(settings.limits) > 0 ? settings.limits : defaultLimits(settings.monthlyCost);
+	return saveSettings({ ...settings, minimum: defaultMinimum(limits) });
 }
 
 /**

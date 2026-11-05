@@ -1,4 +1,3 @@
-import { useEffect, useRef } from "react";
 import { StyleSheet } from "react-native";
 import {
 	CardStack,
@@ -15,6 +14,7 @@ import { useNow } from "@/lib/use-now";
 import { useSpeaker } from "@/lib/voice";
 import { rateCard, seedCards } from "../data/faith-actions";
 import { useFaith } from "../hooks/use-faith";
+import { STARTER_CARDS } from "../lib/faith-content";
 import { faithRoutes } from "../navigation";
 import { FaithScreen } from "./faith-screen";
 
@@ -24,18 +24,6 @@ export function FaithFlashcardsScreen() {
 	const now = useNow(30_000);
 	const speaker = useSpeaker();
 	const { cards } = data;
-
-	// The first visit adds the starter deck.
-	const seeded = useRef(false);
-	useEffect(() => {
-		if (data.loading || seeded.current) return;
-		seeded.current = true;
-		if (cards.length === 0) {
-			seedCards(cards).catch((error: unknown) =>
-				console.error("[faith] could not add the starter cards", error),
-			);
-		}
-	}, [data.loading, cards]);
 
 	const review = useReview(cards, data.loading, rateCard, speaker.stop);
 	const { current, flipped } = review;
@@ -85,6 +73,22 @@ export function FaithFlashcardsScreen() {
 					</CardStack>
 					<RatingRow review={review} />
 				</>
+			) : !data.loading && cards.length === 0 ? (
+				<EmptyCard
+					icon="Layers"
+					title="No cards yet"
+					body={`Flashcards are optional. Add the starter deck of ${STARTER_CARDS.length} words and duas from short surahs if you'd like to learn them.`}
+				>
+					<PillButton
+						label="Add the starter deck"
+						onPress={() =>
+							void seedCards(cards).catch((error: unknown) =>
+								console.error("[faith] could not add the starter cards", error),
+							)
+						}
+					/>
+					<PillButton label="Back to Grow" variant="secondary" onPress={faithRoutes.grow} />
+				</EmptyCard>
 			) : (
 				<EmptyCard
 					icon="Layers"

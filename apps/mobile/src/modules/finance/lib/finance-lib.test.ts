@@ -43,6 +43,7 @@ const settings: FinanceSettings = {
 	...defaultSettings(new Date("2026-10-16T08:00:00")),
 	setUp: true,
 	balance: 148_500,
+	limits: defaultLimits(55_000),
 };
 
 const entry = (at: string, fields: Partial<Entry> = {}): Entry => ({

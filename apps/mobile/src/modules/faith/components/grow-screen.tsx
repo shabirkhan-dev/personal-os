@@ -28,7 +28,7 @@ import {
 	toggleLesson,
 } from "../data/faith-actions";
 import { useFaith } from "../hooks/use-faith";
-import { CHALLENGES, type LearningPath, PATHS, STARTER_CARDS } from "../lib/faith-content";
+import { CHALLENGES, type LearningPath, PATHS } from "../lib/faith-content";
 import { challengeDay, challengeShare, daysAgo } from "../lib/faith-math";
 import { RESOURCE_KINDS, type Resource, type ResourceKind } from "../lib/faith-model";
 import { faithRoutes } from "../navigation";
@@ -63,7 +63,7 @@ export function GrowScreen() {
 	const [path, setPath] = useState<LearningPath | null>(null);
 	const [editing, setEditing] = useState<{ key: number; resource: Resource | null } | null>(null);
 
-	const due = cards.length === 0 ? STARTER_CARDS.length : dueCards(cards, now).length;
+	const due = dueCards(cards, now).length;
 	const shown = useMemo(
 		() => (filter === "all" ? resources : resources.filter((item) => item.kind === filter)),
 		[filter, resources],
@@ -157,8 +157,12 @@ export function GrowScreen() {
 				<ListRow
 					icon={{ name: "Layers", tone: "accentDefault", tile: "accentSubtle" }}
 					title="Flashcards · words and duas"
-					subtitle="Ten cards from what you've read"
-					value={due > 0 ? `${due} due` : "All done"}
+					subtitle={
+						cards.length
+							? `${cards.length} cards from what you've read`
+							: "Optional · add a deck when you want one"
+					}
+					value={cards.length === 0 ? "Add" : due > 0 ? `${due} due` : "All done"}
 					valueTone="accentDefault"
 					onPress={faithRoutes.flashcards}
 				/>

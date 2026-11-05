@@ -132,14 +132,12 @@ describe("minimum day", () => {
 });
 
 describe("plan", () => {
-	const blocks = draftPlan(sources, settings, now);
+	const blocks = draftPlan(sources, settings);
 
 	it("drafts the day from the modules, in order", () => {
 		expect(blocks.map((block) => block.title)).toEqual([
 			"Fajr and Quran",
 			"Morning skin",
-			"Deep work · applications",
-			"Applications · 2nd block",
 			"Maghrib",
 			"Push + handstand",
 			"Isha",
@@ -148,21 +146,17 @@ describe("plan", () => {
 			"Night routine",
 			"Sleep",
 		]);
-		expect(
-			draftPlan(sources, settings, new Date("2026-10-17T09:00:00")).some(
-				(block) => block.id === "career-deep-1",
-			),
-		).toBe(false);
+		// Nothing is invented: no work blocks the person never planned.
+		expect(blocks.some((block) => block.id.startsWith("career-deep"))).toBe(false);
 	});
 
 	it("finds the free stretch and what's now", () => {
-		expect(freeGaps(blocks, settings)[0]).toEqual({ from: 6 * 60 + 34, to: 9 * 60 });
 		const items = withDone(blocks, sources);
 		expect(items.find((item) => item.id === "faith-fajr")?.done).toBe(true);
+		const maghrib = blocks.find((block) => block.title === "Maghrib");
+		expect(freeGaps(blocks, settings)[0]).toEqual({ from: 6 * 60 + 34, to: maghrib?.minutes ?? 0 });
 		const current = rightNow(items, 15 * 60 + 28, []);
-		expect(current).toMatchObject({ state: "now", item: { title: "Applications · 2nd block" } });
-		expect(current?.next?.title).toBe("Maghrib");
-		expect(rightNow(items, 15 * 60 + 28, ["career-deep-2"])?.item.title).toBe("Maghrib");
+		expect(current?.item.title).toBe("Maghrib");
 	});
 });
 

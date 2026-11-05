@@ -1,22 +1,22 @@
 import { useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Linking, Pressable, StyleSheet, View } from "react-native";
 import { Icon } from "@/components/icons";
-import { EmptyCard, Footer, MetaChip } from "@/components/module-ui";
+import { EmptyCard, Footer } from "@/components/module-ui";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
 import { haptics } from "@/lib/haptics";
 import { usePoTheme } from "@/theme";
-import { planRecipe, saveRecipeState } from "../data/food-actions";
+import { addMissingToList, listFor, planRecipe, saveRecipeState } from "../data/food-actions";
 import { useFoodToday } from "../hooks/use-food";
 import { nextSlot, recipeMacros } from "../lib/food-math";
 import { SLOT_LABELS, SLOT_TIMES, SLOTS, type Slot } from "../lib/food-model";
-import { recipeById } from "../lib/recipes";
+import { recipeById, videoSearch } from "../lib/recipes";
 import { remaining } from "../lib/targets";
 import { foodRoutes } from "../navigation";
 import { CookMode } from "./cook-mode";
 import { FoodScreen } from "./food-screen";
-import { Card, MACRO_TONES } from "./home-cards";
+import { Card, kcalText, MACRO_TONES } from "./home-cards";
 import { MealImage } from "./meal-image";
 import { HeartButton } from "./recipes-screen";
 
@@ -28,6 +28,7 @@ export function RecipeDetailScreen({ id }: { id: string }) {
 	const [portions, setPortions] = useState(1);
 	const [cooking, setCooking] = useState(false);
 	const [notice, setNotice] = useState<string | null>(null);
+	const [done, setDone] = useState<number[]>([]);
 
 	if (!recipe) {
 		return (
@@ -72,6 +73,33 @@ export function RecipeDetailScreen({ id }: { id: string }) {
 		);
 	};
 
+	const missing = recipe.ingredients.filter((_, index) => !home.has(index)).length;
+	const shop = () => {
+		addMissingToList(listFor(data.groceries, weekId), recipe, state.atHome)
+			.then((added) => {
+				haptics.success();
+				setNotice(
+					added === 0
+						? "Everything missing is already on your grocery list."
+						: `${added} ${added === 1 ? "thing" : "things"} added to your grocery list.`,
+				);
+			})
+			.catch((error: unknown) => {
+				console.error("[food] could not add to the list", error);
+				setNotice("Couldn't save on this phone. Try again.");
+			});
+	};
+	const openVideo = () =>
+		void Linking.openURL(recipe.video || videoSearch(recipe)).catch((error: unknown) =>
+			console.warn("[food] could not open the video", error),
+		);
+	const toggleStep = (index: number) => {
+		haptics.select();
+		setDone((current) =>
+			current.includes(index) ? current.filter((item) => item !== index) : [...current, index],
+		);
+	};
+
 	const add = () => {
 		planRecipe(plan, weekId, today, slot, recipe.id, portions)
 			.then(() => {
@@ -86,18 +114,22 @@ export function RecipeDetailScreen({ id }: { id: string }) {
 
 	return (
 		<FoodScreen
-			action={{
-				icon: "Filled/Calendar",
-				label: "Meal plan",
-				onPress: foodRoutes.plan,
-			}}
+			action={
+				recipe.mine
+					? {
+							icon: "Filled/Edit",
+							label: "Edit recipe",
+							onPress: () => foodRoutes.recipeEdit({ id: recipe.id }),
+						}
+					: { icon: "Filled/Calendar", label: "Meal plan", onPress: foodRoutes.plan }
+			}
 		>
 			<MealImage recipeId={recipe.id} hero size={240} fill radius={28} />
 			<View style={styles.title}>
 				<View style={styles.titleRow}>
 					<View style={styles.flex}>
-						<PoText variant="eyebrow11" tone="textTertiary">
-							{recipe.kind}
+						<PoText variant="eyebrow11" tone={recipe.mine ? "accentDefault" : "textTertiary"}>
+							{recipe.mine ? `Your recipe · ${recipe.kind}` : recipe.kind}
 						</PoText>
 						<PoText variant="title30" accessibilityRole="header">
 							{recipe.name}
@@ -112,48 +144,66 @@ export function RecipeDetailScreen({ id }: { id: string }) {
 						}
 					/>
 				</View>
-				<View style={styles.chips}>
-					<MetaChip icon="Clock" label={`${recipe.minutes} min`} />
-					<MetaChip icon="Lightning" iconTone="statusCaution" label={`${recipe.kcal} kcal`} />
-					<MetaChip icon="Dumbbell" iconTone="statusDanger" label={`${recipe.protein} g protein`} />
-					<MetaChip icon="Food" label={`Serves ${recipe.serves}`} />
-				</View>
+			</View>
+			<View style={styles.stats}>
+				{[
+					{ label: "Minutes", value: String(recipe.minutes) },
+					{ label: "Kcal", value: recipe.kcal ? kcalText(macros.kcal) : "–" },
+					{ label: "Protein g", value: recipe.protein ? String(macros.protein) : "–" },
+					{ label: "Serves", value: String(recipe.serves) },
+				].map((stat) => (
+					<View key={stat.label} style={[styles.stat, { backgroundColor: colors.bgSurface }]}>
+						<PoText variant="meta13" tone="textTertiary">
+							{stat.label}
+						</PoText>
+						<PoText variant="title18" numberOfLines={1}>
+							{stat.value}
+						</PoText>
+					</View>
+				))}
 			</View>
 
-			<View style={styles.macroBlock}>
-				<View style={styles.macroBar}>
-					{(["protein", "carbs", "fat"] as const).map((key) => (
-						<View
-							key={key}
-							style={[
-								styles.macroPart,
-								{ flex: recipe[key] / grams, backgroundColor: colors[MACRO_TONES[key]] },
-							]}
-						/>
-					))}
+			{grams > 0 ? (
+				<View style={styles.macroBlock}>
+					<View style={styles.macroBar}>
+						{(["protein", "carbs", "fat"] as const).map((key) => (
+							<View
+								key={key}
+								style={[
+									styles.macroPart,
+									{ flex: recipe[key] / grams, backgroundColor: colors[MACRO_TONES[key]] },
+								]}
+							/>
+						))}
+					</View>
+					<View style={styles.legend}>
+						{(["protein", "carbs", "fat"] as const).map((key) => (
+							<View key={key} style={styles.legendItem}>
+								<View style={[styles.dot, { backgroundColor: colors[MACRO_TONES[key]] }]} />
+								<PoText variant="meta13" tone="textSecondary">
+									{`${key.charAt(0).toUpperCase()}${key.slice(1)} ${recipe[key]} g`}
+								</PoText>
+							</View>
+						))}
+					</View>
 				</View>
-				<View style={styles.legend}>
-					{(["protein", "carbs", "fat"] as const).map((key) => (
-						<View key={key} style={styles.legendItem}>
-							<View style={[styles.dot, { backgroundColor: colors[MACRO_TONES[key]] }]} />
-							<PoText variant="meta13" tone="textSecondary">
-								{`${key.charAt(0).toUpperCase()}${key.slice(1)} ${recipe[key]} g`}
-							</PoText>
-						</View>
-					))}
-				</View>
-			</View>
+			) : null}
 
 			<View style={[styles.fit, { backgroundColor: colors.bgSurface }]}>
 				<View style={[styles.fitIcon, { backgroundColor: colors.accentSubtle }]}>
 					<Icon name="Filled/Sparkle" size={16} color={colors.accentDefault} />
 				</View>
 				<PoText variant="meta13" tone="textSecondary" style={styles.flex}>
-					{left.protein > 0
-						? `${macros.kcal <= left.kcal + 150 ? "Fits your plan." : "A big one for today."} Covers `
-						: "Protein's done for today. "}
-					{left.protein > 0 ? <PoText variant="meta13">{`${covers}%`}</PoText> : null}
-					{left.protein > 0 ? " of today's protein left." : ""}
+					{!recipe.protein ? "Add its numbers to see how it fits today. " : null}
+					{!recipe.protein
+						? null
+						: left.protein > 0
+							? `${macros.kcal <= left.kcal + 150 ? "Fits your plan." : "A big one for today."} Covers `
+							: "Protein's done for today. "}
+					{recipe.protein && left.protein > 0 ? (
+						<PoText variant="meta13">{`${covers}%`}</PoText>
+					) : null}
+					{recipe.protein && left.protein > 0 ? " of today's protein left." : ""}
 				</PoText>
 				<View style={[styles.stepper, { backgroundColor: colors.bgSubtle }]}>
 					<Pressable
@@ -185,6 +235,9 @@ export function RecipeDetailScreen({ id }: { id: string }) {
 				</PoText>
 			</View>
 			<Card>
+				<PoText variant="meta13" tone="textTertiary">
+					Tick what you already have at home.
+				</PoText>
 				{recipe.ingredients.map((item, index) => {
 					const have = home.has(index);
 					return (
@@ -209,20 +262,57 @@ export function RecipeDetailScreen({ id }: { id: string }) {
 						</Pressable>
 					);
 				})}
+				{missing > 0 ? (
+					<PillButton
+						label={`Add the ${missing} missing to groceries`}
+						variant="secondary"
+						onPress={shop}
+					/>
+				) : recipe.ingredients.length > 0 ? (
+					<PoText variant="meta13" tone="textSuccess">
+						You have everything for this one.
+					</PoText>
+				) : null}
 			</Card>
 
-			<PoText variant="title18" style={styles.stepsTitle}>
-				Steps
-			</PoText>
+			<View style={styles.sectionHead}>
+				<PoText variant="title18" style={styles.flex}>
+					Steps
+				</PoText>
+				{recipe.steps.length > 1 ? (
+					<PoText variant="meta13" tone="textSecondary">
+						{done.length
+							? `${done.length} of ${recipe.steps.length} done`
+							: "Tap a step when it's done"}
+					</PoText>
+				) : null}
+			</View>
 			{recipe.steps.map((step, index) => (
-				<View key={step.text} style={styles.step}>
-					<View style={[styles.number, { backgroundColor: colors.bgSurface }]}>
-						<PoText variant="meta13" tone="textSecondary">
-							{index + 1}
-						</PoText>
+				<Pressable
+					key={`${index}-${step.text}`}
+					accessibilityRole="checkbox"
+					accessibilityState={{ checked: done.includes(index) }}
+					onPress={() => toggleStep(index)}
+					style={styles.step}
+				>
+					<View
+						style={[
+							styles.number,
+							{ backgroundColor: done.includes(index) ? colors.accentDefault : colors.bgSurface },
+						]}
+					>
+						{done.includes(index) ? (
+							<Icon name="Check bold" size={12} color={colors.textOnAccent} />
+						) : (
+							<PoText variant="meta13" tone="textSecondary">
+								{index + 1}
+							</PoText>
+						)}
 					</View>
 					<View style={styles.stepText}>
-						<PoText variant="body15">{step.text}</PoText>
+						<PoText variant="body15" tone={done.includes(index) ? "textTertiary" : "textPrimary"}>
+							{step.text}
+						</PoText>
 						{step.minutes ? (
 							<View style={[styles.time, { backgroundColor: colors.bgSurface }]}>
 								<Icon name="Clock" size={12} color={colors.textSecondary} />
@@ -232,8 +322,54 @@ export function RecipeDetailScreen({ id }: { id: string }) {
 							</View>
 						) : null}
 					</View>
-				</View>
+				</Pressable>
 			))}
+			{recipe.steps.length === 0 ? (
+				<PoText variant="meta13" tone="textSecondary" style={styles.stepsTitle}>
+					No steps written yet.
+				</PoText>
+			) : null}
+
+			<Pressable
+				accessibilityRole="link"
+				onPress={openVideo}
+				style={({ pressed }) => [
+					styles.video,
+					{ backgroundColor: pressed ? colors.bgHover : colors.bgSurface },
+				]}
+			>
+				<View style={[styles.play, { backgroundColor: colors.statusDanger }]}>
+					<Icon name="Filled/Play" size={16} color={colors.textOnAccent} />
+				</View>
+				<View style={styles.flex}>
+					<PoText variant="row15">{recipe.video ? "Watch how it's made" : "Find a video"}</PoText>
+					<PoText variant="meta13" tone="textSecondary" numberOfLines={1}>
+						{recipe.video
+							? recipe.video.replace(/^https?:\/\/(www\.)?/, "")
+							: `Search YouTube for ${recipe.name.toLowerCase()}`}
+					</PoText>
+				</View>
+				<Icon name="Line/Chevron right" size={16} color={colors.textTertiary} />
+			</Pressable>
+			{recipe.note ? (
+				<Card>
+					<PoText variant="eyebrow11" tone="textTertiary">
+						Your note
+					</PoText>
+					<PoText variant="body15">{recipe.note}</PoText>
+				</Card>
+			) : null}
+			{!recipe.mine ? (
+				<Pressable
+					accessibilityRole="button"
+					onPress={() => foodRoutes.recipeEdit({ copy: recipe.id })}
+					style={styles.yours}
+				>
+					<PoText variant="meta13" tone="textLink">
+						Cook it differently? Make it your own
+					</PoText>
+				</Pressable>
+			) : null}
 			{notice ? (
 				<PoText variant="meta13" tone="textSecondary">
 					{notice}
@@ -261,7 +397,11 @@ const styles = StyleSheet.create({
 	flex: { flex: 1 },
 	title: { gap: 12, paddingHorizontal: 4 },
 	titleRow: { flexDirection: "row", alignItems: "flex-end", gap: 12 },
-	chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+	stats: { flexDirection: "row", gap: 8 },
+	stat: { flex: 1, gap: 2, paddingVertical: 12, paddingHorizontal: 12, borderRadius: 16 },
+	video: { flexDirection: "row", alignItems: "center", gap: 12, padding: 12, borderRadius: 20 },
+	play: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
+	yours: { alignItems: "center", paddingVertical: 4 },
 	macroBlock: { gap: 8, paddingHorizontal: 4 },
 	macroBar: { flexDirection: "row", gap: 2, height: 6, borderRadius: 3, overflow: "hidden" },
 	macroPart: { height: 6 },

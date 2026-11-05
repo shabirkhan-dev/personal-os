@@ -20,7 +20,8 @@ const checkSize: Record<CheckboxSize, number> = { 20: 12, 24: 14, 28: 16 };
 
 /**
  * Kit v2 "Checkbox". Checked = solid accent with a bold white check.
- * Unchecked = clear ring in text/tertiary. Sizes 20 / 24 / 28.
+ * Unchecked = an empty circle with a visible ring, so it reads as something to tap on any card.
+ * Sizes 20 / 24 / 28.
  */
 export function Checkbox({ checked, size = 24 }: CheckboxProps) {
 	const { colors } = usePoTheme();
@@ -34,7 +35,12 @@ export function Checkbox({ checked, size = 24 }: CheckboxProps) {
 		backgroundColor: interpolateColor(
 			progress.value,
 			[0, 1],
-			[colors.bgHover, colors.accentDefault],
+			["transparent", colors.accentDefault],
+		),
+		borderColor: interpolateColor(
+			progress.value,
+			[0, 1],
+			[colors.textTertiary, colors.accentDefault],
 		),
 	}));
 
@@ -60,5 +66,6 @@ const styles = StyleSheet.create({
 	box: {
 		alignItems: "center",
 		justifyContent: "center",
+		borderWidth: 2,
 	},
 });

@@ -2,11 +2,17 @@ import type { Config } from "@/config/env";
 import { askJson } from "./ai.ask";
 import {
 	type AskFoodInput,
+	type DraftRecipeInput,
 	type FoodAnswer,
 	foodAnswer,
 	type MealReading,
 	mealReading,
+	type PlanWeekInput,
 	type ReadMealInput,
+	type RecipeDraft,
+	recipeDraft,
+	type WeekPlanDraft,
+	weekPlanDraft,
 } from "./food.schema";
 
 type Deps = { config: Config };
@@ -44,6 +50,90 @@ export async function askFood(deps: Deps, input: AskFoodInput): Promise<FoodAnsw
 		};
 	}
 	return askJson(deps.config, "Food", "food-ask", GUIDANCE, JSON.stringify(input), foodAnswer);
+}
+
+const DRAFT_RECIPE =
+	"Write a simple home recipe for the dish named, the way it is usually cooked in a Pakistani " +
+	"home when it is a desi dish. Give the ingredients with amounts for the servings asked, short " +
+	"numbered steps (one action each, with minutes when there is waiting), the total minutes, the " +
+	"meals it suits, and calories, protein, carbs and fat for one serving. Follow the person's " +
+	"notes. Keep it honest: plain amounts, no brand names.";
+
+export async function draftRecipe(deps: Deps, input: DraftRecipeInput): Promise<RecipeDraft> {
+	if (deps.config.ai.provider === "mock") {
+		return {
+			kind: "Everyday · dinner",
+			slots: ["dinner"],
+			minutes: 30,
+			kcal: 0,
+			protein: 0,
+			carbs: 0,
+			fat: 0,
+			ingredients: [{ name: input.name, amount: `${input.serves} servings` }],
+			steps: [{ text: `Cook ${input.name.toLowerCase()} your usual way.`, minutes: null }],
+		};
+	}
+	return askJson(
+		deps.config,
+		"Food",
+		"draft-recipe",
+		DRAFT_RECIPE,
+		JSON.stringify(input),
+		recipeDraft,
+	);
+}
+
+const PLAN_WEEK =
+	"Plan meals for each day given, choosing only recipes from the list by id, so each day lands " +
+	"near the calorie and protein targets for the person's goal. Use each recipe's slots, prefer " +
+	"variety across the week (no dish more than twice), keep weekday cost low, and follow the " +
+	"person's wishes. Portions are 0.5 to 4. Add a one-sentence note on how the week was built.";
+
+/** Keeps only days asked for and recipes that exist, in slot order. */
+export function cleanPlan(input: PlanWeekInput, draft: WeekPlanDraft): WeekPlanDraft {
+	const known = new Set(input.recipes.map((recipe) => recipe.id));
+	const wanted = new Set(input.days);
+	const order = ["breakfast", "lunch", "snack", "dinner", "bed"];
+	return {
+		days: draft.days
+			.filter((day) => wanted.has(day.day))
+			.map((day) => ({
+				day: day.day,
+				meals: day.meals
+					.filter((meal) => known.has(meal.recipeId))
+					.filter(
+						(meal, index, list) => list.findIndex((other) => other.slot === meal.slot) === index,
+					)
+					.toSorted((a, b) => order.indexOf(a.slot) - order.indexOf(b.slot)),
+			})),
+		note: draft.note,
+	};
+}
+
+export async function planWeek(deps: Deps, input: PlanWeekInput): Promise<WeekPlanDraft> {
+	if (deps.config.ai.provider === "mock") {
+		const pick = (slot: (typeof input.recipes)[number]["slots"][number]) =>
+			input.recipes.find((recipe) => recipe.slots.includes(slot));
+		return cleanPlan(input, {
+			days: input.days.map((day) => ({
+				day,
+				meals: (["breakfast", "lunch", "dinner"] as const).flatMap((slot) => {
+					const recipe = pick(slot);
+					return recipe ? [{ slot, recipeId: recipe.id, portions: 1 }] : [];
+				}),
+			})),
+			note: "The same simple day each day. With a provider key set, the week is planned here.",
+		});
+	}
+	const draft = await askJson(
+		deps.config,
+		"Food",
+		"plan-week",
+		PLAN_WEEK,
+		JSON.stringify(input),
+		weekPlanDraft,
+	);
+	return cleanPlan(input, draft);
 }
 
 /** The mock's reading: each comma or "and" part becomes an item with no numbers. */

@@ -25,10 +25,10 @@ import { askFashionSchema, readPieceSchema } from "./fashion.schema";
 import { askFashion, readPiece } from "./fashion.tasks";
 import { askFaithSchema } from "./faith.schema";
 import { askFaith } from "./faith.tasks";
-import { askFoodSchema, readMealSchema } from "./food.schema";
+import { askFoodSchema, draftRecipeSchema, planWeekSchema, readMealSchema } from "./food.schema";
 import { askTrainingSchema, designProgramSchema, skillStepsSchema } from "./training.schema";
 import { askTraining, buildSkill, designProgram } from "./training.tasks";
-import { askFood, readMeal } from "./food.tasks";
+import { askFood, draftRecipe, planWeek, readMeal } from "./food.tasks";
 import { askFinanceSchema, readSpendSchema } from "./finance.schema";
 import { askFinance, readSpend } from "./finance.tasks";
 
@@ -74,6 +74,12 @@ export const aiRoutes = new Hono<AppEnv>()
 	)
 	.post("/food/ask", validate("json", askFoodSchema), async (c) =>
 		ok(c, await askFood({ config: c.get("config") }, c.req.valid("json"))),
+	)
+	.post("/food/draft-recipe", validate("json", draftRecipeSchema), async (c) =>
+		ok(c, await draftRecipe({ config: c.get("config") }, c.req.valid("json"))),
+	)
+	.post("/food/plan-week", validate("json", planWeekSchema), async (c) =>
+		ok(c, await planWeek({ config: c.get("config") }, c.req.valid("json"))),
 	)
 	.post("/care/ask", validate("json", askCareSchema), async (c) =>
 		ok(c, await askCare({ config: c.get("config") }, c.req.valid("json"))),

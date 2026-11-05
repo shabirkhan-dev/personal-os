@@ -117,6 +117,12 @@ export type GroceryItem = {
 	price: number;
 	bought: boolean;
 	atHome: boolean;
+	/** Added by the person, not worked out from the plan; kept when the list is made again. */
+	custom: boolean;
+	/** A photo of the pack or brand they buy: on this phone (file://) until uploaded, then R2. */
+	photo: string | null;
+	/** "The green Olpers carton", "from the Sunday bazaar". */
+	note: string;
 };
 
 /** The shopping list for a plan; the id is the plan's week. */
@@ -270,6 +276,9 @@ function parseGroceryItem(raw: unknown): GroceryItem | null {
 		price: Math.round(positive(raw.price)),
 		bought: asBoolean(raw.bought, false),
 		atHome: asBoolean(raw.atHome, false),
+		custom: asBoolean(raw.custom, false),
+		photo: typeof raw.photo === "string" && /^(file|https):\/\//.test(raw.photo) ? raw.photo : null,
+		note: asString(raw.note, "").trim().slice(0, 200),
 	};
 }
 

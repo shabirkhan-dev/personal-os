@@ -627,4 +627,70 @@ describe("AI allowance", () => {
 		const body = JSON.parse(String(init.body)) as { max_tokens: number };
 		expect(body.max_tokens).toBe(4000);
 	});
+
+	it("drafts a recipe with the mock provider", async () => {
+		const response = await mockApp.call("POST", "/ai/food/draft-recipe", {
+			token,
+			body: { name: "Aloo keema", serves: 3 },
+		});
+		expect(response.json?.data).toMatchObject({
+			slots: ["dinner"],
+			ingredients: [{ name: "Aloo keema", amount: "3 servings" }],
+		});
+	});
+
+	it("plans a week only from the recipes given and the days asked", async () => {
+		provider(
+			JSON.stringify({
+				days: [
+					{
+						day: "2026-11-09",
+						meals: [
+							{ slot: "dinner", recipeId: "chicken-karahi", portions: 1.5 },
+							{ slot: "breakfast", recipeId: "made-up", portions: 1 },
+							{ slot: "dinner", recipeId: "daal-chawal", portions: 1 },
+						],
+					},
+					{ day: "2030-01-01", meals: [] },
+				],
+				note: " Lots of chicken. ",
+			}),
+		);
+		const response = await realApp.call("POST", "/ai/food/plan-week", {
+			token,
+			body: {
+				goal: "lean bulk",
+				targets: { kcal: 2900, protein: 140, carbs: 380, fat: 85 },
+				wishes: "more chicken",
+				days: ["2026-11-09"],
+				recipes: [
+					{
+						id: "chicken-karahi",
+						name: "Chicken karahi",
+						slots: ["dinner"],
+						kcal: 520,
+						protein: 42,
+						cost: 260,
+					},
+					{
+						id: "daal-chawal",
+						name: "Daal chawal",
+						slots: ["dinner"],
+						kcal: 680,
+						protein: 22,
+						cost: 120,
+					},
+				],
+			},
+		});
+		expect(response.json?.data).toEqual({
+			days: [
+				{
+					day: "2026-11-09",
+					meals: [{ slot: "dinner", recipeId: "chicken-karahi", portions: 1.5 }],
+				},
+			],
+			note: "Lots of chicken.",
+		});
+	});
 });

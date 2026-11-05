@@ -12,9 +12,12 @@ import {
 	nextSlot,
 	pickRecipe,
 	planDayMacros,
+	sectionFor,
 	slotRows,
 	sumMacros,
 	weekDays,
+	waterPace,
+	waterStreak,
 	weekRecap,
 	weightTrend,
 } from "./food-math";
@@ -29,7 +32,8 @@ import {
 import { FOODS } from "./foods";
 import { PRODUCTS, productById } from "./groceries";
 import { parseFoodLine, parseMealText, withQuantity } from "./parse-meal";
-import { RECIPES } from "./recipes";
+import { blankRecipe, parseMyRecipe } from "./my-recipes";
+import { allRecipes, RECIPES, recipeById, setMyRecipes } from "./recipes";
 import { goalWeight, remaining, targetsFor } from "./targets";
 
 const meal = (day: string, slot: Meal["slot"], text: string, at = `${day}T08:10:00`): Meal => ({
@@ -312,5 +316,109 @@ describe("barcode", () => {
 		});
 		expect(per100).toMatchObject({ unit: "100 g", kcal: 380, protein: 13 });
 		expect(itemFromProduct({ status: 0 })).toBeNull();
+	});
+});
+
+const atHour = (hour: number, minute = 0) => new Date(2026, 10, 5, hour, minute);
+
+describe("water", () => {
+	it("compares today's water with an even pace through the day", () => {
+		expect(waterPace(0, 3000, atHour(6)).state).toBe("on-pace");
+		expect(waterPace(500, 3000, atHour(14, 30))).toMatchObject({
+			state: "behind",
+			glassesLeft: 10,
+		});
+		expect(waterPace(1500, 3000, atHour(14, 30)).state).toBe("on-pace");
+		expect(waterPace(2500, 3000, atHour(12)).state).toBe("ahead");
+		expect(waterPace(3100, 3000, atHour(20))).toMatchObject({ state: "done", glassesLeft: 0 });
+	});
+
+	it("counts the days in a row that reached the target", () => {
+		const water = [
+			{ id: "2026-11-02", ml: 3000 },
+			{ id: "2026-11-03", ml: 3200 },
+			{ id: "2026-11-04", ml: 3000 },
+			{ id: "2026-11-05", ml: 1000 },
+			{ id: "2026-10-30", ml: 3000 },
+		];
+		expect(waterStreak(water, 3000, "2026-11-05")).toBe(3);
+		expect(waterStreak([...water, { id: "2026-11-05", ml: 3000 }], 3000, "2026-11-05")).toBe(4);
+		expect(waterStreak(water, 3000, "2026-11-07")).toBe(0);
+	});
+
+	it("puts written ingredients in the right aisle", () => {
+		expect(sectionFor("Chicken thighs")).toBe("protein");
+		expect(sectionFor("Basmati rice")).toBe("carbs");
+		expect(sectionFor("Green chillies")).toBe("veg");
+		expect(sectionFor("Kitchen roll")).toBe("extras");
+	});
+});
+
+describe("your own recipes", () => {
+	it("reads a stored recipe defensively and keeps it apart from bundled ids", () => {
+		expect(parseMyRecipe({ id: "chicken-karahi", name: "Karahi" })).toBeNull();
+		const recipe = parseMyRecipe({
+			id: "mine-1",
+			name: " Aloo keema ",
+			slots: ["dinner", "brunch"],
+			kcal: 540,
+			protein: 32,
+			video: "javascript:alert(1)",
+			image: "file:///photo.jpg",
+			ingredients: [{ name: "Keema", amount: "500 g" }, { name: "" }],
+			steps: [{ text: "Fry onions", minutes: 6 }, { text: "Add keema" }],
+		});
+		expect(recipe).toMatchObject({
+			name: "Aloo keema",
+			slots: ["dinner"],
+			video: null,
+			image: "file:///photo.jpg",
+			mine: true,
+			uses: [],
+			ingredients: [{ name: "Keema", amount: "500 g" }],
+			steps: [{ text: "Fry onions", minutes: 6 }, { text: "Add keema" }],
+		});
+	});
+
+	it("finds them next to the bundled ones and shops for their ingredients as written", () => {
+		const mine = {
+			...blankRecipe(),
+			id: "mine-2",
+			name: "Aloo keema",
+			kcal: 500,
+			ingredients: [
+				{ name: "Keema", amount: "500 g" },
+				{ name: "Potatoes", amount: "3" },
+			],
+		};
+		setMyRecipes([mine]);
+		try {
+			expect(recipeById("mine-2")?.name).toBe("Aloo keema");
+			expect(allRecipes().length).toBe(RECIPES.length + 1);
+			const list = groceriesFor(
+				[{ day: "2026-11-05", meals: [{ slot: "dinner", recipeId: "mine-2", portions: 1 }] }],
+				[
+					{
+						id: "add-x",
+						name: "Kitchen roll",
+						amount: "1",
+						section: "extras",
+						price: 150,
+						bought: false,
+						atHome: false,
+						custom: true,
+						photo: null,
+						note: "",
+					},
+				],
+			);
+			expect(list.map((item) => [item.name, item.section, item.custom])).toEqual([
+				["Keema", "protein", false],
+				["Potatoes", "carbs", false],
+				["Kitchen roll", "extras", true],
+			]);
+		} finally {
+			setMyRecipes([]);
+		}
 	});
 });

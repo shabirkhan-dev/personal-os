@@ -16,8 +16,16 @@ export type Use = { product: string; per: number };
 export type Recipe = Macros & {
 	id: string;
 	name: string;
-	/** A photo in assets/food. */
+	/** A bundled photo's key in recipe-images (empty for the person's own recipes). */
 	photo: string;
+	/** The person's own photo of the dish: file:// on this phone until uploaded, then its R2 link. */
+	image?: string | null;
+	/** A video showing how it's made, on YouTube or anywhere else. */
+	video?: string | null;
+	/** Anything worth remembering: "less chilli for Ammi". */
+	note?: string;
+	/** Written by the person, so it can be edited and deleted. */
+	mine?: boolean;
 	/** "Desi · dinner". */
 	kind: string;
 	slots: Slot[];
@@ -500,8 +508,29 @@ export const RECIPES: readonly Recipe[] = [
 	}),
 ];
 
+/**
+ * The person's own recipes, kept here by `useFood` as their collection changes, so the plan,
+ * the grocery list and every screen find them next to the bundled ones without passing them
+ * around.
+ */
+let mine: readonly Recipe[] = [];
+
+export function setMyRecipes(list: readonly Recipe[]): void {
+	mine = list;
+}
+
+/** The person's recipes first, then the bundled ones. */
+export function allRecipes(): readonly Recipe[] {
+	return mine.length ? [...mine, ...RECIPES] : RECIPES;
+}
+
 export function recipeById(id: string): Recipe | undefined {
-	return RECIPES.find((recipe) => recipe.id === id);
+	return mine.find((recipe) => recipe.id === id) ?? RECIPES.find((recipe) => recipe.id === id);
+}
+
+/** A YouTube search for the dish, for recipes without their own video. */
+export function videoSearch(recipe: Pick<Recipe, "name">): string {
+	return `https://www.youtube.com/results?search_query=${encodeURIComponent(`${recipe.name} recipe`)}`;
 }
 
 export const TAG_LABELS: Record<RecipeTag, string> = {

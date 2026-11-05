@@ -40,5 +40,47 @@ export const careAnswer = z.object({
 		.transform((items) => items.filter(Boolean).slice(0, 3)),
 });
 
+// --- design-routine --------------------------------------------------------------------------
+
+export const designRoutineSchema = z
+	.object({
+		concerns: z.array(z.string().trim().min(1).max(30)).max(12).default([]),
+		skin: z.array(z.string().trim().min(1).max(30)).max(4).default([]),
+		/** Anything else: "5 minutes max", "no fragrance", "I already use CeraVe". */
+		notes: z.string().trim().max(400).default(""),
+		/** What is already on the shelf, so the routine uses it. */
+		products: z.array(z.string().trim().min(1).max(60)).max(30).default([]),
+	})
+	.strict();
+
+const days = z
+	.array(z.number().int().min(0).max(6))
+	.default([])
+	.transform((items) => [...new Set(items)].toSorted((a, b) => a - b));
+
+export const routineDraft = z.object({
+	steps: z
+		.array(
+			z.object({
+				routine: z.enum(["morning", "night"]).catch("morning"),
+				area: z.enum(["face", "hair", "body"]).catch("face"),
+				name: text(60),
+				detail: text(80).describe("One short line: '3 drops · let it dry'"),
+				howTo: text(600).describe("How to apply it, in a few plain sentences"),
+				minutes: z.number().int().min(0).max(60).catch(1),
+				days: days.describe("Weekdays (0 = Sunday) for weekly steps; empty for every day"),
+			}),
+		)
+		.default([])
+		.transform((items) => items.filter((item) => item.name).slice(0, 16)),
+	habits: z
+		.array(z.object({ name: text(60), detail: text(60) }))
+		.default([])
+		.transform((items) => items.filter((item) => item.name).slice(0, 6)),
+	note: text(240),
+});
+
+export type DesignRoutineInput = z.infer<typeof designRoutineSchema>;
+export type RoutineDraft = z.infer<typeof routineDraft>;
 export type AskCareInput = z.infer<typeof askCareSchema>;
 export type CareAnswer = z.infer<typeof careAnswer>;

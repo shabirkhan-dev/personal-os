@@ -1,7 +1,7 @@
 import type { ColorTokens } from "@personal-os/tokens";
 import type { ReactNode } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
-import { Icon } from "@/components/icons";
+import { Icon, type IconName } from "@/components/icons";
 import { FilterChip, ProgressBar, Segments } from "@/components/module-ui";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PillButton } from "@/components/ui/pill-button";
@@ -10,16 +10,7 @@ import { clock } from "@/lib/day";
 import { haptics } from "@/lib/haptics";
 import { usePoTheme } from "@/theme";
 import type { Supply, WeekCell } from "../lib/care-math";
-import {
-	CONCERN_LABELS,
-	CONCERNS,
-	type Concern,
-	type Product,
-	SKIN_LABELS,
-	SKIN_TYPES,
-	type SkinType,
-	type Step,
-} from "../lib/care-model";
+import type { Product, Step } from "../lib/care-model";
 import { ProductImage } from "./product-image";
 
 type Tone = keyof ColorTokens;
@@ -93,6 +84,7 @@ export function StepRow({
 	product,
 	onPress,
 	onLongPress,
+	onInfo,
 	last = false,
 }: {
 	step: Step;
@@ -101,6 +93,8 @@ export function StepRow({
 	product?: Product | null;
 	onPress: () => void;
 	onLongPress?: () => void;
+	/** Shows the step's photos and how to apply it. */
+	onInfo?: () => void;
 	last?: boolean;
 }) {
 	const { colors } = usePoTheme();
@@ -121,8 +115,8 @@ export function StepRow({
 			]}
 		>
 			<Checkbox checked={doneAt !== null} />
-			{product !== undefined ? (
-				<ProductImage photo={product?.photo ?? null} size={44} radius={12} />
+			{product !== undefined || step.photos[0] ? (
+				<ProductImage photo={step.photos[0] ?? product?.photo ?? null} size={44} radius={12} />
 			) : null}
 			<View style={styles.flex}>
 				<PoText variant="row15" tone={doneAt ? "textSecondary" : "textPrimary"}>
@@ -148,6 +142,30 @@ export function StepRow({
 				<PoText variant="mono13" tone="textTertiary">
 					{`${step.minutes} min`}
 				</PoText>
+			) : null}
+			{onInfo ? (
+				<Pressable
+					accessibilityRole="button"
+					accessibilityLabel={`How to apply ${step.name}`}
+					hitSlop={8}
+					onPress={() => {
+						haptics.tap();
+						onInfo();
+					}}
+					style={[
+						styles.info,
+						{
+							backgroundColor:
+								step.howTo || step.photos.length ? colors.accentSubtle : colors.bgSubtle,
+						},
+					]}
+				>
+					<Icon
+						name="Help"
+						size={14}
+						color={step.howTo || step.photos.length ? colors.accentDefault : colors.textTertiary}
+					/>
+				</Pressable>
 			) : null}
 		</Pressable>
 	);
@@ -353,57 +371,73 @@ export function RunningLowCard({
 }
 
 /** The empty Home: what to work on and the skin type, then Build my routine. */
-export function SetupCard({
-	concerns,
-	skin,
-	busy,
-	onConcern,
-	onSkin,
-	onBuild,
-	action = "Build my routine",
+/** Care starts empty: write your own steps, design a routine with AI, or start from a template. */
+export function StartCard({
+	aiAvailable,
+	onOwn,
+	onAi,
+	onTemplates,
 }: {
-	concerns: readonly Concern[];
-	skin: readonly SkinType[];
-	busy: boolean;
-	onConcern: (concern: Concern) => void;
-	onSkin: (skin: SkinType) => void;
-	onBuild: () => void;
-	action?: string;
+	aiAvailable: boolean;
+	onOwn: () => void;
+	onAi: () => void;
+	onTemplates: () => void;
 }) {
+	const { colors } = usePoTheme();
+	const options: { icon: IconName; title: string; body: string; onPress: () => void }[] = [
+		{
+			icon: "Filled/Edit",
+			title: "Add my own steps",
+			body: "Write each step your way, with photos and how you apply it.",
+			onPress: onOwn,
+		},
+		{
+			icon: "Filled/Sparkle",
+			title: "Design it with AI",
+			body: aiAvailable
+				? "Say what you want to work on; review the draft before anything is saved."
+				: "Sign in to have AI draft a routine you review first.",
+			onPress: onAi,
+		},
+		{
+			icon: "List",
+			title: "Start from a template",
+			body: "Ready-made routines for dark spots, dry skin, dandruff and more. Only if you pick one.",
+			onPress: onTemplates,
+		},
+	];
 	return (
-		<Card>
+		<View style={[styles.start, { backgroundColor: colors.bgSurface }]}>
 			<PoText variant="eyebrow11" tone="textTertiary">
-				What do you want to work on?
+				Care · empty until you add something
 			</PoText>
-			<View style={styles.chips}>
-				{CONCERNS.map((concern) => (
-					<FilterChip
-						key={concern}
-						label={CONCERN_LABELS[concern]}
-						selected={concerns.includes(concern)}
-						onPress={() => onConcern(concern)}
-					/>
-				))}
-			</View>
-			<PoText variant="eyebrow11" tone="textTertiary">
-				Skin type
-			</PoText>
-			<View style={styles.chips}>
-				{SKIN_TYPES.map((type) => (
-					<FilterChip
-						key={type}
-						label={SKIN_LABELS[type]}
-						selected={skin.includes(type)}
-						onPress={() => onSkin(type)}
-					/>
-				))}
-			</View>
-			<PoText variant="meta13" tone="textSecondary">
-				You get a simple morning, night and weekly routine from what you pick. Start with 4
-				products, not 14.
-			</PoText>
-			<PillButton label={busy ? "Building…" : action} disabled={busy} onPress={onBuild} />
-		</Card>
+			<PoText variant="title30">Your routine, your way</PoText>
+			{options.map((option) => (
+				<Pressable
+					key={option.title}
+					accessibilityRole="button"
+					onPress={() => {
+						haptics.tap();
+						option.onPress();
+					}}
+					style={({ pressed }) => [
+						styles.option,
+						{ backgroundColor: pressed ? colors.bgHover : colors.bgSubtle },
+					]}
+				>
+					<View style={[styles.optionIcon, { backgroundColor: colors.accentSubtle }]}>
+						<Icon name={option.icon} size={16} color={colors.accentDefault} />
+					</View>
+					<View style={styles.flex}>
+						<PoText variant="row15">{option.title}</PoText>
+						<PoText variant="meta13" tone="textSecondary">
+							{option.body}
+						</PoText>
+					</View>
+					<Icon name="Line/Chevron right" size={16} color={colors.textTertiary} />
+				</Pressable>
+			))}
+		</View>
 	);
 }
 
@@ -447,6 +481,16 @@ export function CareAnswerCard({
 }
 
 const styles = StyleSheet.create({
+	start: { gap: 12, padding: 16, borderRadius: 24 },
+	option: { flexDirection: "row", alignItems: "center", gap: 12, padding: 12, borderRadius: 16 },
+	optionIcon: {
+		width: 36,
+		height: 36,
+		borderRadius: 18,
+		alignItems: "center",
+		justifyContent: "center",
+	},
+	info: { width: 28, height: 28, borderRadius: 14, alignItems: "center", justifyContent: "center" },
 	flex: { flex: 1 },
 	card: { gap: 12, padding: 16, borderRadius: 20 },
 	head: { flexDirection: "row", alignItems: "center", gap: 8 },

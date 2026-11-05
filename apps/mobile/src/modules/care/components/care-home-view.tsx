@@ -17,7 +17,7 @@ import { voiceOut } from "@/lib/voice";
 import { AskBar } from "@/modules/home/components/ask-bar";
 import type { HomeModuleViewProps } from "@/modules/home/lib/module-home";
 import { useAskInbox } from "@/modules/home/store/ask-inbox";
-import { finish, logCare, restock, saveDay, saveSettings, setUp, tick } from "../data/care-actions";
+import { finish, logCare, restock, saveDay, saveSettings, tick } from "../data/care-actions";
 import { CARE_ASK_JOB, useCareUi } from "../hooks/care-ui-store";
 import { useCareToday } from "../hooks/use-care";
 import { useUv } from "../hooks/use-uv";
@@ -30,7 +30,7 @@ import {
 	weekDays,
 	weekStrip,
 } from "../lib/care-math";
-import type { CareDay, Concern, Routine, SkinType, Step } from "../lib/care-model";
+import type { CareDay, Routine, Step } from "../lib/care-model";
 import { parseCareLine } from "../lib/parse-care-line";
 import { uvLine } from "../lib/uv";
 import { careRoutes } from "../navigation";
@@ -41,7 +41,7 @@ import {
 	CareAnswerCard,
 	RoutineCard,
 	RunningLowCard,
-	SetupCard,
+	StartCard,
 	WeekCard,
 } from "./home-cards";
 
@@ -63,10 +63,6 @@ type Logged = {
 const minutesText = (minutes: number) =>
 	clock(new Date(2000, 0, 1, Math.floor(minutes / 60), minutes % 60));
 
-function toggle<T extends string>(list: readonly T[], value: T): T[] {
-	return list.includes(value) ? list.filter((item) => item !== value) : [...list, value];
-}
-
 /** Care Home: UV, the morning or night routine, body today, the week and what's running low. */
 export function CareHomeView({ actionRequest }: HomeModuleViewProps) {
 	const { data, now, today, record, routine: timeRoutine } = useCareToday();
@@ -80,9 +76,6 @@ export function CareHomeView({ actionRequest }: HomeModuleViewProps) {
 	const dismissJob = useAiJobs((state) => state.dismiss);
 	const [notice, setNotice] = useState<string | null>(null);
 	const [logged, setLogged] = useState<Logged | null>(null);
-	const [concerns, setConcerns] = useState<Concern[]>(["dark-spots", "dryness", "dandruff"]);
-	const [skin, setSkin] = useState<SkinType[]>(["normal-combination"]);
-	const [building, setBuilding] = useState(false);
 	const [locating, setLocating] = useState<string | null>(null);
 
 	const routine: Routine = ui.routine ?? timeRoutine;
@@ -226,14 +219,6 @@ export function CareHomeView({ actionRequest }: HomeModuleViewProps) {
 		// oxlint-disable-next-line react/exhaustive-deps -- runs when a line arrives
 	}, [inboxLine, data.loading]);
 
-	const build = () => {
-		setBuilding(true);
-		setUp(settings, concerns, skin, { steps, products, habits: data.habits })
-			.then(() => haptics.success())
-			.catch(failed("build the routine"))
-			.finally(() => setBuilding(false));
-	};
-
 	const locate = async () => {
 		const result = await currentPlace((stage) => setLocating(LOCATE_STAGE_LABEL[stage]));
 		setLocating(null);
@@ -297,16 +282,15 @@ export function CareHomeView({ actionRequest }: HomeModuleViewProps) {
 
 	if (data.error) return <ReadError name="Care" />;
 
-	if (!data.loading && !settings.setUp) {
+	// Care starts empty: nothing is added until the person writes it, asks AI, or picks a template.
+	if (!data.loading && data.empty) {
 		return (
 			<>
-				<SetupCard
-					concerns={concerns}
-					skin={skin}
-					busy={building}
-					onConcern={(concern) => setConcerns((list) => toggle(list, concern))}
-					onSkin={(type) => setSkin((list) => toggle(list, type))}
-					onBuild={build}
+				<StartCard
+					aiAvailable={ai.available}
+					onOwn={() => careRoutes.step(timeRoutine)}
+					onAi={careRoutes.design}
+					onTemplates={careRoutes.templates}
 				/>
 				{askBar}
 				{answers}

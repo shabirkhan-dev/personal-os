@@ -60,6 +60,28 @@ export function photoFor(name: string): string | null {
 	return match ? `catalog:${match.id}` : null;
 }
 
+/** How to apply each template step, so a template comes with its instructions. */
+const HOW_TO: Record<string, string> = {
+	Cleanser:
+		"Wet your face, massage a small amount in for about a minute, then rinse with lukewarm water and pat dry.",
+	"Niacinamide serum":
+		"Three or four drops on dry skin, pressed in with your palms. Wait a minute before the next step.",
+	"Ceramide cream": "A pea-size amount on slightly damp skin, patted in rather than rubbed.",
+	"Light moisturiser": "A pea-size amount over the face and neck, patted in.",
+	"Sunscreen SPF 50":
+		"The last morning step: two finger lengths for face and neck. Again after two to three hours outside.",
+	"Anti-dandruff wash":
+		"Lather into the scalp, not the lengths, and leave it on 3 to 5 minutes before rinsing.",
+	"Gentle combing":
+		"A wide-tooth comb on damp hair, from the ends up. Never rub hair dry with a towel.",
+	"Rosemary scalp oil":
+		"Part the hair and massage a few drops into the scalp for 3 minutes. Wash out the next morning.",
+	"Body lotion": "After the shower on damp skin: neck, elbows, arms and shins first.",
+	"Body scrub": "Gently in circles in the shower, never on the face, and not on sunburnt skin.",
+	"Nail care":
+		"Trim straight across, file the edges, push cuticles back after a shower, then a little cream.",
+};
+
 export type BuiltRoutine = { steps: Step[]; products: Product[]; habits: Habit[] };
 
 /**
@@ -94,6 +116,8 @@ export function buildRoutine(
 				openedOn: today,
 				lastsDays: entry.lastsDays,
 				price: entry.price,
+				howTo: "",
+				note: "",
 			});
 		}
 		return productId;
@@ -101,9 +125,18 @@ export function buildRoutine(
 
 	const steps: Step[] = [];
 	const step = (
-		input: Omit<Step, "id" | "order" | "days" | "short"> & Partial<Pick<Step, "days" | "short">>,
+		input: Omit<Step, "id" | "order" | "days" | "short" | "photos" | "howTo"> &
+			Partial<Pick<Step, "days" | "short" | "howTo">>,
 	) => {
-		steps.push({ days: [], short: "", ...input, id: newId(), order: steps.length });
+		steps.push({
+			days: [],
+			short: "",
+			howTo: HOW_TO[input.name] ?? "",
+			...input,
+			photos: [],
+			id: newId(),
+			order: steps.length,
+		});
 	};
 
 	const moisturizer = dry ? "Ceramide cream" : "Light moisturiser";

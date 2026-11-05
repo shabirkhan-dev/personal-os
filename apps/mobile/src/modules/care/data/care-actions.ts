@@ -2,21 +2,21 @@ import { listItems, removeItem, saveItem } from "@/lib/db/collection";
 import { dayKey, newId } from "@/lib/day";
 import { deleteJson, readJson } from "@/lib/storage/json-file";
 import { asArray, asNumber, asString, isRecord } from "@/lib/storage/parse";
-import { buildRoutine, photoFor } from "../lib/catalog";
+import { photoFor } from "../lib/catalog";
 import { emptyDay, finishRoutine, toggleStep } from "../lib/care-math";
 import {
+	type BodyArea,
 	type CareDay,
 	type CareSettings,
 	type CheckIn,
-	type Concern,
 	defaultSettings,
 	type Habit,
 	type Product,
 	type Routine,
-	type SkinType,
 	type Step,
 } from "../lib/care-model";
 import {
+	careAreas,
 	careCheckIns,
 	careDays,
 	careHabits,
@@ -29,35 +29,6 @@ import {
 
 export function saveSettings(settings: CareSettings): Promise<void> {
 	return saveItem(careSettings, settings);
-}
-
-/** The empty Home's "Build my routine": steps, a starter shelf and daily habits. */
-export async function setUp(
-	settings: CareSettings,
-	concerns: readonly Concern[],
-	skin: readonly SkinType[],
-	existing: { steps: readonly Step[]; products: readonly Product[]; habits: readonly Habit[] },
-	now = new Date(),
-): Promise<void> {
-	const built = buildRoutine(concerns, skin, dayKey(now), settings.nailDay);
-	const keep = new Set(existing.products.map((product) => product.name.toLowerCase()));
-	await Promise.all([
-		...existing.steps.map((step) => removeItem(careSteps, step.id)),
-		...existing.habits.map((habit) => removeItem(careHabits, habit.id)),
-	]);
-	await Promise.all([
-		...built.steps.map((step) => saveItem(careSteps, step)),
-		...built.habits.map((habit) => saveItem(careHabits, habit)),
-		...built.products
-			.filter((product) => !keep.has(product.name.toLowerCase()))
-			.map((product) => saveItem(careProducts, product)),
-	]);
-	await saveItem(careSettings, {
-		...settings,
-		setUp: true,
-		concerns: [...concerns],
-		skin: [...skin],
-	});
 }
 
 export function saveDay(day: CareDay): Promise<void> {
@@ -146,8 +117,15 @@ export function logCare(
 	});
 }
 
-export function saveStep(step: Omit<Step, "id"> & { id?: string }): Promise<void> {
-	return saveItem(careSteps, { ...step, id: step.id ?? newId() });
+export function saveStep(
+	step: Omit<Step, "id" | "photos" | "howTo"> & { id?: string; photos?: string[]; howTo?: string },
+): Promise<void> {
+	return saveItem(careSteps, {
+		...step,
+		id: step.id ?? newId(),
+		photos: step.photos ?? [],
+		howTo: step.howTo ?? "",
+	});
 }
 
 export function deleteStep(step: Step): Promise<void> {
@@ -163,9 +141,16 @@ export function deleteHabit(habit: Habit): Promise<void> {
 }
 
 export async function saveProduct(
-	input: Omit<Product, "id" | "photo"> & { id?: string; photo?: string | null },
+	input: Omit<Product, "id" | "photo" | "howTo" | "note"> & {
+		id?: string;
+		photo?: string | null;
+		howTo?: string;
+		note?: string;
+	},
 ): Promise<Product> {
 	const product: Product = {
+		howTo: "",
+		note: "",
 		...input,
 		id: input.id ?? newId(),
 		name: input.name.trim(),
@@ -220,6 +205,8 @@ export async function migrateOldSkincare(): Promise<boolean> {
 			days: [],
 			short: "",
 			order,
+			photos: [],
+			howTo: "",
 		})),
 	);
 	const products: Product[] = asArray(raw.products, (item) => {
@@ -230,6 +217,8 @@ export async function migrateOldSkincare(): Promise<boolean> {
 		return {
 			id: asString(item.id, "") || newId(),
 			name,
+			howTo: "",
+			note: "",
 			area: "face" as const,
 			photo: photoFor(name),
 			openedOn,
@@ -264,4 +253,87 @@ export async function migrateOldSkincare(): Promise<boolean> {
 	}
 	await deleteJson("skincare");
 	return true;
+}
+
+// --- body areas ---------------------------------------------------------------------------------
+
+export function saveArea(area: Omit<BodyArea, "id"> & { id?: string }): Promise<void> {
+	return saveItem(careAreas, { ...area, id: area.id ?? newId() });
+}
+
+export function deleteArea(area: BodyArea): Promise<void> {
+	return removeItem(careAreas, area.id);
+}
+
+// --- templates and AI ---------------------------------------------------------------------------
+
+export type RoutinePlan = {
+	steps: (Omit<Step, "id" | "order"> & { order?: number })[];
+	products: Omit<Product, "id">[];
+	habits: Omit<Habit, "id" | "order">[];
+	areas: Omit<BodyArea, "id" | "order">[];
+};
+
+/**
+ * Adds a template's or AI's routine to what the person has, or replaces their steps and habits
+ * with it. Products already on the shelf (same name) are kept, not doubled; steps point at them.
+ */
+export async function applyPlan(
+	plan: RoutinePlan,
+	existing: {
+		steps: readonly Step[];
+		products: readonly Product[];
+		habits: readonly Habit[];
+		areas: readonly BodyArea[];
+	},
+	mode: "add" | "replace",
+	settings: CareSettings,
+): Promise<void> {
+	if (mode === "replace") {
+		await Promise.all([
+			...existing.steps.map((step) => removeItem(careSteps, step.id)),
+			...existing.habits.map((habit) => removeItem(careHabits, habit.id)),
+		]);
+	}
+	const shelf = new Map(
+		existing.products.map((product) => [product.name.toLowerCase(), product.id]),
+	);
+	const productIds = new Map<string, string>();
+	for (const product of plan.products) {
+		const known = shelf.get(product.name.toLowerCase());
+		const id = known ?? newId();
+		productIds.set(product.name.toLowerCase(), id);
+		// oxlint-disable-next-line eslint/no-await-in-loop -- a handful at most
+		if (!known) await saveItem(careProducts, { ...product, id });
+	}
+	const base = mode === "replace" ? 0 : existing.steps.length;
+	const habitBase = mode === "replace" ? 0 : existing.habits.length;
+	const haveHabit = new Set(
+		mode === "replace" ? [] : existing.habits.map((habit) => habit.name.toLowerCase()),
+	);
+	const haveArea = new Set(existing.areas.map((area) => area.name.toLowerCase()));
+	await Promise.all([
+		...plan.steps.map((step, index) => {
+			const linked = step.productId
+				? (productIds.get(step.productId.toLowerCase()) ?? step.productId)
+				: null;
+			return saveItem(careSteps, {
+				...step,
+				productId: linked,
+				id: newId(),
+				order: base + index,
+			});
+		}),
+		...plan.habits
+			.filter((habit) => !haveHabit.has(habit.name.toLowerCase()))
+			.map((habit, index) =>
+				saveItem(careHabits, { ...habit, id: newId(), order: habitBase + index }),
+			),
+		...plan.areas
+			.filter((area) => !haveArea.has(area.name.toLowerCase()))
+			.map((area, index) =>
+				saveItem(careAreas, { ...area, id: newId(), order: existing.areas.length + index }),
+			),
+	]);
+	if (!settings.setUp) await saveItem(careSettings, { ...settings, setUp: true });
 }

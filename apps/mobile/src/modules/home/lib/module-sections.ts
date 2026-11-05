@@ -49,6 +49,8 @@ export const MODULE_SECTIONS: Record<string, readonly Section[]> = {
 		{ label: "Hair", href: "/care/hair" },
 		{ label: "Body", href: "/care/body" },
 		{ label: "Weekly check-in", href: "/care/check-in" },
+		{ label: "Templates", href: "/care/templates" },
+		{ label: "Design with AI", href: "/care/design" },
 	],
 	Food: [
 		{ label: "Log a meal", href: "/food/log" },

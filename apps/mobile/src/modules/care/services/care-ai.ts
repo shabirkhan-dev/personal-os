@@ -10,6 +10,20 @@ const AI_TIMEOUT_MS = 45_000;
 
 export type CareAnswer = { answer: string; followUps: string[] };
 
+export type RoutineDraftAi = {
+	steps: {
+		routine: "morning" | "night";
+		area: "face" | "hair" | "body";
+		name: string;
+		detail: string;
+		howTo: string;
+		minutes: number;
+		days: number[];
+	}[];
+	habits: { name: string; detail: string }[];
+	note: string;
+};
+
 export function careAiMessage(error: unknown): string {
 	const limit = aiLimitMessage(error);
 	if (limit) return limit;
@@ -55,5 +69,27 @@ export function useCareAi() {
 		[available, token],
 	);
 
-	return useMemo(() => ({ available, ask }), [available, ask]);
+	const designRoutine = useCallback(
+		async (input: {
+			concerns: readonly string[];
+			skin: readonly string[];
+			notes: string;
+			products: readonly string[];
+		}): Promise<RoutineDraftAi> => {
+			if (!available || !token) throw new Error("signed-out");
+			return apiClient.post<RoutineDraftAi>(
+				"/ai/care/design-routine",
+				{
+					concerns: input.concerns.slice(0, 12),
+					skin: input.skin.slice(0, 4),
+					notes: input.notes.slice(0, 400),
+					products: input.products.slice(0, 30).map((name) => name.slice(0, 60)),
+				},
+				{ accessToken: token, timeoutMs: AI_TIMEOUT_MS },
+			);
+		},
+		[available, token],
+	);
+
+	return useMemo(() => ({ available, ask, designRoutine }), [available, ask, designRoutine]);
 }

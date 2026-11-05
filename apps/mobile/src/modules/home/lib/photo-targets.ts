@@ -1,12 +1,43 @@
 import type { RecordStore } from "@/lib/db/record-store";
 import { type PhotoTarget, photoTarget } from "@/lib/photos/photo-sync";
 import { pieces, wishes } from "@/modules/fashion/data/collections";
+import { careProducts, careSteps } from "@/modules/care/data/collections";
 import { groceries, meals, myRecipes } from "@/modules/food/data/collections";
 import { healthMedicines, healthRecords } from "@/modules/health/data/collections";
 import { wishlistDreams, wishlistOwned } from "@/modules/wishlist/data/collections";
 import type { Photo } from "@/modules/wishlist/lib/wishlist-model";
 
 const filePhoto = (photo: Photo) => (photo?.kind === "file" ? photo.uri : null);
+
+/** Care steps keep up to four photos each; every one on the phone uploads on its own. */
+const careStepPhotos: PhotoTarget = {
+	name: careSteps.name,
+	jobs: async (store: RecordStore) => {
+		const read = async () =>
+			(await store.list(careSteps.name)).flatMap((raw) => {
+				const step = careSteps.parse(raw);
+				return step ? [step] : [];
+			});
+		return (await read()).flatMap((step) =>
+			step.photos
+				.filter((uri) => uri.startsWith("file://"))
+				.map((uri) => ({
+					collection: careSteps.name,
+					id: `${step.id}:${uri}`,
+					uri,
+					apply: async (url: string) => {
+						const current = (await read()).find((row) => row.id === step.id);
+						if (!current?.photos.includes(uri)) return false;
+						await store.put(careSteps.name, current.id, {
+							...current,
+							photos: current.photos.map((photo) => (photo === uri ? url : photo)),
+						});
+						return true;
+					},
+				})),
+		);
+	},
+};
 
 /** Grocery lists keep a photo per item, so each item on the phone uploads on its own. */
 const groceryPhotos: PhotoTarget = {
@@ -82,6 +113,12 @@ export const PHOTO_TARGETS = [
 		(recipe, image) => ({ ...recipe, image }),
 	),
 	groceryPhotos,
+	careStepPhotos,
+	photoTarget(
+		careProducts,
+		(product) => product.photo,
+		(product, photo) => ({ ...product, photo }),
+	),
 	photoTarget(
 		wishlistDreams,
 		(dream) => filePhoto(dream.photo),

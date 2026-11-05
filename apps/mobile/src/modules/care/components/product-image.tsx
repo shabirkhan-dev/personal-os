@@ -1,5 +1,6 @@
 import { Image, type ImageStyle, type StyleProp, StyleSheet, View } from "react-native";
 import { Icon } from "@/components/icons";
+import { photoSource } from "@/lib/photos/local-photo";
 import { usePoTheme } from "@/theme";
 import { CATALOG_IMAGES } from "../lib/catalog-images";
 
@@ -21,7 +22,8 @@ export function ProductImage({
 	const bundled = photo?.startsWith("catalog:")
 		? CATALOG_IMAGES[photo.slice("catalog:".length)]
 		: undefined;
-	const source = bundled ?? (photo && !photo.startsWith("catalog:") ? { uri: photo } : undefined);
+	const source =
+		bundled ?? (photo && !photo.startsWith("catalog:") ? { uri: photoSource(photo) } : undefined);
 	const box = [
 		fill ? { alignSelf: "stretch" as const, aspectRatio: 1 } : { width: size, height: size },
 		{ borderRadius: radius, backgroundColor: colors.bgSubtle },

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
-import { Footer, ProgressBar, ScreenTitle } from "@/components/module-ui";
+import { FilterChip, Footer, ProgressBar, ScreenTitle } from "@/components/module-ui";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
@@ -9,44 +9,31 @@ import { TextField } from "@/components/ui/text-field";
 import { haptics } from "@/lib/haptics";
 import { useFoodWater } from "@/modules/food";
 import { usePoTheme } from "@/theme";
-import { deleteHabit, logCare, saveHabit, tick, toggleHabit } from "../data/care-actions";
+import {
+	deleteArea,
+	deleteHabit,
+	logCare,
+	saveArea,
+	saveHabit,
+	tick,
+	toggleHabit,
+} from "../data/care-actions";
 import { useCareToday } from "../hooks/use-care";
 import { lastDone, ratingWord, stepsOn, weekdayName } from "../lib/care-math";
-import type { CheckIn, Habit, Metric } from "../lib/care-model";
+import {
+	type BodyArea,
+	type CheckIn,
+	type Habit,
+	METRIC_LABELS,
+	METRICS,
+	type Metric,
+} from "../lib/care-model";
+import { careRoutes } from "../navigation";
 import { CareScreen } from "./care-screen";
 import { Card, CardHead } from "./home-cards";
 import { ProductImage } from "./product-image";
 
-type AreaRow = { name: string; metrics: Metric[]; issue: string; care: string };
-
-const AREA_ROWS: readonly AreaRow[] = [
-	{
-		name: "Neck and arms",
-		metrics: ["tan", "dark-spots"],
-		issue: "Tan and dark spots",
-		care: "SPF daily · lotion at night",
-	},
-	{
-		name: "Back",
-		metrics: ["dark-spots"],
-		issue: "Dark spots",
-		care: "Body lotion · loose cotton in summer",
-	},
-	{
-		name: "Elbows and shins",
-		metrics: ["face-dryness"],
-		issue: "Dry patches",
-		care: "Thicker lotion after shower",
-	},
-	{
-		name: "Hands and nails",
-		metrics: ["nails"],
-		issue: "Trim weekly",
-		care: "File, cuticles, cream",
-	},
-];
-
-function areaState(row: AreaRow, checkIn: CheckIn | null) {
+function areaState(row: BodyArea, checkIn: CheckIn | null) {
 	const values = row.metrics.flatMap((metric) => {
 		const value = checkIn?.ratings[metric];
 		return value ? [value] : [];
@@ -74,6 +61,8 @@ export function BodyScreen() {
 	const { steps, products, habits, days } = data;
 	const water = useFoodWater();
 	const [adding, setAdding] = useState<{ name: string; detail: string } | null>(null);
+	const [area, setArea] = useState<(Omit<BodyArea, "id"> & { id?: string }) | null>(null);
+	const { areas } = data;
 	const [notice, setNotice] = useState<string | null>(null);
 	const latest = data.checkIns.at(-1) ?? null;
 	const nail = steps.find((step) => /nail/i.test(step.name));
@@ -99,11 +88,48 @@ export function BodyScreen() {
 		<CareScreen>
 			<ScreenTitle eyebrow="Skin below the neck · hands · teeth" title="Body and nails" />
 			<Card>
-				<CardHead title="Your areas" right={latest ? `from ${latest.id.slice(5)}` : "4 in focus"} />
-				{AREA_ROWS.map((row) => {
+				<CardHead
+					title="Your areas"
+					right={
+						areas.length
+							? latest
+								? `from ${latest.id.slice(5)}`
+								: `${areas.length} in focus`
+							: undefined
+					}
+				/>
+				{areas.length === 0 ? (
+					<View style={styles.emptyAreas}>
+						<PoText variant="meta13" tone="textSecondary">
+							Add the parts you look after, like neck and arms or elbows, with what's going on and
+							what helps. Or start from the Body areas template.
+						</PoText>
+						<View style={styles.row}>
+							<PillButton
+								label="Add an area"
+								variant="secondary"
+								style={styles.flex}
+								onPress={() => setArea({ name: "", issue: "", care: "", metrics: [], order: 0 })}
+							/>
+							<PillButton
+								label="Templates"
+								variant="secondary"
+								style={styles.flex}
+								onPress={careRoutes.templates}
+							/>
+						</View>
+					</View>
+				) : null}
+				{areas.map((row) => {
 					const state = areaState(row, latest);
 					return (
-						<View key={row.name} style={styles.area}>
+						<Pressable
+							key={row.id}
+							accessibilityRole="button"
+							accessibilityHint="Opens it to change"
+							onPress={() => setArea(row)}
+							style={styles.area}
+						>
 							<View style={styles.areaHead}>
 								<PoText variant="row15" style={styles.flex}>
 									{row.name}
@@ -116,12 +142,27 @@ export function BodyScreen() {
 								</PoText>
 							</View>
 							<ProgressBar share={state.share} tone={state.bar} />
-							<PoText variant="meta13" tone="textSecondary">
-								{row.care}
-							</PoText>
-						</View>
+							{row.care ? (
+								<PoText variant="meta13" tone="textSecondary">
+									{row.care}
+								</PoText>
+							) : null}
+						</Pressable>
 					);
 				})}
+				{areas.length > 0 ? (
+					<Pressable
+						accessibilityRole="button"
+						onPress={() =>
+							setArea({ name: "", issue: "", care: "", metrics: [], order: areas.length })
+						}
+						style={styles.addArea}
+					>
+						<PoText variant="meta13" tone="textLink">
+							Add an area
+						</PoText>
+					</Pressable>
+				) : null}
 			</Card>
 
 			{nail ? (
@@ -248,11 +289,92 @@ export function BodyScreen() {
 					</View>
 				) : null}
 			</Sheet>
+			<Sheet
+				visible={area !== null}
+				title={area?.id ? "Edit area" : "Add an area"}
+				onClose={() => setArea(null)}
+				action={{
+					label: "Save",
+					onPress: () => {
+						if (!area?.name.trim()) {
+							setNotice("Name the area first.");
+							return;
+						}
+						saveArea({
+							...area,
+							name: area.name.trim(),
+							issue: area.issue.trim(),
+							care: area.care.trim(),
+						})
+							.then(() => haptics.success())
+							.catch(failed("save the area"));
+						setArea(null);
+					},
+				}}
+			>
+				{area ? (
+					<View style={styles.sheet}>
+						<TextField
+							label="Area"
+							value={area.name}
+							onChangeText={(name) => setArea({ ...area, name })}
+							placeholder="Neck and arms"
+						/>
+						<TextField
+							label="What's going on"
+							value={area.issue}
+							onChangeText={(issue) => setArea({ ...area, issue })}
+							placeholder="Tan and dark spots"
+						/>
+						<TextField
+							label="What helps"
+							value={area.care}
+							onChangeText={(care) => setArea({ ...area, care })}
+							placeholder="SPF daily · lotion at night"
+						/>
+						<PoText variant="meta13" tone="textSecondary">
+							Show how it's going from your check-in
+						</PoText>
+						<View style={styles.chips}>
+							{METRICS.map((metric: Metric) => (
+								<FilterChip
+									key={metric}
+									label={METRIC_LABELS[metric]}
+									selected={area.metrics.includes(metric)}
+									onPress={() =>
+										setArea({
+											...area,
+											metrics: area.metrics.includes(metric)
+												? area.metrics.filter((item) => item !== metric)
+												: [...area.metrics, metric],
+										})
+									}
+								/>
+							))}
+						</View>
+						{area.id ? (
+							<PillButton
+								label="Remove area"
+								variant="ghost"
+								onPress={() => {
+									const existing = areas.find((item) => item.id === area.id);
+									if (existing) void deleteArea(existing).catch(failed("remove the area"));
+									setArea(null);
+								}}
+							/>
+						) : null}
+					</View>
+				) : null}
+			</Sheet>
 		</CareScreen>
 	);
 }
 
 const styles = StyleSheet.create({
+	emptyAreas: { gap: 12 },
+	addArea: { alignSelf: "flex-start", paddingVertical: 4 },
+	row: { flexDirection: "row", gap: 8 },
+	chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 	flex: { flex: 1 },
 	area: { gap: 8, paddingVertical: 8 },
 	areaHead: { flexDirection: "row", alignItems: "center", gap: 8 },

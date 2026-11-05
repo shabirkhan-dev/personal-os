@@ -68,6 +68,10 @@ export type Step = {
 	/** One word for the week strip: "Wash", "Oil", "Scrub". */
 	short: string;
 	order: number;
+	/** Photos showing how it's done or what it looks like: file:// until uploaded, then R2. */
+	photos: string[];
+	/** How to apply it, in the person's own words or from AI: amount, where, how long. */
+	howTo: string;
 };
 
 export type Product = {
@@ -82,6 +86,23 @@ export type Product = {
 	lastsDays: number;
 	/** Rupees for a new one. */
 	price: number;
+	/** How to use it: "2 pumps on damp skin, morning only". */
+	howTo: string;
+	/** Anything else: where to buy it, what it replaced. */
+	note: string;
+};
+
+/** A part of the body the person looks after, with what's going on and what they do for it. */
+export type BodyArea = {
+	id: string;
+	name: string;
+	/** "Tan and dark spots". */
+	issue: string;
+	/** "SPF daily · lotion at night". */
+	care: string;
+	/** Check-in ratings that show how it's going. */
+	metrics: Metric[];
+	order: number;
 };
 
 /** A small daily habit outside the routines: floss, lotion, water. */
@@ -220,6 +241,33 @@ export function parseStep(raw: unknown): Step | null {
 		days: asArray(raw.days, weekday),
 		short: asString(raw.short, "").slice(0, 8),
 		order: asNumber(raw.order, 0),
+		photos: photoList(raw.photos),
+		howTo: asString(raw.howTo, "").trim().slice(0, 1000),
+	};
+}
+
+const PHOTO = /^(catalog:|file:\/\/|https:\/\/)/;
+/** Up to four photo links, the rest dropped. */
+function photoList(value: unknown): string[] {
+	return strings(value)
+		.filter((item) => PHOTO.test(item))
+		.slice(0, 4);
+}
+
+export function parseBodyArea(raw: unknown): BodyArea | null {
+	if (!isRecord(raw)) return null;
+	const id = asString(raw.id, "");
+	const name = asString(raw.name, "").trim().slice(0, 60);
+	if (!id || !name) return null;
+	return {
+		id,
+		name,
+		issue: asString(raw.issue, "").trim().slice(0, 80),
+		care: asString(raw.care, "").trim().slice(0, 120),
+		metrics: strings(raw.metrics).filter((item): item is Metric =>
+			(METRICS as readonly string[]).includes(item),
+		),
+		order: asNumber(raw.order, 0),
 	};
 }
 
@@ -238,6 +286,8 @@ export function parseProduct(raw: unknown): Product | null {
 		openedOn,
 		lastsDays: Math.min(730, Math.max(0, Math.round(asNumber(raw.lastsDays, 0)))),
 		price: Math.max(0, Math.round(asNumber(raw.price, 0))),
+		howTo: asString(raw.howTo, "").trim().slice(0, 600),
+		note: asString(raw.note, "").trim().slice(0, 300),
 	};
 }
 

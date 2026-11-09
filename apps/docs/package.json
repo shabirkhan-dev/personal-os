@@ -13,16 +13,16 @@
     "format": "oxfmt"
   },
   "dependencies": {
-    "fumadocs-core": "16.17.9",
-    "fumadocs-mdx": "15.4.10",
-    "fumadocs-ui": "16.17.9",
-    "lucide-react": "^1.49.0",
-    "next": "16.4.3",
+    "fumadocs-core": "16.18.1",
+    "fumadocs-mdx": "15.5.0",
+    "fumadocs-ui": "16.18.1",
+    "lucide-react": "^1.70.0",
+    "next": "16.4.5",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "tailwind-merge": "^3.7.0",
     "flexsearch": "^0.8.212",
-    "@ai-sdk/react": "^4.0.163",
+    "@ai-sdk/react": "^4.0.168",
     "ai": "^7.0.126",
     "@radix-ui/react-presence": "^1.1.10",
     "@openrouter/ai-sdk-provider": "^3.1.0",
@@ -35,7 +35,7 @@
     "unist-util-visit": "^5.2.0"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.3.3",
+    "@tailwindcss/postcss": "^4.3.5",
     "@types/mdx": "^2.0.14",
     "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",

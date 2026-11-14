@@ -18,6 +18,10 @@ interface CloudflareBindings {
 	R2_BUCKET_NAME?: string;
 	R2_ACCESS_KEY_ID?: string;
 	R2_SECRET_ACCESS_KEY?: string;
+	/** Optional: crash reports (Sentry project DSN). Without it nothing is sent. */
+	SENTRY_DSN?: string;
+	/** Optional: the release name crash reports carry (for example the git tag). */
+	RELEASE?: string;
 	R2_PUBLIC_URL?: string;
 	/** Only outside Workers (tests, scripts); on Workers the database comes from HYPERDRIVE. */
 	DATABASE_URL?: string;

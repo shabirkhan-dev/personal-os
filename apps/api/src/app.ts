@@ -48,6 +48,11 @@ export function createApp(options: AppOptions = {}) {
 	const app = new Hono<AppEnv>()
 		.use(requestId({ generator: () => `req_${crypto.randomUUID()}` }))
 		.use(secureHeaders())
+		// API answers are personal: never kept by browsers, proxies or the CDN.
+		.use(async (c, next) => {
+			await next();
+			if (!c.res.headers.has("Cache-Control")) c.res.headers.set("Cache-Control", "no-store");
+		})
 		.use(async (c, next) => {
 			try {
 				c.set("config", loadConfig(c.env));

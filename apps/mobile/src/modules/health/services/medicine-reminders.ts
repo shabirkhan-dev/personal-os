@@ -1,77 +1,57 @@
-import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 import { listItems } from "@/lib/db/collection";
-import {
-	prepareNotifications,
-	requestReminderPermission,
-} from "@/modules/onboarding/services/reminders.service";
-import { healthMedicines } from "../data/collections";
-import type { Medicine } from "../lib/health-model";
+import { requestReminderPermission } from "@/modules/onboarding/services/reminders.service";
+import { loadReminderSettings } from "@/modules/reminders/data/collections";
+import { followUpPlans, hm, type Planned } from "@/modules/reminders/lib/reminder-plan";
+import { syncGroup } from "@/modules/reminders/services/reminder-engine";
+import { healthDoses, healthMedicines } from "../data/collections";
+import type { DoseLog, Medicine } from "../lib/health-model";
 
 /**
- * A daily reminder at each dose time of each medicine you're taking. Rescheduled whenever the
- * medicines change; nothing is shown without notification permission.
+ * A daily reminder at each dose time of each medicine you're taking, with Taken and Snooze
+ * buttons, and a follow-up when a dose isn't marked. Re-planned whenever the medicines or the
+ * dose log change; nothing is shown without notification permission.
  */
 
-const KIND = "personal-os.medicine";
-const CHANNEL_ID = "medicines";
-
-let lastPlan = "";
+/** Follow-ups are planned this many days ahead (one-off reminders count against iOS's limit). */
+const FOLLOW_UP_DAYS = Platform.OS === "ios" ? 1 : 3;
 
 /** Asks for notification permission, then schedules every medicine's reminders at once. */
 export async function allowMedicineReminders(): Promise<void> {
 	if (!(await requestReminderPermission())) return;
-	lastPlan = "";
-	await scheduleMedicineReminders(await listItems(healthMedicines));
+	await scheduleMedicineReminders(await listItems(healthMedicines), await listItems(healthDoses));
 }
 
-export async function scheduleMedicineReminders(medicines: readonly Medicine[]): Promise<number> {
+export async function scheduleMedicineReminders(
+	medicines: readonly Medicine[],
+	doses: readonly DoseLog[],
+	now = new Date(),
+): Promise<number> {
 	if (Platform.OS === "web") return 0;
-	const plan = medicines
+	const settings = await loadReminderSettings();
+	const times = medicines
 		.filter((medicine) => medicine.active)
 		.flatMap((medicine) => medicine.times.map((minutes) => ({ medicine, minutes })));
-	const key = JSON.stringify(
-		plan.map((item) => [item.medicine.id, item.medicine.name, item.medicine.dose, item.minutes]),
-	);
-	if (key === lastPlan) return plan.length;
-
-	await prepareNotifications();
-	if (Platform.OS === "android") {
-		await Notifications.setNotificationChannelAsync(CHANNEL_ID, {
-			name: "Medicine reminders",
-			importance: Notifications.AndroidImportance.HIGH,
-			sound: "default",
-		});
-	}
-	const scheduled = await Notifications.getAllScheduledNotificationsAsync();
-	await Promise.all(
-		scheduled
-			.filter((request) => request.content.data?.kind === KIND)
-			.map((request) => Notifications.cancelScheduledNotificationAsync(request.identifier)),
-	);
-	const { granted } = await Notifications.getPermissionsAsync();
-	if (!granted || plan.length === 0) {
-		lastPlan = granted ? key : "";
-		return 0;
-	}
-	await Promise.all(
-		plan.map(({ medicine, minutes }) =>
-			Notifications.scheduleNotificationAsync({
-				content: {
-					title: `Time for ${medicine.name}`,
-					body: medicine.dose ? `${medicine.dose}. Tap to mark it taken.` : "Tap to mark it taken.",
-					sound: "default",
-					data: { kind: KIND, url: "personalos://health/medicines" },
-				},
-				trigger: {
-					type: Notifications.SchedulableTriggerInputTypes.DAILY,
-					hour: Math.floor(minutes / 60),
-					minute: minutes % 60,
-					channelId: CHANNEL_ID,
-				},
-			}),
-		),
-	);
-	lastPlan = key;
-	return plan.length;
+	const daily: Planned[] = times.map(({ medicine, minutes }) => ({
+		id: `dose-${medicine.id}-${minutes}`,
+		title: `Time for ${medicine.name}`,
+		body: medicine.dose ? `${medicine.dose}. Tap Taken once you have.` : "Tap Taken once you have.",
+		when: { daily: hm(minutes) },
+		url: "personalos://health/medicines",
+		actions: "medicine",
+		critical: true,
+		data: { medicineId: medicine.id, minutes },
+	}));
+	const followUps = followUpPlans({
+		settings,
+		doses: times.map(({ medicine, minutes }) => ({
+			medicineId: medicine.id,
+			name: medicine.name,
+			minutes,
+		})),
+		marked: doses,
+		now,
+		days: FOLLOW_UP_DAYS,
+	});
+	return syncGroup("medicine", [...daily, ...followUps]);
 }

@@ -1,0 +1,52 @@
+.page {
+	max-width: 720px;
+	margin: 0 auto;
+	padding: 48px 20px 80px;
+}
+
+.back {
+	color: var(--text-link);
+	text-decoration: none;
+	font: 500 15px/20px var(--font-sans);
+}
+
+.eyebrow {
+	margin: 32px 0 8px;
+	color: var(--text-tertiary);
+	font: 400 11px/16px var(--font-mono);
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.title {
+	margin: 0 0 16px;
+	font: 600 36px/42px var(--font-sans);
+}
+
+.intro {
+	margin: 0 0 32px;
+	color: var(--text-secondary);
+	font: 400 17px/26px var(--font-sans);
+}
+
+.section {
+	margin: 0 0 16px;
+	padding: 20px;
+	border-radius: 20px;
+	background: var(--bg-surface);
+}
+
+.section h2 {
+	margin: 0 0 8px;
+	font: 600 18px/24px var(--font-sans);
+}
+
+.section p {
+	margin: 8px 0 0;
+	color: var(--text-secondary);
+	font: 400 15px/22px var(--font-sans);
+}
+
+.contact {
+	color: var(--text-link);
+}

@@ -1,12 +1,20 @@
-# CD: staged release workflow with overridable deploy hooks.
+# CD: every push to main passes the full quality gate first; then database migrations run
+# (when DATABASE_URL is set) and the live API is checked once Workers Builds has deployed it.
+# The Workers themselves deploy through Cloudflare Workers Builds (see /docs/deploy).
+#
+# Repository settings this uses (Settings → Secrets and variables → Actions):
+#   secret   DATABASE_URL  Neon connection string for production migrations (optional)
+#   variable API_URL       e.g. https://api.example.com (optional; enables the smoke check)
 name: CD
 
 on:
   push:
     branches: [main]
-    tags:
-      - "v*"
   workflow_dispatch:
+
+concurrency:
+  group: cd-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   quality-gate:
@@ -39,34 +47,56 @@ jobs:
         env:
           TEST_DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/ci
 
-  deploy-staging:
-    if: github.ref == 'refs/heads/main'
+  migrate:
     needs: quality-gate
     runs-on: ubuntu-latest
-    environment: staging
-    steps:
-      - uses: actions/checkout@v4
-      - name: Deploy to staging
-        run: |
-          echo "Replace with your staging deploy command."
-          echo "Example: bun run deploy:staging"
-      - name: Staging health check
-        run: |
-          echo "Replace with staging health check."
-          echo "Example: curl --fail $STAGING_HEALTHCHECK_URL"
-
-  deploy-production:
-    if: startsWith(github.ref, 'refs/tags/v')
-    needs: quality-gate
-    runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment: production
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
     steps:
       - uses: actions/checkout@v4
-      - name: Deploy to production
+
+      - name: Skip without a database
+        if: env.DATABASE_URL == ''
+        run: echo "::notice::DATABASE_URL is not set; migrations skipped (run them by hand, see /docs/deploy)."
+
+      - name: Setup Bun
+        if: env.DATABASE_URL != ''
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+
+      - name: Install dependencies
+        if: env.DATABASE_URL != ''
+        run: bun install --frozen-lockfile
+
+      - name: Apply migrations
+        if: env.DATABASE_URL != ''
+        run: bun --cwd=apps/api run db:migrate
+
+  smoke:
+    needs: migrate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      API_URL: ${{ vars.API_URL }}
+    steps:
+      - name: Skip without an API URL
+        if: env.API_URL == ''
+        run: echo "::notice::API_URL is not set; smoke check skipped."
+
+      - name: Wait for the deploy and check the API
+        if: env.API_URL != ''
         run: |
-          echo "Replace with your production deploy command."
-          echo "Example: bun run deploy:production"
-      - name: Production health check
-        run: |
-          echo "Replace with production health check."
-          echo "Example: curl --fail $PROD_HEALTHCHECK_URL"
+          # Workers Builds deploys in parallel; give it up to ten minutes to answer healthy.
+          for attempt in $(seq 1 20); do
+            if curl --fail --silent --show-error --max-time 10 "$API_URL/api/v1/ready" > /dev/null &&
+               curl --fail --silent --show-error --max-time 10 "$API_URL/api/v1/health" | grep -q '"status":"ok"'; then
+              echo "API is healthy (attempt $attempt)."
+              exit 0
+            fi
+            sleep 30
+          done
+          echo "::error::The API did not answer healthy at $API_URL"
+          exit 1

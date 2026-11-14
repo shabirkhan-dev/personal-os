@@ -79,6 +79,16 @@
       "types": "./src/health/index.ts",
       "import": "./src/health/index.ts",
       "default": "./src/health/index.ts"
+    },
+    "./legal": {
+      "types": "./src/legal.ts",
+      "import": "./src/legal.ts",
+      "default": "./src/legal.ts"
+    },
+    "./error-report": {
+      "types": "./src/error-report.ts",
+      "import": "./src/error-report.ts",
+      "default": "./src/error-report.ts"
     }
   },
   "scripts": {

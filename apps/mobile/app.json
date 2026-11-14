@@ -2,7 +2,7 @@
   "expo": {
     "name": "Personal OS",
     "slug": "personal-os-",
-    "version": "0.1.0",
+    "version": "0.5.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "personalos",
@@ -33,6 +33,7 @@
         "android.permission.SYSTEM_ALERT_WINDOW"
       ],
       "permissions": [
+        "android.permission.SCHEDULE_EXACT_ALARM",
         "android.permission.health.READ_BLOOD_GLUCOSE",
         "android.permission.health.READ_BLOOD_PRESSURE",
         "android.permission.health.READ_BODY_TEMPERATURE",
@@ -68,6 +69,7 @@
         }
       ],
       "expo-updates",
+      "expo-background-task",
       [
         "expo-speech-recognition",
         {
@@ -124,6 +126,57 @@
         {
           "NSHealthShareUsageDescription": "Personal OS reads your steps, sleep, heart rate, blood pressure, blood sugar, oxygen, temperature and weight to show them in Health.",
           "NSHealthUpdateUsageDescription": "Personal OS doesn't write to Apple Health; this is only asked by the system."
+        }
+      ],
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "Today",
+              "label": "Today",
+              "description": "Next prayer, water and money left",
+              "minWidth": "250dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 4,
+              "targetCellHeight": 2,
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000
+            },
+            {
+              "name": "Water",
+              "label": "Water",
+              "description": "Today's water with a +250 ml button",
+              "minWidth": "110dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 2,
+              "targetCellHeight": 2,
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000
+            },
+            {
+              "name": "Tasbih",
+              "label": "Tasbih",
+              "description": "Tap to count, right on your home screen",
+              "minWidth": "110dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 2,
+              "targetCellHeight": 2,
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000
+            },
+            {
+              "name": "Money",
+              "label": "Money left",
+              "description": "What's left of this month's budget",
+              "minWidth": "110dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 2,
+              "targetCellHeight": 2,
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000
+            }
+          ]
         }
       ]
     ],

@@ -2,33 +2,8 @@ import * as Notifications from "expo-notifications";
 import { router } from "expo-router";
 import { useEffect } from "react";
 import { Platform } from "react-native";
-import { useCollection } from "@/lib/db/collection";
-import { applications } from "@/modules/career/data/collections";
-import { financeBills } from "@/modules/finance/data/collections";
-import { useAssistantSettings } from "../data/assistant-settings";
-import { pathOf, planNudges } from "../lib/nudges";
-import { scheduleNudges } from "../services/assistant-nudges";
-
-/** Keeps the assistant's nudges planned from the latest bills, applications and settings. */
-export function useAssistantNudges() {
-	const { loading, settings } = useAssistantSettings();
-	const bills = useCollection(financeBills);
-	const apps = useCollection(applications);
-	const ready = !loading && !bills.isPending && !apps.isPending;
-
-	useEffect(() => {
-		if (!ready) return;
-		const nudges = planNudges({
-			settings,
-			bills: bills.data ?? [],
-			applications: apps.data ?? [],
-			now: new Date(),
-		});
-		scheduleNudges(nudges).catch((error: unknown) =>
-			console.warn("[assistant] could not schedule nudges", error),
-		);
-	}, [ready, settings, bills.data, apps.data]);
-}
+import { handleReminderAction } from "@/modules/reminders/services/reminder-actions";
+import { pathOf } from "../lib/nudges";
 
 /** Taps already followed, so the tap that opened the app is not followed again. */
 const opened = new Set<string>();
@@ -46,6 +21,12 @@ export function useNotificationLinks() {
 			const id = `${response.notification.request.identifier}:${response.notification.date}`;
 			if (opened.has(id)) return;
 			opened.add(id);
+			if (response.actionIdentifier !== Notifications.DEFAULT_ACTION_IDENTIFIER) {
+				handleReminderAction(response).catch((error: unknown) =>
+					console.warn("[notifications] a reminder button failed", error),
+				);
+				return;
+			}
 			const path = pathOf(response.notification.request.content.data?.url);
 			if (path) router.push(path as Parameters<typeof router.push>[0]);
 		};

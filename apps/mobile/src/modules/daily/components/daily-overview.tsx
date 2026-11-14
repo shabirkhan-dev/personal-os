@@ -12,7 +12,6 @@ import { useDailyToday } from "../hooks/use-daily";
 import type { PlanModule } from "../lib/daily-model";
 import { splitAtNow, type TimelineItem, todayTimeline } from "../lib/timeline";
 import { dailyRoutes } from "../navigation";
-import { scheduleDailyAlarms } from "../services/daily-alarms";
 import {
 	AgendaRow,
 	Card,
@@ -71,14 +70,6 @@ export function DailyOverview({ onOpen, onNotice, amountsHidden = false }: Daily
 			console.error("[daily] could not keep today's result", error),
 		);
 	}, [data.loading, settings.setUp, log, today, kept, total]);
-
-	const fajr = sources.extra.faith.fajr?.minutes ?? null;
-	useEffect(() => {
-		if (data.loading) return;
-		scheduleDailyAlarms(settings, fajr).catch((error: unknown) =>
-			console.warn("[daily] could not schedule alarms", error),
-		);
-	}, [data.loading, settings, fajr]);
 
 	const open = (module: PlanModule) => {
 		if (module === "daily-life") dailyRoutes.sleep();

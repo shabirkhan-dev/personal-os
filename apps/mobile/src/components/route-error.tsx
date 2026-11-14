@@ -1,5 +1,6 @@
 import type { ErrorBoundaryProps } from "expo-router";
 import { useEffect } from "react";
+import { reportAppError } from "@/lib/error-report";
 import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PillButton } from "@/components/ui/pill-button";
@@ -16,6 +17,7 @@ export function RouteError({ error, retry }: ErrorBoundaryProps) {
 
 	useEffect(() => {
 		console.error("[route] render failed", error);
+		reportAppError(error, { where: "screen" });
 	}, [error]);
 
 	return (

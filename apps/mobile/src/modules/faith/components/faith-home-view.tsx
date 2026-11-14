@@ -37,11 +37,7 @@ import { parseFaithLine } from "../lib/parse-faith-line";
 import { hhmm, PRAYER_LABELS, type PrayerId, untilLabel } from "../lib/prayer-times";
 import { faithRoutes } from "../navigation";
 import { faithAiMessage, useFaithAi } from "../services/faith-ai";
-import {
-	requestReminderPermission,
-	scheduleOnce,
-	schedulePrayerReminders,
-} from "../services/prayer-reminders";
+import { requestReminderPermission, scheduleOnce } from "../services/prayer-reminders";
 import { AnswerCard, AyahCard } from "./ayah-card";
 import { LogPrayerSheet, PrayerSetupSheet, RemindersSheet } from "./faith-sheets";
 import {
@@ -91,16 +87,6 @@ export function FaithHomeView({ actionRequest }: HomeModuleViewProps) {
 		lastRequest.current = actionRequest;
 		faithRoutes.qibla();
 	}, [actionRequest]);
-
-	// Times move a little every day, so reminders are rescheduled whenever Home opens or settings change.
-	const settingsKey = JSON.stringify(settings);
-	useEffect(() => {
-		if (data.loading) return;
-		schedulePrayerReminders(settings).catch((error: unknown) =>
-			console.warn("[faith] could not schedule reminders", error),
-		);
-		// oxlint-disable-next-line react/exhaustive-deps -- keyed on the settings' content
-	}, [settingsKey, data.loading]);
 
 	const view = useMemo(
 		() => ({

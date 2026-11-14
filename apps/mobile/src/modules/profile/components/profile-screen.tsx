@@ -21,7 +21,6 @@ import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store"
 import { usePoTheme } from "@/theme";
 import { modulesOnLabel, syncState, versionLabel } from "../lib/labels";
 import { eraseThisPhone } from "../services/erase-device";
-import { exportData } from "../services/export-data";
 import { useProfileStore } from "../store/profile-store";
 import { DevicesSection } from "./devices-section";
 import { EditProfileSheet } from "./edit-profile-sheet";
@@ -68,7 +67,7 @@ function replayOnboarding() {
 
 /** Profile (Figma 163:1583): member card, modules, devices, data, preferences and account. */
 export function ProfileScreen() {
-	const { colors, preference } = usePoTheme();
+	const { colors } = usePoTheme();
 	const insets = useSafeAreaInsets();
 	const auth = useAuth();
 	const name = useOnboardingStore((state) => state.name);
@@ -83,7 +82,6 @@ export function ProfileScreen() {
 		label: "Edit profile",
 		onPress: () => setSheet("edit"),
 	};
-	const [exporting, setExporting] = useState(false);
 	const [deleting, setDeleting] = useState(false);
 	const backup = useSync();
 
@@ -98,20 +96,6 @@ export function ProfileScreen() {
 	const close = () => setSheet(null);
 	const sync = syncState(auth.status, auth.user?.email ?? null);
 	const signedIn = auth.status === "signed-in";
-
-	const runExport = () => {
-		if (exporting) return;
-		setExporting(true);
-		exportData(preference)
-			.then((result) => {
-				if (result.shared) haptics.success();
-			})
-			.catch((error: unknown) => {
-				console.error("Export failed", error);
-				showDialog("Export failed", "Your data could not be exported. Please try again.");
-			})
-			.finally(() => setExporting(false));
-	};
 
 	/** Backs up first; if that fails, asks before leaving changes that only live on this phone. */
 	const leave = async (erase: boolean) => {
@@ -240,9 +224,9 @@ export function ProfileScreen() {
 							icon="Download"
 							iconTone="statusSuccess"
 							tileTone="statusSuccessSubtle"
-							title="Export data"
-							meta={exporting ? "Preparing…" : "JSON export · everything on this phone"}
-							onPress={runExport}
+							title="Backup and restore"
+							meta="Save everything to a file, or bring a backup back"
+							onPress={() => router.push("/backup")}
 						/>
 						<SettingsRow
 							icon="Filled/Sparkle"

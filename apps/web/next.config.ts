@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
 	output: "export",
 	images: { unoptimized: true },
 	outputFileTracingRoot: path.join(__dirname, "../.."),
-	transpilePackages: ["@personal-os/tokens"],
+	transpilePackages: ["@personal-os/tokens", "@personal-os/domain"],
 };
 
 export default nextConfig;

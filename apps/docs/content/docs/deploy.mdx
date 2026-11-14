@@ -93,6 +93,16 @@ The Worker refuses to start in production without real `JWT_SECRET`, `AUTH_TOKEN
 `RESEND_API_KEY`, and `AI_PROVIDER=openai_compatible` needs `OPENAI_API_KEY`. Changing a secret
 needs no app rebuild.
 
+**Crash reports (optional).** Create a project at [sentry.io](https://sentry.io) (platform:
+JavaScript) and set its DSN as the `SENTRY_DSN` secret (`bunx wrangler secret put SENTRY_DSN`);
+optionally a `RELEASE` variable such as `api@0.5.0`. Unexpected 500s and a failed daily cleanup
+are then reported with the route, method and request id only, never request bodies. Without the
+DSN nothing is sent. The reporter is a few lines in `@personal-os/domain/error-report` (Sentry's
+envelope format over `fetch`), so no SDK ships in the Worker.
+
+API answers carry `Cache-Control: no-store` (personal data never sits in a cache), Hono's secure
+headers and a request id; each area has its own rate limit (`ratelimits` in `wrangler.jsonc`).
+
 ### Deploy
 
 Either connect GitHub once: Workers & Pages → Create → Import a repository → this repo, root
@@ -119,6 +129,52 @@ drops old sign-in codes, ended sessions and old AI usage.
 **Order matters when a pull request adds a migration:** apply it to Neon first, then let the
 Worker deploy. CI fails a pull request whose schema changed without a migration.
 
+### CD: migrations and a smoke check
+
+`.github/workflows/cd.yml` runs on every push to `main`: the full quality gate (lint, typecheck,
+tests against Postgres), then the migrations, then a smoke check that waits for the new Worker
+to answer `/api/v1/ready` and `/api/v1/health`. In the repository's **Settings → Secrets and
+variables → Actions** add:
+
+| Kind | Name | Value |
+|---|---|---|
+| Secret (environment `production`) | `DATABASE_URL` | the Neon connection string (direct, not pooled) |
+| Variable | `API_URL` | the API origin, e.g. `https://api.your-domain.com` |
+
+Without them the two jobs skip with a notice. Workers Builds keeps deploying the Worker itself;
+the migration job runs right after the gate, so add a migration's schema change in a backwards
+compatible way (new nullable column first, use it in the next release).
+
+### Staging
+
+A staging Worker needs its own database so tests never touch real data:
+
+1. In Neon, create a branch `staging` from `main` and copy its connection string.
+2. Create a Hyperdrive config for it (`bunx wrangler hyperdrive create personal-os-staging
+   --connection-string="<staging URL>"`).
+3. Add to `wrangler.jsonc`, with that id:
+
+```jsonc
+"env": {
+	"staging": {
+		"name": "personal-os-api-staging",
+		"vars": { "ENVIRONMENT": "production", "APP_NAME": "Personal OS (staging)", "AI_PROVIDER": "openai_compatible", "R2_BUCKET_NAME": "personal-os-assets-staging" },
+		"hyperdrive": [{ "binding": "HYPERDRIVE", "id": "<staging hyperdrive id>" }],
+		"r2_buckets": [{ "binding": "ASSETS", "bucket_name": "personal-os-assets-staging" }],
+		"ratelimits": [ /* copy the four limiters with new namespace ids, e.g. 5101–5104 */ ]
+	}
+}
+```
+
+4. Set its secrets with `--env staging` and deploy with `bunx wrangler deploy --env staging`.
+   Point a preview build at it with `EXPO_PUBLIC_API_URL` in the EAS `preview` environment.
+
+### Branch protection
+
+In GitHub **Settings → Branches → Add rule** for `main`: require a pull request, require the
+status checks `lint`, `typecheck`, `test` and `build` to pass, and block force pushes and
+deletions. Only the repository owner can set this.
+
 **Backups:** Neon keeps point-in-time history; check the retention window in the Neon project
 settings and restore to a branch to recover (Neon → Branches → restore). Migrations have no
 down step, so a bad one is undone by restoring, not by rolling back.
@@ -133,6 +189,9 @@ down step, so a bad one is undone by restoring, not by rolling back.
    says it can't reach its server instead of calling localhost.
 3. Build from the GitHub tab, or `bunx eas-cli build --profile preview --platform android` for a
    standalone APK.
+4. **Crash reports (optional):** add `EXPO_PUBLIC_SENTRY_DSN` (a Sentry project DSN, it is a
+   public value) to the same environments. Release builds then report crashes and screen errors
+   with the app version and platform, never records. Unset, nothing is sent.
 
 ## 4) Landing page on Cloudflare Workers
 
@@ -171,6 +230,9 @@ Full steps: `apps/web/README.md`.
 - [ ] EAS `preview` and `production` environments have an https `EXPO_PUBLIC_API_URL`
 - [ ] Neon point-in-time restore retention checked
 - [ ] Branch protection on `main` requires lint, typecheck, build and test
+- [ ] `DATABASE_URL` secret and `API_URL` variable set for CD (migrations and smoke check)
+- [ ] `SENTRY_DSN` (Worker) and `EXPO_PUBLIC_SENTRY_DSN` (EAS) set if you want crash reports
+- [ ] Privacy policy at `/privacy` and terms at `/terms` on the landing domain (Play Console needs the URL)
 - [ ] Email-code sign-in works on a device
 - [ ] Landing page live on its custom domain, waitlist KV bound
 - [ ] Docs project live (optional OpenRouter)

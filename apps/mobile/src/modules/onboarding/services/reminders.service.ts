@@ -3,8 +3,6 @@ import { Platform } from "react-native";
 import type { ReminderPlan } from "../lib/reminders";
 
 const CHANNEL_ID = "reminders";
-/** Every reminder this app schedules carries this tag, so rescheduling replaces only them. */
-const KIND = "personal-os.reminder";
 
 let prepared = false;
 let isQuiet: () => boolean = () => false;
@@ -46,39 +44,24 @@ export async function requestReminderPermission(): Promise<boolean> {
 	return asked.granted;
 }
 
-/** Replaces this app's scheduled reminders with `plans`. Returns how many were scheduled. */
+/** Replaces the setup reminders (morning plan, evening check-in…). Returns how many were scheduled. */
 export async function scheduleReminders(plans: readonly ReminderPlan[]): Promise<number> {
-	await prepareNotifications();
-	const scheduled = await Notifications.getAllScheduledNotificationsAsync();
-	await Promise.all(
-		scheduled
-			.filter((request) => request.content.data?.kind === KIND)
-			.map((request) => Notifications.cancelScheduledNotificationAsync(request.identifier)),
+	const { syncGroup } = await import("@/modules/reminders/services/reminder-engine");
+	return syncGroup(
+		"reminder",
+		plans.flatMap((plan) =>
+			(plan.weekdays ?? [undefined]).map((weekday) => ({
+				id: weekday === undefined ? plan.id : `${plan.id}-${weekday}`,
+				title: plan.title,
+				body: plan.body,
+				when:
+					weekday === undefined
+						? { daily: { hour: plan.hour, minute: plan.minute } }
+						: { weekly: { weekday, hour: plan.hour, minute: plan.minute } },
+				url: "personalos://",
+				actions: "snooze" as const,
+				critical: false,
+			})),
+		),
 	);
-	if (plans.length === 0) return 0;
-	const { granted } = await Notifications.getPermissionsAsync();
-	if (!granted) return 0;
-
-	const requests = plans.flatMap((plan) =>
-		(plan.weekdays ?? [undefined]).map((weekday) => ({
-			content: { title: plan.title, body: plan.body, data: { kind: KIND, reminder: plan.id } },
-			trigger:
-				weekday === undefined
-					? {
-							type: Notifications.SchedulableTriggerInputTypes.DAILY,
-							hour: plan.hour,
-							minute: plan.minute,
-							channelId: CHANNEL_ID,
-						}
-					: {
-							type: Notifications.SchedulableTriggerInputTypes.WEEKLY,
-							weekday,
-							hour: plan.hour,
-							minute: plan.minute,
-							channelId: CHANNEL_ID,
-						},
-		})),
-	);
-	await Promise.all(requests.map((request) => Notifications.scheduleNotificationAsync(request)));
-	return requests.length;
 }

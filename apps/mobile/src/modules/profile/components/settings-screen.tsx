@@ -137,6 +137,22 @@ export function SettingsScreen() {
 				Used for your calories, water and training targets.
 			</PoText>
 
+			<SectionLabel>Reminders and data</SectionLabel>
+			<SettingsCard>
+				<SettingsRow
+					icon="Filled/Bell"
+					title="Reminders"
+					meta="Make sure they arrive, Care, water, snooze"
+					onPress={() => router.push("/reminders")}
+				/>
+				<SettingsRow
+					icon="Download"
+					title="Backup and restore"
+					meta="Save everything to a file, bring it back"
+					onPress={() => router.push("/backup")}
+				/>
+			</SettingsCard>
+
 			<SectionLabel>App</SectionLabel>
 			<SettingsCard>
 				<SettingsRow
@@ -162,6 +178,21 @@ export function SettingsScreen() {
 					title="Week starts on"
 					value={weekStartLabel(weekStart)}
 					onPress={() => setSheet("week")}
+				/>
+			</SettingsCard>
+
+			<SectionLabel>About</SectionLabel>
+			<SettingsCard>
+				<SettingsRow
+					icon="Help"
+					title="Privacy policy"
+					meta="What's stored, where it goes, what you control"
+					onPress={() => router.push({ pathname: "/legal", params: { doc: "privacy" } })}
+				/>
+				<SettingsRow
+					icon="List"
+					title="Terms of use"
+					onPress={() => router.push({ pathname: "/legal", params: { doc: "terms" } })}
 				/>
 			</SettingsCard>
 

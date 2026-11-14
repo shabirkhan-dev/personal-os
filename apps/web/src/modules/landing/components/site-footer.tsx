@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { LogoMark } from "@/components/logo-mark";
 import styles from "../landing.module.css";
 
@@ -12,7 +13,8 @@ export function SiteFooter() {
 			<nav aria-label="Footer" className={styles.footerLinks}>
 				<a href="#modules">Modules</a>
 				<a href="#how">How it works</a>
-				<a href="#why">Privacy</a>
+				<Link href="/privacy">Privacy</Link>
+				<Link href="/terms">Terms</Link>
 				<a href="#notify">Get notified</a>
 			</nav>
 		</footer>

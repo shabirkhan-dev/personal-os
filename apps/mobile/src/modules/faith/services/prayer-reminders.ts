@@ -5,66 +5,44 @@ import {
 	requestReminderPermission,
 	setQuietCheck,
 } from "@/modules/onboarding/services/reminders.service";
+import { syncGroup } from "@/modules/reminders/services/reminder-engine";
 import type { FaithSettings } from "../lib/faith-model";
 import { timesSource } from "../lib/faith-math";
 import { dayTimes, PRAYER_LABELS, slots } from "../lib/prayer-times";
 
 /**
  * Prayer reminders as one-off notifications for the next few days, because the times move a
- * little every day. Home reschedules them whenever it opens and whenever the settings change.
+ * little every day. Rescheduled when the app opens, when the settings change and by the
+ * background task, so they never run out.
  */
 
 const KIND = "personal-os.prayer";
 const CHANNEL_ID = "prayers";
-const DAYS_AHEAD = 6;
+/** Planned this far ahead and topped up on every open and by the background task. */
+const DAYS_AHEAD = Platform.OS === "ios" ? 5 : 14;
 const QUIET_MINUTES = 15;
 
 export { requestReminderPermission };
 
-let lastPlan = "";
-
 /** Replaces Faith's scheduled reminders. Returns how many were scheduled. */
-export async function schedulePrayerReminders(
+export function schedulePrayerReminders(
 	settings: FaithSettings,
 	now = new Date(),
 ): Promise<number> {
-	if (Platform.OS === "web") return 0;
-	const plan = upcoming(settings, now);
+	if (Platform.OS === "web") return Promise.resolve(0);
 	updateQuiet(settings, now);
-	const key = JSON.stringify(plan.map((item) => [item.at.getTime(), item.title]));
-	if (key === lastPlan) return plan.length;
-
-	await ensureChannel();
-	const scheduled = await Notifications.getAllScheduledNotificationsAsync();
-	await Promise.all(
-		scheduled
-			.filter((request) => request.content.data?.kind === KIND)
-			.map((request) => Notifications.cancelScheduledNotificationAsync(request.identifier)),
+	return syncGroup(
+		"prayer",
+		upcoming(settings, now).map((item) => ({
+			id: String(item.at.getTime()),
+			title: item.title,
+			body: item.body,
+			when: { at: item.at },
+			url: "personalos://",
+			actions: "snooze" as const,
+			critical: true,
+		})),
 	);
-	const { granted } = await Notifications.getPermissionsAsync();
-	if (!granted || plan.length === 0) {
-		lastPlan = granted ? key : "";
-		return 0;
-	}
-	await Promise.all(
-		plan.map((item) =>
-			Notifications.scheduleNotificationAsync({
-				content: {
-					title: item.title,
-					body: item.body,
-					sound: "default",
-					data: { kind: KIND, url: "personalos://" },
-				},
-				trigger: {
-					type: Notifications.SchedulableTriggerInputTypes.DATE,
-					date: item.at,
-					channelId: CHANNEL_ID,
-				},
-			}),
-		),
-	);
-	lastPlan = key;
-	return plan.length;
 }
 
 async function ensureChannel(): Promise<void> {
@@ -129,6 +107,7 @@ export async function scheduleOnce(at: Date, title: string, body: string): Promi
 			type: Notifications.SchedulableTriggerInputTypes.DATE,
 			date: at,
 			channelId: CHANNEL_ID,
+			delivery: "alarmClock",
 		},
 	});
 	return true;

@@ -97,6 +97,19 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
   card-shaped loading placeholders. Career and the Daily brief share Finance's runway.
 - Offline-first record store on the phone with sync to the API
   ([ADR 0002](/docs/architecture/adr-0002-offline-first-sync)).
+- Reminders that arrive: one scheduler for prayers, medicines, daily alarms, Care routines,
+  water, setup and assistant nudges; important ones ring as Android alarm clocks (exact alarm
+  permission), every one can be snoozed from the notification, medicines have Taken and an
+  "ask again" follow-up, water has Log a glass, and a background task tops them up so they keep
+  coming while the app stays closed. Settings → Reminders checks permission, exact alarms and
+  battery, sends a test and lists what's coming.
+- Backup and restore: one file with every record, document, the setup answers and (optionally)
+  photos, saved to a folder or shared; a daily automatic backup into a picked folder (newest
+  seven kept); restore with a preview, merged with what's there or replacing it.
+- Home-screen widgets on Android: Today (next prayer, water, money left), Water with +250 ml,
+  Tasbih you tap to count, and Money left this month. Buttons work without opening the app.
+- Crash reports (opt-in with `EXPO_PUBLIC_SENTRY_DSN`), and the privacy policy and terms in
+  Settings.
 - EAS development builds, EAS Update channels and a one-command APK build.
 
 ### API and services
@@ -110,15 +123,18 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
   with a mock provider for development and tests, capped answers and a daily allowance per user.
 - Account deletion (`DELETE /users/me` and Profile → Delete account), a full data export, and a
   daily cleanup cron for old codes, sessions and AI usage.
-- Landing page on Cloudflare Workers with a launch waitlist.
+- Landing page on Cloudflare Workers with a launch waitlist, and the privacy policy and terms
+  at `/privacy` and `/terms` (one text, shared with the app).
+- Hardening: `Cache-Control: no-store` on API answers, crash reports from the Worker when
+  `SENTRY_DSN` is set, and CD that runs migrations and a smoke check behind the quality gate.
 
 ## Next
 
 Roughly in order; each item becomes board cards.
 
-1. **Production hardening**: error tracking (Sentry on the app and the Worker), migrations and
-   deploys in `cd.yml` behind CI (it is still a template; Workers Builds deploys today), a
-   staging Worker, branch protection on `main`, and a privacy policy and terms linked in the app.
+1. **Owner setup for production**: the staging Worker (Neon branch and Hyperdrive, steps in
+   [Deploy](/docs/deploy#staging)), branch protection on `main`, the CD secret and variable, and
+   the Sentry DSNs.
 2. **Direct device links** (Whoop and watches that skip Health Connect / Apple Health), and
    iPhone testing of the Apple Health sync.
 3. **"Hey OS" with the app closed**: today it listens while the app is open (Profile → Hey OS) and

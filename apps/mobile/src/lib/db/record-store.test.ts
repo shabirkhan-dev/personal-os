@@ -13,6 +13,27 @@ async function openStore(time = clock()) {
 }
 
 describe("RecordStore", () => {
+	test("applies a restore in one go and marks every change for sync", async () => {
+		const { store } = await openStore();
+		await store.put("notes", "old", { id: "old" });
+		await store.markSynced(await store.pending(10));
+		await store.applyLocal(
+			[
+				{ collection: "notes", id: "a", data: { id: "a" } },
+				{ collection: "meals", id: "m", data: { id: "m" } },
+			],
+			[{ collection: "notes", id: "old" }],
+		);
+		expect(await store.all()).toEqual({ meals: [{ id: "m" }], notes: [{ id: "a" }] });
+		const pending = await store.pending(10);
+		expect(pending.map((record) => `${record.collection}/${record.id}`).sort()).toEqual([
+			"meals/m",
+			"notes/a",
+			"notes/old",
+		]);
+		expect(pending.find((record) => record.id === "old")?.deletedAt).not.toBeNull();
+	});
+
 	test("puts, lists and gets documents per collection", async () => {
 		const { store } = await openStore();
 		await store.put("notes", "a", { text: "one" });

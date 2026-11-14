@@ -106,6 +106,43 @@ export class RecordStore {
 		});
 	}
 
+	/**
+	 * Writes many documents and deletions in one transaction (a restore from a backup). Each change
+	 * is marked dirty, so it syncs like any edit.
+	 */
+	applyLocal(
+		puts: readonly { collection: string; id: string; data: unknown }[],
+		removes: readonly { collection: string; id: string }[] = [],
+	): Promise<void> {
+		const collections = [...puts, ...removes].map((change) => change.collection);
+		return this.write([...new Set(collections)], async () => {
+			for (const put of puts) {
+				// One statement at a time inside the transaction keeps versions strictly increasing.
+				// oxlint-disable-next-line eslint/no-await-in-loop
+				const updatedAt = this.nextVersion(await this.row(put.collection, put.id));
+				// oxlint-disable-next-line eslint/no-await-in-loop
+				await this.db.run(
+					`INSERT INTO records (collection, id, data, updated_at, deleted_at, dirty)
+					 VALUES (?, ?, ?, ?, NULL, 1)
+					 ON CONFLICT (collection, id) DO UPDATE SET
+					   data = excluded.data, updated_at = excluded.updated_at, deleted_at = NULL, dirty = 1`,
+					[put.collection, put.id, JSON.stringify(put.data), updatedAt],
+				);
+			}
+			for (const remove of removes) {
+				// oxlint-disable-next-line eslint/no-await-in-loop
+				const existing = await this.row(remove.collection, remove.id);
+				if (!existing || existing.deleted_at !== null) continue;
+				const updatedAt = this.nextVersion(existing);
+				// oxlint-disable-next-line eslint/no-await-in-loop
+				await this.db.run(
+					"UPDATE records SET updated_at = ?, deleted_at = ?, dirty = 1 WHERE collection = ? AND id = ?",
+					[updatedAt, updatedAt, remove.collection, remove.id],
+				);
+			}
+		});
+	}
+
 	/** Local changes not yet accepted by the server, oldest first. */
 	async pending(limit: number): Promise<SyncRecord[]> {
 		const rows = await this.db.all<Row>(

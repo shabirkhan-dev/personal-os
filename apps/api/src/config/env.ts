@@ -1,3 +1,4 @@
+import { type Dsn, parseDsn } from "@personal-os/domain/error-report";
 import * as z from "zod";
 
 const DEV_JWT_SECRET = "development-only-jwt-secret-change-me-please";
@@ -27,6 +28,8 @@ const envSchema = z
 		R2_SECRET_ACCESS_KEY: optional,
 		R2_PUBLIC_URL: optional.pipe(z.url().optional()),
 		DATABASE_URL: optional,
+		SENTRY_DSN: optional,
+		RELEASE: optional,
 	})
 	.superRefine((env, context) => {
 		const require = (path: string, message: string) =>
@@ -76,6 +79,8 @@ export type Config = {
 		publicUrl: string;
 	};
 	databaseUrl?: string;
+	/** Crash reports go here when SENTRY_DSN is set (see `core/report-error.ts`). */
+	errors: { dsn: Dsn | null; release: string | null };
 };
 
 /** The Worker's settings are incomplete. `issues` names the variables, never their values. */
@@ -121,6 +126,7 @@ export function parseConfig(source: Record<string, unknown>): Config {
 				}
 			: {}),
 		...(env.DATABASE_URL ? { databaseUrl: env.DATABASE_URL } : {}),
+		errors: { dsn: parseDsn(env.SENTRY_DSN), release: env.RELEASE ?? null },
 	};
 }
 

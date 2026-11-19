@@ -137,13 +137,19 @@ export function SettingsScreen() {
 				Used for your calories, water and training targets.
 			</PoText>
 
-			<SectionLabel>Reminders and data</SectionLabel>
+			<SectionLabel>Reminders, templates and data</SectionLabel>
 			<SettingsCard>
 				<SettingsRow
 					icon="Filled/Bell"
 					title="Reminders"
 					meta="Make sure they arrive, Care, water, snooze"
 					onPress={() => router.push("/reminders")}
+				/>
+				<SettingsRow
+					icon="Layers"
+					title="Templates"
+					meta="Ready-made recipes, programs, routines and more"
+					onPress={() => router.push("/templates")}
 				/>
 				<SettingsRow
 					icon="Download"

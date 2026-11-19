@@ -6,6 +6,7 @@ import { PoText } from "@/components/ui/po-text";
 import { useNow } from "@/lib/use-now";
 import { useActiveProgram, useTraining } from "../hooks/use-training";
 import type { ProgramKind } from "../lib/programs/program-model";
+import { templateRoutes } from "@/modules/templates/navigation";
 import { trainingRoutes } from "../navigation";
 import { Card } from "./home-cards";
 import { ActiveProgramCard, ProgramRow } from "./program-cards";
@@ -26,7 +27,7 @@ const FILTERS: readonly { id: Filter; label: string }[] = [
 	{ id: "yours", label: "Yours" },
 ];
 
-/** Programs: the one being followed, ready-made programs by kind, and your own. */
+/** Programs: the one being followed and the person's own (made here or added from Templates). */
 export function ProgramsScreen() {
 	const data = useTraining();
 	const now = useNow();
@@ -81,6 +82,7 @@ export function ProgramsScreen() {
 				horizontal
 				showsHorizontalScrollIndicator={false}
 				contentContainerStyle={styles.chips}
+				style={data.programs.length === 0 ? styles.hidden : null}
 			>
 				{FILTERS.map((item) => (
 					<FilterChip
@@ -102,13 +104,22 @@ export function ProgramsScreen() {
 				))}
 				{list.length === 0 ? (
 					<PoText variant="meta13" tone="textSecondary">
-						{filter === "yours"
-							? "Programs you design show up here."
-							: "No programs of this kind yet."}
+						{data.programs.length === 0
+							? "No programs yet. Make your own above, or add ready-made ones from Templates below."
+							: filter === "yours"
+								? "Programs you design show up here."
+								: "No programs of this kind yet."}
 					</PoText>
 				) : null}
 			</View>
 			<ListCard>
+				<ListRow
+					title="Ready-made programs"
+					subtitle="Calisthenics, running, boxing, gym and recovery, from Templates"
+					icon={{ name: "Layers", tone: "accentDefault", tile: "accentSubtle" }}
+					chevron
+					onPress={() => templateRoutes.pack("training-programs")}
+				/>
 				<ListRow
 					title="Exercise library"
 					subtitle="Every exercise with demos, cues and videos"
@@ -127,4 +138,5 @@ const styles = StyleSheet.create({
 	buttons: { flexDirection: "row", gap: 12 },
 	chips: { gap: 8, paddingVertical: 2 },
 	list: { gap: 12 },
+	hidden: { display: "none" },
 });

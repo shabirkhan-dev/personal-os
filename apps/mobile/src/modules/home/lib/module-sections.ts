@@ -14,6 +14,7 @@ export const MODULE_SECTIONS: Record<string, readonly Section[]> = {
 		{ label: "Sleep", href: "/daily/sleep" },
 		{ label: "Close the day", href: "/daily/close" },
 		{ label: "Calendar", href: "/calendar" },
+		{ label: "Templates", href: "/templates" },
 	],
 	"Daily life": [
 		{ label: "Morning brief", href: "/daily/brief" },
@@ -34,6 +35,7 @@ export const MODULE_SECTIONS: Record<string, readonly Section[]> = {
 		{ label: "Exercises", href: "/training/exercises" },
 		{ label: "Skills", href: "/training/skills" },
 		{ label: "Boxing", href: "/training/boxing" },
+		{ label: "Templates", href: "/templates?module=training" },
 		{ label: "Calendar", href: "/calendar" },
 	],
 	Finance: [
@@ -42,6 +44,7 @@ export const MODULE_SECTIONS: Record<string, readonly Section[]> = {
 		{ label: "Budget", href: "/finance/budget" },
 		{ label: "Income", href: "/finance/income" },
 		{ label: "History", href: "/finance/history" },
+		{ label: "Templates", href: "/templates?module=finance" },
 	],
 	Care: [
 		{ label: "Routine", href: "/care/routine" },
@@ -50,6 +53,7 @@ export const MODULE_SECTIONS: Record<string, readonly Section[]> = {
 		{ label: "Body", href: "/care/body" },
 		{ label: "Weekly check-in", href: "/care/check-in" },
 		{ label: "Templates", href: "/care/templates" },
+		{ label: "All templates", href: "/templates" },
 		{ label: "Design with AI", href: "/care/design" },
 	],
 	Food: [
@@ -60,6 +64,7 @@ export const MODULE_SECTIONS: Record<string, readonly Section[]> = {
 		{ label: "Write a recipe", href: "/food/recipe-edit" },
 		{ label: "Scan a barcode", href: "/food/scan" },
 		{ label: "Goal", href: "/food/goal" },
+		{ label: "Templates", href: "/templates?module=food" },
 	],
 	Faith: [
 		{ label: "Qibla", href: "/faith/qibla" },
@@ -68,12 +73,14 @@ export const MODULE_SECTIONS: Record<string, readonly Section[]> = {
 		{ label: "Grow", href: "/faith/grow" },
 		{ label: "Flashcards", href: "/faith/flashcards" },
 		{ label: "Zakat", href: "/faith/zakat" },
+		{ label: "Templates", href: "/templates?module=faith" },
 	],
 	Fashion: [
 		{ label: "Wardrobe", href: "/fashion/wardrobe" },
 		{ label: "Week plan", href: "/fashion/plan" },
 		{ label: "To buy", href: "/fashion/wishlist" },
 		{ label: "Watches and scents", href: "/fashion/watches" },
+		{ label: "Templates", href: "/templates?module=fashion" },
 	],
 	Health: [
 		{ label: "Vitals", href: "/health/vitals" },

@@ -23,10 +23,10 @@ import {
 	setPlanSlot,
 } from "../data/food-actions";
 import { useFoodUi } from "../hooks/food-ui-store";
-import { useFoodToday } from "../hooks/use-food";
+import { useFood, useFoodToday } from "../hooks/use-food";
 import { eatenOn, planDayCost, planDayMacros, recipeMacros } from "../lib/food-math";
 import { GOAL_LABELS, type PlannedMeal, SLOT_LABELS, SLOTS, type Slot } from "../lib/food-model";
-import { allRecipes, recipeById } from "../lib/recipes";
+import { recipeById } from "../lib/recipes";
 import { foodRoutes } from "../navigation";
 import { foodAiMessage, useFoodAi } from "../services/food-ai";
 import { FoodScreen } from "./food-screen";
@@ -73,8 +73,20 @@ export function MealPlanScreen() {
 			.finally(() => setBusy(false));
 	};
 
-	const autoPlan = () => run(() => regeneratePlan(weekId, week, settings, seed(), plan, today));
+	// Plans are drawn from the person's recipes; with none there is nothing to plan from.
+	const needRecipes = () => {
+		if (data.myRecipes.some((recipe) => recipe.kcal > 0)) return false;
+		setNotice(
+			"Add a few recipes with calories first: write your own, or add a pack from Templates → Food.",
+		);
+		return true;
+	};
+	const autoPlan = () => {
+		if (needRecipes()) return;
+		run(() => regeneratePlan(weekId, week, settings, seed(), plan, today));
+	};
 	const fill = () =>
+		needRecipes() ||
 		run(
 			() => fillPlan(plan, weekId, week, settings, seed(), today),
 			"Empty meals filled. Yours stayed.",
@@ -92,7 +104,7 @@ export function MealPlanScreen() {
 			targets: settings.targets,
 			wishes,
 			days,
-			recipes: allRecipes()
+			recipes: data.myRecipes
 				.filter((recipe) => recipe.kcal > 0)
 				.map((recipe) => ({
 					id: recipe.id,
@@ -409,11 +421,12 @@ function RecipePicker({
 	onChoose: (recipeId: string | null, portions: number) => void;
 }) {
 	const { colors } = usePoTheme();
+	const { myRecipes } = useFood();
 	const [query, setQuery] = useState("");
 	const [portions, setPortions] = useState(1);
 	const slot = picking?.slot ?? "dinner";
 	const words = query.trim().toLowerCase();
-	const recipes = allRecipes()
+	const recipes = myRecipes
 		.filter((recipe) => !words || recipe.name.toLowerCase().includes(words))
 		.sort((a, b) => Number(b.slots.includes(slot)) - Number(a.slots.includes(slot)));
 	const current = picking?.current ? recipeById(picking.current.recipeId) : undefined;

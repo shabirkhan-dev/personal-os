@@ -1,15 +1,19 @@
 import { Image, type ImageSourcePropType } from "react-native";
 import { apiUrl } from "@/lib/api/client";
+import { BUNDLED_PHOTOS } from "./bundled-photos";
 
 /** Every built-in photo the app knows about, so they can all be fetched once after install. */
 const known = new Set<string>();
 
 /**
- * A built-in photo (an exercise demo, a starter piece, a recipe, a care product). They live in
- * R2 under `static/` and come through the API (`/static/<path>`), not inside the app, so the APK
- * stays small; the phone's image cache keeps each one after its first download.
+ * A built-in photo (an exercise demo, a template piece, a recipe, a care product). They ship
+ * inside the app (`bundled-photos.ts`, about 2 MB), so they show offline and never depend on the
+ * bucket. A path that isn't bundled still loads from R2 through the API (`/static/<path>`).
  */
 export function appPhoto(path: string): ImageSourcePropType {
+	// Shipped inside the app: always there, offline, with nothing to upload.
+	const bundled = BUNDLED_PHOTOS[path];
+	if (bundled) return bundled;
 	known.add(path);
 	const url = apiUrl(`/static/${path}`);
 	return url ? { uri: url } : {};

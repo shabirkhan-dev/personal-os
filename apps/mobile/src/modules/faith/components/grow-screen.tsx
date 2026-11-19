@@ -31,6 +31,7 @@ import { useFaith } from "../hooks/use-faith";
 import { CHALLENGES, type LearningPath, PATHS } from "../lib/faith-content";
 import { challengeDay, challengeShare, daysAgo } from "../lib/faith-math";
 import { RESOURCE_KINDS, type Resource, type ResourceKind } from "../lib/faith-model";
+import { templateRoutes } from "@/modules/templates/navigation";
 import { faithRoutes } from "../navigation";
 import { FaithScreen } from "./faith-screen";
 
@@ -57,6 +58,8 @@ const KIND_TONE = {
 export function GrowScreen() {
 	const { colors } = usePoTheme();
 	const { challenge, progress, resources, cards } = useFaith();
+	// Only the paths the person added (from Templates); none shows on its own.
+	const mine = PATHS.filter((path) => progress.some((entry) => entry.id === path.id));
 	const now = useNow();
 	const [filter, setFilter] = useState<ResourceKind | "all">("all");
 	const [picking, setPicking] = useState(false);
@@ -166,7 +169,7 @@ export function GrowScreen() {
 					valueTone="accentDefault"
 					onPress={faithRoutes.flashcards}
 				/>
-				{PATHS.map((item, index) => {
+				{mine.map((item) => {
 					const done = progress.find((entry) => entry.id === item.id)?.done.length ?? 0;
 					return (
 						<ListRow
@@ -180,11 +183,19 @@ export function GrowScreen() {
 							subtitle={done > 0 ? `${done} of ${item.lessons.length} lessons` : item.summary}
 							value={done > 0 ? `${Math.round((done / item.lessons.length) * 100)}%` : "Start"}
 							valueTone={done > 0 ? "accentDefault" : "textSecondary"}
-							last={index === PATHS.length - 1}
+							last={false}
 							onPress={() => setPath(item)}
 						/>
 					);
 				})}
+				<ListRow
+					icon={{ name: "Line/Plus", tone: "textSecondary", tile: "bgSubtle" }}
+					title={mine.length ? "Add another path" : "Add a learning path"}
+					subtitle="Salah, short surahs, core beliefs and more, from Templates"
+					chevron
+					last
+					onPress={() => templateRoutes.pack("faith-learning-paths")}
+				/>
 			</ListCard>
 
 			<SectionLabel>{`Resources · ${resources.length}`}</SectionLabel>

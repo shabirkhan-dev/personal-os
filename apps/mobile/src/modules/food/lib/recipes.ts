@@ -519,11 +519,18 @@ export function setMyRecipes(list: readonly Recipe[]): void {
 	mine = list;
 }
 
-/** The person's recipes first, then the bundled ones. */
+/**
+ * The person's recipes: the ones they wrote and the ones they added from a template. The
+ * bundled list is a template pack (Templates → Food), never shown until it's added.
+ */
 export function allRecipes(): readonly Recipe[] {
-	return mine.length ? [...mine, ...RECIPES] : RECIPES;
+	return mine;
 }
 
+/** Template recipes are added as the person's own copy under this id. */
+export const templateRecipeId = (id: string) => `mine-tpl-${id}`;
+
+/** Finds a recipe by id, the bundled ones included, so older meals and plans keep their names. */
 export function recipeById(id: string): Recipe | undefined {
 	return mine.find((recipe) => recipe.id === id) ?? RECIPES.find((recipe) => recipe.id === id);
 }

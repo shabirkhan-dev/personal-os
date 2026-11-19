@@ -3,7 +3,7 @@ import { newId } from "@/lib/day";
 import { deleteJson, readJson } from "@/lib/storage/json-file";
 import { asArray, asNumber, asString, isRecord } from "@/lib/storage/parse";
 import { estimateKcal } from "../lib/kcal";
-import { SKILLS, type Template } from "../lib/library";
+import type { Template } from "../lib/library";
 import {
 	buildProgramWeek,
 	programStart,
@@ -54,7 +54,7 @@ export async function savePlan(
 	return plan;
 }
 
-/** The empty Home's "Build my first week": settings, this week's program and starter skills. */
+/** The empty Home's "Build my first week": settings and this week's plan. Skills are added by hand. */
 export async function setUp(
 	settings: TrainingSettings,
 	sports: readonly Sport[],
@@ -65,21 +65,6 @@ export async function setUp(
 	const days = weekDays(now);
 	await saveItem(trainingSettings, next);
 	await savePlan(days[0] ?? "", buildWeek(next, days), now);
-	const skills = new Set((await listItems(trainingSkills)).map((skill) => skill.name));
-	await Promise.all(
-		SKILLS.filter((skill) => sports.includes(skill.sport) && !skills.has(skill.name))
-			.slice(0, 4)
-			.map((skill) =>
-				saveItem(trainingSkills, {
-					id: newId(),
-					name: skill.name,
-					sport: skill.sport,
-					photo: skill.photo,
-					steps: skill.steps,
-					done: 0,
-				}),
-			),
-	);
 }
 
 /** The week's slots: the active program's week while it runs, else the free week by sport. */

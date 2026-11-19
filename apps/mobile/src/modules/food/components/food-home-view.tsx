@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { AiWorkingCard } from "@/components/ai-working-card";
-import { ActionPills, FilterChip, ReadError, ResultCard } from "@/components/module-ui";
+import { ActionPills, FilterChip, QuickLinks, ReadError, ResultCard } from "@/components/module-ui";
+import { templateRoutes } from "@/modules/templates/navigation";
 import { PoText } from "@/components/ui/po-text";
 import { Sheet } from "@/components/ui/sheet";
 import { TextField } from "@/components/ui/text-field";
@@ -27,7 +28,6 @@ import {
 } from "../lib/food-math";
 import { GOAL_LABELS, type Goal, SLOT_LABELS, SLOT_TIMES } from "../lib/food-model";
 import { parseFoodLine } from "../lib/parse-meal";
-import { RECIPES } from "../lib/recipes";
 import { goalWeight, remaining, targetsFor } from "../lib/targets";
 import { foodRoutes } from "../navigation";
 import { WaterCard } from "./water-card";
@@ -141,7 +141,7 @@ export function FoodHomeView({ actionRequest }: HomeModuleViewProps) {
 		const left = remaining(settings.targets, eaten);
 		if (!ai.available) {
 			const slot = nextSlot(now.getHours() * 60 + now.getMinutes(), SLOT_TIMES);
-			const recipe = pickRecipe(slot, left);
+			const recipe = pickRecipe(slot, left, data.myRecipes);
 			say(
 				recipe
 					? `Offline pick for ${SLOT_LABELS[slot].toLowerCase()}: ${recipe.name}, ${recipe.protein} g protein for ${recipe.kcal} kcal. You have ${Math.round(left.protein)} g protein left.`
@@ -162,7 +162,7 @@ export function FoodHomeView({ actionRequest }: HomeModuleViewProps) {
 					meals: rows
 						.filter((row) => row.meals.length > 0)
 						.map((row) => ({ slot: row.slot, names: row.title })),
-					recipes: RECIPES.map((recipe) => ({ id: recipe.id, name: recipe.name })),
+					recipes: data.myRecipes.map((recipe) => ({ id: recipe.id, name: recipe.name })),
 				});
 				useFoodUi.getState().setAnswer({ ...answer, question });
 				if (spoken) voiceOut.speak(answer.answer);
@@ -375,16 +375,19 @@ export function FoodHomeView({ actionRequest }: HomeModuleViewProps) {
 								.catch(failed("log the meal"));
 						}}
 					/>
-					<View style={styles.links}>
-						<FilterChip label="Meal plan" selected={false} onPress={foodRoutes.plan} />
-						<FilterChip label="Grocery list" selected={false} onPress={foodRoutes.grocery} />
-						<FilterChip label="Recipes" selected={false} onPress={foodRoutes.recipes} />
-						<FilterChip
-							label="Write a recipe"
-							selected={false}
-							onPress={() => foodRoutes.recipeEdit()}
-						/>
-					</View>
+					<QuickLinks
+						links={[
+							{ label: "Meal plan", icon: "Filled/Calendar", onPress: foodRoutes.plan },
+							{ label: "Grocery list", icon: "List", onPress: foodRoutes.grocery },
+							{ label: "Recipes", icon: "Food", onPress: foodRoutes.recipes },
+							{
+								label: "Write a recipe",
+								icon: "Filled/Edit",
+								onPress: () => foodRoutes.recipeEdit(),
+							},
+							{ label: "Templates", icon: "Layers", onPress: () => templateRoutes.browse("food") },
+						]}
+					/>
 				</>
 			) : (
 				<FirstMealCard />

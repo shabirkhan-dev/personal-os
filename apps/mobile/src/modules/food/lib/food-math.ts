@@ -16,7 +16,7 @@ import {
 } from "./food-model";
 import { foodById } from "./foods";
 import { packLabel, productById } from "./groceries";
-import { allRecipes, RECIPES, type Recipe, recipeById } from "./recipes";
+import { allRecipes, type Recipe, recipeById } from "./recipes";
 import { remaining } from "./targets";
 
 /** The numbers behind Food's screens. Pure, so they're tested without a phone. */
@@ -177,8 +177,8 @@ export function planDayCost(day: PlanDay): number {
 }
 
 /** Recipes for `slot` that have numbers to plan with (a recipe of the person's may not yet). */
-const forSlot = (slot: Slot) =>
-	allRecipes().filter((recipe) => recipe.slots.includes(slot) && recipe.kcal > 0);
+const forSlot = (slot: Slot, recipes: readonly Recipe[] = allRecipes()) =>
+	recipes.filter((recipe) => recipe.slots.includes(slot) && recipe.kcal > 0);
 
 /**
  * A week of meals near the calorie and protein targets: each slot rotates through the recipes
@@ -196,7 +196,7 @@ export function generatePlan(
 		if (kept) return kept;
 		const meals: PlannedMeal[] = SLOTS.map((slot, order) => {
 			const options = forSlot(slot);
-			const recipe = options[(index * 3 + seed * 5 + order) % options.length] ?? RECIPES[0];
+			const recipe = options[(index * 3 + seed * 5 + order) % options.length];
 			return { slot, recipeId: recipe?.id ?? "", portions: 1 };
 		}).filter((meal) => meal.recipeId);
 		const base = planDayMacros({ day, meals }).kcal;
@@ -389,8 +389,12 @@ export function goalWeek(settings: FoodSettings, now: Date): number {
 // --- recipes and insights -----------------------------------------------------------------------
 
 /** The recipe for `slot` that best fills the protein left without going far over calories. */
-export function pickRecipe(slot: Slot, left: Macros): Recipe | null {
-	const options = forSlot(slot);
+export function pickRecipe(
+	slot: Slot,
+	left: Macros,
+	recipes: readonly Recipe[] = allRecipes(),
+): Recipe | null {
+	const options = forSlot(slot, recipes);
 	const scored = options
 		.map((recipe) => {
 			const over = Math.max(0, recipe.kcal - left.kcal - 150);

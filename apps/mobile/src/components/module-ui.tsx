@@ -1,6 +1,6 @@
 import type { ColorTokens } from "@personal-os/tokens";
 import type { ReactNode } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { Icon, type IconName } from "@/components/icons";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
@@ -474,6 +474,42 @@ export function ActionPills({
 	);
 }
 
+export type QuickLink = { label: string; icon?: IconName; onPress: () => void };
+
+/**
+ * A module's links to its other screens ("Meal plan", "Recipes"…) as one row of pills that
+ * scrolls sideways, so it never wraps onto a second line however many there are.
+ */
+export function QuickLinks({ links }: { links: readonly QuickLink[] }) {
+	const { colors } = usePoTheme();
+	return (
+		<ScrollView
+			horizontal
+			showsHorizontalScrollIndicator={false}
+			style={styles.linksBleed}
+			contentContainerStyle={styles.links}
+		>
+			{links.map((link) => (
+				<Pressable
+					key={link.label}
+					accessibilityRole="button"
+					onPress={() => {
+						haptics.tap();
+						link.onPress();
+					}}
+					style={({ pressed }) => [
+						styles.link,
+						{ backgroundColor: pressed ? colors.bgHover : colors.bgSurface },
+					]}
+				>
+					{link.icon ? <Icon name={link.icon} size={16} color={colors.textSecondary} /> : null}
+					<PoText variant="meta13">{link.label}</PoText>
+				</Pressable>
+			))}
+		</ScrollView>
+	);
+}
+
 /** A head row with an icon tile, two lines and a mono value, over a progress bar. */
 export function ProgressCard({
 	icon,
@@ -649,4 +685,14 @@ const styles = StyleSheet.create({
 	title: { gap: 12, paddingHorizontal: 4 },
 	chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 	footer: { flexDirection: "row", gap: 12 },
+	linksBleed: { marginHorizontal: -16, flexGrow: 0 },
+	links: { gap: 8, paddingHorizontal: 16 },
+	link: {
+		flexDirection: "row",
+		alignItems: "center",
+		gap: 8,
+		height: 40,
+		paddingHorizontal: 16,
+		borderRadius: 20,
+	},
 });

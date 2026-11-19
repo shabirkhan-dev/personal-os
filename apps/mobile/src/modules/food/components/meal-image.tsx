@@ -29,9 +29,9 @@ export function MealImage({
 	style,
 }: MealImageProps) {
 	const { colors } = usePoTheme();
-	const bundled = recipeId
-		? ((hero ? RECIPE_HEROES[recipeId] : undefined) ?? RECIPE_IMAGES[recipeId])
-		: undefined;
+	// Bundled photos are keyed by the recipe's photo (a template copy keeps its original's).
+	const key = recipeId ? recipeById(recipeId)?.photo || recipeId : null;
+	const bundled = key ? ((hero ? RECIPE_HEROES[key] : undefined) ?? RECIPE_IMAGES[key]) : undefined;
 	// The person's own recipes carry their own photo.
 	const own = !photo && recipeId ? (recipeById(recipeId)?.image ?? null) : null;
 	const picked = photo ?? own;

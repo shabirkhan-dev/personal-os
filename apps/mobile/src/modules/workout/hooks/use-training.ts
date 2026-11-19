@@ -61,11 +61,17 @@ export function useTraining() {
 		const custom = [...(programList.data ?? [])].sort((a, b) =>
 			(b.createdAt ?? "").localeCompare(a.createdAt ?? ""),
 		);
-		const programs: ProgramDef[] = [...BUILT_IN_PROGRAMS, ...custom];
 		const progress = new Map<string, Progress>(
 			(progressList.data ?? []).map((item) => [item.id, item]),
 		);
 		const settings = settingsList.data?.[0] ?? defaultSettings();
+		// Only the person's programs: built-ins come from Templates as their own copy. One they
+		// were already following before that change stays, so nothing in progress disappears.
+		const following = settings.program?.id ?? null;
+		const kept = BUILT_IN_PROGRAMS.filter(
+			(program) => program.id === following && !custom.some((item) => item.id === program.id),
+		);
+		const programs: ProgramDef[] = [...custom, ...kept];
 		// Program sessions ("p:hybrid-athlete:3:push") are built from the programs and levels. Set
 		// here, during render, so the screen reading this data resolves them right away.
 		setTemplateResolver((id) => resolveTemplate(id, { programs, progress, settings, activities }));

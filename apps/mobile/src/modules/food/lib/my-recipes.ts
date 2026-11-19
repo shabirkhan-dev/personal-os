@@ -4,7 +4,8 @@ import { RECIPE_TAGS, type Recipe, type RecipeTag } from "./recipes";
 
 /**
  * The person's own recipes, as stored. Same shape as a bundled recipe, with their own photo,
- * video and note; `uses` is empty, so the grocery list takes their ingredients as they wrote them.
+ * video and note. A recipe they write has no `uses`, so the grocery list takes its ingredients as
+ * written; one added from a template keeps the bundled photo and grocery mapping.
  */
 
 const text = (value: unknown, max: number) => asString(value, "").trim().slice(0, max);
@@ -28,7 +29,8 @@ export function parseMyRecipe(raw: unknown): Recipe | null {
 	return {
 		id,
 		name,
-		photo: "",
+		// A template recipe keeps its bundled photo's key.
+		photo: /^[a-z0-9-]{1,60}$/.test(text(raw.photo, 60)) ? text(raw.photo, 60) : "",
 		image: link(raw.image, /^(file|https):\/\//),
 		video: link(raw.video, /^https?:\/\//),
 		note: text(raw.note, 400),
@@ -59,7 +61,13 @@ export function parseMyRecipe(raw: unknown): Recipe | null {
 				? { text: step, minutes: Math.min(600, Math.round(minutes)) }
 				: { text: step };
 		}).slice(0, 40),
-		uses: [],
+		// Template recipes keep their grocery mapping; ones the person writes have none.
+		uses: asArray(raw.uses, (item) => {
+			if (!isRecord(item)) return null;
+			const product = text(item.product, 60);
+			const per = asNumber(item.per, 0);
+			return product && per > 0 ? { product, per } : null;
+		}).slice(0, 40),
 	};
 }
 

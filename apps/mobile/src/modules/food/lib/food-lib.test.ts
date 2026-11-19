@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { itemFromProduct, isBarcode } from "./barcode";
@@ -33,7 +33,7 @@ import { FOODS } from "./foods";
 import { PRODUCTS, productById } from "./groceries";
 import { parseFoodLine, parseMealText, withQuantity } from "./parse-meal";
 import { blankRecipe, parseMyRecipe } from "./my-recipes";
-import { allRecipes, RECIPES, recipeById, setMyRecipes } from "./recipes";
+import { allRecipes, RECIPES, recipeById, setMyRecipes, templateRecipeId } from "./recipes";
 import { goalWeight, remaining, targetsFor } from "./targets";
 
 const meal = (day: string, slot: Meal["slot"], text: string, at = `${day}T08:10:00`): Meal => ({
@@ -56,6 +56,10 @@ const settings: FoodSettings = {
 	goalKg: 75,
 	startedOn: "2026-10-02",
 };
+
+// Most suites plan with the bundled recipes, as if the person had added the recipe pack.
+beforeEach(() => setMyRecipes(RECIPES));
+afterEach(() => setMyRecipes([]));
 
 describe("parseMealText", () => {
 	it("reads the Figma breakfast line into three items", () => {
@@ -380,7 +384,22 @@ describe("your own recipes", () => {
 		});
 	});
 
-	it("finds them next to the bundled ones and shops for their ingredients as written", () => {
+	it("starts with none; the bundled ones only come from the template pack", () => {
+		setMyRecipes([]);
+		expect(allRecipes()).toEqual([]);
+		// Older meals and plans still find a bundled recipe's name.
+		expect(recipeById("chicken-karahi")?.name).toBeTruthy();
+		const karahi = RECIPES.find((recipe) => recipe.id === "chicken-karahi");
+		const copy = parseMyRecipe({ ...karahi, id: templateRecipeId("chicken-karahi") });
+		expect(copy).toMatchObject({
+			id: "mine-tpl-chicken-karahi",
+			photo: "chicken-karahi",
+			mine: true,
+		});
+		expect(copy?.uses.length).toBe(karahi?.uses.length);
+	});
+
+	it("finds them and shops for their ingredients as written", () => {
 		const mine = {
 			...blankRecipe(),
 			id: "mine-2",
@@ -394,7 +413,7 @@ describe("your own recipes", () => {
 		setMyRecipes([mine]);
 		try {
 			expect(recipeById("mine-2")?.name).toBe("Aloo keema");
-			expect(allRecipes().length).toBe(RECIPES.length + 1);
+			expect(allRecipes().length).toBe(1);
 			const list = groceriesFor(
 				[{ day: "2026-11-05", meals: [{ slot: "dinner", recipeId: "mine-2", portions: 1 }] }],
 				[

@@ -103,6 +103,11 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
   "ask again" follow-up, water has Log a glass, and a background task tops them up so they keep
   coming while the app stays closed. Settings → Reminders checks permission, exact alarms and
   battery, sends a test and lists what's coming.
+- Templates: one marketplace (Settings → Templates, and Templates in each module's menu) with
+  packs of ready-made recipes, training programs, Care routines, a tasbih sequence, flashcards,
+  learning paths, challenges, a budget split and wardrobe basics. Every module starts empty;
+  adding a pack copies its items into the person's own data. The built-in photos ship inside
+  the app (`app-photos/`, about 2 MB, `scripts/gen-bundled-photos.mjs`), so they show offline.
 - Backup and restore: one file with every record, document, the setup answers and (optionally)
   photos, saved to a folder or shared; a daily automatic backup into a picked folder (newest
   seven kept); restore with a preview, merged with what's there or replacing it.

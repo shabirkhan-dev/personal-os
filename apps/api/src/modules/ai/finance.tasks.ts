@@ -7,6 +7,10 @@ import {
 	type ReadSpendInput,
 	type SpendReading,
 	spendReading,
+	type BudgetDraft,
+	budgetDraft,
+	budgetLines,
+	type DesignBudgetInput,
 } from "./finance.schema";
 
 type Deps = { config: Config };
@@ -73,4 +77,48 @@ export function guessSpend(source: string): SpendReading {
 		});
 	const method = /\bcash\b/i.test(source) ? "cash" : /\bbank|card\b/i.test(source) ? "bank" : null;
 	return { items, method };
+}
+
+const BUDGET =
+	"Design a monthly budget in Pakistani rupees from the person's monthly cost, income, what " +
+	"they spent per line on average and their notes. Give a limit for each line (food, bills, " +
+	"transport, care, giving, shopping, dreams for savings goals, other); the limits should add up " +
+	"to about the monthly cost, or less when they want to save. List the minimum that must be paid " +
+	"whatever happens (rent, food, bills, transport) with amounts, and up to three short, concrete " +
+	"tips. Keep giving at 2.5% or more when income allows. Plain words, no financial advice.";
+
+/** Drafts budget limits and the minimum list; the person reviews them before anything is saved. */
+export async function designBudget(deps: Deps, input: DesignBudgetInput): Promise<BudgetDraft> {
+	if (deps.config.ai.provider === "mock") {
+		const share: Record<(typeof budgetLines)[number], number> = {
+			food: 0.3,
+			bills: 0.25,
+			transport: 0.1,
+			care: 0.05,
+			giving: 0.05,
+			shopping: 0.08,
+			dreams: 0.1,
+			other: 0.07,
+		};
+		const limits = Object.fromEntries(
+			budgetLines.map((name) => [name, Math.round((input.monthlyCost * share[name]) / 100) * 100]),
+		);
+		return {
+			limits,
+			minimum: [
+				{ label: "Food", amount: limits.food ?? 0 },
+				{ label: "Bills", amount: limits.bills ?? 0 },
+			],
+			tips: ["Pay the minimum first each month, then the rest."],
+			note: "A balanced split of your month. With a provider key set, it is designed here.",
+		};
+	}
+	return askJson(
+		deps.config,
+		"Finance",
+		"design-budget",
+		BUDGET,
+		JSON.stringify(input),
+		budgetDraft,
+	);
 }

@@ -92,3 +92,55 @@ export type ReadSpendInput = z.infer<typeof readSpendSchema>;
 export type SpendReading = z.infer<typeof spendReading>;
 export type AskFinanceInput = z.infer<typeof askFinanceSchema>;
 export type FinanceAnswer = z.infer<typeof financeAnswer>;
+
+// --- design a budget --------------------------------------------------------------------------
+
+/** Budget lines, as the app stores them (Finance settings `limits`). */
+export const budgetLines = [
+	"food",
+	"bills",
+	"transport",
+	"care",
+	"giving",
+	"shopping",
+	"dreams",
+	"other",
+] as const;
+
+export const designBudgetSchema = z
+	.object({
+		/** What the month costs today, and what comes in (0 while looking for work). */
+		monthlyCost: rupees,
+		monthlyIncome: rupees.default(0),
+		/** Average spend per line over the last months, from the person's own entries. */
+		spent: z.partialRecord(z.enum(budgetLines), rupees).default({}),
+		/** "Save 20k a month", "rent is 35k", "cut eating out". */
+		notes: line(400).default(""),
+	})
+	.strict();
+
+export const budgetDraft = z.object({
+	limits: z
+		.record(z.string(), z.number().min(0).max(1_000_000_000).catch(0))
+		.default({})
+		.transform((raw) =>
+			Object.fromEntries(budgetLines.map((name) => [name, Math.round(raw[name] ?? 0)])),
+		),
+	minimum: z
+		.array(z.object({ label: text(40), amount: z.number().min(0).max(1_000_000_000).catch(0) }))
+		.default([])
+		.transform((items) =>
+			items
+				.filter((item) => item.label && item.amount > 0)
+				.slice(0, 12)
+				.map((item) => ({ label: item.label, amount: Math.round(item.amount) })),
+		),
+	tips: z
+		.array(text(140))
+		.default([])
+		.transform((items) => items.filter(Boolean).slice(0, 3)),
+	note: text(240),
+});
+
+export type DesignBudgetInput = z.infer<typeof designBudgetSchema>;
+export type BudgetDraft = z.infer<typeof budgetDraft>;

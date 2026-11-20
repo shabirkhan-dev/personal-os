@@ -1,0 +1,11 @@
+# The database is encrypted on the phone, and App lock explains what it needs.
+appId: com.shabirkhandev.personalos
+name: 05-security
+---
+- openLink: personalos://security
+- extendedWaitUntil:
+    visible: "Keep it yours"
+    timeout: 15000
+- assertVisible: "ENCRYPTED ON THIS PHONE"
+- assertVisible: "Lock Personal OS"
+- takeScreenshot: 05-security

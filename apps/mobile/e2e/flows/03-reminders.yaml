@@ -1,0 +1,16 @@
+# The reminders screen checks the phone and sets water reminders.
+appId: com.shabirkhandev.personalos
+name: 03-reminders
+---
+- openLink: personalos://reminders
+- extendedWaitUntil:
+    visible: "Send a test reminder"
+    timeout: 15000
+- assertVisible: "Alarms and reminders"
+- scrollUntilVisible:
+    element: "Remind me to drink"
+- tapOn: "Remind me to drink"
+- scrollUntilVisible:
+    element: "From"
+- assertVisible: "Until"
+- takeScreenshot: 03-reminders

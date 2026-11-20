@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Icon } from "@/components/icons";
 import { ProgressBar, ScreenTitle } from "@/components/module-ui";
+import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
 import { haptics } from "@/lib/haptics";
 import { useZakatLine } from "@/modules/faith";
@@ -19,6 +20,7 @@ import {
 	CATEGORY_TONES,
 	type Entry,
 } from "../lib/finance-model";
+import { BudgetDesignSheet } from "./budget-design-sheet";
 import { ButtonPair, Card, CardHead, Eyebrow } from "./finance-cards";
 import { FinanceScreen } from "./finance-screen";
 import { LimitsSheet, MoveSheet } from "./finance-sheets";
@@ -51,6 +53,7 @@ export function BudgetScreen() {
 	const zakat = useZakatLine();
 	const [limits, setLimits] = useState(false);
 	const [moving, setMoving] = useState(false);
+	const [designing, setDesigning] = useState(false);
 	const [notice, setNotice] = useState<string | null>(null);
 	const lines = CATEGORIES.filter((category) => lineLimits[category] > 0 || sums[category] > 0);
 	const status =
@@ -102,6 +105,11 @@ export function BudgetScreen() {
 									.then(() => haptics.success())
 									.catch(failed),
 						}}
+					/>
+					<PillButton
+						label="Design it with AI"
+						variant="secondary"
+						onPress={() => setDesigning(true)}
 					/>
 				</Card>
 			) : null}
@@ -162,6 +170,19 @@ export function BudgetScreen() {
 			<ButtonPair
 				secondary={{ label: "Change limits", onPress: () => setLimits(true) }}
 				primary={{ label: "Move money", onPress: () => setMoving(true) }}
+			/>
+			{budget > 0 ? (
+				<PillButton
+					label="Redesign with AI"
+					variant="secondary"
+					onPress={() => setDesigning(true)}
+				/>
+			) : null}
+			<BudgetDesignSheet
+				visible={designing}
+				settings={settings}
+				entries={data.entries}
+				onClose={() => setDesigning(false)}
 			/>
 			<LimitsSheet
 				visible={limits}

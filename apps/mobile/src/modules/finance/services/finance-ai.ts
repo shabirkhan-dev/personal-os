@@ -10,6 +10,14 @@ import type { Category, Method } from "../lib/finance-model";
 const AI_TIMEOUT_MS = 45_000;
 
 export type FinanceAnswer = { answer: string; followUps: string[] };
+
+/** A budget drafted by AI: limits per line, the minimum list, and a few tips. */
+export type BudgetDraftAi = {
+	limits: Record<Category, number>;
+	minimum: { label: string; amount: number }[];
+	tips: string[];
+	note: string;
+};
 export type SpendReading = {
 	items: { name: string; amount: number; category: Category }[];
 	method: Method | null;
@@ -85,6 +93,23 @@ export function useFinanceAi() {
 					})),
 				}),
 			read: (text: string) => call<SpendReading>("read", { text: text.slice(0, 600) }),
+			designBudget: (input: {
+				monthlyCost: number;
+				monthlyIncome: number;
+				spent: Partial<Record<Category, number>>;
+				notes: string;
+			}) =>
+				call<BudgetDraftAi>("design-budget", {
+					monthlyCost: Math.max(0, Math.round(input.monthlyCost)),
+					monthlyIncome: Math.max(0, Math.round(input.monthlyIncome)),
+					spent: Object.fromEntries(
+						Object.entries(input.spent).map(([key, value]) => [
+							key,
+							Math.max(0, Math.round(value ?? 0)),
+						]),
+					),
+					notes: input.notes.slice(0, 400),
+				}),
 		}),
 		[available, call],
 	);

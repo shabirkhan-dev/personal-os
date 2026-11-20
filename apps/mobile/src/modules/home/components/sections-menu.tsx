@@ -46,7 +46,7 @@ export function SectionsMenu({ top, title, sections, onClose }: SectionsMenuProp
 				</PoText>
 				{sections.map((section) => (
 					<Pressable
-						key={section.href}
+						key={section.label}
 						accessibilityRole="button"
 						onPress={() => {
 							haptics.select();

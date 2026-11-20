@@ -1,0 +1,40 @@
+# A new person goes through setup, step by step, and lands on an empty Home.
+appId: com.shabirkhandev.personalos
+name: 01-first-launch
+---
+- launchApp:
+    clearState: true
+    permissions:
+      all: deny
+- extendedWaitUntil:
+    visible: "Get started"
+    timeout: 30000
+- tapOn: "Get started"
+- tapOn: "Step by step"
+- tapOn: "Start setup"
+- tapOn: "Your name"
+- inputText: "Sam"
+- hideKeyboard
+- tapOn: "Continue"
+- tapOn: "Continue"
+- tapOn: "Continue"
+- tapOn: "Continue"
+- tapOn: "Finance"
+- tapOn: "Food"
+- tapOn: "Faith"
+- tapOn: "Care"
+- tapOn: "Continue"
+- tapOn: "Not now"
+- extendedWaitUntil:
+    visible: "Save my plan"
+    timeout: 30000
+- tapOn: "Save my plan"
+- tapOn: "Not now"
+- extendedWaitUntil:
+    visible: "Open my OS"
+    timeout: 15000
+- tapOn: "Open my OS"
+- extendedWaitUntil:
+    visible: "Today"
+    timeout: 15000
+- takeScreenshot: 01-home

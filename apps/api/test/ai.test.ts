@@ -746,3 +746,88 @@ describe("Care AI routine", () => {
 		});
 	});
 });
+
+describe("Finance AI budget", () => {
+	it("drafts a budget with the mock provider", async () => {
+		const response = await mockApp.call("POST", "/ai/finance/design-budget", {
+			token,
+			body: { monthlyCost: 60_000, notes: "save 10k" },
+		});
+		expect(response.status).toBe(200);
+		const data = response.json?.data as { limits: Record<string, number>; minimum: unknown[] };
+		expect(data.limits.food).toBe(18_000);
+		expect(data.minimum.length).toBeGreaterThan(0);
+	});
+
+	it("keeps only known lines and sensible amounts from the model", async () => {
+		provider(
+			JSON.stringify({
+				limits: { food: 20_000.4, rent: 5, bills: -3 },
+				minimum: [
+					{ label: "Rent", amount: 35_000 },
+					{ label: "", amount: 9 },
+				],
+				tips: ["Cook at home", "", "a", "b"],
+				note: "Fits.",
+			}),
+		);
+		const response = await realApp.call("POST", "/ai/finance/design-budget", {
+			token,
+			body: { monthlyCost: 60_000 },
+		});
+		const data = response.json?.data as {
+			limits: Record<string, number>;
+			minimum: unknown[];
+			tips: string[];
+		};
+		expect(data.limits).toEqual({
+			food: 20_000,
+			bills: 0,
+			transport: 0,
+			care: 0,
+			giving: 0,
+			shopping: 0,
+			dreams: 0,
+			other: 0,
+		});
+		expect(data.minimum).toEqual([{ label: "Rent", amount: 35_000 }]);
+		expect(data.tips).toEqual(["Cook at home", "a", "b"]);
+	});
+});
+
+describe("Daily AI day", () => {
+	it("keeps the fixed blocks and adds focus time with the mock provider", async () => {
+		const response = await mockApp.call("POST", "/ai/daily/design-day", {
+			token,
+			body: {
+				wakeAt: 360,
+				bedAt: 1380,
+				blocks: [{ minutes: 300, length: 10, title: "Fajr", module: "faith" }],
+				notes: "study 2 hours",
+			},
+		});
+		const data = response.json?.data as { blocks: { title: string }[] };
+		expect(data.blocks.map((block) => block.title)).toEqual(["Fajr", "Deep work"]);
+	});
+
+	it("sorts the model's blocks and drops untitled ones", async () => {
+		provider(
+			JSON.stringify({
+				blocks: [
+					{ minutes: 900, length: 60, title: "Gym", detail: "Push", module: "workout" },
+					{ minutes: 480, length: 90, title: "Study", detail: "", module: "nope" },
+					{ minutes: 600, title: "" },
+				],
+				note: "",
+			}),
+		);
+		const response = await realApp.call("POST", "/ai/daily/design-day", {
+			token,
+			body: { wakeAt: 360, bedAt: 1380 },
+		});
+		expect((response.json?.data as { blocks: unknown[] } | undefined)?.blocks).toEqual([
+			{ minutes: 480, length: 90, title: "Study", detail: "", module: "daily-life" },
+			{ minutes: 900, length: 60, title: "Gym", detail: "Push", module: "workout" },
+		]);
+	});
+});

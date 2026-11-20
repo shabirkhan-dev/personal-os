@@ -4,6 +4,7 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useMemo } from "react";
+import { AppLockGate } from "@/components/app-lock-gate";
 import { AppProviders } from "@/components/providers";
 import { DialogHost } from "@/components/ui/dialog";
 import { RootError } from "@/components/route-error";
@@ -59,13 +60,15 @@ function RootNavigator() {
 	return (
 		<ThemeProvider value={navigationTheme}>
 			<StatusBar style={mode === "dark" ? "light" : "dark"} />
-			<Stack
-				screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bgApp } }}
-			>
-				<Stack.Screen name="(home)" />
-				<Stack.Screen name="(onboarding)" />
-			</Stack>
-			<DialogHost />
+			<AppLockGate>
+				<Stack
+					screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bgApp } }}
+				>
+					<Stack.Screen name="(home)" />
+					<Stack.Screen name="(onboarding)" />
+				</Stack>
+				<DialogHost />
+			</AppLockGate>
 		</ThemeProvider>
 	);
 }

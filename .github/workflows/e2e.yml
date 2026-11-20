@@ -75,7 +75,8 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
           script: |
             adb install -r apps/mobile/android/app/build/outputs/apk/release/app-release.apk
-            maestro test apps/mobile/e2e --format junit --output e2e-report.xml --test-output-dir e2e-output
+            adb logcat -c
+            maestro test apps/mobile/e2e --format junit --output e2e-report.xml --test-output-dir e2e-output || (echo "::group::What was on screen"; maestro hierarchy | grep -oE '"(text|accessibilityText|resource-id)" *: *"[^"]+"' | head -80; echo "::endgroup::"; echo "::group::App log"; adb logcat -d | grep -iE "ReactNativeJS|AndroidRuntime|FATAL|personalos|SQLite|expo" | tail -200; echo "::endgroup::"; exit 1)
 
       - name: Keep the report and screenshots
         if: always()

@@ -18,7 +18,11 @@ export function AppLockGate({ children }: { children: ReactNode }) {
 	const asking = useRef(false);
 
 	useEffect(() => {
-		hydrate().catch((error: unknown) => console.warn("[lock] could not start", error));
+		hydrate().catch((error: unknown) => {
+			// Never leave the app covered because the lock couldn't start.
+			console.warn("[lock] could not start", error);
+			useAppLock.setState({ hydrated: true, locked: false });
+		});
 		const subscription = AppState.addEventListener("change", (state) => {
 			if (state === "active") {
 				setAway(false);

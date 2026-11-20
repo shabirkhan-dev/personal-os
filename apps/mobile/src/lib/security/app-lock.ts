@@ -62,9 +62,10 @@ export const useAppLock = create<LockState>((set, get) => ({
 		} catch (error) {
 			console.warn("[lock] could not read the lock settings", error);
 		}
-		await applyPrivacy(settings.privacy);
-		// A fresh start is "away for a long time": locked when the lock is on.
+		// A fresh start is "away for a long time": locked when the lock is on. Shown right away;
+		// screenshot protection follows without holding the app up.
 		set({ hydrated: true, settings, locked: settings.enabled && Platform.OS !== "web" });
+		if (settings.privacy) void applyPrivacy(true);
 	},
 
 	update: async (change) => {

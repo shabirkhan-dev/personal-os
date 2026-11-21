@@ -16,8 +16,17 @@ name: 01-first-launch
     visible: "Get started"
     timeout: 60000
 - tapOn: "Get started"
+- extendedWaitUntil:
+    visible: "Step by step"
+    timeout: 15000
 - tapOn: "Step by step"
+- extendedWaitUntil:
+    visible: "Start setup"
+    timeout: 15000
 - tapOn: "Start setup"
+- extendedWaitUntil:
+    visible: "Your name"
+    timeout: 15000
 - tapOn: "Your name"
 - inputText: "Sam"
 - hideKeyboard
@@ -25,15 +34,24 @@ name: 01-first-launch
 - tapOn: "Continue"
 - tapOn: "Continue"
 - tapOn: "Continue"
+- extendedWaitUntil:
+    visible: "Finance"
+    timeout: 15000
 - tapOn: "Finance"
 - tapOn: "Food"
 - tapOn: "Faith"
 - tapOn: "Care"
 - tapOn: "Continue"
+- extendedWaitUntil:
+    visible: "Not now"
+    timeout: 15000
 - tapOn: "Not now"
 - extendedWaitUntil:
     visible: "Save my plan"
     timeout: 30000
+- extendedWaitUntil:
+    visible: "Save my plan"
+    timeout: 15000
 - tapOn: "Save my plan"
 - tapOn: "Not now"
 - extendedWaitUntil:

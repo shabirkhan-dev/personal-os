@@ -1,0 +1,64 @@
+# A new person goes through setup, step by step, and lands on an empty Home.
+appId: com.shabirkhandev.personalos
+name: 01-first-launch
+---
+- launchApp:
+    clearState: true
+    permissions:
+      all: deny
+# A slow emulator sometimes shows "<app> isn't responding" for the launcher: let it carry on.
+- runFlow:
+    when:
+      visible: ".*isn't responding"
+    commands:
+      - tapOn: "Wait"
+- extendedWaitUntil:
+    visible: "Get started"
+    timeout: 60000
+- tapOn: "Get started"
+- extendedWaitUntil:
+    visible: "Step by step"
+    timeout: 15000
+- tapOn: "Step by step"
+- extendedWaitUntil:
+    visible: "Start setup"
+    timeout: 15000
+- tapOn: "Start setup"
+- extendedWaitUntil:
+    visible: "Your name"
+    timeout: 15000
+- tapOn: "Your name"
+- inputText: "Sam"
+- hideKeyboard
+- tapOn: "Continue"
+- tapOn: "Continue"
+- tapOn: "Continue"
+- tapOn: "Continue"
+- extendedWaitUntil:
+    visible: "Finance"
+    timeout: 15000
+- tapOn: "Finance"
+- tapOn: "Food"
+- tapOn: "Faith"
+- tapOn: "Care"
+- tapOn: "Continue"
+- extendedWaitUntil:
+    visible: "Not now"
+    timeout: 15000
+- tapOn: "Not now"
+- extendedWaitUntil:
+    visible: "Save my plan"
+    timeout: 30000
+- extendedWaitUntil:
+    visible: "Save my plan"
+    timeout: 15000
+- tapOn: "Save my plan"
+- tapOn: "Not now"
+- extendedWaitUntil:
+    visible: "Open my OS"
+    timeout: 15000
+- tapOn: "Open my OS"
+- extendedWaitUntil:
+    visible: "Today"
+    timeout: 15000
+- takeScreenshot: 01-home

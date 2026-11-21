@@ -29,8 +29,10 @@ import { askFoodSchema, draftRecipeSchema, planWeekSchema, readMealSchema } from
 import { askTrainingSchema, designProgramSchema, skillStepsSchema } from "./training.schema";
 import { askTraining, buildSkill, designProgram } from "./training.tasks";
 import { askFood, draftRecipe, planWeek, readMeal } from "./food.tasks";
-import { askFinanceSchema, readSpendSchema } from "./finance.schema";
-import { askFinance, readSpend } from "./finance.tasks";
+import { designDaySchema } from "./daily.schema";
+import { designDay } from "./daily.tasks";
+import { askFinanceSchema, designBudgetSchema, readSpendSchema } from "./finance.schema";
+import { askFinance, designBudget, readSpend } from "./finance.tasks";
 
 /** Module AI, `POST /ai/<module>/<task>`. Signed-in only; the provider key never leaves the API. */
 export const aiRoutes = new Hono<AppEnv>()
@@ -86,6 +88,12 @@ export const aiRoutes = new Hono<AppEnv>()
 	)
 	.post("/care/design-routine", validate("json", designRoutineSchema), async (c) =>
 		ok(c, await designRoutine({ config: c.get("config") }, c.req.valid("json"))),
+	)
+	.post("/finance/design-budget", validate("json", designBudgetSchema), async (c) =>
+		ok(c, await designBudget({ config: c.get("config") }, c.req.valid("json"))),
+	)
+	.post("/daily/design-day", validate("json", designDaySchema), async (c) =>
+		ok(c, await designDay({ config: c.get("config") }, c.req.valid("json"))),
 	)
 	.post("/training/ask", validate("json", askTrainingSchema), async (c) =>
 		ok(c, await askTraining({ config: c.get("config") }, c.req.valid("json"))),

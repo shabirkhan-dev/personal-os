@@ -2,7 +2,7 @@
   "expo": {
     "name": "Personal OS",
     "slug": "personal-os-",
-    "version": "0.5.1",
+    "version": "0.6.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "personalos",
@@ -44,7 +44,8 @@
         "android.permission.health.READ_SLEEP",
         "android.permission.health.READ_STEPS",
         "android.permission.health.READ_WEIGHT"
-      ]
+      ],
+      "allowBackup": false
     },
     "plugins": [
       "expo-router",
@@ -62,6 +63,18 @@
         }
       ],
       "expo-font",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Personal OS uses Face ID to unlock the app when App lock is on."
+        }
+      ],
+      [
+        "expo-sqlite",
+        {
+          "useSQLCipher": true
+        }
+      ],
       [
         "expo-secure-store",
         {

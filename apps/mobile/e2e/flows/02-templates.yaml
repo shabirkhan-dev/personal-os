@@ -1,0 +1,29 @@
+# Recipes start empty; adding the recipe pack from Templates fills them, with photos.
+appId: com.shabirkhandev.personalos
+name: 02-templates
+---
+- openLink: personalos://food/recipes
+- extendedWaitUntil:
+    visible: "No recipes yet"
+    timeout: 15000
+- tapOn: "Browse recipe templates"
+- tapOn: "Everyday Pakistani recipes"
+- tapOn: "Select all 15"
+# The button sits under the 15 recipes.
+- scrollUntilVisible:
+    element: "Add 15 to my app"
+    timeout: 20000
+- tapOn: "Add 15 to my app"
+- extendedWaitUntil:
+    visible: "Added 15 to your app.*"
+    timeout: 15000
+- scrollUntilVisible:
+    element: "Open"
+- tapOn: "Open"
+- extendedWaitUntil:
+    visible: "MORE RECIPES"
+    timeout: 15000
+- scrollUntilVisible:
+    element: "Chicken karahi"
+- assertNotVisible: "No recipes yet"
+- takeScreenshot: 02-recipes

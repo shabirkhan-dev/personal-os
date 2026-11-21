@@ -15,6 +15,7 @@ import { useDailyToday } from "../hooks/use-daily";
 import { draftPlan, freeGaps, hoursLabel, MODULE_LABELS, withDone } from "../lib/daily-math";
 import { type Block, PLAN_MODULES, type PlanModule } from "../lib/daily-model";
 import { readClock } from "../lib/parse-daily-line";
+import { dailyAiMessage, useDailyAi } from "../services/daily-ai";
 import { AgendaRow, Card } from "./daily-cards";
 import { DailyScreen } from "./daily-screen";
 
@@ -29,6 +30,10 @@ export function PlanScreen() {
 	);
 	const [draft, setDraft] = useState<Draft | null>(null);
 	const [notice, setNotice] = useState<string | null>(null);
+	const [designing, setDesigning] = useState(false);
+	const [wishes, setWishes] = useState("");
+	const [thinking, setThinking] = useState(false);
+	const ai = useDailyAi();
 	const items = withDone(blocks, sources);
 	const gaps = freeGaps(blocks, data.settings);
 	const biggest = [...gaps].sort((a, b) => b.to - b.from - (a.to - a.from))[0];
@@ -121,6 +126,11 @@ export function PlanScreen() {
 					{notice}
 				</PoText>
 			) : null}
+			<PillButton
+				label="Design my day with AI"
+				variant="secondary"
+				onPress={() => setDesigning(true)}
+			/>
 			<Footer>
 				<PillButton
 					label="Regenerate"
@@ -137,6 +147,64 @@ export function PlanScreen() {
 				/>
 				<PillButton label="Use this plan" style={styles.flex} onPress={use} />
 			</Footer>
+
+			<Sheet visible={designing} title="Design my day" onClose={() => setDesigning(false)}>
+				<View style={styles.sheet}>
+					<PoText variant="meta13" tone="textSecondary">
+						{ai.available
+							? "Your prayers, meals and training stay where they are. Say what else today needs; you can change every block after."
+							: "Sign in to design your day with AI. You can still add and move blocks yourself."}
+					</PoText>
+					{ai.available ? (
+						<>
+							<TextField
+								label="What does today need?"
+								value={wishes}
+								onChangeText={setWishes}
+								placeholder="Study 2 hours, gym at 6, family dinner at 9"
+								multiline
+							/>
+							<PillButton
+								label={thinking ? "Designing…" : "Design it"}
+								disabled={thinking}
+								onPress={() => {
+									setThinking(true);
+									setNotice(null);
+									ai.designDay({
+										wakeAt: data.settings.wakeAt,
+										bedAt: data.settings.bedAt,
+										blocks,
+										notes: wishes,
+									})
+										.then((day) => {
+											haptics.success();
+											setBlocks(
+												day.blocks.map((block) => ({
+													id: newId(),
+													minutes: block.minutes,
+													length: block.length,
+													title: block.title,
+													detail:
+														block.detail ||
+														`${MODULE_LABELS[block.module]} · ${block.length >= 60 ? hoursLabel(block.length) : `${block.length} min`}`,
+													module: block.module,
+												})),
+											);
+											setDesigning(false);
+											setNotice(day.note || "Here's a draft. Change anything, then use it.");
+										})
+										.catch((error: unknown) => {
+											console.warn("[daily] day design failed", error);
+											setNotice(dailyAiMessage(error));
+											setDesigning(false);
+										})
+										.finally(() => setThinking(false));
+								}}
+							/>
+						</>
+					) : null}
+				</View>
+			</Sheet>
 
 			<Sheet
 				visible={draft !== null}

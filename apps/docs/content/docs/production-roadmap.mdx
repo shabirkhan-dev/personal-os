@@ -108,6 +108,14 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
   learning paths, challenges, a budget split and wardrobe basics. Every module starts empty;
   adding a pack copies its items into the person's own data. The built-in photos ship inside
   the app (`app-photos/`, about 2 MB, `scripts/gen-bundled-photos.mjs`), so they show offline.
+- Security: the database on the phone is encrypted with SQLCipher (key in the keystore; an
+  older plain database is moved over once), App lock with fingerprint, face or passcode
+  (Settings → Security), privacy mode that hides the app in recent apps and blocks screenshots,
+  and Android auto backup off (Backup and restore is the way to keep a copy).
+- Design with AI in more places: a budget (Finance → Budget) and a day (Daily → Plan the day),
+  next to Care routines, Training programs and the Food week; each is a draft to review.
+- End-to-end checks: Maestro flows (`apps/mobile/e2e`) run the release APK on an Android
+  emulator in CI (`.github/workflows/e2e.yml`) on main, nightly and by hand.
 - Backup and restore: one file with every record, document, the setup answers and (optionally)
   photos, saved to a folder or shared; a daily automatic backup into a picked folder (newest
   seven kept); restore with a preview, merged with what's there or replacing it.

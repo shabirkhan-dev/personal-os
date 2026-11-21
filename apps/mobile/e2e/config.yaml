@@ -1,0 +1,13 @@
+# Maestro: the app's end-to-end checks on an Android emulator (CI: .github/workflows/e2e.yml).
+# Run locally with an emulator or phone attached and the app installed:
+#   maestro test apps/mobile/e2e
+flows:
+  - flows/*.yaml
+executionOrder:
+  continueOnFailure: false
+  flowsOrder:
+    - 01-first-launch
+    - 02-templates
+    - 03-reminders
+    - 04-backup
+    - 05-security

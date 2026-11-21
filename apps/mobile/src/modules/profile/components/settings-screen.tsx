@@ -137,8 +137,14 @@ export function SettingsScreen() {
 				Used for your calories, water and training targets.
 			</PoText>
 
-			<SectionLabel>Reminders, templates and data</SectionLabel>
+			<SectionLabel>Security, reminders and data</SectionLabel>
 			<SettingsCard>
+				<SettingsRow
+					icon="Filled/Eye"
+					title="Security"
+					meta="App lock, privacy mode, encryption"
+					onPress={() => router.push("/security")}
+				/>
 				<SettingsRow
 					icon="Filled/Bell"
 					title="Reminders"

@@ -1,0 +1,13 @@
+# Backup and restore opens with its choices; nothing is written without the person picking.
+appId: com.shabirkhandev.personalos
+name: 04-backup
+---
+- openLink: personalos://backup
+- extendedWaitUntil:
+    visible: "Back up your life"
+    timeout: 15000
+- assertVisible: "Save to a folder"
+- assertVisible: "Share the backup"
+- scrollUntilVisible:
+    element: "Choose a backup file"
+- takeScreenshot: 04-backup

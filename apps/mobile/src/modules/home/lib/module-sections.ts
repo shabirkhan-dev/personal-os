@@ -19,6 +19,7 @@ export const MODULE_SECTIONS: Record<string, readonly Section[]> = {
 	"Daily life": [
 		{ label: "Morning brief", href: "/daily/brief" },
 		{ label: "Plan the day", href: "/daily/plan" },
+		{ label: "Design my day with AI", href: "/daily/plan" },
 		{ label: "Minimum day", href: "/daily/minimum" },
 		{ label: "Sleep", href: "/daily/sleep" },
 		{ label: "Close the day", href: "/daily/close" },
@@ -35,6 +36,7 @@ export const MODULE_SECTIONS: Record<string, readonly Section[]> = {
 		{ label: "Exercises", href: "/training/exercises" },
 		{ label: "Skills", href: "/training/skills" },
 		{ label: "Boxing", href: "/training/boxing" },
+		{ label: "Design a program with AI", href: "/training/program-builder?ai=1" },
 		{ label: "Templates", href: "/templates?module=training" },
 		{ label: "Calendar", href: "/calendar" },
 	],
@@ -44,6 +46,7 @@ export const MODULE_SECTIONS: Record<string, readonly Section[]> = {
 		{ label: "Budget", href: "/finance/budget" },
 		{ label: "Income", href: "/finance/income" },
 		{ label: "History", href: "/finance/history" },
+		{ label: "Design a budget with AI", href: "/finance/budget" },
 		{ label: "Templates", href: "/templates?module=finance" },
 	],
 	Care: [
@@ -64,6 +67,7 @@ export const MODULE_SECTIONS: Record<string, readonly Section[]> = {
 		{ label: "Write a recipe", href: "/food/recipe-edit" },
 		{ label: "Scan a barcode", href: "/food/scan" },
 		{ label: "Goal", href: "/food/goal" },
+		{ label: "Plan my week with AI", href: "/food/plan" },
 		{ label: "Templates", href: "/templates?module=food" },
 	],
 	Faith: [

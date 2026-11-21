@@ -1,7 +1,7 @@
 import * as Notifications from "expo-notifications";
 import { router } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { AppState, Linking, Platform, StyleSheet, View } from "react-native";
+import { AppState, Linking, Platform, Pressable, StyleSheet, View } from "react-native";
 import { FilterChip } from "@/components/module-ui";
 import { ModuleScreen } from "@/components/module-screen";
 import { PillButton } from "@/components/ui/pill-button";
@@ -405,16 +405,25 @@ function ToggleLine({
 	value: boolean;
 	onChange: (value: boolean) => void;
 }) {
+	// The whole row toggles, not only the switch.
 	return (
 		<View style={styles.toggle}>
-			<View style={styles.flex}>
+			<Pressable
+				accessibilityRole="switch"
+				accessibilityState={{ checked: value }}
+				onPress={() => {
+					haptics.select();
+					onChange(!value);
+				}}
+				style={styles.flex}
+			>
 				<PoText variant="row15">{title}</PoText>
 				{meta ? (
 					<PoText variant="meta13" tone="textTertiary">
 						{meta}
 					</PoText>
 				) : null}
-			</View>
+			</Pressable>
 			<Toggle value={value} onChange={onChange} accessibilityLabel={title} />
 		</View>
 	);

@@ -21,7 +21,9 @@ name: 02-templates
     element: "Open"
 - tapOn: "Open"
 - extendedWaitUntil:
-    visible: "Chicken karahi"
+    visible: "MORE RECIPES"
     timeout: 15000
+- scrollUntilVisible:
+    element: "Chicken karahi"
 - assertNotVisible: "No recipes yet"
 - takeScreenshot: 02-recipes

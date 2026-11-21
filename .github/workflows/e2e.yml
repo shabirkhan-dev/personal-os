@@ -76,6 +76,7 @@ jobs:
           script: |
             adb install -r apps/mobile/android/app/build/outputs/apk/release/app-release.apk
             adb logcat -c
+            adb shell settings put global window_animation_scale 0 && sleep 30
             maestro test apps/mobile/e2e --format junit --output e2e-report.xml --test-output-dir e2e-output || (echo "::group::What was on screen"; maestro hierarchy | grep -oE '"(text|accessibilityText|resource-id)" *: *"[^"]+"' | head -80; echo "::endgroup::"; echo "::group::App log"; adb logcat -d | grep -iE "ReactNativeJS|AndroidRuntime|FATAL|personalos|SQLite|expo" | tail -200; echo "::endgroup::"; exit 1)
 
       - name: Keep the report and screenshots

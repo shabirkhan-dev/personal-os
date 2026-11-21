@@ -6,9 +6,15 @@ name: 01-first-launch
     clearState: true
     permissions:
       all: deny
+# A slow emulator sometimes shows "<app> isn't responding" for the launcher: let it carry on.
+- runFlow:
+    when:
+      visible: ".*isn't responding"
+    commands:
+      - tapOn: "Wait"
 - extendedWaitUntil:
     visible: "Get started"
-    timeout: 30000
+    timeout: 60000
 - tapOn: "Get started"
 - tapOn: "Step by step"
 - tapOn: "Start setup"

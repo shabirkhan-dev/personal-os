@@ -10,7 +10,8 @@ name: 03-reminders
 - scrollUntilVisible:
     element: "Remind me to drink"
 - tapOn: "Remind me to drink"
-- scrollUntilVisible:
-    element: "From"
-- assertVisible: "Until"
+# Turning it on shows how often, right under the switch.
+- extendedWaitUntil:
+    visible: "Every 2 h"
+    timeout: 10000
 - takeScreenshot: 03-reminders

@@ -5,7 +5,7 @@ import { ModuleScreen } from "@/components/module-screen";
 import { showDialog } from "@/components/ui/dialog";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
-import { Toggle } from "@/components/ui/toggle";
+import { ToggleRow } from "@/components/ui/toggle-row";
 import { haptics } from "@/lib/haptics";
 import { type ThemePreference, usePoTheme } from "@/theme";
 import { type BackupFile, collectionLabel, type RestoreMode, summarize } from "../lib/backup";
@@ -152,15 +152,12 @@ export function BackupScreen() {
 					Every module, your setup and your photos go into one file you keep: in Downloads, on
 					Drive, or anywhere you like. Bring it back here or on a new phone.
 				</PoText>
-				<View style={styles.toggle}>
-					<View style={styles.flex}>
-						<PoText variant="row15">Include photos</PoText>
-						<PoText variant="meta13" tone="textTertiary">
-							Bigger file; meals, wardrobe, receipts and more come back too
-						</PoText>
-					</View>
-					<Toggle value={photos} onChange={setPhotos} accessibilityLabel="Include photos" />
-				</View>
+				<ToggleRow
+					title="Include photos"
+					meta="Bigger file; meals, wardrobe, receipts and more come back too"
+					value={photos}
+					onChange={setPhotos}
+				/>
 				{native ? (
 					<PillButton
 						label={busy === "Saving" ? "Saving…" : "Save to a folder"}
@@ -185,44 +182,34 @@ export function BackupScreen() {
 				<>
 					<SectionLabel>Automatic</SectionLabel>
 					<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
-						<View style={styles.toggle}>
-							<View style={styles.flex}>
-								<PoText variant="row15">Back up every day</PoText>
-								<PoText variant="meta13" tone="textTertiary">
-									{auto?.on
-										? `Last backup: ${ago(auto.lastAt)}. The newest 7 are kept.`
-										: "Into a folder you pick, when you open the app"}
-								</PoText>
-							</View>
-							<Toggle
-								value={auto?.on ?? false}
-								accessibilityLabel="Back up every day"
-								onChange={(on) => {
-									if (on) {
-										void turnOnAuto();
-										return;
-									}
-									saveAutoBackup({ on: false })
-										.then(setAuto)
-										.catch((error: unknown) => console.error("[backup] could not save", error));
-								}}
-							/>
-						</View>
+						<ToggleRow
+							title="Back up every day"
+							meta={
+								auto?.on
+									? `Last backup: ${ago(auto.lastAt)}. The newest 7 are kept.`
+									: "Into a folder you pick, when you open the app"
+							}
+							value={auto?.on ?? false}
+							onChange={(on) => {
+								if (on) {
+									void turnOnAuto();
+									return;
+								}
+								saveAutoBackup({ on: false })
+									.then(setAuto)
+									.catch((error: unknown) => console.error("[backup] could not save", error));
+							}}
+						/>
 						{auto?.on ? (
-							<View style={styles.toggle}>
-								<PoText variant="row15" style={styles.flex}>
-									Photos in daily backups
-								</PoText>
-								<Toggle
-									value={auto.photos}
-									accessibilityLabel="Photos in daily backups"
-									onChange={(value) =>
-										saveAutoBackup({ photos: value })
-											.then(setAuto)
-											.catch((error: unknown) => console.error("[backup] could not save", error))
-									}
-								/>
-							</View>
+							<ToggleRow
+								title="Photos in daily backups"
+								value={auto.photos}
+								onChange={(value) =>
+									saveAutoBackup({ photos: value })
+										.then(setAuto)
+										.catch((error: unknown) => console.error("[backup] could not save", error))
+								}
+							/>
 						) : null}
 						{auto?.lastError ? (
 							<PoText variant="meta13" tone="textDanger">

@@ -14,7 +14,7 @@ import { markBrief } from "../data/daily-actions";
 import { useDailyToday } from "../hooks/use-daily";
 import {
 	hoursLabel,
-	MINIMUM,
+	minimumModule,
 	minimumState,
 	minimumTitle,
 	sleepWord,
@@ -86,7 +86,7 @@ export function BriefScreen() {
 		.filter((id) => !minimumState(id, sources, log).done)
 		.slice(0, 3)
 		.map((id) => {
-			const owner = MINIMUM[id].module;
+			const owner = minimumModule(id);
 			const when = agenda.find((item) => item.module === owner && !item.done);
 			return {
 				id,

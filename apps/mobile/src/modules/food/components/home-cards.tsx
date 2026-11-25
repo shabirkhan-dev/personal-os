@@ -168,22 +168,43 @@ export function MealsCard({
 	rows,
 	onRow,
 	onLog,
+	onEdit,
 }: {
 	rows: readonly SlotRow[];
 	onRow: (row: SlotRow) => void;
 	onLog: (row: SlotRow) => void;
+	/** Choose which meals show. */
+	onEdit: () => void;
 }) {
 	const { colors } = usePoTheme();
 	const logged = rows.filter((row) => row.meals.length > 0).length;
+	if (rows.length === 0) {
+		return (
+			<View style={[styles.mealsEmpty, { backgroundColor: colors.bgSurface }]}>
+				<PoText variant="row15">Which meals do you eat?</PoText>
+				<PoText variant="meta13" tone="textSecondary">
+					Pick yours (breakfast, lunch, a snack…) and each gets a row here to log in a tap. You can
+					also just log anything with the bar above.
+				</PoText>
+				<PillButton label="Pick my meals" variant="secondary" onPress={onEdit} />
+			</View>
+		);
+	}
 	return (
 		<View style={styles.section}>
 			<View style={styles.sectionHead}>
 				<PoText variant="eyebrow11" tone="textTertiary">
 					Today's meals
 				</PoText>
-				<PoText variant="eyebrow11" tone="textTertiary">
-					{`${logged} of ${rows.length} logged`}
-				</PoText>
+				<Pressable
+					accessibilityRole="button"
+					accessibilityLabel="Change your meals"
+					onPress={onEdit}
+				>
+					<PoText variant="eyebrow11" tone="textLink">
+						{`${logged} of ${rows.length} logged · Edit`}
+					</PoText>
+				</Pressable>
 			</View>
 			<ListCard>
 				{rows.map((row, index) => {
@@ -385,6 +406,7 @@ export function FoodAnswerCard({
 }
 
 const styles = StyleSheet.create({
+	mealsEmpty: { gap: 10, padding: 16, borderRadius: 20 },
 	flex: { flex: 1 },
 	card: { gap: 12, padding: 16, borderRadius: 20 },
 	eyebrow: { flexDirection: "row", alignItems: "center", gap: 8 },

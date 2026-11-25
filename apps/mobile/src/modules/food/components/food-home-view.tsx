@@ -26,7 +26,14 @@ import {
 	waterPace,
 	waterStreak,
 } from "../lib/food-math";
-import { GOAL_LABELS, type Goal, SLOT_LABELS, SLOT_TIMES } from "../lib/food-model";
+import {
+	GOAL_LABELS,
+	type Goal,
+	SLOT_LABELS,
+	SLOT_TIMES,
+	SLOTS,
+	type Slot,
+} from "../lib/food-model";
 import { parseFoodLine } from "../lib/parse-meal";
 import { goalWeight, remaining, targetsFor } from "../lib/targets";
 import { foodRoutes } from "../navigation";
@@ -109,10 +116,23 @@ export function FoodHomeView({ actionRequest }: HomeModuleViewProps) {
 		// oxlint-disable-next-line react/exhaustive-deps -- runs when the header button is pressed
 	}, [actionRequest]);
 
+	// Only the meals the person tracks, plus any slot that has something logged or planned today.
+	const chosen = settings.meals;
 	const rows = useMemo(
-		() => slotRows(meals, today, planToday, SLOT_TIMES),
-		[meals, today, planToday],
+		() =>
+			slotRows(meals, today, planToday, SLOT_TIMES).filter(
+				(row) => chosen.includes(row.slot) || row.meals.length > 0 || row.planned !== null,
+			),
+		[meals, today, planToday, chosen],
 	);
+	const [pickingMeals, setPickingMeals] = useState(false);
+	const toggleMeal = (slot: Slot) =>
+		void saveSettings({
+			...settings,
+			meals: SLOTS.filter((item) =>
+				item === slot ? !chosen.includes(slot) : chosen.includes(item),
+			),
+		}).catch((error: unknown) => console.error("[food] could not save your meals", error));
 	const preview = useMemo(() => targetsFor(body, goal, "active"), [body, goal]);
 
 	const say = (text: string, spoken: boolean) => {
@@ -342,6 +362,7 @@ export function FoodHomeView({ actionRequest }: HomeModuleViewProps) {
 					/>
 					<MealsCard
 						rows={rows}
+						onEdit={() => setPickingMeals(true)}
 						onRow={(row) => {
 							if (row.meals.length === 0 && row.planned) {
 								foodRoutes.recipe(row.planned.recipeId);
@@ -392,6 +413,23 @@ export function FoodHomeView({ actionRequest }: HomeModuleViewProps) {
 			) : (
 				<FirstMealCard />
 			)}
+
+			<Sheet visible={pickingMeals} title="Your meals" onClose={() => setPickingMeals(false)}>
+				<PoText variant="meta13" tone="textSecondary">
+					Pick the meals you eat on a normal day. Only these show on Today; anything you log still
+					shows.
+				</PoText>
+				<View style={styles.mealChips}>
+					{SLOTS.map((slot) => (
+						<FilterChip
+							key={slot}
+							label={SLOT_LABELS[slot]}
+							selected={chosen.includes(slot)}
+							onPress={() => toggleMeal(slot)}
+						/>
+					))}
+				</View>
+			</Sheet>
 
 			<Sheet
 				visible={weighing}
@@ -462,4 +500,5 @@ const styles = StyleSheet.create({
 	ask: { gap: 12 },
 	notice: { paddingHorizontal: 8 },
 	links: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+	mealChips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 });

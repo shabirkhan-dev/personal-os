@@ -16,6 +16,13 @@ export const MINIMUM_IDS = [
 	"phone",
 ] as const;
 export type MinimumId = (typeof MINIMUM_IDS)[number];
+/** An item the person wrote themselves ("Call mum", "10 push-ups"), ticked by hand. */
+export type OwnId = `c-${string}`;
+export type MinimumKey = MinimumId | OwnId;
+export type OwnItem = { id: OwnId; label: string };
+
+const OWN_ID = /^c-[a-z0-9]{3,24}$/;
+export const isOwnId = (value: string): value is OwnId => OWN_ID.test(value);
 
 export const PLAN_MODULES = [
 	"faith",
@@ -35,7 +42,9 @@ export type WindDownId = (typeof WIND_DOWN)[number];
 export type DailySettings = {
 	id: "settings";
 	setUp: boolean;
-	minimum: MinimumId[];
+	minimum: MinimumKey[];
+	/** The person's own minimum items, in the order they wrote them. */
+	own: OwnItem[];
 	/** Minutes after midnight. */
 	bedAt: number;
 	wakeAt: number;
@@ -52,7 +61,7 @@ export type DayLog = {
 	/** "YYYY-MM-DD". */
 	id: string;
 	/** Daily's own minimum items ticked by hand (read, phone). */
-	ticked: MinimumId[];
+	ticked: MinimumKey[];
 	windDown: WindDownId[];
 	energy: number | null;
 	good: string;
@@ -87,6 +96,20 @@ const asIso = (value: unknown) =>
 	typeof value === "string" && !Number.isNaN(Date.parse(value)) ? value : null;
 const minute = (value: unknown, fallback: number) =>
 	Math.min(1439, Math.max(0, Math.round(asNumber(value, fallback))));
+/** Known minimum ids and the person's own ("c-…"), without repeats. */
+function minimumKeys(value: unknown): MinimumKey[] {
+	return [
+		...new Set(
+			asArray(value, (item) =>
+				typeof item === "string" &&
+				((MINIMUM_IDS as readonly string[]).includes(item) || isOwnId(item))
+					? (item as MinimumKey)
+					: null,
+			),
+		),
+	];
+}
+
 const some = <T extends string>(value: unknown, options: readonly T[]): T[] => [
 	...new Set(
 		asArray(value, (item) =>
@@ -103,6 +126,7 @@ export function defaultSettings(): DailySettings {
 		setUp: false,
 		/** Empty until the person picks their own. */
 		minimum: [],
+		own: [],
 		bedAt: 23 * 60,
 		wakeAt: 5 * 60 + 30,
 		weekendWakeAt: 6 * 60 + 30,
@@ -117,10 +141,21 @@ export function parseSettings(raw: unknown): DailySettings | null {
 	if (!isRecord(raw)) return null;
 	const base = defaultSettings();
 	const alarms = isRecord(raw.alarms) ? raw.alarms : {};
+	const own = asArray(raw.own, (item) => {
+		if (!isRecord(item)) return null;
+		const id = asString(item.id, "");
+		const label = asString(item.label, "").trim().slice(0, 60);
+		return isOwnId(id) && label ? { id, label } : null;
+	}).slice(0, 12);
 	return {
 		id: "settings",
 		setUp: asBoolean(raw.setUp, false),
-		minimum: Array.isArray(raw.minimum) ? some(raw.minimum, MINIMUM_IDS) : base.minimum,
+		minimum: Array.isArray(raw.minimum)
+			? minimumKeys(raw.minimum).filter(
+					(key) => !isOwnId(key) || own.some((item) => item.id === key),
+				)
+			: base.minimum,
+		own,
 		bedAt: minute(raw.bedAt, base.bedAt),
 		wakeAt: minute(raw.wakeAt, base.wakeAt),
 		weekendWakeAt: minute(raw.weekendWakeAt, base.weekendWakeAt),
@@ -161,7 +196,7 @@ export function parseLog(raw: unknown): DayLog | null {
 	const total = Math.max(0, Math.min(7, Math.round(asNumber(raw.total, 0))));
 	return {
 		id,
-		ticked: some(raw.ticked, MINIMUM_IDS),
+		ticked: minimumKeys(raw.ticked),
 		windDown: some(raw.windDown, WIND_DOWN),
 		energy: energy >= 1 && energy <= 5 ? Math.round(energy) : null,
 		good: asString(raw.good, "").slice(0, 200),

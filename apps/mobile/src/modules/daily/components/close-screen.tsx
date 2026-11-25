@@ -12,7 +12,7 @@ import { clockOf, minutesOf } from "@/modules/home/lib/module-day";
 import { toTextStyle, usePoTheme } from "@/theme";
 import { closeDay, toggleTick } from "../data/daily-actions";
 import { useDailyToday } from "../hooks/use-daily";
-import { MINIMUM, minimumState, minimumTitle } from "../lib/daily-math";
+import { minimumModule, minimumState, minimumTitle } from "../lib/daily-math";
 import { Card, CardHead, CheckRow, MODULE_TONES } from "./daily-cards";
 import { DailyScreen } from "./daily-screen";
 
@@ -69,18 +69,15 @@ export function CloseScreen() {
 				<CardHead title="Across your modules" />
 				{data.settings.minimum.map((id) => {
 					const state = minimumState(id, sources, log);
-					const own = MINIMUM[id].module === "daily-life";
+					const owner = minimumModule(id);
+					const own = owner === "daily-life";
 					return (
 						<CheckRow
 							key={id}
 							label={minimumTitle(id, sources, data.settings)}
 							value={state.done ? (state.value === "✓" ? "Done" : state.value) : state.value}
 							done={state.done}
-							tone={
-								MODULE_TONES[MINIMUM[id].module] === "textPrimary"
-									? "textSecondary"
-									: MODULE_TONES[MINIMUM[id].module]
-							}
+							tone={MODULE_TONES[owner] === "textPrimary" ? "textSecondary" : MODULE_TONES[owner]}
 							{...(own
 								? {
 										onPress: () =>

@@ -270,3 +270,20 @@ describe("model and alarms", () => {
 		);
 	});
 });
+
+describe("your own minimum items", () => {
+	it("keeps the person's own items and drops unknown ones", () => {
+		const parsed = parseSettings({
+			minimum: ["read", "c-call1", "c-gone1", "nope"],
+			own: [
+				{ id: "c-call1", label: " Call mum " },
+				{ id: "bad id", label: "x" },
+			],
+		});
+		expect(parsed?.own).toEqual([{ id: "c-call1", label: "Call mum" }]);
+		expect(parsed?.minimum).toEqual(["read", "c-call1"]);
+		if (!parsed) return;
+		expect(minimumTitle("c-call1", sources, parsed)).toBe("Call mum");
+		expect(minimumState("c-call1", sources, null).done).toBe(false);
+	});
+});

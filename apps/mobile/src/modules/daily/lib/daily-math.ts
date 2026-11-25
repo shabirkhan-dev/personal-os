@@ -1,7 +1,16 @@
 import { addDays, dayKey } from "@/lib/day";
 import { clockOf, type DayEntry } from "@/modules/home/lib/module-day";
 import type { ModuleId } from "@/modules/onboarding/lib/options";
-import type { Block, DailySettings, DayLog, MinimumId, PlanModule, SleepLog } from "./daily-model";
+import {
+	type Block,
+	type DailySettings,
+	type DayLog,
+	isOwnId,
+	type MinimumId,
+	type MinimumKey,
+	type PlanModule,
+	type SleepLog,
+} from "./daily-model";
 
 /** The numbers behind Daily life. Pure, so they're tested without a phone. */
 
@@ -64,7 +73,21 @@ export function availableMinimum(sources: Sources): MinimumId[] {
 	});
 }
 
-export function minimumTitle(id: MinimumId, sources: Sources, settings: DailySettings): string {
+/** The module a minimum item belongs to; the person's own items are Daily life's. */
+export function minimumModule(key: MinimumKey): PlanModule {
+	return isOwnId(key) ? "daily-life" : MINIMUM[key].module;
+}
+
+/** The short label (for "… ticked for today"). */
+export function minimumLabel(key: MinimumKey, settings: DailySettings): string {
+	return isOwnId(key)
+		? (settings.own.find((item) => item.id === key)?.label ?? "Your item")
+		: MINIMUM[key].label;
+}
+
+export function minimumTitle(key: MinimumKey, sources: Sources, settings: DailySettings): string {
+	if (isOwnId(key)) return minimumLabel(key, settings);
+	const id: MinimumId = key;
 	switch (id) {
 		case "pray":
 			return sources.faith && sources.faith.names.length > 0
@@ -94,8 +117,10 @@ function listWords(words: readonly string[]): string {
 export type MinimumState = { value: string; share: number; done: boolean };
 
 /** Where one minimum item stands today. */
-export function minimumState(id: MinimumId, sources: Sources, log: DayLog | null): MinimumState {
-	const ticked = log?.ticked.includes(id) ?? false;
+export function minimumState(key: MinimumKey, sources: Sources, log: DayLog | null): MinimumState {
+	const ticked = log?.ticked.includes(key) ?? false;
+	if (isOwnId(key)) return { value: ticked ? "✓" : "–", share: ticked ? 1 : 0, done: ticked };
+	const id: MinimumId = key;
 	switch (id) {
 		case "pray": {
 			const faith = sources.faith;
@@ -144,7 +169,7 @@ export function minimumState(id: MinimumId, sources: Sources, log: DayLog | null
 }
 
 export function keptToday(
-	minimum: readonly MinimumId[],
+	minimum: readonly MinimumKey[],
 	sources: Sources,
 	log: DayLog | null,
 ): number {

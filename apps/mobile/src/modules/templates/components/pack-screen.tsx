@@ -9,14 +9,15 @@ import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
 import { haptics } from "@/lib/haptics";
 import { usePoTheme } from "@/theme";
-import { MODULE_LABELS, type PackItem, packById, type TemplatePack } from "../lib/packs";
+import { MODULE_LABELS, type PackItem, type TemplatePack } from "../lib/packs";
+import { findPack } from "../lib/template-store";
 
 /**
  * One template pack: what's in it, each item with its details, and a choice of what to add.
  * Items already in the person's data show as added; adding copies the rest in.
  */
 export function PackScreen({ id }: { id: string }) {
-	const pack = packById(id);
+	const pack = findPack(id);
 	if (!pack) {
 		return (
 			<ModuleScreen label="Templates" tab="profile" onHome={() => router.dismissTo("/")}>
@@ -36,6 +37,8 @@ function Pack({ pack }: { pack: TemplatePack }) {
 	const [open, setOpen] = useState<string | null>(null);
 	const [busy, setBusy] = useState(false);
 	const [notice, setNotice] = useState<string | null>(null);
+	/** Set once something from this pack was added on this visit (shared and server packs can't tell). */
+	const [didAdd, setDidAdd] = useState(false);
 
 	const refresh = useCallback(() => {
 		pack
@@ -72,6 +75,7 @@ function Pack({ pack }: { pack: TemplatePack }) {
 			.add(toAdd)
 			.then(() => {
 				haptics.success();
+				setDidAdd(true);
 				setPicked(new Set());
 				setNotice(
 					pack.choose === "one"
@@ -91,8 +95,8 @@ function Pack({ pack }: { pack: TemplatePack }) {
 		pack.choose === "one"
 			? "Start this one"
 			: pack.choose === "all"
-				? allAdded
-					? "Already in your app"
+				? allAdded || didAdd
+					? "Added to your app"
 					: "Add this set"
 				: toAdd.length > 0
 					? `Add ${toAdd.length} to my app`
@@ -113,6 +117,11 @@ function Pack({ pack }: { pack: TemplatePack }) {
 				<PoText variant="body15" tone="textSecondary">
 					{pack.summary}
 				</PoText>
+				{pack.author ? (
+					<PoText variant="meta13" tone="textTertiary">
+						{`Shared by ${pack.author}. Check it before you add it: it becomes your own copy.`}
+					</PoText>
+				) : null}
 				{pack.choose === "pick" && fresh.length > 1 ? (
 					<Pressable
 						accessibilityRole="button"
@@ -197,7 +206,7 @@ function Pack({ pack }: { pack: TemplatePack }) {
 				</PoText>
 			) : null}
 			<Footer>
-				{added.size > 0 ? (
+				{added.size > 0 || didAdd ? (
 					<PillButton
 						label="Open"
 						variant="secondary"
@@ -207,7 +216,7 @@ function Pack({ pack }: { pack: TemplatePack }) {
 				) : null}
 				<PillButton
 					label={busy ? "Adding…" : label}
-					disabled={busy || toAdd.length === 0}
+					disabled={busy || toAdd.length === 0 || (pack.choose === "all" && didAdd)}
 					style={styles.button}
 					onPress={add}
 				/>

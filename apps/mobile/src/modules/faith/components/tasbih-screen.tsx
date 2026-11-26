@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { ShareTemplateButton } from "@/modules/templates/components/share-template-button";
+import { shareTasbih } from "@/modules/templates/services/share-template";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { showDialog } from "@/components/ui/dialog";
 import Svg, { Circle } from "react-native-svg";
@@ -315,6 +317,7 @@ export function TasbihScreen() {
 				})}
 			</View>
 
+			{sequence.length > 0 ? <ShareTemplateButton share={() => shareTasbih(sequence)} /> : null}
 			<Footer>
 				<PillButton label="Reset" variant="secondary" onPress={reset} style={styles.flex} />
 				<PillButton label="Edit sequence" onPress={() => setEditing(true)} style={styles.flex} />

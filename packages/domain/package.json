@@ -89,6 +89,11 @@
       "types": "./src/error-report.ts",
       "import": "./src/error-report.ts",
       "default": "./src/error-report.ts"
+    },
+    "./templates": {
+      "types": "./src/templates.ts",
+      "import": "./src/templates.ts",
+      "default": "./src/templates.ts"
     }
   },
   "scripts": {

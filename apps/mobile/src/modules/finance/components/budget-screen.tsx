@@ -1,4 +1,6 @@
 import { router } from "expo-router";
+import { ShareTemplateButton } from "@/modules/templates/components/share-template-button";
+import { shareBudget } from "@/modules/templates/services/share-template";
 import { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Icon } from "@/components/icons";
@@ -195,6 +197,7 @@ export function BudgetScreen() {
 					setLimits(false);
 				}}
 			/>
+			{budget > 0 ? <ShareTemplateButton share={() => shareBudget(settings)} /> : null}
 			<MoveSheet
 				visible={moving}
 				limits={settings.limits}

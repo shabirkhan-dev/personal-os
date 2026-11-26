@@ -48,7 +48,14 @@ import { BUILT_IN_PROGRAMS } from "@/modules/workout/lib/programs/built-in";
  * they made. Nothing here is ever added on its own.
  */
 
-export type TemplateModule = "food" | "training" | "care" | "faith" | "finance" | "fashion";
+export type TemplateModule =
+	| "food"
+	| "training"
+	| "care"
+	| "faith"
+	| "finance"
+	| "fashion"
+	| "daily";
 
 export const MODULE_LABELS: Record<TemplateModule, string> = {
 	food: "Food",
@@ -57,6 +64,7 @@ export const MODULE_LABELS: Record<TemplateModule, string> = {
 	faith: "Faith",
 	finance: "Finance",
 	fashion: "Fashion",
+	daily: "Daily life",
 };
 
 export type PackItem = {
@@ -84,6 +92,8 @@ export type TemplatePack = {
 	add: (ids: readonly string[]) => Promise<void>;
 	/** Where to go to see what was added. */
 	open: string;
+	/** Who shared it, for a template someone sent. */
+	author?: string;
 };
 
 const first = <T>(list: readonly T[]): T | undefined => list[0];

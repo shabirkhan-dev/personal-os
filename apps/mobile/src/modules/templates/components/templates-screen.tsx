@@ -1,6 +1,6 @@
 import { textStyles } from "@personal-os/tokens";
 import { router, useFocusEffect } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Image, Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { Icon } from "@/components/icons";
 import { FilterChip, IconTile } from "@/components/module-ui";
@@ -14,7 +14,9 @@ import {
 	type TemplateModule,
 	type TemplatePack,
 } from "../lib/packs";
+import { useTemplateStore } from "../lib/template-store";
 import { templateRoutes } from "../navigation";
+import { pickTemplate } from "../services/share-template";
 
 const inputStyle = toTextStyle(textStyles.body15);
 const MODULES = Object.keys(MODULE_LABELS) as TemplateModule[];
@@ -48,6 +50,36 @@ export function TemplatesScreen({ module }: { module: TemplateModule | null }) {
 	const [query, setQuery] = useState("");
 	const counts = useAddedCounts();
 	const shown = packsFor(selected, query);
+	const { server, serverState, loadServer, openImported } = useTemplateStore();
+	const [notice, setNotice] = useState<string | null>(null);
+	useEffect(() => {
+		loadServer().catch((error: unknown) => console.warn("[templates] could not load", error));
+	}, [loadServer]);
+	const words = query.trim().toLowerCase();
+	const fromServer = server.filter(
+		(pack) =>
+			(!selected || pack.module === selected) &&
+			(!words ||
+				pack.title.toLowerCase().includes(words) ||
+				pack.items.some((item) => item.title.toLowerCase().includes(words))),
+	);
+
+	const openFile = () => {
+		setNotice(null);
+		pickTemplate()
+			.then((result) => {
+				if (!result) return;
+				if (!result.ok) {
+					setNotice(result.reason);
+					return;
+				}
+				templateRoutes.pack(openImported(result.file).id);
+			})
+			.catch((error: unknown) => {
+				console.error("[templates] could not open the file", error);
+				setNotice("That file couldn't be opened. Try again.");
+			});
+	};
 
 	return (
 		<ModuleScreen label="Templates" tab="profile" onHome={() => router.dismissTo("/")}>
@@ -91,13 +123,59 @@ export function TemplatesScreen({ module }: { module: TemplateModule | null }) {
 				))}
 			</ScrollView>
 
-			{shown.length === 0 ? (
+			<Pressable
+				accessibilityRole="button"
+				onPress={openFile}
+				style={({ pressed }) => [
+					styles.card,
+					{ backgroundColor: pressed ? colors.bgHover : colors.accentSubtle },
+				]}
+			>
+				<IconTile name="Download" tone="accentDefault" tile="bgSurface" size={48} />
+				<View style={styles.flex}>
+					<PoText variant="row15">Open a template file</PoText>
+					<PoText variant="meta13" tone="textSecondary">
+						A recipe, routine, program, tasbih, budget or minimum day someone sent you.
+					</PoText>
+				</View>
+			</Pressable>
+			{notice ? (
+				<PoText variant="meta13" tone="textWarning" style={styles.pad}>
+					{notice}
+				</PoText>
+			) : null}
+
+			{shown.length === 0 && fromServer.length === 0 ? (
 				<PoText variant="body15" tone="textSecondary" style={styles.pad}>
 					No pack matches that yet.
 				</PoText>
 			) : (
 				shown.map((pack) => <PackCard key={pack.id} pack={pack} added={counts[pack.id] ?? 0} />)
 			)}
+
+			{fromServer.length > 0 ? (
+				<>
+					<PoText variant="eyebrow11" tone="textTertiary" style={styles.pad}>
+						NEW FROM PERSONAL OS
+					</PoText>
+					{fromServer.map((pack) => (
+						<PackCard key={pack.id} pack={pack} added={0} />
+					))}
+				</>
+			) : serverState === "loading" ? (
+				<PoText variant="meta13" tone="textTertiary" style={styles.pad}>
+					Looking for new packs…
+				</PoText>
+			) : null}
+
+			<View style={[styles.share, { backgroundColor: colors.bgSurface }]}>
+				<PoText variant="row15">Share yours</PoText>
+				<PoText variant="meta13" tone="textSecondary">
+					Send a friend your recipe, Care routine, training program, tasbih, budget or minimum day
+					as a template: look for "Share as a template" on each of those screens. They open it here
+					and add their own copy.
+				</PoText>
+			</View>
 		</ModuleScreen>
 	);
 }
@@ -159,4 +237,5 @@ const styles = StyleSheet.create({
 	chips: { gap: 8, paddingHorizontal: 16 },
 	card: { flexDirection: "row", alignItems: "center", gap: 14, padding: 14, borderRadius: 22 },
 	cover: { width: 72, height: 72, borderRadius: 16 },
+	share: { gap: 6, padding: 16, borderRadius: 22 },
 });

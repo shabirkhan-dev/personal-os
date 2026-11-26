@@ -7,6 +7,8 @@ import { PoText } from "@/components/ui/po-text";
 import { Sheet } from "@/components/ui/sheet";
 import { haptics } from "@/lib/haptics";
 import { useSpeaker } from "@/lib/voice";
+import { ShareTemplateButton } from "@/modules/templates/components/share-template-button";
+import { shareCareRoutine } from "@/modules/templates/services/share-template";
 import { skip, tick } from "../data/care-actions";
 import { useCareToday } from "../hooks/use-care";
 import { stepsOn } from "../lib/care-math";
@@ -132,6 +134,12 @@ export function RoutineScreen({ routine }: { routine: Routine }) {
 			<PoText variant="meta13" tone="textTertiary" style={styles.hint}>
 				Tap to tick. The i shows how to apply it; long press to change it.
 			</PoText>
+			{data.steps.length > 0 ? (
+				<ShareTemplateButton
+					label="Share my routine as a template"
+					share={() => shareCareRoutine(data)}
+				/>
+			) : null}
 			<Footer>
 				<PillButton
 					label={night ? "Skip tonight" : "Skip today"}

@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { ShareTemplateButton } from "@/modules/templates/components/share-template-button";
+import { shareRecipe } from "@/modules/templates/services/share-template";
 import { Linking, Pressable, StyleSheet, View } from "react-native";
 import { Icon } from "@/components/icons";
 import { EmptyCard, Footer } from "@/components/module-ui";
@@ -388,6 +390,7 @@ export function RecipeDetailScreen({ id }: { id: string }) {
 					onPress={add}
 				/>
 			</Footer>
+			{recipe.mine ? <ShareTemplateButton share={() => shareRecipe(recipe)} /> : null}
 			<CookMode recipe={cooking ? recipe : null} onClose={() => setCooking(false)} />
 		</FoodScreen>
 	);

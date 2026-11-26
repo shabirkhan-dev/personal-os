@@ -116,6 +116,11 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
   next to Care routines, Training programs and the Food week; each is a draft to review.
 - End-to-end checks: Maestro flows (`apps/mobile/e2e`) run the release APK on an Android
   emulator in CI (`.github/workflows/e2e.yml`) on main, nightly and by hand.
+- Templates you share: any recipe, Care routine, training program, tasbih, budget or minimum
+  day goes out as a template file (`.posx.json`) through the share sheet, and opens back in
+  Templates → Open a template file as a preview to add. The server offers packs too
+  (`GET /api/v1/templates`, from `apps/api/src/modules/templates`), so new ones arrive without
+  an app update; every item is read with its module's parser before it's saved.
 - Backup and restore: one file with every record, document, the setup answers and (optionally)
   photos, saved to a folder or shared; a daily automatic backup into a picked folder (newest
   seven kept); restore with a preview, merged with what's there or replacing it.

@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import { ShareTemplateButton } from "@/modules/templates/components/share-template-button";
+import { shareProgram } from "@/modules/templates/services/share-template";
 import { Pressable, StyleSheet, View } from "react-native";
 import { showDialog } from "@/components/ui/dialog";
 import { EmptyCard, Footer, MetaChip, ScreenTitle } from "@/components/module-ui";
@@ -254,6 +256,7 @@ export function ProgramScreen({ id }: { id: string }) {
 					{notice}
 				</PoText>
 			) : null}
+			<ShareTemplateButton share={() => shareProgram(program)} />
 			<Footer>
 				{custom ? (
 					<PillButton label="Delete" variant="secondary" style={styles.flex} onPress={remove} />

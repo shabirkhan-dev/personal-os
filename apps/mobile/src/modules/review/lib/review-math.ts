@@ -171,7 +171,11 @@ export function buildReview(input: ReviewInput): Review {
 			suggestions.push("Care slipped this week. Keep just the morning routine for now.");
 	}
 
-	const minimum = input.minimum.filter((day) => week.has(day.id) && day.total > 0);
+	// Today counts once it's kept; until then the day isn't over.
+	const today = input.days[input.days.length - 1];
+	const minimum = input.minimum.filter(
+		(day) => week.has(day.id) && day.total > 0 && (day.id !== today || day.kept >= day.total),
+	);
 	if (minimum.length > 0) {
 		const kept = minimum.filter((day) => day.kept >= day.total).length;
 		lines.push({

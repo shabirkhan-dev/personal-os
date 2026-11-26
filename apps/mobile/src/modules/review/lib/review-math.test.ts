@@ -92,4 +92,12 @@ describe("weekly review", () => {
 		});
 		expect(rough.suggestions).toHaveLength(3);
 	});
+
+	test("today's minimum day only counts once it's kept", () => {
+		const today = days[6] ?? "";
+		const open = buildReview({ ...empty, minimum: [{ id: today, kept: 1, total: 3 }] });
+		expect(open.lines).toEqual([]);
+		const kept = buildReview({ ...empty, minimum: [{ id: today, kept: 3, total: 3 }] });
+		expect(kept.lines[0]?.value).toBe("Kept 1 of 1");
+	});
 });

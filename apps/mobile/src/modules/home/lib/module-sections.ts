@@ -8,6 +8,8 @@ export type Section = { label: string; href: Href & string };
  */
 export const MODULE_SECTIONS: Record<string, readonly Section[]> = {
 	Overview: [
+		{ label: "Search", href: "/search" },
+		{ label: "Your week", href: "/review" },
 		{ label: "Morning brief", href: "/daily/brief" },
 		{ label: "Plan the day", href: "/daily/plan" },
 		{ label: "Minimum day", href: "/daily/minimum" },

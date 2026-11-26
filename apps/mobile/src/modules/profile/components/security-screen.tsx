@@ -4,7 +4,7 @@ import { Platform, StyleSheet, View } from "react-native";
 import { FilterChip } from "@/components/module-ui";
 import { ModuleScreen } from "@/components/module-screen";
 import { PoText } from "@/components/ui/po-text";
-import { Toggle } from "@/components/ui/toggle";
+import { ToggleRow } from "@/components/ui/toggle-row";
 import { haptics } from "@/lib/haptics";
 import * as SecureStore from "@/lib/secure-store";
 import {
@@ -77,21 +77,16 @@ export function SecurityScreen() {
 
 			<SectionLabel>App lock</SectionLabel>
 			<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
-				<View style={styles.row}>
-					<View style={styles.flex}>
-						<PoText variant="row15">Lock Personal OS</PoText>
-						<PoText variant="meta13" tone="textTertiary">
-							{support && !support.available
-								? support.reason
-								: "Fingerprint, face or your phone's passcode to open it"}
-						</PoText>
-					</View>
-					<Toggle
-						value={settings.enabled}
-						accessibilityLabel="Lock Personal OS"
-						onChange={(on) => void setLock(on)}
-					/>
-				</View>
+				<ToggleRow
+					title="Lock Personal OS"
+					meta={
+						support && !support.available
+							? support.reason
+							: "Fingerprint, face or your phone's passcode to open it"
+					}
+					value={settings.enabled}
+					onChange={(on) => void setLock(on)}
+				/>
 				{settings.enabled ? (
 					<>
 						<PoText variant="meta13" tone="textSecondary">
@@ -113,21 +108,16 @@ export function SecurityScreen() {
 
 			<SectionLabel>Privacy</SectionLabel>
 			<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
-				<View style={styles.row}>
-					<View style={styles.flex}>
-						<PoText variant="row15">Hide in recent apps</PoText>
-						<PoText variant="meta13" tone="textTertiary">
-							{Platform.OS === "android"
-								? "A blank card in the app switcher, and screenshots are blocked"
-								: "Covers the app in the app switcher"}
-						</PoText>
-					</View>
-					<Toggle
-						value={settings.privacy}
-						accessibilityLabel="Hide in recent apps"
-						onChange={(privacy) => void save({ privacy })}
-					/>
-				</View>
+				<ToggleRow
+					title="Hide in recent apps"
+					meta={
+						Platform.OS === "android"
+							? "A blank card in the app switcher, and screenshots are blocked"
+							: "Covers the app in the app switcher"
+					}
+					value={settings.privacy}
+					onChange={(privacy) => void save({ privacy })}
+				/>
 			</View>
 			{notice ? (
 				<PoText variant="meta13" tone="textSecondary" style={styles.pad}>

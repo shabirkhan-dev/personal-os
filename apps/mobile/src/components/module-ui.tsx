@@ -403,8 +403,9 @@ export function FilterChip({
 			style={[
 				styles.filter,
 				selected
-					? { backgroundColor: colors.accentDefault }
-					: { backgroundColor: colors.bgSurface },
+					? { backgroundColor: colors.accentDefault, borderColor: colors.accentDefault }
+					: // An outline keeps it visible on a card as well as on the screen.
+						{ backgroundColor: colors.bgSurface, borderColor: colors.borderStrong },
 			]}
 		>
 			<PoText variant="meta13" tone={selected ? "textOnAccent" : "textSecondary"}>
@@ -681,7 +682,7 @@ const styles = StyleSheet.create({
 		borderRadius: 20,
 	},
 	emptyActions: { alignSelf: "stretch", gap: 8, paddingTop: 8 },
-	filter: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20 },
+	filter: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, borderWidth: 1 },
 	title: { gap: 12, paddingHorizontal: 4 },
 	chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 	footer: { flexDirection: "row", gap: 12 },

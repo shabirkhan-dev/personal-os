@@ -80,6 +80,8 @@ export type FoodSettings = {
 	setUp: boolean;
 	goal: Goal;
 	activity: Activity;
+	/** The meals the person tracks each day, in order. Empty until they pick them. */
+	meals: Slot[];
 	targets: Macros & { waterMl: number };
 	/** Weight the goal started from and aims for. */
 	startKg: number;
@@ -204,6 +206,7 @@ export function defaultSettings(): FoodSettings {
 		setUp: false,
 		goal: "maintain",
 		activity: "active",
+		meals: [],
 		targets: { kcal: 2200, protein: 120, carbs: 260, fat: 65, waterMl: 2500 },
 		startKg: 70,
 		goalKg: 70,
@@ -222,6 +225,12 @@ export function parseSettings(raw: unknown): FoodSettings | null {
 		setUp: asBoolean(raw.setUp, false),
 		goal: oneOf(raw.goal, GOALS, base.goal),
 		activity: oneOf(raw.activity, ACTIVITY, base.activity),
+		// Settings from before meals were chosen kept all five, so nothing disappears for them.
+		meals: Array.isArray(raw.meals)
+			? SLOTS.filter((slot) => (raw.meals as unknown[]).includes(slot))
+			: asBoolean(raw.setUp, false)
+				? [...SLOTS]
+				: [],
 		targets: {
 			kcal: Math.round(positive(targets.kcal, base.targets.kcal)) || base.targets.kcal,
 			protein: Math.round(positive(targets.protein, base.targets.protein)),

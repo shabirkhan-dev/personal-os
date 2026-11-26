@@ -5,7 +5,7 @@ import {
 	type DailySettings,
 	type DayLog,
 	emptyLog,
-	type MinimumId,
+	type MinimumKey,
 	type SleepLog,
 	type WindDownId,
 } from "../lib/daily-model";
@@ -43,7 +43,7 @@ function updateLog(
 const toggled = <T>(list: readonly T[], id: T): T[] =>
 	list.includes(id) ? list.filter((item) => item !== id) : [...list, id];
 
-export function toggleTick(day: string, id: MinimumId): Promise<void> {
+export function toggleTick(day: string, id: MinimumKey): Promise<void> {
 	return updateLog(day, (current) => ({ ...current, ticked: toggled(current.ticked, id) }));
 }
 

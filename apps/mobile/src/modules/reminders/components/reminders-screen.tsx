@@ -1,12 +1,12 @@
 import * as Notifications from "expo-notifications";
 import { router } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { AppState, Linking, Platform, Pressable, StyleSheet, View } from "react-native";
+import { AppState, Linking, Platform, StyleSheet, View } from "react-native";
 import { FilterChip } from "@/components/module-ui";
 import { ModuleScreen } from "@/components/module-screen";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
-import { Toggle } from "@/components/ui/toggle";
+import { ToggleRow } from "@/components/ui/toggle-row";
 import { useCollection } from "@/lib/db/collection";
 import { haptics } from "@/lib/haptics";
 import { useNow } from "@/lib/use-now";
@@ -258,7 +258,7 @@ export function RemindersScreen() {
 						Add a step to your Care routine first; these reminders start once you have one.
 					</PoText>
 				)}
-				<ToggleLine
+				<ToggleRow
 					title="Morning routine"
 					value={settings.care.morning.on}
 					onChange={(on) =>
@@ -274,7 +274,7 @@ export function RemindersScreen() {
 						}
 					/>
 				) : null}
-				<ToggleLine
+				<ToggleRow
 					title="Night routine"
 					value={settings.care.night.on}
 					onChange={(on) =>
@@ -294,7 +294,7 @@ export function RemindersScreen() {
 
 			<SectionLabel>Water</SectionLabel>
 			<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
-				<ToggleLine
+				<ToggleRow
 					title="Remind me to drink"
 					meta="With a Log a glass button"
 					value={settings.water.on}
@@ -328,7 +328,7 @@ export function RemindersScreen() {
 
 			<SectionLabel>Medicines</SectionLabel>
 			<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
-				<ToggleLine
+				<ToggleRow
 					title="Ask again if not marked"
 					meta="A second reminder when a dose isn't marked taken"
 					value={settings.followUps}
@@ -366,7 +366,7 @@ export function RemindersScreen() {
 					))}
 				</View>
 				{Platform.OS === "android" ? (
-					<ToggleLine
+					<ToggleRow
 						title="Alarm-style delivery"
 						meta="Prayers, medicines, Care and wake-ups ring on the minute, like an alarm clock"
 						value={settings.exact}
@@ -378,7 +378,7 @@ export function RemindersScreen() {
 			<SectionLabel>Your day</SectionLabel>
 			<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 				{SETUP_ROWS.map((row) => (
-					<ToggleLine
+					<ToggleRow
 						key={row.id}
 						title={row.title}
 						meta={row.meta}
@@ -391,41 +391,6 @@ export function RemindersScreen() {
 				Prayer reminders are set in Faith, and wake-up and wind-down alarms in Daily life → Sleep.
 			</PoText>
 		</ModuleScreen>
-	);
-}
-
-function ToggleLine({
-	title,
-	meta,
-	value,
-	onChange,
-}: {
-	title: string;
-	meta?: string;
-	value: boolean;
-	onChange: (value: boolean) => void;
-}) {
-	// The whole row toggles, not only the switch.
-	return (
-		<View style={styles.toggle}>
-			<Pressable
-				accessibilityRole="switch"
-				accessibilityState={{ checked: value }}
-				onPress={() => {
-					haptics.select();
-					onChange(!value);
-				}}
-				style={styles.flex}
-			>
-				<PoText variant="row15">{title}</PoText>
-				{meta ? (
-					<PoText variant="meta13" tone="textTertiary">
-						{meta}
-					</PoText>
-				) : null}
-			</Pressable>
-			<Toggle value={value} onChange={onChange} accessibilityLabel={title} />
-		</View>
 	);
 }
 

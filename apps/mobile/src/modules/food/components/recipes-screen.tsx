@@ -114,41 +114,45 @@ export function RecipesScreen() {
 				onPress: () => foodRoutes.recipeEdit(),
 			}}
 		>
-			<View style={[styles.search, { backgroundColor: colors.bgSubtle }]}>
-				<Icon name="Search" size={16} color={colors.textSecondary} />
-				<TextInput
-					value={query}
-					onChangeText={setQuery}
-					placeholder="Search a dish or an ingredient"
-					placeholderTextColor={colors.textTertiary}
-					accessibilityLabel="Search recipes"
-					style={[inputStyle, styles.flex, { color: colors.textPrimary }]}
-				/>
-				{query ? (
-					<Pressable
-						accessibilityRole="button"
-						accessibilityLabel="Clear search"
-						hitSlop={8}
-						onPress={() => setQuery("")}
+			{mineCount === 0 ? null : (
+				<>
+					<View style={[styles.search, { backgroundColor: colors.bgSubtle }]}>
+						<Icon name="Search" size={16} color={colors.textSecondary} />
+						<TextInput
+							value={query}
+							onChangeText={setQuery}
+							placeholder="Search a dish or an ingredient"
+							placeholderTextColor={colors.textTertiary}
+							accessibilityLabel="Search recipes"
+							style={[inputStyle, styles.flex, { color: colors.textPrimary }]}
+						/>
+						{query ? (
+							<Pressable
+								accessibilityRole="button"
+								accessibilityLabel="Clear search"
+								hitSlop={8}
+								onPress={() => setQuery("")}
+							>
+								<Icon name="Line/Close" size={14} color={colors.textSecondary} />
+							</Pressable>
+						) : null}
+					</View>
+					<ScrollView
+						horizontal
+						showsHorizontalScrollIndicator={false}
+						contentContainerStyle={styles.filters}
 					>
-						<Icon name="Line/Close" size={14} color={colors.textSecondary} />
-					</Pressable>
-				) : null}
-			</View>
-			<ScrollView
-				horizontal
-				showsHorizontalScrollIndicator={false}
-				contentContainerStyle={styles.filters}
-			>
-				{FILTERS.map((item) => (
-					<FilterChip
-						key={item.id}
-						label={item.label}
-						selected={filter === item.id}
-						onPress={() => setFilter(item.id)}
-					/>
-				))}
-			</ScrollView>
+						{FILTERS.map((item) => (
+							<FilterChip
+								key={item.id}
+								label={item.label}
+								selected={filter === item.id}
+								onPress={() => setFilter(item.id)}
+							/>
+						))}
+					</ScrollView>
+				</>
+			)}
 
 			{mineCount === 0 ? (
 				<View style={[styles.empty, { backgroundColor: colors.bgSurface }]}>

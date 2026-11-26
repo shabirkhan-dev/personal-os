@@ -1,0 +1,25 @@
+# Home shows getting started; search finds a screen by name; the weekly review starts empty.
+appId: com.shabirkhandev.personalos
+name: 06-search-review
+---
+- openLink: personalos://
+- extendedWaitUntil:
+    visible: "Your app starts empty"
+    timeout: 15000
+- takeScreenshot: 06-getting-started
+- openLink: personalos://search
+- extendedWaitUntil:
+    visible: "Search everything"
+    timeout: 15000
+- tapOn: "Search everything"
+- inputText: "budget"
+- extendedWaitUntil:
+    visible: "Open the screen"
+    timeout: 10000
+- takeScreenshot: 06-search
+- openLink: personalos://review
+- extendedWaitUntil:
+    visible: "Nothing logged this week"
+    timeout: 15000
+- assertVisible: "Remind me on Sundays"
+- takeScreenshot: 06-review

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import { nextFire } from "../services/reminder-engine-math";
 import {
+	reviewPlans,
 	carePlans,
 	dayKeyOf,
 	followUpId,
@@ -128,5 +129,18 @@ describe("budget and timing", () => {
 			new Date(1_800_000_000_000),
 		);
 		expect(nextFire(null, now)).toBeNull();
+	});
+});
+
+describe("weekly review", () => {
+	it("is off until turned on, then goes out on Sundays", () => {
+		const base = defaultReminderSettings();
+		expect(reviewPlans(base)).toEqual([]);
+		const [plan] = reviewPlans({ ...base, review: { on: true, minutes: 19 * 60 + 30 } });
+		expect(plan?.when).toEqual({ weekly: { weekday: 1, hour: 19, minute: 30 } });
+		expect(plan?.url).toBe("personalos://review");
+	});
+	it("keeps an older saved settings without a review", () => {
+		expect(parseReminderSettings({ exact: false })?.review.on).toBe(false);
 	});
 });

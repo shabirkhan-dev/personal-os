@@ -12,6 +12,8 @@ import { fashionHome, useFashionStatus } from "@/modules/fashion";
 import { foodHome, useFoodStatus } from "@/modules/food";
 import { financeHome, useFinanceStatus } from "@/modules/finance";
 import { AskBar } from "@/modules/home/components/ask-bar";
+import { SetupChecklist } from "@/modules/home/components/setup-checklist";
+import { QuickLinks } from "@/components/module-ui";
 import { FloatingTabBar } from "@/modules/home/components/floating-tab-bar";
 import { HeaderBar, HomeHeader } from "@/modules/home/components/home-header";
 import { StickyBar, scrolledPast } from "@/components/ui/sticky-bar";
@@ -376,6 +378,14 @@ function OverviewBody({ name, now, modules, amountsHidden, onOpen }: OverviewBod
 					{notice}
 				</PoText>
 			) : null}
+			<QuickLinks
+				links={[
+					{ label: "Search", icon: "Search", onPress: () => router.push("/search") },
+					{ label: "Your week", icon: "Filled/Chart", onPress: () => router.push("/review") },
+					{ label: "Templates", icon: "Layers", onPress: () => router.push("/templates") },
+				]}
+			/>
+			<SetupChecklist modules={modules} onOpen={onOpen} />
 			<DailyOverview onOpen={onOpen} onNotice={setNotice} amountsHidden={amountsHidden} />
 			<CalendarWeekCard />
 		</>

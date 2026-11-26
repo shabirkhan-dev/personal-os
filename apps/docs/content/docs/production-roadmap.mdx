@@ -121,6 +121,15 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
   Templates → Open a template file as a preview to add. The server offers packs too
   (`GET /api/v1/templates`, from `apps/api/src/modules/templates`), so new ones arrive without
   an app update; every item is read with its module's parser before it's saved.
+- Getting started on Overview: each module the person picked, with three ways in (their own,
+  AI, or a template) and a tick once it has something in it. It hides itself when everything is
+  started, or with its close button.
+- Search (Overview → Search, `/search`): one box across recipes, groceries, money, bills,
+  medicines, check-ups, health records, Care steps and products, programs, faith notes, job
+  applications, wardrobe, dreams and calendar events, plus screens by name ("budget", "backup").
+- Your week (Overview → Your week, `/review`): the last seven days from what was logged (prayers,
+  training, money against a week's share of the budget, meals, water, sleep, Care, minimum day)
+  with up to three plain suggestions, and an opt-in Sunday reminder.
 - Backup and restore: one file with every record, document, the setup answers and (optionally)
   photos, saved to a folder or shared; a daily automatic backup into a picked folder (newest
   seven kept); restore with a preview, merged with what's there or replacing it.
@@ -129,6 +138,8 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
 - Crash reports (opt-in with `EXPO_PUBLIC_SENTRY_DSN`), and the privacy policy and terms in
   Settings.
 - EAS development builds, EAS Update channels and a one-command APK build.
+- Open-source releases: pushing a `v*` tag builds the APK and publishes it on GitHub Releases
+  with a checksum and install steps (`.github/workflows/release.yml`).
 
 ### API and services
 

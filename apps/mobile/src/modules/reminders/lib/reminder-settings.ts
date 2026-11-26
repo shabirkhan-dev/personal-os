@@ -16,6 +16,8 @@ export type ReminderSettings = {
 	snoozeMinutes: number;
 	care: { morning: TimedReminder; night: TimedReminder };
 	water: { on: boolean; every: number; from: number; to: number };
+	/** A Sunday nudge to look back at the week; off until the person turns it on. */
+	review: TimedReminder;
 };
 
 const DAY = 24 * 60;
@@ -36,6 +38,7 @@ export function defaultReminderSettings(): ReminderSettings {
 			night: { on: false, minutes: 22 * 60 },
 		},
 		water: { on: false, every: 120, from: 9 * 60, to: 21 * 60 },
+		review: { on: false, minutes: 19 * 60 },
 	};
 }
 
@@ -74,6 +77,7 @@ export function parseReminderSettings(raw: unknown): ReminderSettings | null {
 			from: clock(water.from, base.water.from),
 			to: clock(water.to, base.water.to),
 		},
+		review: timed(raw.review, base.review),
 	};
 }
 

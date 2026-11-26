@@ -193,6 +193,26 @@ down step, so a bad one is undone by restoring, not by rolling back.
    public value) to the same environments. Release builds then report crashes and screen errors
    with the app version and platform, never records. Unset, nothing is sent.
 
+### APK on GitHub Releases
+
+Anyone can install the app from the repository's **Releases** page, no store needed. The
+`Release` workflow (`.github/workflows/release.yml`) builds the arm64 APK, attaches it with a
+SHA-256 checksum and writes install steps into the release notes.
+
+```bash
+# bump "version" in apps/mobile/app.json first, then:
+git tag v0.7.0
+git push origin v0.7.0
+```
+
+Or run **Actions → Release → Run workflow** with a tag name (it creates the tag on the chosen
+branch). Tags with a suffix (`v0.8.0-beta.1`) are marked as pre-releases. The app talks to the API
+in the `API_URL` repository variable.
+
+The APK is signed with the debug key Expo's generated project uses, the same on every machine,
+so each release (and a local `assembleRelease`) installs over the last one and keeps the data.
+A store build uses its own key through EAS, so switching between the two needs an uninstall.
+
 ## 4) Landing page on Cloudflare Workers
 
 `apps/web` is a static export (`out/`) served as Worker static assets, plus a small Worker for
@@ -228,6 +248,7 @@ Full steps: `apps/web/README.md`.
 - [ ] `/api/v1/health` shows production, `openai_compatible` and `assets: ready`
 - [ ] `/api/v1/ready` answers 200, with an uptime monitor on it
 - [ ] EAS `preview` and `production` environments have an https `EXPO_PUBLIC_API_URL`
+- [ ] `API_URL` repository variable set, then a `v*` tag pushed for the GitHub release APK
 - [ ] Neon point-in-time restore retention checked
 - [ ] Branch protection on `main` requires lint, typecheck, build and test
 - [ ] `DATABASE_URL` secret and `API_URL` variable set for CD (migrations and smoke check)

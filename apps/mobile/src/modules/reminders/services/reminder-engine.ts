@@ -26,6 +26,7 @@ export type ReminderGroup =
 	| "care"
 	| "water"
 	| "assistant"
+	| "review"
 	| "snooze";
 
 type Channel = { id: string; name: string; importance: Notifications.AndroidImportance };
@@ -42,18 +43,20 @@ const CHANNELS: Record<ReminderGroup, Channel> = {
 	care: { id: "care", name: "Care routines", importance: HIGH },
 	water: { id: "water", name: "Water", importance: DEFAULT },
 	assistant: { id: "assistant", name: "Assistant", importance: DEFAULT },
+	review: { id: "review", name: "Weekly review", importance: DEFAULT },
 	snooze: { id: "snoozed", name: "Snoozed reminders", importance: HIGH },
 };
 
 /** iOS keeps at most 64 pending notifications for an app; each group gets a share. */
 const IOS_BUDGET: Record<ReminderGroup, number> = {
-	reminder: 6,
+	reminder: 5,
 	prayer: 24,
 	daily: 4,
 	medicine: 14,
 	care: 2,
 	water: 6,
 	assistant: 4,
+	review: 1,
 	snooze: 4,
 };
 

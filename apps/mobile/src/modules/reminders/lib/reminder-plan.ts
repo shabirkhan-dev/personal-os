@@ -100,6 +100,21 @@ export function waterPlans(settings: ReminderSettings): Planned[] {
 	}));
 }
 
+/** The Sunday weekly review, when the person turned it on. */
+export function reviewPlans(settings: ReminderSettings): Planned[] {
+	if (!settings.review.on) return [];
+	return [
+		{
+			id: "review-sunday",
+			title: "Your week in review",
+			body: "Two minutes: what went well, and one thing to change next week.",
+			when: { weekly: { weekday: 1, ...hm(settings.review.minutes) } },
+			url: "personalos://review",
+			critical: false,
+		},
+	];
+}
+
 export type DoseTime = { medicineId: string; name: string; minutes: number };
 export type TakenDose = { medicineId: string; day: string; minutes: number };
 

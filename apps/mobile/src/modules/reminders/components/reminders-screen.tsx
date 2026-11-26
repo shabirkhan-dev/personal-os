@@ -326,6 +326,23 @@ export function RemindersScreen() {
 				) : null}
 			</View>
 
+			<SectionLabel>Weekly review</SectionLabel>
+			<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
+				<ToggleRow
+					title="Sunday look back"
+					meta="A nudge to see how the week went"
+					value={settings.review.on}
+					onChange={(on) => update({ review: { ...settings.review, on } })}
+				/>
+				{settings.review.on ? (
+					<TimeStepper
+						label="At"
+						minutes={settings.review.minutes}
+						onChange={(minutes) => update({ review: { ...settings.review, minutes } })}
+					/>
+				) : null}
+			</View>
+
 			<SectionLabel>Medicines</SectionLabel>
 			<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 				<ToggleRow

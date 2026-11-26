@@ -23,7 +23,7 @@ import { reminderPlans } from "@/modules/onboarding/lib/reminders";
 import { scheduleReminders } from "@/modules/onboarding/services/reminders.service";
 import { loadAnswers } from "@/modules/onboarding/store/answers-storage";
 import { loadReminderSettings } from "../data/collections";
-import { carePlans, waterPlans } from "../lib/reminder-plan";
+import { carePlans, reviewPlans, waterPlans } from "../lib/reminder-plan";
 import { syncGroup } from "./reminder-engine";
 
 /**
@@ -47,7 +47,12 @@ export function rescheduleCareAndWater(): Promise<unknown> {
 		Promise.all([loadReminderSettings(), listItems(careSteps)]).then(([settings, steps]) =>
 			syncGroup("care", carePlans(settings, steps.length > 0)),
 		),
-		loadReminderSettings().then((settings) => syncGroup("water", waterPlans(settings))),
+		loadReminderSettings().then((settings) =>
+			Promise.all([
+				syncGroup("water", waterPlans(settings)),
+				syncGroup("review", reviewPlans(settings)),
+			]),
+		),
 	]);
 }
 

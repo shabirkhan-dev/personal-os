@@ -1,0 +1,109 @@
+# Builds the Android APK and publishes it as a GitHub release, so anyone can install the app
+# without a store. Runs when a version tag is pushed (git tag v0.7.0 && git push origin v0.7.0) or
+# by hand from the Actions tab with a tag name.
+#
+# Repository setting it reads (optional):
+#   variable API_URL   the API the app talks to (sign-in, sync, AI); defaults to the project's own
+#
+# The APK is a sideload build for arm64 phones (every current Android phone). Expo's generated
+# project signs release builds with its shared debug key, which is the same on every machine, so
+# each release installs over the last one. Store builds go through EAS with their own key instead
+# (see /docs/deploy).
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to release, e.g. v0.7.0 (created on the chosen branch if missing)"
+        required: true
+      prerelease:
+        description: "Mark as a pre-release"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.event.inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+      EXPO_PUBLIC_API_URL: ${{ vars.API_URL || 'https://rozapi.rabtx.dev' }}
+      EAS_BUILD_PROFILE: preview
+      NODE_ENV: production
+      CI: 1
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the tag
+        run: |
+          if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]]; then
+            echo "::error::Tags look like v0.7.0 or v0.7.0-beta.1, got '$TAG'"
+            exit 1
+          fi
+          app=$(jq -r .expo.version apps/mobile/app.json)
+          if [ "v$app" != "${TAG%%-*}" ]; then
+            echo "::warning::app.json says $app but the tag is $TAG"
+          fi
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Generate the native project
+        working-directory: apps/mobile
+        run: bunx expo prebuild --platform android --no-install --clean
+
+      - name: Build the APK
+        working-directory: apps/mobile/android
+        run: ./gradlew assembleRelease --no-daemon --console=plain
+
+      - name: Name the APK and its checksum
+        id: apk
+        run: |
+          name="personal-os-${TAG}.apk"
+          cp apps/mobile/android/app/build/outputs/apk/release/app-release.apk "$name"
+          sha256sum "$name" > "$name.sha256"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          echo "size=$(du -h "$name" | cut -f1)" >> "$GITHUB_OUTPUT"
+
+      - name: Publish the release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG }}
+          target_commitish: ${{ github.sha }}
+          name: Personal OS ${{ env.TAG }}
+          prerelease: ${{ github.event.inputs.prerelease == 'true' || contains(env.TAG, '-') }}
+          generate_release_notes: true
+          files: |
+            ${{ steps.apk.outputs.name }}
+            ${{ steps.apk.outputs.name }}.sha256
+          body: |
+            ## Install on Android
+
+            1. Download **${{ steps.apk.outputs.name }}** (${{ steps.apk.outputs.size }}) below on your phone.
+            2. Open it. Android asks once to allow installs from your browser or Files app.
+            3. Already have Personal OS? Installing this updates it and keeps your data.
+
+            Android 8 or newer, 64-bit phones (every phone from the last several years). Your data
+            stays on the phone, encrypted; signing in is only needed for sync and AI.
+            The checksum file lets you check the download: `sha256sum -c ${{ steps.apk.outputs.name }}.sha256`.

@@ -13,9 +13,35 @@ It is built as a Bun + Turborepo monorepo with a product-focused Expo app, a Clo
   Overview, calendar, training programs, exercise demos, a live session and insights.
 </p>
 
+## Download
+
+**Android:** get the latest APK from [Releases](https://github.com/shabirkhan-dev/personal-os/releases/latest),
+open it on your phone and allow the install once. Android 8 or newer, 64-bit phones. A new
+release installs over the old one and keeps your data. iPhone builds aren't published yet.
+
 ## Why this project exists
 
 Most people track life in disconnected tools: notes, finance apps, shopping lists, routines, and personal health data live in separate places. Personal OS brings those systems together into a single daily operating layer.
+
+## How it works
+
+- **It starts empty.** Nothing is filled in for you. Each module offers three ways in: add your
+  own, let AI draft it (a budget, a day plan, a Care routine, a training program, a meal plan),
+  or start from a template. A Getting started card on Home walks through the modules you picked.
+- **Templates you can share.** A marketplace of packs (recipes, programs, routines, tasbih,
+  budgets, minimum days), new packs from the server, and your own recipe, routine, program or
+  budget sent to a friend as a `.posx.json` file they open in the app.
+- **Private by default.** Everything lives on the phone in an encrypted database (SQLCipher, key
+  in the secure keystore), with an optional fingerprint or face lock, privacy mode that blocks
+  screenshots, and no cloud backups of the app's data. Signing in is only for sync and AI.
+- **Reminders that don't get lost.** Prayers, medicines (with Taken and Snooze buttons and a
+  follow-up if you don't mark one), Care routines, water and a Sunday weekly review. Exact alarms
+  on Android, re-planned in the background so they never run out.
+- **Your data, your file.** Back up everything (photos too) to a file or a folder, daily if you
+  like, and restore it by merging or replacing.
+- **Search and your week.** One search across everything you saved, and a weekly review of the
+  last seven days with a few plain suggestions.
+- **Home-screen widgets** on Android: Today, Water (+250 ml), Tasbih and Money left.
 
 ## What's in the app
 
@@ -25,23 +51,25 @@ syncs to your account.
 
 | Module | What it does |
 | --- | --- |
-| **Overview** | Money at a glance, the minimum day, what's next from your live plan, and a seven-day calendar |
+| **Overview** | Getting started, search, your week, money at a glance, the minimum day, what's next and a seven-day calendar |
 | **Calendar** | One calendar for the whole app: training sessions and program weeks, interviews and follow-ups, bill due days, and your own events |
-| **Daily life** | Plan the day, the minimum day with a streak, sleep, a morning brief and an evening close |
+| **Daily life** | Plan the day (by hand or with AI), your own minimum day with a streak, sleep, a morning brief and an evening close |
 | **Training** | Programs with progression, your own activities and exercises, live sessions, insights (below) |
 | **Career** | Job applications, follow-ups, interview prep, flashcards and a skill path |
-| **Finance** | Spending, budget, bills, income and runway |
-| **Food** | Meals, goals, recipes, a grocery list and barcode scanning |
-| **Care** | Skin, hair and body routines, a product shelf and check-ins |
+| **Finance** | Spending, a budget you set or design with AI, bills, income and runway |
+| **Food** | Meals you choose, your own recipes with photos and steps, meal plans, a grocery list and barcode scanning |
+| **Care** | Skin, hair and body routines with how-to and photos, a product shelf and check-ins |
 | **Faith** | Prayer times and logs, Qibla, recitation, tasbih and zakat |
+| **Health** | Medicines and supplements with reminders, vitals, check-ups, labs, symptoms, a records vault, and Health Connect / Apple Health sync |
 | **Fashion** | Wardrobe, weather-aware outfits and a wishlist |
 | **Wishlist** | Dreams with savings backed by Finance |
 
 ### Training
 
-- **Programs:** twelve ready-made ones (Hybrid Athlete, Calisthenics Foundations, Handstand,
-  First Muscle-up, Front Lever, Legs + Pistol, 5 km under 25, 10 km Build, Boxing Conditioning,
-  Lean + Fit, Mobility + Recovery, Gym Strength), or design your own by hand or with AI.
+- **Programs:** design your own by hand or with AI, or start from one of twelve templates
+  (Hybrid Athlete, Calisthenics Foundations, Handstand, First Muscle-up, Front Lever, Legs +
+  Pistol, 5 km under 25, 10 km Build, Boxing Conditioning, Lean + Fit, Mobility + Recovery, Gym
+  Strength).
 - **Progression:** every exercise has a rep range; hit the top on every set and the next session
   adds a rep, then moves you to a harder variation (incline push-up → push-up → … → one-arm), or
   adds 2.5 kg for gym lifts. Light weeks, and test weeks that set your targets.
@@ -65,6 +93,7 @@ This monorepo is organized around a few core parts:
   the AI for every module (the provider key stays in the Worker)
 - Docs: `apps/docs` — Fumadocs site for product and engineering documentation
 - Web: `apps/web` — landing page / public shell, built as a static export
+- Shared models: `packages/domain` — record shapes and parsing used by both the app and the API
 - Shared design system: `packages/tokens` — design tokens and visual primitives
 - Shared tooling: `scripts/`, `.devcontainer/`, CI and project hooks
 
@@ -89,6 +118,7 @@ personal-os/
 │   ├── docs/            # Documentation site
 │   └── web/             # Landing page
 ├── packages/
+│   ├── domain/          # Shared models and parsing (app + API)
 │   ├── tokens/          # Shared design tokens
 │   ├── typescript-config/
 │   └── logger/
@@ -132,16 +162,32 @@ bun run dev
 
 ## Build the Android app
 
-The app builds on EAS (Expo Application Services). A preview build is an installable APK:
+**Release APK (what GitHub Releases ships):** push a version tag and the `Release` workflow builds
+the APK and attaches it to a GitHub release.
+
+```bash
+git tag v0.7.0 && git push origin v0.7.0
+```
+
+**On your machine** (JDK 21 and the Android SDK):
 
 ```bash
 cd apps/mobile
-EAS_BUILD_PROFILE=preview bunx eas-cli build --profile preview --platform android
+EAS_BUILD_PROFILE=preview EXPO_PUBLIC_API_URL=https://your-api.example.com \
+  bunx expo prebuild --platform android --clean
+cd android && ./gradlew assembleRelease   # app/build/outputs/apk/release/app-release.apk
 ```
 
-`EAS_BUILD_PROFILE` must be set locally too: `app.config.js` builds only `arm64-v8a` and shrinks
-the code for preview builds, and the local and cloud configs must match. The API address comes from
-`EXPO_PUBLIC_API_URL` in the project's EAS "preview" environment.
+**On EAS:** `EAS_BUILD_PROFILE=preview bunx eas-cli build --profile preview --platform android`.
+
+`EAS_BUILD_PROFILE=preview` builds only `arm64-v8a` and shrinks the code, so the APK stays small;
+the local and cloud configs must match. The API address is baked in from `EXPO_PUBLIC_API_URL`.
+
+## Tests
+
+- `bun run test`: unit tests across the workspace (the API's run against Postgres).
+- `apps/mobile/e2e`: Maestro flows on an Android emulator (first launch, templates, reminders,
+  backup, security, search and review), run by the `E2E` workflow on `main` and nightly.
 
 ## Local API setup
 
@@ -184,6 +230,13 @@ Main docs and references:
 - `/docs/production-roadmap`
 
 Design rules live in `DESIGN.md` and are the source of truth for the app UI and system tokens.
+
+## Contributing
+
+Issues and pull requests are welcome. Read [AGENTS.md](AGENTS.md) (it applies to people too):
+Bun only, Conventional Commits in lowercase, `bun run lint`, `bun run typecheck` and
+`bun run test` before you push. UI follows [DESIGN.md](DESIGN.md) and the tokens in
+`packages/tokens`, with no raw colours. New screens start empty: no sample data.
 
 ## Credits
 

@@ -1,5 +1,5 @@
 # End-to-end checks on a real Android emulator: builds the release APK, installs it and runs the
-# Maestro flows in apps/mobile/e2e (first launch, templates, reminders, backup, security).
+# Maestro flows in apps/mobile/e2e (first launch, templates, reminders, backup, security, search).
 # Slow (~25 min): runs on main, nightly, by hand, and on pull requests that change the checks.
 name: E2E
 

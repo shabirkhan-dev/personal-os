@@ -51,6 +51,7 @@ There is no root `docs/` directory.
 
 | Package | Workspace import | Purpose |
 | --- | --- | --- |
+| `packages/domain` | `@personal-os/domain` | Record shapes and parsing shared by the app and the API (finance, food, care, templates…) |
 | `packages/tokens` | `@personal-os/tokens` | Kit v2 design tokens (light and dark) |
 | `packages/typescript-config` | `@personal-os/typescript-config` | Reusable TypeScript config presets |
 
@@ -89,11 +90,14 @@ Run one app directly with `bun --cwd=<app-path> run <script>`, for example
 ## Mobile builds (EAS)
 
 `apps/mobile` ships through EAS development builds and EAS Update. See `apps/mobile/README.md` for
-the build profiles, channels and update commands.
+the build profiles, channels and update commands. Public releases: pushing a `v*` tag runs
+`.github/workflows/release.yml`, which builds the APK and attaches it to a GitHub release.
 
 ## CI/CD and security
 
 - **CI:** `.github/workflows/ci.yml` runs lint/typecheck/build/test
+- **E2E:** `.github/workflows/e2e.yml` runs the Maestro flows in `apps/mobile/e2e` on an emulator
+- **Release:** `.github/workflows/release.yml` publishes the Android APK on GitHub Releases
 - **CD:** `.github/workflows/cd.yml` is a staged deploy template (`main` and version tags)
 - **Security:** `.github/workflows/security.yml` + Dependabot + CodeQL
 

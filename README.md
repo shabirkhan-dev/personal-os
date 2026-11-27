@@ -16,8 +16,13 @@ It is built as a Bun + Turborepo monorepo with a product-focused Expo app, a Clo
 ## Download
 
 **Android:** get the latest APK from [Releases](https://github.com/shabirkhan-dev/personal-os/releases/latest),
-open it on your phone and allow the install once. Android 8 or newer, 64-bit phones. A new
-release installs over the old one and keeps your data. iPhone builds aren't published yet.
+open it on your phone and allow the install once. One APK works on every Android phone and
+tablet on Android 8 or newer, and it's signed with the project's release key (the release notes
+list its fingerprint), so a new release installs over the old one and keeps your data.
+
+**iPhone:** Personal OS is a React Native (Expo) app, so the same code runs on iOS. There's no App
+Store build yet: clone the repo and run `bunx expo run:ios --device` (or an EAS build) to put it
+on your own iPhone.
 
 ## Why this project exists
 
@@ -190,7 +195,8 @@ cd android && ./gradlew assembleRelease   # app/build/outputs/apk/release/app-re
 **On EAS:** `EAS_BUILD_PROFILE=preview bunx eas-cli build --profile preview --platform android`.
 
 `EAS_BUILD_PROFILE=preview` builds only `arm64-v8a` and shrinks the code, so the APK stays small;
-the local and cloud configs must match. The API address is baked in from `EXPO_PUBLIC_API_URL`.
+`EAS_BUILD_PROFILE=release` (what GitHub releases use) builds every architecture. The local and
+cloud configs must match. The API address is baked in from `EXPO_PUBLIC_API_URL`.
 
 ## Tests
 

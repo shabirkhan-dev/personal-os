@@ -1,3 +1,4 @@
+import { AI_TASKS, isAiTaskPath, runAiTask } from "@personal-os/ai";
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 
@@ -6,35 +7,13 @@ import { AppError } from "@/core/app-error";
 import type { AppEnv } from "@/core/context";
 import { rateLimit } from "@/core/rate-limit";
 import { ok } from "@/core/response";
-import { validate } from "@/core/validate";
 import { requireAuth } from "@/modules/auth/auth.middleware";
-import {
-	interviewPrepSchema,
-	nudgeSchema,
-	parseLineSchema,
-	readJobSchema,
-	skillPathSchema,
-} from "./career.schema";
-import { buildInterviewPrep, draftNudge, parseLine, planSkillPath, readJob } from "./career.tasks";
 import { aiQuota } from "./ai.quota";
-import { askCareSchema, designRoutineSchema } from "./care.schema";
-import { findDreamSchema } from "./wishlist.schema";
-import { findDream } from "./wishlist.tasks";
-import { askCare, designRoutine } from "./care.tasks";
-import { askFashionSchema, readPieceSchema } from "./fashion.schema";
-import { askFashion, readPiece } from "./fashion.tasks";
-import { askFaithSchema } from "./faith.schema";
-import { askFaith } from "./faith.tasks";
-import { askFoodSchema, draftRecipeSchema, planWeekSchema, readMealSchema } from "./food.schema";
-import { askTrainingSchema, designProgramSchema, skillStepsSchema } from "./training.schema";
-import { askTraining, buildSkill, designProgram } from "./training.tasks";
-import { askFood, draftRecipe, planWeek, readMeal } from "./food.tasks";
-import { designDaySchema } from "./daily.schema";
-import { designDay } from "./daily.tasks";
-import { askFinanceSchema, designBudgetSchema, readSpendSchema } from "./finance.schema";
-import { askFinance, designBudget, readSpend } from "./finance.tasks";
 
-/** Module AI, `POST /ai/<module>/<task>`. Signed-in only; the provider key never leaves the API. */
+/**
+ * Module AI, `POST /ai/<module>/<task>` for every task in `@personal-os/ai`. Signed-in only; the
+ * provider key never leaves the API. People with their own key run the same tasks on the phone.
+ */
 export const aiRoutes = new Hono<AppEnv>()
 	.use(
 		requireAuth,
@@ -47,69 +26,18 @@ export const aiRoutes = new Hono<AppEnv>()
 			},
 		}),
 	)
-	.post("/career/read-job", validate("json", readJobSchema), async (c) =>
-		ok(c, await readJob({ config: c.get("config") }, c.req.valid("json"))),
-	)
-	.post("/career/parse-line", validate("json", parseLineSchema), async (c) =>
-		ok(c, await parseLine({ config: c.get("config") }, c.req.valid("json"))),
-	)
-	.post("/career/nudge", validate("json", nudgeSchema), async (c) =>
-		ok(c, await draftNudge({ config: c.get("config") }, c.req.valid("json"))),
-	)
-	.post("/career/interview-prep", validate("json", interviewPrepSchema), async (c) =>
-		ok(c, await buildInterviewPrep({ config: c.get("config") }, c.req.valid("json"))),
-	)
-	.post("/career/skill-path", validate("json", skillPathSchema), async (c) =>
-		ok(c, await planSkillPath({ config: c.get("config") }, c.req.valid("json"))),
-	)
-	.post("/faith/ask", validate("json", askFaithSchema), async (c) =>
-		ok(c, await askFaith({ config: c.get("config") }, c.req.valid("json"))),
-	)
-	.post("/fashion/read-piece", validate("json", readPieceSchema), async (c) =>
-		ok(c, await readPiece({ config: c.get("config") }, c.req.valid("json"))),
-	)
-	.post("/fashion/ask", validate("json", askFashionSchema), async (c) =>
-		ok(c, await askFashion({ config: c.get("config") }, c.req.valid("json"))),
-	)
-	.post("/food/read-meal", validate("json", readMealSchema), async (c) =>
-		ok(c, await readMeal({ config: c.get("config") }, c.req.valid("json"))),
-	)
-	.post("/food/ask", validate("json", askFoodSchema), async (c) =>
-		ok(c, await askFood({ config: c.get("config") }, c.req.valid("json"))),
-	)
-	.post("/food/draft-recipe", validate("json", draftRecipeSchema), async (c) =>
-		ok(c, await draftRecipe({ config: c.get("config") }, c.req.valid("json"))),
-	)
-	.post("/food/plan-week", validate("json", planWeekSchema), async (c) =>
-		ok(c, await planWeek({ config: c.get("config") }, c.req.valid("json"))),
-	)
-	.post("/care/ask", validate("json", askCareSchema), async (c) =>
-		ok(c, await askCare({ config: c.get("config") }, c.req.valid("json"))),
-	)
-	.post("/care/design-routine", validate("json", designRoutineSchema), async (c) =>
-		ok(c, await designRoutine({ config: c.get("config") }, c.req.valid("json"))),
-	)
-	.post("/finance/design-budget", validate("json", designBudgetSchema), async (c) =>
-		ok(c, await designBudget({ config: c.get("config") }, c.req.valid("json"))),
-	)
-	.post("/daily/design-day", validate("json", designDaySchema), async (c) =>
-		ok(c, await designDay({ config: c.get("config") }, c.req.valid("json"))),
-	)
-	.post("/training/ask", validate("json", askTrainingSchema), async (c) =>
-		ok(c, await askTraining({ config: c.get("config") }, c.req.valid("json"))),
-	)
-	.post("/training/skill", validate("json", skillStepsSchema), async (c) =>
-		ok(c, await buildSkill({ config: c.get("config") }, c.req.valid("json"))),
-	)
-	.post("/training/program", validate("json", designProgramSchema), async (c) =>
-		ok(c, await designProgram({ config: c.get("config") }, c.req.valid("json"))),
-	)
-	.post("/finance/read", validate("json", readSpendSchema), async (c) =>
-		ok(c, await readSpend({ config: c.get("config") }, c.req.valid("json"))),
-	)
-	.post("/finance/ask", validate("json", askFinanceSchema), async (c) =>
-		ok(c, await askFinance({ config: c.get("config") }, c.req.valid("json"))),
-	)
-	.post("/wishlist/find", validate("json", findDreamSchema), async (c) =>
-		ok(c, await findDream({ config: c.get("config") }, c.req.valid("json"))),
-	);
+	.post("/:module/:task", async (c) => {
+		const path = `${c.req.param("module")}/${c.req.param("task")}`;
+		if (!isAiTaskPath(path)) throw new AppError("NOT_FOUND");
+		const body: unknown = await c.req.json().catch(() => null);
+		const parsed = AI_TASKS[path].input.safeParse(body);
+		if (!parsed.success) {
+			throw new AppError("VALIDATION_FAILED", {
+				issues: parsed.error.issues.map((issue) => ({
+					path: issue.path.map(String).join("."),
+					message: issue.message,
+				})),
+			});
+		}
+		return ok(c, await runAiTask(c.get("config").ai, path, parsed.data));
+	});

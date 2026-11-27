@@ -1,8 +1,8 @@
-import type { Config } from "@/config/env";
-import { askJson } from "./ai.ask";
+import type { AiConfig } from "./config";
+import { askJson } from "./ask";
 import { type DayDraft, dayDraft, type DesignDayInput } from "./daily.schema";
 
-type Deps = { config: Config };
+type Deps = { config: AiConfig };
 
 const DESIGN =
 	"Design one day as time blocks between the person's wake and bed times, in minutes after " +
@@ -13,7 +13,7 @@ const DESIGN =
 
 /** Drafts a day the person reviews and edits before using it. */
 export async function designDay(deps: Deps, input: DesignDayInput): Promise<DayDraft> {
-	if (deps.config.ai.provider === "mock") {
+	if (deps.config.provider === "mock") {
 		const focus = input.wakeAt + 120;
 		return {
 			blocks: [

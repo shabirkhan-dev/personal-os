@@ -1,7 +1,8 @@
-import { describe, expect, it } from "vitest";
+/// <reference types="bun" />
+import { describe, expect, it } from "bun:test";
 
-import { AppError } from "@/core/app-error";
-import { assertPublicUrl, fetchPageText, htmlToText, shareImage } from "@/modules/ai/web-page";
+import { AiError } from "./errors";
+import { assertPublicUrl, fetchPageText, htmlToText, shareImage } from "./web-page";
 
 const page = (body: string, init: ResponseInit = {}) => new Response(body, init);
 const longText = "Senior TypeScript Engineer at Tessera. ".repeat(10);
@@ -34,7 +35,7 @@ describe("assertPublicUrl", () => {
 		"http://printer.local/",
 		"file:///etc/passwd",
 	])("refuses %s", (url) => {
-		expect(() => assertPublicUrl(url)).toThrow(AppError);
+		expect(() => assertPublicUrl(url)).toThrow(AiError);
 	});
 
 	it("allows public sites", () => {
@@ -45,16 +46,16 @@ describe("assertPublicUrl", () => {
 describe("fetchPageText", () => {
 	it("follows redirects and checks every hop", async () => {
 		await expect(
-			fetchPageText("https://short.example.com/j", redirectToLocal as typeof fetch),
-		).rejects.toMatchObject({ code: "JOB_LINK_UNREADABLE" });
+			fetchPageText("https://short.example.com/j", redirectToLocal as unknown as typeof fetch),
+		).rejects.toMatchObject({ code: "page_unreadable" });
 	});
 
 	it("reads a public page and refuses sign-in walls", async () => {
-		expect(await fetchPageText("https://jobs.example.com/1", jobPage as typeof fetch)).toContain(
-			"Tessera",
-		);
+		expect(
+			await fetchPageText("https://jobs.example.com/1", jobPage as unknown as typeof fetch),
+		).toContain("Tessera");
 		await expect(
-			fetchPageText("https://jobs.example.com/2", signInWall as typeof fetch),
+			fetchPageText("https://jobs.example.com/2", signInWall as unknown as typeof fetch),
 		).rejects.toMatchObject({
 			message: "The page needs a sign-in or blocks reading.",
 		});
@@ -85,6 +86,24 @@ describe("htmlToText on hostile pages", () => {
 		const started = performance.now();
 		htmlToText(hostile);
 		expect(performance.now() - started).toBeLessThan(1000);
+	});
+
+	it("ends comments the way browsers do, and keeps decoded brackets as text", () => {
+		expect(htmlToText("<p>a</p><!-- x --!><p>b</p>")).toBe("a\nb");
+		expect(htmlToText("<p>&lt;script&gt;alert(1)&lt;/script&gt;</p>")).toBe(
+			"‹script›alert(1)‹/script›",
+		);
+		expect(htmlToText("<p>a &amp; b &#x41; &unknown; &</p>")).toBe("a & b A &unknown; &");
+	});
+
+	it("reads og:image whatever the attribute order or quotes", () => {
+		expect(
+			shareImage(
+				"<meta content='https://s.example.com/a.jpg' property=og:image>",
+				"https://s.example.com",
+			),
+		).toBe("https://s.example.com/a.jpg");
+		expect(shareImage("<meta".repeat(100_000), "https://s.example.com")).toBeNull();
 	});
 
 	it("still drops comments, scripts and an unclosed trailing block", () => {

@@ -100,7 +100,7 @@ export function InterviewPrepScreen({ id }: { id?: string }) {
 
 	/** Builds in the background; the topics replace the working card when they're ready. */
 	const build = () => {
-		if (!ai.available) return setError("Sign in to build prep with AI.");
+		if (!ai.available) return setError("Sign in, or add your own AI key in Settings.");
 		setError(null);
 		startPrep(app, data.stories);
 	};

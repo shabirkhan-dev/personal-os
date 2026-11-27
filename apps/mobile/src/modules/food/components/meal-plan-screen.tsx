@@ -360,7 +360,7 @@ export function MealPlanScreen() {
 					</>
 				) : (
 					<PoText variant="meta13" tone="textSecondary">
-						Sign in to have AI plan the week from what you ask for.
+						Sign in or add your own AI key to have AI plan the week from what you ask for.
 					</PoText>
 				)}
 				{plan ? (

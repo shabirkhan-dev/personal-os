@@ -12,7 +12,9 @@ import { fashionHome, useFashionStatus } from "@/modules/fashion";
 import { foodHome, useFoodStatus } from "@/modules/food";
 import { financeHome, useFinanceStatus } from "@/modules/finance";
 import { AskBar } from "@/modules/home/components/ask-bar";
+import { MomentCard } from "@/modules/home/components/moment-card";
 import { SetupChecklist } from "@/modules/home/components/setup-checklist";
+import { MOMENT_ASKS, momentAt, momentSteps } from "@/modules/home/lib/day-moment";
 import { QuickLinks } from "@/components/module-ui";
 import { FloatingTabBar } from "@/modules/home/components/floating-tab-bar";
 import { HeaderBar, HomeHeader } from "@/modules/home/components/home-header";
@@ -189,6 +191,9 @@ export default function TodayScreen() {
 									modules={answers.modules}
 									amountsHidden={viewDoc.amountsHidden}
 									onOpen={select}
+									status={liveStatus}
+									wake={plan.input.wakeMinutes}
+									bed={plan.input.bedMinutes}
 								/>
 							) : (
 								<SoonView
@@ -302,13 +307,30 @@ type OverviewBodyProps = {
 	modules: readonly ModuleId[];
 	amountsHidden: boolean;
 	onOpen: (view: HomeView) => void;
+	/** Each module's live line, for the moment card. */
+	status: Partial<Record<ModuleId, string>>;
+	/** The person's wake and bed times, so the day's parts are theirs. */
+	wake: number;
+	bed: number;
 };
 
 /**
- * Overview, the day's hub: a greeting, the ask bar, what's next, the day's numbers, one timeline
- * and the week's calendar.
+ * Overview, the day's hub: a greeting, the ask bar, then what matters in this part of the day
+ * first. Morning leads with the brief, prayer, routine and outfit; night with closing the day and
+ * the night routine. What's next, the day's numbers, one timeline and the week's calendar follow,
+ * in an order that fits the moment.
  */
-function OverviewBody({ name, now, modules, amountsHidden, onOpen }: OverviewBodyProps) {
+function OverviewBody({
+	name,
+	now,
+	modules,
+	amountsHidden,
+	onOpen,
+	status,
+	wake,
+	bed,
+}: OverviewBodyProps) {
+	const moment = momentAt(now.getHours() * 60 + now.getMinutes(), wake, bed);
 	const hour = now.getHours();
 	const first = name.trim().split(/\s+/)[0];
 	const greeting = `${hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening"}${first ? `, ${first}` : ""}`;
@@ -348,21 +370,42 @@ function OverviewBody({ name, now, modules, amountsHidden, onOpen }: OverviewBod
 		onOpen(target);
 	};
 
-	const suggestions = [
-		modules.includes("career") ? { label: "Log a job", onPress: () => onOpen("career") } : null,
-		modules.includes("food") ? { label: "Log a meal", onPress: () => onOpen("food") } : null,
-		modules.includes("finance")
-			? { label: "Log spending", onPress: () => onOpen("finance") }
-			: null,
-		modules.includes("workout")
-			? { label: "Start workout", onPress: () => onOpen("workout") }
-			: null,
-		modules.includes("skincare") ? { label: "Care", onPress: () => onOpen("skincare") } : null,
-		modules.includes("faith") ? { label: "Log a prayer", onPress: () => onOpen("faith") } : null,
-		modules.includes("fashion")
-			? { label: "What to wear", onPress: () => onOpen("fashion") }
-			: null,
-	].filter((item): item is { label: string; onPress: () => void } => item !== null);
+	const askFor: Partial<Record<ModuleId, { label: string; onPress: () => void }>> = {
+		career: { label: "Log a job", onPress: () => onOpen("career") },
+		food: { label: "Log a meal", onPress: () => onOpen("food") },
+		finance: { label: "Log spending", onPress: () => onOpen("finance") },
+		workout: { label: "Start workout", onPress: () => onOpen("workout") },
+		skincare: { label: "Care", onPress: () => onOpen("skincare") },
+		faith: { label: "Log a prayer", onPress: () => onOpen("faith") },
+		fashion: { label: "What to wear", onPress: () => onOpen("fashion") },
+	};
+	// The suggestions under the ask bar follow the time of day too.
+	const suggestions = MOMENT_ASKS[moment]
+		.filter((module) => modules.includes(module))
+		.map((module) => askFor[module])
+		.filter((item): item is { label: string; onPress: () => void } => item !== undefined);
+
+	const momentCard = (
+		<MomentCard
+			key="moment"
+			moment={moment}
+			steps={momentSteps(moment, modules)}
+			status={status}
+			onOpen={onOpen}
+		/>
+	);
+	const checklist = <SetupChecklist key="setup" modules={modules} onOpen={onOpen} />;
+	const day = (
+		<DailyOverview key="day" onOpen={onOpen} onNotice={setNotice} amountsHidden={amountsHidden} />
+	);
+	const week = <CalendarWeekCard key="week" />;
+	// Daytime leads with what's next (inside the day card); the other parts lead with the moment.
+	const order =
+		moment === "day"
+			? [day, momentCard, checklist, week]
+			: moment === "night"
+				? [momentCard, day, week, checklist]
+				: [momentCard, checklist, day, week];
 
 	return (
 		<>
@@ -385,9 +428,7 @@ function OverviewBody({ name, now, modules, amountsHidden, onOpen }: OverviewBod
 					{ label: "Templates", icon: "Layers", onPress: () => router.push("/templates") },
 				]}
 			/>
-			<SetupChecklist modules={modules} onOpen={onOpen} />
-			<DailyOverview onOpen={onOpen} onNotice={setNotice} amountsHidden={amountsHidden} />
-			<CalendarWeekCard />
+			{order}
 		</>
 	);
 }

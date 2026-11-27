@@ -51,6 +51,7 @@ There is no root `docs/` directory.
 
 | Package | Workspace import | Purpose |
 | --- | --- | --- |
+| `packages/ai` | `@personal-os/ai` | AI task prompts, schemas and the provider client, used by the API and by the phone with a person's own key |
 | `packages/domain` | `@personal-os/domain` | Record shapes and parsing shared by the app and the API (finance, food, care, templates…) |
 | `packages/tokens` | `@personal-os/tokens` | Kit v2 design tokens (light and dark) |
 | `packages/typescript-config` | `@personal-os/typescript-config` | Reusable TypeScript config presets |

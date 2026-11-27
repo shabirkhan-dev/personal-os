@@ -1,5 +1,5 @@
-import type { Config } from "@/config/env";
-import { askJson } from "./ai.ask";
+import type { AiConfig } from "./config";
+import { askJson } from "./ask";
 import * as mock from "./career.mock";
 import {
 	type InterviewPrep,
@@ -31,11 +31,11 @@ const HALAL_RULE =
 	"banking, gambling or betting, alcohol, pork, tobacco and adult content. Use 'unsure' when the " +
 	"text does not say what the company does. Never claim certainty; the user checks it.";
 
-type Deps = { config: Config; readPage?: (url: string) => Promise<string> };
+type Deps = { config: AiConfig; readPage?: (url: string) => Promise<string> };
 
 export async function readJob(deps: Deps, input: ReadJobInput): Promise<JobDetails> {
 	const text = input.text ?? (await (deps.readPage ?? fetchPageText)(input.url ?? ""));
-	if (deps.config.ai.provider === "mock") return mock.readJob(text, input.url);
+	if (deps.config.provider === "mock") return mock.readJob(text, input.url);
 	const prompt =
 		"Extract the job post's company, role, pay (as written, with currency), where " +
 		"(remote/onsite, city, working hours) and a one-line summary. Leave a field empty rather " +
@@ -44,7 +44,7 @@ export async function readJob(deps: Deps, input: ReadJobInput): Promise<JobDetai
 }
 
 export async function parseLine(deps: Deps, input: ParseLineInput): Promise<ParsedLine> {
-	if (deps.config.ai.provider === "mock") return mock.parseLine(input.text);
+	if (deps.config.provider === "mock") return mock.parseLine(input.text);
 	const prompt =
 		"The user logs job-hunt progress in one line, e.g. 'applied to tessera, senior typescript, " +
 		"500k, remote'. Return the application it describes with its stage (saved, applied, " +
@@ -63,7 +63,7 @@ const TONES: Record<NudgeInput["tone"], string> = {
 };
 
 export async function draftNudge(deps: Deps, input: NudgeInput): Promise<NudgeDraft> {
-	if (deps.config.ai.provider === "mock") return mock.nudge(input);
+	if (deps.config.provider === "mock") return mock.nudge(input);
 	const prompt =
 		"Write a short follow-up email from a job applicant to the company contact. Mention one or " +
 		"two of the applicant's stories that fit the role, offer a call, sign with the sender's " +
@@ -76,7 +76,7 @@ export async function buildInterviewPrep(
 	deps: Deps,
 	input: InterviewPrepInput,
 ): Promise<InterviewPrep> {
-	if (deps.config.ai.provider === "mock") return mock.prep(input);
+	if (deps.config.provider === "mock") return mock.prep(input);
 	const prompt =
 		"Build interview prep for this application: 4-5 topics to revise (title plus one line of " +
 		"what to cover), 3 sharp questions the candidate can ask, and 8-12 flashcards (question on " +
@@ -93,7 +93,7 @@ export async function buildInterviewPrep(
 }
 
 export async function planSkillPath(deps: Deps, input: SkillPathInput): Promise<SkillPath> {
-	if (deps.config.ai.provider === "mock") return mock.skillPath(input);
+	if (deps.config.provider === "mock") return mock.skillPath(input);
 	const prompt =
 		`Plan a ${input.weeks}-week skill path on the focus below, 30 minutes a day, five days a ` +
 		"week. Each week has a title, a one-line goal and five day sessions (title and what to do). " +

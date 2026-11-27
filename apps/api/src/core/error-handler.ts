@@ -1,5 +1,6 @@
 import type { ErrorHandler, NotFoundHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
+import { AiError } from "@personal-os/ai";
 
 import { errors } from "@/config/messages";
 import { AppError } from "./app-error";
@@ -32,9 +33,22 @@ function fail(c: AppContext, error: AppError) {
 	return c.json(body, error.status);
 }
 
+/** The shared AI package's errors as API errors; the server's own key problems stay internal. */
+function fromAiError(error: AiError): AppError {
+	switch (error.code) {
+		case "invalid_output":
+			return new AppError("AI_INVALID_OUTPUT");
+		case "page_unreadable":
+			return new AppError("JOB_LINK_UNREADABLE", { message: error.message });
+		default:
+			return new AppError("AI_UNAVAILABLE", { cause: error });
+	}
+}
+
 /** Known errors keep their code; anything else is logged and answered as a plain 500. */
 export const onError: ErrorHandler<AppEnv> = (error, c) => {
 	if (error instanceof AppError) return fail(c, error);
+	if (error instanceof AiError) return fail(c, fromAiError(error));
 	if (error instanceof HTTPException && error.status === 413) {
 		return fail(c, new AppError("BODY_TOO_LARGE"));
 	}

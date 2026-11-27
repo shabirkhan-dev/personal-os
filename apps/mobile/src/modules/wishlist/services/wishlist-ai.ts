@@ -1,8 +1,8 @@
 import { useCallback, useMemo } from "react";
-import { ApiError, apiClient } from "@/lib/api/client";
+import { useAi } from "@/lib/ai/use-ai";
+import { ApiError } from "@/lib/api/client";
 import { aiLimitMessage } from "@/lib/api/ai-limits";
 import { dayKey } from "@/lib/day";
-import { useAuth } from "@/modules/auth";
 import type { DreamCategory } from "../lib/wishlist-model";
 
 /** The Wishlist AI, `POST /ai/wishlist/<task>`. Needs a connection and a signed-in account. */
@@ -34,18 +34,14 @@ export function wishlistAiMessage(error: unknown): string {
 }
 
 export function useWishlistAi() {
-	const { token, status } = useAuth();
-	const available = status === "signed-in" && token !== null;
+	const { available, run } = useAi();
 
 	const call = useCallback(
 		async <T>(task: string, body: Record<string, unknown>): Promise<T> => {
-			if (!available || !token) throw new Error("signed-out");
-			return apiClient.post<T>(`/ai/wishlist/${task}`, body, {
-				accessToken: token,
-				timeoutMs: AI_TIMEOUT_MS,
-			});
+			if (!available) throw new Error("signed-out");
+			return run<T>(`wishlist/${task}`, body, AI_TIMEOUT_MS);
 		},
-		[available, token],
+		[available, run],
 	);
 
 	return useMemo(

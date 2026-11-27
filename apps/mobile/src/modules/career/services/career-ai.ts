@@ -1,8 +1,9 @@
+import { AiError } from "@personal-os/ai";
 import { useCallback, useMemo } from "react";
-import { ApiError, apiClient } from "@/lib/api/client";
+import { useAi } from "@/lib/ai/use-ai";
+import { ApiError } from "@/lib/api/client";
 import { aiLimitMessage } from "@/lib/api/ai-limits";
 import { dayKey } from "@/lib/day";
-import { useAuth } from "@/modules/auth";
 import type { HalalStatus, Stage, Story } from "../lib/career-model";
 import type { GeneratedPrep } from "../data/career-actions";
 
@@ -68,6 +69,12 @@ export type SkillPathResult = {
 
 function toCareerAiError(error: unknown): CareerAiError {
 	if (error instanceof CareerAiError) return error;
+	if (error instanceof AiError && error.code === "page_unreadable") {
+		return new CareerAiError(
+			"unreadable",
+			"The page needs a sign-in or blocks reading. Paste the job text, or fill it in yourself.",
+		);
+	}
 	const limit = aiLimitMessage(error);
 	if (limit) return new CareerAiError("failed", limit);
 	if (error instanceof ApiError) {
@@ -94,28 +101,25 @@ const storyPayload = (stories: readonly Story[]) =>
 	stories.slice(0, 6).map((story) => ({ title: story.title, summary: story.summary }));
 
 export function useCareerAi() {
-	const { token, status } = useAuth();
+	const { available, run } = useAi();
 
 	const call = useCallback(
 		async <T>(task: string, body: Record<string, unknown>): Promise<T> => {
-			if (status !== "signed-in" || !token) {
-				throw new CareerAiError("signed-out", "Sign in to use AI.");
+			if (!available) {
+				throw new CareerAiError("signed-out", "Sign in, or add your own AI key in Settings.");
 			}
 			try {
-				return await apiClient.post<T>(`/ai/career/${task}`, body, {
-					accessToken: token,
-					timeoutMs: AI_TIMEOUT_MS,
-				});
+				return await run<T>(`career/${task}`, body, AI_TIMEOUT_MS);
 			} catch (error) {
 				throw toCareerAiError(error);
 			}
 		},
-		[status, token],
+		[available, run],
 	);
 
 	return useMemo(
 		() => ({
-			available: status === "signed-in" && token !== null,
+			available,
 
 			readJob: (source: { url: string } | { text: string }) => call<JobDetails>("read-job", source),
 
@@ -147,6 +151,6 @@ export function useCareerAi() {
 			skillPath: (focus: string, context: string) =>
 				call<SkillPathResult>("skill-path", { focus, weeks: 6, context }),
 		}),
-		[call, status, token],
+		[call, available],
 	);
 }

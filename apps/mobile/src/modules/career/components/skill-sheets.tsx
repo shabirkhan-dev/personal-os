@@ -39,7 +39,7 @@ export function SkillFocusSheet({ visible, current = "", apps, onClose }: SkillF
 	const build = () => {
 		const topic = focus.trim();
 		if (topic.length < 2) return setError("Name a skill, like System design.");
-		if (!ai.available) return setError("Sign in to plan a path with AI.");
+		if (!ai.available) return setError("Sign in, or add your own AI key in Settings.");
 		startSkillPath(topic, apps);
 		onClose();
 	};

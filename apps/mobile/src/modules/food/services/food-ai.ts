@@ -1,8 +1,8 @@
 import { useCallback, useMemo } from "react";
-import { ApiError, apiClient } from "@/lib/api/client";
+import { useAi } from "@/lib/ai/use-ai";
+import { ApiError } from "@/lib/api/client";
 import { aiLimitMessage } from "@/lib/api/ai-limits";
 import { dayKey } from "@/lib/day";
-import { useAuth } from "@/modules/auth";
 import type { Macros, Slot } from "../lib/food-model";
 
 /** The Food AI, `POST /ai/food/<task>`. Needs a connection and a signed-in account. */
@@ -37,23 +37,20 @@ export function foodAiMessage(error: unknown): string {
 		if (error.statusCode === 401) return "Sign in again to use AI.";
 		if (error.statusCode === 408) return "That took too long. Try again.";
 	}
-	if (error instanceof Error && error.message === "signed-out") return "Sign in to use AI.";
+	if (error instanceof Error && error.message === "signed-out")
+		return "Sign in, or add your own AI key in Settings.";
 	return "AI couldn't do that just now. Try again in a moment.";
 }
 
 export function useFoodAi() {
-	const { token, status } = useAuth();
-	const available = status === "signed-in" && token !== null;
+	const { available, run } = useAi();
 
 	const call = useCallback(
 		async <T>(task: string, body: Record<string, unknown>): Promise<T> => {
-			if (!available || !token) throw new Error("signed-out");
-			return apiClient.post<T>(`/ai/food/${task}`, body, {
-				accessToken: token,
-				timeoutMs: AI_TIMEOUT_MS,
-			});
+			if (!available) throw new Error("signed-out");
+			return run<T>(`food/${task}`, body, AI_TIMEOUT_MS);
 		},
-		[available, token],
+		[available, run],
 	);
 
 	return useMemo(

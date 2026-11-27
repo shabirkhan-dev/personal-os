@@ -259,7 +259,8 @@ export function ProgramBuilderScreen({ id, ai }: { id?: string; ai: boolean }) {
 				/>
 				{!assistant.available ? (
 					<PoText variant="meta13" tone="textSecondary">
-						Sign in from Profile to design with AI. Building by hand works offline.
+						Sign in, or add your own AI key in Profile, to design with AI. Building by hand works
+						offline.
 					</PoText>
 				) : null}
 			</Card>

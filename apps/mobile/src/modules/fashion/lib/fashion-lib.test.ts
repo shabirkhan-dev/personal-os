@@ -1,5 +1,4 @@
 import { describe, expect, it } from "bun:test";
-import { CATALOG, lookAlike } from "./catalog";
 import {
 	colourHeadline,
 	colourStory,
@@ -240,20 +239,5 @@ describe("weather and catalog", () => {
 		expect(feel(18)).toBe("cool");
 		expect(condition(61)).toBe("rainy");
 		expect(parseOpenMeteo({}, "x", now)).toBeNull();
-	});
-
-	it("finds a look-alike photo for every category", () => {
-		for (const category of [
-			"top",
-			"layer",
-			"bottom",
-			"shoes",
-			"watch",
-			"scent",
-			"extra",
-		] as const) {
-			expect(lookAlike(category, "navy")?.category).toBe(category);
-		}
-		expect(new Set(CATALOG.map((item) => item.id)).size).toBe(CATALOG.length);
 	});
 });

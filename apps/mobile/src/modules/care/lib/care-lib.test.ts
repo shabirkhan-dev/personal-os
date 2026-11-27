@@ -1,9 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import { existsSync } from "node:fs";
-import { join } from "node:path";
 import { dayKey } from "@/lib/day";
-import { buildRoutine, CATALOG, photoFor } from "./catalog";
-import { CARE_TEMPLATES, templateById } from "./care-templates";
+import { buildRoutine } from "./care-routine.fixture";
 import {
 	bodyTiles,
 	careDate,
@@ -80,16 +77,6 @@ describe("buildRoutine", () => {
 		const plain = buildRoutine([], ["oily"], today);
 		expect(plain.steps.some((step) => step.area === "hair")).toBe(false);
 		expect(plain.products.map((product) => product.name)).toContain("Light moisturiser");
-	});
-
-	it("every bundled photo exists", () => {
-		for (const entry of CATALOG) {
-			expect(
-				existsSync(join(import.meta.dir, "../../../../app-photos/care", `${entry.id}.webp`)),
-			).toBe(true);
-		}
-		expect(photoFor("CeraVe foaming cleanser")).toBe("catalog:cleanser");
-		expect(photoFor("Mystery thing")).toBeNull();
 	});
 });
 
@@ -305,23 +292,5 @@ describe("starting empty", () => {
 			metrics: ["dark-spots"],
 		});
 		expect(parseBodyArea({ id: "a", name: " " })).toBeNull();
-	});
-
-	it("offers templates whose steps point at their own products, with how-to filled in", () => {
-		expect(CARE_TEMPLATES.length).toBeGreaterThan(4);
-		for (const template of CARE_TEMPLATES) {
-			const plan = template.plan();
-			expect(plan.steps.length + plan.habits.length + plan.areas.length).toBeGreaterThan(0);
-			const names = new Set(plan.products.map((product) => product.name));
-			for (const step of plan.steps) {
-				if (step.productId) expect(names.has(step.productId)).toBe(true);
-				expect(step.howTo.length).toBeGreaterThan(0);
-			}
-		}
-		expect(
-			templateById("dandruff")
-				?.plan()
-				.steps.every((step) => step.area === "hair"),
-		).toBe(true);
 	});
 });

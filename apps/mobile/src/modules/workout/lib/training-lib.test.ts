@@ -1,8 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import { existsSync } from "node:fs";
-import { join } from "node:path";
 import { estimateKcal } from "./kcal";
-import { SKILLS, setsLabel, TEMPLATES, templateById } from "./library";
+import { setsLabel, templateById } from "./library";
 import { parseTrainingLine } from "./parse-training-line";
 import {
 	buildWeek,
@@ -52,19 +50,24 @@ const session = (day: string, template: string | null, extra: Partial<Session> =
 	...extra,
 });
 
+/** A week as a program would plan it (the app ships no sessions, so the tests name their own). */
+const planned = [
+	"pull-core",
+	"easy-run",
+	"shadow-boxing",
+	null,
+	"push-handstand",
+	"long-run",
+	null,
+].map((template, index) => ({ day: week[index] ?? "", template, movedFrom: null }));
+
 describe("library", () => {
-	it("every photo is bundled and every template is complete", () => {
-		const photos = new Set<string>(SKILLS.map((skill) => skill.photo));
-		for (const template of TEMPLATES) {
-			photos.add(template.photo);
-			for (const item of template.exercises) photos.add(item.photo);
-		}
-		for (const photo of photos) {
-			expect(
-				existsSync(join(import.meta.dir, "../../../../app-photos/training", `${photo}.webp`)),
-			).toBe(true);
-		}
-		expect(templateById("push-handstand")?.exercises).toHaveLength(7);
+	it("ships no workouts: only the boxing timer's own session resolves", () => {
+		expect(templateById("push-handstand")).toBeUndefined();
+		expect(templateById("shadow-boxing")?.rounds).toBe(6);
+	});
+
+	it("labels sets", () => {
 		expect(
 			setsLabel({ name: "x", photo: "", sets: 3, target: null, unit: "reps", restS: 90, note: "" }),
 		).toBe("3 × max");
@@ -87,31 +90,20 @@ describe("library", () => {
 });
 
 describe("the week", () => {
-	it("builds five sessions that take turns by sport, with easy days left", () => {
-		const slots = buildWeek(settings, week);
-		expect(slots.map((slot) => slot.template)).toEqual([
-			"pull-core",
-			"easy-run",
-			"shadow-boxing",
+	it("leaves every day open until the person starts a program of their own", () => {
+		expect(buildWeek(settings, week).map((slot) => slot.template)).toEqual([
 			null,
-			"push-handstand",
-			"long-run",
 			null,
-		]);
-		const yoga = buildWeek({ ...settings, sports: ["calisthenics", "yoga"], daysPerWeek: 3 }, week);
-		expect(yoga.map((slot) => slot.template)).toEqual([
-			"pull-core",
-			"mobility",
-			"push-handstand",
-			"mobility",
-			"legs-core",
-			"mobility",
-			"mobility",
+			null,
+			null,
+			null,
+			null,
+			null,
 		]);
 	});
 
 	it("knows done, missed, today and rest, and moves a missed session to an easy day", () => {
-		const slots = buildWeek(settings, week);
+		const slots = planned;
 		const sessions = [session("2026-10-12", "pull-core"), session("2026-10-13", "easy-run")];
 		expect(slots.map((slot) => slotState(slot, sessions, today))).toEqual([
 			"done",
@@ -177,9 +169,9 @@ describe("numbers", () => {
 			session("2026-10-14", "shadow-boxing"),
 		];
 		expect(weeksInARow(boxing, "boxing", now)).toBe(3);
-		const plan = { id: week[0] ?? "", slots: buildWeek(settings, week), createdAt: "" };
+		const plan = { id: week[0] ?? "", slots: planned, createdAt: "" };
 		const notes = trainingNotes({ sessions: [...pulls, ...boxing], plan, today, now });
-		expect(notes.map((note) => note.kind)).toEqual(["pull-ups", "long-run", "missed", "boxing"]);
+		expect(notes.map((note) => note.kind)).toEqual(["pull-ups", "missed", "boxing"]);
 	});
 
 	it("runs a rounds timer", () => {
@@ -201,8 +193,8 @@ describe("ask bar", () => {
 			kind: "log",
 			session: {
 				sport: "running",
-				template: "easy-run",
-				title: "Easy run",
+				template: null,
+				title: "Running",
 				durationMin: 29,
 				distanceKm: 5,
 				rounds: null,
@@ -210,13 +202,17 @@ describe("ask bar", () => {
 			},
 		});
 		expect(parseTrainingLine("long run 8k 50 min")).toMatchObject({
-			session: { template: "long-run", distanceKm: 8, durationMin: 50 },
+			session: { template: null, distanceKm: 8, durationMin: 50 },
 		});
 		expect(parseTrainingLine("shadow boxing 6 rounds")).toMatchObject({
 			session: { sport: "boxing", rounds: 6, durationMin: 24 },
 		});
 		expect(parseTrainingLine("did push day, 30 push-ups")).toMatchObject({
-			session: { template: "push-handstand", sets: [{ exercise: "Push-ups", value: 30 }] },
+			session: {
+				sport: "calisthenics",
+				template: null,
+				sets: [{ exercise: "Push-ups", value: 30 }],
+			},
 		});
 		expect(parseTrainingLine("12 pull-ups")).toMatchObject({
 			session: { sport: "calisthenics", sets: [{ exercise: "Pull-ups", value: 12 }] },

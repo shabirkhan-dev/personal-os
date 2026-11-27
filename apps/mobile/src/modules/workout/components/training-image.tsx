@@ -1,38 +1,38 @@
-import { Image, type ImageStyle, type StyleProp, StyleSheet, View } from "react-native";
+import { type ImageStyle, type StyleProp, StyleSheet, View } from "react-native";
 import { Icon } from "@/components/icons";
 import { usePoTheme } from "@/theme";
-import { TRAINING_PHOTOS } from "../lib/photos";
 
-/** A bundled training photo by name ("handstand"), or a dumbbell glyph. */
+/**
+ * The picture slot for a session or program: no stock photos ship with the app, so it's a tinted
+ * tile with a dumbbell. (`photo` is kept on saved data from older versions; it's ignored.)
+ */
 export function TrainingImage({
-	photo,
 	size,
 	radius = 14,
 	fill = false,
 	style,
 }: {
-	photo: string | null | undefined;
+	photo?: string | null;
 	size: number;
 	radius?: number;
 	fill?: boolean;
 	style?: StyleProp<ImageStyle>;
 }) {
 	const { colors } = usePoTheme();
-	const source = photo ? TRAINING_PHOTOS[photo] : undefined;
 	const box = [
-		// A fixed width is needed: an image without one keeps its own size inside a scroll view.
 		fill ? { width: "100%" as const, height: size } : { width: size, height: size },
-		{ borderRadius: radius, backgroundColor: colors.bgSubtle },
+		{ borderRadius: radius, backgroundColor: colors.accentSubtle },
 		style,
 	];
-	if (!source) {
-		return (
-			<View style={[styles.empty, box]}>
-				<Icon name="Dumbbell" size={Math.min(26, size / 2)} color={colors.textTertiary} />
-			</View>
-		);
-	}
-	return <Image source={source} resizeMode="cover" style={box} accessibilityIgnoresInvertColors />;
+	return (
+		<View style={[styles.empty, box]}>
+			<Icon
+				name="Dumbbell"
+				size={Math.min(fill ? 40 : 26, size / 2)}
+				color={colors.accentDefault}
+			/>
+		</View>
+	);
 }
 
 const styles = StyleSheet.create({ empty: { alignItems: "center", justifyContent: "center" } });

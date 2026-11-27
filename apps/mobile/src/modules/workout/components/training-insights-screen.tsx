@@ -6,7 +6,6 @@ import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
 import { addDays, dayKey } from "@/lib/day";
 import { haptics } from "@/lib/haptics";
-import { useHomeView } from "@/modules/home/store/home-view";
 import { usePoTheme } from "@/theme";
 import { rebalanceWeek } from "../data/training-actions";
 import { useReadiness } from "../hooks/use-readiness";
@@ -61,7 +60,6 @@ const short = (day: string) => {
 export function TrainingInsightsScreen() {
 	const { colors } = usePoTheme();
 	const { data, now, today, plan, count } = useTrainingToday();
-	const updateView = useHomeView((state) => state.update);
 	const [range, setRange] = useState<Range>("week");
 	const [hidden, setHidden] = useState<string[]>([]);
 	const { sessions } = data;
@@ -83,10 +81,7 @@ export function TrainingInsightsScreen() {
 
 	const act = (note: TrainingNote) => {
 		if (note.kind === "pull-ups") trainingRoutes.skills();
-		else if (note.kind === "long-run") {
-			updateView((doc) => ({ ...doc, view: "food" }));
-			trainingRoutes.today();
-		} else if (note.kind === "missed" && plan) {
+		else if (note.kind === "missed" && plan) {
 			void rebalanceWeek(plan, sessions, today)
 				.then(() => haptics.success())
 				.catch((error: unknown) => console.error("[training] could not save", error));
@@ -215,13 +210,6 @@ function noteText(note: TrainingNote) {
 				body: `${note.best} strict pull-ups, up ${note.change} in two weeks. You're ready for explosive pulls toward the muscle-up.`,
 				primary: "Open skills",
 				secondary: "Got it",
-			};
-		case "long-run":
-			return {
-				title: "Eat for the run",
-				body: `${DAY_NAMES[new Date(`${note.day}T12:00:00`).getDay()]}'s ${note.km} km long run needs fuel. A banana shake the night before and oats in the morning will carry you.`,
-				primary: "Open Food",
-				secondary: "Later",
 			};
 		case "missed":
 			return {

@@ -15,12 +15,7 @@ import { usePoTheme } from "@/theme";
 import { saveSettings, saveTasbih } from "../data/faith-actions";
 import { useFaith } from "../hooks/use-faith";
 import { tasbihProgress } from "../lib/faith-math";
-import {
-	DEFAULT_TASBIH,
-	TASBIH_PHRASES,
-	TASBIH_TARGETS,
-	type TasbihPhrase,
-} from "../lib/faith-model";
+import { TASBIH_PHRASES, TASBIH_TARGETS, type TasbihPhrase } from "../lib/faith-model";
 import { FaithScreen } from "./faith-screen";
 
 const RING = 260;
@@ -250,8 +245,8 @@ export function TasbihScreen() {
 					style={[styles.sequence, styles.emptySequence, { backgroundColor: colors.bgSurface }]}
 				>
 					<PoText variant="body15" tone="textSecondary">
-						No sequence yet: count any phrase above as you like. Build your own sets in order, or
-						use the classic one.
+						No sequence yet: count any phrase above as you like, build your own sets in order, or
+						import one from Templates.
 					</PoText>
 					<View style={styles.emptyButtons}>
 						<PillButton
@@ -259,16 +254,6 @@ export function TasbihScreen() {
 							variant="secondary"
 							onPress={() => setEditing(true)}
 							style={styles.flex}
-						/>
-						<PillButton
-							label="Use the classic"
-							variant="secondary"
-							style={styles.flex}
-							onPress={() =>
-								void saveSettings({ ...data.settings, tasbih: [...DEFAULT_TASBIH] }).catch(
-									(error: unknown) => console.error("[faith] could not save the sequence", error),
-								)
-							}
 						/>
 					</View>
 				</View>

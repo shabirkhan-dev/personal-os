@@ -26,11 +26,11 @@ export type TrainingIntent =
 	| { kind: "question"; text: string };
 
 const SPORT_WORDS: readonly [RegExp, Sport, string | null][] = [
-	[/\b(ran|run|running|jog(ged)?)\b/, "running", "easy-run"],
+	[/\b(ran|run|running|jog(ged)?)\b/, "running", null],
 	[/\b(box(ed|ing)?|shadow ?box(ing)?|sparr(ed|ing))\b/, "boxing", "shadow-boxing"],
-	[/\b(yoga|mobility|stretch(ed|ing)?)\b/, "yoga", "mobility"],
-	[/\b(football|soccer)\b/, "football", "football"],
-	[/\b(volleyball)\b/, "volleyball", "volleyball"],
+	[/\b(yoga|mobility|stretch(ed|ing)?)\b/, "yoga", null],
+	[/\b(football|soccer)\b/, "football", null],
+	[/\b(volleyball)\b/, "volleyball", null],
 	[/\b(walk(ed)?|steps)\b/, "walk", null],
 	[/\b(cycl(ed|ing)|ride|rode|bike)\b/, "cycle", null],
 	[/\b(swim(ming)?|swam)\b/, "swimming", null],
@@ -49,17 +49,6 @@ const EXERCISES: readonly [RegExp, string][] = [
 	[/(\d+)\s*pistols?\b/, "Pistol squat"],
 ];
 
-function templateFor(text: string, sport: Sport, fallback: string | null): string | null {
-	if (sport === "calisthenics") {
-		if (/\b(push|handstand)\b/.test(text)) return "push-handstand";
-		if (/\b(pull)\b/.test(text)) return "pull-core";
-		if (/\b(legs?|pistol)\b/.test(text)) return "legs-core";
-		return null;
-	}
-	if (sport === "running" && /\blong\b/.test(text)) return "long-run";
-	return fallback;
-}
-
 export function parseTrainingLine(input: string): TrainingIntent | null {
 	const text = input.trim().toLowerCase();
 	if (!text) return null;
@@ -77,7 +66,8 @@ export function parseTrainingLine(input: string): TrainingIntent | null {
 	const match = SPORT_WORDS.find(([pattern]) => pattern.test(text));
 	if (!match) return { kind: "question", text: input.trim() };
 	const [, sport, fallback] = match;
-	const template = templateFor(text, sport, fallback);
+	// Only the boxing timer's session is a known one; everything else matches the plan by sport.
+	const template = fallback;
 	const km = /(\d+(?:\.\d+)?)\s*(km|k)\b/.exec(text);
 	const hours = /(\d+(?:\.\d+)?)\s*(h|hr|hrs|hours?)\b/.exec(text);
 	const minutes = /(\d+)\s*(m|min|mins|minutes)\b/.exec(text);

@@ -322,8 +322,8 @@ export function AiKeyScreen() {
 				<PoText variant="row15">What uses it</PoText>
 				<PoText variant="meta13" tone="textSecondary">
 					Designing a budget, a day, a Care routine or a training program, planning meals, reading a
-					meal or a job post, and each module's Ask. With a key you don't need to sign in for these.
-					The chat assistant still runs through your account for now.
+					meal or a job post, each module's Ask, and the chat assistant with its tools, memory and
+					past chats. All of it runs on this phone with your key: no account, no Personal OS server.
 				</PoText>
 			</View>
 		</ModuleScreen>

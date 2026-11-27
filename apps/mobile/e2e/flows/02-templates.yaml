@@ -1,4 +1,5 @@
-# Recipes start empty; adding the recipe pack from Templates fills them, with photos.
+# Nothing ships with the app: recipes start empty, and a template an AI made (pasted in Templates)
+# previews, then adds the recipes picked.
 appId: com.shabirkhandev.personalos
 name: 02-templates
 ---
@@ -6,24 +7,35 @@ name: 02-templates
 - extendedWaitUntil:
     visible: "No recipes yet"
     timeout: 15000
-- tapOn: "Browse recipe templates"
-- tapOn: "Everyday Pakistani recipes"
-- tapOn: "Select all 15"
-# The button sits under the 15 recipes.
-- scrollUntilVisible:
-    element: "Add 15 to my app"
-    timeout: 20000
-- tapOn: "Add 15 to my app"
+- tapOn: "Make recipes with AI"
 - extendedWaitUntil:
-    visible: "Added 15 to your app.*"
+    visible: "Make your own"
+    timeout: 15000
+- tapOn: "Make Recipes"
+- extendedWaitUntil:
+    visible: "Copy the prompt for any AI"
+    timeout: 10000
+- tapOn: "Paste the AI's reply"
+- inputText: '{"kind":"recipes","title":"Two dals","items":[{"name":"Dal tadka","minutes":30,"kcal":320,"ingredients":[{"name":"Lentils","amount":"1 cup"}],"steps":[{"text":"Boil the lentils."}]},{"name":"Chana dal","minutes":40,"kcal":360,"steps":[{"text":"Soak, then cook."}]}]}'
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Preview it"
+- tapOn: "Preview it"
+- extendedWaitUntil:
+    visible: "Two dals"
+    timeout: 10000
+- tapOn: "Select all 2"
+- scrollUntilVisible:
+    element: "Add 2 to my app"
+- tapOn: "Add 2 to my app"
+- extendedWaitUntil:
+    visible: "Added 2 to your app.*"
     timeout: 15000
 - scrollUntilVisible:
     element: "Open"
 - tapOn: "Open"
 - extendedWaitUntil:
-    visible: "MORE RECIPES"
+    visible: "Dal tadka"
     timeout: 15000
-- scrollUntilVisible:
-    element: "Chicken karahi"
 - assertNotVisible: "No recipes yet"
 - takeScreenshot: 02-recipes

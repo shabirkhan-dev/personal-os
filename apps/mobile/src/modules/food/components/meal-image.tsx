@@ -2,7 +2,6 @@ import { Image, type ImageStyle, type StyleProp, StyleSheet, View } from "react-
 import { photoSource } from "@/lib/photos/local-photo";
 import { Icon } from "@/components/icons";
 import { usePoTheme } from "@/theme";
-import { RECIPE_HEROES, RECIPE_IMAGES } from "../lib/recipe-images";
 import { recipeById } from "../lib/recipes";
 
 export type MealImageProps = {
@@ -12,30 +11,24 @@ export type MealImageProps = {
 	size: number;
 	/** Stretch to the parent's width at `size` high. */
 	fill?: boolean;
-	/** Use the wide header crop when there is one. */
-	hero?: boolean;
 	radius?: number;
 	style?: StyleProp<ImageStyle>;
 };
 
-/** A meal's picture: the photo taken, the recipe's photo (bundled or the person's), or a plate glyph. */
+/** A meal's picture: the photo taken, the recipe's own photo, or a plate glyph. */
 export function MealImage({
 	photo,
 	recipeId,
 	size,
 	fill = false,
-	hero = false,
 	radius = 14,
 	style,
 }: MealImageProps) {
 	const { colors } = usePoTheme();
-	// Bundled photos are keyed by the recipe's photo (a template copy keeps its original's).
-	const key = recipeId ? recipeById(recipeId)?.photo || recipeId : null;
-	const bundled = key ? ((hero ? RECIPE_HEROES[key] : undefined) ?? RECIPE_IMAGES[key]) : undefined;
-	// The person's own recipes carry their own photo.
+	// A recipe carries its own photo, when the person added one.
 	const own = !photo && recipeId ? (recipeById(recipeId)?.image ?? null) : null;
 	const picked = photo ?? own;
-	const source = picked ? { uri: photoSource(picked) } : bundled;
+	const source = picked ? { uri: photoSource(picked) } : null;
 	const box = [
 		fill ? { alignSelf: "stretch" as const, height: size } : { width: size, height: size },
 		{ borderRadius: radius, backgroundColor: colors.bgSubtle },

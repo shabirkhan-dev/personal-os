@@ -16,8 +16,13 @@ It is built as a Bun + Turborepo monorepo with a product-focused Expo app, a Clo
 ## Download
 
 **Android:** get the latest APK from [Releases](https://github.com/shabirkhan-dev/personal-os/releases/latest),
-open it on your phone and allow the install once. Android 8 or newer, 64-bit phones. A new
-release installs over the old one and keeps your data. iPhone builds aren't published yet.
+open it on your phone and allow the install once. One APK works on every Android phone and
+tablet on Android 8 or newer, and it's signed with the project's release key (the release notes
+list its fingerprint), so a new release installs over the old one and keeps your data.
+
+**iPhone:** Personal OS is a React Native (Expo) app, so the same code runs on iOS. There's no App
+Store build yet: clone the repo and run `bunx expo run:ios --device` (or an EAS build) to put it
+on your own iPhone.
 
 ## Why this project exists
 
@@ -30,11 +35,15 @@ Most people track life in disconnected tools: notes, finance apps, shopping list
   or start from a template. A Getting started card on Home walks through the modules you picked.
 - **Your own AI key, if you like.** Add a key from OpenRouter (free models included), OpenAI or
   any OpenAI-compatible provider in Profile → Your AI key. It stays in the phone's keystore and
-  AI calls go straight from the phone to your provider, no account needed. Without one, AI runs
-  through your signed-in account.
-- **Templates you can share.** A marketplace of packs (recipes, programs, routines, tasbih,
-  budgets, minimum days), new packs from the server, and your own recipe, routine, program or
-  budget sent to a friend as a `.posx.json` file they open in the app.
+  AI calls go straight from the phone to your provider, no account needed. That includes the
+  chat assistant: its tools, approvals, undo, memory and past chats all run on the phone, over
+  its own encrypted records. Without a key, AI runs through your signed-in account.
+- **Templates made by you, with any AI.** Nothing ships with the app: no stock recipes,
+  programs, exercises or photos. Templates → pick what to make (recipes, a training program,
+  exercises, a Care routine, tasbih, flashcards, a challenge, a budget, a minimum day) → copy the
+  prompt into ChatGPT, Claude or Gemini and paste the reply back, or let your own AI key make it
+  right there. You see a preview and pick what to add. Your own recipe, routine, program or
+  budget goes to a friend as a `.posx.json` file too.
 - **Private by default.** Everything lives on the phone in an encrypted database (SQLCipher, key
   in the secure keystore), with an optional fingerprint or face lock, privacy mode that blocks
   screenshots, and no cloud backups of the app's data. Signing in is only for sync and AI.
@@ -70,20 +79,18 @@ syncs to your account.
 
 ### Training
 
-- **Programs:** design your own by hand or with AI, or start from one of twelve templates
-  (Hybrid Athlete, Calisthenics Foundations, Handstand, First Muscle-up, Front Lever, Legs +
-  Pistol, 5 km under 25, 10 km Build, Boxing Conditioning, Lean + Fit, Mobility + Recovery, Gym
-  Strength).
-- **Progression:** every exercise has a rep range; hit the top on every set and the next session
-  adds a rep, then moves you to a harder variation (incline push-up → push-up → … → one-arm), or
-  adds 2.5 kg for gym lifts. Light weeks, and test weeks that set your targets.
+- **Programs:** design your own by hand, have AI draft one (it writes the exercises it needs),
+  or import one made with any AI from Templates.
+- **Progression:** every exercise has a range; hit the target on every set and the next session
+  asks for a rep more, or 2.5 kg more for gym lifts. Light weeks, and test weeks that set your
+  targets.
 - **Built around your life:** days a week, session length, your equipment, and fixed days for
   the things you already do (a match, a class); legs never land the day before a match.
 - **Activities you define:** football, swimming, climbing or anything else, with the numbers you
   want to track (goals, laps, routes).
-- **Exercise library:** 85 exercises with cues, 45 with photo demos; add your own exercises,
-  photos and GIF animations (Cloudflare R2), and Google Drive videos played in Drive's player.
-- **Live sessions:** the demo, a countdown for holds, rest timers with an alert when the phone is
+- **Your exercises:** each with three cues, your photos and GIF animations, and Google Drive
+  videos played in Drive's player; add them by hand or import a set made with any AI.
+- **Live sessions:** your photo or animation, a countdown for holds, rest timers with an alert when the phone is
   locked, pause, and weights for gym lifts.
 - **Insights:** readiness from sleep and recent effort, an AI weekly review, progress per exercise,
   bests with estimated one-rep max, sets by movement, consistency and activity totals.
@@ -97,8 +104,8 @@ This monorepo is organized around a few core parts:
   the AI for every module (the provider key stays in the Worker)
 - Docs: `apps/docs` — Fumadocs site for product and engineering documentation
 - Web: `apps/web` — landing page / public shell, built as a static export
-- Shared AI: `packages/ai` — every AI task's prompt and schema, run by the API and, with a
-  person's own key, by the phone
+- Shared AI: `packages/ai` — every AI task's prompt and schema, and the assistant agent with
+  its tools, run by the API and, with a person's own key, by the phone
 - Shared models: `packages/domain` — record shapes and parsing used by both the app and the API
 - Shared design system: `packages/tokens` — design tokens and visual primitives
 - Shared tooling: `scripts/`, `.devcontainer/`, CI and project hooks
@@ -188,7 +195,8 @@ cd android && ./gradlew assembleRelease   # app/build/outputs/apk/release/app-re
 **On EAS:** `EAS_BUILD_PROFILE=preview bunx eas-cli build --profile preview --platform android`.
 
 `EAS_BUILD_PROFILE=preview` builds only `arm64-v8a` and shrinks the code, so the APK stays small;
-the local and cloud configs must match. The API address is baked in from `EXPO_PUBLIC_API_URL`.
+`EAS_BUILD_PROFILE=release` (what GitHub releases use) builds every architecture. The local and
+cloud configs must match. The API address is baked in from `EXPO_PUBLIC_API_URL`.
 
 ## Tests
 
@@ -244,11 +252,6 @@ Issues and pull requests are welcome. Read [AGENTS.md](AGENTS.md) (it applies to
 Bun only, Conventional Commits in lowercase, `bun run lint`, `bun run typecheck` and
 `bun run test` before you push. UI follows [DESIGN.md](DESIGN.md) and the tokens in
 `packages/tokens`, with no raw colours. New screens start empty: no sample data.
-
-## Credits
-
-Exercise demo photos are from [free-exercise-db](https://github.com/yuhonas/free-exercise-db),
-released into the public domain under The Unlicense.
 
 ## License
 

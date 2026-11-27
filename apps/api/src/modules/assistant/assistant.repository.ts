@@ -1,11 +1,6 @@
-import type {
-	AssistantContext,
-	Card,
-	StepStatus,
-	ThreadMessage,
-	ThreadSummary,
-} from "@personal-os/domain/assistant";
-import { and, asc, desc, eq, sql } from "drizzle-orm";
+import type { Memory, NewMessage, StoredMessage, ToolContent } from "@personal-os/ai";
+import type { ThreadSummary } from "@personal-os/domain/assistant";
+import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 
 import type { Database } from "@/db/client";
 import {
@@ -16,32 +11,6 @@ import {
 	onboardingProfiles,
 	users,
 } from "@/db/schema";
-import type { ModelMessage, ModelToolCall } from "./assistant.provider";
-import type { UndoWrite } from "./assistant.tool";
-
-/** How a turn is stored: the model's messages plus what the app shows for them. */
-export type UserContent = { text: string; context?: AssistantContext };
-export type AssistantContent = { text: string; toolCalls?: ModelToolCall[] };
-export type ToolStatus = "pending" | "approved" | "declined" | "done" | "failed";
-export type ToolContent = {
-	callId: string;
-	name: string;
-	input: unknown;
-	label: string;
-	status: ToolStatus;
-	/** Whether this call waits for the person's yes. */
-	needsApproval: boolean;
-	/** What the model reads back, once the call has run (or was declined). */
-	result: string | null;
-	cards: Card[];
-	undo?: UndoWrite[];
-	undone?: boolean;
-};
-
-export type StoredMessage =
-	| { id: string; role: "user"; content: UserContent }
-	| { id: string; role: "assistant"; content: AssistantContent }
-	| { id: string; role: "tool"; content: ToolContent };
 
 const asStored = (row: AssistantMessageRow) =>
 	({ id: row.id, role: row.role, content: row.content }) as StoredMessage;
@@ -93,7 +62,7 @@ export async function deleteThread(
 export async function addMessage(
 	db: Database,
 	threadId: string,
-	message: Omit<StoredMessage, "id">,
+	message: NewMessage,
 ): Promise<string> {
 	const [row] = await db
 		.insert(assistantMessages)
@@ -140,79 +109,6 @@ export async function findToolCall(db: Database, userId: string, callId: string)
 	return { id: row.id, threadId: row.threadId, content: row.content as ToolContent };
 }
 
-/** Most messages sent to the model; older ones fall out of the window. */
-const WINDOW = 40;
-
-/**
- * The conversation in the model's format. The window starts at a user message, so a tool result
- * never arrives without the call that asked for it. Unfinished calls are left out.
- */
-export function toModelMessages(stored: readonly StoredMessage[]): ModelMessage[] {
-	let start = Math.max(0, stored.length - WINDOW);
-	while (start > 0 && stored[start]?.role !== "user") start -= 1;
-	const out: ModelMessage[] = [];
-	for (const message of stored.slice(start)) {
-		if (message.role === "user") out.push({ role: "user", content: message.content.text });
-		else if (message.role === "assistant") {
-			out.push({
-				role: "assistant",
-				content: message.content.text || null,
-				...(message.content.toolCalls?.length ? { tool_calls: message.content.toolCalls } : {}),
-			});
-		} else if (message.content.result !== null) {
-			out.push({
-				role: "tool",
-				tool_call_id: message.content.callId,
-				content: message.content.result,
-			});
-		}
-	}
-	return out;
-}
-
-/** The conversation as the app shows it: each user message, then the answer it got. */
-export function toThreadMessages(
-	stored: readonly StoredMessage[],
-	createdAt: string,
-): ThreadMessage[] {
-	const out: ThreadMessage[] = [];
-	let answer: ThreadMessage | null = null;
-	for (const message of stored) {
-		if (message.role === "user") {
-			answer = null;
-			out.push({
-				id: message.id,
-				role: "user",
-				text: message.content.text,
-				cards: [],
-				steps: [],
-				createdAt,
-			});
-			continue;
-		}
-		if (!answer) {
-			answer = { id: message.id, role: "assistant", text: "", cards: [], steps: [], createdAt };
-			out.push(answer);
-		}
-		if (message.role === "assistant") {
-			if (message.content.text)
-				answer.text = [answer.text, message.content.text].filter(Boolean).join("\n\n");
-		} else {
-			const status: StepStatus =
-				message.content.status === "failed"
-					? "failed"
-					: message.content.status === "pending" || message.content.status === "approved"
-						? "running"
-						: "done";
-			answer.steps.push({ callId: message.content.callId, label: message.content.label, status });
-			answer.cards.push(...message.content.cards);
-		}
-	}
-	return out;
-}
-
-export type Memory = { id: string; text: string; createdAt: string };
-
 export async function listMemories(db: Database, userId: string): Promise<Memory[]> {
 	const rows = await db
 		.select()
@@ -241,12 +137,37 @@ export async function loadProfile(db: Database, userId: string) {
 		.from(users)
 		.leftJoin(onboardingProfiles, eq(onboardingProfiles.userId, users.id))
 		.where(eq(users.id, userId));
-	const answers = (user?.answers ?? {}) as { name?: unknown; modules?: unknown };
+	const answers = (user?.answers ?? {}) as { name?: unknown; modules?: unknown } & Record<
+		string,
+		unknown
+	>;
 	const name =
 		user?.name ??
 		(typeof answers.name === "string" && answers.name.trim() ? answers.name.trim() : null);
 	const modules = Array.isArray(answers.modules)
 		? answers.modules.filter((id): id is string => typeof id === "string")
 		: [];
-	return { name, modules };
+	return { name, modules, answers: answers as Record<string, unknown> };
+}
+
+export async function addMemory(db: Database, userId: string, text: string): Promise<string> {
+	const [row] = await db
+		.insert(assistantMemories)
+		.values({ userId, text })
+		.returning({ id: assistantMemories.id });
+	if (!row) throw new Error("memory insert returned nothing");
+	return row.id;
+}
+
+export async function deleteMemories(
+	db: Database,
+	userId: string,
+	ids: readonly string[],
+): Promise<number> {
+	if (ids.length === 0) return 0;
+	const removed = await db
+		.delete(assistantMemories)
+		.where(and(inArray(assistantMemories.id, [...ids]), eq(assistantMemories.userId, userId)))
+		.returning({ id: assistantMemories.id });
+	return removed.length;
 }

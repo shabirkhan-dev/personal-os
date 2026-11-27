@@ -196,8 +196,11 @@ down step, so a bad one is undone by restoring, not by rolling back.
 ### APK on GitHub Releases
 
 Anyone can install the app from the repository's **Releases** page, no store needed. The
-`Release` workflow (`.github/workflows/release.yml`) builds the arm64 APK, attaches it with a
-SHA-256 checksum and writes install steps into the release notes.
+`Release` workflow (`.github/workflows/release.yml`) builds one APK for every Android device
+(arm64-v8a, armeabi-v7a, x86_64 and x86, the `release` profile in `apps/mobile/app.config.js`),
+signs it with the project's release key, checks the signature and every architecture with
+`apksigner`, attaches it with a SHA-256 checksum, and writes install steps and the certificate's
+fingerprint into the release notes.
 
 ```bash
 # bump "version" in apps/mobile/app.json first, then:
@@ -209,9 +212,34 @@ Or run **Actions → Release → Run workflow** with a tag name (it creates the 
 branch). Tags with a suffix (`v0.8.0-beta.1`) are marked as pre-releases. The app talks to the API
 in the `API_URL` repository variable.
 
-The APK is signed with the debug key Expo's generated project uses, the same on every machine,
-so each release (and a local `assembleRelease`) installs over the last one and keeps the data.
-A store build uses its own key through EAS, so switching between the two needs an uninstall.
+#### The release key
+
+Releases are signed with one PKCS12 key (alias `personal-os`), so each release installs over the
+last one and keeps the data. The workflow refuses to publish without it. It lives only in two
+repository secrets (Settings → Secrets and variables → Actions):
+
+| Secret | Value |
+| --- | --- |
+| `ANDROID_KEYSTORE_BASE64` | the keystore, base64-encoded (`base64 -w0 personal-os-release.p12`) |
+| `ANDROID_KEYSTORE_PASSWORD` | its password (the key uses the same one) |
+
+`apps/mobile/plugins/with-release-signing.js` adds the signing config to the generated project and
+uses it whenever `ANDROID_KEYSTORE_PATH` is set; local and E2E builds stay on the debug key.
+
+Keep a copy of the keystore and its password somewhere safe outside GitHub. If it's lost, no
+future APK can update an installed one: everyone would have to uninstall and reinstall.
+
+To make a new key (only for a fork, or if the old one is lost):
+
+```bash
+keytool -genkeypair -storetype PKCS12 -keystore personal-os-release.p12 -alias personal-os \
+  -keyalg RSA -keysize 4096 -validity 36500 -dname "CN=Personal OS, O=Personal OS"
+```
+
+Builds before the release key were signed with Expo's shared debug key. Android won't update
+across keys, so moving from one of those means exporting a backup, uninstalling, installing and
+importing it. A store build uses its own key through EAS, so switching between a store build and
+the APK also needs an uninstall.
 
 ## 4) Landing page on Cloudflare Workers
 

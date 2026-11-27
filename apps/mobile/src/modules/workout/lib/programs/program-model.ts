@@ -3,105 +3,24 @@ import { EQUIPMENT, type Equipment, exerciseById } from "../exercise-guide";
 import { SPORTS, type Sport } from "../training-model";
 
 /**
- * Programs: a goal over a number of weeks, made of sessions whose exercises progress. A session item
- * is either a chain (a ladder of variations: incline push-up → push-up → … → one-arm push-up; the
- * person's level picks the rung) or one fixed exercise. Built-in programs live in code; programs
- * people design (by hand or with AI) are stored and synced.
+ * Programs: a goal over a number of weeks, made of sessions of the person's own exercises, whose
+ * targets rise as they hit them. Programs are made by hand, with AI or imported from a template
+ * file; none ship with the app.
  */
-
-export const CHAIN_IDS = [
-	"push",
-	"vertical-push",
-	"dip",
-	"pull",
-	"row",
-	"lever",
-	"squat",
-	"hinge",
-	"core",
-	"handstand",
-] as const;
-export type ChainId = (typeof CHAIN_IDS)[number];
-
-/** Easiest first. Rungs that need equipment someone lacks are stepped over. */
-export const CHAINS: Record<ChainId, readonly string[]> = {
-	push: [
-		"incline-push-up",
-		"push-up",
-		"diamond-push-up",
-		"decline-push-up",
-		"archer-push-up",
-		"pseudo-planche-push-up",
-		"one-arm-push-up",
-	],
-	"vertical-push": ["pike-push-up", "elevated-pike-push-up", "wall-hspu-negative", "wall-hspu"],
-	dip: ["bench-dip", "dips", "straight-bar-dip", "ring-dip"],
-	pull: [
-		"scapular-pull-up",
-		"negative-pull-up",
-		"chin-up",
-		"pull-up",
-		"chest-to-bar",
-		"archer-pull-up",
-		"muscle-up",
-	],
-	row: ["australian-row", "feet-up-row", "archer-row"],
-	lever: ["tuck-front-lever", "advanced-tuck-lever", "straddle-front-lever"],
-	squat: [
-		"bodyweight-squat",
-		"split-squat",
-		"bulgarian-split-squat",
-		"shrimp-squat",
-		"pistol-squat",
-	],
-	hinge: ["glute-bridge", "single-leg-glute-bridge", "single-leg-rdl", "nordic-curl"],
-	core: [
-		"dead-bug",
-		"plank",
-		"hollow-hold",
-		"hanging-knee-raise",
-		"hanging-leg-raise",
-		"toes-to-bar",
-	],
-	handstand: ["wall-walk", "wall-handstand", "chest-to-wall-handstand", "freestanding-handstand"],
-};
-
-export const CHAIN_LABELS: Record<ChainId, string> = {
-	push: "Push-ups",
-	"vertical-push": "Overhead push",
-	dip: "Dips",
-	pull: "Pull-ups",
-	row: "Rows",
-	lever: "Front lever",
-	squat: "Squats",
-	hinge: "Hips and hamstrings",
-	core: "Core",
-	handstand: "Handstand",
-};
 
 /** [low, high]: reps, seconds or minutes, by the exercise's unit. */
 export type Range = readonly [number, number];
 
-export type ProgramItem =
-	| {
-			kind: "chain";
-			chain: ChainId;
-			sets: number;
-			/** Reps for rep exercises. */
-			range: Range;
-			/** Seconds for holds on the same chain (plank, handstand, lever). */
-			hold: Range;
-			restS: number;
-	  }
-	| {
-			kind: "exercise";
-			exercise: string;
-			sets: number;
-			range: Range;
-			restS: number;
-			/** Weekly growth for timed work (runs): 0.08 adds 8% a week up to the range's top. */
-			grow?: number;
-	  };
+/** One exercise in a session: the person's own, by id. Its target rises as they hit the range. */
+export type ProgramItem = {
+	kind: "exercise";
+	exercise: string;
+	sets: number;
+	range: Range;
+	restS: number;
+	/** Weekly growth for timed work (runs): 0.08 adds 8% a week up to the range's top. */
+	grow?: number;
+};
 
 export const FOCUSES = [
 	"upper",
@@ -162,15 +81,15 @@ export type ProgramDef = {
 	deloadEvery: number | null;
 	/** Week 1 and the last week test maximums, which set the starting targets and show progress. */
 	testWeeks: boolean;
-	source: "built-in" | "custom" | "ai";
+	source: "custom" | "ai";
 	createdAt: string | null;
 };
 
 /** One chain's or exercise's level, kept per person and synced (`training-progress`). */
 export type Progress = {
-	/** A chain id or an exercise id. */
+	/** The exercise's id. */
 	id: string;
-	/** The rung on the chain; 0 for a fixed exercise. */
+	/** Kept for older data (variation ladders); always 0 now. */
 	step: number;
 	/** The number to hit on every set next time. */
 	target: number;
@@ -202,24 +121,16 @@ function parseRange(raw: unknown, fallback: Range, max: number): Range {
 	return [low, high];
 }
 
-export function parseItem(raw: unknown): ProgramItem | null {
+/** Whether an exercise id is one the person has; template previews pass their own. */
+type Knows = (id: string) => boolean;
+const knownExercise: Knows = (id) => exerciseById(id) !== null;
+
+export function parseItem(raw: unknown, knows: Knows = knownExercise): ProgramItem | null {
 	if (!isRecord(raw)) return null;
 	const sets = clampInt(raw.sets, 1, 10, 3);
 	const restS = clampInt(raw.restS, 0, 600, 60);
-	if (raw.kind === "chain") {
-		const chain = oneOf(raw.chain, CHAIN_IDS, "push");
-		if (raw.chain !== chain) return null;
-		return {
-			kind: "chain",
-			chain,
-			sets,
-			range: parseRange(raw.range, [6, 12], 100),
-			hold: parseRange(raw.hold, [15, 30], 300),
-			restS,
-		};
-	}
 	const exercise = asString(raw.exercise, "");
-	if (!exerciseById(exercise)) return null;
+	if (!knows(exercise)) return null;
 	const grow = asNumber(raw.grow, 0);
 	return {
 		kind: "exercise",
@@ -231,9 +142,9 @@ export function parseItem(raw: unknown): ProgramItem | null {
 	};
 }
 
-function parseSession(raw: unknown, index: number): ProgramSession | null {
+function parseSession(raw: unknown, index: number, knows: Knows): ProgramSession | null {
 	if (!isRecord(raw)) return null;
-	const items = asArray(raw.items, parseItem).slice(0, 12);
+	const items = asArray(raw.items, (item) => parseItem(item, knows)).slice(0, 12);
 	const title = asString(raw.title, "").trim().slice(0, 40);
 	if (!title || items.length === 0) return null;
 	const sport = oneOf(raw.sport, SPORTS, "calisthenics");
@@ -257,13 +168,16 @@ function parseSession(raw: unknown, index: number): ProgramSession | null {
 	};
 }
 
-/** A designed program from storage; anything malformed falls back or is dropped. */
-export function parseProgram(raw: unknown): ProgramDef | null {
+/**
+ * A program from storage or a template file; anything malformed falls back or is dropped. Items
+ * need an exercise the person has, unless `knows` says otherwise (a file brings its own).
+ */
+export function parseProgram(raw: unknown, knows: Knows = knownExercise): ProgramDef | null {
 	if (!isRecord(raw)) return null;
 	const id = asString(raw.id, "");
 	const title = asString(raw.title, "").trim().slice(0, 60);
 	const sessions = asArray(raw.sessions, (item) => item)
-		.map((item, index) => parseSession(item, index))
+		.map((item, index) => parseSession(item, index, knows))
 		.filter((item): item is ProgramSession => item !== null)
 		.slice(0, 7);
 	if (!id || !title || sessions.length === 0) return null;
@@ -303,7 +217,7 @@ export function parseProgram(raw: unknown): ProgramDef | null {
 				? (item as Equipment)
 				: null,
 		),
-		photo: asString(raw.photo, "handstand"),
+		photo: asString(raw.photo, ""),
 		sessions,
 		schedule,
 		deloadEvery: deload >= 2 ? Math.round(deload) : null,

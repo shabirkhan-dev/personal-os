@@ -23,6 +23,8 @@ import { askFoodSchema, draftRecipeSchema, planWeekSchema, readMealSchema } from
 import { askFood, draftRecipe, planWeek, readMeal } from "./food.tasks";
 import { askTrainingSchema, designProgramSchema, skillStepsSchema } from "./training.schema";
 import { askTraining, buildSkill, designProgram } from "./training.tasks";
+import { makeTemplateSchema } from "./templates.schema";
+import { makeTemplate } from "./templates.tasks";
 import { findDreamSchema } from "./wishlist.schema";
 import { findDream } from "./wishlist.tasks";
 
@@ -63,6 +65,7 @@ export const AI_TASKS = {
 	"training/skill": task(skillStepsSchema, buildSkill),
 	"training/program": task(designProgramSchema, designProgram),
 	"wishlist/find": task(findDreamSchema, findDream),
+	"templates/make": task(makeTemplateSchema, makeTemplate),
 } as const satisfies Record<string, AiTask>;
 
 export type AiTaskPath = keyof typeof AI_TASKS;

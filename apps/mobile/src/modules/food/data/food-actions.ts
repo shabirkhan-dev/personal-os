@@ -195,7 +195,7 @@ export function saveRecipeState(state: RecipeState): Promise<void> {
 // --- the person's own recipes -------------------------------------------------------------------
 
 export function saveMyRecipe(recipe: Recipe): Promise<void> {
-	return saveItem(myRecipes, { ...recipe, mine: true, photo: "", uses: [] });
+	return saveItem(myRecipes, { ...recipe, mine: true, uses: [] });
 }
 
 export function deleteMyRecipe(id: string): Promise<void> {

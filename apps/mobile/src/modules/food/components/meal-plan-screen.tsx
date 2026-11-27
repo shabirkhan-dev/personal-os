@@ -77,7 +77,7 @@ export function MealPlanScreen() {
 	const needRecipes = () => {
 		if (data.myRecipes.some((recipe) => recipe.kcal > 0)) return false;
 		setNotice(
-			"Add a few recipes with calories first: write your own, or add a pack from Templates → Food.",
+			"Add a few recipes with calories first: write your own, or make a set with AI in Templates.",
 		);
 		return true;
 	};

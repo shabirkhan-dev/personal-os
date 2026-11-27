@@ -118,11 +118,6 @@ function ExerciseRow({
 					{catalogLine(exercise)}
 				</PoText>
 			</View>
-			{exercise.demo ? (
-				<PoText variant="eyebrow11" tone="textTertiary">
-					Demo
-				</PoText>
-			) : null}
 		</Pressable>
 	);
 }

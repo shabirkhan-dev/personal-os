@@ -38,7 +38,6 @@ function startFrom(id: string | undefined, copy: string | undefined): Recipe {
 			...source,
 			id: myRecipeId(),
 			name: `${source.name} (mine)`,
-			photo: "",
 			image: null,
 			mine: true,
 			kind: source.kind,

@@ -5,7 +5,7 @@ import { PoText } from "@/components/ui/po-text";
 import { Sheet } from "@/components/ui/sheet";
 import { usePoTheme } from "@/theme";
 import { useGuide } from "../hooks/use-catalog";
-import { DEMO_CREDIT, videoSearchUrl } from "../lib/exercise-guide";
+import { videoSearchUrl } from "../lib/exercise-guide";
 import { type Exercise, setsLabel } from "../lib/library";
 import { DrivePlayer } from "./drive-player";
 import { ExerciseDemo } from "./exercise-demo";
@@ -91,9 +91,7 @@ export function HowToSheet({
 					<PoText variant="meta13" tone="textTertiary">
 						{video
 							? "Video from your Google Drive."
-							: guide?.demo
-								? `${DEMO_CREDIT}. Add your own photo, animation or video from the exercise library.`
-								: "Add your own photo, animation or video from the exercise library."}
+							: "Add your own photo, animation or video to this exercise."}
 					</PoText>
 				</View>
 			) : null}

@@ -29,8 +29,6 @@ export function parseMyRecipe(raw: unknown): Recipe | null {
 	return {
 		id,
 		name,
-		// A template recipe keeps its bundled photo's key.
-		photo: /^[a-z0-9-]{1,60}$/.test(text(raw.photo, 60)) ? text(raw.photo, 60) : "",
 		image: link(raw.image, /^(file|https):\/\//),
 		video: link(raw.video, /^https?:\/\//),
 		note: text(raw.note, 400),
@@ -80,7 +78,6 @@ export function blankRecipe(slot: Slot = "dinner"): Recipe {
 	return {
 		id: myRecipeId(),
 		name: "",
-		photo: "",
 		image: null,
 		video: null,
 		note: "",

@@ -2,13 +2,16 @@
 # without a store. Runs when a version tag is pushed (git tag v0.7.0 && git push origin v0.7.0) or
 # by hand from the Actions tab with a tag name.
 #
-# Repository setting it reads (optional):
-#   variable API_URL   the API the app talks to (sign-in, sync, AI); defaults to the project's own
+# Repository settings it reads:
+#   secret ANDROID_KEYSTORE_BASE64     the release keystore (PKCS12), base64-encoded; required
+#   secret ANDROID_KEYSTORE_PASSWORD   its password; required
+#   variable API_URL                   the API the app talks to (optional sign-in and sync);
+#                                      defaults to the project's own
 #
-# The APK is a sideload build for arm64 phones (every current Android phone). Expo's generated
-# project signs release builds with its shared debug key, which is the same on every machine, so
-# each release installs over the last one. Store builds go through EAS with their own key instead
-# (see /docs/deploy).
+# One APK for every Android device: 64- and 32-bit ARM phones plus x86 emulators and Chromebooks.
+# It is signed with the project's own release key (see /docs/deploy), so each release installs over
+# the last one, and a release is never published without that key. The certificate's SHA-256 is in
+# the release notes so anyone can check the APK is the project's.
 name: Release
 
 on:
@@ -38,7 +41,7 @@ jobs:
     env:
       TAG: ${{ github.event.inputs.tag || github.ref_name }}
       EXPO_PUBLIC_API_URL: ${{ vars.API_URL || 'https://rozapi.rabtx.dev' }}
-      EAS_BUILD_PROFILE: preview
+      EAS_BUILD_PROFILE: release
       NODE_ENV: production
       CI: 1
     steps:
@@ -73,9 +76,41 @@ jobs:
         working-directory: apps/mobile
         run: bunx expo prebuild --platform android --no-install --clean
 
+      - name: Write the release key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ] || [ -z "$KEYSTORE_PASSWORD" ]; then
+            echo "::error::Add the ANDROID_KEYSTORE_BASE64 and ANDROID_KEYSTORE_PASSWORD secrets (see /docs/deploy)."
+            exit 1
+          fi
+          keystore="$RUNNER_TEMP/release.p12"
+          echo "$KEYSTORE_BASE64" | base64 --decode > "$keystore"
+          echo "ANDROID_KEYSTORE_PATH=$keystore" >> "$GITHUB_ENV"
+          echo "::add-mask::$KEYSTORE_PASSWORD"
+          echo "ANDROID_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
+
       - name: Build the APK
         working-directory: apps/mobile/android
         run: ./gradlew assembleRelease --no-daemon --console=plain
+
+      - name: Check the signature and every architecture
+        id: signed
+        run: |
+          apk=apps/mobile/android/app/build/outputs/apk/release/app-release.apk
+          apksigner=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)
+          "$apksigner" verify --print-certs "$apk" | tee certs.txt
+          if grep -q "CN=Android Debug" certs.txt; then
+            echo "::error::The APK is signed with the debug key"
+            exit 1
+          fi
+          for abi in arm64-v8a armeabi-v7a x86_64 x86; do
+            unzip -l "$apk" | grep -q "lib/$abi/" || { echo "::error::No $abi libraries in the APK"; exit 1; }
+          done
+          sha=$(grep -m1 "certificate SHA-256 digest" certs.txt | sed 's/.*: //')
+          echo "sha256=$sha" >> "$GITHUB_OUTPUT"
+          rm -f "$ANDROID_KEYSTORE_PATH"
 
       - name: Name the APK and its checksum
         id: apk
@@ -104,6 +139,15 @@ jobs:
             2. Open it. Android asks once to allow installs from your browser or Files app.
             3. Already have Personal OS? Installing this updates it and keeps your data.
 
-            Android 8 or newer, 64-bit phones (every phone from the last several years). Your data
-            stays on the phone, encrypted; signing in is only needed for sync and AI.
-            The checksum file lets you check the download: `sha256sum -c ${{ steps.apk.outputs.name }}.sha256`.
+            Coming from v0.x builds before the release key (signed with the shared debug key)?
+            Android won't update across keys, so once: Profile → Backup → Export, uninstall the old
+            app, install this one, then Backup → Import.
+
+            One APK for every Android phone and tablet on Android 8 or newer (64- and 32-bit ARM,
+            plus x86 emulators and Chromebooks). Your data stays on the phone, encrypted. AI works
+            with your own key and no account; signing in is only for optional sync.
+
+            Signed with the Personal OS release key. Certificate SHA-256:
+            `${{ steps.signed.outputs.sha256 }}`
+            (`apksigner verify --print-certs ${{ steps.apk.outputs.name }}` shows the same.)
+            The checksum file checks the download: `sha256sum -c ${{ steps.apk.outputs.name }}.sha256`.

@@ -10,14 +10,11 @@ import { TextField } from "@/components/ui/text-field";
 import { newId } from "@/lib/day";
 import { haptics } from "@/lib/haptics";
 import { usePoTheme } from "@/theme";
-import { savePlan, saveProgram, weekSlots } from "../data/training-actions";
+import { saveExercise, savePlan, saveProgram, weekSlots } from "../data/training-actions";
 import { useTraining } from "../hooks/use-training";
 import { type CatalogExercise, exerciseById } from "../lib/exercise-guide";
-import { defaultStep, pickRung } from "../lib/programs/engine";
-import { itemFor, programFromDraft } from "../lib/programs/draft";
+import { programFromDraft } from "../lib/programs/draft";
 import {
-	CHAIN_LABELS,
-	CHAINS,
 	LEVELS,
 	type ProgramDef,
 	type ProgramItem,
@@ -138,7 +135,9 @@ export function ProgramBuilderScreen({ id, ai }: { id?: string; ai: boolean }) {
 		};
 		try {
 			const result = await assistant.program(request);
-			const program = programFromDraft(result, request);
+			const { program, exercises } = programFromDraft(result, request);
+			// The exercises the AI defined become the person's own, so the program can use them.
+			await Promise.all(exercises.map((exercise) => saveExercise(exercise)));
 			setDraft({ ...program, id: draft.id, createdAt: draft.createdAt });
 			haptics.success();
 		} catch (error) {
@@ -152,7 +151,6 @@ export function ProgramBuilderScreen({ id, ai }: { id?: string; ai: boolean }) {
 	const addExercise = (sessionKey: string, exercise: CatalogExercise) => {
 		const range: [number, number] =
 			exercise.unit === "s" ? [20, 40] : exercise.unit === "min" ? [10, 10] : [8, 12];
-		// The exercise picked is the one trained; the item sheet can turn it into a ladder.
 		const item: ProgramItem = {
 			kind: "exercise",
 			exercise: exercise.id,
@@ -188,7 +186,7 @@ export function ProgramBuilderScreen({ id, ai }: { id?: string; ai: boolean }) {
 			schedule,
 			sports: [...new Set(sessions.map((session) => session.sport))],
 			equipment: data.settings.equipment,
-			testWeeks: sessions.some((session) => session.items.some((item) => item.kind === "chain")),
+			testWeeks: false,
 			createdAt: draft.createdAt ?? new Date().toISOString(),
 		};
 		setSaving(true);
@@ -335,9 +333,6 @@ export function ProgramBuilderScreen({ id, ai }: { id?: string; ai: boolean }) {
 						<ItemRow
 							key={`${session.key}-${index}`}
 							item={item}
-							settings={data.settings}
-							progress={data.progress}
-							level={level}
 							onPress={() => setEditing({ session: session.key, index })}
 						/>
 					))}
@@ -389,9 +384,6 @@ export function ProgramBuilderScreen({ id, ai }: { id?: string; ai: boolean }) {
 			/>
 			<ItemSheet
 				item={editingItem ?? null}
-				settings={data.settings}
-				level={level}
-				progress={data.progress}
 				onClose={() => setEditing(null)}
 				onChange={(next) => {
 					if (!editing) return;
@@ -413,48 +405,20 @@ export function ProgramBuilderScreen({ id, ai }: { id?: string; ai: boolean }) {
 	);
 }
 
-/** The exercise an item trains for this person now: a ladder's current rung, or the exercise. */
-function currentExercise(
-	item: ProgramItem,
-	settings: TrainingSettings,
-	progress: ReturnType<typeof useTraining>["progress"],
-	level: ProgramLevel,
-) {
-	if (item.kind === "exercise") return exerciseById(item.exercise);
-	const saved = progress.get(item.chain);
-	return (
-		pickRung(item.chain, saved?.step ?? defaultStep(item.chain, level), settings.equipment)
-			?.exercise ?? null
-	);
+/** The exercise an item trains: one of the person's own, by id. */
+function currentExercise(item: ProgramItem) {
+	return exerciseById(item.exercise);
 }
 
-function ItemRow({
-	item,
-	settings,
-	progress,
-	level,
-	onPress,
-}: {
-	item: ProgramItem;
-	settings: TrainingSettings;
-	progress: ReturnType<typeof useTraining>["progress"];
-	level: ProgramLevel;
-	onPress: () => void;
-}) {
-	const exercise = currentExercise(item, settings, progress, level);
+function ItemRow({ item, onPress }: { item: ProgramItem; onPress: () => void }) {
+	const exercise = currentExercise(item);
 	return (
 		<Pressable accessibilityRole="button" onPress={onPress} style={styles.row}>
 			{exercise ? <ExerciseThumb name={exercise.name} photo={exercise.photo} size={44} /> : null}
 			<View style={styles.flex}>
-				<PoText variant="row15">
-					{item.kind === "chain"
-						? `${CHAIN_LABELS[item.chain]} ladder`
-						: (exercise?.name ?? "Exercise")}
-				</PoText>
+				<PoText variant="row15">{exercise?.name ?? "Exercise"}</PoText>
 				<PoText variant="meta13" tone="textSecondary">
-					{item.kind === "chain"
-						? `Now: ${exercise?.name ?? "needs equipment"} · ${itemLine(item)}`
-						: itemLine(item)}
+					{itemLine(item)}
 				</PoText>
 			</View>
 		</Pressable>
@@ -505,20 +469,14 @@ function Stepper({
 	);
 }
 
-/** Sets, the target range, rest, ladder or fixed exercise, and remove. */
+/** Sets, the target range, rest, and remove. */
 function ItemSheet({
 	item,
-	settings,
-	level,
-	progress,
 	onChange,
 	onRemove,
 	onClose,
 }: {
 	item: ProgramItem | null;
-	settings: TrainingSettings;
-	level: ProgramLevel;
-	progress: ReturnType<typeof useTraining>["progress"];
 	onChange: (item: ProgramItem) => void;
 	onRemove: () => void;
 	onClose: () => void;
@@ -529,16 +487,11 @@ function ItemSheet({
 				{null}
 			</Sheet>
 		);
-	const exercise = currentExercise(item, settings, progress, level);
-	const unit = item.kind === "exercise" ? (exercise?.unit ?? "reps") : "reps";
+	const exercise = currentExercise(item);
+	const unit = exercise?.unit ?? "reps";
 	const unitLabel = unit === "min" ? "minutes" : unit === "s" ? "seconds" : "reps";
 	const max = unit === "s" ? 300 : unit === "min" ? 180 : 100;
 	const step = unit === "s" ? 5 : 1;
-	const holds =
-		item.kind === "chain" && CHAINS[item.chain].some((id) => exerciseById(id)?.unit === "s");
-	const chainOf = exercise
-		? (Object.entries(CHAINS).find(([, rungs]) => rungs.includes(exercise.id))?.[0] ?? null)
-		: null;
 
 	const setRange = (low: number, high: number) =>
 		onChange({ ...item, range: [low, Math.max(low, high)] });
@@ -546,11 +499,7 @@ function ItemSheet({
 	return (
 		<Sheet
 			visible
-			title={
-				item.kind === "chain"
-					? `${CHAIN_LABELS[item.chain]} ladder`
-					: (exercise?.name ?? "Exercise")
-			}
+			title={exercise?.name ?? "Exercise"}
 			onClose={onClose}
 			footer={
 				<View style={styles.sheetFooter}>
@@ -584,26 +533,6 @@ function ItemSheet({
 					max={max}
 					onChange={(high) => setRange(item.range[0], high)}
 				/>
-				{item.kind === "chain" && holds ? (
-					<>
-						<Stepper
-							label="Hold low (s)"
-							value={item.hold[0]}
-							step={5}
-							min={5}
-							max={300}
-							onChange={(low) => onChange({ ...item, hold: [low, Math.max(low, item.hold[1])] })}
-						/>
-						<Stepper
-							label="Hold high (s)"
-							value={item.hold[1]}
-							step={5}
-							min={item.hold[0]}
-							max={300}
-							onChange={(high) => onChange({ ...item, hold: [item.hold[0], high] })}
-						/>
-					</>
-				) : null}
 				<Stepper
 					label="Rest (s)"
 					value={item.restS}
@@ -612,40 +541,8 @@ function ItemSheet({
 					max={300}
 					onChange={(restS) => onChange({ ...item, restS })}
 				/>
-				{item.kind === "chain" && exercise ? (
-					<PillButton
-						label={`Always do ${exercise.name}`}
-						variant="ghost"
-						onPress={() =>
-							onChange({
-								kind: "exercise",
-								exercise: exercise.id,
-								sets: item.sets,
-								range: exercise.unit === "s" ? item.hold : item.range,
-								restS: item.restS,
-							})
-						}
-					/>
-				) : null}
-				{item.kind === "exercise" && chainOf && exercise ? (
-					<PillButton
-						label="Move up variations as I get stronger"
-						variant="ghost"
-						onPress={() => {
-							const next = itemFor({
-								exercise: exercise.id,
-								sets: item.sets,
-								range: [item.range[0], item.range[1]],
-								restS: item.restS,
-							});
-							if (next) onChange(next);
-						}}
-					/>
-				) : null}
 				<PoText variant="meta13" tone="textSecondary">
-					{item.kind === "chain"
-						? "A ladder trains the variation at your level and moves up when you hit the top of the range on every set."
-						: "Hit the top of the range on every set and the target goes up next time."}
+					Hit the top of the range on every set and the target goes up next time.
 				</PoText>
 			</View>
 		</Sheet>

@@ -1,5 +1,6 @@
-import { describe, expect, it } from "bun:test";
-import { BUILT_IN_PROGRAMS } from "./programs/built-in";
+import { beforeAll, describe, expect, it } from "bun:test";
+import { parseSavedExercise, setCustomExercises } from "./exercise-guide";
+import type { ProgramDef } from "./programs/program-model";
 import {
 	activityTotals,
 	adherence,
@@ -33,6 +34,48 @@ const session = (day: string, overrides: Partial<Session> = {}, sets: SetLog[] =
 });
 const reps = (exercise: string, ...values: number[]): SetLog[] =>
 	values.map((value) => ({ exercise, value, unit: "reps" }));
+
+/** A program of the person's own (none ship with the app). */
+const HYBRID: ProgramDef = {
+	id: "hybrid-athlete",
+	title: "Hybrid Athlete",
+	goal: "",
+	summary: "",
+	kind: "hybrid",
+	weeks: 8,
+	level: "intermediate",
+	sports: ["calisthenics", "running"],
+	equipment: [],
+	photo: "",
+	sessions: ["push", "pull", "legs", "run"].map((key) => ({
+		key,
+		title: key,
+		sport: key === "run" ? ("running" as const) : ("calisthenics" as const),
+		focus: key === "run" ? ("run" as const) : ("full" as const),
+		minutes: 40,
+		effort: 6,
+		items: [
+			{ kind: "exercise" as const, exercise: key, sets: 3, range: [8, 12] as const, restS: 60 },
+		],
+	})),
+	schedule: { 4: ["push", "pull", "legs", "run"] },
+	deloadEvery: 4,
+	testWeeks: true,
+	source: "custom",
+	createdAt: null,
+};
+
+beforeAll(() =>
+	setCustomExercises(
+		[
+			{ id: "pull-up", name: "Pull-ups", pattern: "pull" },
+			{ id: "bench", name: "Bench press", pattern: "gym", weighted: true },
+			{ id: "push-up", name: "Push-ups", pattern: "push" },
+		]
+			.map(parseSavedExercise)
+			.filter((exercise) => exercise !== null),
+	),
+);
 
 describe("exercise progress", () => {
 	const sessions = [
@@ -128,7 +171,7 @@ describe("activities and tests", () => {
 			session("2026-10-19", { template: "p:hybrid-athlete:1:push" }, reps("Push-ups", 24)),
 			session("2026-10-26", { template: "p:hybrid-athlete:2:push" }, reps("Push-ups", 12)),
 		];
-		expect(testResults(sessions, BUILT_IN_PROGRAMS)).toEqual([
+		expect(testResults(sessions, [HYBRID])).toEqual([
 			{
 				day: "2026-10-19",
 				program: "Hybrid Athlete",

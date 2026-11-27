@@ -4,7 +4,7 @@ import { and, eq } from "drizzle-orm";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { syncRecords } from "@/db/schema";
-import { localClock } from "@/modules/assistant/assistant.time";
+import { localClock } from "@personal-os/ai";
 import { db, signIn, testApp, testEnv } from "./support";
 
 const env = testEnv({

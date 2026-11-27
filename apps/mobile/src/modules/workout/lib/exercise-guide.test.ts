@@ -1,39 +1,47 @@
 import { describe, expect, it } from "bun:test";
-import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
-import { CATALOG, DEMO_IDS, guideFor, videoSearchUrl } from "./exercise-guide";
-import { TEMPLATES } from "./library";
+import {
+	allExercises,
+	guideFor,
+	parseSavedExercise,
+	setCustomExercises,
+	videoSearchUrl,
+} from "./exercise-guide";
 
-const framesSource = readFileSync(join(import.meta.dir, "demo-frames.ts"), "utf8");
-const demosDir = join(import.meta.dir, "../../../../app-photos/training/demos");
-
-describe("exercise guides", () => {
-	it("covers every exercise the fixed sessions plan, apart from team sport", () => {
-		const missing = TEMPLATES.flatMap((template) => template.exercises)
-			.map((exercise) => exercise.name)
-			.filter((name) => name !== "Match or training" && guideFor(name) === null);
-		expect(missing).toEqual([]);
+describe("the person's exercises", () => {
+	it("ship with none", () => {
+		setCustomExercises([]);
+		expect(allExercises()).toEqual([]);
+		expect(guideFor("Push-ups")).toBeNull();
 	});
 
-	it("keeps every cue short", () => {
-		for (const exercise of CATALOG) {
-			for (const cue of exercise.cues) expect(cue.length).toBeLessThanOrEqual(100);
-		}
+	it("reads a saved or imported exercise, keeping cues short and dropping bad media", () => {
+		const exercise = parseSavedExercise({
+			id: "ring-row",
+			name: "Ring row",
+			pattern: "row",
+			unit: "reps",
+			level: 40,
+			equipment: ["rings", "spaceship"],
+			cues: ["Body straight", "x".repeat(150)],
+			media: { image: "http://not-https.example/a.jpg", video: "https://example.com/v.mp4" },
+		});
+		expect(exercise).toMatchObject({
+			name: "Ring row",
+			level: 10,
+			equipment: ["rings"],
+			custom: true,
+		});
+		expect(exercise?.cues[1]?.length).toBe(100);
+		expect(exercise?.media).toBeUndefined();
+		expect(parseSavedExercise({ id: "x", name: "" })).toBeNull();
 	});
 
-	it("uses every demo, and every demo's frames are bundled", () => {
-		const used = new Set(CATALOG.map((exercise) => exercise.demo));
-		for (const id of DEMO_IDS) {
-			expect(used.has(id)).toBe(true);
-			const files = [...framesSource.matchAll(new RegExp(`demos/(${id}-\\d)\\.webp`, "g"))];
-			expect(files.length).toBeGreaterThan(0);
-			for (const [, file] of files) expect(existsSync(join(demosDir, `${file}.webp`))).toBe(true);
-		}
-	});
-
-	it("has no guide for an unknown exercise or a team match", () => {
+	it("finds an exercise's guide by name once it's added", () => {
+		const exercise = parseSavedExercise({ id: "a", name: "Pike push-ups", cues: ["Hips high"] });
+		if (!exercise) throw new Error("no exercise");
+		setCustomExercises([exercise]);
+		expect(guideFor("Pike push-ups")?.cues[0]).toBe("Hips high");
 		expect(guideFor("Flying kick")).toBeNull();
-		expect(guideFor("Match or training")).toBeNull();
 	});
 
 	it("searches for a video tutorial by name", () => {

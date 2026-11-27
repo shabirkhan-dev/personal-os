@@ -401,8 +401,8 @@ export function StartCard({
 		},
 		{
 			icon: "List",
-			title: "Start from a template",
-			body: "Ready-made routines for dark spots, dry skin, dandruff and more. Only if you pick one.",
+			title: "Import a routine",
+			body: "Have any AI write one in the template format, or open one a friend sent.",
 			onPress: onTemplates,
 		},
 	];

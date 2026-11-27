@@ -14,7 +14,6 @@ import { usePoTheme } from "@/theme";
 import { deleteExercise, saveExercise } from "../data/training-actions";
 import { useTraining } from "../hooks/use-training";
 import {
-	CATALOG,
 	type CatalogExercise,
 	driveFileId,
 	EQUIPMENT,
@@ -81,19 +80,16 @@ function Section({ title, hint }: { title: string; hint?: string }) {
 }
 
 /**
- * Make an exercise, or improve a built-in one: name, category, level, unit and equipment (own
- * exercises), cues, and media: a photo or animation uploaded to the app's storage, or a Google
+ * Make or change one of your exercises: name, category, level, unit, equipment, cues, and media: a photo or animation uploaded to the app's storage, or a Google
  * Drive video link.
  */
 export function ExerciseEditorScreen({ id }: { id?: string }) {
 	const { colors } = usePoTheme();
 	const { token, status } = useAuth();
 	const data = useTraining();
-	const builtIn = id ? (CATALOG.find((exercise) => exercise.id === id) ?? null) : null;
 	const current = id ? exerciseById(id) : null;
-	const isOwn = !builtIn;
 	const [draft, setDraft] = useState<Draft>(() => draftOf(current));
-	// Filled once saved exercises have loaded, so changes to a built-in one show when editing it.
+	// Filled once saved exercises have loaded, so editing shows the saved values.
 	const loaded = useRef(!id);
 	const [uploading, setUploading] = useState<"image" | "animation" | null>(null);
 	const [saving, setSaving] = useState(false);
@@ -157,11 +153,11 @@ export function ExerciseEditorScreen({ id }: { id?: string }) {
 
 	const save = async () => {
 		const name = draft.name.trim();
-		if (isOwn && name.length < 2) {
+		if (name.length < 2) {
 			setNotice("Give it a name.");
 			return;
 		}
-		if (isOwn && data.savedExercises.some((item) => item.name === name && item.id !== id)) {
+		if (data.savedExercises.some((item) => item.name === name && item.id !== id)) {
 			setNotice("You already have an exercise with that name.");
 			return;
 		}
@@ -171,23 +167,20 @@ export function ExerciseEditorScreen({ id }: { id?: string }) {
 		}
 		const cues = draft.cues.map((cue) => cue.trim()) as [string, string, string];
 		const media = Object.keys(draft.media).length > 0 ? { media: draft.media } : {};
-		const exercise: CatalogExercise = builtIn
-			? { ...builtIn, cues: cues.some(Boolean) ? cues : builtIn.cues, ...media }
-			: {
-					id: id ?? `u-${newId()}`,
-					name,
-					pattern: draft.pattern,
-					level: draft.level,
-					equipment: draft.equipment,
-					unit: draft.unit,
-					...(draft.each ? { each: true } : {}),
-					...(draft.weighted ? { weighted: true } : {}),
-					demo: null,
-					photo: "handstand",
-					cues,
-					...media,
-					custom: true,
-				};
+		const exercise: CatalogExercise = {
+			id: id ?? `u-${newId()}`,
+			name,
+			pattern: draft.pattern,
+			level: draft.level,
+			equipment: draft.equipment,
+			unit: draft.unit,
+			...(draft.each ? { each: true } : {}),
+			...(draft.weighted ? { weighted: true } : {}),
+			photo: "",
+			cues,
+			...media,
+			custom: true,
+		};
 		setSaving(true);
 		setNotice(null);
 		try {
@@ -204,14 +197,12 @@ export function ExerciseEditorScreen({ id }: { id?: string }) {
 	const remove = () => {
 		if (!id) return;
 		showDialog(
-			isOwn ? `Delete ${draft.name || "this exercise"}?` : "Reset to the built-in version?",
-			isOwn
-				? "Programs that use it skip it from now on. Logged sets stay."
-				: "Your cues and media for it are removed.",
+			`Delete ${draft.name || "this exercise"}?`,
+			"Programs that use it skip it from now on. Logged sets stay.",
 			[
 				{ text: "Keep", style: "cancel" },
 				{
-					text: isOwn ? "Delete" : "Reset",
+					text: "Delete",
 					style: "destructive",
 					onPress: () => {
 						deleteExercise(id)
@@ -272,91 +263,89 @@ export function ExerciseEditorScreen({ id }: { id?: string }) {
 		);
 	};
 
-	const previewName = isOwn ? draft.name : (builtIn?.name ?? "");
+	const previewName = draft.name;
 
 	return (
 		<TrainingScreen>
 			<ScreenTitle
-				eyebrow={isOwn ? (id ? "Your exercise" : "New exercise") : "Built-in exercise"}
+				eyebrow={id ? "Your exercise" : "New exercise"}
 				title={previewName || "Make an exercise"}
 			/>
 			{previewName && (draft.media.image || draft.media.animation) ? (
-				<ExerciseDemo name={previewName} photo="handstand" height={200} radius={24} />
+				<ExerciseDemo name={previewName} photo="" height={200} radius={24} />
 			) : null}
-			{isOwn ? (
-				<Card>
-					<TextField
-						label="Name"
-						value={draft.name}
-						onChangeText={(text) => set("name", text)}
-						placeholder="Ring muscle-up"
-					/>
-					<Section title="Category" />
-					<View style={styles.wrap}>
-						{PICKABLE.map((pattern) => (
-							<FilterChip
-								key={pattern}
-								label={PATTERN_LABELS[pattern]}
-								selected={draft.pattern === pattern}
-								onPress={() => set("pattern", pattern)}
-							/>
-						))}
-					</View>
-					<Section title="Counted in" />
-					<View style={styles.wrap}>
-						{UNITS.map((unit) => (
-							<FilterChip
-								key={unit.id}
-								label={unit.label}
-								selected={draft.unit === unit.id}
-								onPress={() => set("unit", unit.id)}
-							/>
-						))}
+			<Card>
+				<TextField
+					label="Name"
+					value={draft.name}
+					onChangeText={(text) => set("name", text)}
+					placeholder="Ring muscle-up"
+				/>
+				<Section title="Category" />
+				<View style={styles.wrap}>
+					{PICKABLE.map((pattern) => (
 						<FilterChip
-							label="Each side"
-							selected={draft.each}
-							onPress={() => set("each", !draft.each)}
+							key={pattern}
+							label={PATTERN_LABELS[pattern]}
+							selected={draft.pattern === pattern}
+							onPress={() => set("pattern", pattern)}
 						/>
+					))}
+				</View>
+				<Section title="Counted in" />
+				<View style={styles.wrap}>
+					{UNITS.map((unit) => (
 						<FilterChip
-							label="With weight (kg)"
-							selected={draft.weighted}
-							onPress={() => set("weighted", !draft.weighted)}
+							key={unit.id}
+							label={unit.label}
+							selected={draft.unit === unit.id}
+							onPress={() => set("unit", unit.id)}
 						/>
-					</View>
-					<Section
-						title={`Level ${draft.level} of 10`}
-						hint="1 is anyone, 10 is years of practice."
+					))}
+					<FilterChip
+						label="Each side"
+						selected={draft.each}
+						onPress={() => set("each", !draft.each)}
 					/>
-					<View style={styles.wrap}>
-						{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((level) => (
-							<FilterChip
-								key={level}
-								label={String(level)}
-								selected={draft.level === level}
-								onPress={() => set("level", level)}
-							/>
-						))}
-					</View>
-					<Section title="Needs" hint="Leave empty for bodyweight anywhere." />
-					<View style={styles.wrap}>
-						{EQUIPMENT.map((item) => (
-							<FilterChip
-								key={item}
-								label={EQUIPMENT_LABELS[item]}
-								selected={draft.equipment.includes(item)}
-								onPress={() =>
-									set(
-										"equipment",
-										draft.equipment.includes(item)
-											? draft.equipment.filter((other) => other !== item)
-											: [...draft.equipment, item],
-									)
-								}
-							/>
-						))}
-					</View>
-				</Card>
-			) : null}
+					<FilterChip
+						label="With weight (kg)"
+						selected={draft.weighted}
+						onPress={() => set("weighted", !draft.weighted)}
+					/>
+				</View>
+				<Section
+					title={`Level ${draft.level} of 10`}
+					hint="1 is anyone, 10 is years of practice."
+				/>
+				<View style={styles.wrap}>
+					{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((level) => (
+						<FilterChip
+							key={level}
+							label={String(level)}
+							selected={draft.level === level}
+							onPress={() => set("level", level)}
+						/>
+					))}
+				</View>
+				<Section title="Needs" hint="Leave empty for bodyweight anywhere." />
+				<View style={styles.wrap}>
+					{EQUIPMENT.map((item) => (
+						<FilterChip
+							key={item}
+							label={EQUIPMENT_LABELS[item]}
+							selected={draft.equipment.includes(item)}
+							onPress={() =>
+								set(
+									"equipment",
+									draft.equipment.includes(item)
+										? draft.equipment.filter((other) => other !== item)
+										: [...draft.equipment, item],
+								)
+							}
+						/>
+					))}
+				</View>
+			</Card>
 			<Card>
 				<Section title="How to do it" hint="Three short cues, shown during workouts." />
 				{draft.cues.map((cue, index) => (
@@ -402,13 +391,8 @@ export function ExerciseEditorScreen({ id }: { id?: string }) {
 				</PoText>
 			) : null}
 			<Footer>
-				{id && (isOwn || data.savedExercises.some((item) => item.id === id)) ? (
-					<PillButton
-						label={isOwn ? "Delete" : "Reset"}
-						variant="secondary"
-						style={styles.flex}
-						onPress={remove}
-					/>
+				{id ? (
+					<PillButton label="Delete" variant="secondary" style={styles.flex} onPress={remove} />
 				) : null}
 				<PillButton
 					label={saving ? "Saving…" : "Save"}

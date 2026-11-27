@@ -1,17 +1,13 @@
-import { describe, expect, it } from "bun:test";
-import { CATALOG, exerciseById } from "../exercise-guide";
+import { beforeAll, describe, expect, it } from "bun:test";
+import { type CatalogExercise, setCustomExercises } from "../exercise-guide";
 import type { Exercise } from "../library";
-import { BUILT_IN_PROGRAMS } from "./built-in";
 import {
 	buildProgramWeek,
-	chainsIn,
-	defaultStep,
 	estimateMinutes,
 	fitToMinutes,
 	materialize,
 	nextProgress,
 	parseTemplateId,
-	pickRung,
 	type ProgramContext,
 	programStart,
 	progressAfter,
@@ -22,22 +18,113 @@ import {
 	weekKind,
 	weekNumber,
 } from "./engine";
-import { CHAINS, parseProgram, type ProgramDef, type Progress } from "./program-model";
+import { parseProgram, type ProgramDef, type ProgramItem } from "./program-model";
+
+/** The person's own exercises: no library ships with the app. */
+const own = (
+	id: string,
+	name: string,
+	pattern: CatalogExercise["pattern"],
+	unit: CatalogExercise["unit"] = "reps",
+	equipment: CatalogExercise["equipment"] = [],
+	level = 3,
+): CatalogExercise => ({
+	id,
+	name,
+	pattern,
+	level,
+	equipment,
+	unit,
+	photo: "",
+	cues: ["", "", ""],
+	custom: true,
+});
+
+const EXERCISES = [
+	own("push-up", "Push-ups", "push"),
+	own("pike", "Pike push-ups", "push", "reps", [], 4),
+	own("pull-up", "Pull-ups", "pull", "reps", ["pull-up-bar"], 5),
+	own("row", "Australian rows", "pull", "reps", [], 2),
+	own("plank", "Plank", "core", "s"),
+	own("squat", "Squats", "squat"),
+	own("easy-run", "Easy run", "run", "min"),
+];
+
+const item = (exercise: string, sets: number, range: [number, number], restS = 90, grow?: number) =>
+	({ kind: "exercise", exercise, sets, range, restS, ...(grow ? { grow } : {}) }) as ProgramItem;
+
+const HYBRID: ProgramDef = {
+	id: "my-hybrid",
+	title: "My hybrid",
+	goal: "Strong and fit",
+	summary: "",
+	kind: "hybrid",
+	weeks: 8,
+	level: "intermediate",
+	sports: ["calisthenics", "running"],
+	equipment: ["pull-up-bar"],
+	photo: "",
+	sessions: [
+		{
+			key: "push",
+			title: "Push",
+			sport: "calisthenics",
+			focus: "upper",
+			minutes: 45,
+			effort: 7,
+			items: [item("push-up", 4, [8, 12]), item("pike", 3, [6, 10])],
+		},
+		{
+			key: "pull",
+			title: "Pull",
+			sport: "calisthenics",
+			focus: "upper",
+			minutes: 45,
+			effort: 7,
+			items: [item("pull-up", 4, [5, 8]), item("plank", 3, [20, 40], 60)],
+		},
+		{
+			key: "legs",
+			title: "Legs",
+			sport: "calisthenics",
+			focus: "lower",
+			minutes: 40,
+			effort: 6,
+			items: [item("squat", 4, [12, 20])],
+		},
+		{
+			key: "easy-run",
+			title: "Easy run",
+			sport: "running",
+			focus: "run",
+			minutes: 25,
+			effort: 4,
+			items: [item("easy-run", 1, [25, 45], 0, 0.08)],
+		},
+	],
+	schedule: {
+		4: ["pull", "easy-run", "push", "legs"],
+		6: ["pull", "easy-run", "push", "legs", "push", "easy-run"],
+	},
+	deloadEvery: 4,
+	testWeeks: true,
+	source: "custom",
+	createdAt: null,
+};
 
 const settings: ProgramContext["settings"] = {
-	equipment: ["pull-up-bar", "dip-bars"],
+	equipment: ["pull-up-bar"],
 	minutes: 45,
 	daysPerWeek: 5,
 	fixedDays: [],
-	sports: ["calisthenics", "running", "boxing"],
+	sports: ["calisthenics", "running"],
 };
 const ctx = (overrides: Partial<ProgramContext> = {}): ProgramContext => ({
-	programs: BUILT_IN_PROGRAMS,
+	programs: [HYBRID],
 	progress: new Map(),
 	settings,
 	...overrides,
 });
-const hybrid = BUILT_IN_PROGRAMS[0] as ProgramDef;
 const week = [
 	"2026-10-19",
 	"2026-10-20",
@@ -48,58 +135,21 @@ const week = [
 	"2026-10-25",
 ];
 
-describe("the catalog and chains", () => {
-	it("has unique ids and names", () => {
-		expect(new Set(CATALOG.map((item) => item.id)).size).toBe(CATALOG.length);
-		expect(new Set(CATALOG.map((item) => item.name)).size).toBe(CATALOG.length);
-	});
+beforeAll(() => setCustomExercises(EXERCISES));
 
-	it("only chains exercises that exist, easiest first", () => {
-		for (const rungs of Object.values(CHAINS)) {
-			const levels = rungs.map((id) => exerciseById(id)?.level ?? -1);
-			expect(levels).not.toContain(-1);
-			expect([...levels].sort((a, b) => a - b)).toEqual(levels);
-		}
-	});
-});
-
-describe("built-in programs", () => {
-	it("have unique ids, valid schedules and known exercises", () => {
-		expect(new Set(BUILT_IN_PROGRAMS.map((program) => program.id)).size).toBe(
-			BUILT_IN_PROGRAMS.length,
-		);
-		for (const program of BUILT_IN_PROGRAMS) {
-			const keys = new Set(program.sessions.map((session) => session.key));
-			expect(keys.size).toBe(program.sessions.length);
-			for (const order of Object.values(program.schedule)) {
-				for (const key of order ?? []) expect(keys.has(key)).toBe(true);
-			}
-			for (const item of program.sessions.flatMap((session) => session.items)) {
-				if (item.kind === "exercise") expect(exerciseById(item.exercise)).not.toBeNull();
-			}
-		}
-	});
-
-	it("turn every session of every week into something to train", () => {
-		for (const program of BUILT_IN_PROGRAMS) {
-			const equipment = [...new Set([...settings.equipment, ...program.equipment])];
-			for (let number = 1; number <= program.weeks; number += 1) {
-				for (const session of program.sessions) {
-					const template = materialize(
-						program,
-						session.key,
-						number,
-						ctx({ settings: { ...settings, equipment } }),
-					);
-					expect(template?.exercises.length ?? 0).toBeGreaterThan(0);
-					expect(template?.minutes ?? 0).toBeGreaterThan(0);
-				}
+describe("a program of the person's own exercises", () => {
+	it("turns every session of every week into something to train", () => {
+		for (let number = 1; number <= HYBRID.weeks; number += 1) {
+			for (const session of HYBRID.sessions) {
+				const template = materialize(HYBRID, session.key, number, ctx());
+				expect(template?.exercises.length ?? 0).toBeGreaterThan(0);
+				expect(template?.minutes ?? 0).toBeGreaterThan(0);
 			}
 		}
 	});
 });
 
-const run = (number: number) => materialize(hybrid, "easy-run", number, ctx())?.exercises[0];
+const run = (number: number) => materialize(HYBRID, "easy-run", number, ctx())?.exercises[0];
 
 describe("weeks", () => {
 	it("numbers weeks from the Monday the program started", () => {
@@ -115,7 +165,7 @@ describe("weeks", () => {
 	});
 
 	it("tests in the first and last week and goes light every fourth", () => {
-		expect([1, 2, 3, 4, 5, 8].map((number) => weekKind(hybrid, number))).toEqual([
+		expect([1, 2, 3, 4, 5, 8].map((number) => weekKind(HYBRID, number))).toEqual([
 			"test",
 			"build",
 			"build",
@@ -126,26 +176,25 @@ describe("weeks", () => {
 	});
 
 	it("takes the schedule for the days a week, or the nearest one", () => {
-		expect(sessionOrder(hybrid, 4)).toEqual(["pull", "easy-run", "push", "legs"]);
-		expect(sessionOrder(hybrid, 7)).toHaveLength(6);
+		expect(sessionOrder(HYBRID, 4)).toEqual(["pull", "easy-run", "push", "legs"]);
+		expect(sessionOrder(HYBRID, 7)).toHaveLength(6);
 	});
 
 	it("keeps team days and never puts legs the day before a match", () => {
 		const slots = buildProgramWeek(
-			hybrid,
+			HYBRID,
 			{ ...settings, fixedDays: [{ weekday: 5, activity: "sport:football" }] },
 			2,
 			week,
 		);
 		expect(slots[5]?.template).toBe("a:sport:football");
 		expect(resolveTemplate("a:sport:football", ctx())?.title).toBe("Football");
-		expect(slots[4]?.template).not.toBe(templateId(hybrid.id, 2, "legs"));
-		expect(slots.filter((slot) => slot.template?.startsWith("p:")).length).toBe(5);
+		expect(slots[4]?.template).not.toBe(templateId(HYBRID.id, 2, "legs"));
 	});
 
 	it("round-trips generated ids", () => {
-		expect(parseTemplateId(templateId("hybrid-athlete", 3, "push"))).toEqual({
-			programId: "hybrid-athlete",
+		expect(parseTemplateId(templateId("my-hybrid", 3, "push"))).toEqual({
+			programId: "my-hybrid",
 			week: 3,
 			key: "push",
 		});
@@ -154,48 +203,39 @@ describe("weeks", () => {
 });
 
 describe("exercise choice", () => {
-	it("starts a chain at the program's level", () => {
-		expect(exerciseById(String(CHAINS.push[defaultStep("push", "beginner")]))?.name).toBe(
-			"Incline push-ups",
-		);
+	it("swaps an exercise someone can't do for one from the same pattern", () => {
+		const pull = EXERCISES.find((exercise) => exercise.id === "pull-up");
+		expect(pull && substitute(pull, [])?.name).toBe("Australian rows");
+		expect(pull && substitute(pull, ["pull-up-bar"])?.name).toBe("Pull-ups");
 	});
 
-	it("steps down to a rung the equipment allows, or gives up", () => {
-		expect(pickRung("dip", 1, [])?.exercise.name).toBe("Bench dips");
-		expect(pickRung("pull", 3, [])).toBeNull();
-	});
-
-	it("swaps an exercise for one from the same pattern", () => {
-		const rope = exerciseById("jump-rope");
-		expect(rope && substitute(rope, [])?.pattern).toBe("conditioning");
-	});
-
-	it("uses the saved level and target", () => {
-		const progress = new Map<string, Progress>([
-			["pull", { id: "pull", step: 3, target: 6, kg: null, misses: 0, updatedAt: "" }],
+	it("uses the saved target", () => {
+		const progress = new Map([
+			["pull-up", { id: "pull-up", step: 0, target: 6, kg: null, misses: 0, updatedAt: "" }],
 		]);
-		const template = resolveTemplate(templateId(hybrid.id, 2, "pull"), ctx({ progress }));
-		const pull = template?.exercises.find((item) => item.progress?.key === "pull");
-		expect(pull?.name).toBe("Pull-ups");
+		const template = resolveTemplate(templateId(HYBRID.id, 2, "pull"), ctx({ progress }));
+		const pull = template?.exercises.find((exercise) => exercise.name === "Pull-ups");
 		expect(pull?.target).toBe(6);
 	});
 
 	it("makes a test week one all-out set", () => {
-		const template = materialize(hybrid, "push", 1, ctx());
-		const push = template?.exercises.find((item) => item.progress?.key === "push");
+		const push = materialize(HYBRID, "push", 1, ctx())?.exercises.find(
+			(exercise) => exercise.name === "Push-ups",
+		);
 		expect(push?.sets).toBe(1);
 		expect(push?.target).toBeNull();
 	});
 
 	it("grows runs each week and eases off in a light week", () => {
-		expect(run(2)?.target).toBe(27);
-		expect(run(4)?.target).toBe(22);
+		const second = run(2)?.target ?? 0;
+		expect(run(3)?.target ?? 0).toBeGreaterThan(second);
+		expect(run(4)?.target ?? 0).toBeLessThan(run(3)?.target ?? 0);
 	});
 });
 
 const exercise = (name: string, sets: number, target: number): Exercise => ({
 	name,
-	photo: "push-ups",
+	photo: "",
 	sets,
 	target,
 	unit: "reps",
@@ -221,7 +261,7 @@ describe("session length", () => {
 });
 
 describe("progression", () => {
-	const ref = { key: "push", step: 1, range: [8, 12] as const, chainLength: 7 };
+	const ref = { key: "push-up", step: 0, range: [8, 12] as const, chainLength: 1 };
 	const step = (overrides: Partial<Parameters<typeof nextProgress>[0]>) =>
 		nextProgress({
 			current: null,
@@ -242,33 +282,31 @@ describe("progression", () => {
 		expect(step({ feel: "hard" })?.target).toBe(10);
 	});
 
-	it("moves up a variation past the top of the range", () => {
+	it("holds at the top of the range", () => {
 		expect(step({ planned: { sets: 3, target: 12 }, values: [12, 12, 12] })).toMatchObject({
-			step: 2,
-			target: 8,
+			step: 0,
+			target: 12,
 		});
 	});
 
 	it("adds 2.5 kg to a weighted lift instead", () => {
 		expect(
 			step({ planned: { sets: 3, target: 12 }, values: [12, 12, 12], kg: 60, weighted: true }),
-		).toMatchObject({ step: 1, target: 8, kg: 62.5 });
+		).toMatchObject({ target: 8, kg: 62.5 });
 	});
 
-	it("steps back after two sessions below the range", () => {
+	it("counts sessions below the range", () => {
 		const first = step({ values: [5, 4, 4] });
-		expect(first).toMatchObject({ step: 1, misses: 1 });
-		expect(step({ current: first, values: [6, 5, 4] })).toMatchObject({ step: 0, target: 12 });
+		expect(first).toMatchObject({ step: 0, misses: 1 });
 	});
 
-	it("sets the target from a test, and skips a rung when it is far too easy", () => {
+	it("sets the target from a test", () => {
 		expect(step({ test: true, values: [14] })?.target).toBe(10);
-		expect(step({ test: true, values: [20] })).toMatchObject({ step: 2, target: 8 });
 	});
 
-	it("reads a finished session's sets into level changes", () => {
-		const template = materialize(hybrid, "push", 2, ctx());
-		const push = template?.exercises.find((item) => item.progress?.key === "push");
+	it("reads a finished session's sets into new targets", () => {
+		const template = materialize(HYBRID, "push", 2, ctx());
+		const push = template?.exercises.find((entry) => entry.name === "Push-ups");
 		if (!template || !push) throw new Error("no push exercise");
 		const sets = Array.from({ length: push.sets }, () => ({
 			exercise: push.name,
@@ -276,18 +314,18 @@ describe("progression", () => {
 			unit: "reps" as const,
 		}));
 		const updates = progressAfter(template, sets, "good", new Map(), "2026-10-24T10:00:00.000Z");
-		expect(updates.find((item) => item.id === "push")?.target).toBe((push.target ?? 0) + 1);
+		expect(updates.find((entry) => entry.id === "push-up")?.target).toBe((push.target ?? 0) + 1);
 	});
 });
 
-describe("designed programs", () => {
-	it("parse back the same shape and drop unknown exercises", () => {
-		const raw = JSON.parse(JSON.stringify({ ...hybrid, id: "mine", source: "custom" }));
+describe("programs from storage or a template file", () => {
+	it("parse back the same shape and drop exercises the person doesn't have", () => {
+		const raw = JSON.parse(JSON.stringify(HYBRID));
 		raw.sessions[0].items.push({ kind: "exercise", exercise: "flying-kick", sets: 3 });
+		raw.sessions[0].items.push({ kind: "chain", chain: "push", sets: 3 });
 		const parsed = parseProgram(raw);
-		expect(parsed?.sessions.length).toBe(hybrid.sessions.length);
-		expect(parsed?.sessions[0]?.items.length).toBe(hybrid.sessions[0]?.items.length);
-		expect(parsed?.schedule[4]).toEqual(hybrid.schedule[4]);
-		expect(chainsIn(parsed as ProgramDef)).toContain("pull");
+		expect(parsed?.sessions.length).toBe(HYBRID.sessions.length);
+		expect(parsed?.sessions[0]?.items.length).toBe(HYBRID.sessions[0]?.items.length);
+		expect(parsed?.schedule[4]).toEqual(HYBRID.schedule[4]);
 	});
 });

@@ -1,7 +1,7 @@
 import { listItems, removeItem, saveItem } from "@/lib/db/collection";
 import { dayKey, newId } from "@/lib/day";
 import { type Rating, review } from "@/lib/flashcards/schedule";
-import { type ChallengeTemplate, STARTER_CARDS } from "../lib/faith-content";
+import type { ChallengeTemplate } from "../lib/faith-content";
 import { prayerLogFor } from "../lib/faith-math";
 import type {
 	Challenge,
@@ -20,7 +20,6 @@ import {
 	challenges,
 	faithCards,
 	faithSettings,
-	pathProgress,
 	prayerLogs,
 	recitations,
 	resources,
@@ -154,20 +153,21 @@ export function toggleChallengeDay(now = new Date()): Promise<void> {
 	});
 }
 
-export function toggleLesson(pathId: string, lessonId: string): Promise<void> {
-	return inTurn(async () => {
-		const progress = (await listItems(pathProgress)).find((item) => item.id === pathId);
-		await saveItem(pathProgress, { id: pathId, done: toggled(progress?.done ?? [], lessonId) });
-	});
-}
-
-/** Adds the starter deck the first time the person opens flashcards. */
-export async function seedCards(existing: readonly FaithCard[], now = new Date()): Promise<void> {
-	const have = new Set(existing.map((card) => card.id));
+/** Adds the person's own cards (written in the app or imported), due now. */
+export async function addCards(
+	cards: readonly Pick<FaithCard, "kind" | "front" | "prompt" | "back" | "source">[],
+	now = new Date(),
+): Promise<void> {
 	const dueAt = now.toISOString();
 	await Promise.all(
-		STARTER_CARDS.filter((card) => !have.has(card.id)).map((card) =>
-			saveItem(faithCards, { ...card, dueAt, intervalMinutes: 0, reps: 0 }),
+		cards.map((card, index) =>
+			saveItem(faithCards, {
+				...card,
+				id: `own-${now.getTime().toString(36)}-${index}`,
+				dueAt,
+				intervalMinutes: 0,
+				reps: 0,
+			}),
 		),
 	);
 }

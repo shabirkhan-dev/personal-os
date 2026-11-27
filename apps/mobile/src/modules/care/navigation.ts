@@ -7,7 +7,7 @@ export const careRoutes = {
 	/** Write or change a step; `id` edits one, `routine` says where a new one goes. */
 	step: (routine: Routine, id?: string) =>
 		router.push({ pathname: "/care/step", params: id ? { routine, id } : { routine } }),
-	templates: () => router.push("/care/templates"),
+	templates: () => router.push({ pathname: "/templates", params: { module: "care" } }),
 	design: () => router.push("/care/design"),
 	shelf: () => router.push("/care/shelf"),
 	hair: () => router.push("/care/hair"),

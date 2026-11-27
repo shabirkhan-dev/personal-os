@@ -9,10 +9,10 @@ import { PoText } from "@/components/ui/po-text";
 import { SelectCard } from "@/components/ui/select-card";
 import { Toggle } from "@/components/ui/toggle";
 import { haptics } from "@/lib/haptics";
-import { useAuth } from "@/modules/auth";
 import { updateAssistantSettings, useAssistantSettings } from "../data/assistant-settings";
 import { showConversation } from "../hooks/use-assistant";
-import { assistantApi, assistantErrorMessage } from "../services/assistant-api";
+import { useAssistantBackend } from "../hooks/use-assistant-backend";
+import { assistantErrorMessage } from "../services/assistant-api";
 
 const home = () => router.dismissTo("/");
 
@@ -21,18 +21,20 @@ const when = (iso: string) =>
 
 /** Past conversations, newest first; one opens back in the chat. */
 export function AssistantHistoryScreen() {
-	const { token } = useAuth();
+	const backend = useAssistantBackend();
 	const queryClient = useQueryClient();
 	const threads = useQuery({
-		queryKey: ["assistant", "threads"],
-		queryFn: () => assistantApi.threads(token ?? ""),
-		enabled: Boolean(token),
+		queryKey: ["assistant", "threads", backend?.key],
+		queryFn: () => (backend ? backend.threads() : []),
+		enabled: backend !== null,
+		networkMode: "always",
 	});
 
 	const open = async (id: string) => {
-		if (!token) return;
+		if (!backend) return;
 		try {
-			const thread = await assistantApi.thread(token, id);
+			const thread = await backend.thread(id);
+			if (!thread) return;
 			showConversation({ threadId: thread.id, title: thread.title, messages: thread.messages });
 			router.back();
 		} catch (error) {
@@ -41,9 +43,9 @@ export function AssistantHistoryScreen() {
 	};
 
 	const remove = async (id: string) => {
-		if (!token) return;
-		await assistantApi
-			.deleteThread(token, id)
+		if (!backend) return;
+		await backend
+			.deleteThread(id)
 			.catch((error: unknown) => console.error("[assistant] could not delete a chat", error));
 		await queryClient.invalidateQueries({ queryKey: ["assistant", "threads"] });
 	};
@@ -101,19 +103,20 @@ const save = (change: Parameters<typeof updateAssistantSettings>[0]) =>
 const BRIEF_TIMES = [6 * 60, 7 * 60, 8 * 60, 9 * 60, 10 * 60] as const;
 
 export function AssistantSettingsScreen() {
-	const { token } = useAuth();
+	const backend = useAssistantBackend();
 	const queryClient = useQueryClient();
 	const { settings } = useAssistantSettings();
 	const memories = useQuery({
-		queryKey: ["assistant", "memories"],
-		queryFn: () => assistantApi.memories(token ?? ""),
-		enabled: Boolean(token),
+		queryKey: ["assistant", "memories", backend?.key],
+		queryFn: () => (backend ? backend.memories() : []),
+		enabled: backend !== null,
+		networkMode: "always",
 	});
 
 	const forget = async (id: string) => {
-		if (!token) return;
-		await assistantApi
-			.forget(token, id)
+		if (!backend) return;
+		await backend
+			.forget(id)
 			.catch((error: unknown) => console.error("[assistant] could not forget", error));
 		await queryClient.invalidateQueries({ queryKey: ["assistant", "memories"] });
 	};

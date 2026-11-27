@@ -12,8 +12,6 @@ import { clockOf, minutesOf } from "@/modules/home/lib/module-day";
 import { usePoTheme } from "@/theme";
 import { deleteSession, updateSession } from "../data/training-actions";
 import { useTraining } from "../hooks/use-training";
-import { templateById } from "../lib/library";
-import { heroOf } from "../lib/photos";
 import { clockTime, negativeSplit, paceOf } from "../lib/training-math";
 import { FEELS } from "../lib/training-model";
 import { Card, CardHead } from "./home-cards";
@@ -22,13 +20,6 @@ import { TrainingScreen } from "./training-screen";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const DEFAULT_PHOTO = {
-	running: "mountain-run",
-	boxing: "shadow-boxing",
-	yoga: "yoga",
-	football: "football",
-	volleyball: "volleyball",
-} as const;
 
 /** One logged session: run numbers and splits, or the sets done, how it felt and a note. */
 function failed(error: unknown) {
@@ -49,12 +40,6 @@ export function SessionScreen({ id }: { id: string }) {
 		);
 	}
 
-	const template = templateById(session.template);
-	const photo =
-		template?.hero ??
-		(session.sport in DEFAULT_PHOTO
-			? DEFAULT_PHOTO[session.sport as keyof typeof DEFAULT_PHOTO]
-			: "push-ups");
 	const started = new Date(session.startedAt);
 	const pace = paceOf(session);
 	const stats: { label: string; value: string }[] = [
@@ -106,7 +91,7 @@ export function SessionScreen({ id }: { id: string }) {
 				eyebrow={`${DAYS[started.getDay()]} ${started.getDate()} ${MONTHS[started.getMonth()]} · ${clockOf(minutesOf(started))} · ${session.title}`}
 				title={session.distanceKm ? `${session.distanceKm.toFixed(2)} km` : session.title}
 			/>
-			<TrainingImage photo={heroOf(photo)} size={170} fill radius={28} />
+			<TrainingImage size={140} fill radius={28} />
 			<View style={styles.stats}>
 				{stats.map((stat) => (
 					<View key={stat.label} style={[styles.stat, { backgroundColor: colors.bgSurface }]}>

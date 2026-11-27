@@ -64,7 +64,7 @@ export function HeartButton({ saved, onPress }: { saved: boolean; onPress: () =>
 }
 
 /**
- * Recipes: the person's own, written here or added from Templates. A pick for the next meal from
+ * Recipes: the person's own, written here, made with AI or imported in Templates. A pick for the next meal from
  * what's left today, then the rest two to a row. Empty until they add one.
  */
 export function RecipesScreen() {
@@ -161,12 +161,12 @@ export function RecipesScreen() {
 					</View>
 					<PoText variant="title18">No recipes yet</PoText>
 					<PoText variant="meta13" tone="textSecondary">
-						Write the dishes you actually cook, with a photo, steps and timers, or add a ready
-						recipe pack from Templates. They plan your week and fill your grocery list.
+						Write the dishes you actually cook, with a photo, steps and timers, or have any AI make
+						a set in Templates. They plan your week and fill your grocery list.
 					</PoText>
 					<PillButton label="Write your own recipe" onPress={() => foodRoutes.recipeEdit()} />
 					<PillButton
-						label="Browse recipe templates"
+						label="Make recipes with AI"
 						variant="secondary"
 						onPress={() => templateRoutes.browse("food")}
 					/>
@@ -212,7 +212,7 @@ export function RecipesScreen() {
 						onPress={() => foodRoutes.recipe(featured.id)}
 						style={[styles.featured, { backgroundColor: colors.bgSurface }]}
 					>
-						<MealImage recipeId={featured.id} hero size={180} fill radius={16} />
+						<MealImage recipeId={featured.id} size={180} fill radius={16} />
 						<View style={styles.featuredText}>
 							<View style={styles.featuredHead}>
 								<PoText variant="title18" style={styles.flex}>

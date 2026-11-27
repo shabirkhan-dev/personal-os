@@ -6,7 +6,6 @@ import { PoText } from "@/components/ui/po-text";
 import { formatMoney } from "@/lib/money";
 import { haptics } from "@/lib/haptics";
 import { usePoTheme } from "@/theme";
-import { catalogItem } from "../lib/catalog";
 import { capital, type ColourShare } from "../lib/fashion-math";
 import type { Piece, Wish } from "../lib/fashion-model";
 import type { Look } from "../lib/outfits";
@@ -361,22 +360,8 @@ export function WishlistRow({
 	);
 }
 
-/** "Build your capsule": the empty Home with quick-add starters. */
-export function CapsuleCard({
-	picked,
-	options,
-	busy,
-	onToggle,
-	onAdd,
-	onOwn,
-}: {
-	picked: readonly string[];
-	options: readonly string[];
-	busy: boolean;
-	onToggle: (id: string) => void;
-	onAdd: () => void;
-	onOwn: () => void;
-}) {
+/** The empty Fashion Home: the first piece is the person's own, with their own photo. */
+export function CapsuleCard({ onOwn }: { onOwn: () => void }) {
 	const { colors } = usePoTheme();
 	return (
 		<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
@@ -384,57 +369,16 @@ export function CapsuleCard({
 				<View style={[styles.railLine, { backgroundColor: colors.borderStrong }]} />
 				<View style={styles.hangers}>
 					{[0, 1, 2, 3].map((step) => (
-						<View key={step} style={[styles.hanger, {}]} />
+						<View key={step} style={styles.hanger} />
 					))}
 				</View>
 			</View>
 			<PoText variant="title18">Build your capsule</PoText>
 			<PoText variant="body15" tone="textSecondary">
-				Name a piece or paste a link and the rest is filled in. Start with what you wear most;
-				outfit ideas follow.
+				Add the pieces you actually wear, with a photo of each. Name one or paste a shop link and
+				the rest is filled in; outfit ideas for the weather follow.
 			</PoText>
-			<PoText variant="eyebrow11" tone="textTertiary">
-				Quick add · tap what you own
-			</PoText>
-			<View style={styles.chips}>
-				{options.map((id) => {
-					const item = catalogItem(id);
-					if (!item) return null;
-					const on = picked.includes(id);
-					return (
-						<Pressable
-							key={id}
-							accessibilityRole="checkbox"
-							accessibilityState={{ checked: on }}
-							onPress={() => {
-								haptics.select();
-								onToggle(id);
-							}}
-							style={[
-								styles.chip,
-								on
-									? { backgroundColor: colors.accentSubtle }
-									: { backgroundColor: colors.bgSubtle },
-							]}
-						>
-							<Swatch colour={item.colour} size={14} />
-							<PoText variant="meta13" tone={on ? "accentDefault" : "textSecondary"}>
-								{item.name}
-							</PoText>
-						</Pressable>
-					);
-				})}
-			</View>
-			<PillButton
-				label={
-					picked.length > 0
-						? `Add ${picked.length} piece${picked.length === 1 ? "" : "s"}`
-						: "Tap what you own"
-				}
-				disabled={picked.length === 0 || busy}
-				onPress={onAdd}
-			/>
-			<PillButton label="Add my own" variant="ghost" onPress={onOwn} />
+			<PillButton label="Add my first piece" onPress={onOwn} />
 		</View>
 	);
 }

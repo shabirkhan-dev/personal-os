@@ -15,9 +15,8 @@ import { dayKey, newId } from "@personal-os/domain/dates";
 import { parseBill } from "@personal-os/domain/finance";
 import * as z from "zod";
 
-import { getRecord, listRecords, putRecord } from "../assistant.records";
-import { localClock } from "../assistant.time";
-import { defineTool, type ToolContext, ToolError } from "../assistant.tool";
+import { localClock } from "../time";
+import { defineTool, type ToolContext, ToolError } from "../tool";
 
 const EVENTS = "calendar-events";
 const rupees = (amount: number) => `Rs ${Math.round(amount).toLocaleString("en-US")}`;
@@ -48,9 +47,9 @@ function minutesOf(clock: string | undefined): number | null {
 async function itemsBetween(ctx: ToolContext, from: string, to: string) {
 	const clock = localClock(ctx.now, ctx.context.timeZone);
 	const [events, bills, apps] = await Promise.all([
-		listRecords(ctx.db, ctx.userId, EVENTS, parseEvent),
-		listRecords(ctx.db, ctx.userId, "finance-bills", parseBill),
-		listRecords(ctx.db, ctx.userId, "career-applications", parseApplication),
+		ctx.store.list(EVENTS, parseEvent),
+		ctx.store.list("finance-bills", parseBill),
+		ctx.store.list("career-applications", parseApplication),
 	]);
 	// Interview and follow-up times move to the person's clock, so their days are local days.
 	const localApps = apps.map((app) =>
@@ -163,7 +162,7 @@ const addEvent = defineTool({
 			tone: SOURCE_TONES.personal,
 			createdAt: ctx.now.toISOString(),
 		};
-		await putRecord(ctx.db, ctx.userId, EVENTS, event.id, event, ctx.now.getTime());
+		await ctx.store.put(EVENTS, event.id, event, ctx.now.getTime());
 		return {
 			result: { added: { id: event.id, title: event.title, date: event.date } },
 			changed: [EVENTS],
@@ -179,14 +178,14 @@ const deleteEvent = defineTool({
 	effect: "risky",
 	label: () => "Deleting the event",
 	describe: async (ctx, input) => {
-		const event = await getRecord(ctx.db, ctx.userId, EVENTS, input.id, parseEvent);
+		const event = await ctx.store.get(EVENTS, input.id, parseEvent);
 		if (!event) throw new ToolError("No event has that id.");
 		return { title: `Delete "${event.title}"`, detail: dayLabel(event.date) };
 	},
 	run: async (ctx, input) => {
-		const event = await getRecord(ctx.db, ctx.userId, EVENTS, input.id, parseEvent);
+		const event = await ctx.store.get(EVENTS, input.id, parseEvent);
 		if (!event) throw new ToolError("No event has that id. Find it with calendar_view.");
-		await putRecord(ctx.db, ctx.userId, EVENTS, event.id, event, ctx.now.getTime(), true);
+		await ctx.store.put(EVENTS, event.id, event, ctx.now.getTime(), true);
 		return {
 			result: { deleted: event.title },
 			changed: [EVENTS],

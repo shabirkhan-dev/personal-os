@@ -18,9 +18,8 @@ import {
 } from "@personal-os/domain/food";
 import * as z from "zod";
 
-import { getRecord, listRecords, putRecord } from "../assistant.records";
-import { localClock, localDate, zonedToDate } from "../assistant.time";
-import { defineTool, type ToolContext, ToolError } from "../assistant.tool";
+import { localClock, localDate, zonedToDate } from "../time";
+import { defineTool, type ToolContext, ToolError } from "../tool";
 
 const MEALS = "food-meals";
 const WATER = "food-water";
@@ -61,10 +60,10 @@ function slotNow(ctx: ToolContext): Slot {
 
 async function load(ctx: ToolContext) {
 	const [settingsRows, meals, water, weights] = await Promise.all([
-		listRecords(ctx.db, ctx.userId, "food-settings", parseSettings),
-		listRecords(ctx.db, ctx.userId, MEALS, parseMeal),
-		listRecords(ctx.db, ctx.userId, WATER, parseWater),
-		listRecords(ctx.db, ctx.userId, WEIGHTS, parseWeighIn),
+		ctx.store.list("food-settings", parseSettings),
+		ctx.store.list(MEALS, parseMeal),
+		ctx.store.list(WATER, parseWater),
+		ctx.store.list(WEIGHTS, parseWeighIn),
 	]);
 	return {
 		settings: settingsRows[0] ?? defaultSettings(),
@@ -312,7 +311,7 @@ const logMeal = defineTool({
 			recipeId: null,
 			at: at.toISOString(),
 		};
-		await putRecord(ctx.db, ctx.userId, MEALS, meal.id, meal, ctx.now.getTime());
+		await ctx.store.put(MEALS, meal.id, meal, ctx.now.getTime());
 		return {
 			result: { logged: mealBrief(meal) },
 			cards: [{ kind: "list", title: "Logged", empty: "", items: [mealItem(meal)] }],
@@ -355,9 +354,9 @@ const logWater = defineTool({
 	describe: async (_ctx, input) => ({ title: `Add ${input.ml} ml of water`, detail: "Today" }),
 	run: async (ctx, input) => {
 		const day = today(ctx);
-		const before = await getRecord(ctx.db, ctx.userId, WATER, day, parseWater);
+		const before = await ctx.store.get(WATER, day, parseWater);
 		const ml = (before?.ml ?? 0) + input.ml;
-		await putRecord(ctx.db, ctx.userId, WATER, day, { id: day, ml }, ctx.now.getTime());
+		await ctx.store.put(WATER, day, { id: day, ml }, ctx.now.getTime());
 		return {
 			result: { todayMl: ml },
 			changed: [WATER],
@@ -375,9 +374,9 @@ const logWeight = defineTool({
 	describe: async (_ctx, input) => ({ title: `Weigh-in: ${input.kg} kg`, detail: "Today" }),
 	run: async (ctx, input) => {
 		const day = today(ctx);
-		const before = await getRecord(ctx.db, ctx.userId, WEIGHTS, day, parseWeighIn);
+		const before = await ctx.store.get(WEIGHTS, day, parseWeighIn);
 		const kg = round1(input.kg);
-		await putRecord(ctx.db, ctx.userId, WEIGHTS, day, { id: day, kg }, ctx.now.getTime());
+		await ctx.store.put(WEIGHTS, day, { id: day, kg }, ctx.now.getTime());
 		return {
 			result: { kg, day },
 			changed: [WEIGHTS],
@@ -393,7 +392,7 @@ const deleteMeal = defineTool({
 	effect: "risky",
 	label: () => "Deleting the meal",
 	describe: async (ctx, input) => {
-		const meal = await getRecord(ctx.db, ctx.userId, MEALS, input.id, parseMeal);
+		const meal = await ctx.store.get(MEALS, input.id, parseMeal);
 		if (!meal) throw new ToolError("No meal has that id.");
 		return {
 			title: `Delete ${SLOT_LABELS[meal.slot].toLowerCase()} on ${meal.day}`,
@@ -401,9 +400,9 @@ const deleteMeal = defineTool({
 		};
 	},
 	run: async (ctx, input) => {
-		const meal = await getRecord(ctx.db, ctx.userId, MEALS, input.id, parseMeal);
+		const meal = await ctx.store.get(MEALS, input.id, parseMeal);
 		if (!meal) throw new ToolError("No meal has that id. Find it with food_today.");
-		await putRecord(ctx.db, ctx.userId, MEALS, meal.id, meal, ctx.now.getTime(), true);
+		await ctx.store.put(MEALS, meal.id, meal, ctx.now.getTime(), true);
 		return {
 			result: { deleted: mealBrief(meal) },
 			changed: [MEALS],

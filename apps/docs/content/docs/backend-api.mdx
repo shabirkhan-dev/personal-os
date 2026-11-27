@@ -184,12 +184,15 @@ for Training `training-settings`, `training-sessions`, `training-plans`, `traini
 `training-programs`, `training-progress`, `training-activities`, `training-exercises`, for the
 calendar `calendar-events`, and
 for Finance `finance-settings`, `finance-entries`, `finance-bills`, `finance-sources`, and for
-the assistant `assistant-settings`. Names are part of the contract.
+the assistant `assistant-settings` (and, on a phone with its own AI key, `assistant-threads`,
+`assistant-messages` and `assistant-memories`). Names are part of the contract.
 
 ### Assistant
 
 One assistant that answers from the person's own records and changes them through tools, under
-`/assistant`. Signed-in only; each model call counts against the daily AI allowance. Shared types
+`/assistant`. Signed-in only; each model call counts against the daily AI allowance. With their
+own AI key the phone runs the same agent (`packages/ai/src/assistant`) itself and never calls
+these routes. Shared types
 (`AssistantEvent`, `Card`, `ThreadMessage`) live in `@personal-os/domain/assistant`.
 
 | Route | Body | Returns |

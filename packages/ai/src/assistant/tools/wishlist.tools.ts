@@ -15,9 +15,8 @@ import {
 } from "@personal-os/domain/wishlist";
 import * as z from "zod";
 
-import { getRecord, listRecords, putRecord } from "../assistant.records";
-import { localClock } from "../assistant.time";
-import { defineTool, type ToolContext, ToolError } from "../assistant.tool";
+import { localClock } from "../time";
+import { defineTool, type ToolContext, ToolError } from "../tool";
 
 const DREAMS = "wishlist-dreams";
 const rupees = (amount: number) => `Rs ${Math.round(amount).toLocaleString("en-US")}`;
@@ -25,9 +24,9 @@ const rupees = (amount: number) => `Rs ${Math.round(amount).toLocaleString("en-U
 async function load(ctx: ToolContext) {
 	const now = localClock(ctx.now, ctx.context.timeZone).now;
 	const [dreams, settingsRows, financeRows] = await Promise.all([
-		listRecords(ctx.db, ctx.userId, DREAMS, parseDream),
-		listRecords(ctx.db, ctx.userId, "wishlist-settings", parseWishlistSettings),
-		listRecords(ctx.db, ctx.userId, "finance-settings", (raw) =>
+		ctx.store.list(DREAMS, parseDream),
+		ctx.store.list("wishlist-settings", parseWishlistSettings),
+		ctx.store.list("finance-settings", (raw) =>
 			typeof raw === "object" && raw && "monthlyIncome" in raw
 				? (raw as { monthlyIncome: unknown })
 				: null,
@@ -147,7 +146,7 @@ const addDream = defineTool({
 			addedAt: ctx.now.toISOString(),
 			gotAt: null,
 		};
-		await putRecord(ctx.db, ctx.userId, DREAMS, dream.id, dream, ctx.now.getTime());
+		await ctx.store.put(DREAMS, dream.id, dream, ctx.now.getTime());
 		return {
 			result: { added: dream.name, place: dream.priority },
 			changed: [DREAMS],
@@ -169,10 +168,8 @@ const markGot = defineTool({
 	run: async (ctx, input) => {
 		const { dreams } = await load(ctx);
 		const dream = findDream(dreams, input.dream);
-		const before = await getRecord(ctx.db, ctx.userId, DREAMS, dream.id, parseDream);
-		await putRecord(
-			ctx.db,
-			ctx.userId,
+		const before = await ctx.store.get(DREAMS, dream.id, parseDream);
+		await ctx.store.put(
 			DREAMS,
 			dream.id,
 			{ ...dream, status: "got", gotAt: ctx.now.toISOString() },

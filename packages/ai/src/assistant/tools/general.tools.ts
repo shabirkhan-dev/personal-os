@@ -1,9 +1,7 @@
 import type { AppLink } from "@personal-os/domain/assistant";
-import { and, eq, inArray } from "drizzle-orm";
 import * as z from "zod";
 
-import { assistantMemories } from "@/db/schema";
-import { defineTool, ToolError } from "../assistant.tool";
+import { defineTool, ToolError } from "../tool";
 
 /** Most facts kept per person; the oldest go first. */
 export const MEMORY_LIMIT = 60;
@@ -20,24 +18,15 @@ const remember = defineTool({
 	effect: "read",
 	label: () => "Remembering that",
 	run: async (ctx, input) => {
-		const existing = await ctx.db
-			.select({ id: assistantMemories.id, text: assistantMemories.text })
-			.from(assistantMemories)
-			.where(eq(assistantMemories.userId, ctx.userId))
-			.orderBy(assistantMemories.createdAt);
+		const existing = await ctx.store.memories();
 		if (existing.some((memory) => memory.text.toLowerCase() === input.fact.toLowerCase())) {
 			return { result: { kept: true, alreadyKnown: true } };
 		}
 		const overflow = existing.length - MEMORY_LIMIT + 1;
 		const oldest = existing.slice(0, Math.max(0, overflow)).map((memory) => memory.id);
-		if (oldest.length > 0) {
-			await ctx.db.delete(assistantMemories).where(inArray(assistantMemories.id, oldest));
-		}
-		const [row] = await ctx.db
-			.insert(assistantMemories)
-			.values({ userId: ctx.userId, text: input.fact })
-			.returning({ id: assistantMemories.id });
-		return { result: { kept: true, id: row?.id } };
+		if (oldest.length > 0) await ctx.store.removeMemories(oldest);
+		const id = await ctx.store.addMemory(input.fact);
+		return { result: { kept: true, id } };
 	},
 });
 
@@ -45,15 +34,12 @@ const forget = defineTool({
 	name: "forget",
 	description:
 		"Removes a remembered fact that is wrong or out of date, by its id from the memory list in your instructions.",
-	input: z.object({ id: z.uuid() }).strict(),
+	input: z.object({ id: z.string().min(1).max(80) }).strict(),
 	effect: "read",
 	label: () => "Forgetting that",
 	run: async (ctx, input) => {
-		const removed = await ctx.db
-			.delete(assistantMemories)
-			.where(and(eq(assistantMemories.id, input.id), eq(assistantMemories.userId, ctx.userId)))
-			.returning({ id: assistantMemories.id });
-		if (removed.length === 0) throw new ToolError("No remembered fact has that id.");
+		const removed = await ctx.store.removeMemories([input.id]);
+		if (removed === 0) throw new ToolError("No remembered fact has that id.");
 		return { result: { forgotten: true } };
 	},
 });

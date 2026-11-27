@@ -2,7 +2,6 @@ import type { AssistantContext, AssistantEvent } from "@personal-os/domain/assis
 import { useCallback, useMemo } from "react";
 import { create } from "zustand";
 import { useSync } from "@/lib/sync/sync-provider";
-import { useAuth } from "@/modules/auth";
 import {
 	applyEvent,
 	type Conversation,
@@ -10,7 +9,8 @@ import {
 	emptyConversation,
 	startTurn,
 } from "../lib/conversation";
-import { assistantApi, assistantErrorMessage, deviceTimeZone } from "../services/assistant-api";
+import { assistantErrorMessage, deviceTimeZone } from "../services/assistant-api";
+import { type AssistantBackend, useAssistantBackend } from "./use-assistant-backend";
 
 export type AssistantStatus = "idle" | "thinking" | "waiting";
 
@@ -47,20 +47,25 @@ function apply(event: AssistantEvent) {
  * Changes the assistant makes are synced to the phone as soon as an answer finishes.
  */
 export function useAssistant() {
-	const { token, status: auth } = useAuth();
+	const backend = useAssistantBackend();
 	const { syncNow } = useSync();
 	const state = useAssistantStore();
 
 	const run = useCallback(
-		async (work: (token: string, emit: (event: AssistantEvent) => void) => Promise<void>) => {
-			if (auth !== "signed-in" || !token) {
-				useAssistantStore.setState({ status: "idle", error: "Sign in to use the assistant." });
+		async (
+			work: (backend: AssistantBackend, emit: (event: AssistantEvent) => void) => Promise<void>,
+		) => {
+			if (!backend) {
+				useAssistantStore.setState({
+					status: "idle",
+					error: "Add your own AI key in Profile to talk to the assistant, no account needed.",
+				});
 				return;
 			}
 			let changed = false;
 			useAssistantStore.setState({ status: "thinking", error: null });
 			try {
-				await work(token, (event) => {
+				await work(backend, (event) => {
 					if (event.type === "done" && event.changed.length > 0) changed = true;
 					apply(event);
 				});
@@ -76,7 +81,7 @@ export function useAssistant() {
 					);
 			}
 		},
-		[auth, token, syncNow],
+		[backend, syncNow],
 	);
 
 	const send = useCallback(
@@ -88,9 +93,8 @@ export function useAssistant() {
 			controller?.abort();
 			controller = new AbortController();
 			const signal = controller.signal;
-			void run((accessToken, emit) =>
-				assistantApi.send(
-					accessToken,
+			void run((current, emit) =>
+				current.send(
 					{
 						threadId: conversation.threadId,
 						text: line,
@@ -109,8 +113,8 @@ export function useAssistant() {
 			useAssistantStore.setState((current) => ({
 				conversation: continueTurn(current.conversation),
 			}));
-			void run((accessToken, emit) =>
-				assistantApi.decide(accessToken, { callId, approve, timeZone: deviceTimeZone() }, emit),
+			void run((current, emit) =>
+				current.decide({ callId, approve, timeZone: deviceTimeZone() }, emit),
 			);
 		},
 		[run],
@@ -118,9 +122,9 @@ export function useAssistant() {
 
 	const undo = useCallback(
 		async (callId: string) => {
-			if (!token) return;
+			if (!backend) return;
 			try {
-				const result = await assistantApi.undo(token, callId);
+				const result = await backend.undo(callId, deviceTimeZone());
 				useAssistantStore.setState((current) => ({
 					conversation: {
 						...current.conversation,
@@ -140,12 +144,19 @@ export function useAssistant() {
 				useAssistantStore.setState({ error: assistantErrorMessage(error) });
 			}
 		},
-		[token, syncNow],
+		[backend, syncNow],
 	);
 
 	return useMemo(
-		() => ({ ...state, send, decide, undo, available: auth === "signed-in" && token !== null }),
-		[state, send, decide, undo, auth, token],
+		() => ({
+			...state,
+			send,
+			decide,
+			undo,
+			available: backend !== null,
+			onDevice: backend?.where === "device",
+		}),
+		[state, send, decide, undo, backend],
 	);
 }
 

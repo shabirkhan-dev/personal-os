@@ -32,9 +32,8 @@ import {
 } from "@personal-os/domain/finance";
 import * as z from "zod";
 
-import { listRecords, putRecord } from "../assistant.records";
-import { localClock, zonedToDate } from "../assistant.time";
-import { defineTool, type ToolContext, ToolError, type UndoWrite } from "../assistant.tool";
+import { localClock, zonedToDate } from "../time";
+import { defineTool, type ToolContext, ToolError, type UndoWrite } from "../tool";
 
 const SETTINGS = "finance-settings";
 const ENTRIES = "finance-entries";
@@ -57,9 +56,9 @@ const dayLabel = (date: Date) => date.toLocaleDateString("en-GB", DAY_FORMAT);
 async function load(ctx: ToolContext) {
 	const clock = localClock(ctx.now, ctx.context.timeZone);
 	const [settingsRows, entryRows, bills] = await Promise.all([
-		listRecords(ctx.db, ctx.userId, SETTINGS, parseSettings),
-		listRecords(ctx.db, ctx.userId, ENTRIES, parseEntry),
-		listRecords(ctx.db, ctx.userId, BILLS, parseBill),
+		ctx.store.list(SETTINGS, parseSettings),
+		ctx.store.list(ENTRIES, parseEntry),
+		ctx.store.list(BILLS, parseBill),
 	]);
 	const stored = settingsRows[0] ?? defaultSettings(ctx.now);
 	const settings: FinanceSettings = { ...stored, balanceAt: clock.shift(stored.balanceAt) };
@@ -113,7 +112,7 @@ async function findBill(ctx: ToolContext, bills: readonly Bill[], ref: string): 
 }
 
 const save = (ctx: ToolContext, collection: string, id: string, data: unknown, deleted = false) =>
-	putRecord(ctx.db, ctx.userId, collection, id, data, ctx.now.getTime(), deleted);
+	ctx.store.put(collection, id, data, ctx.now.getTime(), deleted);
 
 const financeOverview = defineTool({
 	name: "finance_overview",

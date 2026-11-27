@@ -21,9 +21,8 @@ import {
 } from "@personal-os/domain/faith";
 import * as z from "zod";
 
-import { getRecord, listRecords, putRecord } from "../assistant.records";
-import { localClock } from "../assistant.time";
-import { defineTool, type ToolContext, ToolError } from "../assistant.tool";
+import { localClock } from "../time";
+import { defineTool, type ToolContext, ToolError } from "../tool";
 
 const LOGS = "faith-prayer-logs";
 const RECITATIONS = "faith-recitations";
@@ -39,10 +38,10 @@ const rupees = (amount: number) => `Rs ${Math.round(amount).toLocaleString("en-U
 async function load(ctx: ToolContext) {
 	const now = localClock(ctx.now, ctx.context.timeZone).now;
 	const [settingsRows, logs, recitations, tasbih] = await Promise.all([
-		listRecords(ctx.db, ctx.userId, "faith-settings", parseSettings),
-		listRecords(ctx.db, ctx.userId, LOGS, parsePrayerLog),
-		listRecords(ctx.db, ctx.userId, RECITATIONS, parseRecitation),
-		listRecords(ctx.db, ctx.userId, TASBIH, parseTasbihDay),
+		ctx.store.list("faith-settings", parseSettings),
+		ctx.store.list(LOGS, parsePrayerLog),
+		ctx.store.list(RECITATIONS, parseRecitation),
+		ctx.store.list(TASBIH, parseTasbihDay),
 	]);
 	const settings = settingsRows[0] ?? defaultSettings();
 	return { now, today: dayKey(now), settings, logs, recitations, tasbih };
@@ -154,10 +153,10 @@ const logPrayer = defineTool({
 		for (const prayer of input.prayers) {
 			const id = logId(day, prayer);
 			// oxlint-disable-next-line eslint/no-await-in-loop -- a few prayers, each read before it is replaced
-			const before = await getRecord(ctx.db, ctx.userId, LOGS, id, parsePrayerLog);
+			const before = await ctx.store.get(LOGS, id, parsePrayerLog);
 			const log: PrayerLog = { id, day, prayer, status: input.status, at: ctx.now.toISOString() };
 			// oxlint-disable-next-line eslint/no-await-in-loop -- see above
-			await putRecord(ctx.db, ctx.userId, LOGS, id, log, ctx.now.getTime());
+			await ctx.store.put(LOGS, id, log, ctx.now.getTime());
 			undo.push({ collection: LOGS, id, previous: before });
 		}
 		return { result: { day, logged: input.prayers, status: input.status }, changed: [LOGS], undo };
@@ -177,7 +176,7 @@ const logRecitation = defineTool({
 	run: async (ctx, input) => {
 		const { today } = await load(ctx);
 		const session = { id: newId(), day: today, minutes: input.minutes, at: ctx.now.toISOString() };
-		await putRecord(ctx.db, ctx.userId, RECITATIONS, session.id, session, ctx.now.getTime());
+		await ctx.store.put(RECITATIONS, session.id, session, ctx.now.getTime());
 		return {
 			result: { logged: input.minutes },
 			changed: [RECITATIONS],
@@ -220,12 +219,12 @@ const addTasbih = defineTool({
 			throw new ToolError(`No tasbih phrase like "${input.phrase}".`, {
 				phrases: settings.tasbih.map((each) => each.label),
 			});
-		const before = await getRecord(ctx.db, ctx.userId, TASBIH, today, parseTasbihDay);
+		const before = await ctx.store.get(TASBIH, today, parseTasbihDay);
 		const counts = {
 			...before?.counts,
 			[phrase.id]: (before?.counts[phrase.id] ?? 0) + input.count,
 		};
-		await putRecord(ctx.db, ctx.userId, TASBIH, today, { id: today, counts }, ctx.now.getTime());
+		await ctx.store.put(TASBIH, today, { id: today, counts }, ctx.now.getTime());
 		return {
 			result: { phrase: phrase.label, today: counts[phrase.id], target: phrase.target },
 			changed: [TASBIH],
@@ -244,8 +243,8 @@ const zakatStatus = defineTool({
 	run: async (ctx) => {
 		const { now } = await load(ctx);
 		const [profile, payments] = await Promise.all([
-			getRecord(ctx.db, ctx.userId, "faith-zakat", "zakat", parseZakat),
-			listRecords(ctx.db, ctx.userId, PAYMENTS, parsePayment),
+			ctx.store.get("faith-zakat", "zakat", parseZakat),
+			ctx.store.list(PAYMENTS, parsePayment),
 		]);
 		const view = zakatView(profile ?? defaultZakat(), payments, now);
 		return {
@@ -300,7 +299,7 @@ const logZakatPayment = defineTool({
 			amount: input.amount,
 			at: ctx.now.toISOString(),
 		};
-		await putRecord(ctx.db, ctx.userId, PAYMENTS, payment.id, payment, ctx.now.getTime());
+		await ctx.store.put(PAYMENTS, payment.id, payment, ctx.now.getTime());
 		return {
 			result: { recorded: input.amount },
 			changed: [PAYMENTS],

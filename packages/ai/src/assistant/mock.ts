@@ -1,4 +1,4 @@
-import type { ModelChunk, ModelMessage } from "./assistant.provider";
+import type { ModelChunk, ModelMessage } from "./provider";
 
 /**
  * A stand-in model for development and tests: for a new question it reads the money (questions

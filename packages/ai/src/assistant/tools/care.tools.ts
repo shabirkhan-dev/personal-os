@@ -32,9 +32,8 @@ import {
 import { dayKey, newId } from "@personal-os/domain/dates";
 import * as z from "zod";
 
-import { getRecord, listRecords, putRecord } from "../assistant.records";
-import { localClock } from "../assistant.time";
-import { defineTool, type ToolContext, ToolError } from "../assistant.tool";
+import { localClock } from "../time";
+import { defineTool, type ToolContext, ToolError } from "../tool";
 
 const DAYS = "care-days";
 const PRODUCTS = "care-products";
@@ -47,12 +46,12 @@ const rupees = (amount: number) => `Rs ${Math.round(amount).toLocaleString("en-U
 async function load(ctx: ToolContext) {
 	const now = localClock(ctx.now, ctx.context.timeZone).now;
 	const [settingsRows, steps, habits, products, days, checkIns] = await Promise.all([
-		listRecords(ctx.db, ctx.userId, "care-settings", parseSettings),
-		listRecords(ctx.db, ctx.userId, "care-steps", parseStep),
-		listRecords(ctx.db, ctx.userId, "care-habits", parseHabit),
-		listRecords(ctx.db, ctx.userId, PRODUCTS, parseProduct),
-		listRecords(ctx.db, ctx.userId, DAYS, parseDay),
-		listRecords(ctx.db, ctx.userId, CHECK_INS, parseCheckIn),
+		ctx.store.list("care-settings", parseSettings),
+		ctx.store.list("care-steps", parseStep),
+		ctx.store.list("care-habits", parseHabit),
+		ctx.store.list(PRODUCTS, parseProduct),
+		ctx.store.list(DAYS, parseDay),
+		ctx.store.list(CHECK_INS, parseCheckIn),
 	]);
 	const day = dayKey(careDate(now));
 	return {
@@ -299,7 +298,7 @@ const careProgress = defineTool({
 
 /** The open day as stored, so ticks build on what the phone already saved. */
 async function currentDay(ctx: ToolContext, day: string): Promise<CareDay> {
-	return (await getRecord(ctx.db, ctx.userId, DAYS, day, parseDay)) ?? emptyDay(day);
+	return (await ctx.store.get(DAYS, day, parseDay)) ?? emptyDay(day);
 }
 
 const tickCare = defineTool({
@@ -330,7 +329,7 @@ const tickCare = defineTool({
 	},
 	run: async (ctx, input) => {
 		const { day, steps, habits } = await load(ctx);
-		const before = await getRecord(ctx.db, ctx.userId, DAYS, day, parseDay);
+		const before = await ctx.store.get(DAYS, day, parseDay);
 		let record = await currentDay(ctx, day);
 		const stamp = ctx.now.toISOString();
 		if (input.routine) record = finishRoutine(record, stepsOn(steps, input.routine, day), ctx.now);
@@ -353,7 +352,7 @@ const tickCare = defineTool({
 				]),
 			],
 		};
-		await putRecord(ctx.db, ctx.userId, DAYS, day, record, ctx.now.getTime());
+		await ctx.store.put(DAYS, day, record, ctx.now.getTime());
 		return {
 			result: {
 				day,
@@ -381,9 +380,7 @@ const restock = defineTool({
 	run: async (ctx, input) => {
 		const { now, products } = await load(ctx);
 		const [product] = pick(products, [input.product], "product") as [Product];
-		await putRecord(
-			ctx.db,
-			ctx.userId,
+		await ctx.store.put(
 			PRODUCTS,
 			product.id,
 			{ ...product, openedOn: dayKey(now) },
@@ -427,7 +424,7 @@ const addProduct = defineTool({
 			lastsDays: input.lastsDays,
 			price: input.price,
 		};
-		await putRecord(ctx.db, ctx.userId, PRODUCTS, product.id, product, ctx.now.getTime());
+		await ctx.store.put(PRODUCTS, product.id, product, ctx.now.getTime());
 		return {
 			result: { added: product.name },
 			changed: [PRODUCTS],
@@ -457,14 +454,14 @@ const saveCheckIn = defineTool({
 	run: async (ctx, input) => {
 		const { now } = await load(ctx);
 		const id = dayKey(now);
-		const before = await getRecord(ctx.db, ctx.userId, CHECK_INS, id, parseCheckIn);
+		const before = await ctx.store.get(CHECK_INS, id, parseCheckIn);
 		const checkIn = {
 			id,
 			ratings: input.ratings,
 			notes: input.notes ?? {},
 			at: ctx.now.toISOString(),
 		};
-		await putRecord(ctx.db, ctx.userId, CHECK_INS, id, checkIn, ctx.now.getTime());
+		await ctx.store.put(CHECK_INS, id, checkIn, ctx.now.getTime());
 		return {
 			result: { saved: id },
 			changed: [CHECK_INS],

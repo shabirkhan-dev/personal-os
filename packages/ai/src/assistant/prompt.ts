@@ -1,7 +1,7 @@
 import type { ApprovalMode, AssistantContext } from "@personal-os/domain/assistant";
 
-import type { Memory } from "./assistant.repository";
-import { localLabel } from "./assistant.time";
+import type { Memory } from "./store";
+import { localLabel } from "./time";
 
 const MODULE_NAMES: Record<string, string> = {
 	"daily-life": "the daily routine (minimum day)",

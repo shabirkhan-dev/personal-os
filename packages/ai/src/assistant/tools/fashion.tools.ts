@@ -18,9 +18,8 @@ import {
 } from "@personal-os/domain/fashion";
 import * as z from "zod";
 
-import { getRecord, listRecords, putRecord } from "../assistant.records";
-import { localClock } from "../assistant.time";
-import { defineTool, type ToolContext, ToolError } from "../assistant.tool";
+import { localClock } from "../time";
+import { defineTool, type ToolContext, ToolError } from "../tool";
 
 const WEARS = "fashion-wears";
 const WISHES = "fashion-wishes";
@@ -29,9 +28,9 @@ const rupees = (amount: number) => `Rs ${Math.round(amount).toLocaleString("en-U
 async function load(ctx: ToolContext) {
 	const now = localClock(ctx.now, ctx.context.timeZone).now;
 	const [pieces, wears, wishes] = await Promise.all([
-		listRecords(ctx.db, ctx.userId, "fashion-pieces", parsePiece),
-		listRecords(ctx.db, ctx.userId, WEARS, parseWear),
-		listRecords(ctx.db, ctx.userId, WISHES, parseWish),
+		ctx.store.list("fashion-pieces", parsePiece),
+		ctx.store.list(WEARS, parseWear),
+		ctx.store.list(WISHES, parseWish),
 	]);
 	return { now, today: dayKey(now), pieces, wears, wishes };
 }
@@ -170,14 +169,14 @@ const logOutfit = defineTool({
 	run: async (ctx, input) => {
 		const { today, pieces } = await load(ctx);
 		const chosen = findPieces(pieces, input.pieces);
-		const before = await getRecord(ctx.db, ctx.userId, WEARS, today, parseWear);
+		const before = await ctx.store.get(WEARS, today, parseWear);
 		const wear: Wear = {
 			id: today,
 			look: input.look,
 			pieceIds: chosen.map((piece) => piece.id),
 			at: ctx.now.toISOString(),
 		};
-		await putRecord(ctx.db, ctx.userId, WEARS, today, wear, ctx.now.getTime());
+		await ctx.store.put(WEARS, today, wear, ctx.now.getTime());
 		return {
 			result: { logged: chosen.map((piece) => piece.name) },
 			changed: [WEARS],
@@ -220,7 +219,7 @@ const addWish = defineTool({
 			url: "",
 			createdAt: ctx.now.toISOString(),
 		};
-		await putRecord(ctx.db, ctx.userId, WISHES, wish.id, wish, ctx.now.getTime());
+		await ctx.store.put(WISHES, wish.id, wish, ctx.now.getTime());
 		return {
 			result: { added: wish.name },
 			changed: [WISHES],

@@ -1,18 +1,17 @@
 import type { AssistantContext, Card, ToolEffect } from "@personal-os/domain/assistant";
 import type * as z from "zod";
 
-import type { Database } from "@/db/client";
+import type { AssistantStore, UndoWrite } from "./store";
 
 export type ToolContext = {
-	db: Database;
-	userId: string;
+	/** The person's records, memory and profile: on the server, or on the phone. */
+	store: AssistantStore;
 	now: Date;
 	/** Where the person is, and their time zone. */
 	context: AssistantContext;
 };
 
-/** A record as it was before a tool changed it; `previous: null` means the tool created it. */
-export type UndoWrite = { collection: string; id: string; previous: unknown };
+export type { UndoWrite };
 
 export type ToolOutcome = {
 	/** What the model reads back: short, plain JSON with ids and names, never whole documents. */

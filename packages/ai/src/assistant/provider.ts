@@ -1,6 +1,6 @@
-import type { Config } from "@/config/env";
-import { settings } from "@/config/settings";
-import { AppError } from "@/core/app-error";
+import { AI_LIMITS, type AiConfig } from "../config";
+import { AiError } from "../errors";
+import { timeoutSignal } from "../timeout";
 
 /** A message in the OpenAI chat format, the one every compatible provider speaks. */
 export type ModelMessage =
@@ -24,7 +24,7 @@ export type ModelChunk =
 	| { type: "text"; delta: string }
 	| { type: "tool_calls"; calls: ModelToolCall[] };
 
-type ProviderConfig = Extract<Config["ai"], { provider: "openai_compatible" }>;
+type ProviderConfig = Extract<AiConfig, { provider: "openai_compatible" }>;
 
 type StreamDelta = {
 	choices?: {
@@ -39,37 +39,53 @@ type StreamDelta = {
 	}[];
 };
 
+/** "https://x/v1//" → "https://x/v1", without a regex (the address can come from the person). */
+function withoutTrailingSlashes(url: string): string {
+	let end = url.length;
+	while (end > 0 && url[end - 1] === "/") end -= 1;
+	return url.slice(0, end);
+}
+
 /**
  * One streamed chat completion with tools. Text arrives as it is written; tool calls arrive
  * whole once the model finishes them (their arguments stream in pieces and are joined here).
+ * `fetcher` must support streamed bodies (React Native passes `expo/fetch`).
  */
 export async function* streamCompletion(
 	config: ProviderConfig,
 	messages: readonly ModelMessage[],
 	tools: readonly ModelTool[],
+	fetcher: typeof fetch = fetch,
 ): AsyncGenerator<ModelChunk> {
 	let response: Response;
 	try {
-		response = await fetch(`${config.baseUrl}/chat/completions`, {
+		response = await fetcher(`${withoutTrailingSlashes(config.baseUrl)}/chat/completions`, {
 			method: "POST",
-			headers: { Authorization: `Bearer ${config.apiKey}`, "Content-Type": "application/json" },
+			headers: {
+				Authorization: `Bearer ${config.apiKey}`,
+				"Content-Type": "application/json",
+				...config.headers,
+			},
 			body: JSON.stringify({
 				model: config.model,
 				messages,
 				tools: tools.length > 0 ? tools : undefined,
 				temperature: 0.3,
-				max_tokens: settings.ai.maxOutputTokens,
+				max_tokens: config.maxTokens ?? AI_LIMITS.maxOutputTokens,
 				stream: true,
+				...config.extraBody,
 			}),
-			signal: AbortSignal.timeout(settings.ai.timeoutMs),
+			signal: timeoutSignal(config.timeoutMs ?? AI_LIMITS.timeoutMs),
 		});
 	} catch (error) {
-		throw new AppError("AI_UNAVAILABLE", { cause: error });
+		throw new AiError("unavailable", { cause: error });
 	}
 	if (!response.ok || !response.body) {
 		const detail = await response.text().catch(() => "");
 		console.error(`[assistant] provider answered ${response.status}: ${detail.slice(0, 300)}`);
-		throw new AppError("AI_UNAVAILABLE");
+		if (response.status === 401 || response.status === 403) throw new AiError("unauthorized");
+		if (response.status === 429 || response.status === 402) throw new AiError("rate_limited");
+		throw new AiError("unavailable");
 	}
 
 	const calls = new Map<number, ModelToolCall>();

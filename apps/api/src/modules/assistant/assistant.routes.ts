@@ -1,3 +1,16 @@
+import {
+	AiError,
+	AssistantError,
+	decide,
+	expirePending,
+	runTurn,
+	safeZone,
+	type ThreadStore,
+	threadTitle,
+	type ToolContext,
+	toThreadMessages,
+	undo,
+} from "@personal-os/ai";
 import type { AssistantEvent } from "@personal-os/domain/assistant";
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
@@ -10,11 +23,9 @@ import { rateLimit } from "@/core/rate-limit";
 import { ok } from "@/core/response";
 import { validate } from "@/core/validate";
 import { dbOf } from "@/core/context";
+import { countCall } from "@/modules/ai/ai.quota";
 import { requireAuth } from "@/modules/auth/auth.middleware";
-import { decide, runTurn, undo, withState } from "./assistant.agent";
-import { threadTitle } from "./assistant.prompt";
 import {
-	addMessage,
 	createThread,
 	deleteMemory,
 	deleteThread,
@@ -23,12 +34,33 @@ import {
 	listMemories,
 	listThreads,
 	loadMessages,
-	toThreadMessages,
-	updateTool,
 } from "./assistant.repository";
 import { approvalSchema, messageSchema, undoSchema } from "./assistant.schema";
-import { safeZone } from "./assistant.time";
-import type { ToolContext } from "./assistant.tool";
+import { serverStores } from "./assistant.store";
+
+/** The agent's own failures as API errors. */
+function asAppError(error: unknown): AppError | null {
+	if (error instanceof AppError) return error;
+	if (error instanceof AssistantError) {
+		return new AppError(
+			error.code === "nothing_to_approve"
+				? "ASSISTANT_NOTHING_TO_APPROVE"
+				: "ASSISTANT_NOTHING_TO_UNDO",
+		);
+	}
+	if (error instanceof AiError) {
+		return new AppError(error.code === "invalid_output" ? "AI_INVALID_OUTPUT" : "AI_UNAVAILABLE");
+	}
+	return null;
+}
+
+type Work = {
+	ctx: ToolContext;
+	threads: ThreadStore;
+	db: Parameters<typeof serverStores>[0];
+	/** Counts a model call against the person's daily allowance. */
+	beforeCall: () => Promise<void>;
+};
 
 /**
  * The assistant, `/assistant`. A message or an approval answers as a stream of server-sent
@@ -48,18 +80,18 @@ export const assistantRoutes = new Hono<AppEnv>()
 		const body = c.req.valid("json");
 		const userId = c.get("caller").userId;
 		const context = { ...body.context, timeZone: safeZone(body.context.timeZone) };
-		return stream(c, context, async (ctx, emit) => {
+		return stream(c, context, async ({ ctx, threads, db, beforeCall }, emit) => {
 			let threadId = body.threadId;
 			if (threadId) {
-				if (!(await findThread(ctx.db, userId, threadId)))
+				if (!(await findThread(db, userId, threadId)))
 					throw new AppError("ASSISTANT_THREAD_NOT_FOUND");
-				await expirePending(ctx, threadId);
+				await expirePending(threads, threadId);
 			} else {
-				threadId = await createThread(ctx.db, userId, threadTitle(body.text));
+				threadId = await createThread(db, userId, threadTitle(body.text));
 			}
 			await emit({ type: "thread", threadId, title: threadTitle(body.text) });
-			await addMessage(ctx.db, threadId, { role: "user", content: { text: body.text, context } });
-			await runTurn({ config: c.get("config"), ctx, threadId }, emit);
+			await threads.addMessage(threadId, { role: "user", content: { text: body.text, context } });
+			await runTurn({ config: c.get("config").ai, ctx, threadId, threads, beforeCall }, emit);
 		});
 	})
 	.post("/approvals", rateLimit("AI_LIMITER"), validate("json", approvalSchema), async (c) => {
@@ -68,9 +100,9 @@ export const assistantRoutes = new Hono<AppEnv>()
 		const found = await findToolCall(dbOf(c), userId, body.callId);
 		if (!found) throw new AppError("ASSISTANT_NOTHING_TO_APPROVE");
 		const context = { timeZone: safeZone(body.timeZone) };
-		return stream(c, context, (ctx, emit) =>
+		return stream(c, context, ({ ctx, threads, beforeCall }, emit) =>
 			decide(
-				{ config: c.get("config"), ctx, threadId: found.threadId },
+				{ config: c.get("config").ai, ctx, threadId: found.threadId, threads, beforeCall },
 				body.callId,
 				body.approve,
 				emit,
@@ -83,8 +115,13 @@ export const assistantRoutes = new Hono<AppEnv>()
 		const db = dbOf(c);
 		const found = await findToolCall(db, userId, body.callId);
 		if (!found) throw new AppError("ASSISTANT_NOTHING_TO_UNDO");
-		const ctx: ToolContext = { db, userId, now: new Date(), context: { timeZone: "UTC" } };
-		return ok(c, await undo(ctx, body.callId, found));
+		const { store, threads } = serverStores(db, userId);
+		const ctx: ToolContext = { store, now: new Date(), context: { timeZone: "UTC" } };
+		try {
+			return ok(c, await undo(ctx, threads, body.callId, found));
+		} catch (error) {
+			throw asAppError(error) ?? error;
+		}
 	})
 	.get("/threads", async (c) => ok(c, await listThreads(dbOf(c), c.get("caller").userId)))
 	.get("/threads/:id", async (c) => {
@@ -118,44 +155,29 @@ export const assistantRoutes = new Hono<AppEnv>()
 function stream(
 	c: AppContext,
 	context: ToolContext["context"],
-	work: (ctx: ToolContext, emit: (event: AssistantEvent) => Promise<void>) => Promise<void>,
+	work: (work: Work, emit: (event: AssistantEvent) => Promise<void>) => Promise<void>,
 ) {
 	const userId = c.get("caller").userId;
-	const handle = c.get("openDatabase")(c.get("config"), c.env);
+	const config = c.get("config");
+	const handle = c.get("openDatabase")(config, c.env);
 	return streamSSE(c, async (sse) => {
 		const emit = (event: AssistantEvent) => sse.writeSSE({ data: JSON.stringify(event) });
+		const now = new Date();
+		const { store, threads } = serverStores(handle.db, userId);
+		const beforeCall = async () => {
+			if ((await countCall(handle.db, userId, now)) > settings.ai.callsPerDay) {
+				throw new AppError("AI_QUOTA_REACHED");
+			}
+		};
 		try {
-			await work({ db: handle.db, userId, now: new Date(), context }, emit);
+			await work({ ctx: { store, now, context }, threads, db: handle.db, beforeCall }, emit);
 		} catch (error) {
-			if (!(error instanceof AppError)) console.error("[assistant] turn failed", error);
-			const known = error instanceof AppError ? error : new AppError("INTERNAL_ERROR");
+			const mapped = asAppError(error);
+			if (!mapped) console.error("[assistant] turn failed", error);
+			const known = mapped ?? new AppError("INTERNAL_ERROR");
 			await emit({ type: "error", code: known.code, message: known.message });
 		} finally {
 			await handle.close().catch((error: unknown) => console.warn("[assistant] closing db", error));
 		}
 	});
-}
-
-/** A new message moves on from changes left undecided: they count as declined. */
-async function expirePending(ctx: ToolContext, threadId: string) {
-	const open = (await loadMessages(ctx.db, threadId)).filter(
-		(message) => message.role === "tool" && message.content.result === null,
-	);
-	await Promise.all(
-		open.map((message) =>
-			message.role === "tool"
-				? updateTool(ctx.db, message.id, {
-						...message.content,
-						status: "declined",
-						result: JSON.stringify({
-							declined: true,
-							note: "The person moved on without deciding.",
-						}),
-						cards: message.content.cards.map((card) =>
-							card.kind === "approval" ? withState(card, "declined") : card,
-						),
-					})
-				: null,
-		),
-	);
 }

@@ -30,8 +30,9 @@ Most people track life in disconnected tools: notes, finance apps, shopping list
   or start from a template. A Getting started card on Home walks through the modules you picked.
 - **Your own AI key, if you like.** Add a key from OpenRouter (free models included), OpenAI or
   any OpenAI-compatible provider in Profile → Your AI key. It stays in the phone's keystore and
-  AI calls go straight from the phone to your provider, no account needed. Without one, AI runs
-  through your signed-in account.
+  AI calls go straight from the phone to your provider, no account needed. That includes the
+  chat assistant: its tools, approvals, undo, memory and past chats all run on the phone, over
+  its own encrypted records. Without a key, AI runs through your signed-in account.
 - **Templates made by you, with any AI.** Nothing ships with the app: no stock recipes,
   programs, exercises or photos. Templates → pick what to make (recipes, a training program,
   exercises, a Care routine, tasbih, flashcards, a challenge, a budget, a minimum day) → copy the
@@ -98,8 +99,8 @@ This monorepo is organized around a few core parts:
   the AI for every module (the provider key stays in the Worker)
 - Docs: `apps/docs` — Fumadocs site for product and engineering documentation
 - Web: `apps/web` — landing page / public shell, built as a static export
-- Shared AI: `packages/ai` — every AI task's prompt and schema, run by the API and, with a
-  person's own key, by the phone
+- Shared AI: `packages/ai` — every AI task's prompt and schema, and the assistant agent with
+  its tools, run by the API and, with a person's own key, by the phone
 - Shared models: `packages/domain` — record shapes and parsing used by both the app and the API
 - Shared design system: `packages/tokens` — design tokens and visual primitives
 - Shared tooling: `scripts/`, `.devcontainer/`, CI and project hooks

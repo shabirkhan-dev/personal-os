@@ -30,9 +30,8 @@ import {
 } from "@personal-os/domain/health";
 import * as z from "zod";
 
-import { listRecords, putRecord } from "../assistant.records";
-import { localClock } from "../assistant.time";
-import { defineTool, type ToolContext, ToolError } from "../assistant.tool";
+import { localClock } from "../time";
+import { defineTool, type ToolContext, ToolError } from "../tool";
 
 const READINGS = "health-readings";
 const DOSES = "health-doses";
@@ -53,12 +52,12 @@ const SPOKEN_KINDS = [
 async function load(ctx: ToolContext) {
 	const clock = localClock(ctx.now, ctx.context.timeZone);
 	const [readings, medicines, doses, checkups, labs, profiles] = await Promise.all([
-		listRecords(ctx.db, ctx.userId, READINGS, parseReading),
-		listRecords(ctx.db, ctx.userId, "health-medicines", parseMedicine),
-		listRecords(ctx.db, ctx.userId, DOSES, parseDoseLog),
-		listRecords(ctx.db, ctx.userId, CHECKUPS, parseCheckup),
-		listRecords(ctx.db, ctx.userId, "health-labs", parseLabResult),
-		listRecords(ctx.db, ctx.userId, "health-profile", parseHealthProfile),
+		ctx.store.list(READINGS, parseReading),
+		ctx.store.list("health-medicines", parseMedicine),
+		ctx.store.list(DOSES, parseDoseLog),
+		ctx.store.list(CHECKUPS, parseCheckup),
+		ctx.store.list("health-labs", parseLabResult),
+		ctx.store.list("health-profile", parseHealthProfile),
 	]);
 	return {
 		clock,
@@ -199,7 +198,7 @@ const logReading = defineTool({
 					: `That ${READING_LABELS[input.kind].toLowerCase()} doesn't look right.`,
 			);
 		}
-		await putRecord(ctx.db, ctx.userId, READINGS, reading.id, reading, ctx.now.getTime());
+		await ctx.store.put(READINGS, reading.id, reading, ctx.now.getTime());
 		const band = readingBand(reading);
 		return {
 			result: {
@@ -259,15 +258,13 @@ const logDose = defineTool({
 			status: input.status ?? "taken",
 			at: ctx.now.toISOString(),
 		};
-		await putRecord(ctx.db, ctx.userId, DOSES, log.id, log, ctx.now.getTime());
+		await ctx.store.put(DOSES, log.id, log, ctx.now.getTime());
 		const undo: { collection: string; id: string; previous: unknown }[] = [
 			{ collection: DOSES, id: log.id, previous: null },
 		];
 		const changed = [DOSES];
 		if (log.status === "taken" && medicine.stock !== null && medicine.stock > 0) {
-			await putRecord(
-				ctx.db,
-				ctx.userId,
+			await ctx.store.put(
 				"health-medicines",
 				medicine.id,
 				{ ...medicine, stock: medicine.stock - 1 },
@@ -314,7 +311,7 @@ const addCheckup = defineTool({
 			repeatMonths: input.repeatMonths ?? null,
 			note: input.note ?? "",
 		};
-		await putRecord(ctx.db, ctx.userId, CHECKUPS, checkup.id, checkup, ctx.now.getTime());
+		await ctx.store.put(CHECKUPS, checkup.id, checkup, ctx.now.getTime());
 		return {
 			result: { added: checkup.title, on: checkup.on, done: checkup.done },
 			changed: [CHECKUPS],
@@ -350,7 +347,7 @@ const logSymptom = defineTool({
 			at: ctx.now.toISOString(),
 			note: input.note ?? "",
 		}) as Symptom;
-		await putRecord(ctx.db, ctx.userId, SYMPTOM_LOG, symptom.id, symptom, ctx.now.getTime());
+		await ctx.store.put(SYMPTOM_LOG, symptom.id, symptom, ctx.now.getTime());
 		return {
 			result: { noted: SYMPTOM_LABELS[symptom.kind], severity: symptom.severity },
 			changed: [SYMPTOM_LOG],

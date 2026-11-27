@@ -124,8 +124,12 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
 - Your own AI key (Profile → Your AI key): OpenRouter with a live list of its free text models
   (and its automatic free router), OpenAI, or any OpenAI-compatible endpoint. The key is kept in
   the keystore (not synced, not backed up) and every module AI task runs on the phone with it,
-  from the same prompts and schemas the API uses (`packages/ai`). The chat assistant still runs
-  through the server.
+  from the same prompts and schemas the API uses (`packages/ai`).
+- The chat assistant on the phone: with a key, the same agent and tools as the server
+  (`packages/ai/src/assistant`) run on the device over its record store. Threads, messages and
+  memories are records (`assistant-threads`, `assistant-messages`, `assistant-memories`), so
+  they're encrypted, backed up and synced only if the person signs in. Replies stream through
+  `expo/fetch`. The server keeps its own Postgres stores for signed-in accounts without a key.
 - Home follows the day: Overview leads with what matters now, from the person's own wake and
   bed times (morning brief, prayer, routine and outfit in the morning; close the day, night
   routine and tomorrow's outfit at night), and reorders its cards and ask-bar suggestions to fit.

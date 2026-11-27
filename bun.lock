@@ -162,6 +162,7 @@
       "name": "@personal-os/ai",
       "version": "0.0.0",
       "dependencies": {
+        "@personal-os/domain": "workspace:*",
         "zod": "^4.6.7",
       },
       "devDependencies": {

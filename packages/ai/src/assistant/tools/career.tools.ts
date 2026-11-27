@@ -19,9 +19,8 @@ import {
 } from "@personal-os/domain/career";
 import * as z from "zod";
 
-import { getRecord, listRecords, putRecord } from "../assistant.records";
-import { localDate, localLabel, zonedToDate } from "../assistant.time";
-import { defineTool, type ToolContext, ToolError, type UndoWrite } from "../assistant.tool";
+import { localDate, localLabel, zonedToDate } from "../time";
+import { defineTool, type ToolContext, ToolError, type UndoWrite } from "../tool";
 
 const APPLICATIONS = "career-applications";
 const PREPS = "career-preps";
@@ -59,8 +58,7 @@ function brief(app: Application, ctx: ToolContext) {
 	};
 }
 
-const loadAll = (ctx: ToolContext) =>
-	listRecords(ctx.db, ctx.userId, APPLICATIONS, parseApplication);
+const loadAll = (ctx: ToolContext) => ctx.store.list(APPLICATIONS, parseApplication);
 
 /**
  * Finds the application meant by `ref`: its id, or words from the company or role ("tessera",
@@ -92,7 +90,7 @@ async function resolve(ctx: ToolContext, ref: string): Promise<Application> {
 
 /** Saves a changed application and returns how to take it back. */
 async function save(ctx: ToolContext, next: Application, previous: Application | null) {
-	const kept = await putRecord(ctx.db, ctx.userId, APPLICATIONS, next.id, next, ctx.now.getTime());
+	const kept = await ctx.store.put(APPLICATIONS, next.id, next, ctx.now.getTime());
 	if (!kept) throw new ToolError("The phone changed this application a moment ago. Read it again.");
 	const undo: UndoWrite[] = [{ collection: APPLICATIONS, id: next.id, previous }];
 	return undo;
@@ -121,8 +119,8 @@ const careerOverview = defineTool({
 	run: async (ctx) => {
 		const [apps, settingsRows, plans] = await Promise.all([
 			loadAll(ctx),
-			listRecords(ctx.db, ctx.userId, "career-settings", parseSettings),
-			listRecords(ctx.db, ctx.userId, "career-skill-plans", parseSkillPlan),
+			ctx.store.list("career-settings", parseSettings),
+			ctx.store.list("career-skill-plans", parseSkillPlan),
 		]);
 		const settings = settingsRows[0] ?? defaultSettings;
 		const now = ctx.now.getTime();
@@ -506,19 +504,17 @@ const deleteApplication = defineTool({
 		const app = await resolve(ctx, input.application);
 		const at = ctx.now.getTime();
 		const [prep, cards] = await Promise.all([
-			getRecord(ctx.db, ctx.userId, PREPS, app.id, (raw) => raw),
-			listRecords(ctx.db, ctx.userId, FLASHCARDS, parseFlashcard),
+			ctx.store.get(PREPS, app.id, (raw) => raw),
+			ctx.store.list(FLASHCARDS, parseFlashcard),
 		]);
 		const deck = cards.filter((card) => card.deckId === app.id);
 		const undo: UndoWrite[] = [{ collection: APPLICATIONS, id: app.id, previous: app }];
-		await putRecord(ctx.db, ctx.userId, APPLICATIONS, app.id, app, at, true);
+		await ctx.store.put(APPLICATIONS, app.id, app, at, true);
 		if (prep) {
-			await putRecord(ctx.db, ctx.userId, PREPS, app.id, prep, at, true);
+			await ctx.store.put(PREPS, app.id, prep, at, true);
 			undo.push({ collection: PREPS, id: app.id, previous: prep });
 		}
-		await Promise.all(
-			deck.map((card) => putRecord(ctx.db, ctx.userId, FLASHCARDS, card.id, card, at, true)),
-		);
+		await Promise.all(deck.map((card) => ctx.store.put(FLASHCARDS, card.id, card, at, true)));
 		undo.push(...deck.map((card) => ({ collection: FLASHCARDS, id: card.id, previous: card })));
 		return {
 			result: { deleted: { company: app.company, role: app.role } },

@@ -8,13 +8,10 @@ import {
 	SPORT_LABELS,
 	SPORTS,
 } from "@personal-os/domain/training";
-import { eq } from "drizzle-orm";
 import * as z from "zod";
 
-import { onboardingProfiles } from "@/db/schema";
-import { listRecords, putRecord } from "../assistant.records";
-import { localClock, zonedToDate } from "../assistant.time";
-import { defineTool, type ToolContext, ToolError } from "../assistant.tool";
+import { localClock, zonedToDate } from "../time";
+import { defineTool, type ToolContext, ToolError } from "../tool";
 
 const SESSIONS = "training-sessions";
 const DAY_MS = 86_400_000;
@@ -26,7 +23,7 @@ const dayLabel = (iso: string) => new Date(iso).toLocaleDateString("en-GB", DAY_
 /** Sessions on the person's clock (see `localClock`), newest first. */
 async function load(ctx: ToolContext) {
 	const clock = localClock(ctx.now, ctx.context.timeZone);
-	const stored = await listRecords(ctx.db, ctx.userId, SESSIONS, parseSession);
+	const stored = await ctx.store.list(SESSIONS, parseSession);
 	const sessions = stored
 		.map((session) => ({ ...session, startedAt: clock.shift(session.startedAt) }))
 		.toSorted((a, b) => b.startedAt.localeCompare(a.startedAt));
@@ -305,11 +302,7 @@ const exerciseProgress = defineTool({
 });
 
 async function bodyWeight(ctx: ToolContext): Promise<number> {
-	const [row] = await ctx.db
-		.select({ answers: onboardingProfiles.answers })
-		.from(onboardingProfiles)
-		.where(eq(onboardingProfiles.userId, ctx.userId));
-	const weight = (row?.answers as { weightKg?: unknown } | undefined)?.weightKg;
+	const weight = (await ctx.store.profile()).answers.weightKg;
 	return typeof weight === "number" && weight > 20 && weight < 400 ? weight : 70;
 }
 
@@ -385,7 +378,7 @@ const logSession = defineTool({
 			avgHr: null,
 			note: input.note ?? "",
 		};
-		await putRecord(ctx.db, ctx.userId, SESSIONS, session.id, session, ctx.now.getTime());
+		await ctx.store.put(SESSIONS, session.id, session, ctx.now.getTime());
 		const { clock } = await load(ctx);
 		return {
 			result: { logged: sessionBrief(session), kcal: session.kcal },
@@ -422,7 +415,7 @@ const deleteSession = defineTool({
 		const { stored } = await load(ctx);
 		const session = stored.find((each) => each.id === input.id);
 		if (!session) throw new ToolError("No session has that id. Find it with find_sessions.");
-		await putRecord(ctx.db, ctx.userId, SESSIONS, session.id, session, ctx.now.getTime(), true);
+		await ctx.store.put(SESSIONS, session.id, session, ctx.now.getTime(), true);
 		return {
 			result: { deleted: sessionBrief(session) },
 			changed: [SESSIONS],

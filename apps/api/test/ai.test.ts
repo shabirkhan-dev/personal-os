@@ -408,7 +408,16 @@ describe("Training AI", () => {
 		expect(response.json?.data).toMatchObject({
 			title: "Mock program",
 			weeks: 8,
-			sessions: [{ items: [{ exercise: "shoulder-warm-up" }, { exercise: "push-up" }, {}] }],
+			sessions: [
+				{
+					items: [
+						{ exercise: "shoulder-warm-up" },
+						{ exercise: "push-up" },
+						{ exercise: "mock-push-up" },
+					],
+				},
+			],
+			exercises: [{ key: "mock-push-up", name: "Push-up", unit: "reps" }],
 		});
 	});
 
@@ -452,6 +461,57 @@ describe("Training AI", () => {
 				},
 			],
 			order: [0, 0],
+			exercises: [],
+		});
+	});
+
+	it("keeps the new exercises a draft defines, cleaned, when a session uses them", async () => {
+		provider(
+			JSON.stringify({
+				title: "Rings",
+				weeks: 6,
+				sessions: [
+					{
+						title: "Rings A",
+						sport: "calisthenics",
+						focus: "upper",
+						minutes: 40,
+						items: [{ exercise: "Ring Row!", sets: 3, low: 8, high: 12, restS: 90 }],
+					},
+				],
+				order: [0],
+				newExercises: [
+					{
+						key: "Ring Row!",
+						name: "Ring row",
+						pattern: "row",
+						unit: "laps",
+						level: 40,
+						equipment: ["rings"],
+						cues: ["Body straight", "Pull to the chest"],
+					},
+					{ key: "unused", name: "Unused", unit: "reps", cues: [] },
+				],
+			}),
+		);
+		const response = await realApp.call("POST", "/ai/training/program", {
+			token,
+			body: { ...programBody, exercises: [] },
+		});
+		expect(response.status).toBe(200);
+		expect(response.json?.data).toMatchObject({
+			sessions: [{ items: [{ exercise: "ring-row", range: [8, 12] }] }],
+			exercises: [
+				{
+					key: "ring-row",
+					name: "Ring row",
+					pattern: "row",
+					unit: "reps",
+					level: 10,
+					equipment: ["rings"],
+					cues: ["Body straight", "Pull to the chest", ""],
+				},
+			],
 		});
 	});
 
@@ -464,14 +524,6 @@ describe("Training AI", () => {
 			body: programBody,
 		});
 		expect(response.status).toBe(502);
-	});
-
-	it("needs a list of exercises to choose from", async () => {
-		const response = await mockApp.call("POST", "/ai/training/program", {
-			token,
-			body: { ...programBody, exercises: catalog.slice(0, 2) },
-		});
-		expect(response.status).toBe(400);
 	});
 });
 

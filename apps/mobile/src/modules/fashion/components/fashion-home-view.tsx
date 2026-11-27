@@ -15,10 +15,9 @@ import { voiceOut } from "@/lib/voice";
 import { AskBar } from "@/modules/home/components/ask-bar";
 import type { HomeModuleViewProps } from "@/modules/home/lib/module-home";
 import { useAskInbox } from "@/modules/home/store/ask-inbox";
-import { addFromCatalog, saveSettings, undoWear, wearLook } from "../data/fashion-actions";
+import { saveSettings, undoWear, wearLook } from "../data/fashion-actions";
 import { FASHION_ASK_JOB, useFashionUi } from "../hooks/fashion-ui-store";
 import { useFashionToday } from "../hooks/use-fashion-today";
-import { QUICK_ADD } from "../lib/catalog";
 import { colourHeadline, colourStory, daysSinceWorn, idlePieces } from "../lib/fashion-math";
 import type { Wear } from "../lib/fashion-model";
 import { layerAdvice, lookPieceIds, sprays } from "../lib/outfits";
@@ -49,8 +48,6 @@ export function FashionHomeView({ actionRequest }: HomeModuleViewProps) {
 	const dismissJob = useAiJobs((state) => state.dismiss);
 	const [notice, setNotice] = useState<string | null>(null);
 	const [logged, setLogged] = useState<Logged | null>(null);
-	const [picked, setPicked] = useState<string[]>(QUICK_ADD.slice(0, 4));
-	const [adding, setAdding] = useState(false);
 	const [locating, setLocating] = useState<string | null>(null);
 	const [locateError, setLocateError] = useState<string | null>(null);
 
@@ -302,27 +299,7 @@ export function FashionHomeView({ actionRequest }: HomeModuleViewProps) {
 			) : null}
 
 			{empty ? (
-				<CapsuleCard
-					picked={picked}
-					options={QUICK_ADD}
-					busy={adding}
-					onToggle={(id) =>
-						setPicked((current) =>
-							current.includes(id) ? current.filter((item) => item !== id) : [...current, id],
-						)
-					}
-					onAdd={() => {
-						setAdding(true);
-						addFromCatalog(picked)
-							.then(() => haptics.success())
-							.catch((error: unknown) => {
-								console.error("[fashion] quick add failed", error);
-								setNotice("Couldn't save on this phone. Try again.");
-							})
-							.finally(() => setAdding(false));
-					}}
-					onOwn={() => fashionRoutes.add()}
-				/>
+				<CapsuleCard onOwn={() => fashionRoutes.add()} />
 			) : shown ? (
 				<TodayLookCard
 					look={shown}

@@ -4,14 +4,8 @@ import { deleteJson, readJson } from "@/lib/storage/json-file";
 import { asArray, asNumber, asString, isRecord } from "@/lib/storage/parse";
 import { estimateKcal } from "../lib/kcal";
 import type { Template } from "../lib/library";
-import {
-	buildProgramWeek,
-	programStart,
-	progressAfter,
-	startingProgress,
-	weekNumber,
-} from "../lib/programs/engine";
-import type { ChainId, FixedDay, ProgramDef, Progress } from "../lib/programs/program-model";
+import { buildProgramWeek, programStart, progressAfter, weekNumber } from "../lib/programs/engine";
+import type { FixedDay, ProgramDef, Progress } from "../lib/programs/program-model";
 import type { Equipment } from "../lib/exercise-guide";
 import { buildWeek, rebalance, weekDays } from "../lib/training-math";
 import {
@@ -107,8 +101,6 @@ export type ProgramSetup = {
 	minutes: number;
 	equipment: Equipment[];
 	fixedDays: FixedDay[];
-	/** The rung someone can already do, per chain. */
-	steps: Partial<Record<ChainId, number>>;
 };
 
 /**
@@ -134,10 +126,6 @@ export async function startProgram(
 		fixedDays: setup.fixedDays,
 		sports: [...new Set([...settings.sports, ...program.sports])],
 	};
-	const stamp = now.toISOString();
-	await Promise.all(
-		startingProgress(setup.steps, program, stamp).map((item) => saveItem(trainingProgress, item)),
-	);
 	await saveItem(trainingSettings, next);
 	const planned = weekSlots(next, program, days);
 	const slots = planned.map((slot): PlanSlot =>
@@ -190,7 +178,7 @@ export function deleteActivity(activity: Activity): Promise<void> {
 	return removeItem(trainingActivities, activity.id);
 }
 
-/** Saves one of their exercises, or their changes to a built-in one (same id). */
+/** Saves one of their exercises. */
 export function saveExercise(exercise: CatalogExercise): Promise<void> {
 	return saveItem(trainingExercises, exercise);
 }

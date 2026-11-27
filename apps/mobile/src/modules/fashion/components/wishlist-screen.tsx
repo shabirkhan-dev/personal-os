@@ -14,7 +14,6 @@ import { formatMoney, parseAmount } from "@/lib/money";
 import { usePoTheme } from "@/theme";
 import { buyWish, removeWish, saveSettings, saveWish } from "../data/fashion-actions";
 import { useFashion } from "../hooks/use-fashion";
-import { lookAlike } from "../lib/catalog";
 import { goesWith } from "../lib/fashion-math";
 import {
 	CATEGORIES,
@@ -197,9 +196,7 @@ function WishSheet({ wish, onClose }: { wish: Wish | null; onClose: () => void }
 			tag,
 			reason: reason.trim(),
 			unlock: unlock.trim(),
-			image:
-				wish?.image ??
-				(lookAlike(guessed, colour) ? `catalog:${lookAlike(guessed, colour)?.id}` : null),
+			image: wish?.image ?? null,
 			url: url.trim(),
 		}).catch((error: unknown) => console.error("[fashion] could not save the wish", error));
 		onClose();

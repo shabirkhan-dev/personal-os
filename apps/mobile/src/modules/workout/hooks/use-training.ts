@@ -16,7 +16,6 @@ import {
 import { ensureWeek, migrateOldWorkout } from "../data/training-actions";
 import { type CatalogExercise, setCustomExercises } from "../lib/exercise-guide";
 import { setTemplateResolver, templateById } from "../lib/library";
-import { BUILT_IN_PROGRAMS } from "../lib/programs/built-in";
 import { programById, resolveTemplate, weekNumber } from "../lib/programs/engine";
 import type { ProgramDef, Progress } from "../lib/programs/program-model";
 import { weekCount, weekDays } from "../lib/training-math";
@@ -65,13 +64,8 @@ export function useTraining() {
 			(progressList.data ?? []).map((item) => [item.id, item]),
 		);
 		const settings = settingsList.data?.[0] ?? defaultSettings();
-		// Only the person's programs: built-ins come from Templates as their own copy. One they
-		// were already following before that change stays, so nothing in progress disappears.
-		const following = settings.program?.id ?? null;
-		const kept = BUILT_IN_PROGRAMS.filter(
-			(program) => program.id === following && !custom.some((item) => item.id === program.id),
-		);
-		const programs: ProgramDef[] = [...custom, ...kept];
+		// Only the person's programs: made by hand, with AI or imported. None ship with the app.
+		const programs: ProgramDef[] = custom;
 		// Program sessions ("p:hybrid-athlete:3:push") are built from the programs and levels. Set
 		// here, during render, so the screen reading this data resolves them right away.
 		setTemplateResolver((id) => resolveTemplate(id, { programs, progress, settings, activities }));

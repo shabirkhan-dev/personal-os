@@ -25,13 +25,10 @@ import {
 	saveResource,
 	startChallenge,
 	toggleChallengeDay,
-	toggleLesson,
 } from "../data/faith-actions";
 import { useFaith } from "../hooks/use-faith";
-import { CHALLENGES, type LearningPath, PATHS } from "../lib/faith-content";
 import { challengeDay, challengeShare, daysAgo } from "../lib/faith-math";
 import { RESOURCE_KINDS, type Resource, type ResourceKind } from "../lib/faith-model";
-import { templateRoutes } from "@/modules/templates/navigation";
 import { faithRoutes } from "../navigation";
 import { FaithScreen } from "./faith-screen";
 
@@ -54,16 +51,13 @@ const KIND_TONE = {
 	pdf: { tone: "statusCaution", tile: "statusCautionSubtle" },
 } as const;
 
-/** Grow in faith: the current challenge, learning paths and the person's own notes and links. */
+/** Grow in faith: the person's own challenge, their flashcards, and their notes and links. */
 export function GrowScreen() {
 	const { colors } = usePoTheme();
-	const { challenge, progress, resources, cards } = useFaith();
-	// Only the paths the person added (from Templates); none shows on its own.
-	const mine = PATHS.filter((path) => progress.some((entry) => entry.id === path.id));
+	const { challenge, resources, cards } = useFaith();
 	const now = useNow();
 	const [filter, setFilter] = useState<ResourceKind | "all">("all");
 	const [picking, setPicking] = useState(false);
-	const [path, setPath] = useState<LearningPath | null>(null);
 	const [editing, setEditing] = useState<{ key: number; resource: Resource | null } | null>(null);
 
 	const due = dueCards(cards, now).length;
@@ -90,7 +84,7 @@ export function GrowScreen() {
 		<FaithScreen
 			action={{ icon: "Line/Plus", label: "Add a note or link", onPress: () => edit(null) }}
 		>
-			<ScreenTitle eyebrow="Challenges · paths · resources" title="Grow in faith" />
+			<ScreenTitle eyebrow="Challenges · flashcards · resources" title="Grow in faith" />
 
 			<SectionLabel>Challenge</SectionLabel>
 			<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
@@ -146,55 +140,30 @@ export function GrowScreen() {
 					</>
 				) : (
 					<>
-						<PoText variant="row15">Pick a challenge</PoText>
+						<PoText variant="row15">Set yourself a challenge</PoText>
 						<PoText variant="meta13" tone="textSecondary">
-							A small daily step for a few weeks. Mark each day done and watch the grid fill.
+							A small daily step for a few weeks, in your own words. Mark each day done and watch
+							the grid fill.
 						</PoText>
-						<PillButton label="Choose one" onPress={() => setPicking(true)} />
+						<PillButton label="Start one" onPress={() => setPicking(true)} />
 					</>
 				)}
 			</View>
 
-			<SectionLabel>Paths</SectionLabel>
+			<SectionLabel>Learn</SectionLabel>
 			<ListCard>
 				<ListRow
 					icon={{ name: "Layers", tone: "accentDefault", tile: "accentSubtle" }}
 					title="Flashcards · words and duas"
 					subtitle={
 						cards.length
-							? `${cards.length} cards from what you've read`
-							: "Optional · add a deck when you want one"
+							? `${cards.length} cards of your own`
+							: "Optional · write your own or import a deck"
 					}
 					value={cards.length === 0 ? "Add" : due > 0 ? `${due} due` : "All done"}
 					valueTone="accentDefault"
-					onPress={faithRoutes.flashcards}
-				/>
-				{mine.map((item) => {
-					const done = progress.find((entry) => entry.id === item.id)?.done.length ?? 0;
-					return (
-						<ListRow
-							key={item.id}
-							icon={{
-								name: item.id === "beliefs" ? "Star" : item.id === "surahs" ? "Mic" : "Layers",
-								tone: item.id === "beliefs" ? "statusCaution" : "accentDefault",
-								tile: item.id === "beliefs" ? "statusCautionSubtle" : "accentSubtle",
-							}}
-							title={item.title}
-							subtitle={done > 0 ? `${done} of ${item.lessons.length} lessons` : item.summary}
-							value={done > 0 ? `${Math.round((done / item.lessons.length) * 100)}%` : "Start"}
-							valueTone={done > 0 ? "accentDefault" : "textSecondary"}
-							last={false}
-							onPress={() => setPath(item)}
-						/>
-					);
-				})}
-				<ListRow
-					icon={{ name: "Line/Plus", tone: "textSecondary", tile: "bgSubtle" }}
-					title={mine.length ? "Add another path" : "Add a learning path"}
-					subtitle="Salah, short surahs, core beliefs and more, from Templates"
-					chevron
 					last
-					onPress={() => templateRoutes.pack("faith-learning-paths")}
+					onPress={faithRoutes.flashcards}
 				/>
 			</ListCard>
 
@@ -255,37 +224,8 @@ export function GrowScreen() {
 				</PoText>
 			</Pressable>
 
-			<Sheet visible={picking} title="New challenge" onClose={() => setPicking(false)}>
-				{challenge ? (
-					<PoText variant="meta13" tone="textSecondary">
-						Starting a new one replaces “{challenge.title}”.
-					</PoText>
-				) : null}
-				<ListCard>
-					{CHALLENGES.map((template, index) => (
-						<ListRow
-							key={template.title}
-							title={template.title}
-							subtitle={`${template.detail} · ${template.days} days`}
-							chevron
-							last={index === CHALLENGES.length - 1}
-							onPress={() => {
-								setPicking(false);
-								void startChallenge(template).catch((error: unknown) =>
-									console.error("[faith] could not start", error),
-								);
-							}}
-						/>
-					))}
-				</ListCard>
-			</Sheet>
-
-			{path ? (
-				<PathSheet
-					path={path}
-					done={progress.find((entry) => entry.id === path.id)?.done ?? []}
-					onClose={() => setPath(null)}
-				/>
+			{picking ? (
+				<ChallengeSheet replacing={challenge?.title ?? null} onClose={() => setPicking(false)} />
 			) : null}
 			{editing ? (
 				<ResourceSheet
@@ -298,54 +238,62 @@ export function GrowScreen() {
 	);
 }
 
-function PathSheet({
-	path,
-	done,
-	onClose,
-}: {
-	path: LearningPath;
-	done: readonly string[];
-	onClose: () => void;
-}) {
-	const { colors } = usePoTheme();
+const CHALLENGE_DAYS = [7, 14, 21, 30, 40] as const;
+
+/** A challenge in the person's own words: what, the daily step, and for how many days. */
+function ChallengeSheet({ replacing, onClose }: { replacing: string | null; onClose: () => void }) {
+	const [title, setTitle] = useState("");
+	const [detail, setDetail] = useState("");
+	const [days, setDays] = useState<number>(21);
+	const canStart = title.trim().length > 0;
 	return (
 		<Sheet
 			visible
-			title={path.title}
+			title="New challenge"
 			onClose={onClose}
-			action={{ label: "Done", onPress: onClose }}
+			footer={
+				<PillButton
+					label="Start"
+					disabled={!canStart}
+					onPress={() => {
+						haptics.success();
+						onClose();
+						void startChallenge({
+							title: title.trim().slice(0, 60),
+							detail: detail.trim().slice(0, 80) || "Every day",
+							days,
+						}).catch((error: unknown) => console.error("[faith] could not start", error));
+					}}
+				/>
+			}
 		>
-			<PoText variant="meta13" tone="textSecondary">
-				{path.summary}. Tick a lesson when it's done; add notes in Resources.
-			</PoText>
-			<ListCard>
-				{path.lessons.map((lesson, index) => {
-					const checked = done.includes(lesson.id);
-					return (
-						<ListRow
-							key={lesson.id}
-							title={lesson.title}
-							subtitle={lesson.detail}
-							dimmed={checked}
-							last={index === path.lessons.length - 1}
-							leading={
-								<View
-									style={[styles.check, checked ? { backgroundColor: colors.accentDefault } : {}]}
-								>
-									{checked ? (
-										<Icon name="Check bold" size={12} color={colors.textOnAccent} />
-									) : null}
-								</View>
-							}
-							onPress={() =>
-								void toggleLesson(path.id, lesson.id).catch((error: unknown) =>
-									console.error("[faith] could not save the lesson", error),
-								)
-							}
-						/>
-					);
-				})}
-			</ListCard>
+			{replacing ? (
+				<PoText variant="meta13" tone="textSecondary">
+					Starting a new one replaces “{replacing}”.
+				</PoText>
+			) : null}
+			<TextField
+				label="Challenge"
+				value={title}
+				onChangeText={setTitle}
+				placeholder="Fajr on time for three weeks"
+			/>
+			<TextField
+				label="The daily step"
+				value={detail}
+				onChangeText={setDetail}
+				placeholder="Log Fajr every morning"
+			/>
+			<View style={styles.wrap}>
+				{CHALLENGE_DAYS.map((count) => (
+					<FilterChip
+						key={count}
+						label={`${count} days`}
+						selected={days === count}
+						onPress={() => setDays(count)}
+					/>
+				))}
+			</View>
 		</Sheet>
 	);
 }
@@ -449,12 +397,5 @@ const styles = StyleSheet.create({
 
 		borderStyle: "dashed",
 	},
-	check: {
-		width: 22,
-		height: 22,
-		borderRadius: 11,
-
-		alignItems: "center",
-		justifyContent: "center",
-	},
+	wrap: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 });

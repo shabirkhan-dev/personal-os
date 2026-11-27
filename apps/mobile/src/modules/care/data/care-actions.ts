@@ -2,7 +2,6 @@ import { listItems, removeItem, saveItem } from "@/lib/db/collection";
 import { dayKey, newId } from "@/lib/day";
 import { deleteJson, readJson } from "@/lib/storage/json-file";
 import { asArray, asNumber, asString, isRecord } from "@/lib/storage/parse";
-import { photoFor } from "../lib/catalog";
 import { emptyDay, finishRoutine, toggleStep } from "../lib/care-math";
 import {
 	type BodyArea,
@@ -154,7 +153,7 @@ export async function saveProduct(
 		...input,
 		id: input.id ?? newId(),
 		name: input.name.trim(),
-		photo: input.photo ?? photoFor(input.name),
+		photo: input.photo ?? null,
 	};
 	await saveItem(careProducts, product);
 	return product;
@@ -220,7 +219,7 @@ export async function migrateOldSkincare(): Promise<boolean> {
 			howTo: "",
 			note: "",
 			area: "face" as const,
-			photo: photoFor(name),
+			photo: null,
 			openedOn,
 			lastsDays: Math.max(7, Math.round(asNumber(item.lastsWeeks, 8) * 7)),
 			price: 0,

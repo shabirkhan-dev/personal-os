@@ -12,11 +12,8 @@ import type { Exercise, Template } from "../library";
 import { SPREAD } from "../training-math";
 import type { Feel, PlanSlot, SetLog, TrainingSettings } from "../training-model";
 import {
-	CHAINS,
-	type ChainId,
 	type ProgramDef,
 	type ProgramItem,
-	type ProgramLevel,
 	type ProgramSession,
 	type Progress,
 	type Range,
@@ -106,34 +103,6 @@ export function parseTemplateId(
 
 // --- exercises --------------------------------------------------------------------------------------
 
-const LEVEL_START: Record<ProgramLevel, number> = { beginner: 1, intermediate: 3, advanced: 5 };
-
-/** Where a chain starts for someone with no history: the first rung at the program's level. */
-export function defaultStep(chain: ChainId, level: ProgramLevel): number {
-	const rungs = CHAINS[chain];
-	const index = rungs.findIndex((id) => (exerciseById(id)?.level ?? 0) >= LEVEL_START[level]);
-	return index === -1 ? rungs.length - 1 : index;
-}
-
-/** The rung to train: the person's step, or the nearest easier one they have the equipment for. */
-export function pickRung(
-	chain: ChainId,
-	step: number,
-	equipment: readonly Equipment[],
-): { exercise: CatalogExercise; step: number } | null {
-	const rungs = CHAINS[chain];
-	const start = Math.min(rungs.length - 1, Math.max(0, step));
-	const order = [
-		...Array.from({ length: start + 1 }, (_, index) => start - index),
-		...Array.from({ length: rungs.length - start - 1 }, (_, index) => start + 1 + index),
-	];
-	for (const index of order) {
-		const exercise = exerciseById(String(rungs[index]));
-		if (exercise && canDo(exercise, equipment)) return { exercise, step: index };
-	}
-	return null;
-}
-
 /** A doable stand-in from the same pattern at the closest level, easier first on a tie. */
 export function substitute(
 	exercise: CatalogExercise,
@@ -170,52 +139,6 @@ function build(
 	program: ProgramDef,
 	ctx: ProgramContext,
 ): Exercise | null {
-	if (item.kind === "chain") {
-		const saved = ctx.progress.get(item.chain);
-		const rung = pickRung(
-			item.chain,
-			saved?.step ?? defaultStep(item.chain, program.level),
-			ctx.settings.equipment,
-		);
-		if (!rung) return null;
-		const { exercise } = rung;
-		const unit = exercise.unit === "s" ? "s" : "reps";
-		const range = unit === "s" ? item.hold : item.range;
-		const progress = {
-			key: item.chain,
-			step: rung.step,
-			range,
-			chainLength: CHAINS[item.chain].length,
-		};
-		const base = {
-			name: exercise.name,
-			photo: exercise.photo,
-			unit,
-			restS: item.restS,
-			progress,
-			...(exercise.each ? { each: true } : {}),
-		} as const;
-		if (kind === "test") {
-			return {
-				...base,
-				sets: 1,
-				target: null,
-				restS: 120,
-				note: "Test: as many clean as you can",
-			};
-		}
-		const target =
-			kind === "deload" || !saved || saved.step !== rung.step
-				? range[0]
-				: clamp(saved.target, range);
-		return {
-			...base,
-			sets: kind === "deload" ? Math.max(1, item.sets - 1) : item.sets,
-			target,
-			note: `${kind === "deload" ? "Light week · " : ""}Aim ${rangeLabel(range, unit === "s" ? "s" : "reps")}${restNote(item.restS)}`,
-		};
-	}
-
 	const planned = exerciseById(item.exercise);
 	const exercise = planned ? substitute(planned, ctx.settings.equipment) : null;
 	if (!exercise) return null;
@@ -240,6 +163,22 @@ function build(
 	}
 	const saved = ctx.progress.get(exercise.id);
 	const moves = range[0] < range[1];
+	const progress = { key: exercise.id, step: 0, range, chainLength: 1 };
+	// A test week: one all-out set, which sets the targets for the weeks after.
+	if (kind === "test" && moves) {
+		return {
+			name: exercise.name,
+			photo: exercise.photo,
+			sets: 1,
+			target: null,
+			unit,
+			restS: item.restS,
+			note: "Test · one all-out set",
+			...each,
+			progress,
+			...(exercise.weighted ? { weighted: true, kg: saved?.kg ?? null } : {}),
+		};
+	}
 	const target = kind === "deload" || !saved ? range[0] : clamp(saved.target, range);
 	return {
 		name: exercise.name,
@@ -250,7 +189,7 @@ function build(
 		restS: item.restS,
 		note: `${kind === "deload" ? "Light week · " : ""}${moves ? `Aim ${rangeLabel(range, unit === "s" ? "s" : "reps")}` : rangeLabel(range, unit === "s" ? "s" : "reps")}${restNote(item.restS)}`,
 		...each,
-		...(moves ? { progress: { key: exercise.id, step: 0, range, chainLength: 1 } } : {}),
+		...(moves ? { progress } : {}),
 		...(exercise.weighted ? { weighted: true, kg: saved?.kg ?? null } : {}),
 	};
 }
@@ -364,10 +303,7 @@ export function materialize(
 	const photo = main?.photo ?? program.photo;
 	return {
 		id,
-		title:
-			kind === "test" && session.items.some((item) => item.kind === "chain")
-				? `${session.title} · test`
-				: session.title,
+		title: kind === "test" ? `${session.title} · test` : session.title,
 		sport: session.sport,
 		photo,
 		hero: photo,
@@ -541,30 +477,4 @@ export function progressAfter(
 		if (next) updates.set(ref.key, next);
 	}
 	return [...updates.values()];
-}
-
-/** Starting levels someone picks when they start a program: the rung they can already do. */
-export function startingProgress(
-	steps: Partial<Record<ChainId, number>>,
-	program: ProgramDef,
-	now: string,
-): Progress[] {
-	return Object.entries(steps).map(([chain, step]) => {
-		const id = chain as ChainId;
-		const item = program.sessions
-			.flatMap((session) => session.items)
-			.find((candidate) => candidate.kind === "chain" && candidate.chain === id);
-		const rung = exerciseById(String(CHAINS[id][step ?? 0]));
-		const range =
-			item?.kind === "chain" ? (rung?.unit === "s" ? item.hold : item.range) : ([8, 12] as Range);
-		return { id, step: step ?? 0, target: range[0], kg: null, misses: 0, updatedAt: now };
-	});
-}
-
-/** The chains a program trains, for "where are you now?" when starting it. */
-export function chainsIn(program: ProgramDef): ChainId[] {
-	const chains = program.sessions
-		.flatMap((session) => session.items)
-		.flatMap((item) => (item.kind === "chain" ? [item.chain] : []));
-	return [...new Set(chains)];
 }

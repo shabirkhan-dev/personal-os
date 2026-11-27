@@ -13,6 +13,7 @@ import type { TasbihPhrase } from "@/modules/faith/lib/faith-content";
 import type { FinanceSettings } from "@/modules/finance/lib/finance-model";
 import type { Recipe } from "@/modules/food/lib/recipes";
 import { useOnboardingStore } from "@/modules/onboarding/store/onboarding-store";
+import { exerciseById } from "@/modules/workout/lib/exercise-guide";
 import type { ProgramDef } from "@/modules/workout/lib/programs/program-model";
 import { readTemplateText } from "../lib/template-files";
 
@@ -56,8 +57,18 @@ export function shareRecipe(recipe: Recipe): Promise<void> {
 }
 
 export function shareProgram(program: ProgramDef): Promise<void> {
-	const { id: _id, createdAt: _createdAt, ...rest } = program;
-	return share(make("programs", program.title, program.summary || program.goal, [rest]));
+	const { id: _id, createdAt: _createdAt, photo: _photo, ...rest } = program;
+	// The program brings its exercises, so a friend's copy has them too (no photos from this phone).
+	const ids = new Set(
+		program.sessions.flatMap((session) => session.items.map((item) => item.exercise)),
+	);
+	const exercises = [...ids]
+		.map((id) => exerciseById(id))
+		.filter((exercise) => exercise !== null)
+		.map(({ photo: _p, media: _m, custom: _c, ...exercise }) => exercise);
+	return share(
+		make("programs", program.title, program.summary || program.goal, [{ ...rest, exercises }]),
+	);
 }
 
 export function shareCareRoutine(care: {

@@ -27,7 +27,7 @@ const FILTERS: readonly { id: Filter; label: string }[] = [
 	{ id: "yours", label: "Yours" },
 ];
 
-/** Programs: the one being followed and the person's own (made here or added from Templates). */
+/** Programs: the one being followed and the person's own (made here, with AI, or imported). */
 export function ProgramsScreen() {
 	const data = useTraining();
 	const now = useNow();
@@ -36,10 +36,7 @@ export function ProgramsScreen() {
 	const list =
 		filter === "yours"
 			? data.customPrograms
-			: data.programs.filter(
-					(program) =>
-						filter === "all" || (program.source === "built-in" && program.kind === filter),
-				);
+			: data.programs.filter((program) => filter === "all" || program.kind === filter);
 
 	return (
 		<TrainingScreen
@@ -61,8 +58,8 @@ export function ProgramsScreen() {
 			<Card>
 				<PoText variant="title18">Make your own</PoText>
 				<PoText variant="meta13" tone="textSecondary">
-					Describe your goal and AI drafts a program from the exercise library, or build one
-					exercise by exercise. Both progress like the ready-made ones.
+					Describe your goal and AI drafts the program and the exercises it needs, or build one
+					exercise by exercise. Targets rise as you hit them.
 				</PoText>
 				<View style={styles.buttons}>
 					<PillButton
@@ -105,7 +102,7 @@ export function ProgramsScreen() {
 				{list.length === 0 ? (
 					<PoText variant="meta13" tone="textSecondary">
 						{data.programs.length === 0
-							? "No programs yet. Make your own above, or add ready-made ones from Templates below."
+							? "No programs yet. Make your own above, or import one made with any AI from Templates."
 							: filter === "yours"
 								? "Programs you design show up here."
 								: "No programs of this kind yet."}
@@ -114,15 +111,15 @@ export function ProgramsScreen() {
 			</View>
 			<ListCard>
 				<ListRow
-					title="Ready-made programs"
-					subtitle="Calisthenics, running, boxing, gym and recovery, from Templates"
+					title="Import a program"
+					subtitle="Have any AI make one in the template format, then open it here"
 					icon={{ name: "Layers", tone: "accentDefault", tile: "accentSubtle" }}
 					chevron
-					onPress={() => templateRoutes.pack("training-programs")}
+					onPress={() => templateRoutes.browse("training")}
 				/>
 				<ListRow
-					title="Exercise library"
-					subtitle="Every exercise with demos, cues and videos"
+					title="Your exercises"
+					subtitle="Yours, with cues, photos and videos; import more from Templates"
 					icon={{ name: "Dumbbell", tone: "accentDefault", tile: "accentSubtle" }}
 					chevron
 					last

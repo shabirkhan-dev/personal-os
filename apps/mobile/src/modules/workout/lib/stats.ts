@@ -86,7 +86,7 @@ export function records(sessions: readonly Session[], limit = 6): ExerciseRecord
 		.slice(0, limit);
 }
 
-/** Sets per movement pattern over the last `weeks` weeks (built-in patterns; others are "Other"). */
+/** Sets per movement pattern over the last `weeks` weeks (known patterns; others are "Other"). */
 export function volumeByPattern(
 	sessions: readonly Session[],
 	now: Date,

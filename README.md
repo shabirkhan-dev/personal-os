@@ -32,9 +32,12 @@ Most people track life in disconnected tools: notes, finance apps, shopping list
   any OpenAI-compatible provider in Profile → Your AI key. It stays in the phone's keystore and
   AI calls go straight from the phone to your provider, no account needed. Without one, AI runs
   through your signed-in account.
-- **Templates you can share.** A marketplace of packs (recipes, programs, routines, tasbih,
-  budgets, minimum days), new packs from the server, and your own recipe, routine, program or
-  budget sent to a friend as a `.posx.json` file they open in the app.
+- **Templates made by you, with any AI.** Nothing ships with the app: no stock recipes,
+  programs, exercises or photos. Templates → pick what to make (recipes, a training program,
+  exercises, a Care routine, tasbih, flashcards, a challenge, a budget, a minimum day) → copy the
+  prompt into ChatGPT, Claude or Gemini and paste the reply back, or let your own AI key make it
+  right there. You see a preview and pick what to add. Your own recipe, routine, program or
+  budget goes to a friend as a `.posx.json` file too.
 - **Private by default.** Everything lives on the phone in an encrypted database (SQLCipher, key
   in the secure keystore), with an optional fingerprint or face lock, privacy mode that blocks
   screenshots, and no cloud backups of the app's data. Signing in is only for sync and AI.
@@ -70,20 +73,18 @@ syncs to your account.
 
 ### Training
 
-- **Programs:** design your own by hand or with AI, or start from one of twelve templates
-  (Hybrid Athlete, Calisthenics Foundations, Handstand, First Muscle-up, Front Lever, Legs +
-  Pistol, 5 km under 25, 10 km Build, Boxing Conditioning, Lean + Fit, Mobility + Recovery, Gym
-  Strength).
-- **Progression:** every exercise has a rep range; hit the top on every set and the next session
-  adds a rep, then moves you to a harder variation (incline push-up → push-up → … → one-arm), or
-  adds 2.5 kg for gym lifts. Light weeks, and test weeks that set your targets.
+- **Programs:** design your own by hand, have AI draft one (it writes the exercises it needs),
+  or import one made with any AI from Templates.
+- **Progression:** every exercise has a range; hit the target on every set and the next session
+  asks for a rep more, or 2.5 kg more for gym lifts. Light weeks, and test weeks that set your
+  targets.
 - **Built around your life:** days a week, session length, your equipment, and fixed days for
   the things you already do (a match, a class); legs never land the day before a match.
 - **Activities you define:** football, swimming, climbing or anything else, with the numbers you
   want to track (goals, laps, routes).
-- **Exercise library:** 85 exercises with cues, 45 with photo demos; add your own exercises,
-  photos and GIF animations (Cloudflare R2), and Google Drive videos played in Drive's player.
-- **Live sessions:** the demo, a countdown for holds, rest timers with an alert when the phone is
+- **Your exercises:** each with three cues, your photos and GIF animations, and Google Drive
+  videos played in Drive's player; add them by hand or import a set made with any AI.
+- **Live sessions:** your photo or animation, a countdown for holds, rest timers with an alert when the phone is
   locked, pause, and weights for gym lifts.
 - **Insights:** readiness from sleep and recent effort, an AI weekly review, progress per exercise,
   bests with estimated one-rep max, sets by movement, consistency and activity totals.
@@ -244,11 +245,6 @@ Issues and pull requests are welcome. Read [AGENTS.md](AGENTS.md) (it applies to
 Bun only, Conventional Commits in lowercase, `bun run lint`, `bun run typecheck` and
 `bun run test` before you push. UI follows [DESIGN.md](DESIGN.md) and the tokens in
 `packages/tokens`, with no raw colours. New screens start empty: no sample data.
-
-## Credits
-
-Exercise demo photos are from [free-exercise-db](https://github.com/yuhonas/free-exercise-db),
-released into the public domain under The Unlicense.
 
 ## License
 

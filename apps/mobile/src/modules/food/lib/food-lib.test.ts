@@ -1,6 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { existsSync } from "node:fs";
-import { join } from "node:path";
 import { itemFromProduct, isBarcode } from "./barcode";
 import {
 	eatenOn,
@@ -30,10 +28,10 @@ import {
 	SLOT_TIMES,
 } from "./food-model";
 import { FOODS } from "./foods";
-import { PRODUCTS, productById } from "./groceries";
+import { PRODUCTS } from "./groceries";
 import { parseFoodLine, parseMealText, withQuantity } from "./parse-meal";
 import { blankRecipe, parseMyRecipe } from "./my-recipes";
-import { allRecipes, RECIPES, recipeById, setMyRecipes, templateRecipeId } from "./recipes";
+import { allRecipes, type Recipe, recipeById, setMyRecipes } from "./recipes";
 import { goalWeight, remaining, targetsFor } from "./targets";
 
 const meal = (day: string, slot: Meal["slot"], text: string, at = `${day}T08:10:00`): Meal => ({
@@ -58,6 +56,215 @@ const settings: FoodSettings = {
 };
 
 // Most suites plan with the bundled recipes, as if the person had added the recipe pack.
+/** Recipes the tests cook with, one or more for every meal (the app ships none). */
+const RECIPES: Recipe[] = [
+	{
+		id: "chicken-karahi",
+		name: "Chicken karahi",
+		kind: "Desi · dinner",
+		slots: ["dinner", "lunch"],
+		tags: ["high-protein", "desi"],
+		minutes: 35,
+		serves: 2,
+		kcal: 520,
+		protein: 42,
+		carbs: 56,
+		fat: 14,
+		cost: 260,
+		ingredients: [
+			{ name: "Chicken", amount: "500 g" },
+			{ name: "Tomatoes", amount: "4 medium" },
+			{ name: "Ginger and garlic paste", amount: "2 tbsp" },
+			{ name: "Green chillies", amount: "4" },
+			{ name: "Yogurt", amount: "½ cup" },
+			{ name: "Karahi masala", amount: "2 tsp" },
+			{ name: "Fresh coriander", amount: "1 bunch" },
+		],
+		steps: [
+			{ text: "Fry chicken in a little oil until it turns golden.", minutes: 8 },
+			{ text: "Add tomatoes, ginger, garlic and masala. Cook until oil separates.", minutes: 15 },
+			{ text: "Stir in yogurt and chillies. Finish with coriander.", minutes: 5 },
+		],
+		uses: [
+			{ product: "chicken", per: 0.25 },
+			{ product: "tomatoes", per: 0.2 },
+			{ product: "ginger-garlic", per: 0.08 },
+			{ product: "chillies", per: 0.05 },
+			{ product: "yogurt", per: 0.06 },
+			{ product: "masala", per: 0.05 },
+			{ product: "coriander", per: 0.5 },
+			{ product: "oil", per: 0.02 },
+		],
+	},
+	{
+		id: "chana-masala",
+		name: "Chana masala",
+		kind: "Desi · lunch",
+		slots: ["lunch", "dinner"],
+		tags: ["desi", "cheap"],
+		minutes: 25,
+		serves: 3,
+		kcal: 420,
+		protein: 16,
+		carbs: 58,
+		fat: 13,
+		cost: 90,
+		ingredients: [
+			{ name: "Chana, soaked", amount: "1½ cups" },
+			{ name: "Onions", amount: "2" },
+			{ name: "Tomatoes", amount: "3" },
+			{ name: "Chana masala", amount: "2 tsp" },
+			{ name: "Lemon and coriander", amount: "to finish" },
+			{ name: "Roti", amount: "1 each" },
+		],
+		steps: [
+			{ text: "Cook onions until soft, then tomatoes and masala.", minutes: 10 },
+			{ text: "Add boiled chana with a little water and simmer.", minutes: 12 },
+			{ text: "Finish with lemon and coriander. Serve with roti.", minutes: 2 },
+		],
+		uses: [
+			{ product: "chana", per: 0.1 },
+			{ product: "onions", per: 0.1 },
+			{ product: "tomatoes", per: 0.1 },
+			{ product: "masala", per: 0.03 },
+			{ product: "atta", per: 0.01 },
+			{ product: "oil", per: 0.015 },
+		],
+	},
+	{
+		id: "egg-paratha-chai",
+		name: "Eggs, paratha and chai",
+		kind: "Desi · breakfast",
+		slots: ["breakfast"],
+		tags: ["desi", "bulk"],
+		minutes: 15,
+		serves: 1,
+		kcal: 620,
+		protein: 23,
+		carbs: 54,
+		fat: 34,
+		cost: 115,
+		ingredients: [
+			{ name: "Eggs", amount: "2" },
+			{ name: "Paratha", amount: "1" },
+			{ name: "Chai with milk", amount: "1 cup" },
+		],
+		steps: [
+			{ text: "Fry the eggs in a little oil.", minutes: 4 },
+			{ text: "Cook the paratha on a hot tawa.", minutes: 6 },
+			{ text: "Brew chai with milk.", minutes: 5 },
+		],
+		uses: [
+			{ product: "eggs", per: 0.07 },
+			{ product: "atta", per: 0.02 },
+			{ product: "milk", per: 0.15 },
+			{ product: "oil", per: 0.02 },
+		],
+	},
+	{
+		id: "lassi-boiled-eggs",
+		name: "Lassi and boiled eggs",
+		kind: "Everyday · snack",
+		slots: ["snack", "breakfast"],
+		tags: ["quick", "high-protein", "cheap"],
+		minutes: 10,
+		serves: 1,
+		kcal: 370,
+		protein: 20,
+		carbs: 34,
+		fat: 16,
+		cost: 100,
+		ingredients: [
+			{ name: "Yogurt", amount: "1 cup" },
+			{ name: "Milk", amount: "½ glass" },
+			{ name: "Eggs", amount: "2" },
+		],
+		steps: [
+			{ text: "Boil the eggs.", minutes: 9 },
+			{ text: "Blend yogurt with milk and a little sugar or salt.", minutes: 1 },
+		],
+		uses: [
+			{ product: "yogurt", per: 0.2 },
+			{ product: "milk", per: 0.12 },
+			{ product: "eggs", per: 0.07 },
+		],
+	},
+	{
+		id: "banana-pb-shake",
+		name: "Banana PB shake",
+		kind: "Everyday · before bed",
+		slots: ["bed", "snack", "breakfast"],
+		tags: ["bulk", "quick"],
+		minutes: 5,
+		serves: 1,
+		kcal: 540,
+		protein: 20,
+		carbs: 70,
+		fat: 20,
+		cost: 110,
+		ingredients: [
+			{ name: "Milk", amount: "1 glass" },
+			{ name: "Bananas", amount: "2" },
+			{ name: "Peanut butter", amount: "2 tbsp" },
+			{ name: "Honey", amount: "1 tsp" },
+		],
+		steps: [{ text: "Blend everything until smooth.", minutes: 2 }],
+		uses: [
+			{ product: "milk", per: 0.25 },
+			{ product: "bananas", per: 0.17 },
+			{ product: "peanut-butter", per: 0.09 },
+			{ product: "honey", per: 0.03 },
+		],
+	},
+	{
+		id: "milk-oats",
+		name: "Milk oats with banana",
+		kind: "Everyday · breakfast",
+		slots: ["breakfast", "bed"],
+		tags: ["quick", "cheap"],
+		minutes: 8,
+		serves: 1,
+		kcal: 430,
+		protein: 16,
+		carbs: 68,
+		fat: 10,
+		cost: 80,
+		ingredients: [
+			{ name: "Oats", amount: "½ cup" },
+			{ name: "Milk", amount: "1 glass" },
+			{ name: "Banana", amount: "1" },
+			{ name: "Walnuts", amount: "a few" },
+		],
+		steps: [
+			{ text: "Simmer oats in milk, stirring.", minutes: 5 },
+			{ text: "Top with sliced banana and walnuts.", minutes: 1 },
+		],
+		uses: [
+			{ product: "oats", per: 0.1 },
+			{ product: "milk", per: 0.25 },
+			{ product: "bananas", per: 0.08 },
+			{ product: "walnuts", per: 0.04 },
+		],
+	},
+	{
+		id: "fruit-platter",
+		name: "Fruit platter",
+		kind: "Everyday · snack",
+		slots: ["snack"],
+		tags: ["quick"],
+		minutes: 5,
+		serves: 2,
+		kcal: 150,
+		protein: 2,
+		carbs: 36,
+		fat: 1,
+		cost: 120,
+		ingredients: [{ name: "Seasonal fruit", amount: "500 g" }],
+		steps: [{ text: "Wash, cut and share.", minutes: 5 }],
+		uses: [{ product: "fruit", per: 0.25 }],
+	},
+];
+
 beforeEach(() => setMyRecipes(RECIPES));
 afterEach(() => setMyRecipes([]));
 
@@ -273,20 +480,9 @@ describe("weight and recap", () => {
 });
 
 describe("content", () => {
-	it("every recipe has a photo, valid groceries and steps", () => {
-		for (const recipe of RECIPES) {
-			expect(
-				existsSync(join(import.meta.dir, "../../../../app-photos/food", `${recipe.photo}.webp`)),
-			).toBe(true);
-			expect(recipe.steps.length).toBeGreaterThan(0);
-			for (const use of recipe.uses) expect(productById(use.product)).toBeDefined();
-		}
-	});
-
 	it("ids are unique", () => {
 		expect(new Set(FOODS.map((food) => food.id)).size).toBe(FOODS.length);
 		expect(new Set(PRODUCTS.map((product) => product.id)).size).toBe(PRODUCTS.length);
-		expect(new Set(RECIPES.map((recipe) => recipe.id)).size).toBe(RECIPES.length);
 	});
 });
 
@@ -384,19 +580,10 @@ describe("your own recipes", () => {
 		});
 	});
 
-	it("starts with none; the bundled ones only come from the template pack", () => {
+	it("starts with none: no recipe ships with the app", () => {
 		setMyRecipes([]);
 		expect(allRecipes()).toEqual([]);
-		// Older meals and plans still find a bundled recipe's name.
-		expect(recipeById("chicken-karahi")?.name).toBeTruthy();
-		const karahi = RECIPES.find((recipe) => recipe.id === "chicken-karahi");
-		const copy = parseMyRecipe({ ...karahi, id: templateRecipeId("chicken-karahi") });
-		expect(copy).toMatchObject({
-			id: "mine-tpl-chicken-karahi",
-			photo: "chicken-karahi",
-			mine: true,
-		});
-		expect(copy?.uses.length).toBe(karahi?.uses.length);
+		expect(recipeById("chicken-karahi")).toBeUndefined();
 	});
 
 	it("finds them and shops for their ingredients as written", () => {

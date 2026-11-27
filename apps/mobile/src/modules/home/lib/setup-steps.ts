@@ -45,7 +45,7 @@ const STEPS: Record<ModuleId, Omit<SetupStep, "module">> = {
 		hint: "Morning and night steps, with how to do each.",
 		own: { label: "My own", href: "/care/step" },
 		ai: { label: "Design with AI", href: "/care/design" },
-		template: { label: "Template", href: "/care/templates" },
+		template: { label: "Template", href: "/templates?module=care" },
 	},
 	faith: {
 		title: "Set up prayer times",

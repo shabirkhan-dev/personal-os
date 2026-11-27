@@ -1,6 +1,6 @@
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
-import { Image, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { Icon } from "@/components/icons";
 import { Footer, IconTile } from "@/components/module-ui";
 import { ModuleScreen } from "@/components/module-screen";
@@ -9,7 +9,7 @@ import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
 import { haptics } from "@/lib/haptics";
 import { usePoTheme } from "@/theme";
-import { MODULE_LABELS, type PackItem, type TemplatePack } from "../lib/packs";
+import { MODULE_LABELS, type PackItem, type TemplatePack } from "../lib/template-pack";
 import { findPack } from "../lib/template-store";
 
 /**
@@ -37,7 +37,7 @@ function Pack({ pack }: { pack: TemplatePack }) {
 	const [open, setOpen] = useState<string | null>(null);
 	const [busy, setBusy] = useState(false);
 	const [notice, setNotice] = useState<string | null>(null);
-	/** Set once something from this pack was added on this visit (shared and server packs can't tell). */
+	/** Set once something from this pack was added on this visit (a file can't tell what's added). */
 	const [didAdd, setDidAdd] = useState(false);
 
 	const refresh = useCallback(() => {
@@ -105,11 +105,7 @@ function Pack({ pack }: { pack: TemplatePack }) {
 	return (
 		<ModuleScreen label="Templates" tab="profile" onHome={() => router.dismissTo("/")}>
 			<View style={[styles.hero, { backgroundColor: colors.bgSurface }]}>
-				{pack.cover ? (
-					<Image source={pack.cover} resizeMode="cover" style={styles.cover} />
-				) : (
-					<IconTile name={pack.icon} tone="accentDefault" tile="accentSubtle" size={56} />
-				)}
+				<IconTile name={pack.icon} tone="accentDefault" tile="accentSubtle" size={56} />
 				<PoText variant="eyebrow11" tone="textTertiary">
 					{`${MODULE_LABELS[pack.module].toUpperCase()} · TEMPLATE`}
 				</PoText>
@@ -157,9 +153,6 @@ function Pack({ pack }: { pack: TemplatePack }) {
 								onPress={() => toggle(item)}
 								style={styles.row}
 							>
-								{item.photo ? (
-									<Image source={item.photo} resizeMode="cover" style={styles.thumb} />
-								) : null}
 								<View style={styles.flex}>
 									<PoText variant="row15">{item.title}</PoText>
 									<PoText variant="meta13" tone="textSecondary" numberOfLines={expanded ? 4 : 2}>
@@ -229,11 +222,9 @@ const styles = StyleSheet.create({
 	flex: { flex: 1, minWidth: 0, gap: 2 },
 	pad: { paddingHorizontal: 8 },
 	hero: { gap: 10, padding: 20, borderRadius: 24 },
-	cover: { width: "100%", height: 160, borderRadius: 18 },
 	list: { paddingHorizontal: 16, borderRadius: 22 },
 	item: { paddingVertical: 12, gap: 6 },
 	row: { flexDirection: "row", alignItems: "center", gap: 12 },
-	thumb: { width: 52, height: 52, borderRadius: 12 },
 	added: { flexDirection: "row", alignItems: "center", gap: 4 },
 	more: { alignSelf: "flex-start" },
 	detail: { paddingLeft: 4 },

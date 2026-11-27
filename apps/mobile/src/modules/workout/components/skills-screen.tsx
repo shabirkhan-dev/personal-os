@@ -14,7 +14,6 @@ import { usePoTheme } from "@/theme";
 import { deleteSkill, saveSkill } from "../data/training-actions";
 import { TRAINING_SKILL_JOB } from "../hooks/training-ui-store";
 import { useTraining } from "../hooks/use-training";
-import { SKILLS } from "../lib/library";
 import { SPORT_LABELS, type Skill, type Sport } from "../lib/training-model";
 import { trainingAiMessage, useTrainingAi } from "../services/training-ai";
 import { SPORT_TONES } from "./home-cards";
@@ -48,7 +47,6 @@ export function SkillsScreen() {
 	};
 	const current = open ? (skills.find((skill) => skill.id === open.id) ?? null) : null;
 	const sportNames = [...new Set(skills.map((skill) => SPORT_LABELS[skill.sport]))];
-	const suggestions = SKILLS.filter((skill) => !skills.some((item) => item.name === skill.name));
 
 	const build = () => {
 		const skillName = name.trim();
@@ -56,9 +54,7 @@ export function SkillsScreen() {
 		setAdding(false);
 		setName("");
 		if (!ai.available) {
-			setNotice(
-				"Building a new skill needs a connection and sign-in. Pick one of the ready-made skills meanwhile.",
-			);
+			setNotice("Building a skill needs AI: add your own AI key in Profile, or sign in.");
 			return;
 		}
 		const sport = settings.sports[0] ?? "calisthenics";
@@ -209,40 +205,6 @@ export function SkillsScreen() {
 						placeholder="Planche, 10 km, double-under…"
 						onSubmitEditing={build}
 					/>
-					{suggestions.length > 0 ? (
-						<>
-							<PoText variant="eyebrow11" tone="textTertiary">
-								Ready-made
-							</PoText>
-							{suggestions.map((skill) => (
-								<Pressable
-									key={skill.name}
-									accessibilityRole="button"
-									onPress={() => {
-										haptics.tap();
-										void saveSkill({
-											name: skill.name,
-											sport: skill.sport,
-											photo: skill.photo,
-											steps: skill.steps,
-											done: 0,
-										}).catch(failed);
-										setAdding(false);
-									}}
-									style={styles.step}
-								>
-									<TrainingImage photo={skill.photo} size={40} radius={10} />
-									<View style={styles.flex}>
-										<PoText variant="row15">{skill.name}</PoText>
-										<PoText
-											variant="meta13"
-											tone="textSecondary"
-										>{`${skill.steps.length} steps · ${SPORT_LABELS[skill.sport]}`}</PoText>
-									</View>
-								</Pressable>
-							))}
-						</>
-					) : null}
 				</View>
 			</Sheet>
 		</TrainingScreen>

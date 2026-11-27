@@ -10,10 +10,9 @@ import { usePoTheme } from "@/theme";
 import { savePlan } from "../data/training-actions";
 import { startSession } from "../hooks/live-actions";
 import { useTrainingToday } from "../hooks/use-training";
-import { type Exercise, setsLabel, TEMPLATES, templateById } from "../lib/library";
+import { type Exercise, setsLabel, type Template, templateById } from "../lib/library";
 import { guideFor } from "../lib/exercise-guide";
 import { resolveTemplate } from "../lib/programs/engine";
-import { heroOf } from "../lib/photos";
 import { withSlot } from "../lib/training-math";
 import { SPORT_LABELS } from "../lib/training-model";
 import { ExerciseThumb } from "./exercise-demo";
@@ -38,9 +37,7 @@ export function PlanScreen({ templateId }: { templateId?: string }) {
 					settings: data.settings,
 					activities: data.activities,
 				})
-			: templateById(templateId)) ??
-		todays ??
-		templateById("pull-core");
+			: templateById(templateId)) ?? todays;
 	if (!template) {
 		return (
 			<TrainingScreen>
@@ -49,9 +46,10 @@ export function PlanScreen({ templateId }: { templateId?: string }) {
 		);
 	}
 	const isToday = template.id === todays?.id;
-	const options = TEMPLATES.filter(
-		(item) => data.settings.sports.includes(item.sport) || item.sport === "yoga",
-	);
+	// Swap within this week's own sessions (the program's and the person's activities).
+	const options = [...new Set(plan?.slots.map((slot) => slot.template) ?? [])]
+		.map((id) => templateById(id))
+		.filter((item): item is Template => item !== undefined && item.id !== template.id);
 
 	const swap = (id: string) => {
 		setSwapping(false);
@@ -91,7 +89,7 @@ export function PlanScreen({ templateId }: { templateId?: string }) {
 					label={`Effort ${template.effort} of 10`}
 				/>
 			</ScreenTitle>
-			<TrainingImage photo={heroOf(template.hero)} size={180} fill radius={28} />
+			<TrainingImage size={140} fill radius={28} />
 			<Card>
 				<CardHead
 					title="The plan"

@@ -1,4 +1,5 @@
-import { StyleSheet } from "react-native";
+import { useState } from "react";
+import { StyleSheet, View } from "react-native";
 import {
 	CardStack,
 	FlipHint,
@@ -6,15 +7,18 @@ import {
 	ReviewProgress,
 	useReview,
 } from "@/components/flashcard-review";
-import { EmptyCard, MetaChip, ScreenTitle } from "@/components/module-ui";
+import { EmptyCard, FilterChip, MetaChip, ScreenTitle } from "@/components/module-ui";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
+import { Sheet } from "@/components/ui/sheet";
+import { TextField } from "@/components/ui/text-field";
 import { dueCards } from "@/lib/flashcards/schedule";
 import { useNow } from "@/lib/use-now";
 import { useSpeaker } from "@/lib/voice";
-import { rateCard, seedCards } from "../data/faith-actions";
+import { addCards, rateCard } from "../data/faith-actions";
 import { useFaith } from "../hooks/use-faith";
-import { STARTER_CARDS } from "../lib/faith-content";
+import type { CardKind } from "../lib/faith-model";
+import { templateRoutes } from "@/modules/templates/navigation";
 import { faithRoutes } from "../navigation";
 import { FaithScreen } from "./faith-screen";
 
@@ -26,6 +30,7 @@ export function FaithFlashcardsScreen() {
 	const { cards } = data;
 
 	const review = useReview(cards, data.loading, rateCard, speaker.stop);
+	const [writing, setWriting] = useState(false);
 	const { current, flipped } = review;
 
 	return (
@@ -77,15 +82,13 @@ export function FaithFlashcardsScreen() {
 				<EmptyCard
 					icon="Layers"
 					title="No cards yet"
-					body={`Flashcards are optional. Add the starter deck of ${STARTER_CARDS.length} words and duas from short surahs if you'd like to learn them.`}
+					body="Flashcards are optional. Write the words and duas you want to learn, or import a deck you made with any AI from Templates."
 				>
+					<PillButton label="Write a card" onPress={() => setWriting(true)} />
 					<PillButton
-						label="Add the starter deck"
-						onPress={() =>
-							void seedCards(cards).catch((error: unknown) =>
-								console.error("[faith] could not add the starter cards", error),
-							)
-						}
+						label="Import a deck"
+						variant="secondary"
+						onPress={() => templateRoutes.browse("faith")}
 					/>
 					<PillButton label="Back to Grow" variant="secondary" onPress={faithRoutes.grow} />
 				</EmptyCard>
@@ -98,10 +101,71 @@ export function FaithFlashcardsScreen() {
 					<PillButton label="Back to Grow" variant="secondary" onPress={faithRoutes.grow} />
 				</EmptyCard>
 			)}
+			{cards.length > 0 ? (
+				<PillButton label="Write a card" variant="ghost" onPress={() => setWriting(true)} />
+			) : null}
+			{writing ? <CardSheet onClose={() => setWriting(false)} /> : null}
 		</FaithScreen>
+	);
+}
+
+/** One card in the person's own words: the Arabic, a question, and the meaning. */
+function CardSheet({ onClose }: { onClose: () => void }) {
+	const [kind, setKind] = useState<CardKind>("word");
+	const [front, setFront] = useState("");
+	const [prompt, setPrompt] = useState("");
+	const [back, setBack] = useState("");
+	const [source, setSource] = useState("");
+	const ready = front.trim().length > 0 && back.trim().length > 0;
+	return (
+		<Sheet
+			visible
+			title="Write a card"
+			onClose={onClose}
+			footer={
+				<PillButton
+					label="Add card"
+					disabled={!ready}
+					onPress={() => {
+						onClose();
+						void addCards([
+							{
+								kind,
+								front: front.trim(),
+								prompt:
+									prompt.trim() ||
+									(kind === "dua" ? "What does this dua ask for?" : "What does it mean?"),
+								back: back.trim(),
+								source: source.trim(),
+							},
+						]).catch((error: unknown) => console.error("[faith] could not add the card", error));
+					}}
+				/>
+			}
+		>
+			<View style={styles.kinds}>
+				<FilterChip label="Word" selected={kind === "word"} onPress={() => setKind("word")} />
+				<FilterChip label="Dua" selected={kind === "dua"} onPress={() => setKind("dua")} />
+			</View>
+			<TextField label="Front (Arabic)" value={front} onChangeText={setFront} placeholder="صَبْر" />
+			<TextField
+				label="Question"
+				value={prompt}
+				onChangeText={setPrompt}
+				placeholder="What does it mean?"
+			/>
+			<TextField label="Meaning" value={back} onChangeText={setBack} placeholder="Patience" />
+			<TextField
+				label="From"
+				value={source}
+				onChangeText={setSource}
+				placeholder="Al-Baqarah 2:153"
+			/>
+		</Sheet>
 	);
 }
 
 const styles = StyleSheet.create({
 	center: { textAlign: "center" },
+	kinds: { flexDirection: "row", gap: 8 },
 });

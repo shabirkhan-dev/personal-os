@@ -15,5 +15,5 @@ export const trainingPrograms = defineCollection("training-programs", parseProgr
 export const trainingProgress = defineCollection("training-progress", parseProgress);
 /** Activities people define: football, swimming, a climbing night. */
 export const trainingActivities = defineCollection("training-activities", parseActivity);
-/** Their own exercises, and their changes (media, cues) to built-in ones. */
+/** Their exercises: added by hand, made with AI or imported. */
 export const trainingExercises = defineCollection("training-exercises", parseSavedExercise);

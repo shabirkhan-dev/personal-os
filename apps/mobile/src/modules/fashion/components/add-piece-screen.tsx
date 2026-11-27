@@ -1,14 +1,7 @@
 import { textStyles } from "@personal-os/tokens";
 import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import {
-	ActivityIndicator,
-	Pressable,
-	ScrollView,
-	StyleSheet,
-	TextInput,
-	View,
-} from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from "react-native";
 import { SkeletonCard } from "@/components/ui/skeleton";
 import { showDialog } from "@/components/ui/dialog";
 import { Icon } from "@/components/icons";
@@ -24,7 +17,6 @@ import { toTextStyle, usePoTheme } from "@/theme";
 import { deletePiece, savePiece } from "../data/fashion-actions";
 import { useFashionUi } from "../hooks/fashion-ui-store";
 import { useFashion } from "../hooks/use-fashion";
-import { CATALOG } from "../lib/catalog";
 import { capital } from "../lib/fashion-math";
 import {
 	CATEGORIES,
@@ -237,7 +229,6 @@ export function AddPieceScreen({ editId, category }: { editId?: string; category
 		]);
 	};
 
-	const lookAlikes = CATALOG.filter((item) => !form.category || item.category === form.category);
 	const isLink = LINK.test(text.trim());
 
 	if (editId && !editing && loading) {
@@ -344,41 +335,6 @@ export function AddPieceScreen({ editId, category }: { editId?: string; category
 						/>
 					</View>
 				</View>
-				<PoText variant="eyebrow11" tone="textTertiary">
-					Or a look-alike
-				</PoText>
-				<ScrollView
-					horizontal
-					showsHorizontalScrollIndicator={false}
-					contentContainerStyle={styles.alikes}
-				>
-					{lookAlikes.map((item) => {
-						const value = `catalog:${item.id}`;
-						const on = form.image === value;
-						return (
-							<Pressable
-								key={item.id}
-								accessibilityRole="radio"
-								accessibilityLabel={item.name}
-								accessibilityState={{ selected: on }}
-								onPress={() => {
-									haptics.select();
-									set("image", value);
-									if (!touched.has("colour") && !form.colour) set("colour", item.colour);
-								}}
-								style={[styles.alike, { opacity: on ? 1 : 0.55 }]}
-							>
-								<PieceImage
-									image={value}
-									category={item.category}
-									colour={item.colour}
-									size={64}
-									radius={14}
-								/>
-							</Pressable>
-						);
-					})}
-				</ScrollView>
 			</View>
 
 			<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
@@ -568,8 +524,6 @@ const styles = StyleSheet.create({
 		padding: 12,
 	},
 	sourceHead: { flexDirection: "row", alignItems: "center", gap: 8 },
-	alikes: { gap: 8 },
-	alike: { borderRadius: 16, padding: 2 },
 	colours: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 	colour: {
 		flexDirection: "row",

@@ -71,7 +71,8 @@ export const designProgramSchema = z
 		minutes: z.number().int().min(15).max(120),
 		sports: z.array(line(20)).max(12).default([]),
 		equipment: z.array(line(20)).max(10).default([]),
-		exercises: z.array(catalogEntry).min(5).max(150),
+		/** The person's own exercises to reuse; the program can also define new ones. */
+		exercises: z.array(catalogEntry).max(150).default([]),
 	})
 	.strict();
 
@@ -107,6 +108,22 @@ export const programDraft = z.object({
 		)
 		.default([]),
 	order: z.array(whole).default([]),
+	/** Exercises the program needs that the person doesn't have yet, by a short key. */
+	newExercises: z
+		.array(
+			z.object({
+				key: z.string().default(""),
+				name: text(60),
+				pattern: text(20),
+				unit: z.string().default("reps"),
+				level: whole,
+				equipment: z.array(z.string()).default([]),
+				each: z.boolean().catch(false).default(false),
+				weighted: z.boolean().catch(false).default(false),
+				cues: z.array(text(100)).default([]),
+			}),
+		)
+		.default([]),
 });
 
 export type AskTrainingInput = z.infer<typeof askTrainingSchema>;

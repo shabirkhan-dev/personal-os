@@ -7,7 +7,6 @@ import { useOnboardingSync } from "@/modules/onboarding/store/use-onboarding-syn
 import { useNotificationLinks } from "@/modules/assistant/hooks/use-assistant-nudges";
 import { useHeyOs } from "@/modules/home/hooks/use-hey-os";
 import { usePhotoSync } from "@/modules/home/hooks/use-photo-sync";
-import { usePrefetchAppPhotos } from "@/modules/home/hooks/use-prefetch-app-photos";
 import { useAutoBackup } from "@/modules/profile/hooks/use-auto-backup";
 import { useAvatarSync } from "@/modules/profile/hooks/use-avatar-sync";
 import { useReminders } from "@/modules/reminders/hooks/use-reminders";
@@ -22,7 +21,6 @@ export default function HomeLayout() {
 	useOnboardingSync();
 	useAvatarSync();
 	usePhotoSync();
-	usePrefetchAppPhotos();
 	useReminders();
 	useAutoBackup();
 	useWidgetRefresh();

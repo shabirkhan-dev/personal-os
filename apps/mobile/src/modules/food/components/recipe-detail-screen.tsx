@@ -126,7 +126,7 @@ export function RecipeDetailScreen({ id }: { id: string }) {
 					: { icon: "Filled/Calendar", label: "Meal plan", onPress: foodRoutes.plan }
 			}
 		>
-			<MealImage recipeId={recipe.id} hero size={240} fill radius={28} />
+			<MealImage recipeId={recipe.id} size={240} fill radius={28} />
 			<View style={styles.title}>
 				<View style={styles.titleRow}>
 					<View style={styles.flex}>

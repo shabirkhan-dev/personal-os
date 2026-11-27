@@ -1,6 +1,5 @@
 import { removeItem, saveItem } from "@/lib/db/collection";
 import { dayKey, newId } from "@/lib/day";
-import { CATALOG, type CatalogItem } from "../lib/catalog";
 import type { FashionSettings, Piece, PlanDay, Wear, Wish } from "../lib/fashion-model";
 import { fashionSettings, pieces, plans, wears, wishes } from "./collections";
 
@@ -17,30 +16,6 @@ export async function savePiece(input: NewPiece, now = new Date()): Promise<Piec
 	};
 	await saveItem(pieces, piece);
 	return piece;
-}
-
-export function pieceFromCatalog(item: CatalogItem): NewPiece {
-	return {
-		name: item.name,
-		category: item.category,
-		colour: item.colour,
-		image: `catalog:${item.id}`,
-		size: "",
-		fit: "",
-		fabric: "",
-		price: null,
-		boughtOn: null,
-		care: "",
-		note: "",
-		level: item.category === "scent" ? 1 : null,
-		scentTime: item.scentTime ?? null,
-	};
-}
-
-/** Quick add from the empty Home: one piece per tapped starter. */
-export async function addFromCatalog(ids: readonly string[], now = new Date()): Promise<void> {
-	const items = CATALOG.filter((item) => ids.includes(item.id));
-	await Promise.all(items.map((item) => savePiece(pieceFromCatalog(item), now)));
 }
 
 export function deletePiece(piece: Piece): Promise<void> {

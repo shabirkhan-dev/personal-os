@@ -1,5 +1,5 @@
 import { addDays, dayKey } from "@/lib/day";
-import { type Template, TEMPLATES, templateById } from "./library";
+import { templateById } from "./library";
 import type { PlanSlot, Session, Sport, TrainingSettings, WeekPlan } from "./training-model";
 
 /** The numbers behind Training's screens. Pure, so they're tested without a phone. */
@@ -15,15 +15,6 @@ export function weekDays(date: Date): string[] {
 
 // --- the week -----------------------------------------------------------------------------------
 
-const BY_SPORT: Partial<Record<Sport, readonly string[]>> = {
-	calisthenics: ["pull-core", "push-handstand", "legs-core"],
-	running: ["easy-run", "long-run"],
-	boxing: ["shadow-boxing"],
-	football: ["football"],
-	volleyball: ["volleyball"],
-	yoga: ["mobility"],
-};
-
 /** Which weekdays (0 = Monday) get a session, spread so hard days don't stack. */
 export const SPREAD: Record<number, number[]> = {
 	1: [2],
@@ -35,34 +26,12 @@ export const SPREAD: Record<number, number[]> = {
 	7: [0, 1, 2, 3, 4, 5, 6],
 };
 
-/** The order sports take turns in: strength first, then running, boxing and team sports. */
-const MAIN: readonly Sport[] = ["calisthenics", "running", "boxing", "football", "volleyball"];
-
 /**
- * A week from the sports picked and days a week: sessions take turns by sport (pull, run, box,
- * push, long run…), and the free days get mobility when yoga is picked, else rest.
+ * The week without a program: every day open (rest) until the person starts a program of their
+ * own; their activities fill in through `rebalance`/program weeks.
  */
-export function buildWeek(settings: TrainingSettings, days: readonly string[]): PlanSlot[] {
-	const mains = MAIN.filter((sport) => settings.sports.includes(sport));
-	const pool = mains.length > 0 ? mains : (["calisthenics"] as Sport[]);
-	const used: Partial<Record<Sport, number>> = {};
-	const on = new Set(SPREAD[settings.daysPerWeek] ?? SPREAD[5]);
-	let turn = 0;
-	return days.map((day, index) => {
-		if (!on.has(index)) {
-			return {
-				day,
-				template: settings.sports.includes("yoga") ? "mobility" : null,
-				movedFrom: null,
-			};
-		}
-		const sport = pool[turn % pool.length] ?? "calisthenics";
-		turn += 1;
-		const list = BY_SPORT[sport] ?? ["pull-core"];
-		const count = used[sport] ?? 0;
-		used[sport] = count + 1;
-		return { day, template: list[count % list.length] ?? null, movedFrom: null };
-	});
+export function buildWeek(_settings: TrainingSettings, days: readonly string[]): PlanSlot[] {
+	return days.map((day) => ({ day, template: null, movedFrom: null }));
 }
 
 export type SlotState = "done" | "missed" | "today" | "planned" | "rest";
@@ -254,7 +223,6 @@ export function negativeSplit(splits: readonly number[]): boolean {
 export type TrainingNote =
 	| { kind: "pull-ups"; best: number; change: number }
 	| { kind: "boxing"; weeks: number }
-	| { kind: "long-run"; day: string; km: number }
 	| { kind: "missed"; title: string; movedTo: string | null };
 
 /** Weeks in a row (ending this week) with at least one session of `sport`. */
@@ -286,12 +254,6 @@ export function trainingNotes(input: {
 			best: Number(pulls.value),
 			change: Number(pulls.change.replace(/\D/g, "")),
 		});
-	const tomorrow = dayKey(addDays(input.now, 1));
-	const long = input.plan?.slots.find(
-		(slot) => slot.day >= input.today && slot.day <= tomorrow && slot.template === "long-run",
-	);
-	if (long)
-		notes.push({ kind: "long-run", day: long.day, km: templateById("long-run")?.distanceKm ?? 8 });
 	const missed = input.plan?.slots.find(
 		(slot) =>
 			slotState(slot, input.sessions, input.today) === "missed" && slot.template !== "mobility",
@@ -307,10 +269,6 @@ export function trainingNotes(input: {
 	const boxing = weeksInARow(input.sessions, "boxing", input.now);
 	if (boxing >= 2) notes.push({ kind: "boxing", weeks: boxing });
 	return notes;
-}
-
-export function templatesFor(sports: readonly Sport[]): Template[] {
-	return TEMPLATES.filter((template) => sports.includes(template.sport));
 }
 
 export function weekdayShort(day: string): string {

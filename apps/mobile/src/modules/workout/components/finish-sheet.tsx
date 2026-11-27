@@ -13,7 +13,7 @@ import { endLive } from "../hooks/live-actions";
 import type { LiveSession } from "../hooks/live-store";
 import { exerciseById } from "../lib/exercise-guide";
 import type { Template } from "../lib/library";
-import { CHAINS, type ChainId, type Progress } from "../lib/programs/program-model";
+import type { Progress } from "../lib/programs/program-model";
 import { type Feel, FEELS } from "../lib/training-model";
 
 /** Ends a live session: how it felt (and how far, for a run), then the summary. */
@@ -140,20 +140,15 @@ async function levelUp(
 	if (!template.program || !saved) return;
 	try {
 		const updates = await applyProgress(template, live.sets, feel, saved);
-		const trained = new Map(
-			template.exercises.flatMap((exercise) =>
-				exercise.progress ? [[exercise.progress.key, exercise.progress.step] as const] : [],
-			),
-		);
-		const promoted = updates.filter((item) => item.step > (trained.get(item.id) ?? item.step));
-		const names = promoted
-			.map((item) => {
-				const rungs = CHAINS[item.id as ChainId];
-				return rungs ? exerciseById(String(rungs[item.step]))?.name : undefined;
-			})
+		const raised = updates.filter((item) => {
+			const before = saved.get(item.id);
+			return before !== undefined && item.target > before.target;
+		});
+		const names = raised
+			.map((item) => exerciseById(item.id)?.name)
 			.filter((name): name is string => Boolean(name));
 		if (names.length > 0) {
-			voiceOut.speak(`Level up. Next time: ${names.join(" and ")}.`);
+			voiceOut.speak(`Target up next time for ${names.join(" and ")}.`);
 		}
 	} catch (error) {
 		// The session is saved either way; the levels catch up next time.

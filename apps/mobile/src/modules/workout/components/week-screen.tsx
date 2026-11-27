@@ -9,7 +9,7 @@ import { clockOf } from "@/modules/home/lib/module-day";
 import { usePoTheme } from "@/theme";
 import { rebalanceWeek, savePlan } from "../data/training-actions";
 import { useTrainingToday } from "../hooks/use-training";
-import { TEMPLATES, templateById } from "../lib/library";
+import { templateById } from "../lib/library";
 import { buildWeek, type SlotState, slotState, weekdayShort, withSlot } from "../lib/training-math";
 import { SPORT_LABELS } from "../lib/training-model";
 import { trainingRoutes } from "../navigation";
@@ -181,9 +181,8 @@ export function WeekScreen() {
 					</View>
 					{[
 						null,
-						...TEMPLATES.filter(
-							(template) => settings.sports.includes(template.sport) || template.sport === "yoga",
-						).map((template) => template.id),
+						// The week's own sessions: the program's and the person's activities.
+						...new Set(slots.map((slot) => slot.template).filter((id) => id !== null)),
 					].map((id) => {
 						const template = templateById(id);
 						return (

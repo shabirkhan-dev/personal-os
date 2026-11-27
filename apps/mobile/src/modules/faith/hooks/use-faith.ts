@@ -4,7 +4,6 @@ import {
 	challenges,
 	faithCards,
 	faithSettings,
-	pathProgress,
 	prayerLogs,
 	recitations,
 	resources,
@@ -24,7 +23,6 @@ export function useFaith() {
 	const payments = useCollection(zakatPayments);
 	const resourceList = useCollection(resources);
 	const challenge = useCollection(challenges);
-	const progress = useCollection(pathProgress);
 	const cards = useCollection(faithCards);
 
 	return useMemo(() => {
@@ -37,7 +35,6 @@ export function useFaith() {
 			payments,
 			resourceList,
 			challenge,
-			progress,
 			cards,
 		];
 		return {
@@ -53,21 +50,9 @@ export function useFaith() {
 				b.updatedAt.localeCompare(a.updatedAt),
 			),
 			challenge: challenge.data?.[0] ?? null,
-			progress: progress.data ?? [],
 			cards: cards.data ?? [],
 		};
-	}, [
-		settingsList,
-		logs,
-		tasbih,
-		sessions,
-		zakat,
-		payments,
-		resourceList,
-		challenge,
-		progress,
-		cards,
-	]);
+	}, [settingsList, logs, tasbih, sessions, zakat, payments, resourceList, challenge, cards]);
 }
 
 export type FaithData = ReturnType<typeof useFaith>;

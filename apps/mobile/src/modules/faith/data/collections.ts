@@ -2,7 +2,6 @@ import { defineCollection } from "@/lib/db/collection";
 import {
 	parseCard,
 	parseChallenge,
-	parsePathProgress,
 	parsePayment,
 	parsePrayerLog,
 	parseRecitation,
@@ -21,5 +20,4 @@ export const zakatProfiles = defineCollection("faith-zakat", parseZakat);
 export const zakatPayments = defineCollection("faith-zakat-payments", parsePayment);
 export const resources = defineCollection("faith-resources", parseResource);
 export const challenges = defineCollection("faith-challenge", parseChallenge);
-export const pathProgress = defineCollection("faith-paths", parsePathProgress);
 export const faithCards = defineCollection("faith-cards", parseCard);

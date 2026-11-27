@@ -154,7 +154,7 @@ export function SettingsScreen() {
 				<SettingsRow
 					icon="Layers"
 					title="Templates"
-					meta="Ready-made recipes, programs, routines and more"
+					meta="Make your own with any AI, or open a template file"
 					onPress={() => router.push("/templates")}
 				/>
 				<SettingsRow

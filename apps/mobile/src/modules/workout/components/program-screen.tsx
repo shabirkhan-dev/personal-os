@@ -6,19 +6,14 @@ import { showDialog } from "@/components/ui/dialog";
 import { EmptyCard, Footer, MetaChip, ScreenTitle } from "@/components/module-ui";
 import { PillButton } from "@/components/ui/pill-button";
 import { PoText } from "@/components/ui/po-text";
-import { Sheet } from "@/components/ui/sheet";
-import { FilterChip } from "@/components/module-ui";
-import { haptics } from "@/lib/haptics";
 import { useNow } from "@/lib/use-now";
 import { usePoTheme } from "@/theme";
-import { deleteProgram, endProgram, saveProgress } from "../data/training-actions";
+import { deleteProgram, endProgram } from "../data/training-actions";
 import { useActiveProgram, useTraining } from "../hooks/use-training";
-import { EQUIPMENT_LABELS, exerciseById } from "../lib/exercise-guide";
+import { EQUIPMENT_LABELS } from "../lib/exercise-guide";
 import type { Exercise } from "../lib/library";
 import { setsLabel } from "../lib/library";
-import { chainsIn, defaultStep, materialize, pickRung, programById } from "../lib/programs/engine";
-import { CHAIN_LABELS, CHAINS, type ChainId } from "../lib/programs/program-model";
-import { heroOf } from "../lib/photos";
+import { materialize, programById } from "../lib/programs/engine";
 import { weekDays } from "../lib/training-math";
 import { trainingRoutes } from "../navigation";
 import { ExerciseThumb } from "./exercise-demo";
@@ -38,7 +33,6 @@ export function ProgramScreen({ id }: { id: string }) {
 	const program = programById(data.programs, id);
 	const [starting, setStarting] = useState(false);
 	const [howTo, setHowTo] = useState<HowToTarget | null>(null);
-	const [level, setLevel] = useState<ChainId | null>(null);
 	const [notice, setNotice] = useState<string | null>(null);
 	const isActive = active?.program.id === id;
 	const week = isActive && active && !active.finished && !active.upcoming ? active.week : 1;
@@ -58,8 +52,6 @@ export function ProgramScreen({ id }: { id: string }) {
 		);
 	}
 
-	const custom = program.source !== "built-in";
-	const chains = chainsIn(program);
 	const failed = (error: unknown) => {
 		console.error("[training] could not save", error);
 		setNotice("Couldn't save on this phone. Try again.");
@@ -95,27 +87,13 @@ export function ProgramScreen({ id }: { id: string }) {
 			},
 		]);
 
-	const levelOf = (chain: ChainId) => {
-		const saved = data.progress.get(chain);
-		const rung = pickRung(
-			chain,
-			saved?.step ?? defaultStep(chain, program.level),
-			data.settings.equipment,
-		);
-		return { rung, saved };
-	};
-
 	return (
 		<TrainingScreen
-			action={
-				custom
-					? {
-							icon: "Filled/Edit",
-							label: "Edit program",
-							onPress: () => trainingRoutes.builder({ id }),
-						}
-					: { icon: "Filled/Calendar", label: "This week", onPress: trainingRoutes.week }
-			}
+			action={{
+				icon: "Filled/Edit",
+				label: "Edit program",
+				onPress: () => trainingRoutes.builder({ id }),
+			}}
 		>
 			<ScreenTitle eyebrow={programMeta(program)} title={program.title}>
 				<MetaChip icon="Filled/Calendar" label={`${program.weeks} weeks`} />
@@ -129,7 +107,7 @@ export function ProgramScreen({ id }: { id: string }) {
 					<MetaChip icon="Dumbbell" label="No equipment" />
 				)}
 			</ScreenTitle>
-			<TrainingImage photo={heroOf(program.photo)} size={180} fill radius={28} />
+			<TrainingImage size={140} fill radius={28} />
 			{isActive && active ? (
 				<Card>
 					<PoText variant="eyebrow11" tone="accentDefault">
@@ -161,9 +139,7 @@ export function ProgramScreen({ id }: { id: string }) {
 				) : null}
 				<View style={styles.points}>
 					{[
-						chains.length > 0
-							? "Each exercise has a rep range. Hit the top on every set and the next session adds a rep; past the top you move to a harder variation."
-							: null,
+						"Each exercise has a range. Hit the target on every set and the next session asks for a little more.",
 						program.deloadEvery
 							? `Every ${program.deloadEvery}th week is lighter so you recover.`
 							: null,
@@ -183,39 +159,6 @@ export function ProgramScreen({ id }: { id: string }) {
 						))}
 				</View>
 			</Card>
-			{chains.length > 0 ? (
-				<Card>
-					<CardHead title="Your levels" right="Tap to change" />
-					{chains.map((chain) => {
-						const { rung, saved } = levelOf(chain);
-						return (
-							<Pressable
-								key={chain}
-								accessibilityRole="button"
-								onPress={() => setLevel(chain)}
-								style={styles.row}
-							>
-								{rung ? (
-									<ExerciseThumb name={rung.exercise.name} photo={rung.exercise.photo} size={44} />
-								) : null}
-								<View style={styles.flex}>
-									<PoText variant="eyebrow11" tone="textTertiary">
-										{CHAIN_LABELS[chain]}
-									</PoText>
-									<PoText variant="row15">
-										{rung?.exercise.name ?? "Needs equipment you don't have"}
-									</PoText>
-								</View>
-								<PoText variant="mono13" tone="textSecondary">
-									{saved && rung && saved.step === rung.step
-										? `${saved.target}${rung.exercise.unit === "s" ? " s" : ""}`
-										: `step ${(rung?.step ?? 0) + 1}/${CHAINS[chain].length}`}
-								</PoText>
-							</Pressable>
-						);
-					})}
-				</Card>
-			) : null}
 			{program.sessions.map((session) => {
 				const template = materialize(program, session.key, week, context);
 				return (
@@ -258,9 +201,7 @@ export function ProgramScreen({ id }: { id: string }) {
 			) : null}
 			<ShareTemplateButton share={() => shareProgram(program)} />
 			<Footer>
-				{custom ? (
-					<PillButton label="Delete" variant="secondary" style={styles.flex} onPress={remove} />
-				) : null}
+				<PillButton label="Delete" variant="secondary" style={styles.flex} onPress={remove} />
 				{isActive && active && !active.finished ? (
 					<PillButton label="End program" variant="secondary" style={styles.flex} onPress={stop} />
 				) : null}
@@ -281,7 +222,6 @@ export function ProgramScreen({ id }: { id: string }) {
 			<StartProgramSheet
 				program={program}
 				settings={data.settings}
-				progress={data.progress}
 				plan={data.plans.find((item) => item.id === weekDays(now)[0]) ?? null}
 				activities={data.activities}
 				switchingFrom={active && !isActive && !active.finished ? active.program.title : null}
@@ -293,66 +233,7 @@ export function ProgramScreen({ id }: { id: string }) {
 				}}
 			/>
 			<HowToSheet target={howTo} onClose={() => setHowTo(null)} />
-			<LevelSheet
-				chain={level}
-				current={level ? (levelOf(level).rung?.step ?? 0) : 0}
-				onClose={() => setLevel(null)}
-				onPick={(chain, step) => {
-					haptics.tap();
-					const first = exerciseById(String(CHAINS[chain][step]));
-					const item = program.sessions
-						.flatMap((session) => session.items)
-						.find((candidate) => candidate.kind === "chain" && candidate.chain === chain);
-					const range =
-						item?.kind === "chain" ? (first?.unit === "s" ? item.hold : item.range) : [8, 12];
-					setLevel(null);
-					saveProgress({
-						id: chain,
-						step,
-						target: range[0] ?? 8,
-						kg: null,
-						misses: 0,
-						updatedAt: new Date().toISOString(),
-					}).catch(failed);
-				}}
-			/>
 		</TrainingScreen>
-	);
-}
-
-/** Moves one ladder by hand: "I can already do pull-ups". */
-function LevelSheet({
-	chain,
-	current,
-	onPick,
-	onClose,
-}: {
-	chain: ChainId | null;
-	current: number;
-	onPick: (chain: ChainId, step: number) => void;
-	onClose: () => void;
-}) {
-	return (
-		<Sheet visible={chain !== null} title={chain ? CHAIN_LABELS[chain] : ""} onClose={onClose}>
-			<View style={styles.levels}>
-				<PoText variant="meta13" tone="textSecondary">
-					Pick the hardest variation you can do for a few clean reps. Your next sessions start
-					there.
-				</PoText>
-				<View style={styles.wrap}>
-					{chain
-						? CHAINS[chain].map((id, index) => (
-								<FilterChip
-									key={id}
-									label={exerciseById(id)?.name ?? id}
-									selected={index === current}
-									onPress={() => onPick(chain, index)}
-								/>
-							))
-						: null}
-				</View>
-			</View>
-		</Sheet>
 	);
 }
 
@@ -362,6 +243,4 @@ const styles = StyleSheet.create({
 	point: { flexDirection: "row", gap: 12, alignItems: "flex-start" },
 	dot: { width: 6, height: 6, borderRadius: 3, marginTop: 8 },
 	row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8 },
-	levels: { gap: 12, paddingBottom: 8 },
-	wrap: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 });

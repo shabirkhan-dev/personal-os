@@ -1,9 +1,14 @@
 import { newId } from "@/lib/day";
-import { allExercises, canDo, type Equipment, exerciseById } from "../exercise-guide";
+import {
+	allExercises,
+	type CatalogExercise,
+	canDo,
+	type Equipment,
+	exerciseById,
+	parseSavedExercise,
+} from "../exercise-guide";
 import { SPORTS, type Sport } from "../training-model";
 import {
-	CHAINS,
-	type ChainId,
 	FOCUSES,
 	type Focus,
 	type ProgramDef,
@@ -25,6 +30,18 @@ export type ProgramDraft = {
 		items: { exercise: string; sets: number; range: [number, number]; restS: number }[];
 	}[];
 	order: number[];
+	/** Exercises the AI defined for this program; items refer to them by `key`. */
+	exercises: {
+		key: string;
+		name: string;
+		pattern: string;
+		unit: string;
+		level: number;
+		equipment: string[];
+		each: boolean;
+		weighted: boolean;
+		cues: string[];
+	}[];
 };
 
 export type DraftRequest = {
@@ -50,43 +67,34 @@ export function draftCatalog(equipment: readonly Equipment[]) {
 		}));
 }
 
-function chainOf(exerciseId: string): ChainId | null {
-	for (const [chain, rungs] of Object.entries(CHAINS)) {
-		if (rungs.includes(exerciseId)) return chain as ChainId;
+/** The exercises an AI draft defines, as the person's own (ids made unique against theirs). */
+export function exercisesFromDraft(draft: ProgramDraft): Map<string, CatalogExercise> {
+	const taken = new Set(allExercises().map((exercise) => exercise.id));
+	const out = new Map<string, CatalogExercise>();
+	for (const raw of draft.exercises) {
+		let id = `ex-${raw.key}`.slice(0, 50);
+		while (taken.has(id)) id = `${id}-2`;
+		const exercise = parseSavedExercise({ ...raw, id });
+		if (!exercise) continue;
+		taken.add(id);
+		out.set(raw.key, exercise);
 	}
-	return null;
+	return out;
 }
 
 /**
- * An exercise on a chain becomes a chain item, so it moves up variations like the built-in
- * programs; a hold keeps its seconds as the chain's hold range.
+ * Turns an AI draft into a program to review, with the new exercises it defines (save those as
+ * the person's own before showing the program).
  */
-export function itemFor(
-	item: ProgramDraft["sessions"][number]["items"][number],
-): ProgramItem | null {
-	const exercise = exerciseById(item.exercise);
-	if (!exercise) return null;
-	const chain = chainOf(exercise.id);
-	const range = [item.range[0], Math.max(item.range[0], item.range[1])] as const;
-	if (chain && exercise.unit !== "min") {
-		return {
-			kind: "chain",
-			chain,
-			sets: item.sets,
-			range: exercise.unit === "reps" ? range : [8, 12],
-			hold: exercise.unit === "s" ? range : [20, 40],
-			restS: item.restS,
-		};
-	}
-	return { kind: "exercise", exercise: exercise.id, sets: item.sets, range, restS: item.restS };
-}
-
-/** Turns an AI draft into a program to review and save. */
 export function programFromDraft(
 	draft: ProgramDraft,
 	request: DraftRequest,
 	now = new Date(),
-): ProgramDef {
+): { program: ProgramDef; exercises: CatalogExercise[] } {
+	const created = exercisesFromDraft(draft);
+	const idOf = (key: string) => created.get(key)?.id ?? key;
+	const known = (id: string) =>
+		exerciseById(id) ?? [...created.values()].find((item) => item.id === id);
 	const sessions: ProgramSession[] = draft.sessions
 		.map((session, index) => ({
 			key: `s${index + 1}`,
@@ -99,13 +107,26 @@ export function programFromDraft(
 				: "full",
 			minutes: session.minutes,
 			effort: 6,
-			items: session.items.map(itemFor).filter((item): item is ProgramItem => item !== null),
+			items: session.items
+				.map((item): ProgramItem | null => {
+					const exercise = known(idOf(item.exercise));
+					if (!exercise) return null;
+					const range = [item.range[0], Math.max(item.range[0], item.range[1])] as const;
+					return {
+						kind: "exercise",
+						exercise: exercise.id,
+						sets: item.sets,
+						range,
+						restS: item.restS,
+					};
+				})
+				.filter((item): item is ProgramItem => item !== null),
 		}))
 		.filter((session) => session.items.length > 0);
 	const order = draft.order
 		.map((index) => sessions[index]?.key)
 		.filter((key): key is string => key !== undefined);
-	return {
+	const program: ProgramDef = {
 		id: newId(),
 		title: draft.title,
 		goal: request.goal.slice(0, 120),
@@ -115,12 +136,14 @@ export function programFromDraft(
 		level: request.level,
 		sports: [...new Set(sessions.map((session) => session.sport))],
 		equipment: request.equipment,
-		photo: "handstand",
+		photo: "",
 		sessions,
 		schedule: order.length > 0 ? { [order.length]: order } : {},
 		deloadEvery: draft.weeks >= 6 ? 4 : null,
-		testWeeks: sessions.some((session) => session.items.some((item) => item.kind === "chain")),
+		testWeeks: false,
 		source: "ai",
 		createdAt: now.toISOString(),
 	};
+	const used = new Set(sessions.flatMap((session) => session.items.map((item) => item.exercise)));
+	return { program, exercises: [...created.values()].filter((item) => used.has(item.id)) };
 }

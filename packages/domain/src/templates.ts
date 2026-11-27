@@ -1,7 +1,8 @@
 /**
- * A template file: the one shape for templates people share with each other (a `.posx.json`
- * file), import back, and the packs the server offers. Items stay loosely typed here; the app
- * reads each one with its module's own parser before anything is saved.
+ * A template file (`.posx.json`): the one shape for templates people make with any AI, share
+ * with each other and import. Nothing ships with the app; the format is the template. Items stay
+ * loosely typed here; the app reads each one with its module's own parser before anything is
+ * saved.
  */
 
 export const TEMPLATE_FORMAT = "personal-os-template";
@@ -10,8 +11,11 @@ export const TEMPLATE_VERSION = 1;
 export const TEMPLATE_KINDS = [
 	"recipes",
 	"programs",
+	"exercises",
 	"care-routine",
 	"tasbih",
+	"flashcards",
+	"challenge",
 	"budget",
 	"minimum",
 ] as const;
@@ -20,8 +24,11 @@ export type TemplateKind = (typeof TEMPLATE_KINDS)[number];
 export const TEMPLATE_MODULE_OF: Record<TemplateKind, string> = {
 	recipes: "food",
 	programs: "training",
+	exercises: "training",
 	"care-routine": "care",
 	tasbih: "faith",
+	flashcards: "faith",
+	challenge: "faith",
 	budget: "finance",
 	minimum: "daily",
 };
@@ -49,10 +56,12 @@ const text = (value: unknown, max: number) =>
 
 /** Reads a template file; says plainly what's wrong when it isn't one. */
 export function parseTemplateFile(raw: unknown): ParsedTemplate {
-	if (!isObject(raw) || raw.format !== TEMPLATE_FORMAT) {
+	// Files written by an AI sometimes leave out the format and version: a known kind is enough.
+	if (!isObject(raw) || (raw.format !== undefined && raw.format !== TEMPLATE_FORMAT)) {
 		return { ok: false, reason: "This isn't a Personal OS template." };
 	}
-	if (typeof raw.version !== "number" || raw.version > TEMPLATE_VERSION) {
+	const version = raw.version === undefined ? TEMPLATE_VERSION : raw.version;
+	if (typeof version !== "number" || version > TEMPLATE_VERSION) {
 		return {
 			ok: false,
 			reason:
@@ -64,7 +73,7 @@ export function parseTemplateFile(raw: unknown): ParsedTemplate {
 		: null;
 	if (!kind)
 		return { ok: false, reason: "This template is for something the app doesn't know yet." };
-	const items = Array.isArray(raw.items) ? raw.items.slice(0, 60) : [];
+	const items = Array.isArray(raw.items) ? raw.items.slice(0, 100) : [];
 	const title = text(raw.title, 80);
 	if (!title || items.length === 0)
 		return { ok: false, reason: "This template is empty or damaged." };
@@ -72,7 +81,7 @@ export function parseTemplateFile(raw: unknown): ParsedTemplate {
 		ok: true,
 		file: {
 			format: TEMPLATE_FORMAT,
-			version: raw.version,
+			version,
 			id: text(raw.id, 80) || `shared-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
 			kind,
 			title,

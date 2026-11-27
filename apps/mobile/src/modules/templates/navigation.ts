@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import type { TemplateModule } from "./lib/packs";
+import type { TemplateModule } from "./lib/template-pack";
 
 /** The template marketplace, from anywhere: all packs, or one module's. */
 export const templateRoutes = {

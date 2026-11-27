@@ -40,4 +40,13 @@ describe("template files", () => {
 		});
 		expect(empty.ok ? "" : empty.reason).toContain("empty");
 	});
+
+	test("reads a file an AI wrote without the format and version", () => {
+		const parsed = parseTemplateFile({
+			kind: "flashcards",
+			title: "Patience",
+			items: [{ front: "صَبْر", back: "Patience" }],
+		});
+		expect(parsed.ok && parsed.file).toMatchObject({ version: 1, kind: "flashcards" });
+	});
 });

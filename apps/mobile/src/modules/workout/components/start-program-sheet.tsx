@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { showDialog } from "@/components/ui/dialog";
 import { FilterChip } from "@/components/module-ui";
 import { PoText } from "@/components/ui/po-text";
@@ -7,16 +7,8 @@ import { Sheet } from "@/components/ui/sheet";
 import { haptics } from "@/lib/haptics";
 import { startProgram } from "../data/training-actions";
 import { type Activity, presetForKind } from "../lib/activities";
-import { EQUIPMENT, EQUIPMENT_LABELS, type Equipment, exerciseById } from "../lib/exercise-guide";
-import { chainsIn, defaultStep } from "../lib/programs/engine";
-import {
-	CHAIN_LABELS,
-	CHAINS,
-	type ChainId,
-	type FixedDay,
-	type ProgramDef,
-	type Progress,
-} from "../lib/programs/program-model";
+import { EQUIPMENT, EQUIPMENT_LABELS, type Equipment } from "../lib/exercise-guide";
+import type { FixedDay, ProgramDef } from "../lib/programs/program-model";
 import {
 	SESSION_LENGTHS,
 	type Sport,
@@ -39,13 +31,12 @@ function Label({ title, hint }: { title: string; hint?: string }) {
 }
 
 /**
- * Starting (or switching to) a program: days a week, session length, equipment, team days and
- * where you are now on each exercise ladder, so the first week fits.
+ * Starting (or switching to) a program: days a week, session length, equipment and team days,
+ * so the first week fits.
  */
 export function StartProgramSheet({
 	program,
 	settings,
-	progress,
 	plan,
 	activities,
 	switchingFrom,
@@ -55,7 +46,6 @@ export function StartProgramSheet({
 }: {
 	program: ProgramDef;
 	settings: TrainingSettings;
-	progress: ReadonlyMap<string, Progress>;
 	/** This week's plan, so days already gone keep what they had. */
 	plan: WeekPlan | null;
 	/** The person's activities, for fixed days. */
@@ -71,12 +61,10 @@ export function StartProgramSheet({
 	const fallbackDays = dayOptions.includes(settings.daysPerWeek)
 		? settings.daysPerWeek
 		: (dayOptions.at(-1) ?? settings.daysPerWeek);
-	const chains = chainsIn(program);
 	const [days, setDays] = useState(fallbackDays);
 	const [minutes, setMinutes] = useState(settings.minutes);
 	const [equipment, setEquipment] = useState<Equipment[]>(settings.equipment);
 	const [fixed, setFixed] = useState<FixedDay[]>(settings.fixedDays);
-	const [steps, setSteps] = useState<Partial<Record<ChainId, number>>>({});
 	const [saving, setSaving] = useState(false);
 	/** The weekday whose activity is being picked. */
 	const [editingDay, setEditingDay] = useState<number | null>(null);
@@ -89,14 +77,6 @@ export function StartProgramSheet({
 		setMinutes(settings.minutes);
 		setEquipment(settings.equipment);
 		setFixed(settings.fixedDays);
-		setSteps(
-			Object.fromEntries(
-				chains.map((chain) => [
-					chain,
-					progress.get(chain)?.step ?? defaultStep(chain, program.level),
-				]),
-			),
-		);
 		setNotice(null);
 		// oxlint-disable-next-line react/exhaustive-deps -- resets when the sheet opens
 	}, [visible]);
@@ -121,9 +101,6 @@ export function StartProgramSheet({
 		setSaving(true);
 		setNotice(null);
 		try {
-			const changed = Object.entries(steps).filter(
-				([chain, step]) => progress.get(chain)?.step !== step,
-			);
 			await startProgram(
 				settings,
 				program,
@@ -132,7 +109,6 @@ export function StartProgramSheet({
 					minutes,
 					equipment,
 					fixedDays: fixed,
-					steps: Object.fromEntries(changed) as Partial<Record<ChainId, number>>,
 				},
 				plan,
 			);
@@ -256,35 +232,6 @@ export function StartProgramSheet({
 							</PoText>
 						) : null}
 					</View>
-				) : null}
-				{chains.length > 0 ? (
-					<>
-						<Label
-							title="Where are you now?"
-							hint="Pick the hardest one you can do for a few clean reps."
-						/>
-						{chains.map((chain) => (
-							<View key={chain} style={styles.chain}>
-								<PoText variant="meta13" tone="textSecondary">
-									{CHAIN_LABELS[chain]}
-								</PoText>
-								<ScrollView
-									horizontal
-									showsHorizontalScrollIndicator={false}
-									contentContainerStyle={styles.row}
-								>
-									{CHAINS[chain].map((id, index) => (
-										<FilterChip
-											key={id}
-											label={exerciseById(id)?.name ?? id}
-											selected={steps[chain] === index}
-											onPress={() => setSteps((current) => ({ ...current, [chain]: index }))}
-										/>
-									))}
-								</ScrollView>
-							</View>
-						))}
-					</>
 				) : null}
 				{notice ? (
 					<PoText variant="meta13" tone="textDanger">

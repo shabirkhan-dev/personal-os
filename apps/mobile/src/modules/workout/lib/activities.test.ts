@@ -50,7 +50,7 @@ describe("activities", () => {
 });
 
 describe("saved exercises", () => {
-	it("add their own exercises and media on built-in ones", () => {
+	it("are the person's own, with their cues and media", () => {
 		const own = parseSavedExercise({
 			id: "u-1",
 			name: "Ring muscle-up",
@@ -63,7 +63,9 @@ describe("saved exercises", () => {
 		});
 		const change = parseSavedExercise({
 			id: "push-up",
-			cues: ["", "", ""],
+			name: "Push-ups",
+			pattern: "push",
+			cues: ["Hands under the shoulders", "", ""],
 			media: { image: "https://media.example.com/push.jpg" },
 		});
 		expect(own).toMatchObject({

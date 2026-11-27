@@ -46,12 +46,11 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
   reapply time, the shelf with how long each product lasts and what to reorder, hair and scalp,
   body and nails with daily habits (water shared with Food), a weekly check-in with no photos,
   and Insights. Synced through the record store.
-- Training (was Workout): twelve ready-made programs or one designed by hand or with the Training
-  AI, built around the days a week, session length, equipment and the person's fixed activity
-  days; double progression up a chain of variations (or +2.5 kg for gym lifts), light and test
-  weeks; activities the person defines (football, swimming, anything) with their own numbers; an
-  exercise library of 85 exercises with cues and 45 photo demos, plus the person's own exercises
-  with photos, GIFs (R2) and Google Drive videos; a live session with demos, hold countdowns and a
+- Training (was Workout): programs designed by hand, drafted by the Training AI (which writes the
+  exercises they need) or imported from a template file, built around the days a week, session length, equipment and the person's fixed activity
+  days; targets that rise as they're hit (or +2.5 kg for gym lifts), light and test weeks; activities the person defines (football, swimming, anything) with their own numbers; the
+  person's own exercises with cues, photos, GIFs (R2) and Google Drive videos (no library ships
+  with the app); a live session with their media, hold countdowns and a
   rest timer that alerts on a locked phone; readiness, an AI weekly review, bests with estimated
   one-rep max and Insights. Synced through the record store.
 - Calendar: one calendar for the whole app (training sessions and program weeks, interviews and
@@ -103,11 +102,13 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
   "ask again" follow-up, water has Log a glass, and a background task tops them up so they keep
   coming while the app stays closed. Settings → Reminders checks permission, exact alarms and
   battery, sends a test and lists what's coming.
-- Templates: one marketplace (Settings → Templates, and Templates in each module's menu) with
-  packs of ready-made recipes, training programs, Care routines, a tasbih sequence, flashcards,
-  learning paths, challenges, a budget split and wardrobe basics. Every module starts empty;
-  adding a pack copies its items into the person's own data. The built-in photos ship inside
-  the app (`app-photos/`, about 2 MB, `scripts/gen-bundled-photos.mjs`), so they show offline.
+- Templates, made by the person: nothing ships with the app (no stock recipes, programs,
+  exercises, routines, flashcards, learning paths or photos). Templates lists what can be made
+  (recipes, a training program with its exercises, exercises, a Care routine, a tasbih sequence,
+  flashcards, a faith challenge, a budget, a minimum day); each has a prompt with the exact file
+  format and an example (`modules/templates/lib/template-formats.ts`) to copy into any AI, a box
+  to paste the reply, and "Make it with my AI" with the person's own key (`templates/make` in
+  `packages/ai`). A file or reply opens as a preview to pick from, read by each module's parser.
 - Security: the database on the phone is encrypted with SQLCipher (key in the keystore; an
   older plain database is moved over once), App lock with fingerprint, face or passcode
   (Settings → Security), privacy mode that hides the app in recent apps and blocks screenshots,
@@ -118,9 +119,8 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
   emulator in CI (`.github/workflows/e2e.yml`) on main, nightly and by hand.
 - Templates you share: any recipe, Care routine, training program, tasbih, budget or minimum
   day goes out as a template file (`.posx.json`) through the share sheet, and opens back in
-  Templates → Open a template file as a preview to add. The server offers packs too
-  (`GET /api/v1/templates`, from `apps/api/src/modules/templates`), so new ones arrive without
-  an app update; every item is read with its module's parser before it's saved.
+  Templates → Open a template file as a preview to add; every item is read with its module's
+  parser before it's saved.
 - Your own AI key (Profile → Your AI key): OpenRouter with a live list of its free text models
   (and its automatic free router), OpenAI, or any OpenAI-compatible endpoint. The key is kept in
   the keystore (not synced, not backed up) and every module AI task runs on the phone with it,

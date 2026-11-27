@@ -68,7 +68,11 @@ export async function buildSkill(deps: Deps, input: SkillStepsInput): Promise<Sk
 
 const PROGRAM =
 	"Design a training program for the person's goal, level, weeks, days a week and minutes per " +
-	"session. Use ONLY exercise ids from the exercises list. Make 2 to 6 distinct sessions; each " +
+	"session. Reuse ids from their exercises list where they fit; for any other exercise add it " +
+	"to newExercises with a short key (lowercase-with-dashes), its name, pattern (push, pull, " +
+	"squat, hinge, lunge, core, conditioning, mobility, run, boxing or gym), unit (reps, s or min), " +
+	"level 1-10, equipment it needs, and three short cues on doing it well, then use that key as " +
+	"the item's exercise. Make 2 to 6 distinct sessions; each " +
 	"has 3 to 7 items. For each item give sets, a low and high target (reps for 'reps', seconds " +
 	"for 's', minutes for 'min') and rest in seconds. Start a strength session with a mobility " +
 	"warm-up. Balance push and pull, legs and core; respect their sports and equipment. 'order' " +
@@ -99,6 +103,18 @@ const FOCUS_NAMES = new Set([
 	"mobility",
 ]);
 
+export type NewExercise = {
+	key: string;
+	name: string;
+	pattern: string;
+	unit: "reps" | "s" | "min";
+	level: number;
+	equipment: string[];
+	each: boolean;
+	weighted: boolean;
+	cues: [string, string, string];
+};
+
 export type DesignedProgram = {
 	title: string;
 	summary: string;
@@ -111,13 +127,57 @@ export type DesignedProgram = {
 		items: { exercise: string; sets: number; range: [number, number]; restS: number }[];
 	}[];
 	order: number[];
+	/** Exercises the program defines; items refer to them by `key`. */
+	exercises: NewExercise[];
 };
 
 const clampTo = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
+const UNITS = new Set(["reps", "s", "min"]);
+
+/** "Ring Row!" → "ring-row", so items and new exercises agree on keys. */
+const keyOf = (value: string) =>
+	value
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, "-")
+		.replace(/^-|-$/g, "")
+		.slice(0, 40);
+
+/** The new exercises a draft defines, with safe keys and units; at most 40. */
+function cleanNewExercises(draft: ProgramDraft): NewExercise[] {
+	const seen = new Set<string>();
+	const out: NewExercise[] = [];
+	for (const raw of draft.newExercises.slice(0, 40)) {
+		const key = keyOf(raw.key);
+		if (!key || !raw.name || seen.has(key)) continue;
+		seen.add(key);
+		const cues = [raw.cues[0] ?? "", raw.cues[1] ?? "", raw.cues[2] ?? ""] as [
+			string,
+			string,
+			string,
+		];
+		out.push({
+			key,
+			name: raw.name,
+			pattern: raw.pattern || "conditioning",
+			unit: UNITS.has(raw.unit) ? (raw.unit as NewExercise["unit"]) : "reps",
+			level: clampTo(raw.level || 3, 1, 10),
+			equipment: raw.equipment.filter((item) => typeof item === "string").slice(0, 6),
+			each: raw.each,
+			weighted: raw.weighted,
+			cues,
+		});
+	}
+	return out;
+}
+
 /** Keeps only known exercises and sane numbers; fails when no usable session is left. */
 export function cleanProgram(input: DesignProgramInput, draft: ProgramDraft): DesignedProgram {
-	const units = new Map(input.exercises.map((exercise) => [exercise.id, exercise.unit]));
+	const exercises = cleanNewExercises(draft);
+	const units = new Map<string, string>([
+		...input.exercises.map((exercise) => [exercise.id, exercise.unit] as const),
+		...exercises.map((exercise) => [exercise.key, exercise.unit] as const),
+	]);
 	const sessions = draft.sessions
 		.map((session) => ({
 			title: session.title || "Session",
@@ -125,6 +185,9 @@ export function cleanProgram(input: DesignProgramInput, draft: ProgramDraft): De
 			focus: FOCUS_NAMES.has(session.focus) ? session.focus : "full",
 			minutes: clampTo(session.minutes || input.minutes, 10, 180),
 			items: session.items
+				.map((item) =>
+					units.has(item.exercise) ? item : Object.assign(item, { exercise: keyOf(item.exercise) }),
+				)
 				.filter((item) => units.has(item.exercise))
 				.slice(0, 8)
 				.map((item) => {
@@ -154,6 +217,10 @@ export function cleanProgram(input: DesignProgramInput, draft: ProgramDraft): De
 			order.length > 0
 				? order
 				: Array.from({ length: input.daysPerWeek }, (_, index) => index % sessions.length),
+		// Only the new exercises some session actually uses.
+		exercises: exercises.filter((exercise) =>
+			sessions.some((session) => session.items.some((item) => item.exercise === exercise.key)),
+		),
 	};
 }
 
@@ -162,7 +229,6 @@ export async function designProgram(
 	input: DesignProgramInput,
 ): Promise<DesignedProgram> {
 	if (deps.config.provider === "mock") {
-		const [first, second, third] = input.exercises;
 		return cleanProgram(input, {
 			title: "Mock program",
 			summary: `A sample for “${input.goal}”. With a provider key set, the real draft appears here.`,
@@ -173,12 +239,26 @@ export async function designProgram(
 					sport: "calisthenics",
 					focus: "full",
 					minutes: input.minutes,
-					items: [first, second, third]
-						.filter((exercise) => exercise !== undefined)
-						.map((exercise) => ({ exercise: exercise.id, sets: 3, low: 8, high: 12, restS: 60 })),
+					items: [
+						...input.exercises.slice(0, 2).map((exercise) => exercise.id),
+						"mock-push-up",
+					].map((exercise) => ({ exercise, sets: 3, low: 8, high: 12, restS: 60 })),
 				},
 			],
 			order: [0],
+			newExercises: [
+				{
+					key: "mock-push-up",
+					name: "Push-up",
+					pattern: "push",
+					unit: "reps",
+					level: 2,
+					equipment: [],
+					each: false,
+					weighted: false,
+					cues: ["Hands under shoulders", "Body in one line", "Chest to a fist from the floor"],
+				},
+			],
 		});
 	}
 	const draft = await askJson(

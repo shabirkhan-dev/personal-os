@@ -1,5 +1,6 @@
-import { describe, expect, it } from "bun:test";
-import { BUILT_IN_PROGRAMS } from "@/modules/workout/lib/programs/built-in";
+import { beforeAll, describe, expect, it } from "bun:test";
+import { parseSavedExercise, setCustomExercises } from "@/modules/workout/lib/exercise-guide";
+import type { ProgramDef } from "@/modules/workout/lib/programs/program-model";
 import { defaultSettings } from "@/modules/workout/lib/training-model";
 import {
 	billItems,
@@ -11,6 +12,44 @@ import {
 	parseEvent,
 } from "./calendar-model";
 import { trainingItems } from "./training-items";
+
+/** A program of the person's own (none ship with the app). */
+const HYBRID: ProgramDef = {
+	id: "hybrid-athlete",
+	title: "Hybrid Athlete",
+	goal: "",
+	summary: "",
+	kind: "hybrid",
+	weeks: 8,
+	level: "intermediate",
+	sports: ["calisthenics", "running"],
+	equipment: [],
+	photo: "",
+	sessions: ["push", "pull", "legs", "run"].map((key) => ({
+		key,
+		title: key,
+		sport: key === "run" ? ("running" as const) : ("calisthenics" as const),
+		focus: key === "run" ? ("run" as const) : ("full" as const),
+		minutes: 40,
+		effort: 6,
+		items: [
+			{ kind: "exercise" as const, exercise: key, sets: 3, range: [8, 12] as const, restS: 60 },
+		],
+	})),
+	schedule: { 4: ["push", "pull", "legs", "run"] },
+	deloadEvery: 4,
+	testWeeks: true,
+	source: "custom",
+	createdAt: null,
+};
+
+beforeAll(() =>
+	setCustomExercises(
+		["push", "pull", "legs", "run"]
+			.map((id) => parseSavedExercise({ id, name: id, pattern: "push" }))
+			.filter((exercise) => exercise !== null),
+	),
+);
 
 describe("the month grid", () => {
 	it("starts on Monday and covers the whole month", () => {
@@ -118,7 +157,7 @@ describe("training", () => {
 				settings,
 				plans: [],
 				sessions: [],
-				programs: BUILT_IN_PROGRAMS,
+				programs: [HYBRID],
 				progress: new Map(),
 				activities: [],
 			},

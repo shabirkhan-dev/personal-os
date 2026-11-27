@@ -1,8 +1,8 @@
 import { useCallback, useMemo } from "react";
-import { ApiError, apiClient } from "@/lib/api/client";
+import { useAi } from "@/lib/ai/use-ai";
+import { ApiError } from "@/lib/api/client";
 import { aiLimitMessage } from "@/lib/api/ai-limits";
 import { dayKey } from "@/lib/day";
-import { useAuth } from "@/modules/auth";
 
 /** The Care AI, `POST /ai/care/ask`. Needs a connection and a signed-in account. */
 
@@ -32,13 +32,13 @@ export function careAiMessage(error: unknown): string {
 		if (error.statusCode === 401) return "Sign in again to use AI.";
 		if (error.statusCode === 408) return "That took too long. Try again.";
 	}
-	if (error instanceof Error && error.message === "signed-out") return "Sign in to use AI.";
+	if (error instanceof Error && error.message === "signed-out")
+		return "Sign in, or add your own AI key in Settings.";
 	return "AI couldn't do that just now. Try again in a moment.";
 }
 
 export function useCareAi() {
-	const { token, status } = useAuth();
-	const available = status === "signed-in" && token !== null;
+	const { available, run } = useAi();
 
 	const ask = useCallback(
 		async (input: {
@@ -49,9 +49,9 @@ export function useCareAi() {
 			ratings: Record<string, number>;
 			uv: number | null;
 		}): Promise<CareAnswer> => {
-			if (!available || !token) throw new Error("signed-out");
-			return apiClient.post<CareAnswer>(
-				"/ai/care/ask",
+			if (!available) throw new Error("signed-out");
+			return run<CareAnswer>(
+				"care/ask",
 				{
 					question: input.question.slice(0, 500),
 					today: dayKey(new Date()),
@@ -63,10 +63,10 @@ export function useCareAi() {
 					ratings: input.ratings,
 					uv: input.uv,
 				},
-				{ accessToken: token, timeoutMs: AI_TIMEOUT_MS },
+				AI_TIMEOUT_MS,
 			);
 		},
-		[available, token],
+		[available, run],
 	);
 
 	const designRoutine = useCallback(
@@ -76,19 +76,19 @@ export function useCareAi() {
 			notes: string;
 			products: readonly string[];
 		}): Promise<RoutineDraftAi> => {
-			if (!available || !token) throw new Error("signed-out");
-			return apiClient.post<RoutineDraftAi>(
-				"/ai/care/design-routine",
+			if (!available) throw new Error("signed-out");
+			return run<RoutineDraftAi>(
+				"care/design-routine",
 				{
 					concerns: input.concerns.slice(0, 12),
 					skin: input.skin.slice(0, 4),
 					notes: input.notes.slice(0, 400),
 					products: input.products.slice(0, 30).map((name) => name.slice(0, 60)),
 				},
-				{ accessToken: token, timeoutMs: AI_TIMEOUT_MS },
+				AI_TIMEOUT_MS,
 			);
 		},
-		[available, token],
+		[available, run],
 	);
 
 	return useMemo(() => ({ available, ask, designRoutine }), [available, ask, designRoutine]);

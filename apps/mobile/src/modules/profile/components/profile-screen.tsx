@@ -27,6 +27,7 @@ import { EditProfileSheet } from "./edit-profile-sheet";
 import { ManageModulesSheet } from "./manage-modules-sheet";
 import { SectionLabel, SettingsCard, SettingsRow } from "./settings-list";
 import { useAssistantSettings } from "@/modules/assistant/data/assistant-settings";
+import { OWN_AI_PROVIDERS, useOwnAi } from "@/lib/ai/own-ai";
 import { APPROVAL_LABELS } from "@personal-os/domain/assistant";
 
 type OpenSheet = "modules" | "edit" | null;
@@ -72,6 +73,11 @@ export function ProfileScreen() {
 	const auth = useAuth();
 	const name = useOnboardingStore((state) => state.name);
 	const { settings: assistantSettings } = useAssistantSettings();
+	const ownAi = useOwnAi((state) => state.own);
+	const hydrateOwnAi = useOwnAi((state) => state.hydrate);
+	useEffect(() => {
+		hydrateOwnAi().catch((error: unknown) => console.warn("[ai] hydrate failed", error));
+	}, [hydrateOwnAi]);
 	const modules = useOnboardingStore((state) => state.modules);
 	const member = useMemberStore((state) => state.member);
 	const hydrateProfile = useProfileStore((state) => state.hydrate);
@@ -206,6 +212,17 @@ export function ProfileScreen() {
 							title="Assistant"
 							meta={APPROVAL_LABELS[assistantSettings.approval].title}
 							onPress={() => router.push("/assistant/settings")}
+						/>
+						<SettingsRow
+							icon="Lightning"
+							iconTone="accentDefault"
+							title="Your AI key"
+							meta={
+								ownAi
+									? `${OWN_AI_PROVIDERS[ownAi.provider].label} · ${ownAi.model}`
+									: "Use your own key, on this phone only"
+							}
+							onPress={() => router.push("/ai-key")}
 						/>
 						<SettingsRow
 							icon="Filled/Calendar"

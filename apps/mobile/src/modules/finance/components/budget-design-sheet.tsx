@@ -92,8 +92,8 @@ export function BudgetDesignSheet({
 		<Sheet visible={visible} title="Design a budget with AI" onClose={onClose}>
 			{!ai.available ? (
 				<PoText variant="meta13" tone="textSecondary">
-					Sign in to design a budget with AI. You can still set limits yourself or use the suggested
-					split.
+					Sign in, or add your own AI key in Settings, to design a budget with AI. You can still set
+					limits yourself or use the suggested split.
 				</PoText>
 			) : draft ? (
 				<View style={styles.gap}>

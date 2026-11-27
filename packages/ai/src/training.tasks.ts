@@ -1,6 +1,6 @@
-import type { Config } from "@/config/env";
-import { AppError } from "@/core/app-error";
-import { askJson } from "./ai.ask";
+import type { AiConfig } from "./config";
+import { AiError } from "./errors";
+import { askJson } from "./ask";
 import {
 	type AskTrainingInput,
 	type DesignProgramInput,
@@ -13,7 +13,7 @@ import {
 	trainingAnswer,
 } from "./training.schema";
 
-type Deps = { config: Config };
+type Deps = { config: AiConfig };
 
 const GUIDANCE =
 	"Answer a training question using the person's sports, phase (1 = bodyweight, running and " +
@@ -23,7 +23,7 @@ const GUIDANCE =
 	"questions. For pain or injury, say to stop and see a doctor or physiotherapist.";
 
 export async function askTraining(deps: Deps, input: AskTrainingInput): Promise<TrainingAnswer> {
-	if (deps.config.ai.provider === "mock") {
+	if (deps.config.provider === "mock") {
 		return {
 			answer: `You asked “${input.question}”. With a provider key set, the answer appears here.`,
 			followUps: ["What should I do tomorrow?"],
@@ -45,7 +45,7 @@ const SKILL =
 	"needs equipment. Use the level, if given, to choose the first step.";
 
 export async function buildSkill(deps: Deps, input: SkillStepsInput): Promise<SkillSteps> {
-	if (deps.config.ai.provider === "mock") {
+	if (deps.config.provider === "mock") {
 		return {
 			steps: [
 				`Learn the basics of ${input.name}`,
@@ -62,7 +62,7 @@ export async function buildSkill(deps: Deps, input: SkillStepsInput): Promise<Sk
 		JSON.stringify(input),
 		skillSteps,
 	);
-	if (result.steps.length < 2) throw new AppError("AI_INVALID_OUTPUT");
+	if (result.steps.length < 2) throw new AiError("invalid_output");
 	return result;
 }
 
@@ -141,7 +141,7 @@ export function cleanProgram(input: DesignProgramInput, draft: ProgramDraft): De
 		}))
 		.filter((session) => session.items.length > 0)
 		.slice(0, 6);
-	if (sessions.length === 0) throw new AppError("AI_INVALID_OUTPUT");
+	if (sessions.length === 0) throw new AiError("invalid_output");
 	const order = draft.order
 		.filter((index) => index >= 0 && index < sessions.length)
 		.slice(0, input.daysPerWeek);
@@ -161,7 +161,7 @@ export async function designProgram(
 	deps: Deps,
 	input: DesignProgramInput,
 ): Promise<DesignedProgram> {
-	if (deps.config.ai.provider === "mock") {
+	if (deps.config.provider === "mock") {
 		const [first, second, third] = input.exercises;
 		return cleanProgram(input, {
 			title: "Mock program",

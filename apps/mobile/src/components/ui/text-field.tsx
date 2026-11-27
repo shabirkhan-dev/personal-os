@@ -15,6 +15,10 @@ export type TextFieldProps = {
 	onSubmitEditing?: () => void;
 	/** A few lines of text, like a recipe step or a note. */
 	multiline?: boolean;
+	/** Hides what's typed (keys, passwords). */
+	secure?: boolean;
+	/** No capitals or autocorrect: links, model names, codes. */
+	plain?: boolean;
 };
 
 const inputStyle = toTextStyle(textStyles.body15);
@@ -29,6 +33,8 @@ export function TextField({
 	suffix,
 	onSubmitEditing,
 	multiline = false,
+	secure = false,
+	plain = false,
 }: TextFieldProps) {
 	const { colors } = usePoTheme();
 	const [focused, setFocused] = useState(false);
@@ -57,6 +63,9 @@ export function TextField({
 					onBlur={() => setFocused(false)}
 					onSubmitEditing={onSubmitEditing}
 					multiline={multiline}
+					secureTextEntry={secure}
+					autoCapitalize={secure || plain ? "none" : undefined}
+					autoCorrect={secure || plain ? false : undefined}
 					textAlignVertical={multiline ? "top" : "center"}
 					selectionColor={colors.accentDefault}
 					accessibilityLabel={label}

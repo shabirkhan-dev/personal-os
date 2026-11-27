@@ -153,7 +153,7 @@ export function PlanScreen() {
 					<PoText variant="meta13" tone="textSecondary">
 						{ai.available
 							? "Your prayers, meals and training stay where they are. Say what else today needs; you can change every block after."
-							: "Sign in to design your day with AI. You can still add and move blocks yourself."}
+							: "Sign in or add your own AI key to design your day with AI. You can still add and move blocks yourself."}
 					</PoText>
 					{ai.available ? (
 						<>

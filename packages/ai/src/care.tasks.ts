@@ -1,5 +1,5 @@
-import type { Config } from "@/config/env";
-import { askJson } from "./ai.ask";
+import type { AiConfig } from "./config";
+import { askJson } from "./ask";
 import {
 	type AskCareInput,
 	type CareAnswer,
@@ -9,7 +9,7 @@ import {
 	routineDraft,
 } from "./care.schema";
 
-type Deps = { config: Config };
+type Deps = { config: AiConfig };
 
 const GUIDANCE =
 	"Answer a question about skin, hair, body, nails or teeth care, using the person's concerns, " +
@@ -21,7 +21,7 @@ const GUIDANCE =
 
 /** The Care module's AI task: answering a care question. The mock answers from the input. */
 export async function askCare(deps: Deps, input: AskCareInput): Promise<CareAnswer> {
-	if (deps.config.ai.provider === "mock") {
+	if (deps.config.provider === "mock") {
 		return {
 			answer: `You asked “${input.question}”. With a provider key set, the answer appears here.`,
 			followUps: ["What should I change first?"],
@@ -40,7 +40,7 @@ const DESIGN =
 
 /** Drafts a routine the person reviews before anything is saved. */
 export async function designRoutine(deps: Deps, input: DesignRoutineInput): Promise<RoutineDraft> {
-	if (deps.config.ai.provider === "mock") {
+	if (deps.config.provider === "mock") {
 		return {
 			steps: [
 				{

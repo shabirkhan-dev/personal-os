@@ -1,8 +1,8 @@
 import { useCallback, useMemo } from "react";
-import { ApiError, apiClient } from "@/lib/api/client";
+import { useAi } from "@/lib/ai/use-ai";
+import { ApiError } from "@/lib/api/client";
 import { aiLimitMessage } from "@/lib/api/ai-limits";
 import { dayKey } from "@/lib/day";
-import { useAuth } from "@/modules/auth";
 import type { PrayerId } from "../lib/prayer-times";
 
 /** The Faith AI, `POST /ai/faith/ask`. Needs a connection and a signed-in account. */
@@ -33,14 +33,13 @@ export function faithAiMessage(error: unknown): string {
 }
 
 export function useFaithAi() {
-	const { token, status } = useAuth();
-	const available = status === "signed-in" && token !== null;
+	const { available, run } = useAi();
 
 	const ask = useCallback(
 		async (input: AskInput, now = new Date()): Promise<FaithAnswer> => {
-			if (!available || !token) throw new Error("signed-out");
-			return apiClient.post<FaithAnswer>(
-				"/ai/faith/ask",
+			if (!available) throw new Error("signed-out");
+			return run<FaithAnswer>(
+				"faith/ask",
 				{
 					question: input.question.slice(0, 500),
 					tradition: input.tradition,
@@ -48,10 +47,10 @@ export function useFaithAi() {
 					prayers: input.prayers,
 					prayedToday: input.prayedToday,
 				},
-				{ accessToken: token, timeoutMs: AI_TIMEOUT_MS },
+				AI_TIMEOUT_MS,
 			);
 		},
-		[available, token],
+		[available, run],
 	);
 
 	return useMemo(() => ({ available, ask }), [available, ask]);

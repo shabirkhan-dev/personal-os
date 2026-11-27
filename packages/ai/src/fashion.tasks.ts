@@ -1,5 +1,5 @@
-import type { Config } from "@/config/env";
-import { askJson } from "./ai.ask";
+import type { AiConfig } from "./config";
+import { askJson } from "./ask";
 import {
 	type AskFashionInput,
 	type FashionAnswer,
@@ -10,7 +10,7 @@ import {
 } from "./fashion.schema";
 import { fetchPage } from "./web-page";
 
-type Deps = { config: Config; readPage?: typeof fetchPage };
+type Deps = { config: AiConfig; readPage?: typeof fetchPage };
 
 /**
  * The Fashion module's AI tasks: reading a piece from a line or a product link, and answering
@@ -20,7 +20,7 @@ type Deps = { config: Config; readPage?: typeof fetchPage };
 export async function readPiece(deps: Deps, input: ReadPieceInput): Promise<PieceDetails> {
 	const page = input.url ? await (deps.readPage ?? fetchPage)(input.url) : null;
 	const source = page?.text ?? input.text ?? "";
-	if (deps.config.ai.provider === "mock") {
+	if (deps.config.provider === "mock") {
 		return { ...guessPiece(source), imageUrl: page?.image ?? null };
 	}
 	const prompt =
@@ -47,7 +47,7 @@ const GUIDANCE =
 	"pieces' names in `outfit`. Offer up to three short follow-up questions.";
 
 export async function askFashion(deps: Deps, input: AskFashionInput): Promise<FashionAnswer> {
-	if (deps.config.ai.provider === "mock") {
+	if (deps.config.provider === "mock") {
 		const names = input.wardrobe.slice(0, 3).map((piece) => piece.name);
 		return {
 			answer: `You asked “${input.question}”. With a provider key set, the answer appears here.`,

@@ -121,6 +121,11 @@ this page is the summary. Architecture context: [Product System Design](/docs/pr
   Templates → Open a template file as a preview to add. The server offers packs too
   (`GET /api/v1/templates`, from `apps/api/src/modules/templates`), so new ones arrive without
   an app update; every item is read with its module's parser before it's saved.
+- Your own AI key (Profile → Your AI key): OpenRouter with a live list of its free text models
+  (and its automatic free router), OpenAI, or any OpenAI-compatible endpoint. The key is kept in
+  the keystore (not synced, not backed up) and every module AI task runs on the phone with it,
+  from the same prompts and schemas the API uses (`packages/ai`). The chat assistant still runs
+  through the server.
 - Getting started on Overview: each module the person picked, with three ways in (their own,
   AI, or a template) and a tick once it has something in it. It hides itself when everything is
   started, or with its close button.

@@ -1,8 +1,8 @@
-import type { Config } from "@/config/env";
-import { askJson } from "./ai.ask";
+import type { AiConfig } from "./config";
+import { askJson } from "./ask";
 import { type DreamFound, dreamFound, type FindDreamInput } from "./wishlist.schema";
 
-type Deps = { config: Config };
+type Deps = { config: AiConfig };
 
 const GUIDANCE =
 	"The person describes something they want to buy one day, in Pakistan, paying cash. Give it a " +
@@ -13,7 +13,7 @@ const GUIDANCE =
 
 /** Wishlist's AI task: reading a typed dream into a name, versions and a price range. */
 export async function findDream(deps: Deps, input: FindDreamInput): Promise<DreamFound> {
-	if (deps.config.ai.provider === "mock") {
+	if (deps.config.provider === "mock") {
 		const name = input.text.replace(/^(a|an|the)\s+/i, "").split(/\s+for\s+/i)[0] ?? input.text;
 		return dreamFound.parse({
 			name: name.charAt(0).toUpperCase() + name.slice(1),

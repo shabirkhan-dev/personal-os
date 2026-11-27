@@ -1,5 +1,5 @@
-import type { Config } from "@/config/env";
-import { askJson } from "./ai.ask";
+import type { AiConfig } from "./config";
+import { askJson } from "./ask";
 import {
 	type AskFinanceInput,
 	type FinanceAnswer,
@@ -13,7 +13,7 @@ import {
 	type DesignBudgetInput,
 } from "./finance.schema";
 
-type Deps = { config: Config };
+type Deps = { config: AiConfig };
 
 const READ =
 	"Split a line about money spent into items, each with a short name, the amount in rupees " +
@@ -23,7 +23,7 @@ const READ =
 	"Never invent an amount: leave out an item that has none.";
 
 export async function readSpend(deps: Deps, input: ReadSpendInput): Promise<SpendReading> {
-	if (deps.config.ai.provider === "mock") return guessSpend(input.text);
+	if (deps.config.provider === "mock") return guessSpend(input.text);
 	return askJson(deps.config, "Finance", "finance-read", READ, input.text, spendReading);
 }
 
@@ -36,7 +36,7 @@ const GUIDANCE =
 	"general guidance, not financial advice.";
 
 export async function askFinance(deps: Deps, input: AskFinanceInput): Promise<FinanceAnswer> {
-	if (deps.config.ai.provider === "mock") {
+	if (deps.config.provider === "mock") {
 		const runway =
 			input.runwayDays === null ? "Income covers the month" : `${input.runwayDays} days of runway`;
 		return {
@@ -89,7 +89,7 @@ const BUDGET =
 
 /** Drafts budget limits and the minimum list; the person reviews them before anything is saved. */
 export async function designBudget(deps: Deps, input: DesignBudgetInput): Promise<BudgetDraft> {
-	if (deps.config.ai.provider === "mock") {
+	if (deps.config.provider === "mock") {
 		const share: Record<(typeof budgetLines)[number], number> = {
 			food: 0.3,
 			bills: 0.25,

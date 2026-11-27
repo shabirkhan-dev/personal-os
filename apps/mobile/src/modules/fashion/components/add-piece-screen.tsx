@@ -282,7 +282,7 @@ export function AddPieceScreen({ editId, category }: { editId?: string; category
 					) : isLink ? (
 						<View style={styles.status}>
 							<PillButton
-								label={ai.available ? "Read the link" : "Sign in to read links"}
+								label={ai.available ? "Read the link" : "Add an AI key to read links"}
 								variant="secondary"
 								disabled={!ai.available}
 								onPress={() => void readLink()}

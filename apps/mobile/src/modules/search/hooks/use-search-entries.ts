@@ -43,6 +43,7 @@ const SCREENS: SearchEntry[] = [
 	["Reminders", "Settings", "/reminders"],
 	["Backup and restore", "Settings", "/backup"],
 	["App lock and privacy", "Settings", "/security"],
+	["Your AI key", "Settings", "/ai-key"],
 	["Calendar", "App", "/calendar"],
 ].map(([title, module, href]) => ({
 	id: `screen-${href}`,

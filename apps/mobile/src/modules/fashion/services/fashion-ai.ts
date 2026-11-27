@@ -1,8 +1,8 @@
 import { useCallback, useMemo } from "react";
-import { ApiError, apiClient } from "@/lib/api/client";
+import { useAi } from "@/lib/ai/use-ai";
+import { ApiError } from "@/lib/api/client";
 import { aiLimitMessage } from "@/lib/api/ai-limits";
 import { dayKey } from "@/lib/day";
-import { useAuth } from "@/modules/auth";
 import type { Category } from "../lib/fashion-model";
 
 /** The Fashion AI, `POST /ai/fashion/<task>`. Needs a connection and a signed-in account. */
@@ -40,23 +40,20 @@ export function fashionAiMessage(error: unknown): string {
 		if (error.code === "JOB_LINK_UNREADABLE")
 			return "That page blocks reading. Type the piece instead.";
 	}
-	if (error instanceof Error && error.message === "signed-out") return "Sign in to use AI.";
+	if (error instanceof Error && error.message === "signed-out")
+		return "Sign in, or add your own AI key in Settings.";
 	return "AI couldn't do that just now. Try again in a moment.";
 }
 
 export function useFashionAi() {
-	const { token, status } = useAuth();
-	const available = status === "signed-in" && token !== null;
+	const { available, run } = useAi();
 
 	const call = useCallback(
 		async <T>(task: string, body: Record<string, unknown>): Promise<T> => {
-			if (!available || !token) throw new Error("signed-out");
-			return apiClient.post<T>(`/ai/fashion/${task}`, body, {
-				accessToken: token,
-				timeoutMs: AI_TIMEOUT_MS,
-			});
+			if (!available) throw new Error("signed-out");
+			return run<T>(`fashion/${task}`, body, AI_TIMEOUT_MS);
 		},
-		[available, token],
+		[available, run],
 	);
 
 	return useMemo(

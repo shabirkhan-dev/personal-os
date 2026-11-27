@@ -332,7 +332,7 @@ export function WeeklyReviewCard({
 			/>
 			{!ai.available ? (
 				<PoText variant="meta13" tone="textSecondary">
-					Sign in from Profile to use AI.
+					Sign in, or add your own AI key in Profile.
 				</PoText>
 			) : null}
 		</Card>

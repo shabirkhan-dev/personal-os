@@ -1,9 +1,10 @@
-import { settings } from "@/config/settings";
-import { AppError } from "@/core/app-error";
+import { AI_LIMITS } from "./config";
+import { AiError } from "./errors";
+import { timeoutSignal } from "./timeout";
 
-const { maxBytes, maxRedirects, maxText, minText, timeoutMs } = settings.ai.page;
+const { maxBytes, maxRedirects, maxText, minText, timeoutMs } = AI_LIMITS.page;
 
-const unreadable = (message: string) => new AppError("JOB_LINK_UNREADABLE", { message });
+const unreadable = (message: string) => new AiError("page_unreadable", { message });
 
 /**
  * Reads the text of a public job page. Redirects are followed by hand so every hop is checked;
@@ -28,7 +29,7 @@ export async function fetchPage(
 			response = await fetcher(current, {
 				redirect: "manual",
 				headers: { "User-Agent": "PersonalOS/1.0 (job reader)", Accept: "text/html" },
-				signal: AbortSignal.timeout(timeoutMs),
+				signal: timeoutSignal(timeoutMs),
 			});
 		} catch {
 			throw unreadable("The page could not be loaded.");

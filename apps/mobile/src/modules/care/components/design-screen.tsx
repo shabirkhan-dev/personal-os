@@ -134,8 +134,8 @@ export function DesignScreen() {
 					) : (
 						<View style={[styles.card, { backgroundColor: colors.bgSurface }]}>
 							<PoText variant="body15" tone="textSecondary">
-								Sign in to design a routine with AI. Without it, start from a template or add your
-								own steps.
+								Sign in or add your own AI key to design a routine with AI. Without it, start from a
+								template or add your own steps.
 							</PoText>
 							<PillButton
 								label="Browse templates"

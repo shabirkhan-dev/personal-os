@@ -396,7 +396,7 @@ export function StartCard({
 			title: "Design it with AI",
 			body: aiAvailable
 				? "Say what you want to work on; review the draft before anything is saved."
-				: "Sign in to have AI draft a routine you review first.",
+				: "Sign in or add your own AI key to have AI draft a routine.",
 			onPress: onAi,
 		},
 		{

@@ -1,5 +1,5 @@
-import type { Config } from "@/config/env";
-import { askJson } from "./ai.ask";
+import type { AiConfig } from "./config";
+import { askJson } from "./ask";
 import {
 	type AskFoodInput,
 	type DraftRecipeInput,
@@ -15,7 +15,7 @@ import {
 	weekPlanDraft,
 } from "./food.schema";
 
-type Deps = { config: Config };
+type Deps = { config: AiConfig };
 
 /**
  * The Food module's AI tasks: reading a meal the phone couldn't match ("quinoa bowl with
@@ -29,7 +29,7 @@ const READ_MEAL =
 	"before bed) return it as `slot`, otherwise null. Never invent foods that aren't mentioned.";
 
 export async function readMeal(deps: Deps, input: ReadMealInput): Promise<MealReading> {
-	if (deps.config.ai.provider === "mock") return guessMeal(input.text);
+	if (deps.config.provider === "mock") return guessMeal(input.text);
 	return askJson(deps.config, "Food", "read-meal", READ_MEAL, input.text, mealReading);
 }
 
@@ -41,7 +41,7 @@ const GUIDANCE =
 	"This is general guidance, not medical advice.";
 
 export async function askFood(deps: Deps, input: AskFoodInput): Promise<FoodAnswer> {
-	if (deps.config.ai.provider === "mock") {
+	if (deps.config.provider === "mock") {
 		const left = Math.max(0, Math.round(input.targets.protein - input.eaten.protein));
 		return {
 			answer: `You asked “${input.question}”. You have ${left} g protein left today. With a provider key set, the answer appears here.`,
@@ -60,7 +60,7 @@ const DRAFT_RECIPE =
 	"notes. Keep it honest: plain amounts, no brand names.";
 
 export async function draftRecipe(deps: Deps, input: DraftRecipeInput): Promise<RecipeDraft> {
-	if (deps.config.ai.provider === "mock") {
+	if (deps.config.provider === "mock") {
 		return {
 			kind: "Everyday · dinner",
 			slots: ["dinner"],
@@ -111,7 +111,7 @@ export function cleanPlan(input: PlanWeekInput, draft: WeekPlanDraft): WeekPlanD
 }
 
 export async function planWeek(deps: Deps, input: PlanWeekInput): Promise<WeekPlanDraft> {
-	if (deps.config.ai.provider === "mock") {
+	if (deps.config.provider === "mock") {
 		const pick = (slot: (typeof input.recipes)[number]["slots"][number]) =>
 			input.recipes.find((recipe) => recipe.slots.includes(slot));
 		return cleanPlan(input, {

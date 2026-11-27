@@ -1,9 +1,9 @@
-import type { Config } from "@/config/env";
-import { askJson } from "./ai.ask";
+import type { AiConfig } from "./config";
+import { askJson } from "./ask";
 import type { AskFaithInput, FaithAnswer } from "./faith.schema";
 import { faithAnswer } from "./faith.schema";
 
-type Deps = { config: Config };
+type Deps = { config: AiConfig };
 
 const GUIDANCE =
 	"Answer the person's question about their faith in at most 120 words, kindly and plainly. " +
@@ -14,7 +14,7 @@ const GUIDANCE =
 	"tradition. Offer up to three short follow-up questions.";
 
 export async function askFaith(deps: Deps, input: AskFaithInput): Promise<FaithAnswer> {
-	if (deps.config.ai.provider === "mock") return mockAnswer(input);
+	if (deps.config.provider === "mock") return mockAnswer(input);
 	return askJson(deps.config, "Faith", "faith-ask", GUIDANCE, JSON.stringify(input), faithAnswer);
 }
 

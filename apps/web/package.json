@@ -13,7 +13,7 @@
   "dependencies": {
     "@personal-os/domain": "workspace:*",
     "@personal-os/tokens": "workspace:*",
-    "next": "^16.4.3",
+    "next": "^16.4.6",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
   },

@@ -4,8 +4,14 @@ name: 06-search-review
 ---
 - openLink: personalos://
 - extendedWaitUntil:
-    visible: "Your app starts empty"
+    visible: "Your week"
     timeout: 15000
+# Home orders its cards by the time of day, so the checklist can be below the fold.
+- scrollUntilVisible:
+    element:
+      text: "Your app starts empty"
+    direction: DOWN
+    timeout: 20000
 - takeScreenshot: 06-getting-started
 - openLink: personalos://search
 - extendedWaitUntil:

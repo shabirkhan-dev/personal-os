@@ -50,16 +50,63 @@ export async function fetchPage(
 	throw unreadable("The page redirected too many times.");
 }
 
+/** Each `<meta …>` tag's attributes, read by scanning (no backtracking on hostile pages). */
+function metaTags(html: string): Map<string, string>[] {
+	const lower = html.toLowerCase();
+	const tags: Map<string, string>[] = [];
+	let at = lower.indexOf("<meta");
+	while (at !== -1 && tags.length < 400) {
+		const close = lower.indexOf(">", at);
+		if (close === -1) break;
+		tags.push(attributes(html.slice(at + 5, close)));
+		at = lower.indexOf("<meta", close);
+	}
+	return tags;
+}
+
+/** `name="value"` pairs of one tag; names lowercased. */
+function attributes(source: string): Map<string, string> {
+	const out = new Map<string, string>();
+	let i = 0;
+	while (i < source.length) {
+		while (i < source.length && " \t\n\r/".includes(source[i] ?? "")) i += 1;
+		let name = "";
+		while (i < source.length && !" \t\n\r=/".includes(source[i] ?? "")) {
+			name += source[i];
+			i += 1;
+		}
+		if (!name) break;
+		let value = "";
+		if (source[i] === "=") {
+			i += 1;
+			const quote = source[i];
+			if (quote === '"' || quote === "'") {
+				const end = source.indexOf(quote, i + 1);
+				value = source.slice(i + 1, end === -1 ? source.length : end);
+				i = end === -1 ? source.length : end + 1;
+			} else {
+				while (i < source.length && !" \t\n\r".includes(source[i] ?? "")) {
+					value += source[i];
+					i += 1;
+				}
+			}
+		}
+		out.set(name.toLowerCase(), value);
+	}
+	return out;
+}
+
+const IMAGE_KEYS = new Set(["og:image", "og:image:secure_url", "twitter:image"]);
+
 /** The page's `og:image` (or `twitter:image`) as an absolute https URL, or null. */
 export function shareImage(html: string, base: string): string | null {
-	const tag =
-		/<meta[^>]+(?:property|name)=["'](?:og:image(?::secure_url)?|twitter:image)["'][^>]*>/i.exec(
-			html,
-		)?.[0];
-	const content = tag ? /content=["']([^"']+)["']/i.exec(tag)?.[1] : undefined;
+	const tag = metaTags(html).find((item) =>
+		IMAGE_KEYS.has((item.get("property") ?? item.get("name") ?? "").toLowerCase()),
+	);
+	const content = tag?.get("content");
 	if (!content) return null;
 	try {
-		const absolute = new URL(content.replace(/&amp;/g, "&"), base);
+		const absolute = new URL(content.replaceAll("&amp;", "&"), base);
 		return absolute.protocol === "https:" ? absolute.toString() : null;
 	} catch {
 		return null;
@@ -140,48 +187,112 @@ const ENTITIES: Record<string, string> = {
 	nbsp: " ",
 };
 
-const HIDDEN = /<(!--|script|style|noscript|svg|head|template)\b/gi;
+/** Blocks whose content is never visible text. */
+const HIDDEN = new Set(["script", "style", "noscript", "svg", "head", "template"]);
+/** Tags that start a new line of text. */
+const BLOCKS = new Set([
+	"p",
+	"div",
+	"li",
+	"br",
+	"h1",
+	"h2",
+	"h3",
+	"h4",
+	"h5",
+	"h6",
+	"section",
+	"article",
+	"tr",
+	"ul",
+	"ol",
+]);
 
-/**
- * Drops comments and hidden blocks (scripts, styles, the head) in one pass. A lazy regex would
- * rescan to the end for every unclosed tag, which a hostile page can make quadratic.
- */
-function dropHidden(html: string): string {
-	const lower = html.toLowerCase();
-	let out = "";
-	let from = 0;
-	HIDDEN.lastIndex = 0;
-	for (let match = HIDDEN.exec(html); match; match = HIDDEN.exec(html)) {
-		const tag = (match[1] ?? "").toLowerCase();
-		const closer = tag === "!--" ? "-->" : `</${tag}`;
-		const close = lower.indexOf(closer, match.index + match[0].length);
-		out += `${html.slice(from, match.index)} `;
-		if (close === -1) return out;
-		const end = tag === "!--" ? close + 3 : lower.indexOf(">", close) + 1 || lower.length;
-		from = end;
-		HIDDEN.lastIndex = end;
-	}
-	return out + html.slice(from);
+/** Where an HTML comment opened at `from` ends (`-->`, or `--!>` as browsers also accept). */
+function commentEnd(lower: string, from: number): number {
+	const plain = lower.indexOf("-->", from);
+	const bang = lower.indexOf("--!>", from);
+	if (plain === -1 && bang === -1) return lower.length;
+	if (bang === -1 || (plain !== -1 && plain < bang)) return plain + 3;
+	return bang + 4;
 }
 
-/** Visible text of an HTML page: scripts, styles and the head dropped, blocks on new lines. */
+function decodeEntity(entity: string): string | null {
+	if (entity.startsWith("#")) {
+		const hex = entity[1]?.toLowerCase() === "x";
+		const digits = entity.slice(hex ? 2 : 1);
+		if (!digits || !/^[0-9a-f]+$/i.test(digits)) return null;
+		const code = hex ? parseInt(digits, 16) : Number(digits);
+		return Number.isFinite(code) && code > 0 && code < 0x110000 ? String.fromCodePoint(code) : " ";
+	}
+	return ENTITIES[entity.toLowerCase()] ?? null;
+}
+
+/** Text with entities decoded; angle brackets that come out of it stay harmless text. */
+function decodeText(text: string): string {
+	let out = "";
+	let i = 0;
+	while (i < text.length) {
+		const amp = text.indexOf("&", i);
+		if (amp === -1) {
+			out += text.slice(i);
+			break;
+		}
+		out += text.slice(i, amp);
+		const semi = text.indexOf(";", amp);
+		const decoded =
+			semi !== -1 && semi - amp <= 10 ? decodeEntity(text.slice(amp + 1, semi)) : null;
+		if (decoded === null) {
+			out += "&";
+			i = amp + 1;
+		} else {
+			out += decoded;
+			i = semi + 1;
+		}
+	}
+	return out.replaceAll("<", "‹").replaceAll(">", "›");
+}
+
+/**
+ * Visible text of an HTML page: comments, scripts, styles and the head dropped, blocks on new
+ * lines. One pass with `indexOf`, never a backtracking regex, so a hostile page stays linear.
+ */
 export function htmlToText(html: string): string {
-	return dropHidden(html)
-		.replace(/<\/?(p|div|li|br|h[1-6]|section|article|tr|ul|ol)\b[^<>]*>/gi, "\n")
-		.replace(/<[^<>]*>/g, " ")
-		.replace(/&(#x?[0-9a-f]+|[a-z]+);/gi, (match, entity: string) => {
-			if (entity.startsWith("#")) {
-				const code =
-					entity[1]?.toLowerCase() === "x"
-						? parseInt(entity.slice(2), 16)
-						: Number(entity.slice(1));
-				return Number.isFinite(code) && code > 0 && code < 0x110000
-					? String.fromCodePoint(code)
-					: " ";
-			}
-			return ENTITIES[entity.toLowerCase()] ?? match;
-		})
-		.replace(/[ \t\r\f\v]+/g, " ")
-		.replace(/ *\n[\s]*/g, "\n")
-		.trim();
+	const lower = html.toLowerCase();
+	const parts: string[] = [];
+	let i = 0;
+	while (i < html.length) {
+		const open = html.indexOf("<", i);
+		if (open === -1) {
+			parts.push(decodeText(html.slice(i)));
+			break;
+		}
+		parts.push(decodeText(html.slice(i, open)));
+		if (lower.startsWith("<!--", open)) {
+			parts.push(" ");
+			i = commentEnd(lower, open + 4);
+			continue;
+		}
+		const close = html.indexOf(">", open + 1);
+		if (close === -1) break;
+		const inner = lower.slice(open + 1, close).trim();
+		const closing = inner.startsWith("/");
+		const name = /^[a-z0-9]*/.exec(closing ? inner.slice(1) : inner)?.[0] ?? "";
+		i = close + 1;
+		if (!closing && HIDDEN.has(name)) {
+			parts.push(" ");
+			const end = lower.indexOf(`</${name}`, i);
+			if (end === -1) break;
+			const after = html.indexOf(">", end);
+			i = after === -1 ? html.length : after + 1;
+			continue;
+		}
+		parts.push(BLOCKS.has(name) ? "\n" : " ");
+	}
+	return parts
+		.join("")
+		.split("\n")
+		.map((line) => line.replace(/[ \t\r\f\v]+/g, " ").trim())
+		.filter(Boolean)
+		.join("\n");
 }

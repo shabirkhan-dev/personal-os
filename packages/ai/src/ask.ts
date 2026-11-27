@@ -61,11 +61,21 @@ function repairNote(issues: readonly z.core.$ZodIssue[]): string {
 	return `That answer didn't match the schema:\n${problems}\nReply again with only the corrected JSON object.`;
 }
 
+/** The text inside a Markdown code fence (```json … ```), or the answer as it is. */
+function unfenced(answer: string): string {
+	const open = answer.indexOf("```");
+	if (open === -1) return answer;
+	const lineEnd = answer.indexOf("\n", open + 3);
+	const close = answer.indexOf("```", open + 3);
+	if (close === -1) return answer;
+	const start = lineEnd !== -1 && lineEnd < close ? lineEnd + 1 : open + 3;
+	return answer.slice(start, close).trim();
+}
+
 /** The model's JSON, with a Markdown code fence removed if it added one. */
 export function parseJson(answer: string): unknown {
-	const fenced = /```(?:json)?\s*([\s\S]*?)```/.exec(answer);
 	try {
-		return JSON.parse(fenced?.[1] ?? answer);
+		return JSON.parse(unfenced(answer));
 	} catch {
 		return undefined;
 	}

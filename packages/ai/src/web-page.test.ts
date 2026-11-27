@@ -88,6 +88,24 @@ describe("htmlToText on hostile pages", () => {
 		expect(performance.now() - started).toBeLessThan(1000);
 	});
 
+	it("ends comments the way browsers do, and keeps decoded brackets as text", () => {
+		expect(htmlToText("<p>a</p><!-- x --!><p>b</p>")).toBe("a\nb");
+		expect(htmlToText("<p>&lt;script&gt;alert(1)&lt;/script&gt;</p>")).toBe(
+			"‹script›alert(1)‹/script›",
+		);
+		expect(htmlToText("<p>a &amp; b &#x41; &unknown; &</p>")).toBe("a & b A &unknown; &");
+	});
+
+	it("reads og:image whatever the attribute order or quotes", () => {
+		expect(
+			shareImage(
+				"<meta content='https://s.example.com/a.jpg' property=og:image>",
+				"https://s.example.com",
+			),
+		).toBe("https://s.example.com/a.jpg");
+		expect(shareImage("<meta".repeat(100_000), "https://s.example.com")).toBeNull();
+	});
+
 	it("still drops comments, scripts and an unclosed trailing block", () => {
 		expect(
 			htmlToText("<p>Hi</p><!-- note --><script>x()</script><style>a{}</style>there<script>tail"),

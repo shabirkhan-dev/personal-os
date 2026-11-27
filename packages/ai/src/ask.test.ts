@@ -48,6 +48,13 @@ describe("askJson", () => {
 		expect(retry.messages.at(-1)?.content).toContain("total");
 	});
 
+	test("reads JSON inside a code fence, on one line or several", async () => {
+		answers('```\n{"total": 1}\n```');
+		expect(await askJson(config, "F", "t", "i", "c", schema)).toEqual({ total: 1 });
+		answers('Here you go: ```{"total": 2}``` done');
+		expect(await askJson(config, "F", "t", "i", "c", schema)).toEqual({ total: 2 });
+	});
+
 	test("gives up after the retry", async () => {
 		answers("not json at all");
 		const failure = askJson(config, "Finance", "t", "Add it up", "1+2", schema);

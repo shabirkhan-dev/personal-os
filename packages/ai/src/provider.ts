@@ -6,6 +6,13 @@ export type ChatMessage = { role: "system" | "user" | "assistant"; content: stri
 
 type LiveConfig = Extract<AiConfig, { provider: "openai_compatible" }>;
 
+/** "https://x/v1//" → "https://x/v1", without a regex (the address can come from the person). */
+function withoutTrailingSlashes(url: string): string {
+	let end = url.length;
+	while (end > 0 && url[end - 1] === "/") end -= 1;
+	return url.slice(0, end);
+}
+
 /** One chat completion from an OpenAI-compatible API, asking for a JSON object. */
 export async function completeJson(
 	config: LiveConfig,
@@ -14,7 +21,7 @@ export async function completeJson(
 ): Promise<string> {
 	let response: Response;
 	try {
-		response = await fetcher(`${config.baseUrl.replace(/\/+$/, "")}/chat/completions`, {
+		response = await fetcher(`${withoutTrailingSlashes(config.baseUrl)}/chat/completions`, {
 			method: "POST",
 			headers: {
 				Authorization: `Bearer ${config.apiKey}`,
